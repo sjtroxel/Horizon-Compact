@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # A manual trigger that does not depend on push webhooks, which Musical Mycelium saw stop delivering
+  # for hours during a GitHub Actions incident (2026-08-06).
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: make check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Exact tag on purpose: setup-uv publishes no floating v10 tag (checked 2026-10-03).
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.12.0"
+          enable-cache: true
+
+      # --locked fails the build if uv.lock disagrees with pyproject.toml, instead of resolving
+      # something different from what runs locally.
+      - name: Install dependencies
+        run: uv sync --locked
+
+      # The same target as local. GitHub sets CI=true, so `make check` skips `doctor` by name and says so.
+      # The name scan itself never runs here: it needs the private term file, which never leaves the
+      # laptop. CI does run paths-check, which needs no private file, and the guard's own tests, which use
+      # fictional canary names only.
+      - name: make check
+        run: make check

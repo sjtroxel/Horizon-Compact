@@ -1,0 +1,65 @@
+# Local guardrails. Install with `make setup`, which installs all three hook types below.
+#
+# The name guard (Phase 0) is the reason this file exists: it keeps real company names out of a public
+# repository. It runs at three moments: on each commit's staged changes, on each commit message, and on
+# each push. CI never runs it; CI cannot read the private term file (docs/planning/08 §4.8).
+#
+# ruff runs through `uv run`, not from ruff's own hook repository, so the hook, `make check` and CI all use
+# the one ruff version pinned in uv.lock. A second pin is how a hook and CI come to disagree.
+
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
+default_stages: [pre-commit]
+
+repos:
+  - repo: local
+    hooks:
+      - id: name-guard
+        name: name guard (staged paths and content)
+        entry: uv run --no-sync python -m horizon_compact.privacy.guard pre-commit
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      # pass_filenames stays ON here: for a commit-msg hook, pre-commit delivers the message file as the
+      # one "filename" (pre-commit 4.6.2, commands/run.py). Turning it off would hand the guard no file.
+      - id: name-guard-message
+        name: name guard (commit message)
+        entry: uv run --no-sync python -m horizon_compact.privacy.guard commit-msg
+        language: system
+        always_run: true
+        stages: [commit-msg]
+
+      - id: name-guard-push
+        name: name guard (everything being pushed)
+        entry: uv run --no-sync python -m horizon_compact.privacy.guard pre-push
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --no-sync ruff format
+        language: system
+        types: [python]
+
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --no-sync ruff check --fix
+        language: system
+        types: [python]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+# Deliberately NOT included: no-commit-to-branch. He commits directly to main.
