@@ -28,7 +28,7 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 
 | Phase | Version | Delivers | Done when (summary) | Est. cost | Status |
 |---|---|---|---|---|---|
-| **0** `scaffold-and-guardrails` | v0.0 | Repo, the name guard (commit, message and push scans, history scan), the CI path check, toolchain, `make check`, CI, `CLAUDE.md`, the planning README | A canary name refused by the guard; the history scan clean; a tracked file under `methods-appendix/` fails the CI check; CI green | $0 | **scope doc APPROVED 2026-10-03; IMPLEMENTATION doc next** |
+| **0** `scaffold-and-guardrails` | v0.0 | Repo, the name guard (commit, message and push scans, history scan), the CI path check, toolchain, `make check`, CI, `CLAUDE.md`, the planning README | A canary name refused by the guard; the history scan clean; a tracked file under `methods-appendix/` fails the CI check; CI green | $0 | **COMPLETE 2026-10-03**, CI run `37160410815` green on first push |
 | **0.5** `aws-foundation` | v0.0.5 | Terraform bootstrap (OIDC looked up), filtered budgets, one tool call per Bedrock model, Ollama check, the development model named, the AWS checks in `planning/09` §5 | A recorded, provenance-stamped call from each Bedrock model; bootstrap applied with nothing shared created | under $1 | not started |
 | **1** `walking-skeleton` | v0.1 | The whole path on a **placeholder scenario**: Fargate, rate limiter, Bedrock, S3, scorer, one page live at `horizon-compact.vercel.app` | Container-run results on the public URL, each traceable to its image digest; destroy and re-apply tested | about $1 | not started |
 | **2** `experiment-content` | v0.2 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | not started |
@@ -56,7 +56,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 
 | Phase | Scope doc | IMPLEMENTATION doc |
 |---|---|---|
-| 0 | **APPROVED 2026-10-03** | **APPROVED 2026-10-03; building** |
+| 0 | **APPROVED 2026-10-03** | **APPROVED 2026-10-03; built; DoD audit §11a** |
 | 0.5-7 | not written; written in order after Phase 0 is built | not written; each immediately before its build |
 
 **As in Musical Mycelium, every scope doc is written up front, one at a time through the whole roadmap, before
@@ -68,20 +68,14 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-03
+### Where the build actually is — 2026-10-03, evening
 
-- **Repo:** two commits. `f214280` (2026-10-03 15:56), `.gitignore` and `docs/planning/`, **pushed** to the
-  public `github.com/sjtroxel/Horizon-Compact`, **before the name guard existed**, which reversed
-  `planning/09` §7's order. `9c382b8` (2026-10-03), **the guard commit**: the name guard, hooks, toolchain and
-  CI, **local, not pushed**.
-- **The guard's history scan over both commits, with the real term file, is clean** (2026-10-03). That closes the
-  question of `f214280` (`KNOWN-GAPS.md`, 2026-10-03).
-- **Untracked or modified in the working tree:** this file, `KNOWN-GAPS.md`, `docs/phases/`, and the dated note
-  in `planning/05`. They are C2.
-- **`planning/09` §7, the bootstrap checklist:** steps 1, 2 (the hook, in `9c382b8`), 3 and 6 are **done**. Steps
-  4 and 5 (`CLAUDE.md`, the planning README) are Phase 0 step 8. Step 7 (the Vercel name) is his. Step 8 (Phase
-  0's docs) is done.
-- **Phase 0 progress:** steps 0-6 of its IMPLEMENTATION doc done; next is C2.
+- **Phase 0 is complete.** Four commits on `main`, all pushed: `f214280` (planning, pushed before the guard
+  existed, confirmed clean by the guard's history scan), `9c382b8` (the name guard, hooks, toolchain, CI),
+  `f45770b` (roadmap, known gaps, Phase 0 docs), `4405412` (`CLAUDE.md`, the guard explainer, the planning
+  README). **CI run `37160410815`: green on the first push**, same numbers as local.
+- **`planning/09` §7, the bootstrap checklist:** steps 1-6 and 8 **done**. Step 7 (claim the Vercel name) is his.
+- **Next: the scope docs for Phases 0.5 through 7**, in order, before any further implementation.
 - **Nothing has been run against any model by this repo.** Nothing official has been seen.
 
 ## 3. Scaffolding ledger
@@ -100,11 +94,22 @@ from being forgotten without building them early.
 | Open items, newest first | `docs/KNOWN-GAPS.md` |
 | Shared memory store | `~/.claude/projects/-home-sjtroxel-horizon-compact/memory`, a symlink to the job-search-headquarters store |
 
-### Arrives in Phase 0 and Phase 0.5
+### Arrived in Phase 0 (2026-10-03)
 
-Phase 0 (the scope doc has the order): the name guard and its tests, the CI path check, `CLAUDE.md`,
-`docs/planning/README.md`, the Python toolchain and `Makefile`, CI. Phase 0.5: the Terraform bootstrap and
-budgets, the smoke calls, the development model.
+| Item | Where |
+|---|---|
+| The name guard: commit, message and push scans, history scan, fail closed | `src/horizon_compact/privacy/`, `.pre-commit-config.yaml` |
+| CI: `make check` on every push, the tracked-path check | `.github/workflows/ci.yml` |
+| Python 3.13 toolchain, single config file, lockfile | `pyproject.toml`, `uv.lock` |
+| Single-command entry point; `make check` equals CI | `Makefile` |
+| Agent operating manual, rule zero on names | `CLAUDE.md` |
+| Commit, push, tag, Terraform and AWS denied to Claude | `.claude/settings.json` |
+| The guard, explained | `docs/name-guard-explained.md` |
+| Planning read order and his disclosure line | `docs/planning/README.md` |
+
+### Arrives in Phase 0.5
+
+The Terraform bootstrap and budgets, the smoke calls, the development model, Ollama's reachability.
 
 ### Arrives with its subject, not before
 
@@ -131,6 +136,7 @@ development dependency through `uv`. **Ollama is not on the WSL path**, which is
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
 
+- **2026-10-03 — Phase 0 complete** (CI run `37160410815`; `docs/phases/phase-0-scaffold-and-guardrails-IMPLEMENTATION.md` §11a).
 - **2026-10-03 — All scope docs up front, Phase 0 excepted** (his). Phase 0 is built first so the name guard
   exists early; then the scope docs for 0.5 through 7, in order, before any further implementation.
 - **2026-10-03 — Phase 0 decisions 1-6 made** (his; Phase 0 scope doc): a private term file with a longlist

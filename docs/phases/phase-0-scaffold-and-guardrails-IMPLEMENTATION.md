@@ -1,7 +1,9 @@
 # Phase 0 — Scaffold and Guardrails (v0.0): IMPLEMENTATION
 
 > **Plan, not an as-built record.** Written 2026-10-03, immediately before the build, from the approved scope doc
-> `phase-0-scaffold-and-guardrails.md` and its six decisions. **APPROVED 2026-10-03 (his).** This doc may turn out wrong; it may not be silently wrong. It is updated as the build
+> `phase-0-scaffold-and-guardrails.md` and its six decisions. **APPROVED 2026-10-03 (his).** **PHASE 0 COMPLETE
+> 2026-10-03:** every step done, all six DoD items pass (one with a caveat, §11a), CI green on the first push
+> (run `37160410815`). This doc may turn out wrong; it may not be silently wrong. It is updated as the build
 > diverges, and each step is marked `[done]` with its date when it lands.
 
 ## 1. What this phase delivers
@@ -263,8 +265,8 @@ C1 alone first to see CI green early, that works too; it is his call on the day.
 7. **[done 2026-10-03]** **He commits C2.** *Result:* `3b769ad`, 5 files, every hook passed. *Found afterwards,
    before any push:* line 32 of this doc named the private term file's folder and file name, beside a sentence
    saying its path was written nowhere. Not a company name and not the full path, but against the rule.
-   Reworded. Recommended: fold the fix into C2 with `git commit --amend` before the push, so no public commit
-   carries it (his decision; C2 is unpushed, so amending it rewrites nothing anyone else has).
+   Reworded. **He folded the fix into C2 with `git commit --amend` before any push** (his decision), so C2 is
+   now `f45770b` and no public commit carries the old line.
 8. `CLAUDE.md`, `.claude/settings.json`, the `.gitignore` line, `docs/name-guard-explained.md` (the plain-English
    write-up, Claude's draft; it explains the mechanism and is not recruiter-facing). `docs/planning/README.md`
    with the read order; **he writes the disclosure line.** **He commits C3.**
@@ -275,9 +277,31 @@ C1 alone first to see CI green early, that works too; it is his call on the day.
    tracked); `docs/name-guard-explained.md`; `docs/planning/README.md` with the read order and **a marked gap
    for his line**. Plain `make check`, `doctor` included, passes: 123 tests, root 11 of 16. All five files scanned
    with the real term file: 0 matches.
-9. **He pushes.** CI watched to green; the run ID recorded.
-10. As-built notes in this doc; `KNOWN-GAPS.md` and `ROADMAP.md` updated; Phase 0 closed. **Next: the scope docs
-    for Phases 0.5 through 7, in order.**
+   **C3 committed by him 2026-10-03 as `4405412`.** His disclosure line is his own words; he chose to keep it
+   as written after Claude's critique (one note, on "every line", is recorded in the session, not here).
+9. **[done 2026-10-03]** **He pushes.** CI watched to green; the run ID recorded. *Result:* before the push,
+   `CI=true make check`, `make guard-history` ("history clean, 4 commit(s) scanned") and the push scan run by
+   hand all passed. **He pushed `f214280..4405412`; the push hook passed** (three pre-commit-hooks checks also
+   ran at push because their own manifests declare that stage; harmless). **CI run `37160410815` on `4405412`:
+   success, first push, 16 seconds**, with the same numbers as local: CPython 3.13.14, 123 passed, root 11 of
+   16, paths-check clean (33 tracked files), `doctor` skipped by name.
+10. **[done 2026-10-03]** As-built notes in this doc; `KNOWN-GAPS.md` and `ROADMAP.md` updated; Phase 0 closed.
+    **Next: the scope docs for Phases 0.5 through 7, in order.**
+
+## 11a. Definition-of-done audit (as built, 2026-10-03)
+
+| Scope DoD | Verdict | Evidence |
+|---|---|---|
+| 1. Refuses a canary in content, path, message and at push; passes clean and allowed; fails closed | **PASS, one caveat** | 123 tests including real `git commit`/`git push` through installed hooks; the framework rehearsal (§11 step 4); the by-hand check on the installed hooks (step 5). **Caveat:** in this repo the by-hand check ran the installed hook scripts directly rather than through `git commit`, because Claude never runs `git commit`; the refusal *at push* was proven in tests and the rehearsal, not against the real remote, by design |
+| 2. History scan clean; docs commit passes; no term removed | **PASS** | "history clean, 2 commit(s) scanned" after C1, "4 commit(s)" before the push; C2 and C3 passed the hook; the term file was not edited after his approval |
+| 3. CI green on first push; path check shown to fail | **PASS** | run `37160410815`; the tracked `methods-appendix/x.md` throwaway repo failing at paths-check (step 4) |
+| 4. `make check` green, root under cap, `make setup` installs every hook type | **PASS** | plain `make check` green with `doctor`; root 11 of 16; `make setup` installed pre-commit, commit-msg and pre-push |
+| 5. `CLAUDE.md` and the planning README exist; the line is his | **PASS** | both in `4405412`; he wrote the line |
+| 6. Nothing in AWS created, changed or called | **PASS** | no `aws` or `terraform` command run in this phase; `.claude/settings.json` now denies both |
+
+**What Phase 0 leaves behind:** the private term file must be revisited whenever the longlist changes (the guard
+will force it); a fresh clone needs `make setup`; binary files are not scanned; text typed into GitHub is not
+scanned. All four are in `CLAUDE.md` and `docs/name-guard-explained.md`.
 
 ## 12. Genuinely uncertain
 

@@ -7,28 +7,24 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-03
+> ## START HERE — where things stand, 2026-10-03, evening
 >
-> **Two commits.** `f214280` (pushed, public: `.gitignore` and `docs/planning/`), made **before** the name guard
-> existed and since confirmed clean by the guard's history scan (entry below); `9c382b8`, the guard commit
-> (**local, not pushed**). This file, `ROADMAP.md` and the
-> Phase 0 scope doc (`docs/phases/phase-0-scaffold-and-guardrails.md`) are untracked and **not approved**.
+> **PHASE 0 `scaffold-and-guardrails` IS COMPLETE.** Four commits on `main`, all pushed: `f214280` (planning,
+> pushed before the guard existed, since confirmed clean by the guard), `9c382b8` (the name guard, hooks,
+> toolchain, CI), `f45770b` (roadmap, known gaps, Phase 0 docs), `4405412` (`CLAUDE.md`, the guard explainer,
+> the planning README with his disclosure line). **CI run `37160410815`: green on the first push.** The DoD
+> audit, with its one caveat: `docs/phases/phase-0-scaffold-and-guardrails-IMPLEMENTATION.md` §11a.
 >
-> **NEXT:** the Phase 0 scope doc is **APPROVED** (2026-10-03, all six decisions made; Phase 0 is the local half
-> only, the AWS half is Phase 0.5). The IMPLEMENTATION doc is **written 2026-10-03, not approved**
-> (`docs/phases/phase-0-scaffold-and-guardrails-IMPLEMENTATION.md`), **APPROVED**. **Steps 0-3 DONE 2026-10-03:**
-> the private term file (he approved it; **he still commits it in job-search-headquarters**), the toolchain,
-> the matcher and the guard. **Step 4 DONE 2026-10-03:** the pre-commit config, `Makefile` and CI; 123 tests;
-> CI's exact steps pass in a clean copy; a full rehearsal through the real hook framework refused every canary.
-> **Step 5 DONE:** hooks installed by `make setup`, the by-hand canary check passed, **C1 committed as
-> `9c382b8`** (not pushed). **Step 6 DONE:** the guard's history scan over `f214280` and `9c382b8` is clean.
-> **NEXT: step 7**, he commits C2 (the docs). Then step 8 (`CLAUDE.md` and the rest) and C3, then one push.
-> Then step 1, the name guard, **as the next commit**. **After Phase 0 is built:** the scope docs for Phases 0.5
-> through 7, written in order before any further implementation (his convention; Phase 0 is the one exception).
+> **The name guard is live** on every commit, message and push in this clone (61 terms, 11 allowed phrases,
+> fingerprint matching). The private term file is committed in job-search-headquarters (`ca8f316`). **A fresh
+> clone needs `make setup`** before anything is committed; `make check` fails until it is run.
 >
-> **The one mistake that cannot be undone** is a real company's name in a public commit (`planning/04` §2.6).
-> **Decided 2026-10-03 (his): no further commit or push until the guard is installed and has passed its canary
-> test.** **Met 2026-10-03:** installed, canary refused at commit and message, before C1.
+> **NEXT: the scope docs for Phases 0.5 through 7, written one at a time, in order, before any further
+> implementation** (his convention; Phase 0 was the one exception). First: **Phase 0.5 `aws-foundation`**,
+> whose content is listed in the Phase 0 scope doc's "Moved to Phase 0.5" paragraph and whose checks are below.
+> Then Phase 0.5's IMPLEMENTATION doc, immediately before it is built.
+>
+> **Owed by him, no rush:** claim `horizon-compact.vercel.app` (entry below).
 
 ---
 
@@ -60,7 +56,11 @@ commit that holds nothing private would add risk and protect nothing.
 
 ---
 
-## OPEN — the private longlist is prose, not a term list, 2026-10-03
+## CLOSED — the private longlist is prose, not a term list, 2026-10-03
+
+**Closed the same day by Phase 0 decisions 1-4 (his):** a separate private term file with a longlist
+fingerprint, whole-word case-sensitive matching with per-term flags and allowed phrases, and names, tickers and
+plant locations all counted. Built and live; the record below is kept as the finding that led there.
 
 Found while scoping Phase 0's name hook. The longlist was written for a person: candidates appear in table cells,
 in comma-separated lists inside sentences, with tickers, plant locations and SIC codes beside them. Three
@@ -100,8 +100,8 @@ Each is Claude's, using live sources only. None blocks Phase 0.
 ## OPEN — owed by him, 2026-10-03
 
 - ~~**Create the empty public GitHub repo `Horizon-Compact`**~~ **Done 2026-10-03**, with `f214280` pushed to it.
-- **The one-line disclosure in `docs/planning/README.md`**, in his words: the planning docs were drafted with
-  Claude from his interviews and decisions (`planning/06` §10.4, `planning/09` §6).
+- ~~**The one-line disclosure in `docs/planning/README.md`**~~ **Done 2026-10-03**, his words, in `4405412`.
+- ~~**Commit the private term file in job-search-headquarters**~~ **Done 2026-10-03** (`ca8f316`).
 - **Claim `horizon-compact.vercel.app`** as a placeholder (`planning/09` §7 step 7). Unclaimed as of 2026-10-02;
   not re-checked since.
 
