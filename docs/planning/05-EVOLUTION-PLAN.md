@@ -3,6 +3,10 @@
 - **Status:** APPROVED 2026-10-03 (his five decisions in §8). Sets the phase order, what each phase delivers, and
   what grows after v1.0. **Amended by `08` (2026-10-03):** §3.1 the name check, §4.2 per-run storage, Phases 0, 3
   and 6, §5.1 the wording cut (patches P19, P25, P27, P29 and assignments A1-A7 in `09` §3-4).
+  **Patched 2026-10-03 (his):** §5's Phase 0 is split. The local half (repo, guardrails, toolchain, CI) stays
+  Phase 0; the AWS half (Terraform bootstrap, budgets, smoke calls, Ollama, the development model, the `09` §5
+  checks) becomes Phase 0.5 `aws-foundation`. Reason and record: `docs/phases/phase-0-scaffold-and-guardrails.md`,
+  decision 6. The table below is unchanged as the record of the plan.
 - **Read after:** `04-RISK-REGISTER`. **Read before:** `06`.
 - **Answers two questions:** in what order does v1 get built so that nothing built early has to be thrown away; and
   in what order does the experiment get *run* so that nothing seen early can bend the result.
