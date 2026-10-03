@@ -1,0 +1,42 @@
+# PRIVATE: real-case identities, links, scaling factors. Never tracked (04 §2.6).
+# The private copy and its backup live in the private job-search-headquarters repo.
+methods-appendix/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfplan
+crash.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# Node / web
+node_modules/
+web/dist/
+
+# Local caches and experiment scratch (EDGAR fetches, dev runs)
+.cache/
+cache/
+scratch/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+Screenshot*.png
