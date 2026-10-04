@@ -30,9 +30,10 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 |---|---|---|---|---|---|
 | **0** `scaffold-and-guardrails` | v0.0 | Repo, the name guard (commit, message and push scans, history scan), the CI path check, toolchain, `make check`, CI, `CLAUDE.md`, the planning README | A canary name refused by the guard; the history scan clean; a tracked file under `methods-appendix/` fails the CI check; CI green | $0 | **COMPLETE 2026-10-03**, CI run `37160410815` green on first push |
 | **0.5** `aws-foundation` | v0.0.5 | Terraform bootstrap (OIDC looked up), filtered budgets, one tool call per Bedrock model, Ollama check, the development model named, the AWS checks in `planning/09` §5 | A recorded, provenance-stamped call from each Bedrock model; bootstrap applied with nothing shared created | under $1 | not started |
-| **1** `walking-skeleton` | v0.1 | The whole path on a **placeholder scenario**: Fargate, rate limiter, Bedrock, S3, scorer, one page live at `horizon-compact.vercel.app` | Container-run results on the public URL, each traceable to its image digest; destroy and re-apply tested | about $1 | not started |
-| **2** `experiment-content` | v0.2 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | not started |
-| **3** `preregistration-and-scoring` | v0.3 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | not started |
+| **1** `walking-skeleton` | v0.1 | The run path on **placeholder content, off the subject** (scenario, objectives, menu): Fargate, rate limiter, spend cap, official gate (closed), Bedrock, per-run write-once S3 | Container-run results in S3, each traceable to its image digest and input hashes; resume and cap shown | about $1 with 1.5 | not started |
+| **1.5** `publish-path` | v0.1.5 | Scorer, committed static JSON, one page live at `horizon-compact.vercel.app` through CloudFront and Vercel | The placeholder sweep on the public URL, traceable; destroy and re-apply of `main` tested, raw results intact | cents | not started |
+| **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | not started |
+| **3** `preregistration-and-scoring` (split 2026-10-04: **3** `scoring-and-simulation`, **3.5** `preregistration`) | v0.3, v0.3.5 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | not started |
 | **4** `official-grid` | v0.4 | Pilot (excluded), then the full grid on Sonnet 4.6, then Nova Pro; robustness checks; first measured cost | Full grid run under the protocol on at least Sonnet 4.6; the $60 re-plan point checked | about $20-30 | not started |
 | **5** `real-cases` | v0.5 | Cases by the pre-registered selection rule, dossiers, foreshadowing check, recognition probe, a rubric committed before each case runs | At least three cases run and matched, including an invest or retool case; selection log complete | about $20-25 | not started |
 | **6** `explorer-and-methods` | v0.6 | The full site and the methods page | A hostile reader could re-run the experiment from the published inputs; every real-case memo passed the name scan | under $2 | not started |
@@ -46,7 +47,21 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 the AWS half becomes Phase 0.5, so its IMPLEMENTATION doc is written after Phase 0 lands. `planning/05`'s
 status line records the split.
 
-**The phase slugs other than Phase 0's are provisional.** Each one is fixed when its scope doc is written.
+**Phase 1 was split in two on 2026-10-04** (his; Phase 1 scope doc, decision 1): the run path stays Phase 1, the
+scorer, the page and the teardown test become Phase 1.5, both before Phase 2.
+
+**The main model is a slot.** The spine and the scope docs say Sonnet 4.6 because it is the model the account can
+call today. If Sonnet 5.5 access arrives before `prereg-v1`, the main-model choice reopens as his decision
+(`planning/05` §5.2), and model IDs, prices and quotas are config, never code (Phase 1 scope doc). After the tag,
+Sonnet 5.5 is its own sweep.
+
+**Phase 2 was split in two on 2026-10-04** (his; Phase 2 scope doc, decision 1): the cited company dossier is Phase
+2, the scenarios, wordings, neutrality review and blind development runs are Phase 2.5.
+
+**Phase 3 was split in two on 2026-10-04** (his; Phase 3 scope doc, decision 1): the statistics, proven on synthetic
+data, are Phase 3; the protocol, its independent review, the freeze and the `prereg-v1` tag are Phase 3.5.
+
+**The phase slugs other than Phases 0 to 3.5 are provisional.** Each one is fixed when its scope doc is written.
 
 ### Phase doc status
 
@@ -57,7 +72,14 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | Phase | Scope doc | IMPLEMENTATION doc |
 |---|---|---|
 | 0 | **APPROVED 2026-10-03** | **APPROVED 2026-10-03; built; DoD audit §11a** |
-| 0.5-7 | not written; written in order after Phase 0 is built | not written; each immediately before its build |
+| 0.5 `aws-foundation` | **APPROVED 2026-10-04**, all eight decisions as recommended | not written; immediately before its build |
+| 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | not written; immediately before its build |
+| 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1 | not written; immediately before its build |
+| 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | not written; immediately before its build |
+| 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | not written; immediately before its build |
+| 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | not written; immediately before its build |
+| 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | not written; immediately before its build |
+| 4-7 | not written; written in order after 3.5's | not written; each immediately before its build |
 
 **As in Musical Mycelium, every scope doc is written up front, one at a time through the whole roadmap, before
 implementation begins** (his convention). Each phase then starts by writing its IMPLEMENTATION doc immediately
@@ -68,14 +90,18 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-03, evening
+### Where the build actually is — 2026-10-04, early morning
 
 - **Phase 0 is complete.** Four commits on `main`, all pushed: `f214280` (planning, pushed before the guard
   existed, confirmed clean by the guard's history scan), `9c382b8` (the name guard, hooks, toolchain, CI),
   `f45770b` (roadmap, known gaps, Phase 0 docs), `4405412` (`CLAUDE.md`, the guard explainer, the planning
   README). **CI run `37160410815`: green on the first push**, same numbers as local.
 - **`planning/09` §7, the bootstrap checklist:** steps 1-6 and 8 **done**. Step 7 (claim the Vercel name) is his.
-- **Next: the scope docs for Phases 0.5 through 7**, in order, before any further implementation.
+- **2026-10-04: scope docs for Phases 0.5, 1, 1.5, 2, 2.5, 3 and 3.5 written and APPROVED** (his), all decisions
+  as recommended. Phases 1, 2 and 3 were each split in two. Planning `01`, `02`, `05` and `07` carry dated patches
+  from those decisions. No code was written; `make check` unchanged (123 tests passing).
+- **Next: the Phase 4 `official-grid` scope doc**, then 5, 6 and 7, before any further implementation. Then Phase
+  0.5's IMPLEMENTATION doc.
 - **Nothing has been run against any model by this repo.** Nothing official has been seen.
 
 ## 3. Scaffolding ledger
@@ -117,10 +143,10 @@ The Terraform bootstrap and budgets, the smoke calls, the development model, Oll
 |---|---|
 | Dockerfile, ECR, ECS task definition | Phase 1: there is a harness to package |
 | Deploy workflow with OIDC (role trusts this repo only; provider looked up, never created) | Phase 1: there is something to deploy |
-| `web/` site | Phase 1's one page; full explorer in Phase 6. Initialized **inside** `web/`, never at the root |
+| `web/` site | Phase 1.5's one page; full explorer in Phase 6. Initialized **inside** `web/`, never at the root |
 | Experiment content (scenarios, objectives, wordings, lever menu, dossier) as versioned data | Phase 2 |
-| The protocol file and the `prereg-v1` tag | Phase 3. Nothing official runs before it |
-| Scorer and aggregation | Phase 3, tested on synthetic results only |
+| The protocol file and the `prereg-v1` tag | Phase 3.5 (split from Phase 3, 2026-10-04). Nothing official runs before it |
+| Scorer and aggregation | Phase 1.5, descriptive only; verdicts, intervals and the matcher in Phase 3, tested on synthetic results only |
 | Real-case dossiers, rubrics, the selection log | Phase 5 |
 | Memo company-name scan before publishing | Phase 6 (`planning/09` A7) |
 
@@ -129,14 +155,39 @@ The Terraform bootstrap and budgets, the smoke calls, the development model, Oll
 Checked 2026-10-03 on WSL2: `uv` 0.12.0, Terraform 1.15.8, Docker 29.6.2, AWS CLI 2.36.14, `gh` 2.45.0, Node
 22.20.0, GNU Make 4.3, system Python 3.12.3. **`pre-commit` is not installed**; Phase 0 brings it in as a
 development dependency through `uv`. **Ollama is not on the WSL path**, which is not proof it is absent
-(`planning/04` §6.3); Phase 0 checks it.
+(`planning/04` §6.3); Phase 0 checks it. *Updated 2026-10-04:* the check moved to Phase 0.5; a read-only look found
+Ollama installed on the Windows side; whether WSL can reach it is still unchecked.
 
 ## 4. Decision history
 
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
 
-- **2026-10-03 — Phase 0 complete** (CI run `37160410815`; `docs/phases/phase-0-scaffold-and-guardrails-IMPLEMENTATION.md` §11a).
+- **2026-10-04 — Phase 3 and 3.5 scope docs approved** (his), all eight decisions as recommended. Phase 3: split;
+  established library implementations for the intervals, tested against published examples. Phase 3.5: the tag
+  freezes content, protocol and analysis code (`planning/05` §3.1 patched); tag protection, an independent public
+  archive and a release; an independent review of the protocol before the tag; real-case types and *k*
+  (`planning/07` §10.0 patched); errata allowed for changes that alter no computation (`planning/07` patched); the
+  main model chosen in Phase 3.5 from Phase 0.5's measurements if Sonnet 5.5 has arrived.
+- **2026-10-04 — Phase 2 and 2.5 scope docs approved** (his), all eleven decisions as recommended. Phase 2: split;
+  Claude drafts the instrument and he reviews every line, disclosed; industry-level sources only, no peer companies
+  (`planning/01` §2.2 patched); the company unnamed; one shared dossier. Phase 2.5: the development loop blind to
+  outcomes, and a degenerate scenario is a result, not a defect (`planning/05` §2 patched); discrete options
+  shuffled per run (`planning/07` §4, §7.2 patched); the sealed template drawn at random (`planning/07` §7.1
+  patched); S1's retraining cost stated separately (`planning/07` §3.2 patched); the blind reader from another
+  vendor through OpenRouter.
+- **2026-10-04 — Phase 1 scope doc approved** (his), all five decisions as recommended: split into Phase 1
+  `walking-skeleton` and Phase 1.5 `publish-path`; the placeholder off the subject in scenario, objectives and menu
+  (`planning/05` §1-2 patched); the skeleton runs on the main model; the raw results bucket in `bootstrap`, and
+  inputs built into the image with the published JSON committed (`planning/02` §1, §2.8, §2.10 patched). Also his:
+  every scope doc leaves room for Sonnet 5.5 as the main model; Phase 0.5 amended to smoke-test it if access arrives.
+- **2026-10-04 — Phase 0.5 scope doc approved** (his), all eight decisions as recommended: deploy role with no
+  permissions, proven by one workflow run; budgets in `bootstrap` (`planning/02` §2.10 patched); the Nova Pro
+  billing line settled by checking tagged inference profiles first; the real provider seam for the smoke calls;
+  smoke records committed; he runs every AWS-authenticated command; Nova Pro at its own default temperature
+  (`planning/07` §2.3 patched); the development model chosen at the end of the phase.
+- **2026-10-03 — Phase 0 complete** (CI run `37160410815`;
+  `docs/phases/phase-0-scaffold-and-guardrails-IMPLEMENTATION.md` §11a).
 - **2026-10-03 — All scope docs up front, Phase 0 excepted** (his). Phase 0 is built first so the name guard
   exists early; then the scope docs for 0.5 through 7, in order, before any further implementation.
 - **2026-10-03 — Phase 0 decisions 1-6 made** (his; Phase 0 scope doc): a private term file with a longlist

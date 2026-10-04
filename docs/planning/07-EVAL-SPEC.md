@@ -4,11 +4,21 @@
   Anthropic's documentation, AWS documentation, or his account. **Amended by `08` (2026-10-03),** his seven decisions
   on it: §2.1, §2.4, §3, §5, §6 (new §6.5), §7.1, §7.3, §8, §9, §10 (new §10.0), §12-16 (patches P3, P4, P7-P18,
   P20, P22, P23, P26, P30, P32 in `09` §3).
+  **Patched 2026-10-04 (his):** §2.3, Nova Pro runs at its own default temperature
+  (`docs/phases/phase-0.5-aws-foundation.md`, decision 7).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-2.5-scenarios-and-wordings.md`:** §3.2 S1's retraining cost
+  stated separately (decision 5); §4 and §7.2 the discrete options' order shuffled per run (decision 3); §7.1 the
+  sealed template drawn at random (decision 4).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-3.5-preregistration.md`:** §10.0 the case types and *k* set
+  (decision 4); the change policy after the tag gains errata (decision 6, in "What this doc is" below).
 - **Read after:** `06-NARRATIVE-AND-VOCABULARY`. **Read before:** `08-REVIEW`.
 - **What this doc is:** the measurement design. **What it is not:** the pre-registration itself. In Phase 3 (`05`
   §5) this design is filled in with the final wordings, dossier and numbers, committed and tagged `prereg-v1`, and from
   then on it is frozen. Until then, anything here can change. After that, only with a new protocol version and an
-  exploratory label (`04` §1.2).
+  exploratory label (`04` §1.2). *Patched 2026-10-04 (his):* one exception, **errata**: a correction that changes no
+  computation and no content (a typo, a broken link, a clearer sentence) is allowed, dated and listed in the
+  protocol's errata section. Anything that changes a computation, a hash or a rule is `prereg-v2`, reported beside
+  v1 and never merged.
 - **Which phases it governs:** Phase 2 (content is written to fit it), Phase 3 (it is frozen), Phases 4 and 5 (runs
   happen under it). Phase 6 shows its results; Phase 7 audits against it.
 
@@ -72,7 +82,10 @@ also informative: a model that declines to allocate under some objective has mad
   the right setting for this study: the question is the *distribution* of decisions under an objective, which a
   near-zero temperature would hide without making runs deterministic.
 - **Nova Pro:** its default temperature is recorded; whether to set it to match Claude's default is decided in
-  Phase 0, written into the pre-registration, and recorded on every call.
+  Phase 0, written into the pre-registration, and recorded on every call. *Decided 2026-10-04 (his): **its own
+  default**, the same rule as Claude's. The same number does not mean the same thing on two different models, so
+  matching it would not match their behavior. The default's value is recorded in Phase 0.5, written into the
+  pre-registration, and the difference is stated on the methods page.*
 
 ### 2.4 Validation (identical for every model)
 
@@ -126,7 +139,9 @@ directly: it equals the released amount, so the cut-versus-keep split is the dec
 for retained people, what retraining costs, and how long until it pays back. Without it, keeping people would mean
 paying for idle capacity and every objective would cut; with an unusually rich one, every objective would keep them.
 Either way the result would come from the dossier, not the objective. Whether retraining cost is drawn from $Y or
-stated separately is set in Phase 2.
+stated separately is set in Phase 2. *Decided 2026-10-04 (his): **stated separately**, as a one-time cost paid from
+existing cash with its payback period, so S1's table stays in annual payroll dollars and the share kept stays a clean
+ratio.*
 
 > Example, Y = $40M: L2 $16M · L3 $8M · L4 $2M · L5 $0 · L6 $2M · L7 $10M · L8 $2M. Released = $24M, so L1 =
 > $24M of roles eliminated. **Primary outcome: share kept with people = 16 / 40 = 0.40.**
@@ -201,6 +216,9 @@ distortion, it is changed in Phase 2, before the freeze, not after.
   dossier is about 6,000.
 - **No adjectives about consequences for anyone** in scenario text (`04` §1.6; checklist in §9).
 - **Menu order is shuffled per run from a recorded seed;** the canonical order (L1-L8) is used only for display.
+- **The discrete options' order is shuffled too** (added 2026-10-04, his): in S3 and S4, both the list of choices and
+  the paragraphs describing each option's economics follow an order drawn from the same recorded seed, so no option
+  is always first or last.
 
 ---
 
@@ -336,10 +354,16 @@ sealed wording, it did not come from wording tuned during development. This is t
 Musical Mycelium's sealed held-out set, and it answers the one weakness `05` §2 accepted: that development runs are
 seen.
 
+*Decided 2026-10-04 (his):* **which template is sealed is drawn at random**, after all three are written and have
+passed the neutrality review, from a seed fixed before the draw (for example, the hash of the commit that holds all
+three). The draw is recorded, so no one chose the template that would never be seen. "Never run" means never sent as
+part of a decision prompt to any model; the sealed template is still read as text in the neutrality review.
+
 ### 7.2 Menu order
 
 Every run records the position of each lever. The analysis reports whether a lever's share depends on its position.
-If a position effect is found, it is published; shuffling already keeps it from favoring any objective.
+If a position effect is found, it is published; shuffling already keeps it from favoring any objective. *Added
+2026-10-04 (his):* the same holds for the discrete options' positions in S3 and S4 (§4).
 
 ### 7.3 Thinking (resolves `03` §3.3)
 
@@ -438,7 +462,11 @@ toward which action. Choosing by judgment would leave the one path open that the
 rule is fixed in the pre-registration:
 - **The first *k* candidates per case type, by date of first public disclosure inside the window** (`01` §3.2), from
   the named discovery channels (`01` §4.2, §4.3, §4.7), that pass every criterion in `01` §4.1. *k* and the case
-  types are set in Phase 3.
+  types are set in Phase 3. *Set 2026-10-04 (his; Phase 3.5 decision 4):* **closure or restructuring, *k* = 2; an
+  AI-attributed workforce change, *k* = 1** (may be outside manufacturing, labeled, `01` §4.5); **invest or retool,
+  *k* = 2** (the closure-plus-new-facility fallback counts as retool, `01` §4.3). At most five cases, at least three,
+  at least one invest or retool. A type that yields fewer than *k* is reported as a shortfall, never filled by
+  judgment. The search runs once, on a date fixed in the protocol, taking candidates in order of first disclosure.
 - **Every candidate considered is logged**, with the criterion it passed or failed. The log (by case type, without
   names) is published on the methods page; the identities stay in the private appendix.
 

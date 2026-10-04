@@ -3,6 +3,11 @@
 - **Status:** PROPOSED 2026-10-02. Facts marked *verified* were checked live that day. Costs are estimated in `03`.
   **Amended by `08` (2026-10-03):** §2.1 retries and a running spend cap, §2.8 per-run storage, §2.12 the Budgets
   filter's status (patches P18, P19, P20, P33 in `09` §3).
+  **Patched 2026-10-04 (his):** §2.10, the budgets move from `main` to `bootstrap`, so they exist before the first
+  model call and survive `main`'s teardown (`docs/phases/phase-0.5-aws-foundation.md`, decision 2).
+  **Patched 2026-10-04 (his):** §1, §2.8 and §2.10, from Phase 1's decisions 4 and 5
+  (`docs/phases/phase-1-walking-skeleton.md`): the raw results bucket lives in `bootstrap`; experiment inputs are
+  built into the image (no inputs bucket); aggregation runs on the laptop and the published JSON is committed.
 - **Read after:** `01-DATA-SOURCES`. **Read before:** `03-COST-MODEL`.
 - **Inherits from Musical Mycelium** wherever a pattern already worked there: Python 3.13 + uv, Terraform with
   separate `bootstrap` and `main` stacks, GitHub Actions deploying through OIDC with no long-lived keys, a React +
@@ -30,6 +35,12 @@
                                                              v
  visitor ──> horizon-compact.vercel.app ──> CloudFront ──> S3 (SPA + precomputed JSON)
 ```
+
+*Patched 2026-10-04 (his; Phase 1 decisions 4 and 5):* the picture above is kept as the record. As built, the
+experiment's inputs are **built into the container image** rather than read from an S3 inputs bucket, so the image
+digest pins the code and the content together; aggregation runs **on the laptop only**, and the static JSON is
+**committed to the repo** before CI deploys it, so CI never reads raw results (§2.11). The raw results bucket lives
+in the `bootstrap` root (§2.10).
 
 **Three stages that never overlap:** build inputs (offline, reviewed by a human), run the experiment (batch, then
 it stops), publish results (static files). A visitor never triggers a model call in v1.
@@ -181,7 +192,8 @@ its own platforms (Bedrock sets its own dates). Fine for throwaway development, 
   the harness never overwrites). Raw responses are kept, so any score can be recomputed later. *Corrected
   2026-10-03 (`08` §4.2):* the first draft wrote one object per shard, but with one task per model (§2.3) a shard is
   the whole sweep, so an interrupted task would have lost everything; per-run objects let it resume by `run_id`.
-- **Aggregation with DuckDB**, reading straight from S3, on the laptop or in CI: per-cell means, spread, rejection
+- **Aggregation with DuckDB**, reading straight from S3, on the laptop (*patched 2026-10-04:* laptop only; the
+  output JSON is committed to the repo, and CI never reads raw results, §2.11): per-cell means, spread, rejection
   rates, wording-variant comparisons, real-case matching. Output: small static JSON files for the site.
 - **Scoring is deterministic.** The main measure (where the money goes, what was chosen) comes straight from
   validated structured output. **No model grades the main result.** An LLM judge may later analyze the *memos*
@@ -198,8 +210,12 @@ its own platforms (Bedrock sets its own dates). Fine for throwaway development, 
 
 ### 2.10 Infrastructure as code and deployment
 
-- **Terraform** for every resource. `bootstrap` (state bucket, lock, OIDC provider, deploy role) and `main` (VPC,
-  ECR, ECS cluster and task definition, S3 buckets, CloudFront, IAM, log groups, budget alarm).
+- **Terraform** for every resource. `bootstrap` (state bucket, lock, OIDC provider, deploy role, budget alarms, the
+  raw results bucket) and `main` (VPC, ECR, ECS cluster and task definition, the site bucket, CloudFront, IAM, log
+  groups). *Patched 2026-10-04 (his; Phase 1 decision 4):* the raw results bucket moved to `bootstrap`, so
+  destroying `main` never deletes the write-once record (`05` §3.1). *Patched 2026-10-04
+  (his):* the budget alarms moved from `main` to `bootstrap`, so they exist before the first model call and are not
+  removed when `main` is destroyed. The OIDC provider is looked up, never created (`04` §3.5).
 - **GitHub Actions with OIDC:** test on every push; build and push the image; deploy infrastructure and the site on
   merge to main. **CI never launches a sweep.** Sweeps cost money and are started by a person, on purpose.
 

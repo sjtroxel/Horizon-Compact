@@ -7,6 +7,18 @@
   Phase 0; the AWS half (Terraform bootstrap, budgets, smoke calls, Ollama, the development model, the `09` §5
   checks) becomes Phase 0.5 `aws-foundation`. Reason and record: `docs/phases/phase-0-scaffold-and-guardrails.md`,
   decision 6. The table below is unchanged as the record of the plan.
+  **Patched 2026-10-04 (his), from `docs/phases/phase-1-walking-skeleton.md`:** §5's Phase 1 is split into Phase 1
+  `walking-skeleton` (the run path: results land in S3) and Phase 1.5 `publish-path` (the scorer, the page, the
+  teardown test), both done before Phase 2 (decision 1). §1 and §2: the skeleton's placeholder is **off the
+  experiment's subject entirely**, in scenario, objectives and menu, not only in scenario (decision 2).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-2-company-dossier.md` and
+  `docs/phases/phase-2.5-scenarios-and-wordings.md`:** §5's Phase 2 is split into Phase 2 `company-dossier` and Phase
+  2.5 `scenarios-and-wordings`. §2: the development loop is built blind to outcomes, and no scenario changes for an
+  outcome reason (Phase 2.5 decisions 1 and 2).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-3-scoring-and-simulation.md` and
+  `docs/phases/phase-3.5-preregistration.md`:** §5's Phase 3 is split into Phase 3 `scoring-and-simulation` (the
+  statistics, proven on synthetic data) and Phase 3.5 `preregistration` (the protocol, its review, the freeze and the
+  tag). §3.1: the tag freezes the analysis code as well as the content and the protocol (Phase 3.5 decision 1).
 - **Read after:** `04-RISK-REGISTER`. **Read before:** `06`.
 - **Answers two questions:** in what order does v1 get built so that nothing built early has to be thrown away; and
   in what order does the experiment get *run* so that nothing seen early can bend the result.
@@ -25,6 +37,11 @@ real function on the real architecture: every component present and connected, e
 version of its job. It grows by thickening in place. Musical Mycelium was built this way from v0.1 to v1.1 without a
 rewrite.
 
+*Patched 2026-10-04 (his; Phase 1 decision 2):* the scenario, the five objectives and the menu below are all
+**placeholders off the experiment's subject** (no company, workers or owners; no contrast of who counts or of time
+horizon), with the same shape as the real ones. A placeholder scenario alone would still run the real objectives
+on the official model and show which way they push (§2).
+
 For Horizon Compact, the skeleton is: **one scenario, five objectives, a handful of runs, launched as a Fargate task,
 calling Bedrock through the real provider interface, writing provenance-stamped results to S3, aggregated by the real
 scorer, shown on one page of the real site through the real CloudFront and Vercel path.** Every later phase adds
@@ -40,8 +57,8 @@ normal build would do early all count as looking:
 
 | Something a build normally does early | Why it counts as looking | How the plan handles it |
 |---|---|---|
-| A walking skeleton that runs the real scenario | It shows which way the objectives push, before anything is fixed | **The skeleton runs a placeholder scenario** that is not one of the four and never becomes one (§4, Phase 1) |
-| Development runs of every wording on cheap or local models (`00` §5.5) | Different models, but they show a direction, and wording edits made after seeing it are the forking paths `04` §1.2 warns about | **Allowed, with a written rule:** after a development run, a wording or scenario may change only to fix a format, clarity or neutrality failure, and every change is logged with its reason. The pre-registration says plainly that development runs on other models were seen (Phase 2) |
+| A walking skeleton that runs the real scenario | It shows which way the objectives push, before anything is fixed | **The skeleton runs a placeholder scenario** that is not one of the four and never becomes one (§4, Phase 1). *Patched 2026-10-04:* its objectives and menu are placeholders too, off the subject entirely (§1) |
+| Development runs of every wording on cheap or local models (`00` §5.5) | Different models, but they show a direction, and wording edits made after seeing it are the forking paths `04` §1.2 warns about | **Allowed, with a written rule:** after a development run, a wording or scenario may change only to fix a format, clarity or neutrality failure, and every change is logged with its reason. The pre-registration says plainly that development runs on other models were seen (Phase 2). *Patched 2026-10-04:* the loop is **built blind to outcomes**: format from status counts, clarity from comprehension questions with answer keys, neutrality from the checklist and a blind reader; nobody reads allocations by objective. A scenario where every objective lands the same way is a result, never a reason to change numbers (Phase 2.5, decisions 1-2) |
 | A pilot to measure noise and set the number of repeats (`04` §1.5) | It is a run of the real scenarios on the official model | **The pre-registration comes before the pilot.** It states the rule that turns the pilot's measured spread into a repeat count, and pilot runs are excluded from the results (Phase 4) |
 
 **Why this matters more than any infrastructure choice:** a late infrastructure mistake costs a week. A peek before
@@ -56,7 +73,7 @@ result. Everything else in this plan is a two-way door; this is the one that onl
 
 | Decision | Why it locks | What "right" means from the start |
 |---|---|---|
-| **Pre-registration before any official run** (§2) | A result seen before the protocol is fixed cannot be unseen | The protocol commit is a phase gate (Phase 3); the harness refuses to run an official sweep unless the protocol hash in its config matches a committed protocol |
+| **Pre-registration before any official run** (§2) | A result seen before the protocol is fixed cannot be unseen | The protocol commit is a phase gate (Phase 3); the harness refuses to run an official sweep unless the protocol hash in its config matches a committed protocol. *Patched 2026-10-04 (his):* the tag freezes the content, the protocol **and the analysis code** (verdicts, intervals, matching); a change to any of them after the tag is a new protocol version. Run code may be fixed, each fix logged with its effect (Phase 3.5 decision 1) |
 | **Provenance on every model call** (`02` §2.2) | A result without its model, prompt hash and seed cannot be defended or re-run; retrofitting means re-running everything | Recorded from the first skeleton call, including the placeholder runs |
 | **Raw responses kept, write-once** (`02` §2.8) | If only parsed numbers are kept, a scoring bug found later means paying for every run again | The raw response is stored next to the parsed decision; results are never overwritten |
 | **Official and development results kept apart** (`02` §2.2) | A laptop or local-model run mixed into the official set is Musical Mycelium's false-finding lesson | Official = container run, identified by image digest, under a committed protocol. Everything else is labeled development and stored under a different prefix |

@@ -5,6 +5,8 @@
 - **Read after:** `00-DESIGN-BRIEF`. **Read before:** `02-ARCHITECTURE`.
 - **Amended by `08` (2026-10-03):** §1.2-1.3 objective wording, §4.2-4.3 two overstated claims, §4.6 headcount
   scaling (patches P2, P23, P24, P31 in `09` §3).
+- **Patched 2026-10-04 (his):** §2.2, the fictional company uses industry-level sources only; SEC company data is not
+  used for it (`docs/phases/phase-2-company-dossier.md`, decision 3).
 - **Public-safety rule:** this file names no company as a case. Candidate real cases live in
   `methods-appendix/` (gitignored in the repo; see §4.8).
 
@@ -101,7 +103,7 @@ Every figure in the dossier cites a public source. Nothing is invented without a
 | Revenue per employee, payroll share, capital spending for the industry | **US Census Bureau, Annual Integrated Economic Survey (AIES).** It replaced the Annual Survey of Manufactures, collecting from March 2024. | verified that AIES replaced ASM; table selection unverified |
 | Wages by occupation (machinists, assemblers, engineers) | **BLS Occupational Employment and Wage Statistics** | unverified for current release |
 | Operating margin, R&D as a share of revenue, capital spending, dividend payout | **Aswath Damodaran's industry datasets, NYU Stern**, updated January 2026 (margins, R&D, capex, dividend fundamentals) | verified the datasets exist and the date; terms of use unverified |
-| Peer financial structure (debt, cash, buyback history) | **SEC company financial data** (XBRL `companyfacts` API, or the Financial Statement Data Sets) | API verified; data-set currency unverified (one source listed releases only through 2023) |
+| Peer financial structure (debt, cash, buyback history) | **SEC company financial data** (XBRL `companyfacts` API, or the Financial Statement Data Sets) | API verified; data-set currency unverified (one source listed releases only through 2023). *Patched 2026-10-04 (his): **not used for the fictional company**, which takes industry-level figures only (Census, BLS, Damodaran), so no list of real peer companies exists anywhere; kept for Phase 5's real cases* |
 
 ### 2.3 Why this is the main attack surface
 

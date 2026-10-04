@@ -7,7 +7,7 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-03, evening
+> ## START HERE — where things stand, 2026-10-04, early morning
 >
 > **PHASE 0 `scaffold-and-guardrails` IS COMPLETE.** Four commits on `main`, all pushed: `f214280` (planning,
 > pushed before the guard existed, since confirmed clean by the guard), `9c382b8` (the name guard, hooks,
@@ -20,18 +20,48 @@ case by its type and a neutral label. The names live only in the private longlis
 > clone needs `make setup`** before anything is committed; `make check` fails until it is run.
 >
 > **NEXT: the scope docs for Phases 0.5 through 7, written one at a time, in order, before any further
-> implementation** (his convention; Phase 0 was the one exception). First: **Phase 0.5 `aws-foundation`**,
-> whose content is listed in the Phase 0 scope doc's "Moved to Phase 0.5" paragraph and whose checks are below.
-> Then Phase 0.5's IMPLEMENTATION doc, immediately before it is built.
+> implementation** (his convention; Phase 0 was the one exception). **2026-10-04: Phase 0.5's scope doc is
+> APPROVED** (`docs/phases/phase-0.5-aws-foundation.md`), all eight decisions as recommended. **Phase 1
+> `walking-skeleton` is APPROVED and split** (his, 2026-10-04): Phase 1 (`docs/phases/phase-1-walking-skeleton.md`,
+> the run path) and Phase 1.5 (`docs/phases/phase-1.5-publish-path.md`, the scorer, the page, the teardown test).
+> **Phase 2 is APPROVED and split** (his, 2026-10-04): `docs/phases/phase-2-company-dossier.md` and
+> `docs/phases/phase-2.5-scenarios-and-wordings.md`, all eleven decisions as recommended. **Phase 3 is APPROVED and
+> split** (his, 2026-10-04): `docs/phases/phase-3-scoring-and-simulation.md` and
+> `docs/phases/phase-3.5-preregistration.md`, all eight decisions as recommended. **Next: the Phase 4
+> `official-grid` scope doc**, then 5 through 7. A later scope doc that rests on a Phase 0.5 check not yet measured
+> says so in a line, so the amendments are easy to find if the check comes back different. Phase 0.5's
+> IMPLEMENTATION doc is written immediately before it is built.
 >
-> **Owed by him, no rush:** claim `horizon-compact.vercel.app` (entry below).
+> **Owed by him:** claim `horizon-compact.vercel.app` (entry below). No rush now; it is a prerequisite for Phase
+> 1.5.
+
+---
+
+## FINDING — Nova Pro's billing line is shared with Musical Mycelium, 2026-10-04
+
+Found while scoping Phase 0.5, by reading Musical Mycelium's code (read-only). It uses `amazon.nova-pro-v1:0` as
+its **eval judge** (its `DEFAULT_JUDGE_MODEL_ID`; judge result files from 2026-08-20 to 2026-09-10), and Haiku 4.5
+for its agent. `planning/04` §3.3 and `planning/02` §2.12 assumed Musical Mycelium spends only on Haiku 4.5, so a
+budget filtered to Sonnet 4.6 and Nova Pro would measure Horizon Compact alone. **For Nova Pro it would not.** The
+error is small (one 30-item judge run was estimated at about $0.10 in Musical Mycelium's own records) but not zero.
+
+**What this check is not:** it read code, not the bill. A grep of one repo's source is not proof of what was billed.
+The billing check (Cost Explorer by usage type) is in Phase 0.5's checks.
+
+**What it changes:** how this project's budgets treat Nova Pro is Phase 0.5 decision 3. It also narrows
+`planning/09` A1: the development model can be neither Haiku 4.5 nor Nova Pro. `planning/04` §3.3 gets a dated
+patch once decision 3 is made.
+
+**Also found while scoping, recorded in the scope doc:** this repo's OIDC subject claim is the immutable form
+(GitHub API, 2026-10-04); Ollama is installed on the Windows side, and whether WSL can reach it is still unchecked.
 
 ---
 
 ## FINDING — the first commit went public before the name guard, and it is clean, 2026-10-03
 
 `f214280` ("first commit new project", 15:56 CDT) holds `.gitignore` and the 12 files of `docs/planning/` (13
-files in all; `docs/planning/README.md` does not exist yet), and was pushed to `github.com/sjtroxel/Horizon-Compact` (public, confirmed through the GitHub API). `planning/09` §7
+files in all; `docs/planning/README.md` was not in it, and was added later in `4405412`), and was pushed to
+`github.com/sjtroxel/Horizon-Compact` (public, confirmed through the GitHub API). `planning/09` §7
 put the guard in the first commit, before anything was copied in. That order was not followed.
 
 **The push was his, deliberate.** Another session scanned the same 12 planning files against the longlist
@@ -103,7 +133,7 @@ Each is Claude's, using live sources only. None blocks Phase 0.
 - ~~**The one-line disclosure in `docs/planning/README.md`**~~ **Done 2026-10-03**, his words, in `4405412`.
 - ~~**Commit the private term file in job-search-headquarters**~~ **Done 2026-10-03** (`ca8f316`).
 - **Claim `horizon-compact.vercel.app`** as a placeholder (`planning/09` §7 step 7). Unclaimed as of 2026-10-02;
-  not re-checked since.
+  not re-checked since. *2026-10-04:* now a prerequisite for Phase 1.5.
 
 ---
 
@@ -112,6 +142,10 @@ Each is Claude's, using live sources only. None blocks Phase 0.
 Quota requests open (US: AWS Support case 179097554500679; Global: pending). If access arrives **before** the
 `prereg-v1` tag, the main-model choice reopens as his decision. After the tag, Sonnet 5.5 is its own sweep
 (`planning/05` §5.2).
+
+**Room left for it, 2026-10-04 (his):** the scope docs treat the main model as a slot (Phase 1, "The main model is
+a slot"; `ROADMAP.md` §2). Phase 0.5 smoke-tests Sonnet 5.5 if access has arrived, which gives the measured facts
+for the decision. Every later scope doc says which of its lines would change if 5.5 became the main model.
 
 ---
 
