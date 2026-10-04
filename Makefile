@@ -3,10 +3,11 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help setup install fmt lint typecheck test root-check paths-check doctor check \
-        guard-history fingerprint
+        guard-history fingerprint tf-fmt tf-check
 
 GUARD := uv run --no-sync python -m horizon_compact.privacy.guard
 ROOT_CAP := 16
+TF_BOOTSTRAP := infra/terraform/bootstrap
 
 help: ## List available targets
 	@grep -hE '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -51,6 +52,17 @@ root-check: ## Fail if the repo root has grown past its cap
 	echo "repo root: $$count files + $$dirs dirs = $$total entries (cap $(ROOT_CAP))"; \
 	[ "$$total" -le $(ROOT_CAP) ] || { echo "Root cap exceeded: relocate something before raising the cap."; exit 1; }
 
+# No target runs plan, apply, import or destroy: anything that authenticates is typed by hand (Phase 0.5, decision 6).
+tf-fmt: ## Rewrite Terraform files into canonical format
+	terraform -chdir=$(TF_BOOTSTRAP) fmt -recursive
+
+# Needs no credentials and makes no AWS call. `init` only downloads the provider; -lockfile=readonly fails if
+# the committed .terraform.lock.hcl disagrees with the configuration instead of resolving something new.
+tf-check: ## Terraform fmt -check and validate (no credentials, no AWS call)
+	terraform -chdir=$(TF_BOOTSTRAP) fmt -check -recursive
+	terraform -chdir=$(TF_BOOTSTRAP) init -backend=false -input=false -lockfile=readonly
+	terraform -chdir=$(TF_BOOTSTRAP) validate
+
 paths-check: ## Fail if any tracked path is under methods-appendix/ (needs no private file)
 	@$(GUARD) paths-check
 
@@ -59,7 +71,7 @@ doctor: ## Check the hooks are installed and the private term file loads
 
 # CI never has the hooks or the private term file, so `doctor` is skipped there BY NAME, and says so.
 # Everything else is identical, so a green local `make check` predicts a green check on GitHub.
-check: lint typecheck test root-check paths-check ## Everything CI runs, plus doctor when not in CI
+check: lint typecheck test root-check paths-check tf-check ## Everything CI runs, plus doctor when not in CI
 ifdef CI
 	@echo "SKIPPED in CI: doctor (no hooks or private term file on a CI runner, by design)"
 else

@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit real values.
+alert_email = "REPLACE-with-the-address-that-should-receive-budget-alerts"
+
+# Leave unset until the Sonnet 4.6 Service string appears in the Budgets console filter list (it lists only
+# services that have been billed). Then add:
+# sonnet_service_name = "<exact string from the list>"

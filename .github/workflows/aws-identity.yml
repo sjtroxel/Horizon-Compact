@@ -1,0 +1,40 @@
+name: AWS identity check
+
+# MANUAL ONLY, and only ever from `main`. Proves the deploy role's trust (Phase 0.5, decision 1): the role has
+# no permission policy, so the one thing this can do is assume it and print who it is. Never on push: CI does
+# not touch AWS in this phase.
+#
+# Dispatch from `main`, never from a tag or another branch. The trust policy pins the OIDC `sub` claim to
+# refs/heads/main with StringEquals; a run from anywhere else presents a different `sub` and STS refuses with
+# "Not authorized to perform sts:AssumeRoleWithWebIdentity", an error that names nothing about refs. That is
+# the hardening working, not a bug to widen (Musical Mycelium, 2026-09-06).
+
+on:
+  workflow_dispatch:
+
+# id-token: write lets the job request a GitHub-signed token to exchange with STS. Without it the credential
+# step fails with a message that does not mention this line.
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  identity:
+    name: assume the deploy role and print its identity
+    runs-on: ubuntu-latest
+    steps:
+      # The role ARN is a repository SECRET (Phase 0.5 decision D), so it is masked in every log. This repo's
+      # logs are public and the ARN contains the account id. mask-aws-account-id defaults to false, so it is
+      # set explicitly.
+      - name: Assume the deploy role
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      # Pass: the output reads arn:aws:sts::<account-id>:assumed-role/horizon-compact-github-deploy/...
+      # The sed is a second guard in case masking ever misses; GetCallerIdentity needs no permission.
+      - name: Print the identity
+        run: |
+          aws sts get-caller-identity --query Arn --output text | sed -E 's/[0-9]{12}/<account-id>/g'

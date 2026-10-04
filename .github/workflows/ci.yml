@@ -29,6 +29,14 @@ jobs:
           version: "0.12.0"
           enable-cache: true
 
+      # Terraform for `make tf-check` (fmt -check and validate: no credentials, no AWS call). Pinned to the
+      # version used locally. The wrapper is off so `terraform` behaves exactly as it does in the Makefile.
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.15.8"
+          terraform_wrapper: false
+
       # --locked fails the build if uv.lock disagrees with pyproject.toml, instead of resolving
       # something different from what runs locally.
       - name: Install dependencies

@@ -47,8 +47,12 @@ case by its type and a neutral label. The names live only in the private longlis
 > observed). Partly closed: Budgets and profiles (the tag test is in the build, placed early for its 24-48 hour
 > wait), Nova Pro (availability waits for its smoke call). Open until the build: the Sonnet 4.6 smoke calls. Details
 > in "OPEN — Phase 0.5 checks" below. The four `planning/07` patches proposed from them are made.
-> **Next: Phase 0.5's IMPLEMENTATION doc** (Opus to write it; Sonnet for the build), with the tagged inference
-> profile, the first Sonnet smoke call and his tag activation placed early for the 24-48 hour wait.
+> **2026-10-04, 5 PM: Phase 0.5's IMPLEMENTATION doc is APPROVED** (his),
+> `docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md`, its decisions A-D as recommended. The dev IAM policy
+> (`infra/iam/horizon-compact-dev-policy.json`) was drafted with it and is untracked until the build's C1.
+> **Next: the build, with Sonnet, from that doc's §15, starting at step 0** (he reads which identity `default` is,
+> and whether Sonnet 5.5 access has arrived). Found while writing it and **already fixed** (in C0): the deny rules
+> did not cover `terraform -chdir=... apply` or `plan` (§3 finding 1), and `*.tfvars` was not gitignored (finding 2).
 >
 > **Owed by him:** claim `horizon-compact.vercel.app` (entry below). No rush now; it is a prerequisite for Phase
 > 1.5.

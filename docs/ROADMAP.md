@@ -72,7 +72,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | Phase | Scope doc | IMPLEMENTATION doc |
 |---|---|---|
 | 0 | **APPROVED 2026-10-03** | **APPROVED 2026-10-03; built; DoD audit §11a** |
-| 0.5 `aws-foundation` | **APPROVED 2026-10-04**, all eight decisions as recommended | not written; immediately before its build |
+| 0.5 `aws-foundation` | **APPROVED 2026-10-04**, all eight decisions as recommended | **APPROVED 2026-10-04**, its four decisions (A-D) as recommended; not yet built |
 | 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | not written; immediately before its build |
 | 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1 | not written; immediately before its build |
 | 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | not written; immediately before its build |
@@ -126,8 +126,11 @@ then Phase 0.5's IMPLEMENTATION doc.
 - **2026-10-04: the Phase 7 `writeup-and-launch` scope doc written and APPROVED** (his), all six decisions as
   recommended; written to be re-scoped when the phase starts (its own section lists what will change). **Every scope
   doc, Phases 0 through 7, is now written and approved.**
-- **Next: Phase 0.5's IMPLEMENTATION doc** (Opus), then its build (Sonnet), with the tagged inference profile, the
-  first Sonnet smoke call and his tag activation placed early for the 24-48 hour wait.
+- **2026-10-04: Phase 0.5's IMPLEMENTATION doc written and APPROVED** (his),
+  `docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md`, decisions A-D as recommended; the dev IAM policy drafted
+  with it.
+- **Next: Phase 0.5's build** (Sonnet), from that doc's §15, starting at step 0. The tag test is front-loaded for its
+  24-48 hour wait.
 - **Nothing has been run against any model by this repo.** Nothing official has been seen.
 
 ## 3. Scaffolding ledger
@@ -235,6 +238,13 @@ recorded in the planning docs themselves and are only indexed here.
   (`planning/05` §1-2 patched); the skeleton runs on the main model; the raw results bucket in `bootstrap`, and
   inputs built into the image with the published JSON committed (`planning/02` §1, §2.8, §2.10 patched). Also his:
   every scope doc leaves room for Sonnet 5.5 as the main model; Phase 0.5 amended to smoke-test it if access arrives.
+- **2026-10-04 — Phase 0.5 IMPLEMENTATION doc approved** (his), its four decisions as recommended: (A) a scoped IAM
+  user `horizon-compact-dev` with a managed policy that explicitly denies changes to the OIDC provider and to other
+  budgets, and invocation of Musical Mycelium's models, its key deleted at phase end; (B) Nova Lite and gpt-oss-120b
+  as the Bedrock development-model candidates, beside Ollama `qwen3.5:4b`; (C) Sonnet 4.6 and Nova Pro each called by
+  both routes; (D) the deploy role's ARN as a GitHub secret. Also from writing it: the `.claude/settings.json` deny
+  rules gain the `terraform -chdir=*` forms; `*.tfvars` gitignored; budgets on one CUSTOM period; the identity
+  check masks the account ID in public logs.
 - **2026-10-04 — Phase 0.5 scope doc approved** (his), all eight decisions as recommended: deploy role with no
   permissions, proven by one workflow run; budgets in `bootstrap` (`planning/02` §2.10 patched); the Nova Pro
   billing line settled by checking tagged inference profiles first; the real provider seam for the smoke calls;
