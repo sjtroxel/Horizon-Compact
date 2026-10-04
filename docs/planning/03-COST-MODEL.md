@@ -7,6 +7,8 @@
 - *(2026-10-03: `07` §13 replaces §4's run-count assumptions; worst case about $71, about $57 at 10 repeats.)*
 - **Amended by `08` (2026-10-03):** §4 development line, §6 a running spend cap and the per-sweep caps decided
   (patches P20, P21 in `09` §3; caps decided by him, `09` §6).
+- **Patched 2026-10-04 (his), from Phase 0.5's smoke calls (`docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md` §19):** §3.1 the tool-use input overhead, measured;
+  §4 the development model named.
 - **The one-line answer:** v1 should cost **roughly $50-110 in total**, almost all of it model tokens, inside the
   **$135.97** of credits he has left, which expire **2027-07-30** and are **shared with Musical Mycelium**. The
   biggest swing factor is whether the model "thinks" before answering (§3.3).
@@ -70,6 +72,12 @@ Three things this table shows:
 | Output: the decision form | ~300 | — |
 | Output: the memo | ~400 | — |
 | Output: thinking, if enabled | 0 to ~2,000 | — |
+| *Added 2026-10-04:* tool-use input the API adds to every call | a few hundred (measured, below) | part of the prefix; *unverified* whether a cache point covers it on Converse |
+
+*Measured 2026-10-04 (Phase 0.5):* the same short prompt and one-tool schema counted **716** input tokens on Sonnet 4.6,
+**559** on Nova Pro and Nova Lite, and **235** on gpt-oss-120b. Tokenizers differ, so the difference is approximate,
+but a fixed overhead of a few hundred input tokens per call exists on both official models and is not in the rows
+above. Phase 4's measured tokens replace this whole table.
 
 Caching is the reason the dossier costs little: after the first call, each re-read costs $0.33 per million tokens
 instead of $3.30. Cache writes recur when the cache expires; a sweep that keeps calling within the window pays few
@@ -108,7 +116,7 @@ on the fictional company; **5** real cases x 5 objectives x 3 wordings x 10 repe
 | Second model family, Nova Pro, same 1,350 decisions | ~$10 | ~$10 |
 | Recognition probes (every case x every model) | under $1 | under $1 |
 | Dossier building (extraction from retrieved filing sections) | ~$5 | ~$5 |
-| Development: harness testing, failed runs, re-runs (the development model named in Phase 0: local, or a cheap Bedrock model that is neither an official model nor on Musical Mycelium's billing lines; `09` A1. Not Haiku 4.5, `04` §3.3) | ~$15 | ~$20 |
+| Development: harness testing, failed runs, re-runs (the development model named in Phase 0: local, or a cheap Bedrock model that is neither an official model nor on Musical Mycelium's billing lines; `09` A1. Not Haiku 4.5, `04` §3.3). *Named 2026-10-04 (his):* Ollama `qwen3.5:4b` (free) for volume, **Nova Lite** ($0.06 / $0.24 per million) for the Bedrock path | ~$15 | ~$20 |
 | Fargate, IPv4, S3, ECR, CloudFront, logs | under $2 | under $2 |
 | **Total, v1** | **about $55** | **about $105** |
 

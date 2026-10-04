@@ -2,6 +2,7 @@
 
 - **Status:** WRITTEN 2026-10-03. **The last numbered planning doc.** **Patch pass DONE the same afternoon** (P1-P34
   applied to `00`-`07`, §8). **All five of his decisions in §6 made 2026-10-03, as recommended.** Nothing is open.
+  *Patched 2026-10-04 (his):* A1 done in Phase 0.5 (`docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md` §19).
 - **Read after:** `08-REVIEW`. **Read before:** the repo's Phase 0 scope doc.
 - **What this doc is:** the forward-looking half of the review. `08` found what is wrong; this doc says **in what
   order it gets fixed, where each fix lands, and what stands between now and the first commit.** No new analysis.
@@ -124,7 +125,7 @@ goes into that phase's IMPLEMENTATION doc.
 
 | # | Phase | Assignment | From |
 |---|---|---|---|
-| A1 | **0** | **Name the development model** for Phase 2 runs: local (Ollama, once reachable from WSL) or a cheap Bedrock model that is neither an official model (Sonnet 4.6, Nova Pro) nor on a billing line Musical Mycelium already uses. Check that billing line first (*unverified* which Nova models Musical Mycelium spends on). | `08` §4.4 |
+| A1 | **0** | **Name the development model** for Phase 2 runs: local (Ollama, once reachable from WSL) or a cheap Bedrock model that is neither an official model (Sonnet 4.6, Nova Pro) nor on a billing line Musical Mycelium already uses. Check that billing line first (*unverified* which Nova models Musical Mycelium spends on). *Done 2026-10-04 (his):* **Ollama `qwen3.5:4b` for volume, Nova Lite for the Bedrock path.** Musical Mycelium's bill shows Haiku 4.5, Nova Pro and Nova Micro, not Nova Lite; Nova Lite and the local model each made valid single tool calls in the Phase 0.5 smoke tests. | `08` §4.4 |
 | A2 | **0** | The pre-commit name hook, the CI tracked-path check, and the canary test (P25). | `08` §4.8 |
 | A3 | **1** | Per-run write-once storage (P19), the running spend cap (P20), and the account-wide rate limiter (`04` §3.1). | `08` §4.2-4.3 |
 | A4 | **2** | Write the sentence frame and the **three wording templates** (P1, P4); the supplier source (P7); the four scenarios in their patched shapes (P8), including S1's redeployment numbers; a maximum for every source in the dossier (P9); the neutrality review with the two new items (P10). | `08` §3.1, §3.3 |

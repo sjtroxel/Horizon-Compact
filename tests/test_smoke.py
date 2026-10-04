@@ -179,10 +179,19 @@ def test_unknown_call_is_refused(tmp_path: Path) -> None:
 
 def test_a_call_with_a_record_is_refused_without_again(tmp_path: Path) -> None:
     run("novalite", tmp_path)
-    runtime_before = FakeRuntime(good_response())
+    runtime = FakeRuntime(good_response())
     with pytest.raises(SmokeRefusal, match="already has a record"):
-        run("novalite", tmp_path)
-    assert runtime_before.sent == []
+        run_call(
+            "novalite",
+            evidence_dir=tmp_path,
+            provider=BedrockConverseProvider(cast("BedrockRuntimeClient", runtime)),
+            control=cast("BedrockClient", FakeControl()),
+            account_id=ACCOUNT,
+            git=GIT,
+            versions=VERSIONS,
+        )
+    assert runtime.sent == [], "a refused call reached the model"
+    assert len(list(tmp_path.iterdir())) == 1
 
 
 def test_again_writes_a_new_record_and_keeps_the_old_one(tmp_path: Path) -> None:

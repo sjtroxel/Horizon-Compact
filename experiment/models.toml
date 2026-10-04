@@ -1,0 +1,39 @@
+# How each model is reached, its quota and its prices. Config read by the harness; never hard-coded.
+#
+# Prices: AWS Price List, us-east-1, USD per million tokens. Sonnet 4.6 rows are the US geo route ("Regional CRIS"),
+# read from the AmazonBedrockFoundationModels offer file published 2026-09-30, on 2026-10-04. Nova Lite from the
+# AmazonBedrock offer file published 2026-10-03. Re-checked live before any official sweep (planning/03).
+#
+# Quotas: requests per minute, applied values on the account (planning/04 section 3.1, read 2026-10-03). The
+# harness paces at pace_fraction of the quota, leaving headroom for development calls on the same account.
+
+pace_fraction = 0.8
+
+[models.sonnet-4-6]
+model_id = "anthropic.claude-sonnet-4-6"
+# route is decision 3's outcome (Phase 0.5): "application_profile" if the Project tag lands on Marketplace
+# charges, else "geo_profile". Both behave identically on the request path (Phase 0.5 smoke records 01 and 03).
+route = "application_profile"
+inference_profile = "horizon-compact-sonnet-4-6"
+geo_profile_id = "us.anthropic.claude-sonnet-4-6"
+requests_per_minute = 10
+role = "main"
+
+[models.sonnet-4-6.prices]
+input = 3.30
+output = 16.50
+cache_read = 0.33
+cache_write_5m = 4.125
+
+[models.nova-lite]
+model_id = "amazon.nova-lite-v1:0"
+route = "in_region"
+# UNVERIFIED: a conservative placeholder until he reads the applied quota in Service Quotas (Phase 1 step 0).
+requests_per_minute = 20
+role = "development"
+
+[models.nova-lite.prices]
+input = 0.06
+output = 0.24
+cache_read = 0.015
+cache_write_5m = 0.0

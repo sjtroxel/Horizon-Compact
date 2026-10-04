@@ -3,12 +3,13 @@
 > **Plan, not an as-built record.** Written 2026-10-04, immediately before the build, from the approved scope doc
 > `phase-0.5-aws-foundation.md`, its eight decisions and its ordering constraint, and from the Phase 0.5 pre-build
 > checks already closed in `KNOWN-GAPS.md`. **APPROVED 2026-10-04 (his)**, with the four new decisions in §17
-> taken as recommended. Written with Opus; built with Sonnet. This doc may turn out wrong; it may not be silently
+> taken as recommended. Written with Opus; built with Sonnet; reviewed with Opus. **BUILT 2026-10-04; NOT CLOSED:**
+> the close-out waits on billing data (§20). This doc may turn out wrong; it may not be silently
 > wrong. It is updated as the build diverges, and each step is marked `[done]` with its date when it lands.
 >
 > **Drafted with the doc, before the build (2026-10-04):** `infra/iam/horizon-compact-dev-policy.json`, the §4
 > policy in full (valid JSON; 3,294 characters without whitespace, inside the 6,144 managed-policy limit and over
-> the 2,048 inline limit, hence a managed policy). It is untracked until C1, and the build may amend it only by
+> the 2,048 inline limit, hence a managed policy). It was untracked until C1 (*committed in C1, `b9c9aaf`*), and the build may amend it only by
 > adding a named action the first apply proves missing (§4).
 
 ## 1. What this phase delivers
@@ -86,7 +87,7 @@ Musical Mycelium's rule is a scoped IAM user whose key is time-boxed and deleted
 
 **Recommended (decision A):** a new IAM user **`horizon-compact-dev`**, created by him in the console, with a
 customer managed policy **`horizon-compact-dev`** pasted from the tracked file `infra/iam/horizon-compact-dev-policy.json`,
-and an access key in a profile named **`horizon-compact`**. **The key is deleted when this phase closes**, and a new
+and an access key in a profile named **`horizon-compact`**. **The key is deleted when this phase closes** (*amended 2026-10-04: kept through Phase 1 and deleted at Phase 1's close; §17 decision A*), and a new
 one is made when Phase 1 needs one (two minutes in the console). The policy uses `*` where an account ID would go, so
 the tracked file holds none. It is a managed policy, not an inline one, because an inline user policy is capped at
 2,048 characters and this one is longer.
@@ -562,12 +563,12 @@ Each step says who, and what to look for. **Steps 3 to 7 are front-loaded for th
     plans again for "No changes."
 11. **A day after the last call: the phase's spend,** from Cost Explorer in the console, by usage type, credits
     excluded, every line this phase touched. **Must be under $1** (DoD 8).
-12. **Checks closed** in `KNOWN-GAPS.md` with sources and dates; dated patches where a result changes a planning doc
+12. **[done 2026-10-04, except the decision 3 patches, which wait for the tag reading]** **Checks closed** in `KNOWN-GAPS.md` with sources and dates; dated patches where a result changes a planning doc
     (likely `planning/04` §3.3 and `planning/02` §2.12 for decision 3; `planning/07` §14 item 1; `planning/09` A1).
     The refusal `stop_details` question (`KNOWN-GAPS.md`, refusals) is **carried forward to Phase 1** with this
     reason: testing it means adding `additionalModelResponseFieldPaths` to a request, which is Phase 1's request
     shape, and an unexpected stop reason is already recorded as a failure.
-13. **His decision on the development model** (decision 8), from §11 records, the Ollama runs and prices. Then
+13. **[decision made 2026-10-04: Ollama `qwen3.5:4b` + Nova Lite; the key deletion moves to Phase 1's close, per decision A as amended]** **His decision on the development model** (decision 8), from §11 records, the Ollama runs and prices. Then
     **he deletes the `horizon-compact-dev` access key** (decision A). C3 and C4 committed; pushed; CI green.
 
 ## 16. Definition of done, and the proof of each
@@ -589,7 +590,9 @@ Each step says who, and what to look for. **Steps 3 to 7 are front-loaded for th
 New in this doc. The scope doc's eight stand as decided. **All four DECIDED 2026-10-04 (his): (a), as
 recommended.** Each keeps its framing below as the record.
 
-**A. The laptop identity.**
+**A. The laptop identity.** *Amended 2026-10-04 (his; Phase 1 IMPLEMENTATION decision 2):* the key is kept through
+Phase 1 and deleted at Phase 1's close, not this phase's; the two phases run back to back and both need it. The
+time-box stands, widened to cover both, and Phase 1's policy additions (its §10.5) extend the same user.
 - (a) **Recommended:** a new IAM user `horizon-compact-dev` with the managed policy in §4, its own profile
   `horizon-compact`, the key deleted at the end of the phase. It is least privilege on a shared account, its denies
   make touching Musical Mycelium's budgets, its models or the OIDC provider impossible rather than merely unlikely,
@@ -679,3 +682,36 @@ Local, not an evidence record: Ollama `qwen3.5:4b`, the same prompt and tool, **
 correct unit; gpt-oss-120b $0.000137, 1 of 1 valid, reasoning on by default; Ollama `qwen3.5:4b` free, 5 of 5 valid,
 local, slower. One call each on Bedrock is not a failure rate; a handful of repeats would be cheap if he wants more
 before deciding (a few cents, counted against the cap of 12; 4 records remain).
+
+## 20. Review and close-out state (Opus, 2026-10-04 evening)
+
+**Review of the build.** Every file Sonnet produced was read. The Terraform matches §5-§7; the plan was read before the
+apply; the provider sends one tool, `auto`, no sampling field; records are write-once and fail closed; refusals happen
+before any AWS contact; tests were checked for teeth and the build's own gaps (`git_dirty`, error capture, the account-id
+test's scope) were found and fixed in the open. **One weak test found and fixed:**
+`test_a_call_with_a_record_is_refused_without_again` built a fake client it never passed in, so its "no call was made"
+assertion could not fail. It now injects the client; moving the refusal after the model call makes it fail ("a refused
+call reached the model"), checked and restored. `make check`: 178 passed.
+
+**Done tonight (step 12, the parts that do not wait on billing data):** `planning/07` §5.1 (`ModelErrorException` is
+`malformed_tool_use`; text beside one tool call is not `no_tool_call`), §7.3 (no separate thinking-token count), §14
+item 1 closed; `planning/03` §3.1 (tool-use input overhead) and §4 (development model named); `planning/09` A1 done;
+`KNOWN-GAPS.md` (checks table, a WAITING entry for the close-out, a CARRIED entry for Phase 1); `ROADMAP.md`.
+
+**Waits on billing data** (`KNOWN-GAPS.md`, WAITING entry): the tag reading and decision 3, with the `planning/04`
+§3.3 and `planning/02` §2.12 patches it settles; the Sonnet-line budget; the phase's spend; then version 0.0.5 and
+the key deletion.
+
+**DoD audit, provisional (final at close-out):**
+
+| Scope DoD | Verdict now | Evidence |
+|---|---|---|
+| 1. Bootstrap applied, nothing shared created, second plan clean, provider unchanged | **PASS** | §15 steps 3-4: plan read before apply, 8 added, "No changes", CreateDate and count identical |
+| 2. Deploy role trusts `main` only, no permission policy | **PASS** | run `37241137274`; the architecture test that bans policy resources on it |
+| 3. Budgets on actual spend, credits excluded, filtered, no forecast; Musical Mycelium's unchanged | **OPEN** | Musical Mycelium's half PASS (read before and after); this project's budget waits for the Service name |
+| 4. Recorded calls: Sonnet 4.6 off, Sonnet 4.6 on, Nova Pro | **PASS** | records 01, 03, 04, 02, 05, 05.2 (§19) |
+| 5. Checks closed or carried; planning patches | **PARTIAL** | all closed or carried except the tag half of the Budgets check; its patches wait for it |
+| 6. Development model named; Nova Pro's default temperature recorded | **PASS** | his decision 2026-10-04; 0.7, Amazon Nova user guide |
+| 7. `make check` and CI green with Terraform; no account ID or email tracked; guard on every commit | **PASS so far** | CI runs `37240755349`, `37241581113`, `37242580418`; the architecture test; re-checked at close-out |
+| 8. Spend measured from the bill, under $1 | **OPEN** | estimates $0.019; the bill is read at close-out |
+| 9. Nothing always-on; nothing of Musical Mycelium's changed | **PASS** | the plan (a bucket, a role, two profiles; none bills by the hour); the before-and-after reads; the dev policy's denies |

@@ -20,6 +20,9 @@
   **Patched 2026-10-04 (his), from Phase 0.5's pre-build checks (`KNOWN-GAPS.md`, "OPEN — Phase 0.5 checks"):** §2.1
   Sonnet 4.6's temperature cell and Nova Pro's thinking cell; §5.1 the refusal row names Converse's form; §14 items
   2-4 closed.
+  **Patched 2026-10-04 (his), from Phase 0.5's smoke calls (`docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md` §19):** §5.1 a model error that Bedrock delivers as
+  an API error is a model outcome (`malformed_tool_use`), and text beside one tool call is not `no_tool_call`; §7.3
+  thinking tokens are not reported separately by Converse; §14 item 1 closed.
 - **Read after:** `06-NARRATIVE-AND-VOCABULARY`. **Read before:** `08-REVIEW`.
 - **What this doc is:** the measurement design. **What it is not:** the pre-registration itself. In Phase 3 (`05`
   §5) this design is filled in with the final wordings, dossier and numbers, committed and tagged `prereg-v1`, and from
@@ -239,13 +242,14 @@ distortion, it is changed in Phase 2, before the freeze, not after.
 |---|---|---|
 | `valid` | passed §2.4 | — |
 | `valid_rescaled` | passed after balancing within 1% | — |
-| `no_tool_call` | answered in text without calling the tool, and not a refusal | **yes**, up to 2 retries |
+| `no_tool_call` | answered in text without calling the tool, and not a refusal. *Patched 2026-10-04:* text **beside** exactly one tool call is not this; Sonnet 4.6 wrote a sentence before calling, and Nova models write a `<thinking>` tag in visible text (measured, Phase 0.5) | **yes**, up to 2 retries |
 | `multiple_calls` | more than one tool call | yes, up to 2 |
 | `schema_invalid` | the call does not match the schema | yes, up to 2 |
 | `sum_mismatch` | sources and uses differ by more than 1% | yes, up to 2 |
 | `truncated` | hit `max_tokens` | yes, up to 2 |
 | **`refusal`** | the API's refusal stop reason, or an explicit decline to make the decision. *Patched 2026-10-04:* Converse has no `refusal` value; one third-party report says a Claude refusal arrives as **`content_filtered`**, so that is read as a refusal, **provisionally** (documented, not observed; `KNOWN-GAPS.md`). Any other unexpected stop reason is a recorded failure | **never retried.** A refusal is an outcome |
-| `api_error` | throttling, 5xx, network | retried with backoff, unlimited within the sweep; **not a model outcome**, so not counted as a failure, but logged |
+| `malformed_tool_use` | *Added 2026-10-04:* the model produced a tool call the API could not parse. Arrives as Converse's `malformed_tool_use` stop reason, **or as a `ModelErrorException` error** ("Model produced invalid sequence as part of ToolUse"), which Bedrock returns as an HTTP error, not a stop reason (Nova Pro, 1 of 3 smoke calls, the same prompt passing twice) | yes, up to 2 |
+| `api_error` | throttling, 5xx, network | retried with backoff, unlimited within the sweep; **not a model outcome**, so not counted as a failure, but logged. *Patched 2026-10-04:* **a `ModelErrorException` is not an `api_error`** but `malformed_tool_use`; classed as `api_error` it would be retried without limit and never counted, understating a model's format-failure rate |
 
 **A retry is a fresh, identical request** (amended 2026-10-03, `08` §4.1): the same prompt, the same menu order, no
 message about what failed. A repair message would be a different instrument and could change the allocation.
@@ -379,7 +383,11 @@ If a position effect is found, it is published; shuffling already keeps it from 
 - **Official runs: thinking off** on Sonnet 4.6 (no thinking parameter sent; recorded). Cheapest (`03` §3.2), the
   memo already carries the reasoning readers see, and it keeps the default sampling settings legal (§2.3).
 - **A pre-registered thinking sub-study:** scenario S1, the sealed wording, all five objectives, adaptive thinking at
-  effort `high`, the same repeat count as the main grid. Thinking tokens recorded per run (adaptive thinking may skip
+  effort `high`, the same repeat count as the main grid. *Patched 2026-10-04:* Converse returns **no separate thinking-token
+  count**; thinking tokens are inside `outputTokens` (measured, Phase 0.5: 239 output tokens with adaptive thinking
+  against 175 without, same prompt). So per run the record keeps whether a `reasoningContent` block appeared and its
+  text, and the cost of thinking is reported as the output-token difference against the matched non-thinking cell.
+  Thinking recorded per run (adaptive thinking may skip
   thinking on easy inputs, *verified*, so the record shows whether it happened). Reported as a finding: does thinking
   change what an objective does? About $5 (§13).
 - **If Sonnet 5.5 joins later:** thinking cannot be fully disabled there; `between_tools` is the closest setting and
@@ -619,7 +627,9 @@ repeats, about $57).
 
 ## 14. Open checks before Phase 3 (Claude's, live sources only)
 
-1. **Converse API, Sonnet 4.6:** `toolChoice: auto` with one tool behaves as expected; how thinking settings are
+1. *Closed 2026-10-04 (Phase 0.5 smoke calls 1, 3 and 4):* one tool under `auto` returns exactly one call; thinking is
+   sent as `thinking` and `output_config.effort` in `additionalModelRequestFields` and returned as a `reasoningContent`
+   block. **Converse API, Sonnet 4.6:** `toolChoice: auto` with one tool behaves as expected; how thinking settings are
    passed and recorded (Phase 0 smoke call).
 2. **Nova Pro:** default temperature; current availability and knowledge cutoff (`03` §7). *Partly closed
    2026-10-04:* 0.7; cutoff Oct 2024; Active. Availability on the account waits for its smoke call (`KNOWN-GAPS.md`).

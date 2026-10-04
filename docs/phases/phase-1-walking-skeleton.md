@@ -4,6 +4,10 @@
 > and §2.8-2.12, `planning/04` §3.1 and §6.1, `planning/07` §1, §2, §4, §5 and §11, and `planning/09` A3.
 > **APPROVED 2026-10-04 (his)**, with all five decisions at the end taken as recommended.
 >
+> **Amended 2026-10-04 (his, IMPLEMENTATION doc decision 1):** ECR moves from `main` to `bootstrap` (Delivers 5), so
+> the first deploy can push an image before `main` exists, and `main`'s teardown never deletes the images whose
+> digests pin the record (`docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md` §3 finding 2, §18).
+>
 > **Split 2026-10-04 (his, decision 1):** `planning/05`'s Phase 1 is now two phases. This doc covers the **run path**
 > (a sweep from the laptop to results in S3). The **publish path** (the scorer, the page, the teardown test) is
 > **Phase 1.5 `publish-path`**, `docs/phases/phase-1.5-publish-path.md`. Both are done before Phase 2 starts. The
@@ -92,7 +96,7 @@ In build order.
    digest on every result. That record is what will make a run eligible to be official later (`planning/02` §2.2). A
    result without a digest is labeled a laptop run.
 5. **`main`, the Terraform root:** a minimal VPC with public subnets only and a security group that allows outbound
-   traffic and nothing inbound; ECR; the ECS cluster and task definition (Fargate, ARM, on-demand); the task role and
+   traffic and nothing inbound; ~~ECR~~ (*moved to `bootstrap`, amended 2026-10-04*); the ECS cluster and task definition (Fargate, ARM, on-demand); the task role and
    execution role, written by hand one action at a time (`planning/02` §2.11); log groups with retention set. No NAT
    gateway, no endpoints, no load balancer (`planning/02` §2.4). `main`'s state goes in the bucket Phase 0.5 created.
    The task role can invoke only the inference profiles named in config *(which profiles rests on 0.5, decision 3)*.

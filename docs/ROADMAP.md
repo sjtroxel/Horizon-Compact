@@ -29,7 +29,7 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 | Phase | Version | Delivers | Done when (summary) | Est. cost | Status |
 |---|---|---|---|---|---|
 | **0** `scaffold-and-guardrails` | v0.0 | Repo, the name guard (commit, message and push scans, history scan), the CI path check, toolchain, `make check`, CI, `CLAUDE.md`, the planning README | A canary name refused by the guard; the history scan clean; a tracked file under `methods-appendix/` fails the CI check; CI green | $0 | **COMPLETE 2026-10-03**, CI run `37160410815` green on first push |
-| **0.5** `aws-foundation` | v0.0.5 | Terraform bootstrap (OIDC looked up), filtered budgets, one tool call per Bedrock model, Ollama check, the development model named, the AWS checks in `planning/09` §5 | A recorded, provenance-stamped call from each Bedrock model; bootstrap applied with nothing shared created | under $1 | not started |
+| **0.5** `aws-foundation` | v0.0.5 | Terraform bootstrap (OIDC looked up), filtered budgets, one tool call per Bedrock model, Ollama check, the development model named, the AWS checks in `planning/09` §5 | A recorded, provenance-stamped call from each Bedrock model; bootstrap applied with nothing shared created | under $1 | **built 2026-10-04; close-out waits on billing data** |
 | **1** `walking-skeleton` | v0.1 | The run path on **placeholder content, off the subject** (scenario, objectives, menu): Fargate, rate limiter, spend cap, official gate (closed), Bedrock, per-run write-once S3 | Container-run results in S3, each traceable to its image digest and input hashes; resume and cap shown | about $1 with 1.5 | not started |
 | **1.5** `publish-path` | v0.1.5 | Scorer, committed static JSON, one page live at `horizon-compact.vercel.app` through CloudFront and Vercel | The placeholder sweep on the public URL, traceable; destroy and re-apply of `main` tested, raw results intact | cents | not started |
 | **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | not started |
@@ -72,8 +72,8 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | Phase | Scope doc | IMPLEMENTATION doc |
 |---|---|---|
 | 0 | **APPROVED 2026-10-03** | **APPROVED 2026-10-03; built; DoD audit §11a** |
-| 0.5 `aws-foundation` | **APPROVED 2026-10-04**, all eight decisions as recommended | **APPROVED 2026-10-04**, its four decisions (A-D) as recommended; not yet built |
-| 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | not written; immediately before its build |
+| 0.5 `aws-foundation` | **APPROVED 2026-10-04**, all eight decisions as recommended | **APPROVED 2026-10-04**, its four decisions (A-D) as recommended; **built 2026-10-04** (`b9c9aaf`, `52aa3fd`, `ac2fbe0`); close-out waits on billing data |
+| 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | **APPROVED 2026-10-04**, its four decisions as recommended; not yet built |
 | 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1 | not written; immediately before its build |
 | 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | not written; immediately before its build |
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | not written; immediately before its build |
@@ -95,7 +95,11 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-04, noon
+### Where the build actually is — 2026-10-04, 7 PM
+
+**Measured 2026-10-04, 7 PM:** `make check` green, **178 tests passed**, Terraform `validate` clean, root 13 of 16
+(12 tracked, plus the untracked `experiment/` that Phase 1's C1 adds). The dated lines below are a record of the
+day; a count inside one is that moment's count.
 
 - **Phase 0 is complete.** Four commits on `main`, all pushed: `f214280` (planning, pushed before the guard
   existed, confirmed clean by the guard's history scan), `9c382b8` (the name guard, hooks, toolchain, CI),
@@ -106,7 +110,7 @@ then Phase 0.5's IMPLEMENTATION doc.
   as recommended. Phases 1, 2 and 3 were each split in two. Planning `01`, `02`, `05` and `07` carry dated patches
   from those decisions. No code was written; `make check` unchanged (123 tests passing).
 - **2026-10-04 morning: Phase 0.5's pre-build checks run** (his call, before Phase 4): four of seven closed, two
-  partly, one waits for the build (`KNOWN-GAPS.md`). Four `planning/07` patches proposed from them, not yet approved.
+  partly, one waits for the build (`KNOWN-GAPS.md`). Four `planning/07` patches proposed from them, not yet approved (*made later the same day*).
 - **2026-10-04: the Phase 4 `official-grid` scope doc written and APPROVED** (his), all six decisions as recommended:
   the pilot blind to objective, the re-plan check projected from the pilot before the grid (and against the credit
   balance), one shuffled run order, one sweep per study, results committed as data at the phase's end, one phase.
@@ -129,9 +133,15 @@ then Phase 0.5's IMPLEMENTATION doc.
 - **2026-10-04: Phase 0.5's IMPLEMENTATION doc written and APPROVED** (his),
   `docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md`, decisions A-D as recommended; the dev IAM policy drafted
   with it.
-- **Next: Phase 0.5's build** (Sonnet), from that doc's §15, starting at step 0. The tag test is front-loaded for its
-  24-48 hour wait.
-- **Nothing has been run against any model by this repo.** Nothing official has been seen.
+- **2026-10-04 evening: Phase 0.5 built** (Sonnet), reviewed (Opus): bootstrap applied with nothing shared created,
+  deploy-role trust proven, eight smoke records committed, the development model named (his: Ollama `qwen3.5:4b` +
+  Nova Lite). `planning/03`, `07` and `09` patched from the findings.
+- **2026-10-04 evening: Phase 1's IMPLEMENTATION doc written (Opus) and APPROVED** (his), its four decisions as
+  recommended; the placeholder drafted alongside it in `experiment/` (untracked until Phase 1's C1).
+- **Next: Phase 1's build (Sonnet), from that doc's §16, step 0. Phase 0.5's close-out** runs alongside it once
+  billing data posts (`KNOWN-GAPS.md`, WAITING entry); Phase 1's first Sonnet sweep (its step 9) waits for it.
+- **Development calls only.** The smoke prompt is a unit conversion, off the subject entirely. Nothing official has
+  been seen, and no model has seen any experiment content.
 
 ## 3. Scaffolding ledger
 
@@ -219,7 +229,7 @@ recorded in the planning docs themselves and are only indexed here.
   balance too (`planning/04` §3.4 patched); one shuffled run order and one sweep per study (`planning/07` §11
   patched); results committed as data at the phase's end.
 - **2026-10-04 — Phase 0.5's pre-build checks run** (his call, before Phase 4): four of seven closed, two partly,
-  one waits for the build (`KNOWN-GAPS.md`). Four `planning/07` patches proposed from them, not yet approved.
+  one waits for the build (`KNOWN-GAPS.md`). Four `planning/07` patches proposed from them, not yet approved (*made later the same day*).
 - **2026-10-04 — Phase 3 and 3.5 scope docs approved** (his), all eight decisions as recommended. Phase 3: split;
   established library implementations for the intervals, tested against published examples. Phase 3.5: the tag
   freezes content, protocol and analysis code (`planning/05` §3.1 patched); tag protection, an independent public
@@ -238,6 +248,17 @@ recorded in the planning docs themselves and are only indexed here.
   (`planning/05` §1-2 patched); the skeleton runs on the main model; the raw results bucket in `bootstrap`, and
   inputs built into the image with the published JSON committed (`planning/02` §1, §2.8, §2.10 patched). Also his:
   every scope doc leaves room for Sonnet 5.5 as the main model; Phase 0.5 amended to smoke-test it if access arrives.
+- **2026-10-04 — Phase 1 IMPLEMENTATION doc approved** (his), its four decisions as recommended: ECR in `bootstrap`
+  (Phase 1 scope doc and `planning/02` §2.10 patched); the dev key kept through Phase 1 (Phase 0.5 decision A
+  amended); deploy on push for code, experiment and infrastructure paths, plus manual; 15 skeleton runs and 5
+  development runs. Also from writing it: the tool schema identical on every run so caching works; write-once enforced
+  by the results bucket's policy; IAM policies as JSON files so tests can parse them.
+- **2026-10-04 — Phase 0.5 built; development model named** (his): Ollama `qwen3.5:4b` for volume, Nova Lite for the
+  Bedrock path (`planning/09` A1 and `planning/03` §4 patched). From the smoke calls: a `ModelErrorException` is a
+  model outcome, `malformed_tool_use`, not an API error, and text beside one tool call is not `no_tool_call`
+  (`planning/07` §5.1 patched); Converse reports no separate thinking-token count (`planning/07` §7.3 patched); a
+  tool-use input overhead of a few hundred tokens per call (`planning/03` §3.1 patched). The Sonnet-line budget waits
+  for Sonnet's Service name to appear in the Budgets list, which happens only after it is billed.
 - **2026-10-04 — Phase 0.5 IMPLEMENTATION doc approved** (his), its four decisions as recommended: (A) a scoped IAM
   user `horizon-compact-dev` with a managed policy that explicitly denies changes to the OIDC provider and to other
   budgets, and invocation of Musical Mycelium's models, its key deleted at phase end; (B) Nova Lite and gpt-oss-120b

@@ -7,55 +7,78 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-04, noon
+> ## START HERE — where things stand, 2026-10-04, 7 PM
 >
-> **PHASE 0 `scaffold-and-guardrails` IS COMPLETE.** Four commits on `main`, all pushed: `f214280` (planning,
-> pushed before the guard existed, since confirmed clean by the guard), `9c382b8` (the name guard, hooks,
-> toolchain, CI), `f45770b` (roadmap, known gaps, Phase 0 docs), `4405412` (`CLAUDE.md`, the guard explainer,
-> the planning README with his disclosure line). **CI run `37160410815`: green on the first push.** The DoD
-> audit, with its one caveat: `docs/phases/phase-0-scaffold-and-guardrails-IMPLEMENTATION.md` §11a.
+> **PHASE 0 is complete** (2026-10-03; CI run `37160410815`). **Every scope doc, Phases 0 through 7, is approved.**
+> **PHASE 0.5 `aws-foundation` is BUILT and its smoke calls are done; it is NOT closed.** Three commits on `main`, all
+> pushed, CI green: `b9c9aaf` (bootstrap Terraform, identity check, the settings deny fix), `52aa3fd` (provider seam,
+> smoke command), `ac2fbe0` (eight smoke records and findings). The bootstrap is applied with nothing shared created;
+> the deploy role's trust is proven (run `37241137274`); Sonnet 4.6 (thinking off and on), Nova Pro, Nova Lite and
+> gpt-oss-120b each made a recorded tool call. The development model is named (his): **Ollama `qwen3.5:4b` + Nova
+> Lite.** The as-built record is `docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md` §15 and §19.
 >
-> **The name guard is live** on every commit, message and push in this clone (61 terms, 11 allowed phrases,
-> fingerprint matching). The private term file is committed in job-search-headquarters (`ca8f316`). **A fresh
-> clone needs `make setup`** before anything is committed; `make check` fails until it is run.
+> **What keeps it open is billing data, which AWS posts up to about a day late** (the entry just below): the tag
+> measurement for decision 3, the Sonnet 4.6 budget (its Service name appears in the Budgets list only once Sonnet's
+> charges post), and the phase's spend read from the bill. That close-out is about 15 minutes of his console and one
+> `terraform apply`, then the DoD audit; it runs **as soon as the data posts** (evening of 2026-10-05 at the earliest),
+> alongside Phase 1's build.
 >
-> **NEXT: the scope docs for Phases 0.5 through 7, written one at a time, in order, before any further
-> implementation** (his convention; Phase 0 was the one exception). **2026-10-04: Phase 0.5's scope doc is
-> APPROVED** (`docs/phases/phase-0.5-aws-foundation.md`), all eight decisions as recommended. **Phase 1
-> `walking-skeleton` is APPROVED and split** (his, 2026-10-04): Phase 1 (`docs/phases/phase-1-walking-skeleton.md`,
-> the run path) and Phase 1.5 (`docs/phases/phase-1.5-publish-path.md`, the scorer, the page, the teardown test).
-> **Phase 2 is APPROVED and split** (his, 2026-10-04): `docs/phases/phase-2-company-dossier.md` and
-> `docs/phases/phase-2.5-scenarios-and-wordings.md`, all eleven decisions as recommended. **Phase 3 is APPROVED and
-> split** (his, 2026-10-04): `docs/phases/phase-3-scoring-and-simulation.md` and
-> `docs/phases/phase-3.5-preregistration.md`, all eight decisions as recommended. **Phase 4 `official-grid` is
-> APPROVED, not split** (his, 2026-10-04): `docs/phases/phase-4-official-grid.md`, all six decisions as recommended;
-> `planning/04` §3.4 and `planning/07` §11 patched. **Phase 5 is APPROVED and split** (his, 2026-10-04):
-> `docs/phases/phase-5-case-building.md` and `docs/phases/phase-5.5-case-runs.md`, all six decisions as recommended;
-> the Phase 3.5 scope doc amended (the protocol freezes the real-case rules, the gate gains a case mode, the search
-> date is set by rule); `planning/01`, `02`, `04`, `05` and `07` patched. **Phase 6 is APPROVED and split** (his,
-> 2026-10-04): `docs/phases/phase-6-explorer.md` and `docs/phases/phase-6.5-methods-and-release.md`, all six
-> decisions as recommended, decision 6 amended by him; `planning/02`, `05` and `06` patched. **Next: the Phase 7
-> `writeup-and-launch` scope doc**, kept deliberately open (his). **Phase 7 is APPROVED, not split** (his,
-> 2026-10-04): `docs/phases/phase-7-writeup-and-launch.md`, all six decisions as recommended, written to be re-scoped
-> when the phase starts. **Every scope doc, Phases 0 through 7, is written and approved.** The four proposed
-> `planning/07` patches are made (his approval, 2026-10-04). A later scope doc that rests on a Phase 0.5 check not yet measured
-> says so in a line, so the amendments are easy to find if the check comes back different. Phase 0.5's
-> IMPLEMENTATION doc is written immediately before it is built.
+> **Phase 1's IMPLEMENTATION doc is APPROVED (his, 2026-10-04 evening):**
+> `docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md`, its four decisions as recommended (ECR in `bootstrap`; keep
+> the dev key through Phase 1; deploy on push for code paths; 15 runs). **NEXT SESSION: its build, with Sonnet, from
+> §16 step 0.** Drafted with it and untracked: `experiment/`
+> (`models.toml` and the garden-club placeholder). Decision 3 enters it as two branches (§9.3). Its build can start
+> before Phase 0.5 closes; **its first Sonnet sweep cannot** (§1).
 >
-> **2026-10-04 morning: the Phase 0.5 pre-build checks were run** before Phase 4 (his call). Closed: Ollama,
-> Musical Mycelium's billing lines, Claude's default temperature, refusals through Converse (documented, not
-> observed). Partly closed: Budgets and profiles (the tag test is in the build, placed early for its 24-48 hour
-> wait), Nova Pro (availability waits for its smoke call). Open until the build: the Sonnet 4.6 smoke calls. Details
-> in "OPEN — Phase 0.5 checks" below. The four `planning/07` patches proposed from them are made.
-> **2026-10-04, 5 PM: Phase 0.5's IMPLEMENTATION doc is APPROVED** (his),
-> `docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md`, its decisions A-D as recommended. The dev IAM policy
-> (`infra/iam/horizon-compact-dev-policy.json`) was drafted with it and is untracked until the build's C1.
-> **Next: the build, with Sonnet, from that doc's §15, starting at step 0** (he reads which identity `default` is,
-> and whether Sonnet 5.5 access has arrived). Found while writing it and **already fixed** (in C0): the deny rules
-> did not cover `terraform -chdir=... apply` or `plan` (§3 finding 1), and `*.tfvars` was not gitignored (finding 2).
+> **The `horizon-compact-dev` access key stays through Phase 1** (decision A, amended 2026-10-04 by Phase 1's
+> decision 2); he deletes it at Phase 1's close. **Sonnet 5.5 access had not arrived** on 2026-10-04 (case 179097554500679); its two smoke calls did
+> not run.
 >
-> **Owed by him:** claim `horizon-compact.vercel.app` (entry below). No rush now; it is a prerequisite for Phase
-> 1.5.
+> **Owed by him:** claim `horizon-compact.vercel.app` (entry below). A prerequisite for Phase 1.5.
+
+---
+
+## WAITING — Phase 0.5 close-out, on billing data, 2026-10-04
+
+The smoke calls ran 17:54-18:01 CDT on 2026-10-04; `Project` was activated as a cost allocation tag at 17:19 CDT.
+Cost Explorer and Budgets post usage up to about a day late, so these wait until **the evening of 2026-10-05 at the
+earliest; the morning of 2026-10-06 is safer.** All reads are in the console (free; the Cost Explorer API charges).
+
+1. **The tag measurement (decision 3).** Cost Explorer, 2026-10-04, daily, credits excluded (Charge type: exclude
+   Credit), filter Tag `Project` = `horizon-compact`, group by Service, then by Usage type. **(c) holds only if both a
+   Sonnet 4.6 row and a Nova Pro row appear under the tag**, from smoke calls 1, 2 and 4. A day with no rows waits one
+   more day; if still none, try the page's **Backfill tags** before calling it a no. Then he decides (c) or (a).
+2. **The Sonnet-line budget (DoD 3).** Budgets console, Create budget, Customize, Cost, Budget scope, filter
+   Service: copy the exact Sonnet 4.6 string (Haiku's reads `Claude Haiku 4.5 ( Bedrock Edition)`, with that space).
+   Abandon the form. Add `sonnet_service_name = "<string>"` to the untracked `terraform.tfvars`; plan (Claude reads
+   it: one budget, CUSTOM period, $80, ACTUAL at 40/60/75, credits excluded), apply, plan again for "No changes". If
+   (c) was taken, the tag budget is added in the same apply. **If the apply refuses `CUSTOM`**, the fallback is
+   `ANNUALLY` from 2026-10-01 (§6 of the IMPLEMENTATION doc).
+3. **The phase's spend (DoD 8).** Cost Explorer, 2026-10-04 to the day of the read, credits excluded, grouped by usage
+   type, every line this phase touched (Sonnet 4.6, Nova Pro, Nova Lite, gpt-oss, S3). Estimates sum to $0.019;
+   must be under $1. Also whether the errored Nova Pro call (record 05) was charged.
+4. Then: the DoD audit (§16, provisional table in §20), version 0.0.5, `ROADMAP.md`. The dev access key is **not**
+   deleted here; it is kept through Phase 1 (decision A, amended).
+
+---
+
+## CARRIED — from Phase 0.5 to Phase 1, 2026-10-04
+
+Found by the smoke calls (`docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md` §19); each lands in Phase 1's
+IMPLEMENTATION doc.
+- **`ModelErrorException` is `malformed_tool_use`, a model outcome**, not `api_error` (`planning/07` §5.1, patched
+  2026-10-04). The classifier and its tests must say so, with the error's HTTP status and request ID recorded.
+- **Text beside one tool call is not `no_tool_call`** (`planning/07` §5.1, patched). Nova's `<thinking>` text tag is
+  visible text, not a thinking setting.
+- **Thinking tokens are inside `outputTokens`** (`planning/07` §7.3, patched); Phase 4's sub-study reads them that way.
+- **The refusal `stop_details` question** (refusals entry below) is still unchecked; it needs
+  `additionalModelResponseFieldPaths`, which is Phase 1's request shape.
+- **The tool-use input overhead** (a few hundred tokens per call, `planning/03` §3.1 patched) belongs in Phase 1's
+  price-and-cap arithmetic, and whether the cache point covers it is checked there.
+- **The deploy role gets its permissions in Phase 1**, with a permissions boundary; the identity workflow is the
+  pattern for its first run.
+- **Model routes:** both the tagged application profile and the `us.` geo profile behave identically for Sonnet 4.6;
+  which one the task role is granted is decision 3's outcome.
 
 ---
 
@@ -151,9 +174,9 @@ Each is Claude's, using live sources only. None blocks Phase 0.
 | Check | Source |
 |---|---|
 | ~~Ollama's install location and whether WSL can reach it (7 GB RAM visible in WSL)~~ **CLOSED 2026-10-04**, below | `planning/00` §9.7, `planning/04` §6.3 |
-| Whether AWS Budgets can filter on this project's per-model billing lines; whether added budgets cost money; whether application inference profiles could tag spend **PARTLY CLOSED 2026-10-04**, below; the tag half waits for a measurement | `planning/04` §3.3 |
-| Converse: one tool with `auto` choice on Sonnet 4.6; how thinking settings are passed and recorded | `planning/07` §14.1 |
-| Nova Pro: default temperature, availability, knowledge cutoff **PARTLY CLOSED 2026-10-04**, below; availability on this account waits for its smoke call | `planning/07` §14.2, `planning/01` §7.5 |
+| Whether AWS Budgets can filter on this project's per-model billing lines; whether added budgets cost money; whether application inference profiles could tag spend **PARTLY CLOSED 2026-10-04**, below; the tag half waits for a measurement. *Update 2026-10-04 evening:* the tagged profiles exist, `Project` is active (17:19 CDT), and calls 1, 2 and 4 went through them; the reading waits for billing data (WAITING entry above). Found: the Budgets Service list offers only services already billed | `planning/04` §3.3 |
+| ~~Converse: one tool with `auto` choice on Sonnet 4.6; how thinking settings are passed and recorded~~ **CLOSED 2026-10-04** by smoke calls 1, 3 and 4 (IMPLEMENTATION doc §19; `planning/07` §14.1 and §7.3 patched) | `planning/07` §14.1 |
+| ~~Nova Pro: default temperature, availability, knowledge cutoff~~ **CLOSED 2026-10-04**: the documented values below, and availability by smoke calls 2 and 5.2 (one `ModelErrorException` in three calls, recorded) | `planning/07` §14.2, `planning/01` §7.5 |
 | ~~Claude's default temperature value, for the methods page~~ **CLOSED 2026-10-04**, below | `planning/07` §14.3 |
 | ~~How a refusal comes back through Converse on Sonnet 4.6~~ **CLOSED 2026-10-04 as documented, not observed**, below | `planning/07` §14.4 |
 | ~~Which Bedrock billing lines Musical Mycelium already spends on, before the development model is named (`planning/09` A1)~~ **CLOSED 2026-10-04**, below | `planning/09` A1 |

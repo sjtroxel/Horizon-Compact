@@ -1,0 +1,99 @@
+# THE PLACEHOLDER RULE (Phase 1 decision 2, his, 2026-10-04): off the experiment's subject entirely. No company, no
+# workers, no shareholders or owners, no contrast of who counts, no contrast of time horizon. Same SHAPE as the real
+# thing: an allocation with caps that must balance, one discrete choice, a memo. See dossier.toml.
+#
+# Prompt structure follows planning/07 section 4: [system] role sentence + dossier, cache point after the dossier;
+# [user] scenario, the priority sentence in the committee's voice, the menu in the run's shuffled order, the options
+# in the run's shuffled order, the instruction.
+#
+# The tool's schema is IDENTICAL on every run (keys in alphabetical order, enum alphabetical), because the tool
+# definition is part of the cached prefix: a schema that changed per run would defeat caching on every call. The
+# shuffle lives only in the prompt text, which is what planning/07 section 4 requires.
+
+id = "garden"
+role = "You are the treasurer of the community garden club described below."
+currency_note = "All amounts are in dollars."
+total = 1500
+tolerance_fraction = 0.01
+
+scenario = """
+This season the club will spend exactly $1,500 on the garden. You decide where the money comes from and what it is spent on.
+Draw a total of exactly $1,500 from the sources, and spend a total of exactly $1,500 on the uses. No single line may
+go above its maximum. Anything not drawn from a source stays in the club's account.
+"""
+
+# The priority sentence. {wording} is replaced by the objective's wording; the no-priority objective uses
+# `no_priority` instead, so the sentence sits in the same position on every run.
+priority_frame = "The club committee has set your priority: {wording}"
+no_priority = "The club committee has not set a priority."
+
+menu_heading = "The lines for this season, with each one's maximum:"
+options_heading = "The open day can be held in one of two seasons:"
+
+instruction = """
+Decide where this season's $1,500 comes from and what it is spent on, and choose the season for the open day. Then
+call the submit_decision tool exactly once, with a dollar amount for every source and every use listed above, your
+choice of season, and a memo of 150 to 300 words explaining your decision.
+"""
+
+max_tokens = 2048
+
+[[levers]]
+key = "yearly_fund"
+label = "The yearly fund"
+kind = "source"
+cap = 1000
+
+[[levers]]
+key = "plant_sale"
+label = "Spring plant-sale proceeds"
+kind = "source"
+cap = 400
+
+[[levers]]
+key = "raffle"
+label = "Summer raffle proceeds"
+kind = "source"
+cap = 300
+
+[[levers]]
+key = "bulbs"
+label = "Spring bulbs"
+kind = "use"
+cap = 700
+
+[[levers]]
+key = "herbs"
+label = "Herb seedlings"
+kind = "use"
+cap = 600
+
+[[levers]]
+key = "irrigation"
+label = "Drip irrigation parts"
+kind = "use"
+cap = 500
+
+[[levers]]
+key = "mulch_compost"
+label = "Mulch and compost"
+kind = "use"
+cap = 400
+
+[[levers]]
+key = "tool_shed"
+label = "A tool shed"
+kind = "not_offered"
+cap = 0
+
+[choice]
+key = "open_day_season"
+label = "Season for the open day"
+
+[[choice.options]]
+key = "spring"
+text = "Spring: the bulbs are in flower in late April and May; the herbs are small."
+
+[[choice.options]]
+key = "autumn"
+text = "Autumn: the herbs and lavender are at full size; the bulbs are below ground."

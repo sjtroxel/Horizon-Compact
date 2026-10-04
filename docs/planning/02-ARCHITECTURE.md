@@ -13,6 +13,7 @@
   **Patched 2026-10-04 (his):** §2.9, a preview build off the public URL until go-live, share cards built at deploy
   time, a CI job that re-scores the published raw responses, and no visitor tracking
   (`docs/phases/phase-6-explorer.md`, decisions 2, 4, 5 and 6).
+  **Patched 2026-10-04 (his):** §2.10, ECR moves from `main` to `bootstrap` (`docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md`, decision 1).
 - **Read after:** `01-DATA-SOURCES`. **Read before:** `03-COST-MODEL`.
 - **Inherits from Musical Mycelium** wherever a pattern already worked there: Python 3.13 + uv, Terraform with
   separate `bootstrap` and `main` stacks, GitHub Actions deploying through OIDC with no long-lived keys, a React +
@@ -230,7 +231,9 @@ its own platforms (Bedrock sets its own dates). Fine for throwaway development, 
   groups). *Patched 2026-10-04 (his; Phase 1 decision 4):* the raw results bucket moved to `bootstrap`, so
   destroying `main` never deletes the write-once record (`05` §3.1). *Patched 2026-10-04
   (his):* the budget alarms moved from `main` to `bootstrap`, so they exist before the first model call and are not
-  removed when `main` is destroyed. The OIDC provider is looked up, never created (`04` §3.5).
+  removed when `main` is destroyed. *Patched 2026-10-04 (his; Phase 1 IMPLEMENTATION decision 1):* ECR moved from
+  `main` to `bootstrap`, so the first deploy can push before `main` exists and a teardown never deletes the images
+  whose digests pin the results. The OIDC provider is looked up, never created (`04` §3.5).
 - **GitHub Actions with OIDC:** test on every push; build and push the image; deploy infrastructure and the site on
   merge to main. **CI never launches a sweep.** Sweeps cost money and are started by a person, on purpose.
 
