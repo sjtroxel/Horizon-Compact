@@ -6,6 +6,10 @@
 >
 > **Split out of Phase 3 on 2026-10-04** (his, Phase 3 decision 1).
 >
+> **Amended 2026-10-04 (his), from `docs/phases/phase-5-case-building.md` decisions 2 and 6:** the protocol also
+> freezes the real-case rules that Phase 5 would otherwise write after the tag (Delivers 2, last items), the gate gains
+> a case mode (Delivers 4, DoD 4), and the real-case search date is set by rule, not chosen.
+>
 > Written before Phases 0.5 through 3 are built. **Lines marked *(rests on N)* depend on what Phase N builds,
 > measures or decides.**
 
@@ -74,12 +78,25 @@ In build order.
    - **who drafted the instrument:** Claude drafted the dossier, scenarios and wordings from cited sources, and he
      reviewed every line; the main model is from the same family, which the independent reviews and the second model
      family answer (Phase 2 decision 2);
-   - the change policy after the tag (decision 6).
+   - the change policy after the tag (decision 6);
+   - *(added 2026-10-04, Phase 5 decision 2)* **the real-case build rules:** the dossier template per case type; the
+     scenario shape each case type uses (a closure on S3; an AI-attributed workforce change on S1; an invest or retool
+     case on S3 with retool or on S4 for a funded program; a restructuring without a facility on S2), chosen by a
+     stated rule from the first-disclosure document; the option-economics rule (option figures only from pre-cut-off
+     documents, and where an option has none, every option described without figures alike); the replacement rule
+     (a case dropped by the recognition probe is replaced by the next eligible candidate of its type, in disclosure
+     order); the scaling-factor rule (drawn from a stated range with a private recorded seed, never chosen); the
+     uncertain-call rule (each case also matched under every uncertain call's alternative reading, and a match that
+     changes reported as "depends on reading"); and the independent reader's role (Phase 5 decision 4);
+   - *(added 2026-10-04, Phase 5 decision 6)* **the real-case search date, by rule:** the day after Phase 4's results
+     are committed, with the window closing the day before.
 3. **The independent review of the protocol** (decision 3), by another vendor's model, with the brief and the raw
    reply kept as records, and each point marked confirmed, partly right or rejected. Changes are made before the tag.
 4. **The freeze:** the analysis code's hash recorded in the protocol (decision 1); the gate configured to check the
    content hashes, the protocol file and the analysis code against the tagged commit, and to recompute the repeat count
-   from the pilot's raw results when Phase 4 supplies them.
+   from the pilot's raw results when Phase 4 supplies them. *Added 2026-10-04 (Phase 5 decision 2):* **a case mode**,
+   which admits a real-case sweep only when that case's dossier, scenario text and rubric hashes sit in a commit that
+   predates the sweep and its recognition probe passed, since case content does not exist at the tag.
 5. **The tag**, created by him (Claude never runs `git tag`), on the commit that holds the protocol, then made hard to
    move and timestamped from outside (decision 2).
 6. **The gate proven both ways** without a model call: a dry run of an official sweep against the tagged content
@@ -109,7 +126,8 @@ In build order.
 3. **The tag `prereg-v1` exists** on the commit that holds the protocol, is protected from being moved or deleted,
    and has an outside timestamp that matches (decision 2).
 4. **The gate passes the tagged content and refuses changed content or changed scoring code**, shown by dry runs that
-   call no model.
+   call no model. *Added 2026-10-04:* **its case mode is proven both ways** on a synthetic case: admitted with a prior
+   rubric commit and a passed probe record; refused without either.
 5. **No official result exists anywhere:** the results bucket holds no object under an official prefix, and every
    model call made so far is accounted for by its phase and label.
 6. **`make check` and CI are green.**
@@ -213,4 +231,4 @@ phase from the evidence. Each keeps its original framing under *Was:* as the rec
 
 The protocol's outline and its machine-readable format. Which files count as analysis code. The gate's checks, one by
 one. The archive and the GitHub protection settings, checked live. The reviewer's model and brief. The release's
-wording (a title, his). The search date for real cases. The order of the commits and of the steps on tag day.
+wording (a title, his). The real-case build rules' exact text (Delivers 2) and the case mode's checks. The order of the commits and of the steps on tag day.

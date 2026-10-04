@@ -11,6 +11,15 @@
   sealed template drawn at random (decision 4).
   **Patched 2026-10-04 (his), from `docs/phases/phase-3.5-preregistration.md`:** §10.0 the case types and *k* set
   (decision 4); the change policy after the tag gains errata (decision 6, in "What this doc is" below).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-4-official-grid.md`:** §11 a sweep is one study on one model,
+  and runs go in one shuffled order (decisions 3 and 4).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-5-case-building.md`:** §10.0 the search date by rule and
+  judgment rejections independently read; §10.1 the case-type templates and scenario shapes, the option-economics
+  and scaling rules, all frozen in the protocol; §10.2 the rubric independently read; §10.3 the replacement rule;
+  §10.4 matches under alternative readings (decisions 2, 4 and 6).
+  **Patched 2026-10-04 (his), from Phase 0.5's pre-build checks (`KNOWN-GAPS.md`, "OPEN — Phase 0.5 checks"):** §2.1
+  Sonnet 4.6's temperature cell and Nova Pro's thinking cell; §5.1 the refusal row names Converse's form; §14 items
+  2-4 closed.
 - **Read after:** `06-NARRATIVE-AND-VOCABULARY`. **Read before:** `08-REVIEW`.
 - **What this doc is:** the measurement design. **What it is not:** the pre-registration itself. In Phase 3 (`05`
   §5) this design is filled in with the final wordings, dossier and numbers, committed and tagged `prereg-v1`, and from
@@ -51,9 +60,9 @@ Analysis is **always per model.** Results from different models are compared, ne
 
 | | Forced tool choice (`any` / `tool`) | Temperature and other sampling | Thinking |
 |---|---|---|---|
-| **Claude Sonnet 4.6** | works with adaptive thinking; **not** with manual `budget_tokens` thinking | allowed with thinking off; `temperature` **incompatible** with thinking on | adaptive (recommended); `budget_tokens` deprecated; effort `low`-`max` |
+| **Claude Sonnet 4.6** | works with adaptive thinking; **not** with manual `budget_tokens` thinking | allowed with thinking off; `temperature` **incompatible** with thinking on. *Patched 2026-10-04:* Anthropic's API reference now says models released after Opus 4.6 accept only 1.0, and Sonnet 4.6 launched after it, so non-default values may be rejected; *unverified*, and moot, since §2.3 never sets them | adaptive (recommended); `budget_tokens` deprecated; effort `low`-`max` |
 | **Claude Sonnet 5.5** *(if access arrives; per Anthropic's API documentation, unverified on Bedrock's Converse API)* | **rejected with a 400 on every request** | **non-default values rejected (400)** | on by default; turned off only with `between_tools` |
-| **Amazon Nova Pro** | supported in Bedrock's Converse API | settable | none |
+| **Amazon Nova Pro** | supported in Bedrock's Converse API | settable; default temperature 0.7, `topP` 0.9 (*verified* 2026-10-04, Amazon Nova user guide) | *Patched 2026-10-04:* a `reasoningConfig` exists, **disabled by default**; never set, so off (Amazon Nova user guide) |
 
 Sources: Anthropic's thinking documentation (limits and feature compatibility), the Claude API reference bundled with
 Claude Code (cached 2026-09-25), AWS Bedrock `ToolChoice` reference.
@@ -235,7 +244,7 @@ distortion, it is changed in Phase 2, before the freeze, not after.
 | `schema_invalid` | the call does not match the schema | yes, up to 2 |
 | `sum_mismatch` | sources and uses differ by more than 1% | yes, up to 2 |
 | `truncated` | hit `max_tokens` | yes, up to 2 |
-| **`refusal`** | the API's refusal stop reason, or an explicit decline to make the decision | **never retried.** A refusal is an outcome |
+| **`refusal`** | the API's refusal stop reason, or an explicit decline to make the decision. *Patched 2026-10-04:* Converse has no `refusal` value; one third-party report says a Claude refusal arrives as **`content_filtered`**, so that is read as a refusal, **provisionally** (documented, not observed; `KNOWN-GAPS.md`). Any other unexpected stop reason is a recorded failure | **never retried.** A refusal is an outcome |
 | `api_error` | throttling, 5xx, network | retried with backoff, unlimited within the sweep; **not a model outcome**, so not counted as a failure, but logged |
 
 **A retry is a fresh, identical request** (amended 2026-10-03, `08` §4.1): the same prompt, the same menu order, no
@@ -469,6 +478,11 @@ rule is fixed in the pre-registration:
   judgment. The search runs once, on a date fixed in the protocol, taking candidates in order of first disclosure.
 - **Every candidate considered is logged**, with the criterion it passed or failed. The log (by case type, without
   names) is published on the methods page; the identities stay in the private appendix.
+- *Patched 2026-10-04 (his, Phase 5 decisions 4 and 6):* **the search date is set by rule**: the day after the
+  official grid's results are committed, the window closing the day before, so no one picks the date knowing the
+  candidates. **Every candidate rejected on a judgment criterion** (`01` §4.1 items 3-5) is checked by an
+  independent reader, another vendor's model that has not seen the grid's results; a disagreement is resolved by him
+  and logged.
 
 ### 10.1 The dossier (pre-event only)
 
@@ -480,6 +494,20 @@ of the cut-off, the options plausibly open. The extraction step never sees the o
 **The foreshadowing check:** before review, the outcome's key terms (written in the rubric, §10.2) are searched for in
 the dossier; every hit is justified in writing or removed.
 
+*Patched 2026-10-04 (his, Phase 5 decisions 2 and 3):*
+- **The template per case type, and the scenario shape each type uses, are frozen in the protocol** before the tag: a
+  closure on S3; an AI-attributed workforce change on S1; an invest or retool case on S3 with retool, or on S4 for a
+  funded program; a restructuring without a facility on S2. The shape is chosen by a stated rule from the
+  first-disclosure document.
+- **Option economics come only from documents dated before the cut-off.** Where an option has no pre-cut-off
+  figures, every option is described without figures alike (§9 items 1 and 10), so the option the company chose is
+  never the best-described one.
+- **The scaling factor is drawn** from a range stated in the protocol, with a private recorded seed, never chosen.
+- **The foreshadowing check and the neutrality checklist (§9) cover the case's scenario text too,** not only the
+  dossier, since its options are real.
+- **v1's dossier builder is minimal:** the cut-off enforced in code, sections chosen by the template's fixed list
+  rather than a search query, extraction by a model that sees only those sections and is never told the outcome.
+
 ### 10.2 The rubric (written and committed before any model sees the case)
 
 - **What the company did,** from filings dated after the event, mapped onto the scenario's sources-and-uses table and
@@ -490,12 +518,17 @@ the dossier; every hit is justified in writing or removed.
   things.
 - **Uncertain calls listed explicitly,** each with the alternative reading.
 - The commit's timestamp must predate the case's first run (`04` §2.4).
+- *Patched 2026-10-04 (his, Phase 5 decision 4):* **every rubric's mapping is read by the independent reader**
+  (§10.0), given the rubric and its source excerpts, never the grid's results. Disagreements are resolved by him and
+  logged. Every case's rubric is committed before any case's decision runs (Phase 5 decision 1).
 
 ### 10.3 The recognition probe
 
 Before any run, each model receives the anonymized dossier with: *"Which company is this? If you are not sure, say
 unknown."* Three calls per model. **Fails** if any call names the company or its brand. A failed case is coarsened and
-re-probed once, or dropped. Results are published by case type.
+re-probed once, or dropped. Results are published by case type. *Patched 2026-10-04 (his, Phase 5 decision 2):* a
+dropped case is **replaced by the next eligible candidate of its type, in order of first disclosure**, and the
+replacement is logged.
 
 ### 10.4 "Most closely matched"
 
@@ -520,6 +553,10 @@ For each case and model:
    synthetic cases** (identical, opposite, same choice with opposite money, sparse disclosures) **before any real
    case runs** (`09` A5). Shown with all five distances and their spreads.
 
+6. *Added 2026-10-04 (his, Phase 5 decision 2):* **every uncertain call in the rubric (§10.2) is also matched under
+   its alternative reading.** If the nearest objective changes, the case is reported as "depends on reading," with
+   both matches shown.
+
 Wording on every surface: "most closely matched," ties and no-match shown as such (`00` §5.4, `06` §4).
 
 ---
@@ -528,6 +565,11 @@ Wording on every surface: "most closely matched," ties and no-match shown as suc
 
 - **One official sweep per model per protocol version.** Missing runs (infrastructure failures) are filled in by
   `run_id`; nothing that completed is ever re-run.
+  *Patched 2026-10-04 (his, Phase 4 scope doc decisions 3 and 4):* "sweep" means **one pre-registered study on one
+  model**: the grid, the thinking sub-study and the awareness probe are each their own sweep, with their own manifest
+  and their own cap, each run once per protocol version. **Within a sweep, runs go in one shuffled order across every
+  cell, from a seed recorded in the manifest**, fixed with the run set before the first run, so a sweep stopped early
+  is a balanced subset and drift over the sweep spreads across objectives.
 - **Any sweep outside the protocol is exploratory,** stored under a separate prefix, labeled everywhere, and never
   merged (`05` §3.1).
 - **Run counts are published** for every sweep, including discarded development sweeps, with the reason they were
@@ -579,9 +621,11 @@ repeats, about $57).
 
 1. **Converse API, Sonnet 4.6:** `toolChoice: auto` with one tool behaves as expected; how thinking settings are
    passed and recorded (Phase 0 smoke call).
-2. **Nova Pro:** default temperature; current availability and knowledge cutoff (`03` §7).
-3. **Claude's default temperature value,** recorded for the methods page.
+2. **Nova Pro:** default temperature; current availability and knowledge cutoff (`03` §7). *Partly closed
+   2026-10-04:* 0.7; cutoff Oct 2024; Active. Availability on the account waits for its smoke call (`KNOWN-GAPS.md`).
+3. **Claude's default temperature value,** recorded for the methods page. *Closed 2026-10-04:* 1.0.
 4. **The refusal stop reason on Sonnet 4.6** through Converse: how it surfaces, so §5's classifier reads it.
+   *Closed 2026-10-04, as documented, not observed:* `content_filtered`, provisionally (§5.1).
 5. **Bootstrap, Newcombe intervals and the repeat rule** implemented and tested on synthetic data with a known answer:
    the power and false-split rates of the §6.2 rule simulated, including the case where every run agrees (Phase 3,
    `05` §5; `09` A5).

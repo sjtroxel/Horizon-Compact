@@ -301,3 +301,9 @@ the ceiling is cumulative). The neutral prompt and the tool schema, word for wor
 The smoke command's call limit. The credentials and profile. The identity-check workflow (decision 1).
 The `make` targets. Additions to `.claude/settings.json`. The evidence folder's path. The order of the commits,
 with the exact files in each.
+
+**Ordering constraint (added 2026-10-04, his):** the tag test for decision 3 has a 24-48 hour wait between the
+first tagged call and the tag showing in Cost Explorer (`KNOWN-GAPS.md`, Budgets check). The IMPLEMENTATION doc puts
+the tagged application inference profile, one Sonnet 4.6 smoke call through it and his activation of the `Project`
+cost allocation tag **as early in the phase as possible**, so the wait runs while the rest of the phase is built.
+The Cost Explorer look closes it near the end.

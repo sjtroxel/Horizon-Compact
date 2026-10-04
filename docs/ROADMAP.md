@@ -35,8 +35,8 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 | **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | not started |
 | **3** `preregistration-and-scoring` (split 2026-10-04: **3** `scoring-and-simulation`, **3.5** `preregistration`) | v0.3, v0.3.5 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | not started |
 | **4** `official-grid` | v0.4 | Pilot (excluded), then the full grid on Sonnet 4.6, then Nova Pro; robustness checks; first measured cost | Full grid run under the protocol on at least Sonnet 4.6; the $60 re-plan point checked | about $20-30 | not started |
-| **5** `real-cases` | v0.5 | Cases by the pre-registered selection rule, dossiers, foreshadowing check, recognition probe, a rubric committed before each case runs | At least three cases run and matched, including an invest or retool case; selection log complete | about $20-25 | not started |
-| **6** `explorer-and-methods` | v0.6 | The full site and the methods page | A hostile reader could re-run the experiment from the published inputs; every real-case memo passed the name scan | under $2 | not started |
+| **5** `real-cases` (split 2026-10-04: **5** `case-building`, **5.5** `case-runs`) | v0.5, v0.5.5 | Cases by the pre-registered selection rule, dossiers, foreshadowing check, recognition probe, a rubric committed before each case runs | At least three cases run and matched, including an invest or retool case; selection log complete | about $20-25 | not started |
+| **6** `explorer-and-methods` (split 2026-10-04: **6** `explorer`, **6.5** `methods-and-release`) | v0.6, v0.6.5 | The full site and the methods page | A hostile reader could re-run the experiment from the published inputs; every real-case memo passed the name scan | under $2 | not started |
 | **7** `writeup-and-launch` | v1.0 | README and launch post (his prose), the plain-English write-up, a definition-of-done audit against `planning/00` §8 | Every DoD item checked with evidence, partial passes marked partial | $0 | not started |
 
 **Total, about $50-70** (`planning/07` §13 puts the worst case at about $71). Ceiling **$80**, re-plan point at
@@ -61,7 +61,7 @@ Sonnet 5.5 is its own sweep.
 **Phase 3 was split in two on 2026-10-04** (his; Phase 3 scope doc, decision 1): the statistics, proven on synthetic
 data, are Phase 3; the protocol, its independent review, the freeze and the `prereg-v1` tag are Phase 3.5.
 
-**The phase slugs other than Phases 0 to 3.5 are provisional.** Each one is fixed when its scope doc is written.
+**Every phase slug is now fixed by its scope doc.** Each one is fixed when its scope doc is written.
 
 ### Phase doc status
 
@@ -79,7 +79,12 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | not written; immediately before its build |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | not written; immediately before its build |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | not written; immediately before its build |
-| 4-7 | not written; written in order after 3.5's | not written; each immediately before its build |
+| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split | not written; immediately before its build |
+| 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5 | not written; immediately before its build |
+| 5.5 `case-runs` | **APPROVED 2026-10-04**, with Phase 5 | not written; immediately before its build |
+| 6 `explorer` | **APPROVED 2026-10-04**, all six decisions as recommended (6 amended by him); split into 6 and 6.5 | not written; immediately before its build |
+| 6.5 `methods-and-release` | **APPROVED 2026-10-04**, with Phase 6 | not written; immediately before its build |
+| 7 `writeup-and-launch` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; written to be re-scoped when the phase starts | not written; immediately before its build |
 
 **As in Musical Mycelium, every scope doc is written up front, one at a time through the whole roadmap, before
 implementation begins** (his convention). Each phase then starts by writing its IMPLEMENTATION doc immediately
@@ -90,7 +95,7 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-04, early morning
+### Where the build actually is — 2026-10-04, noon
 
 - **Phase 0 is complete.** Four commits on `main`, all pushed: `f214280` (planning, pushed before the guard
   existed, confirmed clean by the guard's history scan), `9c382b8` (the name guard, hooks, toolchain, CI),
@@ -100,8 +105,29 @@ then Phase 0.5's IMPLEMENTATION doc.
 - **2026-10-04: scope docs for Phases 0.5, 1, 1.5, 2, 2.5, 3 and 3.5 written and APPROVED** (his), all decisions
   as recommended. Phases 1, 2 and 3 were each split in two. Planning `01`, `02`, `05` and `07` carry dated patches
   from those decisions. No code was written; `make check` unchanged (123 tests passing).
-- **Next: the Phase 4 `official-grid` scope doc**, then 5, 6 and 7, before any further implementation. Then Phase
-  0.5's IMPLEMENTATION doc.
+- **2026-10-04 morning: Phase 0.5's pre-build checks run** (his call, before Phase 4): four of seven closed, two
+  partly, one waits for the build (`KNOWN-GAPS.md`). Four `planning/07` patches proposed from them, not yet approved.
+- **2026-10-04: the Phase 4 `official-grid` scope doc written and APPROVED** (his), all six decisions as recommended:
+  the pilot blind to objective, the re-plan check projected from the pilot before the grid (and against the credit
+  balance), one shuffled run order, one sweep per study, results committed as data at the phase's end, one phase.
+  `planning/04` §3.4 and `planning/07` §11 patched.
+- **2026-10-04: the Phase 5 scope doc written and APPROVED, and split** (his), all six decisions as recommended:
+  Phase 5 `case-building` and Phase 5.5 `case-runs`, every case built and frozen before any runs; the real-case
+  rules frozen in the protocol (Phase 3.5 scope doc amended); a minimal dossier builder; a required independent
+  reader; dossiers published only after a re-identification check; the search date set by rule. `planning/01`,
+  `02`, `04`, `05` and `07` patched.
+- **2026-10-04: the Phase 6 scope doc written and APPROVED, and split** (his), all six decisions as recommended,
+  decision 6 amended by him: Phase 6 `explorer` and Phase 6.5 `methods-and-release`; results on the public site only
+  at go-live; the gray zone of who writes the site's words settled; re-scoring in CI plus prompt reconstruction; no
+  visitor tracking; an impressive layer (guided story, share cards, cold-read test, narrated video, ElevenLabs
+  available). `planning/02`, `05` and `06` patched.
+- **2026-10-04: the four `planning/07` patches from Phase 0.5's checks made** (his approval), and `planning/06` §11's
+  one citation whose URL named companies shortened to its domain.
+- **2026-10-04: the Phase 7 `writeup-and-launch` scope doc written and APPROVED** (his), all six decisions as
+  recommended; written to be re-scoped when the phase starts (its own section lists what will change). **Every scope
+  doc, Phases 0 through 7, is now written and approved.**
+- **Next: Phase 0.5's IMPLEMENTATION doc** (Opus), then its build (Sonnet), with the tagged inference profile, the
+  first Sonnet smoke call and his tag activation placed early for the 24-48 hour wait.
 - **Nothing has been run against any model by this repo.** Nothing official has been seen.
 
 ## 3. Scaffolding ledger
@@ -163,6 +189,34 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
 
+- **2026-10-04 — Phase 7 scope doc approved** (his), all six decisions as recommended, not split: public prose
+  decided by piece (README and release notes may be Claude-drafted on his grant; the post and card his by default);
+  the launch post last; README numbers tied to data by a test and claims tied to the audit; the audit re-verified by
+  a fresh session; a hosting plan so nothing bills cash after the credits expire 2027-07-30; two launch posts planned.
+  Scoping is complete.
+- **2026-10-04 — the four `planning/07` patches from Phase 0.5's checks made** (his approval); `planning/06` §11's
+  company-naming citation shortened.
+- **2026-10-04 — Phase 6 and 6.5 scope docs approved** (his), all six decisions as recommended, decision 6 amended
+  by him: split into Phase 6 `explorer` and Phase 6.5 `methods-and-release`; results reach the public site only at
+  go-live, complete (`planning/06` §6.1 patched); Claude drafts the result-sentence templates and he approves them
+  word for word, the landing question, scope sentence and titles his (`planning/06` §8 patched); "re-run" shown by
+  CI re-scoring and byte-for-byte prompt reconstruction (`planning/05` patched); no visitor tracking; the impressive
+  layer, with the video a full piece and ElevenLabs available at a cost named first (`planning/06` §7.3, `planning/02`
+  §2.9 patched).
+- **2026-10-04 — Phase 5 and 5.5 scope docs approved** (his), all six decisions as recommended: split into Phase 5
+  `case-building` and Phase 5.5 `case-runs`, every case frozen before any runs; the real-case build rules, the
+  gate's case mode and the search date (by rule: the day after Phase 4's results are committed) frozen in the
+  protocol (Phase 3.5 scope doc amended; `planning/07` §10.0-10.4 patched); a minimal dossier builder without
+  retrieval or reranking (`planning/02` §2.7 patched); a required independent reader on judgment rejections and
+  every rubric (`planning/04` §2.4, `planning/01` §4.1 patched); dossiers published only after a
+  re-identification check (`planning/05` Phase 6 done-when patched); scaling factor drawn and option figures
+  pre-cut-off only (`planning/01` §4.6 patched).
+- **2026-10-04 — Phase 4 scope doc approved** (his), all six decisions as recommended, not split: the pilot and
+  running sweeps blind to objective; the re-plan check projected from the pilot before the grid, against the credit
+  balance too (`planning/04` §3.4 patched); one shuffled run order and one sweep per study (`planning/07` §11
+  patched); results committed as data at the phase's end.
+- **2026-10-04 — Phase 0.5's pre-build checks run** (his call, before Phase 4): four of seven closed, two partly,
+  one waits for the build (`KNOWN-GAPS.md`). Four `planning/07` patches proposed from them, not yet approved.
 - **2026-10-04 — Phase 3 and 3.5 scope docs approved** (his), all eight decisions as recommended. Phase 3: split;
   established library implementations for the intervals, tested against published examples. Phase 3.5: the tag
   freezes content, protocol and analysis code (`planning/05` §3.1 patched); tag protection, an independent public

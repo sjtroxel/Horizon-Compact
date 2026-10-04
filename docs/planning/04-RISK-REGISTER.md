@@ -5,6 +5,10 @@
 - **Read after:** `03-COST-MODEL`. **Read before:** `05-EVOLUTION-PLAN`.
 - **Amended by `08` (2026-10-03):** §1.1 objective wording, §1.2 and §7 the pre-registration's relation to `07`,
   §2.2 measurement, §2.6 and §7 the name check, §6.1 the wording cut (patches P23, P25, P28, P29 in `09` §3).
+- **Patched 2026-10-04 (his):** §3.4, the re-plan check also made on a projection before the official grid
+  (`docs/phases/phase-4-official-grid.md`, decision 2).
+- **Patched 2026-10-04 (his):** §2.4, the second read of each rubric becomes required, and also covers candidates
+  rejected on a judgment criterion (`docs/phases/phase-5-case-building.md`, decision 4).
 - `03` covered money. This covers everything else that can go wrong, mapped before any code. Musical Mycelium's
   register was mostly about infrastructure, because the infrastructure was new to him. Here the order is reversed:
   **the risks that matter most are about whether the experiment means anything**, because a polished app over a
@@ -239,7 +243,10 @@ the mapping, a borderline call could go either way without anyone noticing.
 timestamp is the proof). Each mapping records its uncertain calls explicitly. **The rubric records what a company did, never the reason it
 gave:** a cut attributed to AI may have other causes ("AI-washing," a live term in 2026; `06` §2.1). The matcher reports ties and "no good
 match" as such (`00` §5.4). An optional second read by a different model (or the `08` reviewer) on the mapping
-alone, blind to model results. **Owner:** `07`.
+alone, blind to model results. *Patched 2026-10-04 (his, Phase 5 decision 4):* **the second read is required**, not
+optional, because the rubric is written after the official grid's results are known; it also covers every candidate
+rejected on a judgment criterion, and each uncertain call is matched under its alternative reading (`07` §10.4).
+**Owner:** `07`.
 
 ### 2.5 MEDIUM — Anonymized cases can be re-identified from the public description
 
@@ -356,7 +363,10 @@ predictable line is development: Musical Mycelium's evidence is that eval nights
 
 **Mitigation:** the layers in `03` §6 (harness caps, alarms, per-sweep record, small first sweep), plus **a
 re-plan point at $60 of cumulative project spend** (decided 2026-10-03, his): stop, compare measured spend to the estimate, and decide with
-him what to cut (repeats, wordings, the second model) before continuing. Thinking stays off unless `07` finds a
+him what to cut (repeats, wordings, the second model) before continuing. *Patched 2026-10-04 (his, Phase 4 scope doc decision
+2):* the check is also made **before the official grid, on a projection** from the pilot's measured cost per decision
+and the fixed run set, against the $60 point, the $80 ceiling and the credit balance read that day, so any cut is
+chosen before an official result exists. The measured check at $60 still happens when actual spend reaches it. Thinking stays off unless `07` finds a
 methods reason (`03` §3.3). **Owner:** `03`, `07`.
 
 ### 3.5 MEDIUM — Two projects in one AWS account: the shared GitHub OIDC provider (verified 2026-10-03)

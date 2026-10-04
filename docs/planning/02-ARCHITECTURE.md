@@ -8,6 +8,11 @@
   **Patched 2026-10-04 (his):** §1, §2.8 and §2.10, from Phase 1's decisions 4 and 5
   (`docs/phases/phase-1-walking-skeleton.md`): the raw results bucket lives in `bootstrap`; experiment inputs are
   built into the image (no inputs bucket); aggregation runs on the laptop and the published JSON is committed.
+  **Patched 2026-10-04 (his):** §2.7, v1 builds real-case dossiers with a minimal builder, without retrieval or
+  reranking (`docs/phases/phase-5-case-building.md`, decision 3).
+  **Patched 2026-10-04 (his):** §2.9, a preview build off the public URL until go-live, share cards built at deploy
+  time, a CI job that re-scores the published raw responses, and no visitor tracking
+  (`docs/phases/phase-6-explorer.md`, decisions 2, 4, 5 and 6).
 - **Read after:** `01-DATA-SOURCES`. **Read before:** `03-COST-MODEL`.
 - **Inherits from Musical Mycelium** wherever a pattern already worked there: Python 3.13 + uv, Terraform with
   separate `bootstrap` and `main` stacks, GitHub Actions deploying through OIDC with no long-lived keys, a React +
@@ -185,6 +190,11 @@ its own platforms (Bedrock sets its own dates). Fine for throwaway development, 
   retrieval error can never silently change a result: it can only change a dossier, which a human reviews first.
 - Embeddings and reranker: local or Bedrock-hosted, chosen in `03` on cost and quality. No vector database: a few
   hundred sections per case fit in memory.
+- *Patched 2026-10-04 (his, Phase 5 decision 3):* **v1 uses a minimal builder instead:** fetch by date with the
+  cut-off enforced in code, select sections by the template's fixed list, extract with a model that sees only those
+  sections and is never told the outcome, anonymize and scale, human review, freeze. No embeddings and no reranker:
+  a retrieval query is written by someone who knows the outcome, and a fixed section list is easier to audit. The
+  retrieve-and-rerank design above moves to the frequency study, where it is needed (`05` §4.4).
 
 ### 2.8 Results and aggregation (no database)
 
@@ -207,6 +217,11 @@ its own platforms (Bedrock sets its own dates). Fine for throwaway development, 
 - Reads only the precomputed JSON. **No backend, no model calls, nothing to scale.**
 - Views (from `00` §6): scenario picker; the five CEOs side by side; memo reader; real cases by type; methods page.
 - Charting library and visual design: `06`.
+- *Patched 2026-10-04 (his, Phase 6 decisions 2, 4, 5 and 6):* the explorer is built and checked on **a preview build
+  off the public URL**, and replaces the placeholder in one deploy at go-live. **Share cards** (link-preview images)
+  are generated at deploy time from the data. **A CI job re-scores** the published JSON from the published raw
+  responses and fails on any difference; it reads published files only, never S3 (§2.11). **No visitor tracking:** no
+  cookies, analytics scripts or third-party requests.
 
 ### 2.10 Infrastructure as code and deployment
 

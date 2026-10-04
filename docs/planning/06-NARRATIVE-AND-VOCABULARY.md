@@ -4,6 +4,11 @@
   against live sources that day (listed in §11). **Amended by `08` (2026-10-03):** §1's table and the claim it
   supports, §3.2 "long-term value," §4 a scoped "no split," §5's sample sentence, §6.1 memo labels, real cases and
   the methods page (patches P5, P23, P26, P27 in `09` §3).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-6-explorer.md`:** §6.1 results reach the public site only at
+  go-live, complete, and no visitor tracking (decisions 2 and 5); §7.3 the impressive layer (decision 6); §8 the gray
+  zone of who writes the site's words (decision 3).
+  **Patched 2026-10-04 (his):** §11, one citation's URL shortened to its domain, because its path named real
+  companies, which rule zero keeps out of every tracked file. The full URL remains in the git history.
 - **Read after:** `05-EVOLUTION-PLAN`. **Read before:** `07-EVAL-SPEC`.
 - **What this doc is:** the rules every public surface follows: which words, which claims, which framing, how it
   looks. **What it is not:** copy. The public words are his (`00` §10). Wordings below are templates showing
@@ -199,7 +204,12 @@ mission-driven reader is served by the question, not by louder wording.
 | **Memo reader** | Every memo carries a label **inside the card**, so a cropped screenshot keeps it: written by the model under objective X, for a fictional company (or, on a real case, for an anonymized real decision); not the project's view. **Real-case memos are scanned for company names before publishing and held back if one appears** (`07` §12). A memo under objective A will sometimes read coldly; that is the data, and the label is what keeps it from being quoted as the project's voice. Memos are never edited. |
 | **Real cases** | Coarse descriptions only (§6.3). Results by case type. "Most closely matched," ties and no-match shown (`00` §5.4). Each case shows which dimensions it was matched on and which it could not be (`07` §10.2). Framed as the protocol applied to real decisions, not as validation. |
 | **Methods page** | Order: what is measured and what is not (the scope sentence first, `04` §1.3); the objectives in full; scenarios and the lever menu with each lever's meaning per scenario; models, dates, run counts; the pre-registration link and what changed after it; the disclosure asymmetry and how cases were found, including the selection rule and log (`04` §2.2, `07` §10.0); real-case sources withheld, and why: the experiment can be re-run from the published inputs, but the cases cannot be rebuilt from their sources; the parallel objective wording and what it traded away (`01` §1.3); known limits. |
+| **Visitor tracking** | *Added 2026-10-04 (his, Phase 6 decision 5):* none. No cookies, no analytics scripts, no third-party requests. |
 | **Launch post** | His words. Opens with the question or the Mayflower line, not with a finding stated as a verdict. One chart. A sentence from §4's allowed column. The link. |
+
+*Patched 2026-10-04 (his, Phase 6 decision 2):* **results reach the public site only at go-live, complete,** with
+the scope sentence, labels and methods page beside every number. Until then the public URL keeps Phase 1.5's
+placeholder; results are public in the repo as data, and the explorer is previewed off the public URL.
 
 ### 6.2 What to call the five CEOs
 
@@ -269,6 +279,13 @@ These are not taste; each one protects the method.
   layout. The same see-it-to-pick-it process Musical Mycelium used.
 - **One architectural note now:** the static JSON (`05` §4.3) should carry per-run values, not only averages, so the
   site can draw spread. Cheap to include from the start; annoying to add once the site reads the schema.
+- *Patched 2026-10-04 (his, Phase 6 decision 6, amended by him):* **an impressive layer,** each piece built from the
+  published data, checked against §4 and labeled for what it is: **a guided story** as the landing experience
+  (scroll-driven, transitions only, a plain page under reduced motion); **share cards** with the run count, scope line
+  and labels inside the link-preview image; **a cold-read test** by a browser agent that reports what it concludes
+  from the site, every conclusion outside §4 fixed before release; and **a narrated video overview** (Gemini
+  Notebook, narration optionally by ElevenLabs at a cost named first), checked frame by frame and labeled as
+  AI-generated. Every piece must explain, label, or test for misreading, or it is cut.
 
 ---
 
@@ -279,6 +296,10 @@ These are not taste; each one protects the method.
   by line (`00` §10).
 - **Claude may draft, he reviews:** methods-page structure and its technical descriptions, chart labels and axis
   text, code comments, planning and phase docs.
+- *Patched 2026-10-04 (his, Phase 6 decision 3):* **the gray zone.** The result-sentence templates the site fills in
+  from data are drafted by Claude strictly from §4's allowed column and **approved by him word for word**, each
+  flagged as Claude-drafted when handed over. The landing page's question, the scope sentence's public wording, and
+  every section and view title stay his.
 - **Why the line sits there:** his voice is the point of a project with a point of view, and Claude's prose carries an
   invisible watermark that rewording, not retyping, removes. Text a reader takes as his should be his.
 - **The planning folder is Claude-drafted** from his interviews and decisions and will be public in the repo.
@@ -332,8 +353,8 @@ A short list, run on every public surface (README, post, site, card):
 - Springer, "Stakeholder Capitalism and Ideology":
   https://link.springer.com/rwe/10.1007/978-94-007-6176-6_114-1
 - CorpGov.net, "Shareholder Primacy," February 2026: https://www.corpgov.net/2026/02/shareholder-primacy/
-- Fortune, on AI-attributed layoffs as a cover story, 2026-05-31:
-  https://fortune.com/2026/05/31/tech-companies-ai-washing-layoffs-wix-block-snap-atlassian-disposable-workers/
+- Fortune, on AI-attributed layoffs as a cover story, 2026-05-31: fortune.com (full URL withheld: its path names
+  companies; patched 2026-10-04)
 - Wikipedia, "AI washing": https://en.wikipedia.org/wiki/AI_washing
 
 **Re-check before launch:** these move. The ESG climate, any new Roundtable statement, and the AI-layoff framing are

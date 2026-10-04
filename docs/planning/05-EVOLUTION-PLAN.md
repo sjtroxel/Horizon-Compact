@@ -19,6 +19,20 @@
   `docs/phases/phase-3.5-preregistration.md`:** §5's Phase 3 is split into Phase 3 `scoring-and-simulation` (the
   statistics, proven on synthetic data) and Phase 3.5 `preregistration` (the protocol, its review, the freeze and the
   tag). §3.1: the tag freezes the analysis code as well as the content and the protocol (Phase 3.5 decision 1).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-4-official-grid.md`:** Phase 4 stays one phase (decision 6).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-5-case-building.md` and `docs/phases/phase-5.5-case-runs.md`:**
+  §5's Phase 5 is split into Phase 5 `case-building` (the search, the log, every dossier, rubric and probe, frozen)
+  and Phase 5.5 `case-runs` (the runs, the matching, the name scan, publication), so no rubric is written after any
+  case result exists (decision 1). §5's Phase 6 done-when reads "including every anonymized dossier that passed the
+  re-identification check" in place of "including the anonymized dossiers"; a dossier that fails is withheld and the
+  methods page says which cases cannot be re-run from published inputs (decision 5).
+  **Patched 2026-10-04 (his), from `docs/phases/phase-6-explorer.md` and
+  `docs/phases/phase-6.5-methods-and-release.md`:** §5's Phase 6 is split into Phase 6 `explorer` (the design
+  previews, the views, the guided story and share cards, on a preview build) and Phase 6.5 `methods-and-release` (the
+  methods page, every check, go-live) (decision 1). Phase 6's "a hostile reader could re-run the experiment" is shown
+  by two checks: re-scoring every published number from the published raw responses in CI, and rebuilding sample
+  prompts byte for byte from the methods page alone; re-asking a model gives a new sample, not the same numbers
+  (decision 4).
 - **Read after:** `04-RISK-REGISTER`. **Read before:** `06`.
 - **Answers two questions:** in what order does v1 get built so that nothing built early has to be thrown away; and
   in what order does the experiment get *run* so that nothing seen early can bend the result.

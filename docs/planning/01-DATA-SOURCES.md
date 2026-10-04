@@ -7,6 +7,9 @@
   scaling (patches P2, P23, P24, P31 in `09` §3).
 - **Patched 2026-10-04 (his):** §2.2, the fictional company uses industry-level sources only; SEC company data is not
   used for it (`docs/phases/phase-2-company-dossier.md`, decision 3).
+- **Patched 2026-10-04 (his):** §4.1 judgment rejections and §4.6 rubrics read by an independent reader; §4.6 the
+  scaling factor drawn by rule and option figures from pre-cut-off documents only
+  (`docs/phases/phase-5-case-building.md`, decisions 2 and 4).
 - **Public-safety rule:** this file names no company as a case. Candidate real cases live in
   `methods-appendix/` (gitignored in the repo; see §4.8).
 
@@ -157,6 +160,10 @@ the cutoff may partly include. July cases are allowed only after a check that no
 7. **Preferred: manufacturers of comparable size**, so the real cases speak to the same kind of company as the
    fictional one.
 
+*Patched 2026-10-04 (his, Phase 5 decision 4):* criteria 3, 4 and 5 are judgments, applied after the official grid's
+results are known, so **every candidate rejected on one of them is checked by an independent reader** that has not
+seen those results (`07` §10.0).
+
 ### 4.2 Discovery channel 1: SEC 8-K Item 2.05 (verified working 2026-10-02)
 
 When a public company commits to an exit or disposal plan (a plant closure, a restructuring with severance), it must
@@ -249,13 +256,17 @@ For each accepted case:
    documents dated before the cut-off.
 3. **Anonymization:**
    - Remove company, brand, product, executive and place names. Places become regions ("a plant in the US Midwest").
-   - **Scale every dollar figure by one fixed, undisclosed factor per case** and round. Ratios, margins and trends,
-     which drive the decision, are preserved; exact figures, which identify a company, are not.
+   - **Scale every dollar figure by one fixed, undisclosed factor per case** and round. *Patched 2026-10-04 (his):*
+     the factor is **drawn** from a range stated in the protocol, with a private recorded seed, never chosen.
+     Ratios, margins and trends, which drive the decision, are preserved; exact figures, which identify a company,
+     are not.
    - **Scale headcounts by the same factor**, rounded (added 2026-10-03, `08` §4.7). Scaling dollars alone would
      change pay per employee and revenue per employee, which distorts the decision and can make the case stand
      out. Check that pay per head stays in a realistic band after rounding.
    - Dates become relative ("fiscal year N, Q3").
    - Remove distinctive facts that identify a company on their own (a unique product, a famous lawsuit).
+   - *Patched 2026-10-04 (his):* **option figures come only from documents dated before the cut-off;** where an
+     option has none, every option is described without figures alike (`07` §10.1).
 4. **Recognition probe:** before any run, each model is asked *"Which company is this?"* If a model names it, or
    names it with confidence, the case is fixed or dropped. Probe results are published (by case type). It is a
    direct, measurable answer to "the model just recognized the company."
