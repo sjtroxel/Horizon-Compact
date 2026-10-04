@@ -525,6 +525,27 @@ Each step says who, and what to look for. **Steps 3 to 7 are front-loaded for th
    **Also meanwhile:** he adds the `AWS_DEPLOY_ROLE_ARN` secret (`gh secret set AWS_DEPLOY_ROLE_ARN`, pasting the
    ARN from `terraform output -raw github_deploy_role_arn`) and dispatches the identity workflow from `main`.
    **Pass:** the log shows the assumed role, account ID masked. That is DoD 2.
+   *As built, 2026-10-04 (step 5's identity check done):* **C1 is `b9c9aaf`, CI run `37240755349` green** (Terraform
+   1.15.8 installed on the runner; `fmt -check`, locked `init` and `validate` passed with no credentials). The
+   secret `AWS_DEPLOY_ROLE_ARN` was set by piping `terraform output -raw` into `gh secret set` (the ARN never
+   displayed). **Identity run `37241137274`, dispatched from `main`: success.** Its log shows the role assumed and
+   `arn:aws:sts::<account-id>:assumed-role/horizon-compact-github-deploy/GitHubActions`; the role ARN appears as
+   `***`; the log holds zero unmasked 12-digit numbers. **DoD 2 met.** Found along the way: the account-id test
+   scanned gitignored local state and `terraform.tfvars`, which legitimately hold the ID and an email; it now
+   asks git for the files that could be tracked (teeth re-checked).
+   *C2 built meanwhile (Sonnet, 2026-10-04; commit pending):* `src/horizon_compact/providers/` (`base.py`,
+   `bedrock.py`), `src/horizon_compact/smoke/` (`plan.py`, `record.py`, `runner.py`), `cli.py` (`hc smoke list` and
+   `hc smoke run`), `tests/conftest.py` (network unreachable, no real AWS identity), 48 new tests; boto3 1.43.108 as
+   the first runtime dependency, `boto3-stubs` as a dev dependency. `make check`: **178 passed**, strict mypy and
+   ruff clean. Teeth checked by deliberate breaks (account redaction removed, a sampling parameter sent, forced
+   tool choice, an overwritable record, a refusal made after the AWS call, the email check removed): every one
+   failed a test. *Harness caveat found:* a same-size edit reverted within one second left stale compiled
+   bytecode, which once made a green test look red and a broken change look green; the fix is to clear
+   `__pycache__` between mutations. The network block was probed: an unmocked client is stopped with "a test tried
+   to open a network connection". *Deviation 5:* `hc smoke run` checks every refusal from the filesystem **before**
+   creating an AWS session (the doc's order would have called STS first). *Deviation 6:* the account-id test's
+   pattern now excludes digit runs inside hyphenated IDs, so a UUID's last group cannot trip it (about 0.35% per
+   UUID otherwise).
 6. **Once `Project` is active: smoke calls 1 and 2,** `uv run hc smoke run sonnet46-profile-off --profile
    horizon-compact`, then `novapro-profile`, one at a time. The clock for the tag measurement starts here.
 7. **Claude reads both records:** did each call the tool once under `auto`; stop reason; usage fields; the

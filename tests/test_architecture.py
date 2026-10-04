@@ -142,7 +142,7 @@ def test_deploy_role_has_no_permission_policy() -> None:
 
 def test_no_account_id_or_email_in_infra_or_evidence() -> None:
     """Twelve-digit numbers and email addresses stay out of the public repo."""
-    account_id = re.compile(r"(?<!\d)\d{12}(?!\d)")
+    account_id = re.compile(r"(?<![\w-])\d{12}(?![\w-])")
     email = re.compile(r"[\w.+-]+@[\w-]+\.[A-Za-z]{2,}")
     offenders: list[str] = []
     for base in (INFRA, EVIDENCE):

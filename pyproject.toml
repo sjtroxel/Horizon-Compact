@@ -13,12 +13,18 @@ description = "An experiment: the same model, given five different corporate obj
 requires-python = ">=3.13,<3.14"
 authors = [{ name = "sjtroxel" }]
 
-# Deliberately empty. Each runtime dependency arrives with its subject: boto3 with the provider interface
-# (Phase 0.5), pydantic with the decision schema. The name guard is standard-library only, on purpose.
-dependencies = []
+# Each runtime dependency arrives with its subject: boto3 with the provider interface (Phase 0.5), pydantic with the
+# decision schema (Phase 1). The name guard (horizon_compact.privacy) stays standard-library only, on purpose.
+dependencies = [
+    "boto3>=1.43.108",
+]
+
+[project.scripts]
+hc = "horizon_compact.cli:main"
 
 [dependency-groups]
 dev = [
+  "boto3-stubs[bedrock,bedrock-runtime,sts]>=1.43.108",
   "mypy>=2.4",
   "pre-commit>=4.6",
   "pytest>=9.1",
