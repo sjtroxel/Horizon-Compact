@@ -171,7 +171,10 @@ def test_an_api_error_is_a_record_with_its_code_and_message(code: str, status: i
     provider, _ = provider_with(setup)
     result = provider.decide(make_request())
     assert result.status == "api_error"
-    assert result.error == {"code": code, "message": "boom"}
+    assert result.error is not None
+    assert result.error["code"] == code
+    assert result.error["message"] == "boom"
+    assert result.error["http_status"] == str(status)
     assert result.raw_response is None
     assert result.tool_call_count == 0
 

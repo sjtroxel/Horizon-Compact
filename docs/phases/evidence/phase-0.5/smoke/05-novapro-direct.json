@@ -1,0 +1,114 @@
+{
+  "again_reason": null,
+  "api": "converse",
+  "botocore_version": "1.43.108",
+  "call_name": "novapro-direct",
+  "effort": "not set",
+  "error": {
+    "code": "ModelErrorException",
+    "message": "Model produced invalid sequence as part of ToolUse. Please refer to the model tool use troubleshooting guide."
+  },
+  "est_cost_usd": 0.0,
+  "finished_at": "2026-10-04T22:58:55.707380+00:00",
+  "git_dirty": true,
+  "git_sha": "52aa3fd1b37ff45de9ace7eeada3ca8c2ebd12b2",
+  "harness_version": "0.0.0",
+  "inference_profile": null,
+  "invoke_id": "amazon.nova-pro-v1:0",
+  "label": "development",
+  "latency_ms": 8125,
+  "max_tokens": 1024,
+  "model_id": "amazon.nova-pro-v1:0",
+  "price_source": "AWS Price List publication 2026-10-03, us-east-1, standard tier",
+  "prompt_sha256": "bd7d939b8c372d858f65a547e8f666de94afa99637590ad0af1c709fd5ab36ab",
+  "provider": "bedrock",
+  "raw_response": null,
+  "reasoning_block_count": 0,
+  "record_version": 1,
+  "region": "us-east-1",
+  "request": {
+    "inferenceConfig": {
+      "maxTokens": 1024
+    },
+    "messages": [
+      {
+        "content": [
+          {
+            "text": "A walking trail is 12 miles long. Convert its length to kilometers, using 1 mile = 1.609344 kilometers, and round to two decimal places. Record your answer by calling the record_conversion tool exactly once. Do not give the answer in text."
+          }
+        ],
+        "role": "user"
+      }
+    ],
+    "modelId": "amazon.nova-pro-v1:0",
+    "system": [
+      {
+        "text": "You are a careful assistant completing a short arithmetic task."
+      }
+    ],
+    "toolConfig": {
+      "toolChoice": {
+        "auto": {}
+      },
+      "tools": [
+        {
+          "toolSpec": {
+            "description": "Records the result of a unit conversion.",
+            "inputSchema": {
+              "json": {
+                "additionalProperties": false,
+                "properties": {
+                  "kilometers": {
+                    "description": "The converted length in kilometers, rounded to two decimal places.",
+                    "type": "number"
+                  },
+                  "note": {
+                    "description": "One sentence describing how the conversion was done.",
+                    "type": "string"
+                  },
+                  "unit_system": {
+                    "description": "The unit system of the converted value.",
+                    "enum": [
+                      "metric",
+                      "imperial"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kilometers",
+                  "unit_system",
+                  "note"
+                ],
+                "type": "object"
+              }
+            },
+            "name": "record_conversion"
+          }
+        }
+      ]
+    }
+  },
+  "route_kind": "in_region",
+  "started_at": "2026-10-04T22:58:49.978728+00:00",
+  "status": "api_error",
+  "stop_reason": null,
+  "temperature": "not set",
+  "text_blocks": [],
+  "thinking": "not set",
+  "tool_call_count": 0,
+  "tool_input": null,
+  "tool_input_check": {
+    "answer_correct": null,
+    "problems": [
+      "no tool call"
+    ],
+    "valid": false
+  },
+  "usage": {
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "input_tokens": 0,
+    "output_tokens": 0
+  }
+}

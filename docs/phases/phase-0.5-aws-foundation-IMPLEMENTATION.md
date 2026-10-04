@@ -546,11 +546,11 @@ Each step says who, and what to look for. **Steps 3 to 7 are front-loaded for th
    creating an AWS session (the doc's order would have called STS first). *Deviation 6:* the account-id test's
    pattern now excludes digit runs inside hyphenated IDs, so a UUID's last group cannot trip it (about 0.35% per
    UUID otherwise).
-6. **Once `Project` is active: smoke calls 1 and 2,** `uv run hc smoke run sonnet46-profile-off --profile
+6. **[done 2026-10-04, 17:54 CDT; results in section 19]** **Once `Project` is active: smoke calls 1 and 2,** `uv run hc smoke run sonnet46-profile-off --profile
    horizon-compact`, then `novapro-profile`, one at a time. The clock for the tag measurement starts here.
 7. **Claude reads both records:** did each call the tool once under `auto`; stop reason; usage fields; the
    profile recorded with the account ID removed.
-8. **The remaining smoke calls,** 3 to 7, one at a time, Claude reading each record before the next. If Sonnet 5.5
+8. **[done 2026-10-04 except the Sonnet 5.5 pair, whose access had not arrived; Ollama done]** **The remaining smoke calls,** 3 to 7, one at a time, Claude reading each record before the next. If Sonnet 5.5
    access has arrived: **he first makes one call to it in the Bedrock console playground** (the Marketplace
    subscription, §3 finding 6), using the same neutral prompt, noted here; then calls 8 and 9 with
    `--confirm-access`.
@@ -628,3 +628,54 @@ recommended.** Each keeps its framing below as the record.
 - **Whether gpt-oss-120b calls a tool through Converse on `bedrock-runtime`** (§3 finding 8).
 - **How Nova models report cache fields** when no cache point is set (absent, or zero). The parser reads absent as
   zero and the record keeps the raw response, so either is visible.
+
+## 19. Smoke results (as built, 2026-10-04, steps 6-8)
+
+Eight records in `docs/phases/evidence/phase-0.5/smoke/` (cap 12; Sonnet 5.5 access had **not** arrived, so calls 8
+and 9 did not run). All `development`, thinking and temperature as recorded, no sampling parameter sent. Estimates
+sum to about **$0.019**; the bill is the authority (DoD 8). First call 17:54 CDT, after `Project` was activated at
+17:19, which starts the tag clock; the earliest useful Cost Explorer look is the evening of 2026-10-05.
+
+| Record | Route | Result | Tokens in/out | ms |
+|---|---|---|---|---|
+| 01 `sonnet46-profile-off` | tagged profile | 1 tool call, valid, correct | 716 / 175 | 2,637 |
+| 02 `novapro-profile` | tagged profile | 1 tool call, valid, correct (`unit_system` wrongly `imperial`) | 559 / 120 | 1,470 |
+| 03 `sonnet46-geo-off` | `us.` geo profile | identical shape to 01 | 716 / 173 | 2,669 |
+| 04 `sonnet46-profile-adaptive` | tagged profile | thinking block, text, 1 tool call | 716 / 239 | 3,295 |
+| 05 `novapro-direct` | in-region | **`ModelErrorException`**, no usage returned | 0 / 0 | 8,125 |
+| 05.2 `novapro-direct` (`--again`) | in-region | 1 tool call, valid, correct | 559 / 119 | 1,553 |
+| 06 `novalite` | in-region | 1 tool call, valid, correct | 559 / 89 | 1,342 |
+| 07 `gptoss120b` | in-region | 1 tool call, valid, correct (reasoning block) | 235 / 169 | 1,050 |
+
+Local, not an evidence record: Ollama `qwen3.5:4b`, the same prompt and tool, **5 of 5** valid correct calls, 5-17 s.
+
+**Findings, each carried to step 12 where it changes a doc:**
+1. **Thinking on Converse** (`planning/07` 14.1, 7.3). Sent as `additionalModelRequestFields` `thinking` and
+   `output_config.effort`; returned as a `reasoningContent` block ahead of text and tool use; **no separate
+   thinking-token count**, the tokens are inside `outputTokens` (239 vs 175 for the same call without it). 7.3's
+   "thinking tokens recorded per run" must be read from the reasoning text or a paired non-thinking run. Patch 7.3.
+2. **`ModelErrorException` is a model failure delivered as an API error** (`planning/07` 5.1). Nova Pro, one in three
+   calls, same prompt that passed twice. `api_error` is "retried unlimited, not a model outcome", which would hide it.
+   It must classify as a `malformed_tool_use` model outcome. Patch 5.1; carried to Phase 1's classifier.
+3. **Text beside a tool call is normal under `auto`.** Sonnet 4.6 narrated a sentence and then made one call, in
+   spite of "do not give the answer in text". Nova models write a `<thinking>` tag in visible text with
+   `reasoning_block_count` 0. Neither is `no_tool_call`.
+4. **Tool-use input overhead is about 400-450 tokens on Claude and Nova** (716 and 559 input for a roughly 100-token
+   prompt); gpt-oss showed 235. `planning/03`'s per-decision token estimates need it; Phase 4 measures it.
+5. **Valid is not sensible:** Nova Pro filled `unit_system: imperial` for a metric value. The schema allows it.
+6. **Cache fields:** Sonnet returns explicit zeros; Nova and gpt-oss omit them. Absent reads as zero, as built.
+7. **Profile and plain `us.` route behave identically** on Sonnet 4.6 (calls 1 and 3). Decision 3 is therefore only
+   about billing attribution; nothing in the request or response depends on the route.
+8. **Nova Pro is enabled and answering on this account** (closes the availability half of the Nova Pro check).
+9. **gpt-oss-120b supports Converse tool use on `bedrock-runtime`**, though its model card lists tool calling only
+   for the other endpoint.
+10. **Provenance honesty:** `git_dirty` read `True` from record 02 because earlier evidence was uncommitted, not
+    because code differed; records from 05.2 on also carry the uncommitted error-capture change (error path only).
+    The flag now ignores the evidence folder.
+11. **Error records now carry `http_status` and `request_id`.** Record 05 predates that and has code and message only.
+12. **The estimate for an errored call is $0.00 by assumption;** the bill shows whether input tokens were charged.
+
+**Development-model evidence so far (decision 8, his, at the end):** Nova Lite $0.000055 per call, 1 of 1 valid,
+correct unit; gpt-oss-120b $0.000137, 1 of 1 valid, reasoning on by default; Ollama `qwen3.5:4b` free, 5 of 5 valid,
+local, slower. One call each on Bedrock is not a failure rate; a handful of repeats would be cheap if he wants more
+before deciding (a few cents, counted against the cap of 12; 4 records remain).

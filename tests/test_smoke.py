@@ -279,12 +279,20 @@ def test_a_text_answer_is_recorded_not_retried(tmp_path: Path) -> None:
 def test_an_api_error_is_recorded(tmp_path: Path) -> None:
     from botocore.exceptions import ClientError
 
-    error = ClientError(
-        {"Error": {"Code": "ThrottlingException", "Message": "slow down"}}, "Converse"
-    )
+    response: Any = {
+        "Error": {"Code": "ModelErrorException", "Message": "invalid sequence"},
+        "ResponseMetadata": {"HTTPStatusCode": 424, "RequestId": "req-123"},
+    }
+    error = ClientError(response, "Converse")
     result, _ = run("novalite", tmp_path, response=error)
     assert result.record["status"] == "api_error"
-    assert result.record["error"] == {"code": "ThrottlingException", "message": "slow down"}
+    assert result.record["error"] == {
+        "code": "ModelErrorException",
+        "message": "invalid sequence",
+        "http_status": "424",
+        "request_id": "req-123",
+    }
+    assert result.record["tool_input_check"]["problems"] == ["no tool call"]
 
 
 # --- the tool-input check --------------------------------------------------------------------------------

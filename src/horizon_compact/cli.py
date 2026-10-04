@@ -27,6 +27,8 @@ from horizon_compact.smoke.runner import (
 )
 
 EVIDENCE_RELATIVE = Path("docs/phases/evidence/phase-0.5/smoke")
+# "Dirty" means code or docs differ from the commit, not that earlier evidence records are uncommitted.
+_CODE_ONLY = ("--", ".", ":(exclude)docs/phases/evidence")
 
 
 def _git(*args: str) -> str:
@@ -67,7 +69,10 @@ def cmd_run(args: argparse.Namespace, evidence_dir: Path) -> int:
             provider=provider,
             control=session.client("bedrock"),
             account_id=account_id,
-            git=GitInfo(sha=_git("rev-parse", "HEAD"), dirty=bool(_git("status", "--porcelain"))),
+            git=GitInfo(
+                sha=_git("rev-parse", "HEAD"),
+                dirty=bool(_git("status", "--porcelain", *_CODE_ONLY)),
+            ),
             versions=Versions(harness=horizon_compact.__version__, botocore=botocore.__version__),
             confirm_access=args.confirm_access,
             again_reason=args.again,

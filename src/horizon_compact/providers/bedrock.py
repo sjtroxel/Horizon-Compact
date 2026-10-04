@@ -127,10 +127,16 @@ class BedrockConverseProvider:
             raw = dict(self._client.converse(**body))
         except ClientError as exc:
             err = exc.response.get("Error", {})
+            meta = exc.response.get("ResponseMetadata", {})
             error = {
                 "code": str(err.get("Code", "ClientError")),
                 "message": str(err.get("Message", exc)),
             }
+            # AWS Support asks for the request id, and the HTTP status helps classify the error.
+            if "HTTPStatusCode" in meta:
+                error["http_status"] = str(meta["HTTPStatusCode"])
+            if "RequestId" in meta:
+                error["request_id"] = str(meta["RequestId"])
         except BotoCoreError as exc:
             error = {"code": type(exc).__name__, "message": str(exc)}
         latency_ms = round((self._monotonic() - t0) * 1000)
