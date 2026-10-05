@@ -710,3 +710,26 @@ architecture tests parse the real JSON. Where it diverges from §10.4 or fills a
 to change, 0 to destroy; nothing existing touched, the deploy role's trust unchanged), and applied: **10 added, 0 changed,
 0 destroyed**, no permission error. The second plan read "No changes". The results bucket, the repository, the boundary and
 the deploy policy exist, and the deploy role carries the deploy policy. Not yet exercised: the deploy policy itself (step 7).
+
+**Step 7, C4 written (2026-10-05), not yet pushed.** `infra/terraform/main/` (versions, main, variables, network, ecs, iam, logs,
+outputs; its own lock file), `infra/iam/task.json` and `execution.json`, `.github/workflows/deploy.yml` and
+`aws-permission-check.yml`, `make tf-check` over both roots, three `terraform -chdir=infra/terraform/main` allows in
+`.claude/settings.json`. `make check`: **353 tests**; both roots validate. Deliberately breaking the boundary on one role
+fails its test. Nothing in `main` has been planned or applied: the first plan is the deploy workflow's. Where it fills a
+silence or diverges:
+
+1. **The task role also gets the `us.` geo-profile ARN on the `application_profile` route.** §9.3 says "only" the
+   application profile and the foundation model, but an application profile that copies a cross-region profile is invoked
+   through the system profile, and the dev policy that made Phase 0.5's calls work held both. If the first real run is
+   `AccessDenied`, this is the first thing to check; if it succeeds, a later test can narrow it.
+2. **`HC_SONNET_PROFILE_ARN` is set from a data source** (`aws_bedrock_inference_profiles`, matched by name), per §21 item 4,
+   and is empty on the `geo_profile` route. On the application route a missing profile fails at plan time.
+3. **The security group's egress is inline,** not a separate rule resource, so no tag-on-create is needed for a rule (the
+   deploy role's `CreateTags` allowance covers five resource types).
+4. **`main` names `bootstrap`'s resources, it does not read them:** the results bucket and boundary ARNs are built from
+   names; only the ECR repository is a data source (`ecr:DescribeRepositories` and `ListTagsForResource`, already allowed).
+5. **The permission check passes an attempt only if it fails with an access error** (AccessDenied, not authorized, explicit
+   deny); a command that fails for another reason fails the job, so the check cannot pass by being broken.
+6. **Unverified until the first deploy,** and each is fixed by name if it fails: tagging a task definition at registration
+   (`ecs:TagResource` on `*`?); `ec2:CreateTags` for the VPC, subnets, gateway, route table and group at creation; the
+   untagged-network deny's `Null` exemption (step 5 note 1); `iam:CreateRole` with tags.

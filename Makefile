@@ -8,6 +8,7 @@
 GUARD := uv run --no-sync python -m horizon_compact.privacy.guard
 ROOT_CAP := 16
 TF_BOOTSTRAP := infra/terraform/bootstrap
+TF_MAIN := infra/terraform/main
 
 help: ## List available targets
 	@grep -hE '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -55,6 +56,7 @@ root-check: ## Fail if the repo root has grown past its cap
 # No target runs plan, apply, import or destroy: anything that authenticates is typed by hand (Phase 0.5, decision 6).
 tf-fmt: ## Rewrite Terraform files into canonical format
 	terraform -chdir=$(TF_BOOTSTRAP) fmt -recursive
+	terraform -chdir=$(TF_MAIN) fmt -recursive
 
 # Needs no credentials and makes no AWS call. `init` only downloads the provider; -lockfile=readonly fails if
 # the committed .terraform.lock.hcl disagrees with the configuration instead of resolving something new.
@@ -62,6 +64,9 @@ tf-check: ## Terraform fmt -check and validate (no credentials, no AWS call)
 	terraform -chdir=$(TF_BOOTSTRAP) fmt -check -recursive
 	terraform -chdir=$(TF_BOOTSTRAP) init -backend=false -input=false -lockfile=readonly
 	terraform -chdir=$(TF_BOOTSTRAP) validate
+	terraform -chdir=$(TF_MAIN) fmt -check -recursive
+	terraform -chdir=$(TF_MAIN) init -backend=false -input=false -lockfile=readonly
+	terraform -chdir=$(TF_MAIN) validate
 
 paths-check: ## Fail if any tracked path is under methods-appendix/ (needs no private file)
 	@$(GUARD) paths-check

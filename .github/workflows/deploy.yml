@@ -1,0 +1,133 @@
+name: Deploy
+
+# Phase 1 decision 3: a push to main that touches code the sweep runs, or the infrastructure, builds the image and
+# applies `main`. A push that touches only docs does nothing here (CI still runs).
+#
+# CI NEVER LAUNCHES A SWEEP. The deploy role's policy denies ecs:RunTask and every model call, so this workflow
+# could not start one if it tried (infra/iam/deploy.json: CiNeverLaunchesASweep).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "experiment/**"
+      - "infra/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time, and never cancel one in flight: a cancelled apply can strand the state lock.
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: make check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.12.0"
+          enable-cache: true
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.15.8"
+          terraform_wrapper: false
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: make check
+        run: make check
+
+  image:
+    name: build and push the arm64 image
+    needs: check
+    # Fargate runs ARM64 (task definition), so the image is built natively on an ARM runner, not emulated.
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Logs here are public and ARNs hold the account id, so it is masked for the whole job (proved by the
+      # identity check, run 37241137274).
+      - name: Assume the deploy role
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      - name: Log in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - uses: docker/setup-buildx-action@v4
+
+      # Tags are immutable in the repository, so each build gets a unique one. provenance: false keeps the push
+      # to one manifest, so the digest names exactly the image that runs.
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: infra/docker/Dockerfile
+          platforms: linux/arm64
+          push: true
+          provenance: false
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+          tags: ${{ steps.ecr.outputs.registry }}/horizon-compact:${{ github.sha }}-${{ github.run_id }}
+
+  infra:
+    name: apply main
+    needs: image
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Assume the deploy role
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.15.8"
+          terraform_wrapper: false
+
+      # The state bucket's name holds the account id, so it is a secret (masked), not a file.
+      - name: Init
+        run: >
+          terraform -chdir=infra/terraform/main init -input=false -lockfile=readonly
+          -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      - name: Plan
+        run: >
+          terraform -chdir=infra/terraform/main plan -input=false -no-color -out=main.tfplan
+          -var "image_digest=${{ needs.image.outputs.digest }}"
+          -var "sonnet_route=${{ vars.SONNET_ROUTE }}"
+
+      - name: Apply
+        run: terraform -chdir=infra/terraform/main apply -input=false -no-color main.tfplan

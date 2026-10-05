@@ -1,0 +1,82 @@
+name: AWS permission check
+
+# MANUAL ONLY, from main (the deploy role's trust is pinned to refs/heads/main). Proves the deploy role CANNOT do
+# four things it must never do (Phase 1 definition of done 5). Each attempt must be refused with an access error:
+# a command that fails for any other reason (a typo, a missing argument) does not count as "refused", so the
+# check cannot pass by being broken. If any attempt succeeds, the job cleans up what it can and fails.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  check:
+    name: attempt four forbidden actions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assume the deploy role
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      - name: Attempt each forbidden action
+        shell: bash
+        run: |
+          set +e
+          failures=0
+          trust='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ecs-tasks.amazonaws.com"},"Action":"sts:AssumeRole"}]}'
+          policy='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"*","Resource":"*"}]}'
+          bucket="hc-escalation-test-${GITHUB_RUN_ID}"
+
+          # Runs one command; passes only if it fails AND says it was denied.
+          expect_refused() {
+            local name="$1"; shift
+            local out
+            out=$("$@" 2>&1)
+            local code=$?
+            echo "--- $name (exit $code)"
+            echo "$out" | sed -E 's/[0-9]{12}/<account-id>/g' | head -5
+            if [ "$code" -eq 0 ]; then
+              echo "FAIL: $name SUCCEEDED, which must never happen"
+              failures=$((failures + 1))
+              return 1
+            fi
+            if ! echo "$out" | grep -qiE "AccessDenied|not authorized|explicit deny"; then
+              echo "FAIL: $name failed, but not with an access error, so it proves nothing"
+              failures=$((failures + 1))
+              return 1
+            fi
+            echo "PASS: $name refused"
+          }
+
+          expect_refused "create a role without the boundary" \
+            aws iam create-role --role-name horizon-compact-escalation-test \
+              --assume-role-policy-document "$trust" \
+          || aws iam delete-role --role-name horizon-compact-escalation-test >/dev/null 2>&1
+
+          expect_refused "create a bucket outside the project" \
+            aws s3api create-bucket --bucket "$bucket" \
+          || aws s3api delete-bucket --bucket "$bucket" >/dev/null 2>&1
+
+          expect_refused "put an inline policy on its own role" \
+            aws iam put-role-policy --role-name horizon-compact-github-deploy \
+              --policy-name escalation-test --policy-document "$policy" \
+          || aws iam delete-role-policy --role-name horizon-compact-github-deploy \
+              --policy-name escalation-test >/dev/null 2>&1
+
+          expect_refused "run a task" \
+            aws ecs run-task --cluster horizon-compact --task-definition horizon-compact-sweep \
+              --launch-type FARGATE \
+              --network-configuration "awsvpcConfiguration={subnets=[subnet-00000000]}"
+
+          echo
+          if [ "$failures" -ne 0 ]; then
+            echo "$failures of 4 checks failed"
+            exit 1
+          fi
+          echo "All four forbidden actions were refused."

@@ -219,6 +219,11 @@ _FAKE_VARS = {
     "nova_pro_profile_arn": (
         "arn:aws:bedrock:us-east-1:000000000000:application-inference-profile/mnopqrstuvwx"
     ),
+    # main passes a JSON list here (jsonencode); a plain substitution is enough to parse the template.
+    "bedrock_resources": (
+        '["arn:aws:bedrock:us-east-1:000000000000:application-inference-profile/abcdefghijkl",'
+        '"arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6*"]'
+    ),
 }
 _MANAGED_POLICY_LIMIT = 6144
 
@@ -332,3 +337,133 @@ def test_ecr_tags_are_immutable_and_scanned() -> None:
     code = _strip_comments((BOOTSTRAP / "ecr.tf").read_text(encoding="utf-8"))
     assert re.search(r'image_tag_mutability\s*=\s*"IMMUTABLE"', code)
     assert re.search(r"scan_on_push\s*=\s*true", code)
+
+
+# --- the `main` root and the workflows (Phase 1 IMPLEMENTATION doc sections 9, 10 and 12) -----------------
+
+MAIN = INFRA / "terraform" / "main"
+WORKFLOWS = ROOT / ".github" / "workflows"
+
+
+def _main_code() -> str:
+    return "\n".join(
+        _strip_comments(p.read_text(encoding="utf-8")) for p in sorted(MAIN.glob("*.tf"))
+    )
+
+
+def test_task_and_execution_roles_fit_inside_the_boundary() -> None:
+    """Both roles' actions are a subset of the boundary's (a role can never hold more than it)."""
+    boundary = set(_allowed_actions("boundary.json"))
+    for name in ("task.json", "execution.json"):
+        assert set(_allowed_actions(name)) <= boundary, name
+
+
+def test_task_role_cannot_delete_or_touch_iam() -> None:
+    allowed = _allowed_actions("task.json")
+    assert not [a for a in allowed if a.startswith(("iam:", "s3:Delete")) or a.endswith(":*")]
+    assert set(allowed) == {"bedrock:InvokeModel", "s3:GetObject", "s3:PutObject", "s3:ListBucket"}
+
+
+def test_every_role_in_main_carries_the_boundary() -> None:
+    code = _main_code()
+    roles = re.split(r'(?=resource\s+"aws_iam_role"\s)', code)[1:]
+    assert len(roles) == 2
+    for block in roles:
+        assert re.search(r"permissions_boundary\s*=\s*local\.boundary_arn", block), block[:80]
+
+
+def test_roles_trust_ecs_tasks_for_this_account_only() -> None:
+    code = _main_code()
+    assert "ecs-tasks.amazonaws.com" in code
+    assert "aws:SourceAccount" in code
+
+
+def test_main_creates_no_always_on_resource() -> None:
+    """No NAT gateway, load balancer, database or endpoint (planning/02 section 2.4; CLAUDE.md cost rules)."""
+    code = _main_code()
+    for resource in (
+        "aws_nat_gateway",
+        "aws_eip",
+        "aws_lb",
+        "aws_alb",
+        "aws_db_instance",
+        "aws_rds_cluster",
+        "aws_vpc_endpoint",
+        "aws_ecs_service",
+    ):
+        assert not re.search(rf'resource\s+"{resource}"', code), resource
+
+
+def test_main_log_group_has_explicit_retention_and_cluster_insights_are_off() -> None:
+    code = _main_code()
+    assert re.search(r"retention_in_days\s*=\s*30", code)
+    assert re.search(r'name\s*=\s*"containerInsights"\s*\n\s*value\s*=\s*"disabled"', code)
+
+
+def test_sweep_security_group_has_no_ingress_and_only_https_egress() -> None:
+    code = _main_code()
+    assert not re.search(r"\bingress\b\s*\{", code)
+    egress = re.findall(r"egress\s*\{(.*?)\n\s*\}", code, flags=re.DOTALL)
+    assert len(egress) == 1
+    assert re.search(r"from_port\s*=\s*443", egress[0]) and re.search(
+        r"to_port\s*=\s*443", egress[0]
+    )
+
+
+def test_task_definition_is_arm64_and_names_the_image_by_digest() -> None:
+    code = _main_code()
+    assert re.search(r'cpu_architecture\s*=\s*"ARM64"', code)
+    assert "@${var.image_digest}" in code
+    assert not re.search(r'image\s*=\s*"[^"]*:latest', code)
+
+
+def test_main_requires_the_route_and_the_digest_with_no_default() -> None:
+    code = (MAIN / "variables.tf").read_text(encoding="utf-8")
+    for name in ("image_digest", "sonnet_route"):
+        block = re.search(rf'variable\s+"{name}"\s*\{{(.*?)\n\}}', code, flags=re.DOTALL)
+        assert block is not None, name
+        assert not re.search(r"^\s*default\s*=", block.group(1), flags=re.MULTILINE), name
+
+
+def test_main_backend_names_no_bucket() -> None:
+    """The state bucket's name holds the account id; it arrives at init (-backend-config=bucket=...)."""
+    code = _strip_comments((MAIN / "versions.tf").read_text(encoding="utf-8"))
+    assert re.search(r'backend\s+"s3"', code)
+    assert not re.search(r"\bbucket\s*=", code)
+    assert re.search(r"use_lockfile\s*=\s*true", code)
+
+
+def test_tf_check_covers_both_roots() -> None:
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    assert "terraform -chdir=$(TF_MAIN) validate" in makefile
+    assert "terraform -chdir=$(TF_MAIN) fmt -check" in makefile
+    assert (MAIN / ".terraform.lock.hcl").is_file()
+
+
+def test_deploy_workflow_never_cancels_an_apply_and_builds_one_manifest() -> None:
+    text = (WORKFLOWS / "deploy.yml").read_text(encoding="utf-8")
+    assert re.search(r"cancel-in-progress:\s*false", text)
+    assert re.search(r"provenance:\s*false", text)
+    assert "ubuntu-24.04-arm" in text
+    assert "mask-aws-account-id: true" in text
+    assert "-lockfile=readonly" in text
+    assert "ecs run-task" not in text and "sweep launch" not in text
+
+
+def test_permission_check_covers_the_four_refusals() -> None:
+    text = (WORKFLOWS / "aws-permission-check.yml").read_text(encoding="utf-8")
+    for needle in (
+        "create-role",
+        "create-bucket",
+        "put-role-policy",
+        "run-task",
+        "workflow_dispatch",
+    ):
+        assert needle in text, needle
+    assert "push:" not in text
+
+
+def test_workflows_hold_no_account_id() -> None:
+    account_id = re.compile(r"(?<![\w-])\d{12}(?![\w-])")
+    offenders = [p.name for p in WORKFLOWS.glob("*.yml") if account_id.search(p.read_text())]
+    assert not offenders, offenders
