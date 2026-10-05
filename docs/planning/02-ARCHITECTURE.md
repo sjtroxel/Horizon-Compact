@@ -8,6 +8,8 @@
   **Patched 2026-10-04 (his):** §1, §2.8 and §2.10, from Phase 1's decisions 4 and 5
   (`docs/phases/phase-1-walking-skeleton.md`): the raw results bucket lives in `bootstrap`; experiment inputs are
   built into the image (no inputs bucket); aggregation runs on the laptop and the published JSON is committed.
+  **Patched 2026-10-05 (his):** §2.5, Sonnet 4.6 is the v1 main model, fixed; Sonnet 5.5 is no longer awaited
+  (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry). The Sonnet 5.5 facts below stay as the record.
   **Patched 2026-10-04 (his):** §2.7, v1 builds real-case dossiers with a minimal builder, without retrieval or
   reranking (`docs/phases/phase-5-case-building.md`, decision 3).
   **Patched 2026-10-04 (his):** §2.9, a preview build off the public URL until go-live, share cards built at deploy
@@ -134,6 +136,9 @@ producing a false finding, built into the data model.
 > Haiku 4.5 and Amazon Nova Pro all work.** A quota increase for Sonnet 5.5 is being requested. **v1 is designed
 > on Sonnet 4.6**; the Sonnet 5.5 notes below apply if and when access arrives.
 >
+> **2026-10-05:** AWS held Sonnet 5.5 until the account has several billing cycles of Bedrock use. **Sonnet 4.6
+> is the v1 main model, fixed;** the notes below are a record, not a plan.
+>
 > **Claude Sonnet 4.6 on Bedrock (verified, AWS model card):** launched 2026-02-17; **EOL not sooner than
 > 2027-02-17**; knowledge cutoff Aug 2025 (Anthropic lists training data through **Jan 2026**); `us.` geo profile
 > `us.anthropic.claude-sonnet-4-6`; **native structured outputs SUPPORTED** (unlike 5.5); prompt caching (min
@@ -162,7 +167,7 @@ Other facts that shape the design:
 
 | Role | Model | Where |
 |---|---|---|
-| Main "CEO" for official results | **Claude Sonnet 4.6** (works on his account, verified 2026-10-02); Sonnet 5.5 added if AWS grants access | Bedrock, Fargate |
+| Main "CEO" for official results | **Claude Sonnet 4.6** (works on his account, verified 2026-10-02); fixed 2026-10-05, Sonnet 5.5 not awaited | Bedrock, Fargate |
 | Development, harness testing, all wording variants | a local model (Ollama) and/or a cheap Bedrock model | laptop |
 | Second model family (multi-model check) | a non-Anthropic model on Bedrock, if its cutoff fits | Bedrock, Fargate |
 | Small-model contestant (later phase) | a small open model | see §2.6 |

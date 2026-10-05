@@ -128,8 +128,8 @@ not estimated: the target is under $1 a month (`planning/03` §6).
 
 ## The main model
 
-The README and the audit name the model the protocol fixed, with its dates. If a Sonnet 5.5 sweep exists by then, it
-is reported beside v1, never merged (`planning/04` §1.9), and the README says which result is which.
+The README and the audit name the model the protocol fixed (Sonnet 4.6, fixed 2026-10-05), with its dates. No
+Sonnet 5.5 sweep is planned.
 
 ## What is re-scoped when this phase starts
 
@@ -138,7 +138,6 @@ Expected to change, by a dated amendment to this doc before its IMPLEMENTATION d
 - **What the results say**, which sets the README's lead result and the post's one sentence, chosen from the
   `planning/06` §1 table row that the data actually supports.
 - **What was cut** under `planning/05` §5.1, if anything, and how the README and audit say so.
-- **Whether a Sonnet 5.5 sweep exists**, and how it is presented beside v1.
 - **The vocabulary climate** and any new Roundtable statement (`planning/06` §11).
 - **Which impressive pieces shipped** in Phase 6 and 6.5, and which images the README can use.
 - **The tools**, if the post uses any (an image tool, the video): availability and cost, checked live.

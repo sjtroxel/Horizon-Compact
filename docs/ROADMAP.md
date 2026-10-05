@@ -50,10 +50,10 @@ status line records the split.
 **Phase 1 was split in two on 2026-10-04** (his; Phase 1 scope doc, decision 1): the run path stays Phase 1, the
 scorer, the page and the teardown test become Phase 1.5, both before Phase 2.
 
-**The main model is a slot.** The spine and the scope docs say Sonnet 4.6 because it is the model the account can
-call today. If Sonnet 5.5 access arrives before `prereg-v1`, the main-model choice reopens as his decision
-(`planning/05` §5.2), and model IDs, prices and quotas are config, never code (Phase 1 scope doc). After the tag,
-Sonnet 5.5 is its own sweep.
+**The main model is Sonnet 4.6, fixed for v1** (his, 2026-10-05). Until then it was a slot held open for Sonnet
+5.5. AWS answered the quota case on 2026-10-05: the newest models are held until an account has several billing
+cycles of Bedrock use, so Sonnet 5.5 is no longer awaited (`planning/05` §5.2, patched). Model IDs, prices and
+quotas stay config, never code (Phase 1 scope doc).
 
 **Phase 2 was split in two on 2026-10-04** (his; Phase 2 scope doc, decision 1): the cited company dossier is Phase
 2, the scenarios, wordings, neutrality review and blind development runs are Phase 2.5.
@@ -202,6 +202,9 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
 
+- **2026-10-05 — Sonnet 4.6 fixed as the v1 main model; Sonnet 5.5 no longer awaited** (his), after AWS held
+  the newest models until the account has several billing cycles of Bedrock use. The main-model slot is closed;
+  nothing is spent to qualify. `planning/02`-`05`, `07`, `09` and eight scope docs patched (`KNOWN-GAPS.md`).
 - **2026-10-04 — Phase 7 scope doc approved** (his), all six decisions as recommended, not split: public prose
   decided by piece (README and release notes may be Claude-drafted on his grant; the post and card his by default);
   the launch post last; README numbers tied to data by a test and claims tied to the audit; the audit re-verified by
@@ -307,5 +310,5 @@ ceiling covers v1 only. Credits expire 2027-07-30.
 6. The frequency study.
 7. A fine-tuned or distilled CEO, after a cost check.
 
-The Sonnet 5.5 sweep runs whenever access arrives (`planning/05` §5.2). Before the `prereg-v1` tag, its arrival
-reopens the main-model choice as his decision; after the tag, it is its own sweep, never merged.
+*2026-10-05:* a Sonnet 5.5 sweep is no longer planned (`planning/05` §5.2). If access ever arrives, it is a new
+decision of his, run as its own sweep and never merged.

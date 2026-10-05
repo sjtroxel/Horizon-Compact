@@ -32,6 +32,10 @@ re-running or overwriting anything; and no sweep can spend past its cap or be la
 
 ## The main model is a slot, not a fixed name
 
+> **Amended 2026-10-05 (his): the slot is closed. Sonnet 4.6 is the v1 main model, fixed;** Sonnet 5.5 is no
+> longer awaited (`KNOWN-GAPS.md`). Model IDs, prices and quotas still live in config, never in code. The
+> section as it stood:
+
 This doc says **Sonnet 4.6** because it is the model the account can call today (`planning/02` §2.5). **If Sonnet
 5.5 access arrives before `prereg-v1`, choosing the main model reopens as his decision** (`planning/05` §5.2), and
 wherever this doc says Sonnet 4.6, it means the main model.

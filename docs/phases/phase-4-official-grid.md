@@ -104,8 +104,7 @@ In order. Each step starts only when the one before it is done.
 - **The explorer's views of the results and the methods page.** Phase 6. This phase produces the data they show.
 - **Any public prose about the results** (a post, a README section, a thread). Phase 7, in his words. Decision 5 is
   about publishing data, not commentary.
-- **Sonnet 5.5,** unless Phase 3.5 pre-registered it as its own sweep (Phase 3.5 decision 5). If access arrives after
-  the tag, its sweep is a later, separate study.
+- **Sonnet 5.5.** Not awaited after 2026-10-05 (Phase 3.5 decision 5, closed).
 - **Re-running anything** that has a final result, for any reason.
 
 ## Definition of done
@@ -153,9 +152,7 @@ the sub-study about 10. Nova Pro at 25 a minute takes under an hour.
 
 ## The main model
 
-**Fixed in Phase 3.5 and not reopened here.** Wherever this doc says Sonnet 4.6, it means the main model the protocol
-names. If Phase 3.5 chose Sonnet 5.5, its sweep uses `between_tools` thinking (`planning/07` §7.3) and the protocol
-says so.
+**Sonnet 4.6, fixed 2026-10-05 (his)**, and named in the protocol. Not reopened here.
 
 ## Known risks
 

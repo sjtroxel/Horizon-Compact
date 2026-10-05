@@ -7,7 +7,7 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-04, 7 PM
+> ## START HERE — where things stand, 2026-10-04, 7 PM (main-model line amended 2026-10-05)
 >
 > **PHASE 0 is complete** (2026-10-03; CI run `37160410815`). **Every scope doc, Phases 0 through 7, is approved.**
 > **PHASE 0.5 `aws-foundation` is BUILT and its smoke calls are done; it is NOT closed.** Three commits on `main`, all
@@ -31,8 +31,8 @@ case by its type and a neutral label. The names live only in the private longlis
 > before Phase 0.5 closes; **its first Sonnet sweep cannot** (§1).
 >
 > **The `horizon-compact-dev` access key stays through Phase 1** (decision A, amended 2026-10-04 by Phase 1's
-> decision 2); he deletes it at Phase 1's close. **Sonnet 5.5 access had not arrived** on 2026-10-04 (case 179097554500679); its two smoke calls did
-> not run.
+> decision 2); he deletes it at Phase 1's close. **Sonnet 4.6 is the main model for v1, fixed (his, 2026-10-05).** Sonnet 5.5 is no longer awaited;
+> its two smoke calls will not run (the closed Sonnet 5.5 entry below).
 >
 > **Owed by him:** claim `horizon-compact.vercel.app` (entry below). A prerequisite for Phase 1.5.
 
@@ -286,7 +286,19 @@ provisionally); §14 items 2-4 marked closed with a pointer here.
 
 ---
 
-## WAITING — Sonnet 5.5 access, no action, 2026-10-03
+## CLOSED 2026-10-05 — Sonnet 5.5 access (was WAITING, 2026-10-03)
+
+**Decided 2026-10-05 (his)**: **Sonnet 4.6 is the main model for v1, fixed. Sonnet 5.5 is no longer awaited.** AWS answered
+the Global quota case on 2026-10-05: the newest models, Sonnet 5.5 among them, are held until an account has
+several billing cycles of Bedrock usage and spend, with automatic re-evaluation or a new request after the next
+cycle. The US case (179097554500679) asks for the same model and is expected to get the same answer. The
+main-model slot is closed, no phase plans around Sonnet 5.5, and nothing is spent to qualify for it. If access
+ever arrives, using it is a new decision of his, not something the plan assumes. Patched the same day:
+`planning/02`, `03`, `04`, `05`, `07` and `09` (status lines), `ROADMAP.md` §2, §4 and §5, and the scope docs for
+Phases 0.5, 1, 1.5, 2, 2.5, 3.5, 4 and 7. The Phase 0.5 smoke code keeps its two inert Sonnet 5.5 entries
+(built and tested; never run).
+
+*The entry as it stood before closing:*
 
 Quota requests open (US: AWS Support case 179097554500679; Global: pending). If access arrives **before** the
 `prereg-v1` tag, the main-model choice reopens as his decision. After the tag, Sonnet 5.5 is its own sweep

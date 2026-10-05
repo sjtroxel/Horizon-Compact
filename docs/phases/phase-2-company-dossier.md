@@ -138,8 +138,8 @@ cost ledger either way, so the full cost of the project is visible.
 
 ## The main model
 
-Nothing in this phase depends on which model is main. If Sonnet 5.5 replaces Sonnet 4.6 before `prereg-v1`, the
-dossier is unchanged. Its length is far above either model's caching minimum.
+Nothing in this phase depends on which model is main (Sonnet 4.6, fixed 2026-10-05). The dossier's length is far
+above its caching minimum.
 
 ## Known risks
 

@@ -7,6 +7,8 @@
   Phase 0; the AWS half (Terraform bootstrap, budgets, smoke calls, Ollama, the development model, the `09` §5
   checks) becomes Phase 0.5 `aws-foundation`. Reason and record: `docs/phases/phase-0-scaffold-and-guardrails.md`,
   decision 6. The table below is unchanged as the record of the plan.
+  **Patched 2026-10-05 (his):** §5.2 and §6, Sonnet 4.6 is the v1 main model, fixed; Sonnet 5.5 is no longer
+  awaited (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry). §8 items 4 and 5 stay as the record.
   **Patched 2026-10-04 (his), from `docs/phases/phase-1-walking-skeleton.md`:** §5's Phase 1 is split into Phase 1
   `walking-skeleton` (the run path: results land in S3) and Phase 1.5 `publish-path` (the scorer, the page, the
   teardown test), both done before Phase 2 (decision 1). §1 and §2: the skeleton's placeholder is **off the
@@ -210,6 +212,10 @@ three real cases including one invest or retool case, and provenance.
 
 ### 5.2 If Sonnet 5.5 access arrives
 
+> **Decided 2026-10-05 (his)**: **closed. Sonnet 4.6 is the v1 main model, and Sonnet 5.5 is not awaited.** AWS holds its
+> newest models until an account has several billing cycles of Bedrock use. If access ever arrives, using it is
+> a new decision of his, run as its own complete sweep, never merged (`04` §1.9). The plan as it stood:
+
 - **Before the Phase 3 commit:** choosing the main model is reopened, as his decision. Sonnet 5.5 is about a third
   cheaper (`03` §2.1) and newer; Sonnet 4.6 is already proven on the account.
 - **After the Phase 3 commit:** v1 stays on the models it pre-registered. Sonnet 5.5 runs as its **own complete
@@ -229,7 +235,7 @@ Each later phase reuses the v1 protocol where it can and writes a **new pre-regi
 | Phase | What it adds | Which seam absorbs it | Order |
 |---|---|---|---|
 | **More company types** (software, healthcare, others) | New dossiers, scenarios adapted per type | Experiment definition (§4.2), frozen dossier (§4.4) | **Committed: first after v1.0** (his decision, `00` §6.1) |
-| **Sonnet 5.5 sweep** | The same grid on a newer model | Provider config (§4.1) | Whenever access arrives (§5.2) |
+| **Sonnet 5.5 sweep** | The same grid on a newer model | Provider config (§4.1) | Not planned (§5.2, 2026-10-05) |
 | **Horizon sweep** | Objective D at 10, 20 and 50 years | New objective variants (§4.2) | Second: small and cheap |
 | **Small-model contestant** | A small open model as a sixth CEO, on Bedrock or local (`02` §2.6) | Provider (§4.1) | Third |
 | **Memo analysis** | A secondary, labeled LLM-judge pass over the memos (`02` §2.8) | A new scorer over kept raw responses (§4.3) | Fourth |

@@ -8,6 +8,9 @@
 > **Amended 2026-10-04 (his):** if Sonnet 5.5 access has arrived when this phase is built, it gets the same smoke
 > calls (Delivers 4), so the main-model choice can reopen on measured facts (`planning/05` §5.2).
 >
+> **Amended 2026-10-05 (his):** Sonnet 5.5 is no longer awaited and Sonnet 4.6 is the v1 main model, fixed
+> (`KNOWN-GAPS.md`). The Sonnet 5.5 smoke calls will not run; DoD 4 is met by Sonnet 4.6 and Nova Pro.
+>
 > The first of the scope docs for Phases 0.5 through 7, which are written in order before any further
 > implementation. This phase's IMPLEMENTATION doc is written immediately before it is built, after the other scope
 > docs exist.
@@ -168,7 +171,7 @@ dated patch noted in its status line.
 - **Prompt caching.** Phase 1 onward.
 - **Any experiment content**, including the placeholder scenario. Phases 1 and 2.
 - **An Ollama provider in the harness.** Phase 2, and only if Ollama is chosen.
-- **Sonnet 5.5.** Still waiting on AWS (`KNOWN-GAPS.md`).
+- **Sonnet 5.5.** Not awaited after 2026-10-05 (`KNOWN-GAPS.md`).
 - **Any change to Musical Mycelium:** its budgets, Terraform, OIDC provider or code. Reading it is allowed.
 
 ## Definition of done

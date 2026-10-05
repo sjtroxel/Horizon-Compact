@@ -6,6 +6,9 @@
 >
 > **Split out of Phase 3 on 2026-10-04** (his, Phase 3 decision 1).
 >
+> **Amended 2026-10-05 (his):** Sonnet 4.6 is the v1 main model, fixed; Sonnet 5.5 is no longer awaited
+> (`KNOWN-GAPS.md`). Decision 5 is closed, "The main model" names Sonnet 4.6, and constraint 3 has no fallback.
+>
 > **Amended 2026-10-04 (his), from `docs/phases/phase-5-case-building.md` decisions 2 and 6:** the protocol also
 > freezes the real-case rules that Phase 5 would otherwise write after the tag (Delivers 2, last items), the gate gains
 > a case mode (Delivers 4, DoD 4), and the real-case search date is set by rule, not chosen.
@@ -39,6 +42,8 @@ protocol existed in this exact form before any official run, and that every offi
 3. **Sonnet 4.6's end of life is not sooner than 2027-02-17** (`planning/02` §2.5). The model set is fixed here and
    real cases are run in Phase 5 on that set. If the main model retires before Phase 5 finishes, the real cases
    cannot run on it. That is a schedule constraint, and a consideration in the main-model choice (decision 5).
+   *2026-10-05:* with Sonnet 5.5 not awaited, there is no successor to choose; the schedule has to fit Sonnet
+   4.6's life.
 4. **The protocol is the last design document a second reader can still change for free.** `planning/08`'s
    independent review changed thirty-four things. After the tag, a flaw becomes a new protocol version. Decision 3.
 5. **The pilot's repeat count is computed after the tag,** from the pilot's results (`planning/07` §8). The gate must
@@ -135,7 +140,7 @@ In build order.
 ## Prerequisites
 
 - **Phases 2, 2.5 and 3 complete:** the content final, the change log closed, the engine and simulations done.
-- *(rests on 0.5)* **The measured facts about each model**, including Sonnet 5.5's if access has arrived.
+- *(rests on 0.5)* **The measured facts about each model** (Sonnet 4.6 and Nova Pro).
 - **His OpenRouter balance** for the review.
 
 ## Cost
@@ -145,6 +150,7 @@ In build order.
 
 ## The main model
 
+**Sonnet 4.6, fixed 2026-10-05 (his); no choice is made here.** Sonnet 5.5 is no longer awaited. *Was:*
 **This is where the choice is made.** If Sonnet 5.5 access has arrived by now, choosing the main model reopens as his
 decision (`planning/05` §5.2), with Phase 0.5's measurements of it in hand. If access arrives after the tag, Sonnet 5.5
 is its own complete sweep under the same protocol, never merged (`planning/04` §1.9). The considerations are
@@ -205,7 +211,8 @@ phase from the evidence. Each keeps its original framing under *Was:* as the rec
      shortfall, never filled by judgment. The search runs once, on a date fixed in the protocol, and candidates are
      taken in order of first disclosure. This matches `planning/07` §13's budget of five cases.
    - (b) Different *k* or types, his choice, before the tag.
-5. **AGREED 2026-10-04 (his), as a procedure:** if Sonnet 5.5 access has arrived, the main model is chosen in this
+5. **CLOSED 2026-10-05 (his): Sonnet 4.6 is the main model; Sonnet 5.5 is not awaited.** *Was:*
+   **AGREED 2026-10-04 (his), as a procedure:** if Sonnet 5.5 access has arrived, the main model is chosen in this
    phase from Phase 0.5's measurements, weighing the considerations below. No choice is made before that evidence
    exists. *Was:*
    **The main model, if Sonnet 5.5 access has arrived** (decided here, with Phase 0.5's measurements). No

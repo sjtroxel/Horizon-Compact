@@ -5,6 +5,8 @@
 - **Read after:** `03-COST-MODEL`. **Read before:** `05-EVOLUTION-PLAN`.
 - **Amended by `08` (2026-10-03):** §1.1 objective wording, §1.2 and §7 the pre-registration's relation to `07`,
   §2.2 measurement, §2.6 and §7 the name check, §6.1 the wording cut (patches P23, P25, P28, P29 in `09` §3).
+- **Patched 2026-10-05 (his):** §1.9 and §3.2, Sonnet 4.6 is the v1 main model, fixed; Sonnet 5.5 is no
+  longer awaited (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry).
 - **Patched 2026-10-04 (his):** §3.4, the re-plan check also made on a projection before the official grid
   (`docs/phases/phase-4-official-grid.md`, decision 2).
 - **Patched 2026-10-04 (his):** §2.4, the second read of each rubric becomes required, and also covers candidates
@@ -154,6 +156,10 @@ failure (`07` §5).
 
 Sonnet 4.6's end of life is *not sooner than 2027-02-17* (`02` §2.5). If Sonnet 5.5 access arrives partway through
 v1, there will be pressure to switch, and a grid half on one model and half on another means nothing.
+
+*2026-10-05:* Sonnet 5.5 is no longer awaited (§3.2), so the switch pressure is gone and the retirement date is
+the live half of this risk: there is no successor model on the account to fall back to. The real cases must
+finish on Sonnet 4.6 before it retires (Phase 3.5 scope doc, constraint 3).
 
 **Mitigation:** **a sweep is pinned to one model ID for its whole grid.** A new model means a new, complete sweep,
 reported beside the old one, never merged into it. The published results name the model and the date, so they stay
@@ -307,6 +313,10 @@ would throttle each other.
 **Owner:** `02` (patch), the harness's rate limiter (build).
 
 ### 3.2 MEDIUM — Sonnet 5.5 access may arrive late, or not at all
+
+> **Closed 2026-10-05 (his):** AWS held Sonnet 5.5 until the account has several billing cycles of Bedrock use.
+> Sonnet 4.6 is the v1 main model, fixed; Sonnet 5.5 is not awaited. As this section said, the refusal costs
+> only the cheaper price. The section as it stood:
 
 Requested 2026-10-02 (US: Support case 179097554500679; Global: pending); no change as of 2026-10-03. Musical
 Mycelium's last Bedrock quota case took 12 days. v1 is already designed on Sonnet 4.6 (`02` §2.5), so a refusal

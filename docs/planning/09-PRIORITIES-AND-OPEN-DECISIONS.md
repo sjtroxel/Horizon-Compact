@@ -3,6 +3,7 @@
 - **Status:** WRITTEN 2026-10-03. **The last numbered planning doc.** **Patch pass DONE the same afternoon** (P1-P34
   applied to `00`-`07`, §8). **All five of his decisions in §6 made 2026-10-03, as recommended.** Nothing is open.
   *Patched 2026-10-04 (his):* A1 done in Phase 0.5 (`docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md` §19).
+  *Patched 2026-10-05 (his):* §5's "Waiting on AWS" line closed; Sonnet 4.6 is the v1 main model, fixed.
 - **Read after:** `08-REVIEW`. **Read before:** the repo's Phase 0 scope doc.
 - **What this doc is:** the forward-looking half of the review. `08` found what is wrong; this doc says **in what
   order it gets fixed, where each fix lands, and what stands between now and the first commit.** No new analysis.
@@ -157,7 +158,8 @@ sources only (`00` §10). None blocks the patch pass or the repo's creation.
 
 **Waiting on AWS, nothing to do:** the Sonnet 5.5 quota requests (US: Support case 179097554500679; Global: pending).
 If access arrives **before** the Phase 3 tag, the choice of main model reopens as his decision (`05` §5.2); after it,
-Sonnet 5.5 is its own sweep.
+Sonnet 5.5 is its own sweep. *Closed 2026-10-05 (his): AWS held Sonnet 5.5 until the account has several
+billing cycles of Bedrock use; Sonnet 4.6 is the v1 main model, fixed, and Sonnet 5.5 is not awaited.*
 
 **Closed by decision, recorded so they are not re-opened:** `02` §5 checks 4 and 5 (Nova Pro is the v1 second model;
 dossier embeddings are local, `03` §5).

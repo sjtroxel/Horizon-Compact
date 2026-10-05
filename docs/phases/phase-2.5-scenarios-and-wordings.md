@@ -93,8 +93,7 @@ In build order.
 
 ## The rules this phase must not break
 
-- **No official model sees real content in any form before `prereg-v1`.** Not Sonnet 4.6, not Sonnet 5.5 if it
-  arrives, not Nova Pro, whether as a decision, a probe or a review. Every model call in this phase is to the
+- **No official model sees real content in any form before `prereg-v1`.** Not Sonnet 4.6, not Nova Pro, whether as a decision, a probe or a review. Every model call in this phase is to the
   development model or, for the text review, to a non-official reader.
 - **Nobody aggregates or reads allocations by objective** (decision 1): not him, not Claude, not a script whose output
   either of them sees. Raw development results are still kept, write-once, under the development prefix
@@ -145,9 +144,8 @@ Bedrock model costs cents for a few hundred short calls. The blind reader is one
 
 ## The main model
 
-The content does not depend on which model is main. If Sonnet 5.5 replaces Sonnet 4.6 before `prereg-v1`, nothing
-here changes: no official model runs in this phase either way. One downstream note for Phase 3: on Sonnet 5.5,
-thinking cannot be fully turned off (`planning/07` §7.3), and the protocol states the setting used.
+The content does not depend on which model is main (Sonnet 4.6, fixed 2026-10-05; Sonnet 5.5 is no longer
+awaited). No official model runs in this phase.
 
 ## Known risks
 

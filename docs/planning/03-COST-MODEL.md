@@ -9,6 +9,9 @@
   (patches P20, P21 in `09` §3; caps decided by him, `09` §6).
 - **Patched 2026-10-04 (his), from Phase 0.5's smoke calls (`docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md` §19):** §3.1 the tool-use input overhead, measured;
   §4 the development model named.
+- **Patched 2026-10-05 (his):** §1 and §2.1, Sonnet 5.5 is no longer awaited and Sonnet 4.6 is the v1 main
+  model, fixed (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry). Every estimate here was already on Sonnet
+  4.6's price, so no figure changes.
 - **The one-line answer:** v1 should cost **roughly $50-110 in total**, almost all of it model tokens, inside the
   **$135.97** of credits he has left, which expire **2027-07-30** and are **shared with Musical Mycelium**. The
   biggest swing factor is whether the model "thinks" before answering (§3.3).
@@ -24,7 +27,7 @@
 | Plan | Paid plan |
 | Models that work | **Claude Sonnet 4.6, Claude Haiku 4.5, Amazon Nova Pro** |
 | Models denied | Claude Sonnet 5.5, Opus 5.5, Sonnet 5 (`AccessDeniedException`; applied quota 0) |
-| Pending | Sonnet 5.5 quota requests (US cross-region: Support case opened; Global: pending). Musical Mycelium's last Bedrock quota case took 12 days. |
+| Pending | Sonnet 5.5 quota requests (US cross-region: Support case opened; Global: pending). Musical Mycelium's last Bedrock quota case took 12 days. *2026-10-05: held by AWS until the account has several billing cycles of Bedrock use; no longer awaited.* |
 
 **The credits are one shared pot.** Musical Mycelium's eval runs draw on it too (about $15 for five eval episodes in
 September). Every Horizon Compact dollar is a dollar Musical Mycelium cannot spend before July 2027.
@@ -45,6 +48,7 @@ Three things this table shows:
 - **The US route costs 10% more than global** for Claude ($3.30 vs $3.00 input). He chose US for data residency;
   over v1 that premium is a few dollars. Worth knowing, not worth reversing.
 - **Sonnet 5.5, if access arrives, is about a third cheaper than Sonnet 4.6.** Access would *save* money.
+  *(2026-10-05: not awaited; the saving is not counted on anywhere in this doc.)*
 - **Nova Pro is about a quarter of Sonnet's price,** which makes it cheap to run as the second model family.
 - **Claude on Bedrock is billed through AWS Marketplace,** listed under the model, not under "Amazon Bedrock."
   (Musical Mycelium's cost check was wrong by about 200x on 2026-09-19 for exactly this reason.)
@@ -124,7 +128,7 @@ The total sits **inside the $135.97**, but at the "with thinking" end it uses mo
 Mycelium and nothing for later phases. **So the plan defaults to the low column** unless `07` finds a methods
 reason for thinking, and the "both, as a finding" option is run on a subset only.
 
-**If Sonnet 5.5 access arrives:** the Claude lines drop by about a third.
+**If Sonnet 5.5 access arrives:** the Claude lines drop by about a third. *(2026-10-05: not awaited.)*
 
 ## 5. Options considered and rejected for v1
 

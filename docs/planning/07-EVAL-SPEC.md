@@ -6,6 +6,9 @@
   P20, P22, P23, P26, P30, P32 in `09` §3).
   **Patched 2026-10-04 (his):** §2.3, Nova Pro runs at its own default temperature
   (`docs/phases/phase-0.5-aws-foundation.md`, decision 7).
+  **Patched 2026-10-05 (his):** §7.3, Sonnet 5.5 is no longer awaited and Sonnet 4.6 is the v1 main model,
+  fixed (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry). §2.1's Sonnet 5.5 row stays: it is why the
+  capture method is one tool with `auto` choice, and that method stays.
   **Patched 2026-10-04 (his), from `docs/phases/phase-2.5-scenarios-and-wordings.md`:** §3.2 S1's retraining cost
   stated separately (decision 5); §4 and §7.2 the discrete options' order shuffled per run (decision 3); §7.1 the
   sealed template drawn at random (decision 4).
@@ -391,7 +394,7 @@ If a position effect is found, it is published; shuffling already keeps it from 
   thinking on easy inputs, *verified*, so the record shows whether it happened). Reported as a finding: does thinking
   change what an objective does? About $5 (§13).
 - **If Sonnet 5.5 joins later:** thinking cannot be fully disabled there; `between_tools` is the closest setting and
-  is what its sweep uses, recorded as such.
+  is what its sweep uses, recorded as such. *(2026-10-05: not awaited; kept as the setting if it ever runs.)*
 
 ### 7.4 A second model family
 

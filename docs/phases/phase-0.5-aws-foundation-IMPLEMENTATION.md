@@ -578,7 +578,7 @@ Each step says who, and what to look for. **Steps 3 to 7 are front-loaded for th
 | 1. Bootstrap applied, nothing shared created; second plan clean; provider unchanged | the pre-apply plan as read by Claude (step 3); "No changes" (step 4); ARN and CreateDate before and after; the architecture test that bans the resource type |
 | 2. Deploy role trusts `main` only, by the immutable claim; no permission policy | the identity workflow's run ID and its masked output; the role's Terraform; the absence of any policy resource on it |
 | 3. Budgets on actual spend, credits excluded, filtered, no forecast; Musical Mycelium's unchanged | the applied budgets; the architecture tests; the before-and-after budget reads |
-| 4. A recorded tool call from Sonnet 4.6 off, Sonnet 4.6 on, Nova Pro (and Sonnet 5.5 if access) | records 1-5 (and 8-9) in the evidence folder |
+| 4. A recorded tool call from Sonnet 4.6 off, Sonnet 4.6 on, Nova Pro (and Sonnet 5.5 if access) | records 1-5 in the evidence folder (8-9 not run: Sonnet 5.5 not awaited, 2026-10-05) |
 | 5. Checks closed or carried with a reason; planning patches made | `KNOWN-GAPS.md` entries; the patched docs' status lines |
 | 6. Development model named; Nova Pro's default temperature recorded with its source | his decision recorded; 0.7, Amazon Nova user guide (already closed 2026-10-04) |
 | 7. `make check` and CI green with Terraform; no account ID or email tracked; every commit through the guard | CI run IDs; the architecture tests; the hooks |
@@ -635,7 +635,7 @@ time-box stands, widened to cover both, and Phase 1's policy additions (its §10
 ## 19. Smoke results (as built, 2026-10-04, steps 6-8)
 
 Eight records in `docs/phases/evidence/phase-0.5/smoke/` (cap 12; Sonnet 5.5 access had **not** arrived, so calls 8
-and 9 did not run). All `development`, thinking and temperature as recorded, no sampling parameter sent. Estimates
+and 9 did not run; *2026-10-05:* and will not, since Sonnet 5.5 is no longer awaited). All `development`, thinking and temperature as recorded, no sampling parameter sent. Estimates
 sum to about **$0.019**; the bill is the authority (DoD 8). First call 17:54 CDT, after `Project` was activated at
 17:19, which starts the tag clock; the earliest useful Cost Explorer look is the evening of 2026-10-05.
 

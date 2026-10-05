@@ -18,9 +18,8 @@ is done, the skeleton walks end to end, and every later phase thickens it rather
 page cannot be read as a finding, and `terraform destroy` on `main` followed by a re-apply brings the whole thing
 back with the raw results untouched.
 
-**The main model:** this phase shows whatever Phase 1's sweep ran on. If Sonnet 5.5 replaces Sonnet 4.6 as the main
-model (Phase 1, "The main model is a slot"), nothing here changes; the model's name comes from the provenance, never
-from the page's code.
+**The main model:** this phase shows whatever Phase 1's sweep ran on: Sonnet 4.6, fixed 2026-10-05 (Phase 1, "The
+main model is a slot"). The model's name comes from the provenance, never from the page's code.
 
 ## Delivers
 
