@@ -198,3 +198,137 @@ def test_the_experiment_folder_has_no_account_id_or_email() -> None:
         or email.search(p.read_text(encoding="utf-8"))
     ]
     assert not offenders, f"account id or email address in: {offenders}"
+
+
+# --- IAM and storage rules (Phase 1 IMPLEMENTATION doc sections 8 and 10) ----------------------------------
+
+IAM = INFRA / "iam"
+BOOTSTRAP = INFRA / "terraform" / "bootstrap"
+
+# Fictional values with the real shape and length, so a rendered policy's size is measured, not guessed.
+_FAKE_VARS = {
+    "account_id": "000000000000",
+    "region": "us-east-1",
+    "state_bucket": "horizon-compact-tfstate-000000000000",
+    "results_bucket": "horizon-compact-results-000000000000",
+    "ecr_repository_arn": "arn:aws:ecr:us-east-1:000000000000:repository/horizon-compact",
+    "boundary_arn": "arn:aws:iam::000000000000:policy/horizon-compact-boundary",
+    "sonnet_profile_arn": (
+        "arn:aws:bedrock:us-east-1:000000000000:application-inference-profile/abcdefghijkl"
+    ),
+    "nova_pro_profile_arn": (
+        "arn:aws:bedrock:us-east-1:000000000000:application-inference-profile/mnopqrstuvwx"
+    ),
+}
+_MANAGED_POLICY_LIMIT = 6144
+
+
+def _rendered(name: str) -> tuple[str, dict[str, object]]:
+    import json
+    from string import Template
+
+    text = Template((IAM / name).read_text(encoding="utf-8")).substitute(_FAKE_VARS)
+    return text, json.loads(text)
+
+
+def _statements(name: str) -> list[dict[str, object]]:
+    statements = _rendered(name)[1]["Statement"]
+    assert isinstance(statements, list)
+    return statements
+
+
+def _as_list(value: object) -> list[str]:
+    return [value] if isinstance(value, str) else list(value)  # type: ignore[call-overload]
+
+
+def _actions(statement: dict[str, object]) -> list[str]:
+    return _as_list(statement["Action"])
+
+
+def _allowed_actions(name: str) -> list[str]:
+    return [a for s in _statements(name) if s["Effect"] == "Allow" for a in _actions(s)]
+
+
+def test_iam_templates_render_to_json_and_fit_a_managed_policy() -> None:
+    for name in ("boundary.json", "deploy.json"):
+        text, _ = _rendered(name)
+        size = len("".join(text.split()))
+        assert size < _MANAGED_POLICY_LIMIT, f"{name} renders to {size} non-space characters"
+
+
+def test_boundary_grants_no_iam_and_no_s3_delete() -> None:
+    allowed = _allowed_actions("boundary.json")
+    assert not [a for a in allowed if a.startswith("iam:") or a == "*"]
+    assert not [a for a in allowed if a.startswith("s3:Delete") or a in {"s3:*", "s3:Put*"}]
+
+
+def test_deploy_policy_has_no_wildcard_allow_of_a_whole_service() -> None:
+    allowed = _allowed_actions("deploy.json")
+    assert not [a for a in allowed if a == "*" or a.endswith(":*")]
+
+
+def test_every_deploy_iam_write_on_roles_carries_the_boundary_condition() -> None:
+    """The deploy role may create a role only with the boundary on it (planning/04, Phase 1 section 10.4)."""
+    found = False
+    for s in _statements("deploy.json"):
+        if s["Effect"] == "Allow" and "iam:CreateRole" in _actions(s):
+            found = True
+            condition = s["Condition"]
+            assert isinstance(condition, dict)
+            assert (
+                condition["StringEquals"]["iam:PermissionsBoundary"] == _FAKE_VARS["boundary_arn"]
+            )
+    assert found
+
+
+def test_deploy_policy_denies_what_ci_must_never_do() -> None:
+    denied: dict[str, list[str]] = {}
+    for s in _statements("deploy.json"):
+        if s["Effect"] == "Deny":
+            denied[str(s["Sid"])] = _actions(s)
+    assert {"ecs:RunTask", "bedrock:InvokeModel*", "bedrock:Converse*"} <= set(
+        denied["CiNeverLaunchesASweep"]
+    )
+    assert "s3:GetObject" in denied["CiNeverReadsRawResults"]
+    assert denied["NeverChangeOwnPermissions"] == ["iam:*"]
+    assert denied["NeverRemoveBoundary"] == ["iam:DeleteRolePermissionsBoundary"]
+
+
+def test_deploy_policy_can_write_state_only_under_main() -> None:
+    for s in _statements("deploy.json"):
+        if s["Sid"] == "StateMainKey":
+            assert _as_list(s["Resource"]) == [f"arn:aws:s3:::{_FAKE_VARS['state_bucket']}/main/*"]
+
+
+def test_dev_policy_keeps_its_explicit_denies() -> None:
+    import json
+
+    statements = json.loads((IAM / "horizon-compact-dev-policy.json").read_text(encoding="utf-8"))[
+        "Statement"
+    ]
+    sids = {s["Sid"] for s in statements if s["Effect"] == "Deny"}
+    assert {
+        "NeverChangeOidcProviders",
+        "NeverChangeOtherBudgets",
+        "NeverInvokeMusicalMyceliumModels",
+    } <= sids
+
+
+def test_results_bucket_is_write_once_and_cannot_be_destroyed() -> None:
+    code = _strip_comments((BOOTSTRAP / "results.tf").read_text(encoding="utf-8"))
+    assert re.search(r"prevent_destroy\s*=\s*true", code)
+    assert "force_destroy" not in code
+    assert "aws_s3_bucket_lifecycle_configuration" not in code
+    for needle in (
+        "s3:if-none-match",
+        "s3:if-match",
+        "s3:DeleteObjectVersion",
+        "aws:SecureTransport",
+    ):
+        assert needle in code, needle
+
+
+def test_ecr_tags_are_immutable_and_scanned() -> None:
+    code = _strip_comments((BOOTSTRAP / "ecr.tf").read_text(encoding="utf-8"))
+    assert re.search(r'image_tag_mutability\s*=\s*"IMMUTABLE"', code)
+    assert re.search(r"scan_on_push\s*=\s*true", code)

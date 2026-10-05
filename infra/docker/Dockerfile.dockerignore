@@ -1,0 +1,9 @@
+# Allow-list: BuildKit reads this file for infra/docker/Dockerfile (Phase 1 §11).
+*
+!pyproject.toml
+!uv.lock
+!src/
+!experiment/
+!README.md
+**/__pycache__
+**/*.pyc

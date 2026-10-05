@@ -1,0 +1,68 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeProjectModels",
+      "Effect": "Allow",
+      "Action": "bedrock:InvokeModel",
+      "Resource": [
+        "${sonnet_profile_arn}",
+        "${nova_pro_profile_arn}",
+        "arn:aws:bedrock:${region}:${account_id}:inference-profile/us.anthropic.claude-sonnet-4-6",
+        "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6*",
+        "arn:aws:bedrock:${region}::foundation-model/amazon.nova-pro-v1:0"
+      ]
+    },
+    {
+      "Sid": "ResultsObjects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${results_bucket}/development/*",
+        "arn:aws:s3:::${results_bucket}/official/*"
+      ]
+    },
+    {
+      "Sid": "ResultsList",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::${results_bucket}",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "development/*",
+            "official/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "SweepLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:${region}:${account_id}:log-group:/ecs/horizon-compact-*:*"
+    },
+    {
+      "Sid": "EcrLogin",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "EcrPull",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ],
+      "Resource": "${ecr_repository_arn}"
+    }
+  ]
+}

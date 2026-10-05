@@ -679,3 +679,34 @@ botocore's S3 model by the Stubber, not against live S3; the first deployed run 
 smoke call 10 failed the same way. The account's Bedrock quotas read 0 (`KNOWN-GAPS.md`, BLOCKED entry; AWS case
 179121856900232). **Order changed while blocked:** steps 4-8 run next, since none calls a model; steps 3 and 9 run when
 AWS restores the quotas. The step 3 script is `scratch/step3-dev-run.sh`.
+
+**Step 4, C2 (2026-10-05).** `infra/docker/Dockerfile` and `Dockerfile.dockerignore` as §11 specifies, with the base pinned
+to the `python:3.13-slim` index digest `sha256:3dd7cc10...b3db5f` (3.13.16, checked 2026-10-05; the index lists
+`linux/arm64/v8`). `uv:0.12.0` is the same version as CI's. Built locally for the laptop's architecture (x86_64): the
+image runs as uid 10001, holds only `pyproject.toml`, `uv.lock`, `src` and `experiment`, and `HC_EXPERIMENT_DIR` and
+`HC_GIT_SHA` are set. `docker run --rm <image> sweep plan --experiment placeholder --model sonnet-4-6 --repeats 3 --seed
+20261005 --label skeleton` printed the same plan as the host run (same sweep id `skeleton-sonnet-4-6-e46a6530`, same
+content hash, identical output byte for byte). No `README.md` exists, so the ignore file's line for it admits nothing.
+The ARM build is CI's job (step 7). `make check` green.
+
+**Step 5, C3 written (2026-10-05); folded into one commit with C2 at his request.** `infra/iam/boundary.json` and
+`deploy.json` (templates; rendered with fictional values they are 1,412 and 5,674 non-space characters, under the managed
+policy's 6,144); `infra/terraform/bootstrap/{results,ecr,iam}.tf` and three new sensitive outputs; the dev policy gains
+the §10.5 statements (insertions only, the eleven existing statements unchanged, the three explicit denies kept). New
+architecture tests parse the real JSON. Where it diverges from §10.4 or fills a silence:
+
+1. **`NeverTouchUntaggedNetwork` has no `IfExists`.** On a Deny, `StringNotEqualsIfExists` is true when the tag is absent,
+   so it would block the new resources it meant to spare. Tag-on-create is exempted differently: `CreateTags` and
+   `DeleteTags` moved to their own Deny (`NeverRetagUntaggedNetwork`) that applies only when `ec2:CreateAction` is
+   absent (`Null` is `true`). Untested against live EC2; the first deploy shows whether a create path is caught.
+2. **The boundary names the two application profiles by ARN** (from the bootstrap resources), not by `application-inference-profile/*`,
+   so a task role cannot reach another project's profile in the account.
+3. **`EcsTaskDefinitionTags` is a separate statement** (task definitions are registered on `*` but tagged on their own ARN).
+4. **`aws_iam_policy.deploy` and its attachment are in `iam.tf`,** so Phase 0.5's "trust only" test, which reads `oidc.tf`, still holds.
+5. **A multipart upload to the results bucket would be refused** (`UploadPart` carries no `If-None-Match`). Every result is a
+   small single `PutObject`, so none is needed.
+
+**Step 5, applied (2026-10-05).** He pasted the new dev policy ("Policy horizon-compact-dev updated."), planned (10 to add, 0
+to change, 0 to destroy; nothing existing touched, the deploy role's trust unchanged), and applied: **10 added, 0 changed,
+0 destroyed**, no permission error. The second plan read "No changes". The results bucket, the repository, the boundary and
+the deploy policy exist, and the deploy role carries the deploy policy. Not yet exercised: the deploy policy itself (step 7).

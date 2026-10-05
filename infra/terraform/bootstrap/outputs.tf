@@ -30,3 +30,21 @@ output "nova_pro_profile_arn" {
   value       = aws_bedrock_inference_profile.nova_pro.arn
   sensitive   = true
 }
+
+output "results_bucket" {
+  description = "Set as HC_RESULTS_BUCKET on the sweep task; the harness reads it from here."
+  value       = aws_s3_bucket.results.id
+  sensitive   = true
+}
+
+output "ecr_repository_url" {
+  description = "Where CI pushes the image and the task definition pulls it from."
+  value       = aws_ecr_repository.sweep.repository_url
+  sensitive   = true
+}
+
+output "boundary_arn" {
+  description = "The permissions boundary every role in main must carry."
+  value       = aws_iam_policy.boundary.arn
+  sensitive   = true
+}
