@@ -18,7 +18,16 @@
       "Bash(terraform -chdir=* output*)",
       "Bash(uv run hc smoke run*)",
       "Bash(uv run --no-sync hc smoke run*)",
-      "Bash(aws *)"
+      "Bash(aws *)",
+      "Bash(uv run hc sweep run*)",
+      "Bash(uv run --no-sync hc sweep run*)",
+      "Bash(uv run hc sweep launch*)",
+      "Bash(uv run --no-sync hc sweep launch*)",
+      "Bash(uv run hc sweep stop*)",
+      "Bash(uv run --no-sync hc sweep stop*)",
+      "Bash(uv run hc sweep status*)",
+      "Bash(uv run --no-sync hc sweep status*)",
+      "Bash(docker push*)"
     ],
     "allow": [
       "Bash(make check*)",
@@ -47,7 +56,11 @@
       "Bash(git diff*)",
       "Bash(git log*)",
       "Bash(git ls-files*)",
-      "Bash(git show*)"
+      "Bash(git show*)",
+      "Bash(uv run hc sweep plan*)",
+      "Bash(uv run --no-sync hc sweep plan*)",
+      "Bash(docker build*)",
+      "Bash(docker run --rm*)"
     ]
   }
 }

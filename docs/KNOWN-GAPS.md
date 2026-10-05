@@ -25,8 +25,8 @@ case by its type and a neutral label. The names live only in the private longlis
 >
 > **Phase 1's IMPLEMENTATION doc is APPROVED (his, 2026-10-04 evening):**
 > `docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md`, its four decisions as recommended (ECR in `bootstrap`; keep
-> the dev key through Phase 1; deploy on push for code paths; 15 runs). **NEXT SESSION: its build, with Sonnet, from
-> §16 step 0.** Drafted with it and untracked: `experiment/`
+> the dev key through Phase 1; deploy on push for code paths; 15 runs). **BUILD STARTED 2026-10-05 (Sonnet): steps 0-2
+> done, C1 written and awaiting his commit; NEXT: step 3, his laptop run (IMPLEMENTATION doc §16, §21).** Drafted with it and untracked: `experiment/`
 > (`models.toml` and the garden-club placeholder). Decision 3 enters it as two branches (§9.3). Its build can start
 > before Phase 0.5 closes; **its first Sonnet sweep cannot** (§1).
 >

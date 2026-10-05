@@ -161,3 +161,40 @@ def test_outputs_with_account_ids_are_sensitive() -> None:
     assert blocks
     for block in blocks:
         assert re.search(r"sensitive\s*=\s*true", block), block.splitlines()[0]
+
+
+# --- the harness (Phase 1 IMPLEMENTATION doc section 13, "architecture") -----------------------------------
+
+_SAMPLING_KEYS = {"temperature", "topP", "top_p", "top_k"}
+
+
+def test_no_sampling_parameter_can_be_built_into_a_request() -> None:
+    """Sampling parameters are never set, so none can be sent (planning/07 section 2.3)."""
+    import dataclasses
+
+    from horizon_compact.providers.base import DecisionRequest
+
+    assert not _SAMPLING_KEYS & {f.name for f in dataclasses.fields(DecisionRequest)}
+    offenders: list[str] = []
+    for path in sorted((ROOT / "src" / "horizon_compact" / "providers").glob("*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Dict):
+                offenders.extend(
+                    f"{path.name}:{key.lineno} {key.value}"
+                    for key in node.keys
+                    if isinstance(key, ast.Constant) and key.value in _SAMPLING_KEYS
+                )
+    assert not offenders, f"a sampling key in a provider dict: {offenders}"
+
+
+def test_the_experiment_folder_has_no_account_id_or_email() -> None:
+    """experiment/ is built into a public image and committed; nothing private belongs in it."""
+    account_id = re.compile(r"(?<![\w-])\d{12}(?![\w-])")
+    email = re.compile(r"[\w.+-]+@[\w-]+\.[A-Za-z]{2,}")
+    offenders = [
+        str(p.relative_to(ROOT))
+        for p in _text_files(ROOT / "experiment")
+        if account_id.search(p.read_text(encoding="utf-8"))
+        or email.search(p.read_text(encoding="utf-8"))
+    ]
+    assert not offenders, f"account id or email address in: {offenders}"

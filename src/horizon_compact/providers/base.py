@@ -8,7 +8,7 @@ model (Phase 1).
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
@@ -47,6 +47,10 @@ class DecisionRequest:
     tool: ToolSpec
     max_tokens: int
     additional_fields: Mapping[str, Any] | None = None
+    # A cache point after the system text (Phase 1 section 6.4). Off unless the request asks for it.
+    cache_system: bool = False
+    # Extra response fields to ask for, e.g. "/stop_details" (a smoke call only; a sweep never sends it).
+    additional_response_fields: Sequence[str] | None = None
 
 
 @dataclass(frozen=True)

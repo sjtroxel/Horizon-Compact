@@ -124,6 +124,9 @@ def build_record(
         "tool_input_check": check_tool_input(raw),
         "text_blocks": raw.text_blocks,
         "reasoning_block_count": raw.reasoning_block_count,
+        "additional_model_response_fields": _json_safe(
+            (raw.raw_response or {}).get("additionalModelResponseFields")
+        ),
         "raw_response": _json_safe(raw.raw_response),
         "est_cost_usd": estimate_cost_usd(
             request.route.model_id, raw.usage.input_tokens, raw.usage.output_tokens

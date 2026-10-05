@@ -122,6 +122,7 @@ def run_call(
         tool=plan.TOOL,
         max_tokens=call.max_tokens,
         additional_fields=call.additional_fields,
+        additional_response_fields=call.additional_response_fields,
     )
     raw = provider.decide(request)
     record = build_record(

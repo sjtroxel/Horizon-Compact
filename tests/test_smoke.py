@@ -104,10 +104,10 @@ def run(
 # --- the plan --------------------------------------------------------------------------------------------
 
 
-def test_plan_names_and_numbers_are_unique_and_the_cap_leaves_three_spare() -> None:
-    assert [c.number for c in plan.PLAN] == list(range(1, 10))
-    assert len({c.name for c in plan.PLAN}) == 9
-    assert len(plan.PLAN) + 3 == plan.MAX_RECORDS
+def test_plan_names_and_numbers_are_unique_and_the_cap_leaves_two_spare() -> None:
+    assert [c.number for c in plan.PLAN] == list(range(1, 11))
+    assert len({c.name for c in plan.PLAN}) == 10
+    assert len(plan.PLAN) + 2 == plan.MAX_RECORDS
 
 
 def test_only_the_two_sonnet_55_calls_are_conditional() -> None:
@@ -162,6 +162,24 @@ def test_the_adaptive_call_sends_thinking_and_effort_and_records_them(tmp_path: 
     }
     assert result.record["thinking"] == '{"type": "adaptive"}'
     assert result.record["effort"] == "high"
+
+
+def test_the_stop_details_call_asks_for_the_field_and_records_what_comes_back(
+    tmp_path: Path,
+) -> None:
+    response = good_response()
+    response["additionalModelResponseFields"] = {"stop_details": {"type": "tool_use"}}
+    result, runtime = run("sonnet46-stop-details", tmp_path, response)
+    assert runtime.sent[0]["additionalModelResponseFieldPaths"] == ["/stop_details"]
+    assert "additionalModelRequestFields" not in runtime.sent[0]
+    assert result.record["additional_model_response_fields"] == {
+        "stop_details": {"type": "tool_use"}
+    }
+
+
+def test_no_other_call_asks_for_response_fields() -> None:
+    asking = [c.name for c in plan.PLAN if c.additional_response_fields]
+    assert asking == ["sonnet46-stop-details"]
 
 
 def test_a_geo_route_sends_its_profile_id_and_needs_no_lookup(tmp_path: Path) -> None:

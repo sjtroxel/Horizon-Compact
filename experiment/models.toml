@@ -4,8 +4,10 @@
 # read from the AmazonBedrockFoundationModels offer file published 2026-09-30, on 2026-10-04. Nova Lite from the
 # AmazonBedrock offer file published 2026-10-03. Re-checked live before any official sweep (planning/03).
 #
-# Quotas: requests per minute, applied values on the account (planning/04 section 3.1, read 2026-10-03). The
-# harness paces at pace_fraction of the quota, leaving headroom for development calls on the same account.
+# Quotas: requests per minute (Sonnet 4.6: planning/04 section 3.1, read 2026-10-03). The harness paces at
+# pace_fraction of the quota, leaving headroom for development calls on the same account. UNVERIFIED as the enforced
+# limit: on 2026-10-05 the console and the API both showed 0 applied for these models while calls worked, so the real
+# limit is unknown and the cautious values are kept (Phase 1 IMPLEMENTATION doc section 21).
 
 pace_fraction = 0.8
 
@@ -28,7 +30,7 @@ cache_write_5m = 4.125
 [models.nova-lite]
 model_id = "amazon.nova-lite-v1:0"
 route = "in_region"
-# UNVERIFIED: a conservative placeholder until he reads the applied quota in Service Quotas (Phase 1 step 0).
+# UNVERIFIED: a conservative placeholder. Read 2026-10-05: 0 applied (default 2,000), while calls work; see above.
 requests_per_minute = 20
 role = "development"
 

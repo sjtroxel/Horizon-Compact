@@ -6,7 +6,7 @@ exact answer. A smoke call must show nothing about how any objective pushes a de
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -63,7 +63,7 @@ SUBJECT_VOCABULARY = (
     "board",
 )
 
-# Twelve records, ever, in this phase: nine planned, three spare (section 11.5). Worst case about $0.84.
+# Twelve records, ever, across Phases 0.5 and 1: nine planned in 0.5, call 10 added by Phase 1, two spare.
 MAX_RECORDS = 12
 
 ADAPTIVE_HIGH: Mapping[str, Any] = {
@@ -81,6 +81,7 @@ class SmokeCall:
     max_tokens: int
     additional_fields: Mapping[str, Any] | None = None
     conditional: bool = False
+    additional_response_fields: Sequence[str] | None = None
 
 
 SONNET46 = "anthropic.claude-sonnet-4-6"
@@ -159,6 +160,21 @@ PLAN: tuple[SmokeCall, ...] = (
         4096,
         BETWEEN_TOOLS,
         conditional=True,
+    ),
+    # Phase 1 section 6.4: the one place `stop_details` is asked for, so every sweep request stays identical
+    # apart from its shuffle. On the route models.toml names (application profile until decision 3 says
+    # otherwise), thinking off, the neutral prompt. If Bedrock rejects the field, that is the finding.
+    SmokeCall(
+        10,
+        "sonnet46-stop-details",
+        ModelRoute(
+            "sonnet-4-6",
+            SONNET46,
+            "application_profile",
+            inference_profile="horizon-compact-sonnet-4-6",
+        ),
+        1024,
+        additional_response_fields=("/stop_details",),
     ),
 )
 

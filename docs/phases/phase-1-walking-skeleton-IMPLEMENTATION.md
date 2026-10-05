@@ -523,11 +523,11 @@ All offline (the Phase 0.5 conftest makes the network unreachable). Expected new
 
 ## 16. Order of work
 
-0. **He checks** (console, free): Phase 0.5 closed, or at least its budget applied (§1); the Sonnet 4.6 and Nova Lite
+0. **[done 2026-10-05 except the budget and decision 3, which wait for billing data; results in §21]** **He checks** (console, free): Phase 0.5 closed, or at least its budget applied (§1); the Sonnet 4.6 and Nova Lite
    request quotas in Service Quotas (us-east-1, "Bedrock", on-demand and cross-region requests per minute); whether
    IAM, Roles holds `AWSServiceRoleForECS`; whether decision 3 has landed, and so `SONNET_ROUTE`.
-1. **Claude writes C1's code and tests** (§5-§7, §13), the settings. `make check` green. **He commits C1.**
-2. **Claude runs `hc sweep plan` offline** for the skeleton and the development run, and checks the 15 rendered
+1. **[done 2026-10-05; C1 awaits his commit; notes in §21]** **Claude writes C1's code and tests** (§5-§7, §13), the settings. `make check` green. **He commits C1.**
+2. **[done 2026-10-05; prompts in gitignored `scratch/skeleton-prompts.txt`]** **Claude runs `hc sweep plan` offline** for the skeleton and the development run, and checks the 15 rendered
    prompts by eye: the order shuffles, the tool is identical, the vocabulary test passes.
 3. **He runs the development sweep on the laptop:** Nova Lite, 5 runs, `--store local`. Then **one smoke call**,
    `sonnet46-stop-details` (§6.4), the tenth record of Phase 0.5's twelve. **Claude reads every attempt**: statuses, validation, the cache fields (Nova's minimum cache
@@ -621,3 +621,51 @@ tokens (most of them cached after the first) and up to about 700 output, roughly
 ARM at 0.25 vCPU and 0.5 GB for under ten minutes in all, plus its public IPv4 for those minutes: under a cent. ECR
 storage for a few images of about 60 MB compressed: inside the free 500 MB. S3: fractions of a cent. **Phase 1 total:
 well under $1**, inside `planning/05`'s "about $1" for Phases 1 and 1.5 together. Nothing bills by the hour at rest.
+
+## 21. As built, step 0 to step 2 (2026-10-05)
+
+**Step 0 (his reads).** Sonnet 4.6 and Nova Lite request quotas read **0 applied** in the console and from
+`list-service-quotas`, against defaults of 10,000 (Sonnet 4.6) and 2,000-4,000 (Nova Lite), while the Phase 0.5 calls
+worked. The applied value is therefore not the enforced limit, and the 10 recorded on 2026-10-03 is unexplained. The
+real limit is unknown; **cautious pacing is kept** (Sonnet 4.6 at 10, Nova Lite at 20, both from `models.toml`), with
+backoff on throttling. The first sweep shows whether it throttles. `AWSServiceRoleForECS` is **absent**, so §10.4's
+`EcsServiceLinkedRole` stays. Phase 0.5's budget and decision 3 are not yet available (billing data).
+
+**C1 (step 1).** Everything §6.1 lists, as `src/horizon_compact/experiment.py` and `sweep/{plan,prompt,decision,
+classify,pacing,spend,store,identity,runner,launch,status}.py`; `providers/` gains the cache point and the response-field
+paths; `cli.py` gains `hc sweep plan / run / launch / status / stop`; smoke call 10 `sonnet46-stop-details` is in the
+plan. `make check`: **323 tests** (178 before), strict types, root 13 of 16. The skeleton plan: 15 runs, one call every
+7.5 s, worst case **$1.94** for the sweep (the doc estimated about $1.90). The placeholder passed the extended vocabulary
+test **unchanged**; no placeholder edit was needed or made. Seven deliberate breakages of the code (resume re-running,
+unlimited retries, no cap check, an overwriting store, a retried refusal, a put without `IfNoneMatch`, an unknown error
+retried forever) each failed the tests, so the tests do bite.
+
+**Where the build diverged from this doc, or filled a silence in it:**
+
+1. **The content hash covers the experiment's folder only.** `models.toml` is hashed beside it (it is in `file_hashes`
+   on every attempt), so a quota or price edit does not turn an interrupted sweep into a new one.
+2. **An error code §6.4 does not name stops the session** (`config_error`), the safe direction: a session that stops
+   resumes on re-launch; one that retries an unknown error cannot be trusted to end.
+3. **`hc sweep status` is denied in `.claude/settings.json`** with run, launch and stop, because it authenticates to AWS
+   (§14 listed only the other three). `plan` is allowed.
+4. **`HC_SONNET_PROFILE_ARN` is a new task environment variable.** The task role (§10.1) cannot list inference profiles,
+   so on the `application_profile` route the harness reads the profile's ARN from this variable and, only on a laptop,
+   falls back to finding it by name. **C4's task definition must set it** from the profile data source (or the task role
+   gains `bedrock:ListInferenceProfiles`; the variable is the narrower choice). §9.2's environment list gains it.
+5. **A model's running task is found from the `--model` in its command override**, not from tags, so `ecs:TagResource` is
+   not needed in the dev policy (§10.5).
+6. **`menu_order_seed` is stored as a string** in attempt records: it is a 64-bit integer, and the Phase 6 explorer's
+   JavaScript would silently round anything above 2^53.
+7. **Smoke call 10 uses the application-profile route**, the one `models.toml` names while decision 3 is open. Records 8 and
+   9 (Sonnet 5.5) will never run, so call 10 makes the ninth record of the twelve, not the tenth.
+8. **The official gate's lock file is provisional:** a TOML file with `content_hash`, at `experiment/protocol/prereg.lock`.
+   Phase 3.5 owns the real format. The gate refuses on a laptop even when a matching lock exists, and today refuses
+   everywhere because none exists.
+9. **A session exits 0** when it stops cleanly (`complete`, `cap_reached`, `max_minutes`, `stop_requested`) and **3** when it
+   stops on `config_error` or `write_conflict`; a refusal before any call exits 2.
+
+**Still unverified until real calls** (§19, unchanged): whether `inputTokens` excludes cache tokens; whether the cache point
+covers the tool definition; whether `stop_details` is accepted. New: `S3Store`'s `IfNoneMatch` parameter is checked against
+botocore's S3 model by the Stubber, not against live S3; the first deployed run is its first real test.
+
+**Next:** step 3, his laptop run on Nova Lite (`scratch/step3-dev-run.sh`, given with this note).

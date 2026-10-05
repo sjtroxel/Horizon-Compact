@@ -25,8 +25,11 @@ if TYPE_CHECKING:
 REGION = "us-east-1"
 
 
-def make_runtime_client(profile: str, region: str = REGION) -> BedrockRuntimeClient:
-    """A bedrock-runtime client that makes one attempt per call and never retries silently."""
+def make_runtime_client(profile: str | None, region: str = REGION) -> BedrockRuntimeClient:
+    """A bedrock-runtime client that makes one attempt per call and never retries silently.
+
+    No profile means the default credential chain, which is the task role inside the container.
+    """
     config = Config(retries={"max_attempts": 1, "mode": "standard"}, read_timeout=300)
     return boto3.Session(profile_name=profile, region_name=region).client(
         "bedrock-runtime", config=config
@@ -52,9 +55,12 @@ def prompt_sha256(request: DecisionRequest) -> str:
 
 
 def build_request(request: DecisionRequest) -> dict[str, Any]:
+    system: list[dict[str, Any]] = [{"text": request.system}]
+    if request.cache_system:
+        system.append({"cachePoint": {"type": "default"}})
     body: dict[str, Any] = {
         "modelId": request.route.invoke_id,
-        "system": [{"text": request.system}],
+        "system": system,
         "messages": [{"role": "user", "content": [{"text": request.user}]}],
         "toolConfig": {
             "tools": [
@@ -72,6 +78,8 @@ def build_request(request: DecisionRequest) -> dict[str, Any]:
     }
     if request.additional_fields:
         body["additionalModelRequestFields"] = dict(request.additional_fields)
+    if request.additional_response_fields:
+        body["additionalModelResponseFieldPaths"] = list(request.additional_response_fields)
     return body
 
 
