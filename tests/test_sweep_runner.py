@@ -414,3 +414,72 @@ def test_every_object_a_session_writes_is_labeled_development_and_stored_under_d
     for pattern in ("/attempt-", "final.json", "/sessions/"):
         labels = {o["label"] for o in objects(store, plan.sweep_id, pattern)}
         assert labels == {"development"}, pattern
+
+
+DAILY = "Too many tokens per day, please wait before trying again."
+
+
+def test_a_daily_quota_stops_at_once_with_a_clear_reason_and_no_waiting(tmp_path: Path) -> None:
+    exp, plan = make_plan()
+    store = LocalStore(tmp_path)
+    clock = FakeClock()
+    provider = ScriptedProvider(lambda n, request: raw_error(request, "ThrottlingException", DAILY))
+    result = session(exp, plan, provider, store, clock=clock)
+    assert (result.stopped, result.clean, len(provider.requests)) == ("quota_exhausted", False, 1)
+    assert clock.sleeps == []  # no backoff: it would not have helped
+    assert objects(store, plan.sweep_id, "final.json") == []
+    assert objects(store, plan.sweep_id, "/sessions/")[0]["stopped"] == "quota_exhausted"
+
+
+def test_ten_throttles_in_a_row_stop_the_session_instead_of_waiting_out_the_clock(
+    tmp_path: Path,
+) -> None:
+    exp, plan = make_plan()
+    provider = ScriptedProvider(
+        lambda n, request: raw_error(request, "ThrottlingException", "Too many requests.")
+    )
+    result = session(exp, plan, provider, LocalStore(tmp_path))
+    assert (result.stopped, result.clean, len(provider.requests)) == ("api_errors", False, 10)
+
+
+def test_the_run_of_errors_resets_on_any_model_outcome(tmp_path: Path) -> None:
+    exp, plan = make_plan()
+
+    def script(n: int, request: DecisionRequest) -> RawDecision:
+        # nine throttles, one good answer, nine more: never ten in a row
+        return raw_error(request, "ThrottlingException", "x") if n % 10 != 0 else raw_ok(request)
+
+    provider = ScriptedProvider(script)
+    result = session(
+        exp, plan, provider, LocalStore(tmp_path), should_stop=lambda: len(provider.requests) >= 30
+    )
+    assert result.stopped == "stop_requested"
+    assert result.runs_finished_now == 3
+
+
+def test_every_attempt_reports_its_progress(tmp_path: Path) -> None:
+    exp, plan = make_plan()
+    lines: list[str] = []
+    session(exp, plan, always(), LocalStore(tmp_path), progress=lines.append)
+    assert len(lines) == 5
+    assert lines[0].startswith("run 1/5 ") and "attempt 1: valid" in lines[0]
+    assert lines[-1].startswith("run 5/5 ")
+
+
+def test_a_stop_request_during_a_backoff_is_honoured_within_a_second(tmp_path: Path) -> None:
+    exp, plan = make_plan()
+    clock = FakeClock()
+    provider = ScriptedProvider(
+        lambda n, request: raw_error(request, "ThrottlingException", "Too many requests.")
+    )
+    result = session(
+        exp,
+        plan,
+        provider,
+        LocalStore(tmp_path),
+        clock=clock,
+        should_stop=lambda: len(clock.sleeps) >= 3,
+    )
+    assert result.stopped == "stop_requested"
+    assert len(provider.requests) < 10
+    assert all(s <= 3.75 + 1e-9 for s in clock.sleeps)  # slices, never one long sleep

@@ -52,6 +52,10 @@ _RUN_KEY = re.compile(
 
 # Why a session stopped. "complete" and the first three are clean: a re-launch resumes. The last two are not.
 CLEAN_STOPS = frozenset({"complete", "cap_reached", "max_minutes", "stop_requested"})
+# This many api_errors in a row, across runs, means the problem is not transient: stop and say so. (Phase 1
+# IMPLEMENTATION doc section 6.4 said unlimited within the wall clock; a daily quota showed that hides a
+# stuck sweep.)
+MAX_CONSECUTIVE_API_ERRORS = 10
 
 
 @dataclass(frozen=True)
@@ -116,6 +120,7 @@ class _Tally:
     attempts: int = 0
     cost: float = 0.0
     finished: int = 0
+    consecutive_api_errors: int = 0
 
 
 class _Existing:
@@ -245,6 +250,7 @@ def run_session(
     rng: random.Random | None = None,
     should_stop: Callable[[], bool] = lambda: False,
     pacer: Pacer | None = None,
+    progress: Callable[[str], None] = lambda line: None,
 ) -> SessionResult:
     config: ModelConfig = experiment.model(plan.model_key)
     check_preflight(experiment, plan, cap_usd)
@@ -285,7 +291,15 @@ def run_session(
         text = serialize_safely(record, account_id)
         return store.put_new(f"{prefix}runs/{spec.run_id}/final.json", text)
 
-    def run_one(spec: RunSpec) -> str | None:
+    def nap(seconds: float) -> None:
+        """Sleep in slices of at most a second, so a stop request is honoured within a second."""
+        remaining = seconds
+        while remaining > 0 and not should_stop():
+            step = min(1.0, remaining)
+            sleep(step)
+            remaining -= step
+
+    def run_one(position: int, spec: RunSpec) -> str | None:
         prompt = render_prompt(experiment, objectives[spec.objective_id], spec.menu_order_seed)
         request = DecisionRequest(
             route=route,
@@ -344,12 +358,25 @@ def run_session(
             counts[outcome.status] += 1
             attempts.append(record)
             next_n += 1
+            note = f" {outcome.detail}" if outcome.detail else ""
+            progress(
+                f"run {position}/{len(plan.runs)} {spec.objective_id} attempt {next_n - 1}: "
+                f"{outcome.status}{note}  (${tally.cost:.4f} so far)"
+            )
             if outcome.stop_session:
-                return "config_error"
-            if outcome.retry == "backoff":
-                sleep(backoff_seconds(api_streak, rng))
+                return outcome.stop_as
+            if outcome.status == "api_error":
+                tally.consecutive_api_errors += 1
+                if tally.consecutive_api_errors >= MAX_CONSECUTIVE_API_ERRORS:
+                    return "api_errors"
+                wait = backoff_seconds(api_streak, rng)
+                progress(
+                    f"  backing off {wait:.0f}s ({tally.consecutive_api_errors} api errors in a row)"
+                )
+                nap(wait)
                 api_streak += 1
                 continue
+            tally.consecutive_api_errors = 0
             api_streak = 0
             done = [a for a in attempts if a["status"] not in NON_MODEL_STATUSES]
             if outcome.retry == "model" and len(done) < MAX_MODEL_ATTEMPTS:
@@ -362,10 +389,10 @@ def run_session(
     stopped = "crashed"
     try:
         stopped = "complete"
-        for spec in plan.runs:
+        for position, spec in enumerate(plan.runs, 1):
             if spec.run_id in existing.finals:
                 continue
-            reason = run_one(spec)
+            reason = run_one(position, spec)
             if reason is not None:
                 stopped = reason
                 break

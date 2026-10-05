@@ -668,4 +668,14 @@ retried forever) each failed the tests, so the tests do bite.
 covers the tool definition; whether `stop_details` is accepted. New: `S3Store`'s `IfNoneMatch` parameter is checked against
 botocore's S3 model by the Stubber, not against live S3; the first deployed run is its first real test.
 
-**Next:** step 3, his laptop run on Nova Lite (`scratch/step3-dev-run.sh`, given with this note).
+10. **A daily quota stops the session; so do ten `api_error`s in a row** (added 2026-10-05, after step 3's first try).
+    §6.4 said backoff was unlimited within the wall clock. On 2026-10-05 Nova Lite answered every call with
+    `ThrottlingException` "Too many tokens per day", and the session retried silently for ten minutes, which looked like a
+    hang. Now a throttle whose message says "per day" stops the session as `quota_exhausted`, ten consecutive `api_error`s
+    stop it as `api_errors` (both exit 3), each attempt prints a progress line, and a stop request is honoured within a
+    second during a backoff. 330 tests.
+
+**Step 3, first try (2026-10-05): blocked.** 28 attempts, all `api_error` (daily-quota throttle), $0, stopped by him;
+smoke call 10 failed the same way. The account's Bedrock quotas read 0 (`KNOWN-GAPS.md`, BLOCKED entry; AWS case
+179121856900232). **Order changed while blocked:** steps 4-8 run next, since none calls a model; steps 3 and 9 run when
+AWS restores the quotas. The step 3 script is `scratch/step3-dev-run.sh`.

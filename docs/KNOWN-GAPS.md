@@ -26,7 +26,8 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Phase 1's IMPLEMENTATION doc is APPROVED (his, 2026-10-04 evening):**
 > `docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md`, its four decisions as recommended (ECR in `bootstrap`; keep
 > the dev key through Phase 1; deploy on push for code paths; 15 runs). **BUILD STARTED 2026-10-05 (Sonnet): steps 0-2
-> done, C1 written and awaiting his commit; NEXT: step 3, his laptop run (IMPLEMENTATION doc §16, §21).** Drafted with it and untracked: `experiment/`
+> done, C1 committed (`70a4c4e`). BEDROCK IS BLOCKED (entry below): steps 3 and 9 wait for AWS; NEXT: steps 4-8, which
+> call no model (IMPLEMENTATION doc §16, §21).** Drafted with it and untracked: `experiment/`
 > (`models.toml` and the garden-club placeholder). Decision 3 enters it as two branches (§9.3). Its build can start
 > before Phase 0.5 closes; **its first Sonnet sweep cannot** (§1).
 >
@@ -35,6 +36,39 @@ case by its type and a neutral label. The names live only in the private longlis
 > its two smoke calls will not run (the closed Sonnet 5.5 entry below).
 >
 > **Owed by him:** claim `horizon-compact.vercel.app` (entry below). A prerequisite for Phase 1.5.
+
+---
+
+## BLOCKED — every Bedrock call throttled, quotas reset to 0, 2026-10-05
+
+**What happened.** On 2026-10-05 every Bedrock call on the account returns `ThrottlingException`, HTTP 429, "Too many
+tokens per day, please wait before trying again": Nova Lite (the step 3 development run, 28 attempts, $0) and Sonnet 4.6
+(smoke call 10, recorded as `10-sonnet46-stop-details.json`, an `api_error`). Service Quotas shows **0 applied** for
+Sonnet 4.6 cross-region requests and tokens per minute and for Nova Lite, including Nova Lite's tokens per day; on
+2026-10-03 Sonnet 4.6 read 10 requests a minute applied. Every call worked on 2026-10-04 (22:54-23:02 UTC).
+
+**Likely cause, unconfirmed by AWS.** AWS answered the Sonnet 5.5 Global case at 05:31 UTC on 2026-10-05 after
+"reaching out to the service team" (new models need several billing cycles of usage and spend). The quotas went to 0
+between that review and the morning. The same message on new or low-spend accounts is widely reported, and the
+reported fix is a support case asking AWS to restore the default quotas. **It is account-wide**, so Musical Mycelium's
+Bedrock calls (Haiku 4.5, Nova Pro) are probably failing too; unchecked.
+
+**Action taken.** Account-and-billing case **179121856900232**, opened 2026-10-05 11:42 CDT (Service Quotas, General;
+web), asking for the default quotas back and naming the two request ids. Nothing is spent to qualify (no cash; credits
+only). Not tried yet: whether US West (Oregon) has non-zero applied quotas (limits are per region); using it would be a
+design change and his decision.
+
+**What it blocks.** Phase 1 steps 3 (the development run) and 9 (the skeleton sweep), and Phase 0.5's tag measurement
+only if it needs a new call (it does not: it reads the 2026-10-04 bill). **What it does not block:** steps 4-8 (container,
+`bootstrap` additions, `main`, deploy, permission check), which call no model.
+
+**If AWS says no** (discussed 2026-10-05, nothing decided): ask again or escalate; another region; a free local open
+model (Ollama `qwen3.5:4b`) as the subject, a smaller but real version of the experiment; another cloud's new-account
+credits, if they cover the models (unverified). Each is his decision.
+
+**The harness change it caused** (IMPLEMENTATION doc §21, item 10): a daily-quota throttle now stops the session at once
+(`quota_exhausted`), and ten `api_error`s in a row stop it (`api_errors`), instead of retrying silently until the
+30-minute clock ends.
 
 ---
 

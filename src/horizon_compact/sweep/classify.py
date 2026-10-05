@@ -85,6 +85,8 @@ class Outcome:
     possible_decline: bool = False
     validation: Validation | None = None
     detail: str | None = None
+    # Why the session stops, when ``stop_session`` is set.
+    stop_as: str = "config_error"
 
     @property
     def is_model_outcome(self) -> bool:
@@ -93,6 +95,16 @@ class Outcome:
 
 def _classify_error(raw: RawDecision) -> Outcome:
     code = (raw.error or {}).get("code", "")
+    message = (raw.error or {}).get("message", "")
+    # A *daily* limit will not clear in minutes, so retrying inside a 30-minute session only hides it (seen
+    # 2026-10-05: Nova Lite answered "Too many tokens per day" to every call). Stop and say so.
+    if code == "ThrottlingException" and "per day" in message.lower():
+        return Outcome(
+            "api_error",
+            stop_session=True,
+            stop_as="quota_exhausted",
+            detail=f"{code}: {message}",
+        )
     if code in _BACKOFF_CODES or code in _NETWORK_ERRORS:
         return Outcome("api_error", retry="backoff", detail=code)
     if code in _MALFORMED_CODES:

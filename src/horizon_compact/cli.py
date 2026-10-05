@@ -263,6 +263,7 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         harness_version=horizon_compact.__version__,
         rng=random.Random(),
         should_stop=lambda: stop_requested["flag"],
+        progress=lambda line: print(line, file=sys.stderr, flush=True),
     )
     print(f"sweep:           {plan_.sweep_id}")
     print(f"stopped:         {result.stopped}")
@@ -272,6 +273,8 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
     print(f"this session:    {result.attempts_now} attempts, ${result.cost_usd_now:.4f}")
     print(f"sweep total:     ${result.cost_usd_total:.4f} (cap ${cap:.2f})")
     print(f"summary:         {result.summary_key}")
+    if result.stopped == "quota_exhausted":
+        print("a daily quota is used up: this will not clear by waiting minutes", file=sys.stderr)
     return CLEAN_EXIT if result.clean else NOT_CLEAN_EXIT
 
 

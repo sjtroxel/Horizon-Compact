@@ -115,11 +115,11 @@ def raw_ok(
     )
 
 
-def raw_error(request: DecisionRequest, code: str) -> RawDecision:
+def raw_error(request: DecisionRequest, code: str, message: str | None = None) -> RawDecision:
     return RawDecision(
         status="api_error",
         provenance=provenance(request),
-        error={"code": code, "message": f"{code} for {ACCOUNT}"},
+        error={"code": code, "message": message or f"{code} for {ACCOUNT}"},
     )
 
 
@@ -167,6 +167,7 @@ def session(
     cap_usd: float = 5.0,
     max_minutes: float = 30.0,
     should_stop: Callable[[], bool] = lambda: False,
+    progress: Callable[[str], None] = lambda line: None,
 ) -> SessionResult:
     clock = clock or FakeClock()
     return run_session(
@@ -184,6 +185,7 @@ def session(
         sleep=clock.sleep,
         rng=random.Random(1),
         should_stop=should_stop,
+        progress=progress,
     )
 
 

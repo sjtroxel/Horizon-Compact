@@ -143,3 +143,25 @@ def test_an_error_code_the_table_does_not_name_stops_the_session() -> None:
         True,
         "SomethingNew",
     )
+
+
+DAILY = "Too many tokens per day, please wait before trying again."
+
+
+def test_a_daily_quota_throttle_stops_the_session_as_quota_exhausted() -> None:
+    """Seen 2026-10-05: Nova Lite answered this to every call, and retrying only hid it."""
+    result = outcome(raw_error(dummy_request(), "ThrottlingException", DAILY))
+    assert (result.status, result.stop_session, result.stop_as) == (
+        "api_error",
+        True,
+        "quota_exhausted",
+    )
+    assert "per day" in (result.detail or "")
+    assert not result.is_model_outcome
+
+
+def test_an_ordinary_throttle_still_backs_off_and_does_not_stop() -> None:
+    result = outcome(
+        raw_error(dummy_request(), "ThrottlingException", "Too many requests, please wait.")
+    )
+    assert (result.status, result.retry, result.stop_session) == ("api_error", "backoff", False)
