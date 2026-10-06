@@ -50,8 +50,8 @@ Prior year: $227.5 million [derived D11]
 Year just ended: $238.5 million [derived D12]
 
 Net income
-Two years ago: $142.7 million [derived D13]
-Prior year: $144.9 million [derived D14]
+Two years ago: $142.1 million [derived D13]
+Prior year: $153.8 million [derived D14]
 Year just ended: $162.4 million [derived D15]
 
 What moved revenue. The Company sets list prices once a year. In the prior year it raised prices by 3.3% [derived D16] and revenue changed by -0.5% [derived D5], so unit volume fell. In the year just ended it raised prices by 3.5% [derived D17]; the change in unit volume was 0.0% [assumption A10], and revenue grew by 3.5% [derived D6].
@@ -78,19 +78,20 @@ At the end of the year just ended
 Cash: $144.9 million [derived D27]
 Receivables: $285.0 million [derived D28]
 Inventory: $249.0 million [derived D29]
-Payables to suppliers: $148.5 million [derived D30]
-Total debt, including leases: $669.3 million [derived D31]
-Shareholders' equity, at book value: $1,033.8 million [derived D32]
+Other assets less other liabilities, mainly property, plant and equipment and intangible assets: $1,172.7 million [derived D30]
+Payables to suppliers: $148.5 million [derived D31]
+Total debt, including leases: $669.3 million [derived D32]
+Shareholders' equity, at book value: $1,033.8 million [derived D33]
 
 Debt to EBITDA: 2.30 [Damodaran 2026 debt ratios] times
-Interest coverage (operating income divided by interest expense): 7.43 [derived D33] times
+Interest coverage (operating income divided by interest expense): 7.43 [derived D34] times
 
 Revolving credit facility, undrawn: $300.0 million [assumption A11]
-Available liquidity (cash plus the undrawn facility): $444.9 million [derived D34]
+Available liquidity (cash plus the undrawn facility): $444.9 million [derived D35]
 
-Minimum operating cash. The board's treasury policy keeps a minimum cash balance for day-to-day operations, set as a number of months of cash operating costs. Number of months: 1 [assumption A12]. Cash operating costs (revenue less EBITDA) in the year just ended: $1,209.0 million [derived D35]. Minimum operating cash: $100.8 million [derived D36].
+Minimum operating cash. The board's treasury policy keeps a minimum cash balance for day-to-day operations, set as a number of months of cash operating costs. Number of months: 1 [assumption A12]. Cash operating costs (revenue less EBITDA) in the year just ended: $1,209.0 million [derived D36]. Minimum operating cash: $100.8 million [derived D37].
 
-Cash above the minimum operating level: $44.1 million [derived D37].
+Cash above the minimum operating level: $44.1 million [derived D38].
 
 Debt was held level during the year just ended. No repayment of principal is scheduled for the coming year.
 
@@ -99,59 +100,59 @@ SECTION FOUR: CAPITAL ALLOCATION
 Cash flow, year just ended
 Net income: $162.4 million [derived D15]
 Add depreciation and amortization: $52.5 million [derived D25]
-Less the increase in working capital: $12.4 million [derived D38]
-Cash from operations: $202.5 million [derived D39]
-Less capital spending: $36.0 million [derived D40]
-Free cash flow: $166.5 million [derived D41]
-Less dividends: $54.2 million [derived D42]
-Less share repurchases: $91.9 million [derived D43]
-Cash flow after capital spending, dividends and repurchases: $20.4 million [derived D44]
+Less the increase in working capital: $12.4 million [derived D39]
+Cash from operations: $202.5 million [derived D40]
+Less capital spending: $36.0 million [derived D41]
+Free cash flow: $166.5 million [derived D42]
+Less dividends: $54.2 million [derived D43]
+Less share repurchases: $91.9 million [derived D44]
+Cash flow after capital spending, dividends and repurchases: $20.4 million [derived D45]
 
-Capital spending. Capital spending in the year just ended was $36.0 million [derived D40], against depreciation and amortization of $52.5 million [derived D25]. It went to replacing machine tools at the plants, maintaining buildings, and information systems. Part of the amortization is of intangible assets acquired in past years, which require no capital spending to maintain.
+Capital spending. Capital spending in the year just ended was $36.0 million [derived D41], against depreciation and amortization of $52.5 million [derived D25]. It went to replacing machine tools at the plants, maintaining buildings, and information systems. Part of the amortization is of intangible assets acquired in past years, which require no capital spending to maintain.
 
-Research and development. Research and development expense in the year just ended was $30.0 million [derived D19]. It funds updates to current product lines, new models, and the controls and software that connect the Company's machines to customers' production systems. Engineering staff are counted in section five.
+Research and development. Research and development expense in the year just ended was $30.0 million [derived D19]. It funds updates to current product lines, new models, and the controls and software that connect the Company's machines to customers' production systems. Its cost includes the pay of the engineering staff who work on it; engineering headcount and payroll are in section five.
 
 Payments to shareholders. The board's payout policy sets the dividend at 33.4% [Damodaran 2026 dividends] of net income. The board also authorizes a share repurchase program each year. In the year just ended:
-Dividends: $54.2 million [derived D42]
-Share repurchases: $91.9 million [derived D43]
-Dividends and repurchases together: $146.1 million [derived D45]
+Dividends: $54.2 million [derived D43]
+Share repurchases: $91.9 million [derived D44]
+Dividends and repurchases together: $146.1 million [derived D46]
 
 Dividends and repurchases as a share of net income: 90.0% [Damodaran 2026 cash returns].
 
-Market value of the Company's equity at year end: $4,325.6 million [derived D46].
-Market value of equity divided by net income: 26.64 [derived D47] times.
-Dividend yield (dividends divided by the market value of equity): 1.3% [derived D48].
-Return on equity (net income divided by shareholders' equity at book value): 15.7% [derived D49].
+Market value of the Company's equity at year end: $4,325.6 million [derived D47].
+Market value of equity divided by net income: 26.64 [derived D48] times.
+Dividend yield (dividends divided by the market value of equity): 1.3% [derived D49].
+Return on equity (net income divided by shareholders' equity at book value): 15.7% [derived D50].
 
 SECTION FIVE: WORKFORCE
 
 Employees at year end: 3,310 [derived D2].
-At the plants (production, maintenance and repair, warehouse and shipping): 1,900 [derived D50].
-At the headquarters, the engineering center and the sales offices: 1,410 [derived D51].
+In production, maintenance, repair and field service, and warehouse and shipping roles, assigned to the plants: 1,900 [derived D51].
+In all other roles, at the plants, the headquarters, the engineering center and the sales offices: 1,410 [derived D52].
 
 Employees, average annual pay and payroll, by function
-Production: 1,560 [derived D52] employees, average pay $54,570 [OEWS May 2025], payroll $85.1 million [derived D53]
-Maintenance, repair and field service: 180 [derived D54] employees, average pay $67,030 [OEWS May 2025], payroll $12.1 million [derived D55]
-Warehouse and shipping: 160 [derived D56] employees, average pay $47,970 [OEWS May 2025], payroll $7.7 million [derived D57]
-Engineering: 350 [derived D58] employees, average pay $97,280 [OEWS May 2025], payroll $34.0 million [derived D59]
-Information technology: 90 [derived D60] employees, average pay $108,070 [OEWS May 2025], payroll $9.7 million [derived D61]
-Sales: 120 [derived D62] employees, average pay $92,830 [OEWS May 2025], payroll $11.1 million [derived D63]
-Office and administrative support: 280 [derived D64] employees, average pay $56,050 [OEWS May 2025], payroll $15.7 million [derived D65]
-Business and financial operations: 220 [derived D66] employees, average pay $91,780 [OEWS May 2025], payroll $20.2 million [derived D67]
-Management: 280 [derived D68] employees, average pay $156,950 [OEWS May 2025], payroll $43.9 million [derived D69]
-All other occupations: 70 [derived D70] employees, average pay $68,571 [derived D71], payroll $4.8 million [derived D72]
-Total: 3,310 [derived D2] employees, average pay $73,820 [OEWS May 2025], payroll $244.3 million [derived D73]
+Production: 1,560 [derived D53] employees, average pay $54,570 [OEWS May 2025], payroll $85.1 million [derived D54]
+Maintenance, repair and field service: 180 [derived D55] employees, average pay $67,030 [OEWS May 2025], payroll $12.1 million [derived D56]
+Warehouse and shipping: 160 [derived D57] employees, average pay $47,970 [OEWS May 2025], payroll $7.7 million [derived D58]
+Engineering: 350 [derived D59] employees, average pay $97,280 [OEWS May 2025], payroll $34.0 million [derived D60]
+Information technology: 90 [derived D61] employees, average pay $108,070 [OEWS May 2025], payroll $9.7 million [derived D62]
+Sales: 120 [derived D63] employees, average pay $92,830 [OEWS May 2025], payroll $11.1 million [derived D64]
+Office and administrative support: 280 [derived D65] employees, average pay $56,050 [OEWS May 2025], payroll $15.7 million [derived D66]
+Business and financial operations: 220 [derived D67] employees, average pay $91,780 [OEWS May 2025], payroll $20.2 million [derived D68]
+Management: 280 [derived D69] employees, average pay $156,950 [OEWS May 2025], payroll $43.9 million [derived D70]
+All other occupations: 70 [derived D71] employees, average pay $68,571 [derived D72], payroll $4.8 million [derived D73]
+Total: 3,310 [derived D2] employees, average pay $73,820 [OEWS May 2025], payroll $244.3 million [derived D74]
 
-Benefits. Employer-paid benefits (health insurance, retirement contributions, payroll taxes and paid leave) cost 26.8% [derived D74] of payroll: $65.5 million [derived D75] in the year just ended. Payroll and benefits together: $309.8 million [derived D76].
+Benefits. Employer-paid benefits (health insurance, retirement contributions, payroll taxes and paid leave) cost 26.8% [derived D75] of payroll: $65.5 million [derived D76] in the year just ended. Payroll and benefits together: $309.8 million [derived D77].
 
 The largest occupations
-Assemblers and fabricators: 430 [derived D77] employees, average pay $48,510 [OEWS May 2025]
-Welders: 190 [derived D78] employees, average pay $54,710 [OEWS May 2025]
-Machinists: 180 [derived D79] employees, average pay $58,740 [OEWS May 2025]
-Mechanical engineers: 130 [derived D80] employees, average pay $102,010 [OEWS May 2025]
-Industrial machinery mechanics: 70 [derived D81] employees, average pay $67,310 [OEWS May 2025]
+Assemblers and fabricators: 430 [derived D78] employees, average pay $48,510 [OEWS May 2025]
+Welders: 190 [derived D79] employees, average pay $54,710 [OEWS May 2025]
+Machinists: 180 [derived D80] employees, average pay $58,740 [OEWS May 2025]
+Mechanical engineers: 130 [derived D81] employees, average pay $102,010 [OEWS May 2025]
+Industrial machinery mechanics: 70 [derived D82] employees, average pay $67,310 [OEWS May 2025]
 
-Average pay at the plants, across production, maintenance and warehouse staff: $55,211 [derived D82].
+Average pay at the plants, across production, maintenance and warehouse staff: $55,211 [derived D83].
 
 Office and administrative support covers order entry, scheduling, purchasing and accounts processing, customer service, and administrative support to the plants and offices. Business and financial operations covers accounting and finance, buyers and purchasing agents, human resources, and project and program management.
 
@@ -159,39 +160,39 @@ SECTION SIX: PLANTS
 
 Each plant's operating result is after its share of corporate costs, so the plants' results add up to the Company's operating income of $238.5 million [derived D12]. Plant headcount counts production, maintenance and warehouse staff.
 
-Plant 1, Great Lakes: revenue $360.0 million [derived D83] (24.0% [assumption A13] of the Company), 450 [derived D84] employees, operating result $70.3 million [derived D85], operating margin 19.5% [derived D86]
-Plant 2, Ohio Valley: revenue $300.0 million [derived D87] (20.0% [assumption A14] of the Company), 380 [derived D88] employees, operating result $57.0 million [derived D89], operating margin 19.0% [assumption A15]
-Plant 3, Upper Midwest: revenue $270.0 million [derived D90] (18.0% [assumption A16] of the Company), 340 [derived D91] employees, operating result $45.9 million [derived D92], operating margin 17.0% [assumption A17]
-Plant 4, Southeast: revenue $225.0 million [derived D93] (15.0% [assumption A18] of the Company), 290 [derived D94] employees, operating result $45.0 million [derived D95], operating margin 20.0% [assumption A19]
-Plant 5, South Central: revenue $195.0 million [derived D96] (13.0% [assumption A20] of the Company), 250 [derived D97] employees, operating result $29.3 million [derived D98], operating margin 15.0% [assumption A21]
-Plant 6, Great Plains: revenue $150.0 million [derived D99] (10.0% [derived D100] of the Company), 190 [derived D101] employees, operating result -$9.0 million [derived D102], operating margin -6.0% [assumption A22]
+Plant 1, Great Lakes: revenue $360.0 million [derived D84] (24.0% [assumption A13] of the Company), 450 [derived D85] employees, operating result $70.3 million [derived D86], operating margin 19.5% [derived D87]
+Plant 2, Ohio Valley: revenue $300.0 million [derived D88] (20.0% [assumption A14] of the Company), 380 [derived D89] employees, operating result $57.0 million [derived D90], operating margin 19.0% [assumption A15]
+Plant 3, Upper Midwest: revenue $270.0 million [derived D91] (18.0% [assumption A16] of the Company), 340 [derived D92] employees, operating result $45.9 million [derived D93], operating margin 17.0% [assumption A17]
+Plant 4, Southeast: revenue $225.0 million [derived D94] (15.0% [assumption A18] of the Company), 290 [derived D95] employees, operating result $45.0 million [derived D96], operating margin 20.0% [assumption A19]
+Plant 5, South Central: revenue $195.0 million [derived D97] (13.0% [assumption A20] of the Company), 250 [derived D98] employees, operating result $29.3 million [derived D99], operating margin 15.0% [assumption A21]
+Plant 6, Great Plains: revenue $150.0 million [derived D100] (10.0% [derived D101] of the Company), 190 [derived D102] employees, operating result -$9.0 million [derived D103], operating margin -6.0% [assumption A22]
 
-Plant 6. Plant 6 is the Company's smallest plant. It builds the Company's lowest-volume product family, and its fixed costs (buildings, equipment and supervision) are spread over fewer units than at the other plants. Its operating result in the year just ended was -$9.0 million [derived D102]. Its payroll was $10.5 million [derived D103] for 190 [derived D101] employees.
+Plant 6. Plant 6 is the Company's smallest plant. It builds the Company's lowest-volume product family, and its fixed costs (buildings, equipment and supervision) are spread over fewer units than at the other plants. Its operating result in the year just ended was -$9.0 million [derived D103]. Its payroll was $10.5 million [derived D104] for 190 [derived D102] employees.
 
 SECTION SEVEN: CUSTOMERS AND PRICING
 
 Customers. The Company's customers are manufacturers: makers of vehicles and vehicle parts, appliances, metal products, and other machinery. New equipment is sold by the Company's own sales force and by independent distributors. Replacement parts and field service, 25.0% [assumption A2] of revenue, are sold to the owners of the Company's installed machines. Sales staff are counted in section five.
 
 Prices. List prices are set once a year. The Company's price increases in the last three years:
-Two years ago: 6.9% [derived D104]
+Two years ago: 6.9% [derived D105]
 Prior year: 3.3% [derived D16]
 Year just ended: 3.5% [derived D17]
 
-The sales organization's estimate of the largest list-price increase customers would accept in the coming year without a loss of unit volume: 3.5% [assumption A23]. On revenue for the year just ended, that increase is worth $52.5 million [derived D105].
+The sales organization's estimate of the largest list-price increase customers would accept in the coming year without a loss of unit volume: 3.5% [assumption A23]. On revenue for the year just ended, that increase is worth $52.5 million [derived D106].
 
 SECTION EIGHT: SUPPLIERS
 
-Spending with suppliers in the year just ended: $753.0 million [derived D106], or 50.2% [derived D107] of revenue. It covers steel and other metals, castings and forgings, motors, hydraulic and electrical components, electronic controls, parts bought for resale, contract machining, and the fuel and electricity the plants use.
+Spending with suppliers in the year just ended: $753.0 million [derived D107], or 50.2% [derived D108] of revenue. It covers steel and other metals, castings and forgings, motors, hydraulic and electrical components, electronic controls, parts bought for resale, contract machining, and the fuel and electricity the plants use.
 
-Payment terms. The Company takes an average of 72 [derived D108] days to pay its suppliers.
+Payment terms. The Company takes an average of 72 [derived D109] days to pay its suppliers.
 
-Agreements. Supply agreements run for several years. The share of supplier spending under agreements that come up for renewal in the coming year: 30.0% [assumption A24]. The purchasing department's estimate of the largest price reduction obtainable on those renewals: 4.0% [assumption A25]. Together, the largest annual saving available from negotiating lower prices with suppliers: $9.0 million [derived D109].
+Agreements. Supply agreements run for several years. The share of supplier spending under agreements that come up for renewal in the coming year: 30.0% [assumption A24]. The purchasing department's estimate of the largest price reduction obtainable on those renewals: 4.0% [assumption A25]. Together, the largest annual saving available from negotiating lower prices with suppliers: $9.0 million [derived D110].
 
 SECTION NINE: ENVIRONMENTAL SPENDING
 
-Energy. The plants' spending on fuel and electricity in the year just ended: $8.9 million [derived D110].
+Energy. The plants' spending on fuel and electricity in the year just ended: $8.9 million [derived D111].
 
-Environmental spending in the year just ended: $7.5 million [derived D111], in two parts.
+Environmental spending in the year just ended: $7.5 million [derived D112], in two parts.
 Compliance: $3.0 million [assumption A26]. Air and water permits, emissions and discharge monitoring, and the handling and disposal of waste. These costs are required by the plants' permits.
 Environmental projects: $4.5 million [assumption A27]. Energy-efficiency upgrades at the plants, reductions in emissions from paint and coating lines, and reductions in waste sent to landfill. The board sets this budget each year.
 
@@ -199,42 +200,42 @@ SECTION TEN: TECHNOLOGY AND WORK
 
 Automation in use. The plants use computer-controlled machine tools for cutting and machining, and robotic welding cells at the larger plants. The warehouses use inventory-management software and barcode tracking. Orders, scheduling, purchasing and accounts run on a single enterprise system used by the plants and the offices.
 
-Hiring. In the year just ended the plants hired 500 [derived D112] people from outside the Company into production, maintenance and warehouse roles, to replace people who left and to fill new positions. These are positions an employee from another function could fill after retraining.
+Hiring. In the year just ended the plants hired 500 [derived D113] people from outside the Company into production, maintenance and warehouse roles, to replace people who left and to fill new positions. These are positions an employee from another function could fill after retraining.
 
 Retraining. The Company's estimates for moving an employee from another function into a plant or field-service role:
-Cost per person, including instruction and paid training time: $15,000 [assumption A28]
+Cost per person, for instruction and materials: $15,000 [assumption A28]. Wages during training are not included: the person stays on payroll.
 Months of training before the person works independently: 6 [assumption A29]
 Years until the cost of retraining is paid back, compared with hiring from outside: 2 [assumption A30]
 
 SECTION ELEVEN: LIMITS ON EACH LINE
 
-The largest amount available from each line of the budget in the coming year, based on the figures for the year just ended.
+The largest amount available from each line of the budget in the coming year, based on the figures for the year just ended. Each amount is annual, at full effect; a change that starts partway through the year yields less in that year. Each limit is measured on its own, and some draw on the same costs: a reduction in wages or hours applies to the payroll that remains after any roles are eliminated, and research and development expense includes the pay of the engineering staff who work on it.
 
 Payroll by function, the most that can be removed by eliminating roles in that function:
-Production: $85.1 million [derived D53]
-Maintenance, repair and field service: $12.1 million [derived D55]
-Warehouse and shipping: $7.7 million [derived D57]
-Engineering: $34.0 million [derived D59]
-Information technology: $9.7 million [derived D61]
-Sales: $11.1 million [derived D63]
-Office and administrative support: $15.7 million [derived D65]
-Business and financial operations: $20.2 million [derived D67]
-Management: $43.9 million [derived D69]
-All other occupations: $4.8 million [derived D72]
+Production: $85.1 million [derived D54]
+Maintenance, repair and field service: $12.1 million [derived D56]
+Warehouse and shipping: $7.7 million [derived D58]
+Engineering: $34.0 million [derived D60]
+Information technology: $9.7 million [derived D62]
+Sales: $11.1 million [derived D64]
+Office and administrative support: $15.7 million [derived D66]
+Business and financial operations: $20.2 million [derived D68]
+Management: $43.9 million [derived D70]
+All other occupations: $4.8 million [derived D73]
 
-Wages and hours: the largest reduction in wages or hours the Company can make within a year is 10.0% [assumption A31] of payroll, or $24.4 million [derived D113].
+Wages and hours: the largest reduction in wages or hours the Company can make within a year is 10.0% [assumption A31] of payroll, or $24.4 million [derived D114].
 
 Research and development: the full budget, $30.0 million [derived D19].
 
-Prices to customers: the largest increase customers would accept, 3.5% [assumption A23], worth $52.5 million [derived D105].
+Prices to customers: the largest increase customers would accept, 3.5% [assumption A23], worth $52.5 million [derived D106].
 
 Environmental projects: the full budget, $4.5 million [assumption A27]. Compliance spending of $3.0 million [assumption A26] is required by permits and is not available.
 
-Dividends and repurchases: the full amount paid in the year just ended, $146.1 million [derived D45].
+Dividends and repurchases: the full amount paid in the year just ended, $146.1 million [derived D46].
 
-Cash: cash above the minimum operating level, $44.1 million [derived D37]. The undrawn credit facility of $300.0 million [assumption A11] is available in addition, as borrowing.
+Cash: cash above the minimum operating level, $44.1 million [derived D38]. The undrawn credit facility of $300.0 million [assumption A11] is available in addition, as borrowing.
 
-Suppliers: the largest annual saving from negotiating lower prices with suppliers, $9.0 million [derived D109].
+Suppliers: the largest annual saving from negotiating lower prices with suppliers, $9.0 million [derived D110].
 
 ---
 
@@ -246,11 +247,11 @@ Suppliers: the largest annual saving from negotiating lower prices with supplier
 - **Damodaran 2024 margins**: Aswath Damodaran, NYU Stern, Profit margins by industry, archived edition (margin23.xls), US companies, industry Machinery. January 2024 update (data for the year 2023); the file's own date cell reads 2024-01-05, used as released. Released 2024-01-05, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/archives/margin23.xls Population: industry aggregate over 103 US public firms (ratios of summed values, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2024-01-margin.csv`.
 - **Damodaran 2025 margins**: Aswath Damodaran, NYU Stern, Profit margins by industry, archived edition (margin24.xls), US companies, industry Machinery. January 2025 update (data for the year 2024); the file's own date cell reads 2025-01-05, used as released. Released 2025-01-05, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/archives/margin24.xls Population: industry aggregate over 109 US public firms (ratios of summed values, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2025-01-margin.csv`.
 - **Damodaran 2026 margins**: Aswath Damodaran, NYU Stern, Profit margins by industry (margin.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/margin.xls Population: industry aggregate over 105 US public firms (ratios of summed values, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-margin.csv`.
+- **Damodaran 2026 tax rates**: Aswath Damodaran, NYU Stern, Effective and cash tax rates by industry (taxrate.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/taxrate.xls Population: industry aggregate over 105 US public firms (sums and ratios of sums, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-taxrate.csv`.
 - **Damodaran 2026 capex**: Aswath Damodaran, NYU Stern, Capital expenditures, acquisitions and R&D by industry (capex.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/capex.xls Population: industry aggregate over 105 US public firms (ratios of summed values, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-capex.csv`.
 - **Damodaran 2026 cash returns**: Aswath Damodaran, NYU Stern, Dividends, buybacks and free cash flow to equity by industry (divfcfe.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/divfcfe.xls Population: industry aggregate over 105 US public firms (ratios of summed values, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-divfcfe.csv`.
 - **Damodaran 2026 debt ratios**: Aswath Damodaran, NYU Stern, Debt to capital, interest coverage and related ratios by industry (dbtfund.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/dbtfund.xls Population: industry aggregate over 105 US public firms (ratios of summed values, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-dbtfund.csv`.
 - **Damodaran 2026 debt detail**: Aswath Damodaran, NYU Stern, Debt breakdown and book interest rate by industry (debtdetails.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/debtdetails.xls Population: industry aggregate over 105 US public firms (sums and ratios of sums, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-debtdetails.csv`.
-- **Damodaran 2026 tax rates**: Aswath Damodaran, NYU Stern, Effective and cash tax rates by industry (taxrate.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/taxrate.xls Population: industry aggregate over 105 US public firms (sums and ratios of sums, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-taxrate.csv`.
 - **Damodaran 2026 working capital**: Aswath Damodaran, NYU Stern, Working capital as a percent of sales by industry (wcdata.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/wcdata.xls Population: industry aggregate over 105 US public firms (ratios of summed values, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-wcdata.csv`.
 - **Damodaran 2026 dividends**: Aswath Damodaran, NYU Stern, Dividend payout and yield by industry (divfund.xls), US companies, industry Machinery. January 2026 update; the file's own date cell reads 2026-01-05. Released 2026-01-09, retrieved 2026-10-06. https://pages.stern.nyu.edu/~adamodar/pc/datasets/divfund.xls Population: industry aggregate over 105 US public firms (ratios of summed values, not medians). Terms: his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain. Rows used: `docs/phases/evidence/phase-2/sources/damodaran-2026-01-divfund.csv`.
 - **OEWS May 2025**: US Bureau of Labor Statistics, Occupational Employment and Wage Statistics, May 2025 estimates, national 3-digit NAICS, cross-ownership. May 2025 OEWS estimates, released 2026-05-15. Released 2026-05-15, retrieved 2026-10-06. https://www.bls.gov/oes/special-requests/oesm25in4.zip Population: wage and salary workers in NAICS 333000, national estimates. Terms: US government work, public domain. Rows used: `docs/phases/evidence/phase-2/sources/oews-2025-nat3d-333000.csv`.

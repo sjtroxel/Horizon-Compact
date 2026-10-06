@@ -71,8 +71,8 @@ tf-check: ## Terraform fmt -check and validate (no credentials, no AWS call)
 paths-check: ## Fail if any tracked path is under methods-appendix/ (needs no private file)
 	@$(GUARD) paths-check
 
-# Offline, no model: the Company's figures, template and that every rendered file is fresh (Phase 2). Until the
-# figures are drafted it checks sources.toml and its extracts and says it skipped the rest.
+# Offline, no model: the Company's figures, template and that every rendered file is fresh (Phase 2). A missing
+# figures file, template or rendered file fails the check; nothing is skipped.
 dossier-check: ## Check the company dossier's figures, template and rendered files
 	uv run --no-sync hc dossier check
 

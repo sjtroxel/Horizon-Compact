@@ -77,6 +77,7 @@ At the end of the year just ended
 Cash: {cash}
 Receivables: {receivables}
 Inventory: {inventory}
+Other assets less other liabilities, mainly property, plant and equipment and intangible assets: {other_net_assets}
 Payables to suppliers: {payables}
 Total debt, including leases: {debt}
 Shareholders' equity, at book value: {equity_book}
@@ -109,7 +110,7 @@ Cash flow after capital spending, dividends and repurchases: {uncommitted_cash_f
 
 Capital spending. Capital spending in the year just ended was {capex_fy0}, against depreciation and amortization of {da_fy0}. It went to replacing machine tools at the plants, maintaining buildings, and information systems. Part of the amortization is of intangible assets acquired in past years, which require no capital spending to maintain.
 
-Research and development. Research and development expense in the year just ended was {rnd_fy0}. It funds updates to current product lines, new models, and the controls and software that connect the Company's machines to customers' production systems. Engineering staff are counted in section five.
+Research and development. Research and development expense in the year just ended was {rnd_fy0}. It funds updates to current product lines, new models, and the controls and software that connect the Company's machines to customers' production systems. Its cost includes the pay of the engineering staff who work on it; engineering headcount and payroll are in section five.
 
 @group shareholders
 Payments to shareholders. The board's payout policy sets the dividend at {ind_payout} of net income. The board also authorizes a share repurchase program each year. In the year just ended:
@@ -129,8 +130,8 @@ Return on equity (net income divided by shareholders' equity at book value): {ro
 SECTION FIVE: WORKFORCE
 
 Employees at year end: {headcount_total}.
-At the plants (production, maintenance and repair, warehouse and shipping): {plant_workforce}.
-At the headquarters, the engineering center and the sales offices: {office_workforce}.
+In production, maintenance, repair and field service, and warehouse and shipping roles, assigned to the plants: {plant_workforce}.
+In all other roles, at the plants, the headquarters, the engineering center and the sales offices: {office_workforce}.
 
 Employees, average annual pay and payroll, by function
 Production: {hc_prod} employees, average pay {oews_wage_prod}, payroll {payroll_prod}
@@ -215,7 +216,7 @@ Automation in use. The plants use computer-controlled machine tools for cutting 
 Hiring. In the year just ended the plants hired {plant_hires} people from outside the Company into production, maintenance and warehouse roles, to replace people who left and to fill new positions. These are positions an employee from another function could fill after retraining.
 
 Retraining. The Company's estimates for moving an employee from another function into a plant or field-service role:
-Cost per person, including instruction and paid training time: {retraining_cost_pp}
+Cost per person, for instruction and materials: {retraining_cost_pp}. Wages during training are not included: the person stays on payroll.
 Months of training before the person works independently: {retraining_months}
 Years until the cost of retraining is paid back, compared with hiring from outside: {retraining_payback}
 
@@ -223,7 +224,7 @@ Years until the cost of retraining is paid back, compared with hiring from outsi
 
 SECTION ELEVEN: LIMITS ON EACH LINE
 
-The largest amount available from each line of the budget in the coming year, based on the figures for the year just ended.
+The largest amount available from each line of the budget in the coming year, based on the figures for the year just ended. Each amount is annual, at full effect; a change that starts partway through the year yields less in that year. Each limit is measured on its own, and some draw on the same costs: a reduction in wages or hours applies to the payroll that remains after any roles are eliminated, and research and development expense includes the pay of the engineering staff who work on it.
 
 Payroll by function, the most that can be removed by eliminating roles in that function:
 Production: {payroll_prod}

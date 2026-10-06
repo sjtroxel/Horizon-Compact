@@ -32,7 +32,7 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 | **0.5** `aws-foundation` | v0.0.5 | Terraform bootstrap (OIDC looked up), filtered budgets, one tool call per Bedrock model, Ollama check, the development model named, the AWS checks in `planning/09` §5 | A recorded, provenance-stamped call from each Bedrock model; bootstrap applied with nothing shared created | under $1 | **built 2026-10-04; close-out waits on billing data** |
 | **1** `walking-skeleton` | v0.1 | The run path on **placeholder content, off the subject** (scenario, objectives, menu): Fargate, rate limiter, spend cap, official gate (closed), Bedrock, per-run write-once S3 | Container-run results in S3, each traceable to its image digest and input hashes; resume and cap shown | about $1 with 1.5 | **building since 2026-10-05**; steps 3, 9, 11, 12 wait on Bedrock quotas (`KNOWN-GAPS.md`) |
 | **1.5** `publish-path` | v0.1.5 | Scorer, committed static JSON, one page live at `horizon-compact.vercel.app` through CloudFront and Vercel | The placeholder sweep on the public URL, traceable; destroy and re-apply of `main` tested, raw results intact | cents | not started |
-| **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | **2: IMPLEMENTATION doc approved 2026-10-06, out of order; build next**; 2.5 not started |
+| **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | **2 `company-dossier`: BUILT AND CLOSED 2026-10-06, out of order** (steps 1-9; `pyproject.toml` stays at Phase 1's version until Phases 1 and 1.5 close, Phase 2 decision 4); 2.5 not started |
 | **3** `preregistration-and-scoring` (split 2026-10-04: **3** `scoring-and-simulation`, **3.5** `preregistration`) | v0.3, v0.3.5 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | not started |
 | **4** `official-grid` | v0.4 | Pilot (excluded), then the full grid on Sonnet 4.6, then Nova Pro; robustness checks; first measured cost | Full grid run under the protocol on at least Sonnet 4.6; the $60 re-plan point checked | about $20-30 | not started |
 | **5** `real-cases` (split 2026-10-04: **5** `case-building`, **5.5** `case-runs`) | v0.5, v0.5.5 | Cases by the pre-registered selection rule, dossiers, foreshadowing check, recognition probe, a rubric committed before each case runs | At least three cases run and matched, including an invest or retool case; selection log complete | about $20-25 | not started |
@@ -75,7 +75,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 0.5 `aws-foundation` | **APPROVED 2026-10-04**, all eight decisions as recommended | **APPROVED 2026-10-04**, its four decisions (A-D) as recommended; **built 2026-10-04** (`b9c9aaf`, `52aa3fd`, `ac2fbe0`); close-out waits on billing data |
 | 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | **APPROVED 2026-10-04**, its four decisions as recommended; not yet built |
 | 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1 | not written; immediately before its build |
-| 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | not written; immediately before its build |
+| 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | **APPROVED 2026-10-06**, its five decisions as recommended; **built and closed 2026-10-06**, DoD audit in §14 |
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | not written; immediately before its build |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | not written; immediately before its build |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | not written; immediately before its build |
@@ -95,7 +95,19 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-06, morning
+### Where the build actually is — 2026-10-06, evening
+
+**Measured 2026-10-06, evening:** `make check` green, **442 tests passed**, root 13 of 16. `origin/main` at `6262c82`;
+the Phase 2 close-out (steps 8 and 9) is one commit he runs.
+
+- **Phase 2 `company-dossier` is built and closed** (out of order, his): 218 figure rows, 31 assumptions, a rendered
+  pack of about 2,100 words, DoD audit in its IMPLEMENTATION doc §13 step 9 (DoD 4 marked partial: his review was an
+  acceptance by deferral). One outside call, $0.50, no AWS spend and no official model. `pyproject.toml` unchanged.
+- **Next: Phase 2.5 `scenarios-and-wordings`**, its IMPLEMENTATION doc first (Opus), unless AWS restores Bedrock
+  first (`KNOWN-GAPS.md`, START HERE, "TOMORROW"). **Bedrock** still throttled at 2:31 PM CDT, $0.
+- **Phase 0.5 still open** on billing data (`KNOWN-GAPS.md`, WAITING); Phase 1 steps 3, 9, 11, 12 still wait on Bedrock.
+
+### Where the build actually was — 2026-10-06, morning *(superseded by the block above; kept as the day's record)*
 
 - **Phase 2 `company-dossier` started out of order (his):** everything ahead of it waits on AWS (`KNOWN-GAPS.md`,
   START HERE, "WAITING ON AWS"). Its IMPLEMENTATION doc is approved (his, 2026-10-06, all five decisions as recommended)
@@ -224,6 +236,15 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
 
+- **2026-10-06 — Phase 2 `company-dossier` built and closed, started out of order** (his; Phases 1, 1.5 and every
+  Bedrock run were waiting on AWS, and Phase 2 needs neither AWS nor a model). The IMPLEMENTATION doc and its five
+  decisions were approved as recommended. Built and closed in one day: the four source checks (`planning/01`
+  patched), 218 figure rows with 31 assumptions, a rendered 2,113-word board pack and its cited public version,
+  his review by deferral (disclosed), a two-sided neutrality read (one wording changed, `planning/07` L9 patched;
+  S3's missing community consequence logged for Phase 3), and a realism read by `openai/gpt-6-astra` (13 points
+  verified, 8 acted on, 5 declined or logged). **Cost: $0.50, one OpenRouter call from his balance, outside the $80
+  AWS ceiling; no AWS spend and no official model call.** The version in `pyproject.toml` is unchanged.
+  Reasoning and the as-built record: `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`.
 - **2026-10-05 — Sonnet 4.6 fixed as the v1 main model; Sonnet 5.5 no longer awaited** (his), after AWS held
   the newest models until the account has several billing cycles of Bedrock use. The main-model slot is closed;
   nothing is spent to qualify. `planning/02`-`05`, `07`, `09` and eight scope docs patched (`KNOWN-GAPS.md`).

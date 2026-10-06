@@ -173,6 +173,15 @@ class FigureRow(_Strict):
             raise ValueError("an assumption needs both low and high")
         if not (_finite(low) and _finite(high)) or low > high:
             raise ValueError("an assumption's low and high must be finite, with low <= high")
+        # A bound finer than the unit can show would print rounded in the assumptions table, so the range read
+        # there would not be the range stored (a count range of 0.5 to 2 printed as 1 to 2).
+        unit_step = DEFAULT_STEP[self.unit]
+        for bound in (low, high):
+            if Decimal(str(bound)) % unit_step != 0:
+                raise ValueError(
+                    f"an assumption's bound {bound} cannot be shown in {self.unit} "
+                    f"(it must be a multiple of {unit_step})"
+                )
 
 
 class FiguresFile(_Strict):

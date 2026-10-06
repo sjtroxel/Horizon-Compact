@@ -126,13 +126,6 @@ value = 0.021636323
 source = "damodaran-2025-01-margin"
 locator = "Machinery, R&D/Sales"
 
-[figures.ind_net_margin_fy1]
-label = "Industry net margin, prior year"
-unit = "pct"
-value = 0.100392
-source = "damodaran-2025-01-margin"
-locator = "Machinery, Net Margin"
-
 [figures.ind_gm_fy2]
 label = "Industry gross margin, two years ago"
 unit = "pct"
@@ -153,13 +146,6 @@ unit = "pct"
 value = 0.021220999
 source = "damodaran-2024-01-margin"
 locator = "Machinery, R&D/Sales"
-
-[figures.ind_net_margin_fy2]
-label = "Industry net margin, two years ago"
-unit = "pct"
-value = 0.097724728
-source = "damodaran-2024-01-margin"
-locator = "Machinery, Net Margin"
 
 # --- industry totals behind the capital and cash ratios ---------------------------------------------------
 
@@ -258,7 +244,7 @@ assumption = { low = -0.04, high = 0.04, range_from = "no industry volume figure
 [figures.rev_growth_fy0]
 label = "Revenue growth, year just ended"
 unit = "pct"
-formula = "price_change_fy0 + volume_change_fy0"
+formula = "(1 + price_change_fy0) * (1 + volume_change_fy0) - 1"
 
 [figures.rev_growth_fy1]
 label = "Revenue growth, prior year"
@@ -386,7 +372,8 @@ formula = "revenue_fy1 * (ind_gm_fy1 - ind_sga_fy1 - ind_rnd_fy1)"
 [figures.net_income_fy1]
 label = "Net income, prior year"
 unit = "usd_m"
-formula = "revenue_fy1 * ind_net_margin_fy1"
+formula = "(op_income_fy1 - interest_fy0) * (1 - ind_tax_rate)"
+note = "Built as the year just ended is: operating income less interest less tax. Interest is the year just ended's (debt taken as level) and tax is at the industry's rate for the year just ended; changed 2026-10-06 from revenue times the industry net margin, so the three years are built one way (step 8 realism read)."
 
 [figures.gross_profit_fy2]
 label = "Gross profit, two years ago"
@@ -401,7 +388,8 @@ formula = "revenue_fy2 * (ind_gm_fy2 - ind_sga_fy2 - ind_rnd_fy2)"
 [figures.net_income_fy2]
 label = "Net income, two years ago"
 unit = "usd_m"
-formula = "revenue_fy2 * ind_net_margin_fy2"
+formula = "(op_income_fy2 - interest_fy0) * (1 - ind_tax_rate)"
+note = "Built as the prior year's is (see net_income_fy1)."
 
 # ============================================================================================================
 # 3. Balance sheet and liquidity
@@ -494,6 +482,12 @@ unit = "usd_m"
 formula = "debt * (1 - ind_book_dc) / ind_book_dc"
 note = "At the industry's book debt to capital, where capital is book debt plus book equity."
 
+[figures.other_net_assets]
+label = "Other assets less other liabilities, end of year just ended"
+unit = "usd_m"
+formula = "equity_book + debt + payables - cash - receivables - inventory"
+note = "The balancing line, so the condensed balance sheet adds up: mainly property, plant and equipment and intangible assets (step 8 realism read, 2026-10-06)."
+
 [figures.interest_coverage]
 label = "Interest coverage (operating income to interest)"
 unit = "ratio"
@@ -503,7 +497,7 @@ formula = "op_income_fy0 / interest_fy0"
 label = "Minimum operating cash, in months of cash operating costs"
 unit = "count"
 value = 1
-assumption = { low = 0.5, high = 2, range_from = "no public industry-level source found for the cash companies hold for operations; half a month to two months of cash operating costs", reason = "One month, a round figure inside the range.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
+assumption = { low = 1, high = 2, range_from = "no public industry-level source found for the cash companies hold for operations; one to two months of cash operating costs", reason = "One month, a round figure inside the range.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation. Range changed 2026-10-06 from half a month to two months (his, step 8 realism read): a half month could not be shown in whole months, so the table printed 1 to 2 while storing 0.5 to 2" }
 
 [figures.cash_costs_fy0]
 label = "Cash operating costs, year just ended (revenue less EBITDA)"
@@ -1341,10 +1335,10 @@ round = 10
 note = "The Company's plants are taken to hire at the durable goods rate. These are the openings a retrained employee could fill."
 
 [figures.retraining_cost_pp]
-label = "Retraining cost per person (instruction and paid training time)"
+label = "Retraining cost per person (instruction and materials; wages during training are part of payroll and not included)"
 unit = "usd"
 value = 15_000
-assumption = { low = 5_000, high = 30_000, range_from = "no public industry-level source found; from a short course to several months of paid instruction", reason = "Below the middle of the range: most plant roles are learned on the job after a few months of instruction.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
+assumption = { low = 5_000, high = 30_000, range_from = "no public industry-level source found; from a short course to several months of instruction", reason = "Below the middle of the range: most plant roles are learned on the job after a few months of instruction.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation. Definition changed 2026-10-06 (his, step 8 realism read): wages during training excluded, because a retained person's pay already stays in payroll; the old label said paid training time was included, which $15,000 could not cover (six months of plant pay and benefits is about $35,000)" }
 
 [figures.retraining_months]
 label = "Months of training before a retrained person works independently"

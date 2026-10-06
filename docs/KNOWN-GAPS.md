@@ -9,24 +9,46 @@ case by its type and a neutral label. The names live only in the private longlis
 
 > ## START HERE — where things stand, 2026-10-06, afternoon
 >
-> **NOW: Phase 2 `company-dossier`, started out of order (his, 2026-10-06)**, because everything ahead of it waits on
-> AWS. It needs no AWS and no official model (its scope doc, Prerequisites). **Its IMPLEMENTATION doc is APPROVED
-> (his, 2026-10-06, all five §15 decisions as recommended):** `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`.
-> **BUILD STEPS 1-4 COMMITTED (`fe82c3f`, Sonnet). STEPS 5-6 COMMITTED AND PUSHED (`891ee3c`, Opus, C2,
-> 2026-10-06), `make check` green.** `experiment/company/figures.toml` (219 rows, 31 assumptions), `dossier.template.txt`,
-> the rendered `dossier.toml` and the public `dossier-cited.md`, `figures-table.md`, `assumptions-table.md` under
-> `docs/phases/evidence/phase-2/`; 15 sources with pruned extracts. The not-built-yet skip is removed. The text is
-> about 1,990 words (estimated 2,690 tokens), under the 4,400-word target, and not padded (IMPLEMENTATION doc §13
-> step 6 says why). **STEP 7 (his review) DONE 2026-10-06, Sonnet, UNCOMMITTED until he runs C3** (`figures.toml`
-> review lines, the re-rendered `assumptions-table.md`, the IMPLEMENTATION doc as-built note, this block). **What it
-> is: no value, range or reason changed; the environmental limit kept as drafted (projects budget only; compliance
-> required by permits, not available); he accepted A1-A31 and the rendered text on Opus's recommendations,
-> choosing not to weigh in item by item, so DoD 4 is an acceptance by deferral, not an independent check** (the as-built
-> note under §13 step 7 says so). **Then a two-sided neutrality read (Opus, his decisions):** "pressing suppliers"
-> became "negotiating lower prices with suppliers" in the dossier and in `planning/07` L9; S3's missing community
-> consequence is logged for Phase 3 (OPEN entry below). **Next: step 8, the realism read
-> (Opus: pick the reader live, draft the brief, show him, cap $3)**, which is now the independent check on the
-> numbers. Nothing in Phase 2 calls Bedrock or any official model.
+> **Phase 2 `company-dossier` was started out of order (his, 2026-10-06)**, because everything ahead of it waits on
+> AWS; it needed no AWS and no official model. Its IMPLEMENTATION doc (approved, his, all five §15 decisions as
+> recommended): `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`.
+> **PHASE 2 `company-dossier` IS BUILT AND CLOSED (2026-10-06), pending one commit.** Steps 1-4 (`fe82c3f`), 5-6
+> (`891ee3c`) and 7 (`6262c82`) are committed and pushed; **steps 8 (Opus) and 9 (Sonnet) are UNCOMMITTED, and he
+> folds them into one commit (C4+C5)**. After he pushes it: **add that CI run's id to the IMPLEMENTATION doc's DoD 7
+> row** (the audit under §13 step 9 says where). **DoD audit: all seven met except DoD 4, marked partial** (an
+> acceptance by deferral). The manual rule-zero read found nothing; the guard passes on the change set and the
+> history; two tests were added for DoD 3. `ROADMAP.md` marks Phase 2 closed; `pyproject.toml` is unchanged (decision
+> 4). **TOMORROW (2026-10-07), in this order:**
+> 1. **Confirm the commit.** `git log -1` should show his "phase 2: realism read, close-out and audit" commit, pushed
+>    and CI green; **add that CI run's id to the DoD 7 row** (IMPLEMENTATION doc, the audit under §13 step 9).
+> 2. **Bedrock check, once:** `scratch/throttle-check.py`, report only; then look at case 179121856900232 (BLOCKED
+>    entry). **If Bedrock answers:** Phase 1 steps 3 and 9 first (they unblock 11 and 12), and Phase 0.5's billing
+>    close-out the same day (WAITING entry), then Phase 2.5. **If still throttled (the expected case): Phase 2.5.**
+> 3. **Phase 2.5 `scenarios-and-wordings`: Opus writes its IMPLEMENTATION doc** (`docs/phases/phase-2.5-scenarios-and-wordings.md`,
+>    "Left for the IMPLEMENTATION doc" is the list), shown to him for approval **before any build**. Needs no AWS:
+>    the scenarios (S1-S4, `planning/07` §3), the three templates and the text check are data and code, and its
+>    Ollama runs are local; **only its Nova Lite development runs wait on AWS.** Bring into it: **the S3 community
+>    consequence (OPEN entry below, for Phase 3 or here, his call)**; the two simplifications kept after the realism
+>    read (RECORDED entry); the neutrality checklist (`planning/07` §9) and the blind-reader method (this phase's
+>    realism read is the working model: brief, one OpenRouter call about $1, raw reply committed, each point
+>    verified; he needs a fresh key at the hidden prompt, and his OpenRouter keys can expire); the sealed template's
+>    random draw; the sealed-template refusal test. **Phase 2's dossier is fixed input**: a wording or number change
+>    there goes through `figures.toml` and a re-render (IMPLEMENTATION doc §13 step 7's method).
+> 4. Model note for him: Opus for the IMPLEMENTATION doc; Sonnet for the build after approval.
+> The step 7 and 8 details follow.
+> **STEP 8 (the realism read) DONE 2026-10-06, Opus.** `experiment/company/figures.toml` (218 rows, 31 assumptions),
+> `dossier.template.txt`, the rendered `dossier.toml` and the public files under `docs/phases/evidence/phase-2/`;
+> about 2,113 words (estimated 2,850 tokens). **Step 7:** DoD 4 is an acceptance by deferral (he accepted A1-A31 and
+> the text on Opus's recommendations, choosing not to weigh in item by item); the environmental limit kept as
+> drafted; a two-sided neutrality read changed "pressing suppliers" to "negotiating lower prices with suppliers"
+> here and in `planning/07` L9, and logged S3's missing community consequence (OPEN entry below). **Step 8:**
+> `openai/gpt-6-astra`, one call, $0.50 (his OpenRouter balance, outside the AWS ceiling); 13 points, each verified
+> and decided (his: all as recommended); the table is in the IMPLEMENTATION doc §13 step 8. Fixed: the retraining
+> cost's definition (wages excluded, value kept), A12's range and a new check on range bounds, roles not places in
+> section five, compounded growth, the overlaps and annual basis in section eleven, a balancing line, prior-year
+> net income built like the current year's. Two left and logged (RECORDED entry below). **Nothing scenario-facing
+> moved.** **Step 9 (Sonnet):** the manual rule-zero read (nothing found), the DoD audit, `ROADMAP.md`, this block.
+> Nothing in Phase 2 called Bedrock or any official model.
 > **Bedrock at 2:31 PM CDT on 2026-10-06 (`scratch/throttle-check.py`, run once, not acted on):** Nova Lite and
 > Sonnet 4.6 both still `ThrottlingException`, "Too many tokens per day", $0 (12:00 PM: same).
 >
@@ -73,9 +95,23 @@ case by its type and a neutral label. The names live only in the private longlis
 >
 > **`horizon-compact.vercel.app` is claimed** (his, 2026-10-05; entry below), so Phase 1.5's prerequisite is met.
 >
-> **Each session, alongside Phase 2:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
+> **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## RECORDED — dossier simplifications kept after the realism read, 2026-10-06
+
+The Phase 2 realism read (`openai/gpt-6-astra`, IMPLEMENTATION doc §13 step 8) raised two points he chose to leave
+as they are. They go to Phase 2.5's checklist and the methods page as known simplifications, not defects to fix
+silently:
+
+- **Every plant has the same revenue per employee** (plant headcount is split by revenue share). The text says
+  Plant 6 is subscale, which would usually mean fewer sales per employee. Changing it moves Plant 6's loss and
+  payroll, which every closure scenario uses, so it is a scenario-design question, not a dossier edit.
+- **No orders, backlog or outlook.** A machinery maker's board pack would usually have them. There is no keyless
+  public source (the Census M3 survey needs a key), and an outlook invites the model to forecast.
 
 ---
 

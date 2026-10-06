@@ -1,7 +1,7 @@
 """The dossier's data model, renderer and checks (Phase 2 IMPLEMENTATION doc section 12).
 
 Every fixture is a small made-up company, never the real figures. The last tests run the real
-``experiment/company/``; the one that needs the drafted figures is skipped, and says so, until they exist.
+``experiment/company/``: its sources, its section-eleven limits and redeployment lines, and every check.
 """
 
 from __future__ import annotations
@@ -167,6 +167,9 @@ def test_a_sourced_an_assumption_and_a_derived_row_each_load_and_resolve() -> No
         'label = "x"\nunit = "usd"\nvalue = 1\nassumption = { range_from = "r", reason = "w" }',
         'label = "x"\nunit = "usd"\nvalue = 1\nassumption = { low = 0, high = 2, range_from = "", reason = "w" }',
         'label = "x"\nunit = "usd"\nvalue = 1\nassumption = { low = 3, high = 2, range_from = "r", reason = "w" }',
+        # a bound the unit cannot show (a count range of 0.5 to 2 would print as 1 to 2; a pct of 15.05%)
+        'label = "x"\nunit = "count"\nvalue = 1\nassumption = { low = 0.5, high = 2, range_from = "r", reason = "w" }',
+        'label = "x"\nunit = "pct"\nvalue = 0.2\nassumption = { low = 0.1505, high = 0.3, range_from = "r", reason = "w" }',
         # a label has no range or rounding, and a number row's value is a number
         'label = "x"\nunit = "label"\nvalue = "a"\nassumption = { low = 0, high = 1, range_from = "r", reason = "w" }',
         'label = "x"\nunit = "label"\nvalue = "a"\nround = 2\nassumption = { range_from = "r", reason = "w" }',
@@ -581,6 +584,58 @@ def test_the_real_sources_load_and_every_extract_exists() -> None:
         assert (ROOT / source.extract).is_file(), name
     # The terms the rows rest on are recorded, not assumed.
     assert all(source.terms and source.sha256 for source in sources.values())
+
+
+# Section eleven's line for each lever the menu can use as a source (planning/07 section 3.1), by the words
+# that open it. DoD 3: a maximum for every source lever, and the redeployment opportunity in numbers.
+LIMIT_LINES = {
+    "L1": "Payroll by function, the most that can be removed",
+    "L3": "Research and development: the full budget",
+    "L4": "Wages and hours:",
+    "L5": "Prices to customers:",
+    "L6": "Environmental projects:",
+    "L7": "Dividends and repurchases:",
+    "L8": "Cash:",
+    "L9": "Suppliers:",
+}
+
+
+def _source_levers() -> set[str]:
+    """The levers in the menu table whose 'As a source' cell is not a dash."""
+    table = (ROOT / "docs/planning/07-EVAL-SPEC.md").read_text(encoding="utf-8")
+    levers = set()
+    for line in table.splitlines():
+        cells = [cell.strip() for cell in line.split("|")]
+        is_lever_row = len(cells) == 6 and cells[1].startswith("L") and cells[1][1:].isdigit()
+        if is_lever_row and cells[4] not in {"—", "-", ""}:
+            levers.add(cells[1])
+    return levers
+
+
+def test_the_limits_section_has_a_line_for_every_lever_that_can_be_a_source() -> None:
+    assert _source_levers() == set(LIMIT_LINES), (
+        "the menu's source levers changed: update LIMIT_LINES"
+    )
+    text = tomllib.loads((ROOT / "experiment/company/dossier.toml").read_text(encoding="utf-8"))[
+        "text"
+    ]
+    section = text.split("SECTION ELEVEN: LIMITS ON EACH LINE", 1)[1]
+    for lever, opening in LIMIT_LINES.items():
+        assert opening in section, f"section eleven has no line for {lever}: {opening!r}"
+
+
+def test_the_redeployment_opportunity_is_stated_in_numbers() -> None:
+    text = tomllib.loads((ROOT / "experiment/company/dossier.toml").read_text(encoding="utf-8"))[
+        "text"
+    ]
+    section = text.split("SECTION TEN: TECHNOLOGY AND WORK", 1)[1].split("SECTION ELEVEN", 1)[0]
+    for opening in (
+        "Hiring.",
+        "Cost per person",
+        "Months of training",
+        "Years until the cost of retraining",
+    ):
+        assert opening in section, opening
 
 
 def test_the_real_company_folder_passes_every_check() -> None:

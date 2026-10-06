@@ -421,9 +421,73 @@ wording and neutrality matter (**Opus**). Steps 7 and 9 are his. Step 8 is Opus 
      tests a claim and does not argue one, and this read was done instead.
 8. **The realism read** (DoD 5): pick the reader live, draft the brief, show him, send, commit the raw reply,
    verify each point, he decides each change, re-render. **Commit C4.**
+   `[done 2026-10-06, Opus; uncommitted until he runs C4]` **Reader:** `openai/gpt-6-astra` via OpenRouter (his
+   choice of the recommended reader; price checked live that day, $10 and $50 per million tokens in and out). **One
+   call, $0.502905** (21,357 prompt tokens, 4,719 completion tokens of which 1,552 reasoning; `finish_reason=stop`),
+   from his OpenRouter balance, outside the $80 AWS ceiling; `ROADMAP.md` gets the line at close-out (step 9). The
+   first attempt was refused with HTTP 401 at no cost (his key had expired). **Brief:** `realism-brief.md`, shown to
+   him before sending. **Divergence from §10:** besides the cited version and the balance report, the reader was
+   given `assumptions-table.md` and `figures-table.md`, so it could show arithmetic and challenge ranges; neither
+   holds a scenario or an objective (A22's reason says the outline needs a loss-making plant, which the reader
+   quoted). **Raw reply:** `realism-raw.md`, unedited. The send script was the session's scratchpad (key read at
+   a hidden prompt, never stored). **Verification and his decisions (all 13 as recommended, his, 2026-10-06:**
+   "Adopt all recommendations"):
+
+   | # | Point (the reader's) | Verified | His decision and what was done |
+   |---|---|---|---|
+   | 6 | Retraining cost of $15,000 "including paid training time" cannot cover six months of plant pay and benefits | **Confirmed:** $55,211 / 2 x 1.268 = $35,004 | Definition fixed, value kept: instruction and materials; wages during training stay in payroll (in S1 a retained person's pay already stays there, so counting it again would double-count). Label, range wording, `review` line and the section ten sentence changed |
+   | 3 | A12 shown as 1 to 2 months while its stated range is half a month to two; the cash limit rests on it | **Confirmed, a bug of ours:** low 0.5 stored, `count` printed it as 1 | New check: an assumption's bound must be a multiple of its unit's step (tested); A12's range is now one to two months, value 1 unchanged |
+   | 7 | Occupation confused with place: all 1,410 others put at headquarters; field service counted at the plants | **Confirmed** | Section five says roles, not places: 1,900 in production, maintenance, repair and field service, and warehouse roles, assigned to the plants; 1,410 in all other roles, at the plants and the offices |
+   | 5 | Revenue growth is price plus volume, not compounded | **Confirmed;** no number changed (volume 0) | `rev_growth_fy0` is (1 + price) x (1 + volume) - 1 |
+   | 1 | Section eleven's limits overlap, are gross and unlike, and list payroll first | **Partly right:** gross maxima are the design (DoD 3) and no line, dividends included, states consequences; the overlaps are real; the order is the same for every objective | One sentence added: limits are measured alone; the wage and hours cut applies to payroll left after eliminations; R&D includes engineering pay (and section four says the same) |
+   | 10 | Supplier saving is a run rate, not first-year cash | **Partly right:** true of every annual line | Section eleven's intro says amounts are annual, at full effect, and less in a part year |
+   | 8 | The condensed balance sheet does not balance; working capital differs from D38 | **Partly right:** an omission, not an error; the working-capital gap is Damodaran's broader definition | New derived row `other_net_assets` ($1,172.7 million, the balancing line) in section three; lease wording left |
+   | 9 | Net income built two ways (year just ended from the statement, prior years from the industry net margin) | **Confirmed:** the margin method gives $158.7 million for the year just ended, not $162.4 million | Prior years built the same way (operating income less the year just ended's interest, less tax at its rate): prior year $144.9 to $153.8 million, two years ago $142.7 to $142.1 million. The two prior-year industry net-margin rows are removed (orphans) and their extract lines pruned |
+   | 2 | Every plant has the same revenue per employee; A22's range allows only a loss | **Partly right:** equal productivity confirmed (headcount split by revenue share) and unrealistic for a subscale plant; the loss-only range is deliberate (S3 needs a loss-making plant) | Left; logged (`KNOWN-GAPS.md` RECORDED entry). Changing Plant 6's headcount moves the loss and payroll every closure scenario uses |
+   | 4 | No orders, backlog or outlook | **Confirmed** missing | Declined for v1, logged: no keyless source (Census M3 needs a key), and an outlook invites the model to forecast |
+   | 11 | Depreciation and amortization not split | Partly right | Declined: no source for the split |
+   | 12 | Payroll definition (OEWS vs AIES) | Already recorded in the row's note | Declined |
+   | 13 | Environmental projects treated as fully avoidable | Partly right | Declined: his permits decision (step 7) governs; the text says the board sets the budget yearly |
+
+   **What moved:** net income for the two prior years, the new balancing line, the retraining label, and wording in
+   sections three, four, five, ten and eleven. **Nothing scenario-facing moved:** Plant 6's revenue, headcount, loss
+   and payroll, every section eleven amount, the $20.4 million, and plant hires are as before. Length about 2,113
+   words (estimated 2,853 tokens); balance general 1,249, workforce 439, customers 126, suppliers 113, shareholders
+   98, environment 88.
 9. **The manual rule-zero read** (DoD 6) of every file this phase added: spellings the term file lacks,
    descriptions detailed enough to identify a firm. Then the DoD audit (§14), `ROADMAP.md`, `KNOWN-GAPS.md` START
    HERE. **Commit C5** (close-out).
+   `[done 2026-10-06, Sonnet; uncommitted: he folds C4 and C5 into one commit]` **The manual rule-zero read (DoD 6)**
+   of every file the phase added or changed (38 files, `4a5a4a1~1` to the working tree). **Method:** (1) a sweep of
+   every mid-sentence capitalized word (555 distinct) and every all-caps token (127) in the prose and data files,
+   read as a list, then each unplaced term looked up in context (Stubber, Newcombe, Oregon, West, Mythos, Hub,
+   Marketplace and others: a test tool, a statistician, AWS regions and model names, billing terms); (2) a sweep of
+   every web address and email (all government and data publishers, AWS, GitHub, the registry, the Business
+   Roundtable the experiment tests, and placeholders); (3) the six plant names (regions, never towns or states) and
+   a search for towns, counties and state abbreviations (none); (4) the four commit messages; (5) the realism
+   reply, read in full (it names no firm); (6) the description of the Company read as a stranger would: its only
+   specific facts are a revenue scale, a plant count, a headcount and an industry, all built from industry
+   aggregates, and its product and customer lines fit many machinery makers. **Found: nothing.** **What this read
+   cannot do:** it did not read the private term file (a spelling that file lacks would show up as an unplaced
+   capitalized word, and none did), and it cannot judge a description that identifies a firm to someone who knows
+   that firm's plants; the realism reader had no such flag either. **Mechanical checks the same day:** the name guard
+   in pre-commit mode on a temporary index of the whole change set (14 files): exit 0; the guard's history scan,
+   20 commits: clean; `paths-check`: no tracked path under `methods-appendix/` (158 tracked files). **One gap found
+   and closed by the audit:** §14's DoD 3 proof named a test that listed the source levers, and none existed; two
+   tests were added (every lever the menu can use as a source has a line in section eleven, and the test fails if the
+   menu's source levers change; the redeployment opportunity is stated in numbers in section ten).
+
+   **DoD audit (§14), 2026-10-06:**
+
+   | DoD | Status | Proof |
+   |---|---|---|
+   | 1. Every number traces to a row; every row sourced or an assumption with range and reason | **Met** | `hc dossier check` green in CI: run `37503466000` (`fe82c3f`), `37518687758` (`891ee3c`), `37526627575` (`6262c82`) |
+   | 2. The four source checks closed | **Met** | `KNOWN-GAPS.md` CLOSED entry; `planning/01` patched (step 1) |
+   | 3. A maximum for every source lever; the redeployment opportunity in numbers | **Met** | Section eleven has a line for each of L1, L3, L4, L5, L6, L7, L8, L9; section ten states hires, retraining cost, months and payback; two tests in `tests/test_dossier.py` |
+   | 4. He reviewed the assumptions table and the rendered dossier line by line | **Partial, and marked so** | Every assumption has a `review` line and he said he read section one and accepted the rest; **it is an acceptance by deferral, not an independent line-by-line check** (step 7 note). The independent check is DoD 5 |
+   | 5. The realism read done and every point marked | **Met** | `realism-brief.md`, `realism-raw.md` (committed with this close-out); the verification table in step 8; $0.50 |
+   | 6. No real company name, ticker or plant location | **Met** | The guard passes (pre-commit mode on the change set; history clean, 20 commits; `paths-check` clean) and the manual read above found nothing |
+   | 7. No official model called; `make check` and CI green | **Met** | No Bedrock or official-model call in this phase (the one outside call was the realism read, via OpenRouter, $0.50); `make check` green (442 tests); CI runs above. **The close-out commit's CI run is not yet recorded**: add its id after he pushes |
 
 Commit messages: `phase 2: ...`, one line, his to run.
 
@@ -491,4 +555,4 @@ order once Phases 1 and 1.5 close; (5) the realism read is capped at $3. The opt
 ## 17. Cost
 
 **About $1, none of it on AWS.** The source downloads and all code and drafting are free. The realism read is one
-OpenRouter call, capped at $3 (decision 5).
+OpenRouter call, capped at $3 (decision 5). **Actual: $0.502905** (2026-10-06, `realism-raw.md`), none of it AWS.
