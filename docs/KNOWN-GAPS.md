@@ -7,15 +7,25 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-06, 8:30 AM
+> ## START HERE — where things stand, 2026-10-06, afternoon
 >
 > **NOW: Phase 2 `company-dossier`, started out of order (his, 2026-10-06)**, because everything ahead of it waits on
 > AWS. It needs no AWS and no official model (its scope doc, Prerequisites). **Its IMPLEMENTATION doc is APPROVED
-> (his, 2026-10-06, all five §15 decisions as recommended):** `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`. Its §2 holds the four source checks, run live 2026-10-06 (2024 AIES, OEWS May 2025, Damodaran 2026-01-09 with
-> his public-domain statement, SEC data sets current); they are recorded as CLOSED here in build step 1, not before.
-> **Next session, first move:** the build from §13 step 1. **Steps 1-4 are code (Sonnet);
-> steps 5-6 draft the instrument (switch to Opus); 7 and 9 are his.** Nothing in Phase 2 calls Bedrock or any
-> official model.
+> (his, 2026-10-06, all five §15 decisions as recommended):** `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`.
+> **BUILD STEPS 1-4 ARE DONE (Sonnet, 2026-10-06), `make check` green, NOT YET COMMITTED** (one commit for the
+> session, his to run). Step 1: the four source checks are the CLOSED entry just below, `planning/01` is patched, and
+> `experiment/company/sources.toml` holds ten sources with the hash of each file read, with their extracts under
+> `docs/phases/evidence/phase-2/sources/`. Steps 2-4: `src/horizon_compact/dossier/` (the data model, the renderer,
+> the checks), `hc dossier render` and `hc dossier check`, a `dossier-check` target inside `make check`, and
+> `tests/test_dossier.py`. **`hc dossier check` is skipping the figures check by name** until the figures exist; step 6
+> removes that skip.
+> **Next session, first move: SWITCH TO OPUS, then build step 5** (draft `figures.toml`, section by section in the
+> IMPLEMENTATION doc §8's order, every row from the extracts, a formula, or an assumption with its range and reason),
+> then step 6 (the template, render, prune each extract to the rows the figures cite, commit C2). **Steps 7 and 9 are
+> his.** Nothing in Phase 2 calls Bedrock or any official model. The IMPLEMENTATION doc §13 records, step by step,
+> where the build diverged from it (rounding rule, `label` rows, `review` line, template markers, the skip).
+> **Bedrock at 12:00 PM CDT on 2026-10-06 (`scratch/throttle-check.py`, run once, not acted on):** Nova Lite and
+> Sonnet 4.6 both still `ThrottlingException`, "Too many tokens per day", $0.
 >
 > **WAITING ON AWS, the full list (2026-10-06):**
 > - **Bedrock quotas restored** (case 179121856900232, BLOCKED entry). Behind it: Phase 1 steps 3 and 9, then 11 and
@@ -63,6 +73,51 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Each session, alongside Phase 2:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## CLOSED — Phase 2 source checks, 2026-10-06
+
+The four checks the Phase 2 scope doc owed (`planning/01` §7 items 1-3, and the SEC currency question). The IMPLEMENTATION
+doc §2 ran them in the morning; build step 1 re-read the files themselves in the afternoon and recorded them here.
+`planning/01` §2.2, §2.3, §6 and §7 are patched with dated notes. Every source and its file hash is in
+`experiment/company/sources.toml`; the extracts of the rows used are under `docs/phases/evidence/phase-2/sources/`.
+
+- **Census AIES: closed.** 2024 is the current release (full data 2026-09-03; the file was last modified 2026-09-08).
+  Table `AIES31BASIC01`, U.S. by industry. NAICS 333 read from the file: revenue $473,891,483 thousand; employees
+  1,046,464; annual payroll $84,347,756 thousand; fringe benefits $22,566,734 thousand; cost of materials
+  $237,904,461 thousand; value added $236,158,343 thousand. **All six match the IMPLEMENTATION doc §2.** Derived:
+  revenue per employee $452,850 (the doc's §5 example row said 452851; the file gives 452,850.2, so the real row says
+  452850); payroll 17.8% of revenue; fringe benefits 26.8% of payroll; materials 50.2% of revenue; production workers
+  64.5% of employees. **`AIES31BASIC03` holds sector-level rows only (U.S. and states, NAICS 31-33), no NAICS 333**, so
+  the materials share comes from `BASIC01`, which has it. Capital spending is not in these files; it comes from
+  Damodaran, so no Census API key is needed.
+- **BLS OEWS: closed.** May 2025 is current (released 2026-05-15). File `nat3d_M2025_dl.xlsx` inside `oesm25in4.zip`
+  (the file list calls it "National, 3-digit NAICS, cross-ownership estimates"), NAICS 333000, 535 rows. **Every
+  occupation the workforce table needs is published at the 333000 level**, so none comes from the all-industries
+  table (IMPLEMENTATION doc §16, second uncertainty, answered). BLS refuses HEAD requests (403) but serves the
+  GET, so the edition is recorded by file name and hash. OEWS counts 1,092,170 jobs in NAICS 333000 against AIES's
+  1,046,464 employees: different surveys and reference dates, so the dossier uses AIES for ratios and OEWS for pay and
+  does not mix their counts.
+- **Damodaran: closed.** US industry Machinery, 105 firms, in each of the eight files used (margin, capex, divfund,
+  divfcfe, dbtfund, debtdetails, wcdata, taxrate). **The margin row matches the doc's §2 to the digit** (pre-tax
+  unadjusted operating margin 15.86%, net 10.58%, R&D 2.03%, SG&A 19.65%, EBITDA 19.62%, gross 37.47%). **The files'
+  own "date updated" cell reads 2026-01-05; the 2026-01-09 date is his post announcing the update** ("Data Update 1 for
+  2026", header date Friday, January 9, 2026, read live). Both are recorded; `sources.toml` uses 2026-01-09 as the
+  release and names the 01-05 cell. His public-domain statement was re-read live and is quoted in `planning/01` §6.
+  **His `Employee` file is not used:** its Machinery row says revenue per employee is $34 thousand against AIES's
+  $453 thousand, because its market-cap and revenue columns cover a different set of firms than its employee column
+  (a market cap of $49 billion there against $605 billion in `divfund`). Only the AIES ratio is used.
+- **SEC Financial Statement Data Sets: closed, moot here.** Current: the 2026 Q2 quarterly set exists (last modified
+  2026-08-19) and Q3 does not yet; the 2026-10-02 worry (releases only through 2023) was wrong. Not used for the
+  fictional company (scope decision 3); recorded for Phase 5.
+- **Reading the downloads.** Each download went in its own new folder, read with `python -I`; the `.xlsx` files with the
+  standard library, the legacy `.xls` files with `xlrd` run from a throwaway `uv --no-project --with xlrd` environment
+  (not a project dependency). The extract script is `scratch/phase2-extract-sources.py` (gitignored); to add a row
+  or an occupation later, add it to the script's lists and re-run it on a fresh download. **Damodaran's values are
+  written to 8 significant digits** in the extracts: the `.xls` cells carry binary-float noise
+  (6927.635999999998), and a 12-digit fraction trips `tests/test_architecture.py`'s account-id pattern; the test was
+  left as it is.
 
 ---
 

@@ -2,7 +2,7 @@
 # `make help` lists targets. `make check` is what CI runs, except the one check CI skips by name.
 
 .DEFAULT_GOAL := help
-.PHONY: help setup install fmt lint typecheck test root-check paths-check doctor check \
+.PHONY: help setup install fmt lint typecheck test root-check paths-check dossier-check doctor check \
         guard-history fingerprint tf-fmt tf-check
 
 GUARD := uv run --no-sync python -m horizon_compact.privacy.guard
@@ -71,12 +71,17 @@ tf-check: ## Terraform fmt -check and validate (no credentials, no AWS call)
 paths-check: ## Fail if any tracked path is under methods-appendix/ (needs no private file)
 	@$(GUARD) paths-check
 
+# Offline, no model: the Company's figures, template and that every rendered file is fresh (Phase 2). Until the
+# figures are drafted it checks sources.toml and its extracts and says it skipped the rest.
+dossier-check: ## Check the company dossier's figures, template and rendered files
+	uv run --no-sync hc dossier check
+
 doctor: ## Check the hooks are installed and the private term file loads
 	@$(GUARD) doctor
 
 # CI never has the hooks or the private term file, so `doctor` is skipped there BY NAME, and says so.
 # Everything else is identical, so a green local `make check` predicts a green check on GitHub.
-check: lint typecheck test root-check paths-check tf-check ## Everything CI runs, plus doctor when not in CI
+check: lint typecheck test root-check paths-check dossier-check tf-check ## Everything CI runs, plus doctor when not in CI
 ifdef CI
 	@echo "SKIPPED in CI: doctor (no hooks or private term file on a CI runner, by design)"
 else

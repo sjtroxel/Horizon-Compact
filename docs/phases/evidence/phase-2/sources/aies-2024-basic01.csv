@@ -1,0 +1,75 @@
+field,label,value
+GEO_ID,Geographic identifier code,0100000US
+GEO_LABEL,Geographic Area Name,United States
+GEOTYPE,Type of geography flag,01
+SECTOR,NAICS economic sector,31
+INDLEVEL,Industry level,3
+NAICS2017,2017 NAICS code,333
+NAICS2017_LABEL,Meaning of 2017 NAICS code,Machinery manufacturing
+YEAR,Year,2024
+RCPT_TOT_VAL,"Sales, value of shipments, or revenue ($1,000)",473891483
+EXPS_TOT_DVAL,"Operating expenses ($1,000)",379876763
+PAY_ANN_VAL,"Annual payroll ($1,000)",84347756
+PAY_QTR1_VAL,"First-quarter payroll ($1,000)",21735115
+EMP_MAR12_NUM,Number of employees,1046464
+PAY_ANN_PRDWRK_VAL,"Production workers annual wages ($1,000)",44625789
+PAY_QTR1_PRDWRK_VAL,"Production workers first-quarter payroll ($1,000)",11271101
+EMP_MAR12_PRDWRK_NUM,Production workers for pay period including March 12,674592
+HOURS_PRDWRK_NUM,"Production workers annual hours (1,000)",1344289
+EXPS_FRNG_BENEFIT_VAL,"Total employer costs for fringe benefits ($1,000)",22566734
+EXPS_CSTMTOT_DVAL,"Total cost of materials ($1,000)",237904461
+EXPS_MAT_DVAL,"Purchases of other materials, parts, and supplies (not for resale) ($1,000)",215642133
+EXPS_RESALE_VAL,"Cost of resale without further manufacturing ($1,000)",14822235
+EXPS_CONTRACT_VAL,"Cost of contract work ($1,000)",4629020
+EXPS_FUEL_VAL,"Purchased fuels (except motor fuels) ($1,000)",543209
+EXPS_ELEC_VAL,"Purchased electricity ($1,000)",2267798
+ELEC_PRCH_KWH_NUM,"Quantity of electricity purchased for heat and power (1,000 kWh)",22732412
+VALUE_ADDED_DVAL,"Value added ($1,000)",236158343
+INV_E_TOT_DVAL,"Total inventories, end of year ($1,000)",101151666
+INV_E_FIN_VAL,"Finished goods inventories, end of year ($1,000)",31835511
+INV_E_WIP_VAL,"Work-in-process inventories, end of year ($1,000)",20888172
+INV_E_MAT_VAL,"Materials and supplies inventories, end of year ($1,000)",48428015
+EXPS_RENT_VAL,"Lease and rental payments for machinery, equipment, land, buildings, and other tangible items and structures ($1,000)",3894749
+EXPS_TEMPSTAF_VAL,"Contract labor costs, including temporary help ($1,000)",2435185
+EXPS_COMPTR_OTHEQ_VAL,"Expensed computer hardware and other equipment ($1,000)",562730
+EXPS_DATAPROC_VAL,"Data processing and other purchased computer services ($1,000)",956315
+EXPS_MACH_REP_VAL,"Purchased repairs and maintenance to machinery, vehicles, and equipment ($1,000)",2721162
+EXPS_BUILD_REP_VAL,"Purchased repairs and maintenance to buildings, structures, and offices ($1,000)",1535792
+EXPS_REFUSE_VAL,"Water, sewer, refuse removal, and other utility payments ($1,000)",725754
+EXPS_ADVERT_VAL,"Purchased advertising and promotional services ($1,000)",1367229
+EXPS_PROFTECH_VAL,"Purchased professional and technical services ($1,000)",3378452
+EXPS_TAX_VAL,"Taxes and license fees ($1,000)",1865997
+EXPS_OTHER_VAL,"Other operating expenses ($1,000)",15614426
+RCPT_TOT_CV,"Coefficient of variation for sales, value of shipments, or revenue (%)",.8
+EXPS_TOT_CV,Coefficient of variation for operating expenses (%),.8
+PAY_ANN_CV,Coefficient of variation for annual payroll (%),1
+PAY_QTR1_CV,Coefficient of variation for first-quarter payroll (%),.6
+EMP_MAR12_CV,Coefficient of variation for number of employees (%),.9
+PAY_ANN_PRDWRK_CV,Coefficient of variation for production workers annual wages (%),1.1
+PAY_QTR1_PRDWRK_CV,Coefficient of variation for production workers first-quarter payroll (%),.7
+EMP_MAR12_PRDWRK_CV,Coefficient of variation for production workers for pay period including March 12 (%),1
+HOURS_PRDWRK_CV,Coefficient of variation for production workers annual hours (%),.7
+EXPS_FRNG_BENEFIT_CV,Coefficient of variation for total employer costs for fringe benefits (%),.8
+EXPS_CSTMTOT_CV,Coefficient of variation for total cost of materials  (%),.9
+EXPS_MAT_CV,"Coefficient of variation for purchases of other materials, parts, and supplies (not for resale) (%)",.9
+EXPS_RESALE_CV,Coefficient of variation for cost of resale without further manufacturing (%),1.9
+EXPS_CONTRACT_CV,Coefficient of variation for cost of contract work (%),2.5
+EXPS_FUEL_CV,Coefficient of variation for cost of purchased fuels (except motor fuel)(%),2.4
+EXPS_ELEC_CV,Coefficient of variation for cost of purchased electricity (%),1.7
+ELEC_PRCH_KWH_CV,Coefficient of variation for quantity of electricity purchased for heat and power (%),1.7
+VALUE_ADDED_CV,Coefficient of variation for value added (%),.7
+INV_E_TOT_CV,"Coefficient of variation for total inventories, end of year (%)",.5
+INV_E_FIN_CV,"Coefficient of variation for finished goods inventories, end of year (%)",1
+INV_E_WIP_CV,"Coefficient of variation for work-in-process inventories, end of year (%)",.8
+INV_E_MAT_CV,"Coefficient of variation for materials and supplies inventories, end of year (%)",.6
+EXPS_RENT_CV,"Coefficient of variation for lease and rental payments for machinery, equipment, land, buildings, and other tangible items and structures (%)",1
+EXPS_TEMPSTAF_CV,"Coefficient of variation for contract labor costs, including temporary help (%)",1.4
+EXPS_COMPTR_OTHEQ_CV,Coefficient of variation for expensed computer hardware and other equipment (%),1.3
+EXPS_DATAPROC_CV,Coefficient of variation for data processing and other purchased computer services (%),1.2
+EXPS_MACH_REP_CV,"Coefficient of variation for purchased repairs and maintenance to machinery, vehicles, and equipment (%)",1
+EXPS_BUILD_REP_CV,"Coefficient of variation for purchased repairs and maintenance to buildings, structures, and offices (%)",1.1
+EXPS_REFUSE_CV,"Coefficient of variation for water, sewer, refuse removal, and other utility payments (%)",4
+EXPS_ADVERT_CV,Coefficient of variation for estimate of advertising and promotional services (%),3
+EXPS_PROFTECH_CV,Coefficient of variation for estimate of purchased professional and technical services (%),2.1
+EXPS_TAX_CV,Coefficient of variation for estimate of taxes and license fees (%),1.3
+EXPS_OTHER_CV,Coefficient of variation for estimate of other operating expenses (%),.8

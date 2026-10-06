@@ -1,6 +1,7 @@
 """``hc``: the harness command line. ``smoke`` (Phase 0.5) makes single recorded calls; ``sweep`` (Phase 1)
-plans, runs, launches, inspects and stops a sweep. Every command that calls a model or authenticates to AWS is
-typed by him."""
+plans, runs, launches, inspects and stops a sweep; ``dossier`` (Phase 2) renders and checks the fictional
+company's dossier and calls nothing. Every command that calls a model or authenticates to AWS is typed by
+him."""
 
 from __future__ import annotations
 
@@ -19,6 +20,15 @@ import botocore
 from botocore.exceptions import BotoCoreError, ClientError
 
 import horizon_compact
+from horizon_compact.dossier.check import default_repo_root, run_checks
+from horizon_compact.dossier.figures import FigureError, load_figures
+from horizon_compact.dossier.render import (
+    COMPANY_DIR,
+    TEMPLATE_PATH,
+    TemplateError,
+    parse_template,
+    render_outputs,
+)
 from horizon_compact.experiment import Experiment, ExperimentError, load_experiment
 from horizon_compact.providers.base import ModelRoute
 from horizon_compact.providers.bedrock import REGION, BedrockConverseProvider, make_runtime_client
@@ -131,6 +141,7 @@ RESULTS_BUCKET_ENV = "HC_RESULTS_BUCKET"
 REGION_ENV = "HC_REGION"
 PROFILE_ARN_ENV = "HC_SONNET_PROFILE_ARN"
 CLEAN_EXIT, REFUSED_EXIT, NOT_CLEAN_EXIT = 0, 2, 3
+CHECK_FAILED_EXIT = 1
 
 
 def _laptop_git() -> tuple[str, bool]:
@@ -342,6 +353,43 @@ def cmd_sweep_stop(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+# --- dossier ---------------------------------------------------------------------------------------------
+
+
+def cmd_dossier_check(root: Path) -> int:
+    report = run_checks(root)
+    for note in report.notes:
+        print(f"note: {note}")
+    for failure in report.failures:
+        print(f"FAIL: {failure}", file=sys.stderr)
+    if report.ok:
+        print("dossier check: ok")
+    return CLEAN_EXIT if report.ok else CHECK_FAILED_EXIT
+
+
+def cmd_dossier_render(root: Path) -> int:
+    try:
+        figures = load_figures(root / COMPANY_DIR)
+        template = parse_template((root / TEMPLATE_PATH).read_text(encoding="utf-8"))
+        outputs = render_outputs(template, figures)
+    except (FigureError, TemplateError, OSError) as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return REFUSED_EXIT
+    for relative, content in outputs.items():
+        path = root / relative
+        unchanged = path.is_file() and path.read_text(encoding="utf-8") == content
+        if not unchanged:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8", newline="\n")
+        print(f"{'unchanged' if unchanged else 'wrote':<10} {relative}")
+    return CLEAN_EXIT
+
+
+def cmd_dossier(args: argparse.Namespace) -> int:
+    root: Path = args.root or default_repo_root()
+    return cmd_dossier_check(root) if args.action == "check" else cmd_dossier_render(root)
+
+
 def _add_plan_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--experiment", required=True, help="folder under experiment/, e.g. placeholder"
@@ -404,6 +452,17 @@ def build_parser() -> argparse.ArgumentParser:
     stop_parser = sweep_actions.add_parser("stop", help="Stop a model's running sweep task")
     stop_parser.add_argument("--model", required=True)
     stop_parser.add_argument("--profile", default=None)
+
+    dossier = groups.add_parser("dossier", help="Phase 2 company dossier. Offline; calls no model.")
+    dossier.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
+    dossier_actions = dossier.add_subparsers(dest="action", required=True)
+    dossier_actions.add_parser(
+        "render",
+        help="Write the dossier and its public documents from the figures and the template",
+    )
+    dossier_actions.add_parser(
+        "check", help="Check the figures, the template and that every rendered file is fresh"
+    )
     return parser
 
 
@@ -418,6 +477,8 @@ SWEEP_COMMANDS = {
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.group == "dossier":
+        return cmd_dossier(args)
     if args.group == "sweep":
         try:
             return SWEEP_COMMANDS[args.action](args)

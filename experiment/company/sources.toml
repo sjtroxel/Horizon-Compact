@@ -1,0 +1,145 @@
+# Every source behind the Company's figures (docs/phases/phase-2-company-dossier-IMPLEMENTATION.md, section 5).
+# `short` is the label the cited public version puts after a number. `sha256` is the hash of the exact file read (`file`); `archive_sha256` is the hash of the zip it came in, where there was one.
+# `extract` is the cut of that file kept in the repo, only the rows used. Dates are ISO; `retrieved` is the day the file was downloaded.
+
+[sources.aies-2024-basic01]
+short = "AIES 2024"
+publisher = "US Census Bureau"
+title = "Annual Integrated Economic Survey, 2024, table AIES31BASIC01 (U.S. by industry)"
+edition = "2024 AIES, full data release; file last modified 2026-09-08"
+released = 2026-09-03
+retrieved = 2026-10-06
+url = "https://www2.census.gov/programs-surveys/aies/data/2024/AIES31BASIC01.zip"
+file = "AIES31BASIC01.dat"
+sha256 = "b33318598873e0d7be37429cb1532e88fc3a89fe99570da61a0e66856f0d1f27"
+archive_sha256 = "62e2d1919c021a59cfbe9813b440f26f9c36dae95fa089232917bc79d964c687"
+population = "all US employer firms, NAICS 333 (Machinery manufacturing)"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2/sources/aies-2024-basic01.csv"
+
+[sources.oews-2025-nat3d]
+short = "OEWS May 2025"
+publisher = "US Bureau of Labor Statistics"
+title = "Occupational Employment and Wage Statistics, May 2025 estimates, national 3-digit NAICS, cross-ownership"
+edition = "May 2025 OEWS estimates, released 2026-05-15"
+released = 2026-05-15
+retrieved = 2026-10-06
+url = "https://www.bls.gov/oes/special-requests/oesm25in4.zip"
+file = "nat3d_M2025_dl.xlsx"
+sha256 = "2ff31601098f3f9827738f14a293ac5fd93f2e9ef960138ef9078e8a5f799e64"
+archive_sha256 = "3ef0e42fab1b42a7dac8a3a9b3e7024f5d7a07eff308bff5fc91808061ec08e1"
+population = "wage and salary workers in NAICS 333000, national estimates"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2/sources/oews-2025-nat3d-333000.csv"
+
+[sources.damodaran-2026-01-margin]
+short = "Damodaran 2026 margins"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Profit margins by industry (margin.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/margin.xls"
+file = "margin.xls"
+sha256 = "25b04fce9740d9a471d50e176bf55aa6b7608cd0621b00072508a20e7c35ed7a"
+population = "industry aggregate over 105 US public firms (ratios of summed values, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-margin.csv"
+
+[sources.damodaran-2026-01-capex]
+short = "Damodaran 2026 capex"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Capital expenditures, acquisitions and R&D by industry (capex.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/capex.xls"
+file = "capex.xls"
+sha256 = "97216e369c8c6bd69987ed2ace0933381cc278b7d423a0c7b4944effded4c58e"
+population = "industry aggregate over 105 US public firms (ratios of summed values, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-capex.csv"
+
+[sources.damodaran-2026-01-divfund]
+short = "Damodaran 2026 dividends"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Dividend payout and yield by industry (divfund.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/divfund.xls"
+file = "divfund.xls"
+sha256 = "cc8f1d666d322faf65236ab9c6513ce3ff6052c52ccba7402c429fde629affc9"
+population = "industry aggregate over 105 US public firms (ratios of summed values, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-divfund.csv"
+
+[sources.damodaran-2026-01-divfcfe]
+short = "Damodaran 2026 cash returns"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Dividends, buybacks and free cash flow to equity by industry (divfcfe.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/divfcfe.xls"
+file = "divfcfe.xls"
+sha256 = "da94c9828e853da3db4c87f40e7218f7b3c2b0662b1b05c7e159493349f5bd88"
+population = "industry aggregate over 105 US public firms (ratios of summed values, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-divfcfe.csv"
+
+[sources.damodaran-2026-01-dbtfund]
+short = "Damodaran 2026 debt ratios"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Debt to capital, interest coverage and related ratios by industry (dbtfund.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/dbtfund.xls"
+file = "dbtfund.xls"
+sha256 = "e6218cf139b1e16aca5d054d7c2bf831a5105a206e2cd457a9079e4302010f68"
+population = "industry aggregate over 105 US public firms (ratios of summed values, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-dbtfund.csv"
+
+[sources.damodaran-2026-01-debtdetails]
+short = "Damodaran 2026 debt detail"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Debt breakdown and book interest rate by industry (debtdetails.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/debtdetails.xls"
+file = "debtdetails.xls"
+sha256 = "9314f84826311b594487f9e5f70521bcc8921d77d79ccb37b2666a3d1456f343"
+population = "industry aggregate over 105 US public firms (sums and ratios of sums, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-debtdetails.csv"
+
+[sources.damodaran-2026-01-wcdata]
+short = "Damodaran 2026 working capital"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Working capital as a percent of sales by industry (wcdata.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/wcdata.xls"
+file = "wcdata.xls"
+sha256 = "d73a2bc07111d90996595c74718a0eedb902ffd50dff45395a08b65f39db1288"
+population = "industry aggregate over 105 US public firms (ratios of summed values, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-wcdata.csv"
+
+[sources.damodaran-2026-01-taxrate]
+short = "Damodaran 2026 tax rates"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Effective and cash tax rates by industry (taxrate.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/taxrate.xls"
+file = "taxrate.xls"
+sha256 = "3e1e0e1d79e70eb964996ea04c2994bb4399aa634673f21714bf856ec3bdad29"
+population = "industry aggregate over 105 US public firms (sums and ratios of sums, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-taxrate.csv"

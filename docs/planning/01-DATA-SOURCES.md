@@ -10,6 +10,9 @@
 - **Patched 2026-10-04 (his):** §4.1 judgment rejections and §4.6 rubrics read by an independent reader; §4.6 the
   scaling factor drawn by rule and option figures from pre-cut-off documents only
   (`docs/phases/phase-5-case-building.md`, decisions 2 and 4).
+- **Patched 2026-10-06:** §2.2 status column and §2.3 (the four source checks closed; Damodaran's figures are
+  industry aggregates, not medians), §6 (Damodaran terms) and §7 items 1-3
+  (`docs/phases/phase-2-company-dossier-IMPLEMENTATION.md` §2 and §13 step 1; `docs/KNOWN-GAPS.md`, CLOSED entry).
 - **Public-safety rule:** this file names no company as a case. Candidate real cases live in
   `methods-appendix/` (gitignored in the repo; see §4.8).
 
@@ -103,16 +106,22 @@ Every figure in the dossier cites a public source. Nothing is invented without a
 
 | Feature | Source | Status |
 |---|---|---|
-| Revenue per employee, payroll share, capital spending for the industry | **US Census Bureau, Annual Integrated Economic Survey (AIES).** It replaced the Annual Survey of Manufactures, collecting from March 2024. | verified that AIES replaced ASM; table selection unverified |
-| Wages by occupation (machinists, assemblers, engineers) | **BLS Occupational Employment and Wage Statistics** | unverified for current release |
-| Operating margin, R&D as a share of revenue, capital spending, dividend payout | **Aswath Damodaran's industry datasets, NYU Stern**, updated January 2026 (margins, R&D, capex, dividend fundamentals) | verified the datasets exist and the date; terms of use unverified |
-| Peer financial structure (debt, cash, buyback history) | **SEC company financial data** (XBRL `companyfacts` API, or the Financial Statement Data Sets) | API verified; data-set currency unverified (one source listed releases only through 2023). *Patched 2026-10-04 (his): **not used for the fictional company**, which takes industry-level figures only (Census, BLS, Damodaran), so no list of real peer companies exists anywhere; kept for Phase 5's real cases* |
+| Revenue per employee, payroll share, capital spending for the industry | **US Census Bureau, Annual Integrated Economic Survey (AIES).** It replaced the Annual Survey of Manufactures, collecting from March 2024. | verified that AIES replaced ASM; table selection unverified. *Closed 2026-10-06: the 2024 AIES is the current release (full data 2026-09-03); the table is `AIES31BASIC01` (U.S. by industry, NAICS 333 down to six digits), keyless bulk file. Capital spending is not in the manufacturing tables (it is in a dataset the Census API serves only with a key), so capital spending comes from Damodaran.* |
+| Wages by occupation (machinists, assemblers, engineers) | **BLS Occupational Employment and Wage Statistics** | unverified for current release. *Closed 2026-10-06: May 2025 is current (released 2026-05-15); the file is `nat3d_M2025_dl.xlsx` in `oesm25in4.zip`, NAICS 333000, and every occupation the workforce table needs is published at that level.* |
+| Operating margin, R&D as a share of revenue, capital spending, dividend payout | **Aswath Damodaran's industry datasets, NYU Stern**, updated January 2026 (margins, R&D, capex, dividend fundamentals) | verified the datasets exist and the date; terms of use unverified. *Closed 2026-10-06: the US industry Machinery exists (105 firms), the files' own date cell reads 2026-01-05 and his post announcing the update is dated 2026-01-09; terms are in §6.* |
+| Peer financial structure (debt, cash, buyback history) | **SEC company financial data** (XBRL `companyfacts` API, or the Financial Statement Data Sets) | API verified; data-set currency unverified (one source listed releases only through 2023). *Patched 2026-10-04 (his): **not used for the fictional company**, which takes industry-level figures only (Census, BLS, Damodaran), so no list of real peer companies exists anywhere; kept for Phase 5's real cases.* *Closed 2026-10-06: the Financial Statement Data Sets are current (quarterly, 2026 Q1 and Q2 posted); the worry about releases only through 2023 was wrong. Moot for the fictional company.* |
 
 ### 2.3 Why this is the main attack surface
 
 A critic's first line will be "it's a toy company." The answer is a **published dossier with a source on every
-number**: "operating margin 9%: industry median per [dataset, date]." The dossier is the most important public
+number**: "operating margin 9%: industry aggregate per [dataset, date]." The dossier is the most important public
 document in the project after the methods page.
+
+*Patched 2026-10-06 (found writing the Phase 2 IMPLEMENTATION doc, confirmed against the files): Damodaran's industry
+figures are **aggregates, not medians**. Each ratio is computed over the industry's public firms taken together (for
+Machinery, 105 firms), which weights the largest firms most. The example above said "median" and was wrong about that;
+every row built from his files says "industry aggregate, 105 firms." Census AIES covers every employer firm in the
+industry and Damodaran covers public firms only, so each row also names its population.*
 
 ---
 
@@ -313,8 +322,10 @@ Verified 2026-10-02 (SEC developer resources, and a live query from this machine
   dossiers are anonymized summaries.
 - **US Census and BLS data:** US government works, public domain.
 - **The Business Roundtable statement:** quoted briefly, with attribution, as the subject of the test.
-- **Damodaran datasets:** free and widely used; **terms unverified**. Cite as the source; check terms before
-  redistributing any table.
+- **Damodaran datasets:** free and widely used. *Terms read 2026-10-06 (his post "Data Update 1 for 2026", dated
+  2026-01-09): "If you use my data, and acknowledge me as a source, I thank you, but you do not need to explicitly ask
+  me for permission. The data is in the public domain to be used." Cite him as the source; small extracts of the rows
+  used are committed with attribution (Phase 2 decision 3).*
 
 ---
 
@@ -324,9 +335,11 @@ Verified 2026-10-02 (SEC developer resources, and a live query from this machine
 industrial machinery, retool fallback).
 
 **Claude's checks still owed:**
-1. AIES and BLS tables: which exact tables, current release (§2.2).
-2. Damodaran terms of use (§6).
-3. Whether the SEC Financial Statement Data Sets are current; otherwise `companyfacts` only (§2.2).
+1. ~~AIES and BLS tables: which exact tables, current release (§2.2).~~ Done 2026-10-06: 2024 AIES table
+   `AIES31BASIC01`; May 2025 OEWS, `nat3d_M2025_dl.xlsx` (§2.2).
+2. ~~Damodaran terms of use (§6).~~ Done 2026-10-06: public domain with attribution, his statement quoted in §6.
+3. ~~Whether the SEC Financial Statement Data Sets are current; otherwise `companyfacts` only (§2.2).~~ Done
+   2026-10-06: current, quarterly through 2026 Q2; not used for the fictional company in any case.
 4. ~~Bedrock prices, regional availability, batch discounts (`03`).~~ Done 2026-10-02 in `03` §2 and §5.
 5. Cutoffs of any non-Claude model before it joins (§3.1).
 6. Each real-case candidate: first-disclosure date, public status, and recognition (§4.4, §4.6). Happens during case

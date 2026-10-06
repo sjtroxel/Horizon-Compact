@@ -251,11 +251,53 @@ wording and neutrality matter (**Opus**). Steps 7 and 9 are his. Step 8 is Opus 
 1. **Close the source checks.** Record §2 in `KNOWN-GAPS.md` (a CLOSED entry); patch `planning/01` §2.2 (status
    column), §2.3 (aggregates, not medians, §3 finding 1) and §7 items 1-3, each with a dated note. Download the OEWS
    May 2025 industry file and record its name and edition. Write `sources.toml` and the source extracts (decision 3).
-2. **The data model and formulas** (`figures.py`) with their tests.
+   `[done 2026-10-06]` As built: the CLOSED entry is in `KNOWN-GAPS.md`; `planning/01` is patched in §2.2, §2.3, §6
+   and §7 (§6 too, because it still said Damodaran's terms were unverified); OEWS is `nat3d_M2025_dl.xlsx` in
+   `oesm25in4.zip`; ten sources (AIES, OEWS, eight Damodaran files) are in `experiment/company/sources.toml` with the
+   hash of each exact file, and ten extracts are under `docs/phases/evidence/phase-2/sources/`. **Divergences from
+   this doc:** (1) `sources.toml` carries three fields beyond §5's example, `edition`, `file` and `sha256`
+   (plus `archive_sha256` for zips); step 2's model must accept them. (2) The §5 example row's 452851 is really
+   452850, from the file. (3) The extracts hold every field of the NAICS 333 row (AIES) and 21 candidate occupations
+   plus the major groups (OEWS), which is more than the final figures will use: **step 6 prunes each extract to the
+   rows the figures cite** before C2. (4) The Damodaran `Employee` file is not used (bad Machinery row; CLOSED entry).
+   (5) The extract script is `scratch/phase2-extract-sources.py`, untracked. (6) Damodaran's values are written to
+   8 significant digits in the extracts (binary-float noise, and the account-id test, `KNOWN-GAPS.md` CLOSED entry);
+   the rounding the figures use is far coarser. (7) `sources.toml` also carries a `short` label per source, which
+   the cited version prints after a number.
+2. **The data model and formulas** (`figures.py`) with their tests. `[done 2026-10-06]` Pydantic models for
+   sources, assumptions and rows; formulas parsed with `ast` and walked, `Decimal` arithmetic. **Rules the build
+   fixed that §5 and §6 left open:** (1) **rounding is one rule:** every row's value is rounded half up to its step
+   (its `round`, or the unit's default: usd 1, usd_m 100,000, pct 0.001 as a fraction, count 1, years 0.1, ratio
+   0.01) when resolved, and formulas and text both see the rounded value, so the page's numbers agree with each
+   other; an explicit `round` must be a multiple of the unit's default. (2) **`pct` is stored as a fraction**
+   (0.159, shown 15.9%); `usd_m` is stored in dollars. (3) **A `label` row (a plant number) is an assumption with
+   no range** (`low` and `high` both absent), listed in the assumptions table as "none (a name, not a quantity)";
+   it gets no bracket in the cited text. (4) **An assumption has an optional `review` line**, which is where his
+   step 7 review is recorded, so the rendered table stays reproducible from the data (§9 said he fills the table;
+   a hand-filled table could not pass the byte-for-byte check). (5) Numbers use strict types: a TOML boolean is
+   refused (a lax union had quietly read `true` as 1; the test for it found that).
 3. **The renderer and the checks** (`render.py`, `check.py`), the `hc dossier render` and `hc dossier check`
    commands, and `make check` running the check. Tests first where practical. **Commit C1** (code only; the real
-   files do not exist yet, so the last test in §12 is skipped until they do, and says so).
-4. **Wire-up**: `experiment/README.md` line, `.gitignore` if needed, `make check` green.
+   files do not exist yet, so the last test in §12 is skipped until they do, and says so). `[done 2026-10-06]`
+   `render.py` (template parser, renderer, the three tables), `check.py`, the `hc dossier` group in `cli.py`, and
+   `tests/test_dossier.py` (the §12 cases: 83 pass and one is skipped by name). **As built:** (1) **the template's
+   markers are `@title <text>` (once, first) and `@group <name>` lines**, never rendered; groups are `general`,
+   `workforce`, `customers`, `suppliers`, `shareholders`, `environment`. Consecutive blank lines collapse. (2)
+   **The digit check rejects any Unicode numeric character**, so `2` `²` and `½` all fail. Spelled-out numbers
+   ("two years ago") cannot be checked mechanically; **step 7's line-by-line read is the check for them.** (3)
+   **Cited labels:** a sourced row prints its source's `short`, an assumption `assumption A#`, a derived row
+   `derived D#`, numbered in order of first appearance in the template. (4) **An orphan is a row the template
+   cannot reach**, directly or through formulas (stricter than §5's "used by another row's formula": a chain of
+   rows feeding only each other is still an orphan). (5) **While none of `figures.toml`, the template and
+   `dossier.toml` exist, `hc dossier check` validates `sources.toml` and its extracts and prints a SKIPPED note;
+   once any exists, all must. Step 6 removes the skip** (it is a hole: deleting all three would pass). (6) Exit
+   codes: 0 ok, 1 a check failed, 2 `render` refused. (7) The token estimate is words x 1.35 and warns above 7,000.
+4. **Wire-up**: `experiment/README.md` line, `.gitignore` if needed, `make check` green. `[done 2026-10-06]` The
+   README line; a `dossier-check` Makefile target in `check` (so CI runs it); `.gitignore` needed nothing. `make
+   check` is green with doctor (436 tests, 1 skipped, mypy strict, ruff, both Terraform roots). The name guard,
+   run on a temporary copy of the whole change set, passes. **One thing it cost:** the repo's account-id test caught
+   the extracts' float noise (12-digit fractions); the Damodaran extracts were re-cut to 8 significant digits and
+   the test was left alone (divergence 6, step 1).
 5. **Draft the figures** (Opus), section by section in §8's order: every sourced row from the extracts, every derived
    row as a formula, every assumption with its range and reason.
 6. **Draft the template** (Opus) and render. Run the checks. Estimate the length. **Commit C2** (the dossier, its
