@@ -7,7 +7,28 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-04, 7 PM (main-model line amended 2026-10-05)
+> ## START HERE — where things stand, 2026-10-06, 8:30 AM
+>
+> **NOW: Phase 2 `company-dossier`, started out of order (his, 2026-10-06)**, because everything ahead of it waits on
+> AWS. It needs no AWS and no official model (its scope doc, Prerequisites). **Its IMPLEMENTATION doc is APPROVED
+> (his, 2026-10-06, all five §15 decisions as recommended):** `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`. Its §2 holds the four source checks, run live 2026-10-06 (2024 AIES, OEWS May 2025, Damodaran 2026-01-09 with
+> his public-domain statement, SEC data sets current); they are recorded as CLOSED here in build step 1, not before.
+> **Next session, first move:** the build from §13 step 1. **Steps 1-4 are code (Sonnet);
+> steps 5-6 draft the instrument (switch to Opus); 7 and 9 are his.** Nothing in Phase 2 calls Bedrock or any
+> official model.
+>
+> **WAITING ON AWS, the full list (2026-10-06):**
+> - **Bedrock quotas restored** (case 179121856900232, BLOCKED entry). Behind it: Phase 1 steps 3 and 9, then 11 and
+>   12, so Phase 1's close and the first test of the task role's Bedrock and S3 permissions; Phase 1.5, which needs
+>   Phase 1's sweep results in S3; Phase 2.5's Nova Lite development runs (its Ollama runs do not wait); Phase 3.5's
+>   pilot and everything after it. Probably Musical Mycelium's Bedrock calls too (unchecked).
+> - **Phase 0.5 close-out on billing data** (WAITING entry). Not the quota block: the data should have posted by the
+>   morning of 2026-10-06, so it can run now, about 15 minutes of his console. The Sonnet 4.6 budget needs Sonnet's
+>   charges to have posted.
+> - **If AWS never restores the quotas,** the fallbacks are another provider's credits or a free route; none is
+>   researched or decided (his decision, when it comes to that).
+>
+> *Everything below this line is as of 2026-10-05, 1:20 PM, and still true unless the list above says otherwise.*
 >
 > **PHASE 0 is complete** (2026-10-03; CI run `37160410815`). **Every scope doc, Phases 0 through 7, is approved.**
 > **PHASE 0.5 `aws-foundation` is BUILT and its smoke calls are done; it is NOT closed.** Three commits on `main`, all
@@ -25,17 +46,23 @@ case by its type and a neutral label. The names live only in the private longlis
 >
 > **Phase 1's IMPLEMENTATION doc is APPROVED (his, 2026-10-04 evening):**
 > `docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md`, its four decisions as recommended (ECR in `bootstrap`; keep
-> the dev key through Phase 1; deploy on push for code paths; 15 runs). **BUILD STARTED 2026-10-05 (Sonnet): steps 0-2
-> done, C1 committed (`70a4c4e`). BEDROCK IS BLOCKED (entry below): steps 3 and 9 wait for AWS; NEXT: steps 4-8, which
-> call no model (IMPLEMENTATION doc §16, §21).** Drafted with it and untracked: `experiment/`
-> (`models.toml` and the garden-club placeholder). Decision 3 enters it as two branches (§9.3). Its build can start
+> the dev key through Phase 1; deploy on push for code paths; 15 runs). **BUILD STARTED 2026-10-05 (Sonnet): steps 0-2,
+> 4-8 and 10 are DONE** (C1-C4 committed and pushed; first deploy green, run `37352790960`; permission check passed, run
+> `37353579140`; official launch refused). **BEDROCK IS BLOCKED (entry below): steps 3 and 9 wait for AWS, and 11 and 12
+> follow them** (IMPLEMENTATION doc §16, §21). No task has run yet, so the task role's Bedrock and S3 permissions are
+> untested. `experiment/` (`models.toml` and the garden-club placeholder) is tracked since C1. Decision 3 enters as two
+> branches (§9.3); `SONNET_ROUTE` is set to `application_profile`, matching `models.toml`, until it closes. Its build can start
 > before Phase 0.5 closes; **its first Sonnet sweep cannot** (§1).
 >
 > **The `horizon-compact-dev` access key stays through Phase 1** (decision A, amended 2026-10-04 by Phase 1's
 > decision 2); he deletes it at Phase 1's close. **Sonnet 4.6 is the main model for v1, fixed (his, 2026-10-05).** Sonnet 5.5 is no longer awaited;
 > its two smoke calls will not run (the closed Sonnet 5.5 entry below).
 >
-> **Owed by him:** claim `horizon-compact.vercel.app` (entry below). A prerequisite for Phase 1.5.
+> **`horizon-compact.vercel.app` is claimed** (his, 2026-10-05; entry below), so Phase 1.5's prerequisite is met.
+>
+> **Each session, alongside Phase 2:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
+> entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
+> Phase 0.5's billing close-out (WAITING entry) can run the same day.
 
 ---
 
@@ -55,8 +82,27 @@ Bedrock calls (Haiku 4.5, Nova Pro) are probably failing too; unchecked.
 
 **Action taken.** Account-and-billing case **179121856900232**, opened 2026-10-05 11:42 CDT (Service Quotas, General;
 web), asking for the default quotas back and naming the two request ids. Nothing is spent to qualify (no cash; credits
-only). Not tried yet: whether US West (Oregon) has non-zero applied quotas (limits are per region); using it would be a
-design change and his decision.
+only).
+
+**Follow-up added 2026-10-06 08:04 CDT (his).** The restricted-list argument below, with fresh request ids: one call each
+at 13:03 UTC, both `ThrottlingException`, $0. Service Quotas read the same morning: Sonnet 4.6 and Nova Lite rate
+quotas still 0 applied; several Nova Lite ones are "Not adjustable", so the case is the only route. Case still
+Unassigned. One-call check: `scratch/throttle-check.py` (gitignored).
+
+**AWS's own answer contradicts the block (read again 2026-10-05 13:18 CDT).** The Sonnet 5.5 case's reply lists the models
+that need "a consistent usage and spend history ... for few billing cycle": Opus 4.7 and 4.8, Fable 5, Sonnet 5 and 5.5,
+Haiku 4.5, Mythos 5, Grok 4.3, GPT 5.4 and 5.5. **Sonnet 4.6 and Nova Lite are not on it**, and the reply says "the other
+models should have their default quota available." Both read 0 and are throttled. That is the argument for case
+179121856900232; he adds it to the case in his own words. Haiku 4.5 is on the list, so Musical Mycelium's Haiku calls are
+probably restricted too (unchecked).
+
+**US West (Oregon), read 2026-10-05 13:15 CDT (console, free, no call):** every rate quota reads **0 applied** against a
+non-zero default, the same as us-east-1: Sonnet 4.6 cross-region and global cross-region requests and tokens per minute;
+Nova Lite cross-region requests and tokens per minute and max tokens per day. Batch-job limits read their defaults.
+**Inconclusive:** us-east-1 also read 0 applied on the morning of 2026-10-05 while the 2026-10-04 calls had worked (Phase 1
+IMPLEMENTATION doc §21, step 0), so an applied 0 is not proof of a block. Only a call in Oregon would tell, and moving
+regions to get around a limit while the case is open is **not** being done (his decision, 2026-10-05). The case is the
+path.
 
 **What it blocks.** Phase 1 steps 3 (the development run) and 9 (the skeleton sweep), and Phase 0.5's tag measurement
 only if it needs a new call (it does not: it reads the 2026-10-04 bill). **What it does not block:** steps 4-8 (container,
@@ -315,8 +361,10 @@ provisionally); §14 items 2-4 marked closed with a pointer here.
 - ~~**Create the empty public GitHub repo `Horizon-Compact`**~~ **Done 2026-10-03**, with `f214280` pushed to it.
 - ~~**The one-line disclosure in `docs/planning/README.md`**~~ **Done 2026-10-03**, his words, in `4405412`.
 - ~~**Commit the private term file in job-search-headquarters**~~ **Done 2026-10-03** (`ca8f316`).
-- **Claim `horizon-compact.vercel.app`** as a placeholder (`planning/09` §7 step 7). Unclaimed as of 2026-10-02;
-  not re-checked since. *2026-10-04:* now a prerequisite for Phase 1.5.
+- ~~**Claim `horizon-compact.vercel.app`**~~ **Done 2026-10-05 (his)**, as a placeholder (`planning/09` §7 step 7): Vercel
+  project `horizon-compact`, deployed with the CLI from a folder outside this repo (not linked to GitHub, so pushes do
+  not deploy it). The page holds only the name and `noindex`. The production URL answers 200 to the public; Deployment
+  Protection covers only the generated deployment URLs. Phase 1.5 replaces it with the rewrite to CloudFront.
 
 ---
 
@@ -325,7 +373,8 @@ provisionally); §14 items 2-4 marked closed with a pointer here.
 **Decided 2026-10-05 (his)**: **Sonnet 4.6 is the main model for v1, fixed. Sonnet 5.5 is no longer awaited.** AWS answered
 the Global quota case on 2026-10-05: the newest models, Sonnet 5.5 among them, are held until an account has
 several billing cycles of Bedrock usage and spend, with automatic re-evaluation or a new request after the next
-cycle. The US case (179097554500679) asks for the same model and is expected to get the same answer. The
+cycle. The US case (179097554500679) asked for the same model; AWS closed it on 2026-10-06 as a duplicate of
+179097558200946 (taken to be the Global case). Case 179121856900232, the quota restore, is separate. The
 main-model slot is closed, no phase plans around Sonnet 5.5, and nothing is spent to qualify for it. If access
 ever arrives, using it is a new decision of his, not something the plan assumes. Patched the same day:
 `planning/02`, `03`, `04`, `05`, `07` and `09` (status lines), `ROADMAP.md` §2, §4 and §5, and the scope docs for

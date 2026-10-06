@@ -515,7 +515,7 @@ All offline (the Phase 0.5 conftest makes the network unreachable). Expected new
 |---|---|---|
 | C1 | `experiment/`, `src/` (experiment, sweep modules, provider cache point, CLI, smoke call 10), tests, `pyproject.toml`, `uv.lock`, settings | `make check` green |
 | (no commit) | the laptop development run on Nova Lite, `LocalStore` | his run, step 3 |
-| C2 | `infra/docker/`, the Dockerfile-dockerignore; doc notes from step 3 | local image builds and `sweep plan` runs in it |
+| C2 | `infra/docker/`, the Dockerfile-dockerignore; doc notes from step 3 *(as built: folded into C3's commit `927036f`, his choice, 2026-10-05)* | local image builds and `sweep plan` runs in it |
 | C3 | `infra/terraform/bootstrap/` additions, `infra/iam/*.json`, the dev policy file | bootstrap applied, second plan clean |
 | C4 | `infra/terraform/main/`, `deploy.yml`, `aws-permission-check.yml`, `make tf-check` over both roots | pushed: the first deploy runs from it |
 | C5 | evidence and as-built notes; `planning/07` §4 note | the sweep, the resume, the refusals |
@@ -526,29 +526,29 @@ All offline (the Phase 0.5 conftest makes the network unreachable). Expected new
 0. **[done 2026-10-05 except the budget and decision 3, which wait for billing data; results in §21]** **He checks** (console, free): Phase 0.5 closed, or at least its budget applied (§1); the Sonnet 4.6 and Nova Lite
    request quotas in Service Quotas (us-east-1, "Bedrock", on-demand and cross-region requests per minute); whether
    IAM, Roles holds `AWSServiceRoleForECS`; whether decision 3 has landed, and so `SONNET_ROUTE`.
-1. **[done 2026-10-05; C1 awaits his commit; notes in §21]** **Claude writes C1's code and tests** (§5-§7, §13), the settings. `make check` green. **He commits C1.**
+1. **[done 2026-10-05; C1 committed as `70a4c4e`; notes in §21]** **Claude writes C1's code and tests** (§5-§7, §13), the settings. `make check` green. **He commits C1.**
 2. **[done 2026-10-05; prompts in gitignored `scratch/skeleton-prompts.txt`]** **Claude runs `hc sweep plan` offline** for the skeleton and the development run, and checks the 15 rendered
    prompts by eye: the order shuffles, the tool is identical, the vocabulary test passes.
-3. **He runs the development sweep on the laptop:** Nova Lite, 5 runs, `--store local`. Then **one smoke call**,
+3. **[BLOCKED 2026-10-05: Bedrock throttled, `KNOWN-GAPS.md` BLOCKED; first try in §21]** **He runs the development sweep on the laptop:** Nova Lite, 5 runs, `--store local`. Then **one smoke call**,
    `sonnet46-stop-details` (§6.4), the tenth record of Phase 0.5's twelve. **Claude reads every attempt**: statuses, validation, the cache fields (Nova's minimum cache
    checkpoint is 1,000 tokens and this prefix is above it, so a cache write is expected on the first run, at $0), the
    memo lengths, any format surprise.
    A format or clarity fix to the placeholder is allowed and logged (`planning/05` §2).
-4. **Claude writes C2** (the container); builds it locally; runs `sweep plan` inside it. **He commits C2.**
-5. **Claude writes C3** (bootstrap additions, IAM JSON, the dev policy update). **He pastes the dev policy's new
+4. **[done 2026-10-05; committed with C3 as `927036f`, his choice; notes in §21]** **Claude writes C2** (the container); builds it locally; runs `sweep plan` inside it. **He commits C2.**
+5. **[done 2026-10-05; applied, second plan clean; `927036f`]** **Claude writes C3** (bootstrap additions, IAM JSON, the dev policy update). **He pastes the dev policy's new
    version**, then plans; **Claude reads the plan** (nothing destroyed; the results bucket has `prevent_destroy`; the
    bucket policy denies unconditional puts; the role gains only the deploy policy); he applies; plans again for "No
    changes". **He commits C3.**
-6. **He sets three repository settings:** secret `TF_STATE_BUCKET` (piped from `terraform output -raw state_bucket`,
+6. **[done 2026-10-05: `TF_STATE_BUCKET` set, `SONNET_ROUTE` = `application_profile`]** **He sets three repository settings:** secret `TF_STATE_BUCKET` (piped from `terraform output -raw state_bucket`,
    as in Phase 0.5), variable `SONNET_ROUTE`. (`AWS_DEPLOY_ROLE_ARN` exists.)
-7. **Claude writes C4** (`main`, the two workflows). **He commits and pushes C4**; the deploy workflow runs. **Claude
+7. **[done 2026-10-05; `ab76636`; deploy green on the first run, no follow-ups]** **Claude writes C4** (`main`, the two workflows). **He commits and pushes C4**; the deploy workflow runs. **Claude
    reads its logs**; each missing permission is fixed by name (C4 follow-ups) until the deploy is green.
-8. **He dispatches the permission check** (DoD 5). Claude reads its log.
-9. **Phase 0.5 must be closed by here** (§1). **He launches the skeleton sweep:**
+8. **[done 2026-10-05; run `37353579140`, passed]** **He dispatches the permission check** (DoD 5). Claude reads its log.
+9. **[BLOCKED with step 3]** **Phase 0.5 must be closed by here** (§1). **He launches the skeleton sweep:**
    `hc sweep launch --experiment placeholder --model sonnet-4-6 --repeats 3 --seed 20261005 --label skeleton --profile horizon-compact`
    (given as a script in `scratch/`, since it is long). After about six runs, **`hc sweep stop`**; then the same launch
    again, which must resume. `hc sweep status` between and after.
-10. **He tries one official launch** (`--official`) and pastes the refusal (DoD 4).
+10. **[done 2026-10-05; refused, §21]** **He tries one official launch** (`--official`) and pastes the refusal (DoD 4).
 11. **Claude reads every object** of the sweep: digest present and matching ECR's; hashes; resume behavior (no run
     re-run, no object overwritten, attempt numbers continuing); cache fields; costs; then writes the as-built notes
     and the CARRIED list for Phase 1.5. **He commits C5.**
@@ -622,7 +622,7 @@ ARM at 0.25 vCPU and 0.5 GB for under ten minutes in all, plus its public IPv4 f
 storage for a few images of about 60 MB compressed: inside the free 500 MB. S3: fractions of a cent. **Phase 1 total:
 well under $1**, inside `planning/05`'s "about $1" for Phases 1 and 1.5 together. Nothing bills by the hour at rest.
 
-## 21. As built, step 0 to step 2 (2026-10-05)
+## 21. As built, step 0 to step 2 (2026-10-05; extended the same day through step 10)
 
 **Step 0 (his reads).** Sonnet 4.6 and Nova Lite request quotas read **0 applied** in the console and from
 `list-service-quotas`, against defaults of 10,000 (Sonnet 4.6) and 2,000-4,000 (Nova Lite), while the Phase 0.5 calls
@@ -733,3 +733,22 @@ silence or diverges:
 6. **Unverified until the first deploy,** and each is fixed by name if it fails: tagging a task definition at registration
    (`ecs:TagResource` on `*`?); `ec2:CreateTags` for the VPC, subnets, gateway, route table and group at creation; the
    untagged-network deny's `Null` exemption (step 5 note 1); `iam:CreateRole` with tags.
+
+**Step 7, first deploy (2026-10-05): green on the first run, no permission follow-up.** Push `ab76636`; Deploy run
+`37352790960`: `make check`, the arm64 image (one manifest, digest `sha256:dcb72dc...`), and `apply main` against that digest on
+the `application_profile` route: **16 added, 0 changed, 0 destroyed**. None of the §21 "unverified until the first deploy"
+items (note 6 under C4) failed: tag-on-create for the five EC2 types, the untagged-network deny's `Null` exemption, role
+creation with tags and the task definition's tags all passed as written. No C4 follow-up commit was needed. Not yet
+exercised: a real task run (step 9), so the task role's Bedrock and S3 permissions, including the geo-profile ARN
+(C4 note 1), are untested.
+
+**Step 8, permission check (2026-10-05): passed.** Run `37353579140`, dispatched from `main`: all four attempts were refused with
+an access error (create a role without the boundary, create a bucket outside the project, put an inline policy on its own
+role, `ecs:RunTask`); the job ended `All four forbidden actions were refused.` This is DoD 5's proof, with `deploy.json`
+and its tests.
+
+**Step 10, official refusal (2026-10-05): refused, as required.** His command: `uv run hc sweep launch --experiment placeholder
+--model sonnet-4-6 --repeats 3 --seed 20261005 --label skeleton --profile horizon-compact --official`. Output, verbatim:
+`refused: official sweeps are refused: no committed protocol (prereg-v1 does not exist)`. The gate runs before any AWS session
+is created (`cmd_sweep_launch`), so it needed no Bedrock and made no AWS call; no task was launched. The exit code was not
+captured. This is DoD 4's pasted refusal, beside the gate tests.

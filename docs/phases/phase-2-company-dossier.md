@@ -4,6 +4,10 @@
 > §2, §6 and §7, `planning/04` §1.10, `planning/07` §2.4 (lever caps), §3 and §4, `planning/08` §3.3, and
 > `planning/09` A4 and §5. **APPROVED 2026-10-04 (his)**, with all five decisions at the end taken as recommended.
 >
+> **IMPLEMENTATION doc written 2026-10-06** (`phase-2-company-dossier-IMPLEMENTATION.md`), with the phase started out
+> of order while Phase 1 waits on AWS. Its §3 finding 1 corrects "industry medians" below: Damodaran's figures are
+> industry aggregates over public firms, not medians. Where this doc and that one differ, that one governs.
+>
 > **Split 2026-10-04 (his, decision 1):** `planning/05`'s Phase 2 is now two phases. This doc covers **the fictional
 > company**: the cited dossier every scenario is set in. **Phase 2.5 `scenarios-and-wordings`**
 > (`docs/phases/phase-2.5-scenarios-and-wordings.md`) covers the four scenarios, the objective wordings, the

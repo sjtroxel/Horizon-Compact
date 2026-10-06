@@ -30,9 +30,9 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 |---|---|---|---|---|---|
 | **0** `scaffold-and-guardrails` | v0.0 | Repo, the name guard (commit, message and push scans, history scan), the CI path check, toolchain, `make check`, CI, `CLAUDE.md`, the planning README | A canary name refused by the guard; the history scan clean; a tracked file under `methods-appendix/` fails the CI check; CI green | $0 | **COMPLETE 2026-10-03**, CI run `37160410815` green on first push |
 | **0.5** `aws-foundation` | v0.0.5 | Terraform bootstrap (OIDC looked up), filtered budgets, one tool call per Bedrock model, Ollama check, the development model named, the AWS checks in `planning/09` §5 | A recorded, provenance-stamped call from each Bedrock model; bootstrap applied with nothing shared created | under $1 | **built 2026-10-04; close-out waits on billing data** |
-| **1** `walking-skeleton` | v0.1 | The run path on **placeholder content, off the subject** (scenario, objectives, menu): Fargate, rate limiter, spend cap, official gate (closed), Bedrock, per-run write-once S3 | Container-run results in S3, each traceable to its image digest and input hashes; resume and cap shown | about $1 with 1.5 | not started |
+| **1** `walking-skeleton` | v0.1 | The run path on **placeholder content, off the subject** (scenario, objectives, menu): Fargate, rate limiter, spend cap, official gate (closed), Bedrock, per-run write-once S3 | Container-run results in S3, each traceable to its image digest and input hashes; resume and cap shown | about $1 with 1.5 | **building since 2026-10-05**; steps 3, 9, 11, 12 wait on Bedrock quotas (`KNOWN-GAPS.md`) |
 | **1.5** `publish-path` | v0.1.5 | Scorer, committed static JSON, one page live at `horizon-compact.vercel.app` through CloudFront and Vercel | The placeholder sweep on the public URL, traceable; destroy and re-apply of `main` tested, raw results intact | cents | not started |
-| **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | not started |
+| **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | **2: IMPLEMENTATION doc approved 2026-10-06, out of order; build next**; 2.5 not started |
 | **3** `preregistration-and-scoring` (split 2026-10-04: **3** `scoring-and-simulation`, **3.5** `preregistration`) | v0.3, v0.3.5 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | not started |
 | **4** `official-grid` | v0.4 | Pilot (excluded), then the full grid on Sonnet 4.6, then Nova Pro; robustness checks; first measured cost | Full grid run under the protocol on at least Sonnet 4.6; the $60 re-plan point checked | about $20-30 | not started |
 | **5** `real-cases` (split 2026-10-04: **5** `case-building`, **5.5** `case-runs`) | v0.5, v0.5.5 | Cases by the pre-registered selection rule, dossiers, foreshadowing check, recognition probe, a rubric committed before each case runs | At least three cases run and matched, including an invest or retool case; selection log complete | about $20-25 | not started |
@@ -95,7 +95,29 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-04, 7 PM
+### Where the build actually is — 2026-10-06, morning
+
+- **Phase 2 `company-dossier` started out of order (his):** everything ahead of it waits on AWS (`KNOWN-GAPS.md`,
+  START HERE, "WAITING ON AWS"). Its IMPLEMENTATION doc is approved (his, 2026-10-06, all five decisions as recommended)
+  (`docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`). Phase 2 calls no official model and nothing on AWS.
+- **The Bedrock quota case** has his restricted-list follow-up (2026-10-06 08:04 CDT); both models still throttled
+  at 13:03 UTC, $0.
+- Nothing else changed since the block below.
+
+### Where the build actually was — 2026-10-05, 1:20 PM *(superseded by the block above; kept as the day's record)*
+
+**Measured 2026-10-05, 1:20 PM:** `make check` green, **353 tests passed**, both Terraform roots (`bootstrap`, `main`)
+validate, root 13 of 16. `origin/main` at `ab76636`.
+
+- **Phase 1 build (Sonnet), steps 0-2, 4-8 and 10 done:** C1 `70a4c4e` (harness and tests), `b89b270` (stop on quota
+  errors), C2+C3 folded into `927036f` (container; results bucket, ECR, boundary and deploy policy, applied), C4
+  `ab76636` (`main` root, deploy and permission-check workflows). **First deploy green on its first run** (run
+  `37352790960`, 16 resources); permission check passed (run `37353579140`); an official launch refused.
+- **Bedrock is blocked account-wide as far as can be read** (`KNOWN-GAPS.md`, BLOCKED): steps 3 and 9, and so 11 and 12,
+  wait for AWS. No model has seen experiment content; no task has run.
+- **Phase 0.5 still open** on billing data (`KNOWN-GAPS.md`, WAITING).
+
+### Where the build actually was — 2026-10-04, 7 PM *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-04, 7 PM:** `make check` green, **178 tests passed**, Terraform `validate` clean, root 13 of 16
 (12 tracked, plus the untracked `experiment/` that Phase 1's C1 adds). The dated lines below are a record of the

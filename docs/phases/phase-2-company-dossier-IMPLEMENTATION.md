@@ -1,0 +1,337 @@
+# Phase 2 — Company Dossier (v0.2): IMPLEMENTATION
+
+> **Plan, not an as-built record.** Written 2026-10-06 (Opus), immediately before the build, from the approved scope
+> doc `phase-2-company-dossier.md` and its five decisions, `planning/01` §2 and §6-7, `planning/07` §2.4, §3, §4 and
+> §9, `planning/06` §3.3, the Phase 2.5 scope doc (what it needs from the dossier), the Phase 1 code as built, and
+> live source checks the same morning (§2). **APPROVED 2026-10-06 (his)**, with all five decisions in §15 taken as
+> recommended.
+>
+> **Started out of order (his, 2026-10-06).** Phase 1 is not closed: its steps 3, 9, 11 and 12 wait on AWS
+> (`KNOWN-GAPS.md`, BLOCKED entry), and Phase 1.5 waits on Phase 1. This phase needs no AWS and no official model, and
+> nothing it produces depends on what those steps find (§3 finding 7).
+>
+> This doc may turn out wrong; it may not be silently wrong. It is updated as the build diverges, and each step is
+> marked `[done]` with its date when it lands.
+
+## 1. What this phase delivers
+
+**One cited board pack for a fictional industrial machinery company, as data first and text second.** Every number in
+the text is rendered from a row in one data file, and every row has a source or is marked as an assumption with its
+range and reason. A check fails the build if any digit in the text did not come from a row.
+
+Built in this order (§13): the source checks recorded and the planning patches made; the data format, the renderer
+and the check, with tests (code, Sonnet); the figures and the template text (drafting, Opus); his line-by-line review;
+the realism read by another vendor's model; close-out.
+
+**Not here** (scope doc): the four scenarios, the objective wordings, the neutrality checklist on scenarios, any
+model call on the dossier, any change to the sweep harness. Those are Phase 2.5.
+
+## 2. The source checks, run live 2026-10-06
+
+The scope doc's four checks (Delivers 1; `planning/01` §7 items 1-3). Closing them in `KNOWN-GAPS.md` and patching
+`planning/01` §2.2 and §7 is step 1 of the build (§13), from this table.
+
+| Source | Finding (2026-10-06) | Use in the dossier |
+|---|---|---|
+| **Census AIES** | **The 2024 AIES is the current release** (full data released 2026-09-03; time series 2026-09-10). Keyless bulk files at `www2.census.gov/programs-surveys/aies/data/2024/`; the manufacturing tables are `AIES31BASIC01` (U.S. by industry), `-02` (by state), `-03` (expenses and inventories). **NAICS 333, Machinery manufacturing, U.S., 2024, read from `AIES31BASIC01`:** revenue $473,891,483 thousand; employees 1,046,464; annual payroll $84,347,756 thousand; fringe benefits $22,566,734 thousand; cost of materials $237,904,461 thousand; value added $236,158,343 thousand. Detail goes down to six-digit NAICS. **Capital spending is not in these files**: it is in the `aiesmiscsector` dataset, which the Census API serves only with a key (redirects to `missing_key` without one). | Revenue per employee (about $453 thousand), payroll share of revenue (about 17.8%), fringe benefits relative to payroll (about 26.8%), materials share of revenue (about 50.2%), production-worker share. Capital spending comes from Damodaran instead, so no Census key is needed. |
+| **BLS OEWS** | **May 2025 is current**, released 2026-05-15 (the national news release, read live). The industry-specific estimates cover NAICS 333000 and its four-digit industries. The BLS web pages refused automated reads, so the 333000 rows are downloaded as the industry-specific file in the build (step 1) and the exact file name and edition recorded then. | Pay by occupation for every function in the workforce table: machinists, assemblers, welders, maintenance, engineers, supervisors, sales, service technicians, office and administrative. |
+| **Damodaran** | **Current edition dated 2026-01-09.** The US industry **Machinery** exists, **105 firms**. Margins file, read live: operating margin (pre-tax, unadjusted) 15.86%; net margin 10.58%; R&D/sales 2.03%; SG&A/sales 19.65%; EBITDA/sales 19.62%; gross margin 37.47%. Also available: capital expenditures, dividends and FCFE, debt details, working capital, employee statistics, cash. **Terms:** his 2026-01-09 post says "If you use my data, and acknowledge me as a source, I thank you, but you do not need to explicitly ask me for permission" and "The data is in the public domain to be used." | Margins, R&D, capital spending, payout, debt and cash ratios. **Quoted with attribution**, which his statement allows. |
+| **SEC Financial Statement Data Sets** | **Current**: quarterly, with 2026 Q1 and Q2 posted. The 2026-10-02 worry (releases only through 2023) was wrong. | **Not used for the fictional company** (scope decision 3). Recorded for Phase 5. Moot here, closed with the reason. |
+
+## 3. What writing this doc found
+
+1. **Damodaran's figures are aggregates, not medians.** His industry ratios are computed over the industry's 105
+   public firms taken together, which weights the largest firms most. `planning/01` §2.3's example ("industry median
+   per [dataset, date]") and the scope doc's "set from industry medians" are both wrong about that. Every Damodaran
+   row says "industry aggregate, 105 firms," and `planning/01` §2.3 gets a dated note in step 1.
+2. **Two populations, said plainly.** Census AIES covers every employer firm in NAICS 333, private and small ones
+   included; Damodaran covers public firms only. A board pack mixes such sources all the time, but a reader with a
+   finance background will check. Each row names its population, and where the two disagree on the same quantity
+   the dossier takes one and the assumptions table says why.
+3. **The scale holds together.** At the AIES revenue per employee, a company with $1.5 billion of revenue has about
+   3,300 employees, inside `planning/01` §2.1's "several thousand." The headcount is derived from the revenue and
+   the ratio, not chosen separately.
+4. **The source years differ.** AIES is 2024, OEWS is May 2025, Damodaran is data for 2025 published January 2026.
+   The dossier uses **ratios** from AIES (stable year to year) and **dollar pay** from OEWS, and does not inflate
+   anything, because an inflation factor is an invented number. The assumptions table records the mismatch once.
+5. **A number in the text with no row is detectable mechanically.** If the template's own text contains no digit at
+   all, every digit in the rendered dossier came from a row. Plant numbers become rows too (unit `label`). That is
+   DoD 1's check, and it is simpler and stricter than matching numbers back to rows after rendering.
+6. **The dossier will be tokenized without a Claude tokenizer.** Counting Sonnet 4.6 tokens exactly needs a call to
+   an official model, which this phase forbids. The length target (about 6,000 tokens, `planning/03` §3.1) is checked
+   as words times 1.35, recorded as an estimate; Phase 2.5's development runs report Nova Lite's count and Phase 4's
+   pilot reports Sonnet's. Nothing depends on the exact number: the caching minimum is 1,024.
+7. **Nothing Phase 1 still has to do can invalidate this phase.** The model reads the dossier as `dossier.toml`
+   (`title`, `text`), the format Phase 1 built and committed (`experiment/placeholder/dossier.toml`,
+   `src/horizon_compact/experiment.py`). Phase 1's open steps test calls and storage. If a provider changes, the
+   dossier does not.
+8. **The loader expects a whole experiment folder.** `load_experiment` reads `dossier.toml`, `scenario.toml` and
+   `objectives.toml` from one folder. The dossier's folder holds no scenario until Phase 2.5, which decides how its
+   four scenarios share one dossier (one loader change, there). This phase does not touch the loader (scope: no
+   harness change).
+9. **Where the citations go is a design choice** (decision 1). A board pack carries no footnotes. Citations in the
+   model's prompt would tell it the company is built from industry averages, which is a cue that it is in a test
+   (`planning/07` §7.5's awareness probe exists because of that risk). The public needs the citations. Both can come
+   from the same rows.
+
+## 4. Layout
+
+```
+experiment/company/                       the dossier, hashed into the image like all experiment content
+  figures.toml                            every figure: value or formula, unit, source or assumption
+  sources.toml                            every source: publisher, title, edition, release date, URL, table, terms
+  dossier.template.txt                    the board-pack text, with {row_id} placeholders and NO digits
+  dossier.toml                            RENDERED (title, text): what the model reads; committed, checked
+src/horizon_compact/dossier/
+  figures.py                              the data model (pydantic), formula evaluation
+  render.py                               template + figures -> dossier.toml text; the cited public version
+  check.py                                the checks of §7
+docs/phases/evidence/phase-2/
+  sources/                                extracts of the source rows used, one file per source (decision 3)
+  dossier-cited.md                        RENDERED: the public version, with a citation on every number
+  figures-table.md                        RENDERED: every row, its value, source or assumption
+  assumptions-table.md                    RENDERED: the assumption rows only, his review columns
+  realism-brief.md, realism-raw.md        the realism read, as `08a`/`08b` are
+tests/test_dossier.py
+```
+
+`experiment/README.md` gets one line for `company/`. Nothing is added at the repo root.
+
+## 5. The data format
+
+**`sources.toml`**, one table per source:
+
+```toml
+[sources.aies-2024-basic01]
+publisher = "US Census Bureau"
+title = "Annual Integrated Economic Survey, 2024, table AIES31BASIC01"
+released = 2026-09-03
+retrieved = 2026-10-06
+url = "https://www2.census.gov/programs-surveys/aies/data/2024/AIES31BASIC01.zip"
+population = "all US employer firms, NAICS 333"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2/sources/aies-2024-basic01.csv"
+```
+
+**`figures.toml`**, one table per figure. A row is exactly one of three kinds:
+
+```toml
+[figures.ind_revenue_per_employee]          # SOURCED: a value read from a source
+label = "Industry revenue per employee"
+value = 452851
+unit = "usd"
+source = "aies-2024-basic01"
+locator = "NAICS 333, U.S., RCPT_TOT_VAL / EMP_MAR12_NUM, x1000"
+
+[figures.revenue_fy0]                        # ASSUMPTION: a chosen value, with its range and reason
+label = "Revenue, year just ended"
+value = 1_500_000_000
+unit = "usd"
+assumption = { low = 1_000_000_000, high = 2_000_000_000, range_from = "planning/01 section 2.1, scale decided 2026-10-02", reason = "midpoint of the decided scale" }
+
+[figures.headcount_total]                    # DERIVED: a formula over other rows
+label = "Employees"
+formula = "revenue_fy0 / ind_revenue_per_employee"
+unit = "count"
+round = 10
+```
+
+- **Units:** `usd`, `usd_m` (rendered in millions, one decimal), `pct` (one decimal), `count`, `years`, `ratio`,
+  `label` (rendered as written; for plant numbers and the like). Rounding is per row, defaulting by unit.
+- **Formulas** use only row IDs, numbers, `+ - * /` and parentheses, evaluated by a small `ast` walker, never
+  `eval`. A cycle or an unknown ID fails loading.
+- **Every row must be used** by the template or by another row's formula; an orphan row fails the check, so the
+  assumptions table never lists a figure the reader cannot find.
+- **No row is chosen for its effect on a decision** (scope rule). The `reason` field says why that point in the range,
+  in terms of the industry, never in terms of what a model might do.
+
+## 6. Rendering
+
+- **The template** is plain text with `{row_id}` placeholders, formatted with `string.Formatter` (standard library;
+  no new dependency). It contains **no digit characters** outside placeholders.
+- **`hc dossier render`** writes `experiment/company/dossier.toml` (the model's version) and the three rendered
+  files under `docs/phases/evidence/phase-2/`. The model's version has no citations (decision 1). The cited version
+  is the same text with a bracketed source label after each number, `[AIES 2024]` or `[assumption A7]`, and a
+  sources list at the end.
+- **The title** follows the placeholder's pattern: "the Company: board pack for the year just ended" (wording settled in
+  drafting). The dossier says "the Company" throughout (scope decision 4), and the plants by region and number.
+
+## 7. The checks (`hc dossier check`, run by `make check` and CI)
+
+1. **No digit in the template** outside a placeholder (DoD 1).
+2. **The committed `dossier.toml` and the three rendered files equal a fresh render**, byte for byte, so nobody edits
+   the output by hand.
+3. **Every row is sourced, an assumption with a range and reason, or derived;** every source a row names exists in
+   `sources.toml`; every row is used; no formula cycles; every assumption's value lies inside its own range.
+4. **Every row ID in the template exists.**
+5. **A balance report** (not a failure): words per stakeholder group (workforce, customers, suppliers, shareholders,
+   environment and communities), from section markers in the template. It goes to the realism read and to Phase
+   2.5's neutrality checklist (`planning/07` §9 items 3 and 9, scope Known risks).
+6. **The estimated length** (words times 1.35), reported, warned above 7,000.
+
+The name guard already runs on every file. The check adds nothing for it; the manual read in step 9 covers what the
+guard cannot.
+
+## 8. What the dossier contains
+
+The outline. Each section is drafted in step 5 with its rows, and each names the scenario that needs it, so
+nothing is there for its own sake and nothing a scenario needs is missing.
+
+| # | Section | Holds | Needed by |
+|---|---|---|---|
+| 1 | The Company | what it makes (industrial machinery and replacement parts, sold to manufacturers; service revenue), where it sells, its plants by region | all |
+| 2 | Results, three years | revenue, gross margin, operating income, net income, for the year just ended and the two before; growth from AIES year-over-year change where it exists | all |
+| 3 | Balance sheet and liquidity | cash, debt, the credit facility, minimum operating cash; **uncommitted cash** (cash above the operating minimum) | S3 (every option fundable), S4 ($B) |
+| 4 | Capital allocation | capital spending, R&D (with what it funds), dividends and repurchases and **the payout policy**, which S2 holds fixed | S2, S4 |
+| 5 | Workforce | headcount by function and occupation, average pay from OEWS, benefits ratio from AIES, **payroll by function** | S1, S2 |
+| 6 | Plants | six plants by region and number: headcount, revenue, operating result; **one with an operating loss**, its headcount and payroll | S3 |
+| 7 | Customers and pricing | customer mix, recent price changes, **the price change the market would bear**, as a maximum | L5 in S2, S4 |
+| 8 | Suppliers | supplier spend (AIES materials share), payment terms, **the share that could be renegotiated** | L9 in S2, S4 |
+| 9 | Environmental spending | the current budget and what it covers | L6 everywhere |
+| 10 | Technology and work | where the Company already uses automation; **the redeployment opportunity in numbers**: the new work that exists, the retraining cost per person, the time until it pays back (`planning/07` §3.2, retraining stated separately, decided 2026-10-04) | S1 |
+| 11 | Limits on each line | one table: **the maximum for every lever that can be a source** (R&D that exists, payroll of each function, cash available, environmental budget, payout, renegotiable supplier spend) | every scenario's caps (`planning/07` §2.4 item 2a) |
+
+**Register:** a board pack. Numbers, units, plain labels; no adjective about anyone's welfare or hardship or about
+shareholders' expectations; no euphemism from `planning/06` §3.3; one vocabulary throughout. About 4,400 words.
+
+**Rows likely to be assumptions** (scope Known risks; each gets its range from the best source found in step 5, or
+says none exists): the Company's revenue (the decided scale), the plant split and the losing plant's result, the
+price change the market would bear, the renegotiable share of supplier spend, the environmental budget, the
+retraining cost and payback, the new work available. **A dossier with an honest assumptions table is stronger than
+one that hides its guesses.**
+
+## 9. The assumptions table
+
+Generated from `figures.toml` into `assumptions-table.md`. Columns: ID (A1, A2, ... in template order), figure,
+value, range, where the range comes from, why this point, and **his review**: accepted, changed (to what, why), or
+questioned. He fills the last column in step 7 (DoD 4). A changed value is changed in `figures.toml` and re-rendered,
+never in the table.
+
+## 10. The realism read (DoD 5)
+
+- **The reader** is another vendor's model through OpenRouter, as `planning/08` was made. **Not Anthropic** (the
+  drafter's family) and **not Nova's maker** (Nova Pro is the second official model). Chosen live at step 8 from what
+  OpenRouter offers that day, with its price checked; recorded with its exact model ID.
+- **The brief** (`realism-brief.md`, drafted at step 8 and shown to him before it is sent): the cited version of the
+  dossier; the question "what would a director or a buy-side analyst covering industrial machinery find implausible,
+  missing, internally inconsistent or slanted"; the balance report; an explicit statement that it is a fictional
+  company built from industry sources. **It is never asked what the CEO should do**, and it is never shown a scenario
+  or an objective.
+- **The raw reply** is committed unedited (`realism-raw.md`). Claude verifies each point against the sources; each is
+  marked confirmed, partly right or rejected, in a table appended to this doc; **he decides each change.**
+- **Cost:** one call, expected under $1, cap $3. From his OpenRouter balance, not the AWS credits; recorded in the
+  `ROADMAP.md` cost ledger as outside the $80 AWS ceiling.
+
+## 11. Rules this build must not break
+
+- **No official model is called, for anything.** No Sonnet 4.6, no Nova Pro: not as a decision, a probe, a token
+  count or a review. In practice nothing in this phase calls Bedrock at all.
+- **Rule zero, sources included.** No real company's name, ticker or plant location in any file, including source
+  extracts, which are cut to the rows used (industry aggregates; Damodaran's industry rows name no firm). The extract
+  step drops any column that lists firms.
+- **Numbers come from sources, never from what they might make a model do.**
+- **The dossier is fixed when Phase 2.5 starts**; a later change is logged with a reason (Phase 2.5's change log).
+
+## 12. Tests (`tests/test_dossier.py`)
+
+Every fixture is a small made-up figures file, not the real one. The cases: a sourced, an assumption and a derived row
+each load; a row that is two kinds at once, or none, is refused; an unknown source, an unknown ID in a formula, a
+cycle, a disallowed character in a formula, and an assumption outside its own range are each refused; a digit in the
+template outside a placeholder fails; an orphan row fails; each unit renders as specified, with rounding; the cited
+version puts the right label after each number; a hand-edited `dossier.toml` fails the equality check; the real
+`experiment/company/` passes all checks (once it exists). `make check` runs them with everything else.
+
+## 13. Order of work
+
+**Model for each step:** steps 1-4 are code and records (**Sonnet**). Steps 5-6 are drafting the instrument, where
+wording and neutrality matter (**Opus**). Steps 7 and 9 are his. Step 8 is Opus for the brief and the verification.
+
+0. **Approval of this doc** and its five decisions (§15). `[done 2026-10-06]` He commits it with the session's other
+   doc edits.
+1. **Close the source checks.** Record §2 in `KNOWN-GAPS.md` (a CLOSED entry); patch `planning/01` §2.2 (status
+   column), §2.3 (aggregates, not medians, §3 finding 1) and §7 items 1-3, each with a dated note. Download the OEWS
+   May 2025 industry file and record its name and edition. Write `sources.toml` and the source extracts (decision 3).
+2. **The data model and formulas** (`figures.py`) with their tests.
+3. **The renderer and the checks** (`render.py`, `check.py`), the `hc dossier render` and `hc dossier check`
+   commands, and `make check` running the check. Tests first where practical. **Commit C1** (code only; the real
+   files do not exist yet, so the last test in §12 is skipped until they do, and says so).
+4. **Wire-up**: `experiment/README.md` line, `.gitignore` if needed, `make check` green.
+5. **Draft the figures** (Opus), section by section in §8's order: every sourced row from the extracts, every derived
+   row as a formula, every assumption with its range and reason.
+6. **Draft the template** (Opus) and render. Run the checks. Estimate the length. **Commit C2** (the dossier, its
+   rendered files, the source extracts).
+7. **His review** (DoD 4): the assumptions table line by line, then the rendered model version line by line. Each
+   change goes through `figures.toml` or the template and a re-render. **Commit C3** if anything changed.
+8. **The realism read** (DoD 5): pick the reader live, draft the brief, show him, send, commit the raw reply,
+   verify each point, he decides each change, re-render. **Commit C4.**
+9. **The manual rule-zero read** (DoD 6) of every file this phase added: spellings the term file lacks,
+   descriptions detailed enough to identify a firm. Then the DoD audit (§14), `ROADMAP.md`, `KNOWN-GAPS.md` START
+   HERE. **Commit C5** (close-out).
+
+Commit messages: `phase 2: ...`, one line, his to run.
+
+## 14. Definition of done, and the proof of each
+
+| DoD (scope doc) | Proof |
+|---|---|
+| 1. Every number traces to a row; every row sourced or an assumption with range and reason | `hc dossier check` green in CI: no digit in the template, every row of a valid kind |
+| 2. The four source checks closed | `KNOWN-GAPS.md` CLOSED entry and `planning/01` patches, step 1 |
+| 3. A maximum for every source lever; the redeployment opportunity in numbers | §8 sections 10 and 11 present; the lever-limits table has a row per lever (a test lists the levers from `planning/07` §3.1 that can be sources) |
+| 4. He reviewed the assumptions table and the rendered dossier line by line | His review column filled in `assumptions-table.md`; his statement in this doc's as-built section |
+| 5. The realism read done and every point marked | `realism-brief.md`, `realism-raw.md` committed; the verification table in this doc |
+| 6. No real company name, ticker or plant location | The guard passing on every commit, plus the manual read recorded in step 9 |
+| 7. No official model called; `make check` and CI green | No Bedrock call in this phase (nothing to show in the provenance store); CI run IDs recorded |
+
+## 15. Decisions for him
+
+All five taken 2026-10-06 (his), as recommended: (1) no citations in the model's text, a cited public version from
+the same rows; (2) relative year labels, no calendar date in the model's text; (3) extracts of the rows used are
+committed; (4) `ROADMAP.md` marks Phase 2 closed when it closes, `pyproject.toml` steps through 0.1, 0.1.5 and 0.2 in
+order once Phases 1 and 1.5 close; (5) the realism read is capped at $3. The options below stay as the record.
+
+1. **Where the citations go.**
+   - (a) **Recommended:** **the model reads a board pack with no citations; the public reads a cited version.** Both
+     are rendered from the same rows, and the check proves the numbers are identical. Citations in the prompt would
+     tell the model it is reading a constructed company, which is the cue `planning/07` §7.5 worries about, and a
+     real board pack carries none. The methods page says exactly this.
+   - (b) Citations in the model's text too. One version, simpler to explain, at the cost of the cue and about 15%
+     more tokens.
+2. **Calendar years, or "the year just ended."**
+   - (a) **Recommended:** **relative labels** ("the year just ended," "the prior year," "two years ago") and no
+     calendar date anywhere in the model's text. A named year invites the model to bring in what it knows about that
+     year's rates, tariffs and markets, a variable the experiment does not control, which is the same reasoning that
+     took the company's name out (scope decision 4). The cited public version gives the source editions, so the
+     reader still knows when the numbers are from.
+   - (b) A named fiscal year, matching the sources (the year just ended is 2025). More natural to a finance reader;
+     brings in the year's associations.
+3. **Commit extracts of the source rows.**
+   - (a) **Recommended:** **commit small extracts of only the rows used**, one file per source, under
+     `docs/phases/evidence/phase-2/sources/`. Census and BLS are public domain; Damodaran's statement allows it with
+     attribution. Sources update (Damodaran each January), so without extracts a reader may not be able to find the
+     number cited, which fails the scope doc's "under a minute" test.
+   - (b) Cite URLs and editions only. Smaller, and dependent on the sources keeping old editions online.
+4. **The version number, out of order.**
+   - (a) **Recommended:** when Phase 2 closes, `ROADMAP.md` marks it **built and closed**, but **`pyproject.toml`
+     stays at Phase 1's version** until Phases 1 and 1.5 close, then steps through 0.1, 0.1.5 and 0.2 in order. The
+     spine stays readable, and the version never claims a phase that is not done.
+   - (b) Bump to 0.2 at Phase 2's close regardless.
+5. **The realism reader's cost cap.**
+   - (a) **Recommended:** **$3**, one call, model chosen live at step 8 and shown to him before sending.
+     `planning/08`'s much longer read cost $1.34.
+   - (b) Another figure of his choosing.
+
+## 16. Genuinely uncertain
+
+- **Whether public sources exist** for the environmental budget, the retraining cost and payback, the price change
+  the market would bear and the renegotiable supplier share. Likely assumptions; step 5 looks first.
+- **Whether OEWS publishes every occupation needed** at the NAICS 333000 level, or some come from the all-industries
+  table (a population difference, recorded per row).
+- **Whether six plants by region** can each carry a believable headcount and result from industry ratios without
+  invented detail. If not, the plant split is an assumption with its reason.
+- **The length.** About 4,400 words is the target; if the outline needs much more, the drafting step says so before
+  trimming anything a scenario needs.
+
+## 17. Cost
+
+**About $1, none of it on AWS.** The source downloads and all code and drafting are free. The realism read is one
+OpenRouter call, capped at $3 (decision 5).
