@@ -6,6 +6,8 @@
   P20, P22, P23, P26, P30, P32 in `09` §3).
   **Patched 2026-10-04 (his):** §2.3, Nova Pro runs at its own default temperature
   (`docs/phases/phase-0.5-aws-foundation.md`, decision 7).
+  **Patched 2026-10-06 (his):** §3.1, L9's wording ("negotiating lower prices or longer payment terms with
+  suppliers"), a neutrality fix from Phase 2 step 7; the dossier uses the same words.
   **Patched 2026-10-05 (his):** §7.3, Sonnet 5.5 is no longer awaited and Sonnet 4.6 is the v1 main model,
   fixed (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry). §2.1's Sonnet 5.5 row stays: it is why the
   capture method is one tool with `auto` choice, and that method stays.
@@ -140,7 +142,7 @@ goes to it), or **not offered**, with the reason. *(Nine levers since 2026-10-03
 | L6 | **Environmental investment** | funding it | cutting it |
 | L7 | **Share repurchases and dividends** | increasing them | reducing them |
 | L8 | **Cash** | retaining it | drawing on it, or accepting lower profit |
-| L9 | **Supplier terms** | — | pressing suppliers on price or payment terms (added 2026-10-03, `08` §3.3: B and D name suppliers, so the menu gives them a lever) |
+| L9 | **Supplier terms** | — | negotiating lower prices or longer payment terms with suppliers (added 2026-10-03, `08` §3.3: B and D name suppliers, so the menu gives them a lever; *reworded 2026-10-06 (his)* from "pressing suppliers on price or payment terms", which reads as harsh and leans the model away from the lever, a neutrality fix found in Phase 2 step 7) |
 
 ### 3.2 Per scenario, with a worked example
 

@@ -185,7 +185,7 @@ Spending with suppliers in the year just ended: $753.0 million [derived D106], o
 
 Payment terms. The Company takes an average of 72 [derived D108] days to pay its suppliers.
 
-Agreements. Supply agreements run for several years. The share of supplier spending under agreements that come up for renewal in the coming year: 30.0% [assumption A24]. The purchasing department's estimate of the largest price reduction obtainable on those renewals: 4.0% [assumption A25]. Together, the largest annual saving available from pressing suppliers on price: $9.0 million [derived D109].
+Agreements. Supply agreements run for several years. The share of supplier spending under agreements that come up for renewal in the coming year: 30.0% [assumption A24]. The purchasing department's estimate of the largest price reduction obtainable on those renewals: 4.0% [assumption A25]. Together, the largest annual saving available from negotiating lower prices with suppliers: $9.0 million [derived D109].
 
 SECTION NINE: ENVIRONMENTAL SPENDING
 
@@ -234,7 +234,7 @@ Dividends and repurchases: the full amount paid in the year just ended, $146.1 m
 
 Cash: cash above the minimum operating level, $44.1 million [derived D37]. The undrawn credit facility of $300.0 million [assumption A11] is available in addition, as borrowing.
 
-Suppliers: the largest annual saving from pressing suppliers on price, $9.0 million [derived D109].
+Suppliers: the largest annual saving from negotiating lower prices with suppliers, $9.0 million [derived D109].
 
 ---
 

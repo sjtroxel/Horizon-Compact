@@ -15,55 +15,55 @@
 label = "Revenue, year just ended"
 unit = "usd_m"
 value = 1_500_000_000
-assumption = { low = 1_000_000_000, high = 2_000_000_000, range_from = "planning/01 section 2.1: roughly $1-2 billion of revenue, decided 2026-10-02", reason = "The midpoint of the decided scale. Damodaran's 105 Machinery firms average about $1.9 billion of revenue each (ind_revenue_total / 105), so the Company sits inside the population the margins come from." }
+assumption = { low = 1_000_000_000, high = 2_000_000_000, range_from = "planning/01 section 2.1: roughly $1-2 billion of revenue, decided 2026-10-02", reason = "The midpoint of the decided scale. Damodaran's 105 Machinery firms average about $1.9 billion of revenue each (ind_revenue_total / 105), so the Company sits inside the population the margins come from.", review = "accepted 2026-10-06: no independent view on the value; deferred to the drafted recommendation" }
 
 [figures.plant_count]
 label = "Number of plants"
 unit = "count"
 value = 6
-assumption = { low = 5, high = 6, range_from = "planning/01 section 2.1: five or six plants", reason = "The upper end, so the plant with an operating loss (section 6) is one of several rather than a fifth of the Company." }
+assumption = { low = 5, high = 6, range_from = "planning/01 section 2.1: five or six plants", reason = "The upper end, so the plant with an operating loss (section 6) is one of several rather than a fifth of the Company.", review = "accepted 2026-10-06: six plants; deferred to the drafted recommendation" }
 
 [figures.plant_1_no]
 label = "Plant number, Great Lakes"
 unit = "label"
 value = "1"
-assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4).", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.plant_2_no]
 label = "Plant number, Ohio Valley"
 unit = "label"
 value = "2"
-assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4).", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.plant_3_no]
 label = "Plant number, Upper Midwest"
 unit = "label"
 value = "3"
-assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4).", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.plant_4_no]
 label = "Plant number, Southeast"
 unit = "label"
 value = "4"
-assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4).", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.plant_5_no]
 label = "Plant number, South Central"
 unit = "label"
 value = "5"
-assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4).", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.plant_6_no]
 label = "Plant number, Great Plains"
 unit = "label"
 value = "6"
-assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4).", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.aftermarket_share]
 label = "Replacement parts and service, share of revenue"
 unit = "pct"
 value = 0.25
-assumption = { low = 0.15, high = 0.35, range_from = "no public industry-level source found for the aftermarket share of machinery makers' revenue; a wide range around a quarter", reason = "The middle of the range." }
+assumption = { low = 0.15, high = 0.35, range_from = "no public industry-level source found for the aftermarket share of machinery makers' revenue; a wide range around a quarter", reason = "The middle of the range.", review = "accepted 2026-10-06: stability and profitability of parts and service depend on the parts and service in question, which is not known; deferred to the drafted recommendation" }
 
 [figures.aftermarket_revenue_fy0]
 label = "Replacement parts and service revenue, year just ended"
@@ -253,7 +253,7 @@ locator = "NAICS 333, U.S., RCPT_TOT_VAL ($1,000) 473891483, in dollars"
 label = "Change in the Company's unit volume, year just ended"
 unit = "pct"
 value = 0.0
-assumption = { low = -0.04, high = 0.04, range_from = "no industry volume figure for 2025 without a Census API key; the prior year's industry volume change was about -3.6% (AIES revenue change less the PPI change)", reason = "Flat, the middle of the range; with it, revenue grew with prices." }
+assumption = { low = -0.04, high = 0.04, range_from = "no industry volume figure for 2025 without a Census API key; the prior year's industry volume change was about -3.6% (AIES revenue change less the PPI change)", reason = "Flat, the middle of the range; with it, revenue grew with prices.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.rev_growth_fy0]
 label = "Revenue growth, year just ended"
@@ -503,7 +503,7 @@ formula = "op_income_fy0 / interest_fy0"
 label = "Minimum operating cash, in months of cash operating costs"
 unit = "count"
 value = 1
-assumption = { low = 0.5, high = 2, range_from = "no public industry-level source found for the cash companies hold for operations; half a month to two months of cash operating costs", reason = "One month, a round figure inside the range." }
+assumption = { low = 0.5, high = 2, range_from = "no public industry-level source found for the cash companies hold for operations; half a month to two months of cash operating costs", reason = "One month, a round figure inside the range.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.cash_costs_fy0]
 label = "Cash operating costs, year just ended (revenue less EBITDA)"
@@ -524,7 +524,7 @@ formula = "cash - min_operating_cash"
 label = "Revolving credit facility, undrawn"
 unit = "usd_m"
 value = 300_000_000
-assumption = { low = 150_000_000, high = 450_000_000, range_from = "no public industry-level source found for the size of undrawn credit lines; 10% to 30% of revenue", reason = "The middle of the range (20% of revenue), a round figure." }
+assumption = { low = 150_000_000, high = 450_000_000, range_from = "no public industry-level source found for the size of undrawn credit lines; 10% to 30% of revenue", reason = "The middle of the range (20% of revenue), a round figure.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.liquidity]
 label = "Available liquidity (cash plus the undrawn facility)"
@@ -1054,31 +1054,31 @@ formula = "(payroll_prod + payroll_maint + payroll_logistics) / plant_workforce"
 label = "Plant 1 share of revenue"
 unit = "pct"
 value = 0.24
-assumption = { low = 0.20, high = 0.30, range_from = "no public plant-level source; six plants of unequal size", reason = "The largest plant, about a quarter of revenue." }
+assumption = { low = 0.20, high = 0.30, range_from = "no public plant-level source; six plants of unequal size", reason = "The largest plant, about a quarter of revenue.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.share_p2]
 label = "Plant 2 share of revenue"
 unit = "pct"
 value = 0.20
-assumption = { low = 0.15, high = 0.25, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1." }
+assumption = { low = 0.15, high = 0.25, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.share_p3]
 label = "Plant 3 share of revenue"
 unit = "pct"
 value = 0.18
-assumption = { low = 0.13, high = 0.23, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1." }
+assumption = { low = 0.13, high = 0.23, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.share_p4]
 label = "Plant 4 share of revenue"
 unit = "pct"
 value = 0.15
-assumption = { low = 0.10, high = 0.20, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1." }
+assumption = { low = 0.10, high = 0.20, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.share_p5]
 label = "Plant 5 share of revenue"
 unit = "pct"
 value = 0.13
-assumption = { low = 0.08, high = 0.18, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1." }
+assumption = { low = 0.08, high = 0.18, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.share_p6]
 label = "Plant 6 share of revenue"
@@ -1157,31 +1157,31 @@ note = "The remainder, so the plants add up to the plant workforce."
 label = "Plant 2 operating margin, after allocated corporate costs"
 unit = "pct"
 value = 0.19
-assumption = { low = 0.14, high = 0.24, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven." }
+assumption = { low = 0.14, high = 0.24, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.margin_p3]
 label = "Plant 3 operating margin, after allocated corporate costs"
 unit = "pct"
 value = 0.17
-assumption = { low = 0.12, high = 0.22, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven." }
+assumption = { low = 0.12, high = 0.22, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.margin_p4]
 label = "Plant 4 operating margin, after allocated corporate costs"
 unit = "pct"
 value = 0.20
-assumption = { low = 0.15, high = 0.25, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven." }
+assumption = { low = 0.15, high = 0.25, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.margin_p5]
 label = "Plant 5 operating margin, after allocated corporate costs"
 unit = "pct"
 value = 0.15
-assumption = { low = 0.10, high = 0.20, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven." }
+assumption = { low = 0.10, high = 0.20, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.margin_p6]
 label = "Plant 6 operating margin, after allocated corporate costs"
 unit = "pct"
 value = -0.06
-assumption = { low = -0.12, high = -0.02, range_from = "no public plant-level source; a loss small enough to be one plant's problem, not the Company's", reason = "The middle of the range. The outline needs one plant with an operating loss (section 8, row 6); the smallest plant is the one a subscale cost base would hit first." }
+assumption = { low = -0.12, high = -0.02, range_from = "no public plant-level source; a loss small enough to be one plant's problem, not the Company's", reason = "The middle of the range. The outline needs one plant with an operating loss (section 8, row 6); the smallest plant is the one a subscale cost base would hit first.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.result_p2]
 label = "Plant 2 operating result"
@@ -1232,7 +1232,7 @@ formula = "hc_p6 * plant_avg_pay"
 label = "Price increase customers would accept in the coming year, at most"
 unit = "pct"
 value = 0.035
-assumption = { low = 0.02, high = 0.069, range_from = "the industry's annual producer price changes over the last three years (BLS PPI, 3.3% to 6.9%), extended down to 2%", reason = "The latest year's industry price change, which customers accepted." }
+assumption = { low = 0.02, high = 0.069, range_from = "the industry's annual producer price changes over the last three years (BLS PPI, 3.3% to 6.9%), extended down to 2%", reason = "The latest year's industry price change, which customers accepted.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.price_cap]
 label = "Revenue from the largest price increase customers would accept"
@@ -1269,16 +1269,16 @@ formula = "payables / supplier_spend * 365"
 label = "Supplier spending under agreements that come up for renewal in the coming year"
 unit = "pct"
 value = 0.30
-assumption = { low = 0.20, high = 0.50, range_from = "no public industry-level source; supply agreements of two to five years renewing evenly", reason = "Agreements of about three years renewing evenly." }
+assumption = { low = 0.20, high = 0.50, range_from = "no public industry-level source; supply agreements of two to five years renewing evenly", reason = "Agreements of about three years renewing evenly.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.max_supplier_reduction]
 label = "Price reduction obtainable on renewing supplier agreements, at most"
 unit = "pct"
 value = 0.04
-assumption = { low = 0.02, high = 0.08, range_from = "no public industry-level source found", reason = "Near the middle of the range." }
+assumption = { low = 0.02, high = 0.08, range_from = "no public industry-level source found", reason = "Near the middle of the range.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.supplier_cap]
-label = "Annual saving from pressing suppliers, at most"
+label = "Annual saving from negotiating lower prices with suppliers, at most"
 unit = "usd_m"
 formula = "supplier_spend * renegotiable_share * max_supplier_reduction"
 
@@ -1309,13 +1309,13 @@ formula = "revenue_fy0 * (aies_fuel_2024 + aies_elec_2024) / aies_rev_2024"
 label = "Environmental compliance spending (permits, monitoring, waste handling), year just ended"
 unit = "usd_m"
 value = 3_000_000
-assumption = { low = 1_500_000, high = 6_000_000, range_from = "no public industry-level source found; 0.1% to 0.4% of revenue", reason = "0.2% of revenue, in the lower half of the range for a maker of machinery rather than of chemicals or metals." }
+assumption = { low = 1_500_000, high = 6_000_000, range_from = "no public industry-level source found; 0.1% to 0.4% of revenue", reason = "0.2% of revenue, in the lower half of the range for a maker of machinery rather than of chemicals or metals.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.env_projects]
 label = "Environmental projects budget (energy efficiency, emissions reduction), year just ended"
 unit = "usd_m"
 value = 4_500_000
-assumption = { low = 1_500_000, high = 9_000_000, range_from = "no public industry-level source found; 0.1% to 0.6% of revenue", reason = "0.3% of revenue, near the middle of the range." }
+assumption = { low = 1_500_000, high = 9_000_000, range_from = "no public industry-level source found; 0.1% to 0.6% of revenue", reason = "0.3% of revenue, near the middle of the range.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.env_total]
 label = "Environmental spending, year just ended"
@@ -1344,19 +1344,19 @@ note = "The Company's plants are taken to hire at the durable goods rate. These 
 label = "Retraining cost per person (instruction and paid training time)"
 unit = "usd"
 value = 15_000
-assumption = { low = 5_000, high = 30_000, range_from = "no public industry-level source found; from a short course to several months of paid instruction", reason = "Below the middle of the range: most plant roles are learned on the job after a few months of instruction." }
+assumption = { low = 5_000, high = 30_000, range_from = "no public industry-level source found; from a short course to several months of paid instruction", reason = "Below the middle of the range: most plant roles are learned on the job after a few months of instruction.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.retraining_months]
 label = "Months of training before a retrained person works independently"
 unit = "count"
 value = 6
-assumption = { low = 3, high = 12, range_from = "no public industry-level source found", reason = "The middle of the range, rounded." }
+assumption = { low = 3, high = 12, range_from = "no public industry-level source found", reason = "The middle of the range, rounded.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.retraining_payback]
 label = "Years until retraining pays back, against hiring from outside"
 unit = "years"
 value = 2
-assumption = { low = 1, high = 4, range_from = "no public industry-level source found", reason = "Near the middle of the range." }
+assumption = { low = 1, high = 4, range_from = "no public industry-level source found", reason = "Near the middle of the range.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 # ============================================================================================================
 # 11. Limits on each line (the maximum for every lever that can be a source)
@@ -1366,7 +1366,7 @@ assumption = { low = 1, high = 4, range_from = "no public industry-level source 
 label = "Reduction in wages or hours the Company can make within a year, at most, as a share of payroll"
 unit = "pct"
 value = 0.10
-assumption = { low = 0.05, high = 0.20, range_from = "no public industry-level source found; reduced schedules of a half day to a day a week", reason = "A half day a week, the lower middle of the range." }
+assumption = { low = 0.05, high = 0.20, range_from = "no public industry-level source found; reduced schedules of a half day to a day a week", reason = "A half day a week, the lower middle of the range.", review = "accepted 2026-10-06, grouped with A4 to A31: no independent view; deferred to the drafted recommendation" }
 
 [figures.wage_cut_cap]
 label = "Payroll saving from cutting wages or hours, at most"

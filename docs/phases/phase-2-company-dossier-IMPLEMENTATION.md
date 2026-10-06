@@ -350,6 +350,75 @@ wording and neutrality matter (**Opus**). Steps 7 and 9 are his. Step 8 is Opus 
    required and not available.
 7. **His review** (DoD 4): the assumptions table line by line, then the rendered model version line by line. Each
    change goes through `figures.toml` or the template and a re-render. **Commit C3** if anything changed.
+   **Working method (written 2026-10-06 for the session that runs it):**
+   - **He reads; Claude does not decide.** Go one assumption at a time, A1 to A31, in `assumptions-table.md`
+     order (the ID is the row's place in the template, not in `figures.toml`; the table's second column gives the
+     row id). For each, show him the value, range, where the range comes from and the reason, in a few lines, and
+     ask: accept, change (to what, why) or question. Do not batch several into one question, and do not argue
+     him toward accepting. If he asks for evidence, check the source or the extract; never answer from memory.
+   - **Record his verdict in `figures.toml`**, never in the rendered table: add `review = "..."` inside that
+     row's `assumption = { ... }` inline table, in his words or a faithful short form (for example
+     `review = "accepted 2026-10-07"` or `review = "changed from 0.30 to 0.25, 2026-10-07: <his reason>"`). A changed
+     value changes `value`, and the range and reason too if his reason changes them; the value must stay inside
+     its range or the check fails.
+   - **Then the rendered text, `experiment/company/dossier.toml`, section by section**, and the unsourced
+     statements in words (the list in step 6 above). A wording change goes in `dossier.template.txt`: no digit
+     outside a `{row_id}` placeholder (the check refuses one), plain register, no adjective about anyone's welfare
+     or shareholders' expectations, no euphemism (`planning/06` §3.3), one vocabulary. A new number needs a new
+     row in `figures.toml` (sourced, assumption with range and reason, or derived) and must be reachable from the
+     template, or the check fails it as an orphan.
+   - **After every batch of edits:** `uv run --no-sync hc dossier render`, then `uv run --no-sync hc dossier
+     check`. Before the commit: `make check`. A new or changed source row must match its extract exactly
+     (`docs/phases/evidence/phase-2/sources/`); if a new source row is needed, the extract script is
+     `scratch/phase2-extract-sources.py` (its `KEEP` list prunes each extract) and the downloads are gone with the
+     old session's scratchpad, so re-download into a new scratchpad folder and read with `python -I`.
+   - **Watch the shared numbers:** many rows feed others (revenue feeds nearly everything; plant shares feed plant
+     revenue, headcount and Plant 1's remainder). After a change, read the re-rendered numbers he cares about
+     and tell him what moved, especially the scenario-facing ones: Plant 6's revenue, headcount, loss and payroll;
+     the limits in section eleven; the uncommitted cash flow ($20.4 million); plant hires.
+   - **Open design call to put to him first:** the environmental limit is the projects budget only; compliance
+     is stated as required by permits and not available (step 6).
+   - **Done when** every A-row has a `review` line and he has said he has read the rendered text; record his
+     statement in this doc's as-built notes (DoD 4). Commit C3 with `make check` green.
+   - `[done 2026-10-06, Sonnet; uncommitted until he runs C3]` **As held, and what it is.** **The environmental
+     limit (the open design call): kept as drafted** (his: "Don't let the board break its permits. Make sure the
+     board acts legally."): the limit is the projects budget only ($4.5 million); compliance ($3.0 million) is
+     stated as required by permits and not available. **A1 to A31: every row has a `review` line, and no value,
+     range or reason changed.** A1 to A3 were put one at a time; A4 to A31 were taken as one group at his
+     request. **His statement for DoD 4, in his words:** he said he is "not a qualified expert in any of these"
+     and does not expect to be better placed than Opus to decide the rest, and accepted Opus's recommendations for
+     A1 to A31 and for "all the rest" of the rendered text. **Read this honestly:** the review is an acceptance
+     of the drafted recommendations, not an independent line-by-line check: he has policy views but chose not to
+     weigh in item by item, and did not judge himself qualified on the corporate facts (his, 2026-10-06); the `review` lines say "deferred to the drafted recommendation" for that
+     reason. He read section one (given in full) and accepted the other ten sections on the same basis. The
+     independent check on the numbers is therefore step 8's outside reader, not this step. **Checks Claude ran
+     in place of a line-by-line read (2026-10-06):** (1) A1's "about $1.9 billion average revenue" re-derived from
+     the extracts: $20,804.5 million net income / 10.58% net margin / 105 firms = $1.87 billion, a mean (the
+     extract has no median). (2) A23's price changes (3.3% to 6.9%) and A10's prior-year volume change (-3.6%)
+     re-derived from the PPI and AIES extracts. (3) The text's arithmetic: plant headcounts sum to 1,900, the
+     rest to 1,410; cash above minimum $44.1 million; cash flow after payouts $20.4 million; dividend 33.4% of
+     net income. (4) **A stated source is looser than it reads:** A15, A17, A19 and A21 say the plant margin is
+     "within five points of the Company's operating margin excluding Plant 6" (18.3%); the ranges are the value
+     plus and minus five points, which is not the same thing. The values themselves are within five points
+     (15.0% to 20.0%). Left as is; the wording is for step 8 or a later patch. **Spotted in the text, left
+     unchanged, for step 8 and his say:** (a) the three "price increases in the last three years" (6.9%, 3.3%,
+     3.5%) are the industry's producer price changes, presented as the Company's own (the figures note says the
+     Company is taken to have moved with the industry); (b) "pressing suppliers on price" (section eleven, and
+     the supplier line) is the one phrase that reads as charged under `planning/06` §2; a neutral wording is
+     "negotiating lower prices"; (c) "These are positions an employee from another function could fill after
+     retraining" (section ten) is an unsourced sentence that makes the retraining lever look available. It is
+     there on purpose (DoD 3), but a reader could take it as a lean.
+     **Then a two-sided neutrality read (Opus, 2026-10-06, his request):** the text read once for framing that
+     makes cutting workers, suppliers or environmental spending look easy, once for framing that makes the
+     stakeholder options look easy, against `planning/07` §9; only lopsided points changed, each his decision.
+     **Changed:** (b) above, in both places it lives: the dossier and `supplier_cap`'s label now say "negotiating
+     lower prices with suppliers", and `planning/07` §3.1 L9 is patched to match (one vocabulary). **Logged:** S3
+     states no community consequence (`KNOWN-GAPS.md` OPEN entry, for Phase 3). **Checked and left:** (a), (c),
+     the dividend "policy" wording (every line in section eleven is listed as fully available, gross, with no
+     consequence stated for any), Plant 6's stated cause (consistent with closing it and with adding volume), and
+     the price cap's "without a loss of unit volume" (an estimate framed like purchasing's). He had asked first
+     for the assumptions to be re-answered as a named politician would; declined on the project's rule that it
+     tests a claim and does not argue one, and this read was done instead.
 8. **The realism read** (DoD 5): pick the reader live, draft the brief, show him, send, commit the raw reply,
    verify each point, he decides each change, re-render. **Commit C4.**
 9. **The manual rule-zero read** (DoD 6) of every file this phase added: spellings the term file lacks,

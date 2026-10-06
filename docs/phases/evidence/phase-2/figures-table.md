@@ -158,7 +158,7 @@ Every row behind the dossier. `As shown` is the value after rounding, which is t
 | `payment_days` | Days taken to pay suppliers | 72 | derived | derived D108: payables / supplier_spend * 365 |
 | `renegotiable_share` | Supplier spending under agreements that come up for renewal in the coming year | 30.0% | assumption | assumption A24: see assumptions-table.md |
 | `max_supplier_reduction` | Price reduction obtainable on renewing supplier agreements, at most | 4.0% | assumption | assumption A25: see assumptions-table.md |
-| `supplier_cap` | Annual saving from pressing suppliers, at most | $9.0 million | derived | derived D109: supplier_spend * renegotiable_share * max_supplier_reduction |
+| `supplier_cap` | Annual saving from negotiating lower prices with suppliers, at most | $9.0 million | derived | derived D109: supplier_spend * renegotiable_share * max_supplier_reduction |
 | `energy_spend` | Spending on fuel and electricity, year just ended | $8.9 million | derived | derived D110: revenue_fy0 * (aies_fuel_2024 + aies_elec_2024) / aies_rev_2024 |
 | `env_total` | Environmental spending, year just ended | $7.5 million | derived | derived D111: env_compliance + env_projects |
 | `env_compliance` | Environmental compliance spending (permits, monitoring, waste handling), year just ended | $3.0 million | assumption | assumption A26: see assumptions-table.md |

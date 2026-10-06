@@ -12,18 +12,23 @@ case by its type and a neutral label. The names live only in the private longlis
 > **NOW: Phase 2 `company-dossier`, started out of order (his, 2026-10-06)**, because everything ahead of it waits on
 > AWS. It needs no AWS and no official model (its scope doc, Prerequisites). **Its IMPLEMENTATION doc is APPROVED
 > (his, 2026-10-06, all five §15 decisions as recommended):** `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`.
-> **BUILD STEPS 1-4 COMMITTED (`fe82c3f`, Sonnet). STEPS 5-6 DONE (Opus, 2026-10-06), `make check` green, NOT YET
-> COMMITTED (C2, his to run).** `experiment/company/figures.toml` (219 rows, 31 assumptions), `dossier.template.txt`,
+> **BUILD STEPS 1-4 COMMITTED (`fe82c3f`, Sonnet). STEPS 5-6 COMMITTED AND PUSHED (`891ee3c`, Opus, C2,
+> 2026-10-06), `make check` green.** `experiment/company/figures.toml` (219 rows, 31 assumptions), `dossier.template.txt`,
 > the rendered `dossier.toml` and the public `dossier-cited.md`, `figures-table.md`, `assumptions-table.md` under
 > `docs/phases/evidence/phase-2/`; 15 sources with pruned extracts. The not-built-yet skip is removed. The text is
 > about 1,990 words (estimated 2,690 tokens), under the 4,400-word target, and not padded (IMPLEMENTATION doc §13
-> step 6 says why). **Next session, first move: step 7, his review** (DoD 4): `assumptions-table.md` line by line,
-> then the rendered `dossier.toml` line by line, plus the list of unsourced statements in words in §13 step 6. A
-> change goes into `figures.toml` (the `review` line records his verdict on each assumption) or the template, then
-> `hc dossier render`. **Model: Sonnet is fine for 7 (his reading, mechanical edits); step 8's brief and
-> verification are Opus.** Nothing in Phase 2 calls Bedrock or any official model.
-> **Bedrock at 12:00 PM CDT on 2026-10-06 (`scratch/throttle-check.py`, run once, not acted on):** Nova Lite and
-> Sonnet 4.6 both still `ThrottlingException`, "Too many tokens per day", $0.
+> step 6 says why). **STEP 7 (his review) DONE 2026-10-06, Sonnet, UNCOMMITTED until he runs C3** (`figures.toml`
+> review lines, the re-rendered `assumptions-table.md`, the IMPLEMENTATION doc as-built note, this block). **What it
+> is: no value, range or reason changed; the environmental limit kept as drafted (projects budget only; compliance
+> required by permits, not available); he accepted A1-A31 and the rendered text on Opus's recommendations,
+> choosing not to weigh in item by item, so DoD 4 is an acceptance by deferral, not an independent check** (the as-built
+> note under §13 step 7 says so). **Then a two-sided neutrality read (Opus, his decisions):** "pressing suppliers"
+> became "negotiating lower prices with suppliers" in the dossier and in `planning/07` L9; S3's missing community
+> consequence is logged for Phase 3 (OPEN entry below). **Next: step 8, the realism read
+> (Opus: pick the reader live, draft the brief, show him, cap $3)**, which is now the independent check on the
+> numbers. Nothing in Phase 2 calls Bedrock or any official model.
+> **Bedrock at 2:31 PM CDT on 2026-10-06 (`scratch/throttle-check.py`, run once, not acted on):** Nova Lite and
+> Sonnet 4.6 both still `ThrottlingException`, "Too many tokens per day", $0 (12:00 PM: same).
 >
 > **WAITING ON AWS, the full list (2026-10-06):**
 > - **Bedrock quotas restored** (case 179121856900232, BLOCKED entry). Behind it: Phase 1 steps 3 and 9, then 11 and
@@ -71,6 +76,22 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Each session, alongside Phase 2:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN — for Phase 3: S3 states no community consequence, 2026-10-06
+
+Found in Phase 2 step 7's two-sided neutrality read (his decision to log it, 2026-10-06). The Roundtable names
+communities as a stakeholder, and objectives B and D direct the model to weigh them. `planning/07` §3 S3 (facility
+closure) states every option's **workforce** outcome in numbers, but nothing about the community the plant is in,
+and the dossier has no community figure (communities share L6 with environmental spending, §3.3). Checklist item 1
+(`planning/07` §9) asks for consequences "for every affected group, or for none"; on a closure the local community
+is an affected group, so S3 as written may fail its own checklist.
+
+**For Phase 3, when S3's text is written:** either S3 gives the closure's local consequence a number (an assumption
+with a range and reason, like the dossier's, and the same for every option: close, retool, sell), or the committed
+checklist record says why no group's community consequence is stated. Not a dossier change: adding a local-economy
+figure now would be designing S3 early. Step 8's realism reader may comment on it; that is input, not the decision.
 
 ---
 

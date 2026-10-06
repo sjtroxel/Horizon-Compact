@@ -194,7 +194,7 @@ Spending with suppliers in the year just ended: {supplier_spend}, or {materials_
 
 Payment terms. The Company takes an average of {payment_days} days to pay its suppliers.
 
-Agreements. Supply agreements run for several years. The share of supplier spending under agreements that come up for renewal in the coming year: {renegotiable_share}. The purchasing department's estimate of the largest price reduction obtainable on those renewals: {max_supplier_reduction}. Together, the largest annual saving available from pressing suppliers on price: {supplier_cap}.
+Agreements. Supply agreements run for several years. The share of supplier spending under agreements that come up for renewal in the coming year: {renegotiable_share}. The purchasing department's estimate of the largest price reduction obtainable on those renewals: {max_supplier_reduction}. Together, the largest annual saving available from negotiating lower prices with suppliers: {supplier_cap}.
 
 @group environment
 
@@ -249,4 +249,4 @@ Dividends and repurchases: the full amount paid in the year just ended, {shareho
 
 Cash: cash above the minimum operating level, {cash_above_min}. The undrawn credit facility of {credit_facility} is available in addition, as borrowing.
 
-Suppliers: the largest annual saving from pressing suppliers on price, {supplier_cap}.
+Suppliers: the largest annual saving from negotiating lower prices with suppliers, {supplier_cap}.
