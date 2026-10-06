@@ -300,8 +300,54 @@ wording and neutrality matter (**Opus**). Steps 7 and 9 are his. Step 8 is Opus 
    the test was left alone (divergence 6, step 1).
 5. **Draft the figures** (Opus), section by section in §8's order: every sourced row from the extracts, every derived
    row as a formula, every assumption with its range and reason.
+   `[done 2026-10-06, drafted; uncommitted]` `experiment/company/figures.toml`: 216 rows, all resolving. **It cannot
+   be committed alone:** with figures and no template, `hc dossier check` fails the folder as half built, by design,
+   so it lands with step 6 in C2. **Five sources added** (15 in all): AIES 2023 (industry revenue 2023 to 2024,
+   -0.5%), Damodaran's archived January 2024 and January 2025 margin editions (so each of the three years has its
+   own industry margins), BLS PPI for NAICS 333 (2022-2025 annual averages: the price changes) and BLS JOLTS for
+   durable goods manufacturing (2025 hires rate, 26.4%: the openings a retrained person could fill). All through
+   keyless public routes; the Census M3 API wants a key and FRED refused automated reads, so neither is used.
+   **How the Company is built:** revenue $1,500.0 million (the one scale assumption); every margin, the balance
+   sheet ratios, capital spending, payout and repurchases from Damodaran's industry aggregates; headcount from
+   AIES revenue per employee (3,310); the functions, their headcounts and pay from OEWS shares and mean wages; the
+   benefits ratio and the supplier spend from AIES. The statements tie: operating income is gross profit less SG&A
+   and R&D; net income is operating income less interest (debt at the industry's debt to EBITDA, at its book
+   rate) less tax; payroll by function adds to the total; the plants add to operating income. **Two findings:**
+   (1) OEWS pay gives payroll at 16.3% of revenue against AIES's 17.8%; OEWS is used throughout because pay by
+   occupation needs it, and the row's note says so. (2) `formula_references` validated a formula by evaluating it
+   with every row set to one, so `ev * r / (1 - r)` divided by zero and a valid formula was refused; it now walks
+   the formula without arithmetic (a regression test added). **Code change:** an optional `note` on any row,
+   shown in the figures table only, never in the model's text (tested). **Assumptions: 31**, six of them plant
+   numbers; the rest are the scale, plant count, aftermarket share, unit volume, minimum cash, the credit
+   facility, five plant shares and five plant margins, the price ceiling, two supplier figures, two environmental
+   figures, three retraining figures and the wage-or-hours ceiling. Every one says where its range comes from,
+   and most say plainly that no public industry-level source was found.
 6. **Draft the template** (Opus) and render. Run the checks. Estimate the length. **Commit C2** (the dossier, its
    rendered files, the source extracts).
+   `[done 2026-10-06, Opus; uncommitted until he runs C2]` `experiment/company/dossier.template.txt`, eleven
+   sections in §8's order, rendered to `dossier.toml` and the three public files; `hc dossier check` green with no
+   skip; `make check` green (438 tests); the name guard passes on the whole change set. **Three more rows**
+   (return on equity, dividend yield, market value over net income), all derived, no new assumption: the balance
+   report had the shareholder section at 54 words. **Balance now (words):** general 1,152, workforce 418,
+   customers 126, suppliers 112, shareholders 98, environment 88. The workforce lead is structural (payroll by
+   function is every scenario's caps); it goes to the realism read and Phase 2.5's checklist as is. **Length:
+   about 1,990 words, an estimated 2,690 tokens, well under §8's 4,400 words.** Not padded: every added sentence
+   is unsourced content, the caching minimum is 1,024, and a shorter prefix costs less per run. **Found and
+   fixed:** (1) the cited version's source list followed a set's order, which changes per process with Python's
+   string hashing, so a render could differ from the committed file; now sorted, with a test that renders under
+   six hash seeds and fails without the fix. (2) The figures table printed a raw twelve-digit dollar amount
+   (AIES revenue), which tripped the account-id test; integers now print with separators. (3) The skip is gone:
+   a missing figures file or template fails the check. **Extracts pruned** to the rows the figures cite plus each
+   file's identifying rows (the script's `KEEP` list); 170 lines across 15 files. **Unsourced statements in words**
+   (no number, so no row; step 7 should read them as claims): the product range and customers' industries; the
+   sales force plus distributors; list prices set once a year; that debt was held level and no principal falls
+   due in the coming year; what capital spending and R&D fund; the dividend set as a share of net income and an
+   annual repurchase program; what office and business functions cover; why Plant 6 loses money (smallest plant,
+   lowest-volume family, fixed costs over fewer units); supplier categories and multi-year agreements; what
+   compliance and environmental projects cover, and that compliance is required by permits; the automation in
+   use; that the openings are positions a retrained employee could fill. **One design call for him:** the
+   environmental line's limit is the projects budget only ($4.5 million); compliance ($3.0 million) is stated as
+   required and not available.
 7. **His review** (DoD 4): the assumptions table line by line, then the rendered model version line by line. Each
    change goes through `figures.toml` or the template and a re-render. **Commit C3** if anything changed.
 8. **The realism read** (DoD 5): pick the reader live, draft the brief, show him, send, commit the raw reply,

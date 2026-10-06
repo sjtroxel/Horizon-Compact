@@ -143,3 +143,76 @@ sha256 = "3e1e0e1d79e70eb964996ea04c2994bb4399aa634673f21714bf856ec3bdad29"
 population = "industry aggregate over 105 US public firms (sums and ratios of sums, not medians)"
 terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
 extract = "docs/phases/evidence/phase-2/sources/damodaran-2026-01-taxrate.csv"
+
+# Added in step 5 (2026-10-06): a prior year of AIES, the two prior Damodaran margin editions (so each of the
+# three years has its own industry margins), and two BLS series read through the public API (no key).
+
+[sources.aies-2023-basic01]
+short = "AIES 2023"
+publisher = "US Census Bureau"
+title = "Annual Integrated Economic Survey, 2023, table AIES31BASIC01 (U.S. by industry)"
+edition = "2023 AIES, the file as re-posted with the 2024 release; last modified 2026-09-08 (the date used as released)"
+released = 2026-09-08
+retrieved = 2026-10-06
+url = "https://www2.census.gov/programs-surveys/aies/data/2023/AIES31BASIC01.zip"
+file = "AIES31BASIC01.dat"
+sha256 = "a27bbf9fc692c681ad5b67a22f14c6f954826a2fa994e674c58d71d72d087a9b"
+population = "all US employer firms, NAICS 333 (Machinery manufacturing)"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2/sources/aies-2023-basic01.csv"
+
+[sources.damodaran-2024-01-margin]
+short = "Damodaran 2024 margins"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Profit margins by industry, archived edition (margin23.xls), US companies, industry Machinery"
+edition = "January 2024 update (data for the year 2023); the file's own date cell reads 2024-01-05, used as released"
+released = 2024-01-05
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/archives/margin23.xls"
+file = "margin23.xls"
+sha256 = "89ce08b2f8ad09137e46bce400a3b15ac7a8501608c54cc10137acb81bead8b7"
+population = "industry aggregate over 103 US public firms (ratios of summed values, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2024-01-margin.csv"
+
+[sources.damodaran-2025-01-margin]
+short = "Damodaran 2025 margins"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Profit margins by industry, archived edition (margin24.xls), US companies, industry Machinery"
+edition = "January 2025 update (data for the year 2024); the file's own date cell reads 2025-01-05, used as released"
+released = 2025-01-05
+retrieved = 2026-10-06
+url = "https://pages.stern.nyu.edu/~adamodar/pc/archives/margin24.xls"
+file = "margin24.xls"
+sha256 = "2a577cfd96e5a2cd5767bdf8f67132d420b374d2dd0da02df708fd4f09f743c3"
+population = "industry aggregate over 109 US public firms (ratios of summed values, not medians)"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2/sources/damodaran-2025-01-margin.csv"
+
+[sources.bls-ppi-333]
+short = "BLS PPI"
+publisher = "US Bureau of Labor Statistics"
+title = "Producer Price Index by industry, machinery manufacturing (series PCU333---333---), monthly, 2022 to 2025"
+edition = "series as served by the BLS public API v1 on 2026-10-06 (used as released); no 2022-2025 value carries the preliminary flag"
+released = 2026-10-06
+retrieved = 2026-10-06
+url = "https://api.bls.gov/publicAPI/v1/timeseries/data/ (series PCU333---333---, years 2022-2025)"
+file = "ppi2225.json"
+sha256 = "845b8fef286ae1a11bb80ff180a4bd6605bae4f83ab4e2c2b8f16093542606cb"
+population = "prices received by US producers in NAICS 333"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2/sources/bls-ppi-333.csv"
+
+[sources.bls-jolts-durable-2025]
+short = "BLS JOLTS"
+publisher = "US Bureau of Labor Statistics"
+title = "Job Openings and Labor Turnover Survey, durable goods manufacturing, hires rate, monthly, 2025 (the response also held quits and total separations, not used)"
+edition = "series as served by the BLS public API v1 on 2026-10-06 (used as released); not seasonally adjusted"
+released = 2026-10-06
+retrieved = 2026-10-06
+url = "https://api.bls.gov/publicAPI/v1/timeseries/data/ (series JTU320000000000000HIR, QUR, TSR, year 2025)"
+file = "jolts2025.json"
+sha256 = "ddb1a2b487858e86ce5157edfa4bf45278c9b4c621fdc8d4c81ae617995eab82"
+population = "US durable goods manufacturing establishments (NAICS 33 durable goods, which includes NAICS 333)"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2/sources/bls-jolts-durable-2025.csv"

@@ -83,6 +83,7 @@ label = "Employees"
 unit = "count"
 formula = "revenue / rev_per_emp"
 round = 10
+note = "rounded to the nearest ten"
 
 [figures.payback]
 label = "Payback"
@@ -250,6 +251,17 @@ def test_a_formula_may_hold_only_ids_numbers_operators_and_parentheses(formula: 
         formula_references(formula)
 
 
+def test_a_valid_formula_that_would_divide_by_zero_if_every_row_were_one_is_accepted() -> None:
+    # Found drafting the real figures: cash = ev * r / (1 - r). Collecting ids must not evaluate.
+    assert formula_references("ev * r / (1 - r)") == {"ev", "r"}
+    rows = (
+        '[figures.r]\nlabel = "r"\nunit = "pct"\nvalue = 0.25\n'
+        'assumption = { low = 0, high = 0.5, range_from = "x", reason = "w" }\n'
+        '[figures.c]\nlabel = "c"\nunit = "ratio"\nformula = "r / (1 - r)"\n'
+    )
+    assert load(rows).resolved["c"].value == Decimal("0.33")
+
+
 def test_formulas_follow_ordinary_precedence_and_support_unary_minus() -> None:
     rows = (
         '[figures.a]\nlabel = "a"\nunit = "count"\nvalue = 6\n'
@@ -380,6 +392,7 @@ def test_the_models_version_has_no_citation_and_loads_as_a_dossier(tmp_path: Pat
     dossier = Dossier.model_validate(data)
     assert dossier.title == "the Company: a test pack"
     assert "[" not in dossier.text
+    assert "nearest ten" not in dossier.text  # a note is for the public tables only
     assert "Revenue was $1,500.0 million." in dossier.text
     assert dossier.text.endswith("is the largest.\n")
 
@@ -399,7 +412,7 @@ def test_the_tables_list_every_row_and_the_assumptions_with_his_review(tmp_path:
     figures = (root / FIGURES_TABLE_PATH).read_text(encoding="utf-8")
     for key in ("rev_per_emp", "margin", "revenue", "headcount", "payback", "plant_a"):
         assert f"`{key}`" in figures
-    assert "derived D1: revenue / rev_per_emp" in figures
+    assert "derived D1: revenue / rev_per_emp. Note: rounded to the nearest ten" in figures
     assumptions = (root / ASSUMPTIONS_TABLE_PATH).read_text(encoding="utf-8")
     assert (
         "| A1 | Revenue (`revenue`) | $1,500.0 million | $1,000.0 million to $2,000.0 million |"
@@ -407,6 +420,42 @@ def test_the_tables_list_every_row_and_the_assumptions_with_his_review(tmp_path:
     )
     assert "| accepted |" in assumptions  # payback's review
     assert "none (a name, not a quantity)" in assumptions
+
+
+def test_rendering_is_the_same_in_every_process(tmp_path: Path) -> None:
+    """Found in step 6: the cited sources list followed a set's order, which changes per process with
+    Python's string hashing, so a render could differ from the committed file. Render under several seeds."""
+    import os
+    import subprocess
+    import sys
+
+    second = SOURCES.replace("src-a", "src-b").replace("Src A", "Src B")
+    figures = (
+        '[figures.a]\nlabel = "a"\nunit = "usd"\nvalue = 1\nsource = "src-a"\nlocator = "l"\n'
+        '[figures.b]\nlabel = "b"\nunit = "usd"\nvalue = 2\nsource = "src-b"\nlocator = "l"\n'
+        '[figures.c]\nlabel = "c"\nunit = "usd"\nformula = "a + b"\n'
+    )
+    root = build(
+        tmp_path,
+        sources=SOURCES + second,
+        figures=figures,
+        template="@title t\nTotal {c}.\n",
+        render=False,
+    )
+    extract_b = root / "docs/phases/evidence/phase-2/sources/src-b.csv"
+    extract_b.write_text("field,value\nx,1\n", encoding="utf-8")
+    seen = set()
+    for seed in ("0", "1", "2", "3", "4", "5"):
+        env = {**os.environ, "PYTHONHASHSEED": seed}
+        code = "import sys; from horizon_compact.cli import main; sys.exit(main(sys.argv[1:]))"
+        subprocess.run(
+            [sys.executable, "-c", code, "dossier", "--root", str(root), "render"],
+            check=True,
+            env=env,
+            capture_output=True,
+        )
+        seen.add((root / CITED_PATH).read_text(encoding="utf-8"))
+    assert len(seen) == 1
 
 
 def test_rendering_twice_gives_the_same_bytes() -> None:
@@ -499,16 +548,14 @@ def test_a_missing_extract_fails_the_check(tmp_path: Path) -> None:
     )
 
 
-def test_a_half_built_company_folder_fails_but_an_empty_one_is_skipped_by_name(
-    tmp_path: Path,
-) -> None:
-    half = run_checks(build(tmp_path / "half", template=None))
+def test_a_missing_figures_file_or_template_fails_with_no_skip(tmp_path: Path) -> None:
+    no_template = run_checks(build(tmp_path / "a", template=None))
+    assert any("missing: dossier.template.txt" in failure for failure in no_template.failures)
+    neither = run_checks(build(tmp_path / "b", figures=None, template=None))
     assert any(
-        "half built" in failure and "dossier.template.txt" in failure for failure in half.failures
+        "missing: figures.toml, dossier.template.txt" in failure for failure in neither.failures
     )
-    empty = run_checks(build(tmp_path / "empty", figures=None, template=None))
-    assert empty.ok
-    assert any(note.startswith("SKIPPED") for note in empty.notes)
+    assert not any(note.startswith("SKIPPED") for note in neither.notes)
 
 
 def test_the_length_estimate_warns_above_seven_thousand_tokens(tmp_path: Path) -> None:
@@ -536,16 +583,7 @@ def test_the_real_sources_load_and_every_extract_exists() -> None:
     assert all(source.terms and source.sha256 for source in sources.values())
 
 
-@pytest.mark.skipif(
-    not (ROOT / "experiment/company/figures.toml").exists(),
-    reason="SKIPPED: Phase 2 steps 5-6 have not drafted experiment/company/figures.toml yet",
-)
 def test_the_real_company_folder_passes_every_check() -> None:
     report = run_checks(ROOT)
     assert report.ok, report.failures
-    assert not any(note.startswith("SKIPPED") for note in report.notes)
-
-
-def test_the_real_tree_passes_the_check_as_it_stands() -> None:
-    assert run_checks(ROOT).ok
     assert TEMPLATE_PATH.endswith("dossier.template.txt")

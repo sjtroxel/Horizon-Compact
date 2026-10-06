@@ -19,7 +19,6 @@ from horizon_compact.dossier.figures import (
 )
 from horizon_compact.dossier.render import (
     COMPANY_DIR,
-    DOSSIER_PATH,
     TEMPLATE_PATH,
     Template,
     TemplateError,
@@ -85,23 +84,20 @@ def run_checks(root: Path) -> Report:
                 f"{SOURCES_FILE}: {name}: the extract {source.extract} does not exist"
             )
 
+    # No skip: the figures and the template must exist (the not-built-yet skip of steps 2-4 was removed in
+    # step 6, when they landed). A missing rendered file is reported by the freshness check below.
     figures_text = _read(company / FIGURES_FILE)
     template_text = _read(root / TEMPLATE_PATH)
-    dossier_text = _read(root / DOSSIER_PATH)
-    present = {
-        FIGURES_FILE: figures_text is not None,
-        "dossier.template.txt": template_text is not None,
-        "dossier.toml": dossier_text is not None,
-    }
-    if not any(present.values()):
-        report.notes.append(
-            "SKIPPED: the figures, template and rendered dossier do not exist yet (Phase 2 steps 5-6); "
-            f"only {SOURCES_FILE} and its extracts were checked. This skip is removed when they land."
-        )
-        return report
     if figures_text is None or template_text is None:
-        missing = ", ".join(name for name, there in present.items() if not there)
-        report.failures.append(f"{COMPANY_DIR} is half built; missing: {missing}")
+        missing = [
+            name
+            for name, text in (
+                (FIGURES_FILE, figures_text),
+                ("dossier.template.txt", template_text),
+            )
+            if text is None
+        ]
+        report.failures.append(f"{COMPANY_DIR} is missing: {', '.join(missing)}")
         return report
 
     try:

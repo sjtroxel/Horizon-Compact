@@ -116,6 +116,9 @@ class FigureRow(_Strict):
     assumption: Assumption | None = None
     formula: str | None = None
     round: Number | None = None
+    # Shown in the figures table only, never in the model's text: how a row was read or why a formula is built
+    # the way it is (added in step 5, when derived rows needed their reasoning recorded somewhere).
+    note: str | None = None
 
     @property
     def kind(self) -> Kind:
@@ -226,16 +229,33 @@ def _parse_formula(expression: str) -> ast.Expression:
         raise FigureError(f"not a formula: {exc.msg}") from None
 
 
+def _names(node: ast.AST, seen: set[str]) -> None:
+    """Validate a formula's structure and collect its names, with no arithmetic (a dry run that evaluated
+    would divide by zero on a valid formula such as ``x / (1 - r)``)."""
+    if isinstance(node, ast.Expression):
+        _names(node.body, seen)
+    elif isinstance(node, ast.Constant):
+        if isinstance(node.value, bool) or not isinstance(node.value, int | float):
+            raise FigureError(f"only numbers are allowed in a formula, not {node.value!r}")
+    elif isinstance(node, ast.Name):
+        seen.add(node.id)
+    elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.UAdd | ast.USub):
+        _names(node.operand, seen)
+    elif isinstance(node, ast.BinOp) and isinstance(
+        node.op, ast.Add | ast.Sub | ast.Mult | ast.Div
+    ):
+        _names(node.left, seen)
+        _names(node.right, seen)
+    else:
+        raise FigureError(
+            f"only + - * / and parentheses are allowed in a formula ({type(node).__name__})"
+        )
+
+
 def formula_references(expression: str) -> frozenset[str]:
     """The row ids a formula uses. Validates the whole formula (characters, syntax, allowed operations)."""
     seen: set[str] = set()
-
-    def record(name: str) -> Decimal:
-        seen.add(name)
-        return Decimal(1)
-
-    # A divisor of one in the dry run cannot divide by zero, so only real structure problems surface here.
-    _walk(_parse_formula(expression), record)
+    _names(_parse_formula(expression), seen)
     return frozenset(seen)
 
 

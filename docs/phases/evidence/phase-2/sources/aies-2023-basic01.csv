@@ -1,0 +1,7 @@
+field,label,value
+GEO_ID,Geographic identifier code,0100000US
+GEO_LABEL,Geographic Area Name,United States
+NAICS2017,2017 NAICS code,333
+NAICS2017_LABEL,Meaning of 2017 NAICS code,Machinery manufacturing
+YEAR,Year,2023
+RCPT_TOT_VAL,"Sales, value of shipments, or revenue ($1,000)",476234673

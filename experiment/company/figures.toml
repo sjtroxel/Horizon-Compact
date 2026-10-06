@@ -1,0 +1,1374 @@
+# Every figure behind the Company's board pack (docs/phases/phase-2-company-dossier-IMPLEMENTATION.md, section 5).
+# A row is exactly one of: SOURCED (value + source + locator), an ASSUMPTION (value + range + reason) or DERIVED
+# (a formula over other rows). Every value is rounded to its step when resolved, and later formulas see the
+# rounded value (section 13, step 2). `pct` is a fraction; `usd` and `usd_m` are in dollars.
+#
+# Sections follow the outline (section 8). Industry rows come first in each section, then the Company's.
+# Labels for the years are relative: fy0 is the year just ended (the sources' 2025), fy1 the prior year (2024),
+# fy2 two years ago (2023). No row is chosen for its effect on a decision.
+
+# ============================================================================================================
+# 1. The Company
+# ============================================================================================================
+
+[figures.revenue_fy0]
+label = "Revenue, year just ended"
+unit = "usd_m"
+value = 1_500_000_000
+assumption = { low = 1_000_000_000, high = 2_000_000_000, range_from = "planning/01 section 2.1: roughly $1-2 billion of revenue, decided 2026-10-02", reason = "The midpoint of the decided scale. Damodaran's 105 Machinery firms average about $1.9 billion of revenue each (ind_revenue_total / 105), so the Company sits inside the population the margins come from." }
+
+[figures.plant_count]
+label = "Number of plants"
+unit = "count"
+value = 6
+assumption = { low = 5, high = 6, range_from = "planning/01 section 2.1: five or six plants", reason = "The upper end, so the plant with an operating loss (section 6) is one of several rather than a fifth of the Company." }
+
+[figures.plant_1_no]
+label = "Plant number, Great Lakes"
+unit = "label"
+value = "1"
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+
+[figures.plant_2_no]
+label = "Plant number, Ohio Valley"
+unit = "label"
+value = "2"
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+
+[figures.plant_3_no]
+label = "Plant number, Upper Midwest"
+unit = "label"
+value = "3"
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+
+[figures.plant_4_no]
+label = "Plant number, Southeast"
+unit = "label"
+value = "4"
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+
+[figures.plant_5_no]
+label = "Plant number, South Central"
+unit = "label"
+value = "5"
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+
+[figures.plant_6_no]
+label = "Plant number, Great Plains"
+unit = "label"
+value = "6"
+assumption = { range_from = "a name, not a quantity", reason = "Plants are named by region and number (scope decision 4)." }
+
+[figures.aftermarket_share]
+label = "Replacement parts and service, share of revenue"
+unit = "pct"
+value = 0.25
+assumption = { low = 0.15, high = 0.35, range_from = "no public industry-level source found for the aftermarket share of machinery makers' revenue; a wide range around a quarter", reason = "The middle of the range." }
+
+[figures.aftermarket_revenue_fy0]
+label = "Replacement parts and service revenue, year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * aftermarket_share"
+
+# ============================================================================================================
+# 2. Results, three years
+# ============================================================================================================
+
+# --- industry margins, one Damodaran edition per year ------------------------------------------------------
+
+[figures.ind_gm_fy0]
+label = "Industry gross margin, year just ended"
+unit = "pct"
+value = 0.3747335
+source = "damodaran-2026-01-margin"
+locator = "Machinery, Gross Margin"
+
+[figures.ind_sga_fy0]
+label = "Industry SG&A as a share of revenue, year just ended"
+unit = "pct"
+value = 0.19649988
+source = "damodaran-2026-01-margin"
+locator = "Machinery, SG&A/ Sales"
+
+[figures.ind_rnd_fy0]
+label = "Industry R&D as a share of revenue, year just ended"
+unit = "pct"
+value = 0.020329465
+source = "damodaran-2026-01-margin"
+locator = "Machinery, R&D/Sales"
+
+[figures.ind_net_margin_fy0]
+label = "Industry net margin, year just ended"
+unit = "pct"
+value = 0.10578747
+source = "damodaran-2026-01-margin"
+locator = "Machinery, Net Margin"
+note = "Used only to back out the industry's aggregate revenue; the Company's own net income is built from its operating income, interest and tax."
+
+[figures.ind_gm_fy1]
+label = "Industry gross margin, prior year"
+unit = "pct"
+value = 0.37078192
+source = "damodaran-2025-01-margin"
+locator = "Machinery, Gross Margin"
+
+[figures.ind_sga_fy1]
+label = "Industry SG&A as a share of revenue, prior year"
+unit = "pct"
+value = 0.19248441
+source = "damodaran-2025-01-margin"
+locator = "Machinery, SG&A/ Sales"
+
+[figures.ind_rnd_fy1]
+label = "Industry R&D as a share of revenue, prior year"
+unit = "pct"
+value = 0.021636323
+source = "damodaran-2025-01-margin"
+locator = "Machinery, R&D/Sales"
+
+[figures.ind_net_margin_fy1]
+label = "Industry net margin, prior year"
+unit = "pct"
+value = 0.100392
+source = "damodaran-2025-01-margin"
+locator = "Machinery, Net Margin"
+
+[figures.ind_gm_fy2]
+label = "Industry gross margin, two years ago"
+unit = "pct"
+value = 0.35540162
+source = "damodaran-2024-01-margin"
+locator = "Machinery, Gross Margin"
+
+[figures.ind_sga_fy2]
+label = "Industry SG&A as a share of revenue, two years ago"
+unit = "pct"
+value = 0.18827063
+source = "damodaran-2024-01-margin"
+locator = "Machinery, SG&A/ Sales"
+
+[figures.ind_rnd_fy2]
+label = "Industry R&D as a share of revenue, two years ago"
+unit = "pct"
+value = 0.021220999
+source = "damodaran-2024-01-margin"
+locator = "Machinery, R&D/Sales"
+
+[figures.ind_net_margin_fy2]
+label = "Industry net margin, two years ago"
+unit = "pct"
+value = 0.097724728
+source = "damodaran-2024-01-margin"
+locator = "Machinery, Net Margin"
+
+# --- industry totals behind the capital and cash ratios ---------------------------------------------------
+
+[figures.ind_ni_total]
+label = "Industry aggregate net income (105 firms)"
+unit = "usd_m"
+value = 20_804_484_000
+source = "damodaran-2026-01-divfcfe"
+locator = "Machinery, Net Income (US $ millions) 20804.484, in dollars"
+
+[figures.ind_revenue_total]
+label = "Industry aggregate revenue (105 firms)"
+unit = "usd_m"
+formula = "ind_ni_total / ind_net_margin_fy0"
+note = "Damodaran's files used here do not state the industry's revenue; it is backed out of his aggregate net income and net margin, both computed over the same 105 firms."
+
+[figures.ind_capex_total]
+label = "Industry aggregate capital expenditures (105 firms)"
+unit = "usd_m"
+value = 4_700_863_000
+source = "damodaran-2026-01-capex"
+locator = "Machinery, Capital Expenditures (US $ millions) 4700.863, in dollars"
+
+[figures.ind_da_total]
+label = "Industry aggregate depreciation and amortization (105 firms)"
+unit = "usd_m"
+value = 6_927_636_000
+source = "damodaran-2026-01-capex"
+locator = "Machinery, Depreciation & Amort (US $ millions) 6927.636, in dollars"
+
+# --- producer prices and industry revenue, for growth ------------------------------------------------------
+
+[figures.ppi_2022]
+label = "Producer price index, machinery manufacturing, annual average, two years before fy2 (2022)"
+unit = "ratio"
+value = 166.86417
+source = "bls-ppi-333"
+locator = "PCU333---333---, 2022, mean of the twelve monthly values"
+
+[figures.ppi_2023]
+label = "Producer price index, machinery manufacturing, annual average, fy2 (2023)"
+unit = "ratio"
+value = 178.39433
+source = "bls-ppi-333"
+locator = "PCU333---333---, 2023, mean of the twelve monthly values"
+
+[figures.ppi_2024]
+label = "Producer price index, machinery manufacturing, annual average, fy1 (2024)"
+unit = "ratio"
+value = 184.18967
+source = "bls-ppi-333"
+locator = "PCU333---333---, 2024, mean of the twelve monthly values"
+
+[figures.ppi_2025]
+label = "Producer price index, machinery manufacturing, annual average, fy0 (2025)"
+unit = "ratio"
+value = 190.54667
+source = "bls-ppi-333"
+locator = "PCU333---333---, 2025, mean of the twelve monthly values"
+
+[figures.price_change_fy0]
+label = "Industry producer price change, year just ended"
+unit = "pct"
+formula = "ppi_2025 / ppi_2024 - 1"
+
+[figures.price_change_fy1]
+label = "Industry producer price change, prior year"
+unit = "pct"
+formula = "ppi_2024 / ppi_2023 - 1"
+
+[figures.price_change_fy2]
+label = "Industry producer price change, two years ago"
+unit = "pct"
+formula = "ppi_2023 / ppi_2022 - 1"
+
+[figures.aies_rev_2023]
+label = "Industry revenue, NAICS 333, 2023"
+unit = "usd_m"
+value = 476_234_673_000
+source = "aies-2023-basic01"
+locator = "NAICS 333, U.S., RCPT_TOT_VAL ($1,000) 476234673, in dollars"
+
+[figures.aies_rev_2024]
+label = "Industry revenue, NAICS 333, 2024"
+unit = "usd_m"
+value = 473_891_483_000
+source = "aies-2024-basic01"
+locator = "NAICS 333, U.S., RCPT_TOT_VAL ($1,000) 473891483, in dollars"
+
+[figures.volume_change_fy0]
+label = "Change in the Company's unit volume, year just ended"
+unit = "pct"
+value = 0.0
+assumption = { low = -0.04, high = 0.04, range_from = "no industry volume figure for 2025 without a Census API key; the prior year's industry volume change was about -3.6% (AIES revenue change less the PPI change)", reason = "Flat, the middle of the range; with it, revenue grew with prices." }
+
+[figures.rev_growth_fy0]
+label = "Revenue growth, year just ended"
+unit = "pct"
+formula = "price_change_fy0 + volume_change_fy0"
+
+[figures.rev_growth_fy1]
+label = "Revenue growth, prior year"
+unit = "pct"
+formula = "aies_rev_2024 / aies_rev_2023 - 1"
+note = "The Company's revenue is taken to have moved with the industry's (AIES, all employer firms, 2023 to 2024)."
+
+[figures.revenue_fy1]
+label = "Revenue, prior year"
+unit = "usd_m"
+formula = "revenue_fy0 / (1 + rev_growth_fy0)"
+
+[figures.revenue_fy2]
+label = "Revenue, two years ago"
+unit = "usd_m"
+formula = "revenue_fy1 / (1 + rev_growth_fy1)"
+
+# --- the Company's income statement, year just ended -------------------------------------------------------
+
+[figures.gross_profit_fy0]
+label = "Gross profit, year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * ind_gm_fy0"
+
+[figures.sga_fy0]
+label = "Selling, general and administrative expense, year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * ind_sga_fy0"
+
+[figures.rnd_fy0]
+label = "Research and development expense, year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * ind_rnd_fy0"
+
+[figures.op_income_fy0]
+label = "Operating income, year just ended"
+unit = "usd_m"
+formula = "gross_profit_fy0 - sga_fy0 - rnd_fy0"
+note = "Gross margin less SG&A and R&D. Damodaran's own pre-tax operating margin for the year is 15.86%; the rounded line items (37.5% less 19.6% less 2.0%) give 15.9%, and the statement adds up from its own lines."
+
+[figures.op_margin_fy0]
+label = "Operating margin, year just ended"
+unit = "pct"
+formula = "op_income_fy0 / revenue_fy0"
+
+[figures.ind_da_share]
+label = "Industry depreciation and amortization as a share of revenue"
+unit = "pct"
+formula = "ind_da_total / ind_revenue_total"
+
+[figures.da_fy0]
+label = "Depreciation and amortization, year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * ind_da_share"
+
+[figures.ebitda_fy0]
+label = "EBITDA, year just ended"
+unit = "usd_m"
+formula = "op_income_fy0 + da_fy0"
+
+[figures.ind_debt_ebitda]
+label = "Industry debt to EBITDA"
+unit = "ratio"
+value = 2.3039265
+source = "damodaran-2026-01-dbtfund"
+locator = "Machinery, Debt to EBITDA"
+
+[figures.ind_book_rate]
+label = "Industry book interest rate"
+unit = "pct"
+value = 0.047970758
+source = "damodaran-2026-01-debtdetails"
+locator = "Machinery, Book interest rate"
+
+[figures.ind_tax_rate]
+label = "Industry effective tax rate, aggregate"
+unit = "pct"
+value = 0.21294562
+source = "damodaran-2026-01-taxrate"
+locator = "Machinery, Effective Tax Rates: Aggregate tax rate (the first of the two columns so named; the second is the cash rate)"
+
+[figures.debt]
+label = "Total debt, end of year just ended"
+unit = "usd_m"
+formula = "ebitda_fy0 * ind_debt_ebitda"
+note = "Set at the industry's debt to EBITDA."
+
+[figures.interest_fy0]
+label = "Interest expense, year just ended"
+unit = "usd_m"
+formula = "debt * ind_book_rate"
+
+[figures.pretax_income_fy0]
+label = "Income before tax, year just ended"
+unit = "usd_m"
+formula = "op_income_fy0 - interest_fy0"
+
+[figures.tax_fy0]
+label = "Income tax, year just ended"
+unit = "usd_m"
+formula = "pretax_income_fy0 * ind_tax_rate"
+
+[figures.net_income_fy0]
+label = "Net income, year just ended"
+unit = "usd_m"
+formula = "pretax_income_fy0 - tax_fy0"
+
+[figures.net_margin_fy0]
+label = "Net margin, year just ended"
+unit = "pct"
+formula = "net_income_fy0 / revenue_fy0"
+
+# --- the two prior years, from each year's industry margins -------------------------------------------------
+
+[figures.gross_profit_fy1]
+label = "Gross profit, prior year"
+unit = "usd_m"
+formula = "revenue_fy1 * ind_gm_fy1"
+
+[figures.op_income_fy1]
+label = "Operating income, prior year"
+unit = "usd_m"
+formula = "revenue_fy1 * (ind_gm_fy1 - ind_sga_fy1 - ind_rnd_fy1)"
+
+[figures.net_income_fy1]
+label = "Net income, prior year"
+unit = "usd_m"
+formula = "revenue_fy1 * ind_net_margin_fy1"
+
+[figures.gross_profit_fy2]
+label = "Gross profit, two years ago"
+unit = "usd_m"
+formula = "revenue_fy2 * ind_gm_fy2"
+
+[figures.op_income_fy2]
+label = "Operating income, two years ago"
+unit = "usd_m"
+formula = "revenue_fy2 * (ind_gm_fy2 - ind_sga_fy2 - ind_rnd_fy2)"
+
+[figures.net_income_fy2]
+label = "Net income, two years ago"
+unit = "usd_m"
+formula = "revenue_fy2 * ind_net_margin_fy2"
+
+# ============================================================================================================
+# 3. Balance sheet and liquidity
+# ============================================================================================================
+
+[figures.ind_ar_sales]
+label = "Industry receivables as a share of revenue"
+unit = "pct"
+value = 0.19032645
+source = "damodaran-2026-01-wcdata"
+locator = "Machinery, Acc Rec/ Sales"
+
+[figures.ind_inv_sales]
+label = "Industry inventory as a share of revenue"
+unit = "pct"
+value = 0.16618568
+source = "damodaran-2026-01-wcdata"
+locator = "Machinery, Inventory/Sales"
+
+[figures.ind_ap_sales]
+label = "Industry payables as a share of revenue"
+unit = "pct"
+value = 0.099265724
+source = "damodaran-2026-01-wcdata"
+locator = "Machinery, Acc Pay/ Sales"
+
+[figures.ind_nwc_sales]
+label = "Industry non-cash working capital as a share of revenue"
+unit = "pct"
+value = 0.24421936
+source = "damodaran-2026-01-wcdata"
+locator = "Machinery, Non-cash WC/ Sales"
+
+[figures.ind_ebitda_ev]
+label = "Industry EBITDA to enterprise value"
+unit = "pct"
+value = 0.060369518
+source = "damodaran-2026-01-dbtfund"
+locator = "Machinery, EBITDA/EV"
+
+[figures.ind_cash_fv]
+label = "Industry cash to firm value"
+unit = "pct"
+value = 0.029141915
+source = "damodaran-2026-01-divfcfe"
+locator = "Machinery, Cash/ Firm Value"
+
+[figures.ind_book_dc]
+label = "Industry book debt to capital"
+unit = "pct"
+value = 0.39328982
+source = "damodaran-2026-01-dbtfund"
+locator = "Machinery, Book Debt to Capital"
+
+[figures.receivables]
+label = "Receivables, end of year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * ind_ar_sales"
+
+[figures.inventory]
+label = "Inventory, end of year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * ind_inv_sales"
+
+[figures.payables]
+label = "Payables, end of year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * ind_ap_sales"
+
+[figures.enterprise_value]
+label = "Enterprise value"
+unit = "usd_m"
+formula = "ebitda_fy0 / ind_ebitda_ev"
+note = "At the industry's EBITDA to enterprise value."
+
+[figures.cash]
+label = "Cash, end of year just ended"
+unit = "usd_m"
+formula = "enterprise_value * ind_cash_fv / (1 - ind_cash_fv)"
+note = "Damodaran's cash to firm value, where firm value is enterprise value plus cash; solving cash = r x (EV + cash) gives cash = EV x r / (1 - r)."
+
+[figures.market_cap]
+label = "Market value of equity"
+unit = "usd_m"
+formula = "enterprise_value - debt + cash"
+
+[figures.equity_book]
+label = "Shareholders' equity (book), end of year just ended"
+unit = "usd_m"
+formula = "debt * (1 - ind_book_dc) / ind_book_dc"
+note = "At the industry's book debt to capital, where capital is book debt plus book equity."
+
+[figures.interest_coverage]
+label = "Interest coverage (operating income to interest)"
+unit = "ratio"
+formula = "op_income_fy0 / interest_fy0"
+
+[figures.min_cash_months]
+label = "Minimum operating cash, in months of cash operating costs"
+unit = "count"
+value = 1
+assumption = { low = 0.5, high = 2, range_from = "no public industry-level source found for the cash companies hold for operations; half a month to two months of cash operating costs", reason = "One month, a round figure inside the range." }
+
+[figures.cash_costs_fy0]
+label = "Cash operating costs, year just ended (revenue less EBITDA)"
+unit = "usd_m"
+formula = "revenue_fy0 - ebitda_fy0"
+
+[figures.min_operating_cash]
+label = "Minimum operating cash"
+unit = "usd_m"
+formula = "cash_costs_fy0 / 12 * min_cash_months"
+
+[figures.cash_above_min]
+label = "Cash above the minimum operating level"
+unit = "usd_m"
+formula = "cash - min_operating_cash"
+
+[figures.credit_facility]
+label = "Revolving credit facility, undrawn"
+unit = "usd_m"
+value = 300_000_000
+assumption = { low = 150_000_000, high = 450_000_000, range_from = "no public industry-level source found for the size of undrawn credit lines; 10% to 30% of revenue", reason = "The middle of the range (20% of revenue), a round figure." }
+
+[figures.liquidity]
+label = "Available liquidity (cash plus the undrawn facility)"
+unit = "usd_m"
+formula = "cash + credit_facility"
+
+# ============================================================================================================
+# 4. Capital allocation
+# ============================================================================================================
+
+[figures.ind_payout]
+label = "Industry dividend payout ratio"
+unit = "pct"
+value = 0.33425684
+source = "damodaran-2026-01-divfund"
+locator = "Machinery, Dividend Payout"
+
+[figures.ind_cash_return]
+label = "Industry dividends plus buybacks as a share of net income"
+unit = "pct"
+value = 0.90040863
+source = "damodaran-2026-01-divfcfe"
+locator = "Machinery, Cash Return as % of Net Income"
+
+[figures.ind_capex_share]
+label = "Industry capital expenditures as a share of revenue"
+unit = "pct"
+formula = "ind_capex_total / ind_revenue_total"
+
+[figures.capex_fy0]
+label = "Capital spending, year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * ind_capex_share"
+note = "Below depreciation and amortization, as for the industry (Damodaran's Cap Ex/Deprecn for Machinery is 0.68); amortization of acquired intangibles is part of the gap."
+
+[figures.dividends_fy0]
+label = "Dividends paid, year just ended"
+unit = "usd_m"
+formula = "net_income_fy0 * ind_payout"
+
+[figures.repurchases_fy0]
+label = "Share repurchases, year just ended"
+unit = "usd_m"
+formula = "net_income_fy0 * (ind_cash_return - ind_payout)"
+
+[figures.shareholder_returns_fy0]
+label = "Dividends and repurchases, year just ended"
+unit = "usd_m"
+formula = "dividends_fy0 + repurchases_fy0"
+
+[figures.roe_fy0]
+label = "Return on equity (net income over book equity), year just ended"
+unit = "pct"
+formula = "net_income_fy0 / equity_book"
+
+[figures.dividend_yield]
+label = "Dividend yield (dividends over the market value of equity)"
+unit = "pct"
+formula = "dividends_fy0 / market_cap"
+
+[figures.pe_ratio]
+label = "Market value of equity over net income"
+unit = "ratio"
+formula = "market_cap / net_income_fy0"
+
+[figures.wc_increase_fy0]
+label = "Increase in working capital, year just ended"
+unit = "usd_m"
+formula = "(revenue_fy0 - revenue_fy1) * ind_nwc_sales"
+note = "Working capital held at the industry's share of revenue, so it grows with revenue."
+
+[figures.operating_cash_flow_fy0]
+label = "Cash from operations, year just ended"
+unit = "usd_m"
+formula = "net_income_fy0 + da_fy0 - wc_increase_fy0"
+
+[figures.free_cash_flow_fy0]
+label = "Free cash flow (cash from operations less capital spending), year just ended"
+unit = "usd_m"
+formula = "operating_cash_flow_fy0 - capex_fy0"
+
+[figures.uncommitted_cash_flow]
+label = "Cash flow after capital spending, dividends and repurchases, year just ended"
+unit = "usd_m"
+formula = "free_cash_flow_fy0 - dividends_fy0 - repurchases_fy0"
+note = "The uncommitted cash a year produces at the current plans (the R&D scenario's annual amount draws on this row)."
+
+# ============================================================================================================
+# 5. Workforce
+# ============================================================================================================
+
+[figures.aies_emp_2024]
+label = "Industry employees, NAICS 333, 2024"
+unit = "count"
+value = 1_046_464
+source = "aies-2024-basic01"
+locator = "NAICS 333, U.S., EMP_MAR12_NUM"
+
+[figures.aies_payroll_2024]
+label = "Industry annual payroll, NAICS 333, 2024"
+unit = "usd_m"
+value = 84_347_756_000
+source = "aies-2024-basic01"
+locator = "NAICS 333, U.S., PAY_ANN_VAL ($1,000) 84347756, in dollars"
+
+[figures.aies_fringe_2024]
+label = "Industry employer cost of fringe benefits, NAICS 333, 2024"
+unit = "usd_m"
+value = 22_566_734_000
+source = "aies-2024-basic01"
+locator = "NAICS 333, U.S., EXPS_FRNG_BENEFIT_VAL ($1,000) 22566734, in dollars"
+
+[figures.ind_rev_per_emp]
+label = "Industry revenue per employee"
+unit = "usd"
+formula = "aies_rev_2024 / aies_emp_2024"
+
+[figures.headcount_total]
+label = "Employees, end of year just ended"
+unit = "count"
+formula = "revenue_fy0 / ind_rev_per_emp"
+round = 10
+
+[figures.benefits_ratio]
+label = "Benefits cost as a share of payroll"
+unit = "pct"
+formula = "aies_fringe_2024 / aies_payroll_2024"
+
+# --- OEWS employment and mean annual wage, NAICS 333000 -----------------------------------------------------
+
+[figures.oews_emp_all]
+label = "Industry jobs, all occupations"
+unit = "count"
+value = 1_092_170
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 00-0000 All Occupations, TOT_EMP"
+
+[figures.oews_wage_all]
+label = "Industry mean annual wage, all occupations"
+unit = "usd"
+value = 73_820
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 00-0000 All Occupations, A_MEAN"
+
+[figures.oews_emp_prod]
+label = "Industry jobs, production occupations"
+unit = "count"
+value = 516_150
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 51-0000 Production Occupations, TOT_EMP"
+
+[figures.oews_wage_prod]
+label = "Mean annual wage, production occupations"
+unit = "usd"
+value = 54_570
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 51-0000 Production Occupations, A_MEAN"
+
+[figures.oews_emp_maint]
+label = "Industry jobs, installation, maintenance and repair occupations"
+unit = "count"
+value = 59_060
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 49-0000 Installation, Maintenance, and Repair Occupations, TOT_EMP"
+
+[figures.oews_wage_maint]
+label = "Mean annual wage, installation, maintenance and repair occupations"
+unit = "usd"
+value = 67_030
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 49-0000 Installation, Maintenance, and Repair Occupations, A_MEAN"
+
+[figures.oews_emp_logistics]
+label = "Industry jobs, transportation and material moving occupations"
+unit = "count"
+value = 52_110
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 53-0000 Transportation and Material Moving Occupations, TOT_EMP"
+
+[figures.oews_wage_logistics]
+label = "Mean annual wage, transportation and material moving occupations"
+unit = "usd"
+value = 47_970
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 53-0000 Transportation and Material Moving Occupations, A_MEAN"
+
+[figures.oews_emp_eng]
+label = "Industry jobs, architecture and engineering occupations"
+unit = "count"
+value = 116_640
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 17-0000 Architecture and Engineering Occupations, TOT_EMP"
+
+[figures.oews_wage_eng]
+label = "Mean annual wage, architecture and engineering occupations"
+unit = "usd"
+value = 97_280
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 17-0000 Architecture and Engineering Occupations, A_MEAN"
+
+[figures.oews_emp_it]
+label = "Industry jobs, computer and mathematical occupations"
+unit = "count"
+value = 29_780
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 15-0000 Computer and Mathematical Occupations, TOT_EMP"
+
+[figures.oews_wage_it]
+label = "Mean annual wage, computer and mathematical occupations"
+unit = "usd"
+value = 108_070
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 15-0000 Computer and Mathematical Occupations, A_MEAN"
+
+[figures.oews_emp_sales]
+label = "Industry jobs, sales occupations"
+unit = "count"
+value = 38_040
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 41-0000 Sales and Related Occupations, TOT_EMP"
+
+[figures.oews_wage_sales]
+label = "Mean annual wage, sales occupations"
+unit = "usd"
+value = 92_830
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 41-0000 Sales and Related Occupations, A_MEAN"
+
+[figures.oews_emp_office]
+label = "Industry jobs, office and administrative support occupations"
+unit = "count"
+value = 91_270
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 43-0000 Office and Administrative Support Occupations, TOT_EMP"
+
+[figures.oews_wage_office]
+label = "Mean annual wage, office and administrative support occupations"
+unit = "usd"
+value = 56_050
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 43-0000 Office and Administrative Support Occupations, A_MEAN"
+
+[figures.oews_emp_business]
+label = "Industry jobs, business and financial operations occupations"
+unit = "count"
+value = 71_240
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 13-0000 Business and Financial Operations Occupations, TOT_EMP"
+
+[figures.oews_wage_business]
+label = "Mean annual wage, business and financial operations occupations"
+unit = "usd"
+value = 91_780
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 13-0000 Business and Financial Operations Occupations, A_MEAN"
+
+[figures.oews_emp_mgmt]
+label = "Industry jobs, management occupations"
+unit = "count"
+value = 92_110
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 11-0000 Management Occupations, TOT_EMP"
+
+[figures.oews_wage_mgmt]
+label = "Mean annual wage, management occupations"
+unit = "usd"
+value = 156_950
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 11-0000 Management Occupations, A_MEAN"
+
+# --- the Company's workforce by function: industry occupation shares applied to its headcount ---------------
+
+[figures.hc_prod]
+label = "Employees, production"
+unit = "count"
+formula = "headcount_total * oews_emp_prod / oews_emp_all"
+round = 10
+
+[figures.hc_maint]
+label = "Employees, maintenance, repair and field service"
+unit = "count"
+formula = "headcount_total * oews_emp_maint / oews_emp_all"
+round = 10
+
+[figures.hc_logistics]
+label = "Employees, warehouse and shipping"
+unit = "count"
+formula = "headcount_total * oews_emp_logistics / oews_emp_all"
+round = 10
+
+[figures.hc_eng]
+label = "Employees, engineering"
+unit = "count"
+formula = "headcount_total * oews_emp_eng / oews_emp_all"
+round = 10
+
+[figures.hc_it]
+label = "Employees, information technology"
+unit = "count"
+formula = "headcount_total * oews_emp_it / oews_emp_all"
+round = 10
+
+[figures.hc_sales]
+label = "Employees, sales"
+unit = "count"
+formula = "headcount_total * oews_emp_sales / oews_emp_all"
+round = 10
+
+[figures.hc_office]
+label = "Employees, office and administrative support"
+unit = "count"
+formula = "headcount_total * oews_emp_office / oews_emp_all"
+round = 10
+
+[figures.hc_business]
+label = "Employees, business and financial operations"
+unit = "count"
+formula = "headcount_total * oews_emp_business / oews_emp_all"
+round = 10
+
+[figures.hc_mgmt]
+label = "Employees, management"
+unit = "count"
+formula = "headcount_total * oews_emp_mgmt / oews_emp_all"
+round = 10
+
+[figures.hc_other]
+label = "Employees, all other occupations"
+unit = "count"
+formula = "headcount_total - hc_prod - hc_maint - hc_logistics - hc_eng - hc_it - hc_sales - hc_office - hc_business - hc_mgmt"
+note = "The remainder, so the functions add up to the total."
+
+[figures.payroll_prod]
+label = "Payroll, production"
+unit = "usd_m"
+formula = "hc_prod * oews_wage_prod"
+
+[figures.payroll_maint]
+label = "Payroll, maintenance, repair and field service"
+unit = "usd_m"
+formula = "hc_maint * oews_wage_maint"
+
+[figures.payroll_logistics]
+label = "Payroll, warehouse and shipping"
+unit = "usd_m"
+formula = "hc_logistics * oews_wage_logistics"
+
+[figures.payroll_eng]
+label = "Payroll, engineering"
+unit = "usd_m"
+formula = "hc_eng * oews_wage_eng"
+
+[figures.payroll_it]
+label = "Payroll, information technology"
+unit = "usd_m"
+formula = "hc_it * oews_wage_it"
+
+[figures.payroll_sales]
+label = "Payroll, sales"
+unit = "usd_m"
+formula = "hc_sales * oews_wage_sales"
+
+[figures.payroll_office]
+label = "Payroll, office and administrative support"
+unit = "usd_m"
+formula = "hc_office * oews_wage_office"
+
+[figures.payroll_business]
+label = "Payroll, business and financial operations"
+unit = "usd_m"
+formula = "hc_business * oews_wage_business"
+
+[figures.payroll_mgmt]
+label = "Payroll, management"
+unit = "usd_m"
+formula = "hc_mgmt * oews_wage_mgmt"
+
+[figures.payroll_total]
+label = "Payroll, total"
+unit = "usd_m"
+formula = "headcount_total * oews_wage_all"
+note = "Headcount times the industry's mean wage across all occupations (OEWS). AIES's payroll share of revenue (17.8%, 2024) is higher than this gives (about 16.3%); the two surveys differ in what pay they count and in year, and pay by occupation needs OEWS, so OEWS is used throughout."
+
+[figures.payroll_other]
+label = "Payroll, all other occupations"
+unit = "usd_m"
+formula = "payroll_total - payroll_prod - payroll_maint - payroll_logistics - payroll_eng - payroll_it - payroll_sales - payroll_office - payroll_business - payroll_mgmt"
+note = "The remainder, so payroll by function adds up to the total."
+
+[figures.pay_other]
+label = "Average pay, all other occupations"
+unit = "usd"
+formula = "payroll_other / hc_other"
+
+[figures.benefits_total]
+label = "Benefits cost, year just ended"
+unit = "usd_m"
+formula = "payroll_total * benefits_ratio"
+
+[figures.employment_cost]
+label = "Payroll and benefits, year just ended"
+unit = "usd_m"
+formula = "payroll_total + benefits_total"
+
+# --- the largest occupations ---------------------------------------------------------------------------------
+
+[figures.oews_emp_assemblers]
+label = "Industry jobs, miscellaneous assemblers and fabricators"
+unit = "count"
+value = 143_310
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 51-2090 Miscellaneous Assemblers and Fabricators, TOT_EMP"
+
+[figures.oews_wage_assemblers]
+label = "Mean annual wage, assemblers and fabricators"
+unit = "usd"
+value = 48_510
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 51-2090 Miscellaneous Assemblers and Fabricators, A_MEAN"
+
+[figures.oews_emp_welders]
+label = "Industry jobs, welders, cutters, solderers and brazers"
+unit = "count"
+value = 63_880
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 51-4121 Welders, Cutters, Solderers, and Brazers, TOT_EMP"
+
+[figures.oews_wage_welders]
+label = "Mean annual wage, welders"
+unit = "usd"
+value = 54_710
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 51-4121 Welders, Cutters, Solderers, and Brazers, A_MEAN"
+
+[figures.oews_emp_machinists]
+label = "Industry jobs, machinists"
+unit = "count"
+value = 59_550
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 51-4041 Machinists, TOT_EMP"
+
+[figures.oews_wage_machinists]
+label = "Mean annual wage, machinists"
+unit = "usd"
+value = 58_740
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 51-4041 Machinists, A_MEAN"
+
+[figures.oews_emp_mech_eng]
+label = "Industry jobs, mechanical engineers"
+unit = "count"
+value = 41_730
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 17-2141 Mechanical Engineers, TOT_EMP"
+
+[figures.oews_wage_mech_eng]
+label = "Mean annual wage, mechanical engineers"
+unit = "usd"
+value = 102_010
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 17-2141 Mechanical Engineers, A_MEAN"
+
+[figures.oews_emp_mechanics]
+label = "Industry jobs, industrial machinery mechanics"
+unit = "count"
+value = 24_740
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 49-9041 Industrial Machinery Mechanics, TOT_EMP"
+
+[figures.oews_wage_mechanics]
+label = "Mean annual wage, industrial machinery mechanics"
+unit = "usd"
+value = 67_310
+source = "oews-2025-nat3d"
+locator = "NAICS 333000, 49-9041 Industrial Machinery Mechanics, A_MEAN"
+
+[figures.hc_assemblers]
+label = "Employees, assemblers and fabricators"
+unit = "count"
+formula = "headcount_total * oews_emp_assemblers / oews_emp_all"
+round = 10
+
+[figures.hc_welders]
+label = "Employees, welders"
+unit = "count"
+formula = "headcount_total * oews_emp_welders / oews_emp_all"
+round = 10
+
+[figures.hc_machinists]
+label = "Employees, machinists"
+unit = "count"
+formula = "headcount_total * oews_emp_machinists / oews_emp_all"
+round = 10
+
+[figures.hc_mech_eng]
+label = "Employees, mechanical engineers"
+unit = "count"
+formula = "headcount_total * oews_emp_mech_eng / oews_emp_all"
+round = 10
+
+[figures.hc_mechanics]
+label = "Employees, industrial machinery mechanics"
+unit = "count"
+formula = "headcount_total * oews_emp_mechanics / oews_emp_all"
+round = 10
+
+# ============================================================================================================
+# 6. Plants
+# ============================================================================================================
+
+[figures.plant_workforce]
+label = "Employees at the plants (production, maintenance and warehouse)"
+unit = "count"
+formula = "hc_prod + hc_maint + hc_logistics"
+
+[figures.office_workforce]
+label = "Employees at the headquarters, engineering center and sales offices"
+unit = "count"
+formula = "headcount_total - plant_workforce"
+
+[figures.plant_avg_pay]
+label = "Average pay at the plants"
+unit = "usd"
+formula = "(payroll_prod + payroll_maint + payroll_logistics) / plant_workforce"
+
+[figures.share_p1]
+label = "Plant 1 share of revenue"
+unit = "pct"
+value = 0.24
+assumption = { low = 0.20, high = 0.30, range_from = "no public plant-level source; six plants of unequal size", reason = "The largest plant, about a quarter of revenue." }
+
+[figures.share_p2]
+label = "Plant 2 share of revenue"
+unit = "pct"
+value = 0.20
+assumption = { low = 0.15, high = 0.25, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1." }
+
+[figures.share_p3]
+label = "Plant 3 share of revenue"
+unit = "pct"
+value = 0.18
+assumption = { low = 0.13, high = 0.23, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1." }
+
+[figures.share_p4]
+label = "Plant 4 share of revenue"
+unit = "pct"
+value = 0.15
+assumption = { low = 0.10, high = 0.20, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1." }
+
+[figures.share_p5]
+label = "Plant 5 share of revenue"
+unit = "pct"
+value = 0.13
+assumption = { low = 0.08, high = 0.18, range_from = "no public plant-level source; six plants of unequal size", reason = "Sizes step down from Plant 1." }
+
+[figures.share_p6]
+label = "Plant 6 share of revenue"
+unit = "pct"
+formula = "1 - share_p1 - share_p2 - share_p3 - share_p4 - share_p5"
+note = "The remainder: the smallest plant, about a tenth of revenue."
+
+[figures.rev_p1]
+label = "Plant 1 revenue"
+unit = "usd_m"
+formula = "revenue_fy0 * share_p1"
+
+[figures.rev_p2]
+label = "Plant 2 revenue"
+unit = "usd_m"
+formula = "revenue_fy0 * share_p2"
+
+[figures.rev_p3]
+label = "Plant 3 revenue"
+unit = "usd_m"
+formula = "revenue_fy0 * share_p3"
+
+[figures.rev_p4]
+label = "Plant 4 revenue"
+unit = "usd_m"
+formula = "revenue_fy0 * share_p4"
+
+[figures.rev_p5]
+label = "Plant 5 revenue"
+unit = "usd_m"
+formula = "revenue_fy0 * share_p5"
+
+[figures.rev_p6]
+label = "Plant 6 revenue"
+unit = "usd_m"
+formula = "revenue_fy0 * share_p6"
+
+[figures.hc_p2]
+label = "Plant 2 employees"
+unit = "count"
+formula = "plant_workforce * share_p2"
+round = 10
+note = "Plant employees are spread in proportion to plant revenue (an assumption with no further source)."
+
+[figures.hc_p3]
+label = "Plant 3 employees"
+unit = "count"
+formula = "plant_workforce * share_p3"
+round = 10
+
+[figures.hc_p4]
+label = "Plant 4 employees"
+unit = "count"
+formula = "plant_workforce * share_p4"
+round = 10
+
+[figures.hc_p5]
+label = "Plant 5 employees"
+unit = "count"
+formula = "plant_workforce * share_p5"
+round = 10
+
+[figures.hc_p6]
+label = "Plant 6 employees"
+unit = "count"
+formula = "plant_workforce * share_p6"
+round = 10
+
+[figures.hc_p1]
+label = "Plant 1 employees"
+unit = "count"
+formula = "plant_workforce - hc_p2 - hc_p3 - hc_p4 - hc_p5 - hc_p6"
+note = "The remainder, so the plants add up to the plant workforce."
+
+[figures.margin_p2]
+label = "Plant 2 operating margin, after allocated corporate costs"
+unit = "pct"
+value = 0.19
+assumption = { low = 0.14, high = 0.24, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven." }
+
+[figures.margin_p3]
+label = "Plant 3 operating margin, after allocated corporate costs"
+unit = "pct"
+value = 0.17
+assumption = { low = 0.12, high = 0.22, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven." }
+
+[figures.margin_p4]
+label = "Plant 4 operating margin, after allocated corporate costs"
+unit = "pct"
+value = 0.20
+assumption = { low = 0.15, high = 0.25, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven." }
+
+[figures.margin_p5]
+label = "Plant 5 operating margin, after allocated corporate costs"
+unit = "pct"
+value = 0.15
+assumption = { low = 0.10, high = 0.20, range_from = "no public plant-level source; within five points of the Company's operating margin excluding Plant 6", reason = "Plants differ in product mix and age; spread so no plant other than Plant 6 is near breakeven." }
+
+[figures.margin_p6]
+label = "Plant 6 operating margin, after allocated corporate costs"
+unit = "pct"
+value = -0.06
+assumption = { low = -0.12, high = -0.02, range_from = "no public plant-level source; a loss small enough to be one plant's problem, not the Company's", reason = "The middle of the range. The outline needs one plant with an operating loss (section 8, row 6); the smallest plant is the one a subscale cost base would hit first." }
+
+[figures.result_p2]
+label = "Plant 2 operating result"
+unit = "usd_m"
+formula = "rev_p2 * margin_p2"
+
+[figures.result_p3]
+label = "Plant 3 operating result"
+unit = "usd_m"
+formula = "rev_p3 * margin_p3"
+
+[figures.result_p4]
+label = "Plant 4 operating result"
+unit = "usd_m"
+formula = "rev_p4 * margin_p4"
+
+[figures.result_p5]
+label = "Plant 5 operating result"
+unit = "usd_m"
+formula = "rev_p5 * margin_p5"
+
+[figures.result_p6]
+label = "Plant 6 operating result"
+unit = "usd_m"
+formula = "rev_p6 * margin_p6"
+
+[figures.result_p1]
+label = "Plant 1 operating result"
+unit = "usd_m"
+formula = "op_income_fy0 - result_p2 - result_p3 - result_p4 - result_p5 - result_p6"
+note = "The remainder, so the plants add up to the Company's operating income."
+
+[figures.margin_p1]
+label = "Plant 1 operating margin, after allocated corporate costs"
+unit = "pct"
+formula = "result_p1 / rev_p1"
+
+[figures.payroll_p6]
+label = "Plant 6 payroll"
+unit = "usd_m"
+formula = "hc_p6 * plant_avg_pay"
+
+# ============================================================================================================
+# 7. Customers and pricing
+# ============================================================================================================
+
+[figures.max_price_increase]
+label = "Price increase customers would accept in the coming year, at most"
+unit = "pct"
+value = 0.035
+assumption = { low = 0.02, high = 0.069, range_from = "the industry's annual producer price changes over the last three years (BLS PPI, 3.3% to 6.9%), extended down to 2%", reason = "The latest year's industry price change, which customers accepted." }
+
+[figures.price_cap]
+label = "Revenue from the largest price increase customers would accept"
+unit = "usd_m"
+formula = "revenue_fy0 * max_price_increase"
+
+# ============================================================================================================
+# 8. Suppliers
+# ============================================================================================================
+
+[figures.aies_materials_2024]
+label = "Industry cost of materials, NAICS 333, 2024"
+unit = "usd_m"
+value = 237_904_461_000
+source = "aies-2024-basic01"
+locator = "NAICS 333, U.S., EXPS_CSTMTOT_DVAL ($1,000) 237904461, in dollars (materials, parts, resale, contract work, fuel and electricity)"
+
+[figures.materials_share]
+label = "Purchased materials, parts and services as a share of revenue"
+unit = "pct"
+formula = "aies_materials_2024 / aies_rev_2024"
+
+[figures.supplier_spend]
+label = "Spending with suppliers, year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * materials_share"
+
+[figures.payment_days]
+label = "Days taken to pay suppliers"
+unit = "count"
+formula = "payables / supplier_spend * 365"
+
+[figures.renegotiable_share]
+label = "Supplier spending under agreements that come up for renewal in the coming year"
+unit = "pct"
+value = 0.30
+assumption = { low = 0.20, high = 0.50, range_from = "no public industry-level source; supply agreements of two to five years renewing evenly", reason = "Agreements of about three years renewing evenly." }
+
+[figures.max_supplier_reduction]
+label = "Price reduction obtainable on renewing supplier agreements, at most"
+unit = "pct"
+value = 0.04
+assumption = { low = 0.02, high = 0.08, range_from = "no public industry-level source found", reason = "Near the middle of the range." }
+
+[figures.supplier_cap]
+label = "Annual saving from pressing suppliers, at most"
+unit = "usd_m"
+formula = "supplier_spend * renegotiable_share * max_supplier_reduction"
+
+# ============================================================================================================
+# 9. Environmental spending
+# ============================================================================================================
+
+[figures.aies_fuel_2024]
+label = "Industry purchased fuels, NAICS 333, 2024"
+unit = "usd_m"
+value = 543_209_000
+source = "aies-2024-basic01"
+locator = "NAICS 333, U.S., EXPS_FUEL_VAL ($1,000) 543209, in dollars"
+
+[figures.aies_elec_2024]
+label = "Industry purchased electricity, NAICS 333, 2024"
+unit = "usd_m"
+value = 2_267_798_000
+source = "aies-2024-basic01"
+locator = "NAICS 333, U.S., EXPS_ELEC_VAL ($1,000) 2267798, in dollars"
+
+[figures.energy_spend]
+label = "Spending on fuel and electricity, year just ended"
+unit = "usd_m"
+formula = "revenue_fy0 * (aies_fuel_2024 + aies_elec_2024) / aies_rev_2024"
+
+[figures.env_compliance]
+label = "Environmental compliance spending (permits, monitoring, waste handling), year just ended"
+unit = "usd_m"
+value = 3_000_000
+assumption = { low = 1_500_000, high = 6_000_000, range_from = "no public industry-level source found; 0.1% to 0.4% of revenue", reason = "0.2% of revenue, in the lower half of the range for a maker of machinery rather than of chemicals or metals." }
+
+[figures.env_projects]
+label = "Environmental projects budget (energy efficiency, emissions reduction), year just ended"
+unit = "usd_m"
+value = 4_500_000
+assumption = { low = 1_500_000, high = 9_000_000, range_from = "no public industry-level source found; 0.1% to 0.6% of revenue", reason = "0.3% of revenue, near the middle of the range." }
+
+[figures.env_total]
+label = "Environmental spending, year just ended"
+unit = "usd_m"
+formula = "env_compliance + env_projects"
+
+# ============================================================================================================
+# 10. Technology and work
+# ============================================================================================================
+
+[figures.jolts_hires_rate]
+label = "Hires as a share of employment, durable goods manufacturing, 2025"
+unit = "pct"
+value = 0.264
+source = "bls-jolts-durable-2025"
+locator = "JTU320000000000000HIR, 2025, sum of the twelve monthly rates, 26.4 (percent), as a fraction"
+
+[figures.plant_hires]
+label = "People hired from outside into plant roles, year just ended"
+unit = "count"
+formula = "plant_workforce * jolts_hires_rate"
+round = 10
+note = "The Company's plants are taken to hire at the durable goods rate. These are the openings a retrained employee could fill."
+
+[figures.retraining_cost_pp]
+label = "Retraining cost per person (instruction and paid training time)"
+unit = "usd"
+value = 15_000
+assumption = { low = 5_000, high = 30_000, range_from = "no public industry-level source found; from a short course to several months of paid instruction", reason = "Below the middle of the range: most plant roles are learned on the job after a few months of instruction." }
+
+[figures.retraining_months]
+label = "Months of training before a retrained person works independently"
+unit = "count"
+value = 6
+assumption = { low = 3, high = 12, range_from = "no public industry-level source found", reason = "The middle of the range, rounded." }
+
+[figures.retraining_payback]
+label = "Years until retraining pays back, against hiring from outside"
+unit = "years"
+value = 2
+assumption = { low = 1, high = 4, range_from = "no public industry-level source found", reason = "Near the middle of the range." }
+
+# ============================================================================================================
+# 11. Limits on each line (the maximum for every lever that can be a source)
+# ============================================================================================================
+
+[figures.max_wage_cut]
+label = "Reduction in wages or hours the Company can make within a year, at most, as a share of payroll"
+unit = "pct"
+value = 0.10
+assumption = { low = 0.05, high = 0.20, range_from = "no public industry-level source found; reduced schedules of a half day to a day a week", reason = "A half day a week, the lower middle of the range." }
+
+[figures.wage_cut_cap]
+label = "Payroll saving from cutting wages or hours, at most"
+unit = "usd_m"
+formula = "payroll_total * max_wage_cut"

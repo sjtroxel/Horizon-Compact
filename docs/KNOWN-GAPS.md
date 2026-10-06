@@ -12,18 +12,16 @@ case by its type and a neutral label. The names live only in the private longlis
 > **NOW: Phase 2 `company-dossier`, started out of order (his, 2026-10-06)**, because everything ahead of it waits on
 > AWS. It needs no AWS and no official model (its scope doc, Prerequisites). **Its IMPLEMENTATION doc is APPROVED
 > (his, 2026-10-06, all five §15 decisions as recommended):** `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`.
-> **BUILD STEPS 1-4 ARE DONE (Sonnet, 2026-10-06), `make check` green, NOT YET COMMITTED** (one commit for the
-> session, his to run). Step 1: the four source checks are the CLOSED entry just below, `planning/01` is patched, and
-> `experiment/company/sources.toml` holds ten sources with the hash of each file read, with their extracts under
-> `docs/phases/evidence/phase-2/sources/`. Steps 2-4: `src/horizon_compact/dossier/` (the data model, the renderer,
-> the checks), `hc dossier render` and `hc dossier check`, a `dossier-check` target inside `make check`, and
-> `tests/test_dossier.py`. **`hc dossier check` is skipping the figures check by name** until the figures exist; step 6
-> removes that skip.
-> **Next session, first move: SWITCH TO OPUS, then build step 5** (draft `figures.toml`, section by section in the
-> IMPLEMENTATION doc §8's order, every row from the extracts, a formula, or an assumption with its range and reason),
-> then step 6 (the template, render, prune each extract to the rows the figures cite, commit C2). **Steps 7 and 9 are
-> his.** Nothing in Phase 2 calls Bedrock or any official model. The IMPLEMENTATION doc §13 records, step by step,
-> where the build diverged from it (rounding rule, `label` rows, `review` line, template markers, the skip).
+> **BUILD STEPS 1-4 COMMITTED (`fe82c3f`, Sonnet). STEPS 5-6 DONE (Opus, 2026-10-06), `make check` green, NOT YET
+> COMMITTED (C2, his to run).** `experiment/company/figures.toml` (219 rows, 31 assumptions), `dossier.template.txt`,
+> the rendered `dossier.toml` and the public `dossier-cited.md`, `figures-table.md`, `assumptions-table.md` under
+> `docs/phases/evidence/phase-2/`; 15 sources with pruned extracts. The not-built-yet skip is removed. The text is
+> about 1,990 words (estimated 2,690 tokens), under the 4,400-word target, and not padded (IMPLEMENTATION doc §13
+> step 6 says why). **Next session, first move: step 7, his review** (DoD 4): `assumptions-table.md` line by line,
+> then the rendered `dossier.toml` line by line, plus the list of unsourced statements in words in §13 step 6. A
+> change goes into `figures.toml` (the `review` line records his verdict on each assumption) or the template, then
+> `hc dossier render`. **Model: Sonnet is fine for 7 (his reading, mechanical edits); step 8's brief and
+> verification are Opus.** Nothing in Phase 2 calls Bedrock or any official model.
 > **Bedrock at 12:00 PM CDT on 2026-10-06 (`scratch/throttle-check.py`, run once, not acted on):** Nova Lite and
 > Sonnet 4.6 both still `ThrottlingException`, "Too many tokens per day", $0.
 >

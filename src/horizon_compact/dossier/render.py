@@ -266,7 +266,7 @@ def _cited_markdown(template: Template, fs: FigureSet) -> str:
 def _sources_behind(fs: FigureSet, key: str) -> list[str]:
     """Sources of every sourced row a derived row ultimately rests on."""
     found: list[str] = []
-    for dependency in fs.references.get(key, frozenset()):
+    for dependency in sorted(fs.references.get(key, frozenset())):
         row = fs.rows[dependency]
         if row.source:
             found.append(row.source)
@@ -280,11 +280,16 @@ def _figures_markdown(template: Template, fs: FigureSet, ref: dict[str, str]) ->
         row, resolved = fs.rows[key], fs.resolved[key]
         if row.kind == "sourced":
             assert row.source is not None
-            basis = f"{fs.sources[row.source].short}: {row.locator}; read as {row.value}"
+            # Integers with separators: easier to read, and a bare twelve-digit dollar amount would trip the
+            # account-id test (tests/test_architecture.py), as the AIES revenue in dollars did in step 6.
+            read = f"{row.value:,}" if isinstance(row.value, int) else row.value
+            basis = f"{fs.sources[row.source].short}: {row.locator}; read as {read}"
         elif row.kind == "assumption":
             basis = f"{ref[key]}: see assumptions-table.md"
         else:
             basis = f"{ref[key]}: {row.formula}"
+        if row.note:
+            basis += f". Note: {row.note}"
         rows.append([f"`{key}`", row.label, resolved.shown, row.kind, basis])
     return (
         "# Figures\n\nEvery row behind the dossier. `As shown` is the value after rounding, which is the "

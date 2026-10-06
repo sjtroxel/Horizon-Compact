@@ -1,43 +1,16 @@
 OCC_CODE,OCC_TITLE,O_GROUP,TOT_EMP,EMP_PRSE,A_MEAN,MEAN_PRSE,A_PCT10,A_MEDIAN,A_PCT90
 00-0000,All Occupations,total,1092170,0,73820,0.3,39260,60340,127680
 11-0000,Management Occupations,major,92110,0.8,156950,0.5,81960,139830,245440
-11-1021,General and Operations Managers,detailed,24900,1.6,164380,1,70110,142790,297160
-11-3051,Industrial Production Managers,detailed,17600,1.4,131650,0.6,78730,124850,198320
-11-9041,Architectural and Engineering Managers,detailed,11930,2.2000000000000002,166820,0.6,110020,162200,224910
 13-0000,Business and Financial Operations Occupations,major,71240,0.9,91780,0.4,54970,83130,135500
-13-1020,Buyers and Purchasing Agents,detailed,15760,1.3,78980,0.4,50840,76170,108780
 15-0000,Computer and Mathematical Occupations,major,29780,1.6,108070,0.6,61740,102350,166680
-15-1252,Software Developers,detailed,12340,2.7,120050,0.8,77440,107450,169650
-17-0000,Architecture and Engineering Occupations,major,116640,1.1000000000000001,97280,0.5,59660,94750,138660
-17-2071,Electrical Engineers,detailed,8030,3.1,108780,0.8,74140,101840,153930
-17-2112,Industrial Engineers,detailed,28010,1.6,103110,0.4,74900,99070,136250
+17-0000,Architecture and Engineering Occupations,major,116640,1.1,97280,0.5,59660,94750,138660
 17-2141,Mechanical Engineers,detailed,41730,1.6,102010,0.4,66590,98620,138630
-19-0000,"Life, Physical, and Social Science Occupations",major,3530,3.5,96220,1.5,54220,87130,148470
-23-0000,Legal Occupations,major,580,11.5,191790,3.6,78630,177490,324310
-25-0000,Educational Instruction and Library Occupations,major,40,18.8,75070,5.2,43700,77520,99440
-27-0000,"Arts, Design, Entertainment, Sports, and Media Occupations",major,3930,3.6,78620,1.5,48530,76050,110650
-29-0000,Healthcare Practitioners and Technical Occupations,major,130,6.4,86960,1,37160,90000,119510
-33-0000,Protective Service Occupations,major,350,5.2,50060,1.2,35490,43890,76360
-35-0000,Food Preparation and Serving Related Occupations,major,380,32.5,35310,11.1,25220,32810,50500
-37-0000,Building and Grounds Cleaning and Maintenance Occupations,major,3810,3.6,40820,0.8,30140,39700,51590
-39-0000,Personal Care and Service Occupations,major,40,34.5,45260,11.1,34900,37440,64300
 41-0000,Sales and Related Occupations,major,38040,1.7,92830,0.7,49900,82920,146330
-41-4012,"Sales Representatives, Wholesale and Manufacturing, Except Technical and Scientific Products",detailed,27100,2,90670,0.8,49670,81160,139730
-41-9031,Sales Engineers,detailed,3140,5.3,101340,1,68900,96510,137760
 43-0000,Office and Administrative Support Occupations,major,91270,0.8,56050,0.3,37960,51430,78540
-43-4051,Customer Service Representatives,detailed,11920,3.7,56080,1.1000000000000001,38130,53690,77680
-45-0000,"Farming, Fishing, and Forestry Occupations",major,60,11.9,45520,2.2999999999999998,36300,43410,58890
-47-0000,Construction and Extraction Occupations,major,12910,4,63740,1.6,39510,58440,95210
 49-0000,"Installation, Maintenance, and Repair Occupations",major,59060,1.8,67030,0.6,44500,62720,94840
 49-9041,Industrial Machinery Mechanics,detailed,24740,2.9,67310,0.8,46350,64050,89370
-49-9071,"Maintenance and Repair Workers, General",detailed,12870,2,60690,0.5,41810,60240,78380
 51-0000,Production Occupations,major,516150,0.4,54570,0.2,37920,50460,75030
-51-1011,First-Line Supervisors of Production and Operating Workers,detailed,38680,1.2,79150,0.4,53320,77040,105430
 51-2090,Miscellaneous Assemblers and Fabricators,detailed,143310,1,48510,0.3,36810,47080,62180
-51-4034,"Lathe and Turning Machine Tool Setters, Operators, and Tenders, Metal and Plastic",detailed,2490,9.8000000000000007,54860,1.9,40030,55610,66710
 51-4041,Machinists,detailed,59550,1.9,58740,0.4,41320,59590,76560
 51-4121,"Welders, Cutters, Solderers, and Brazers",detailed,63880,1.6,54710,0.3,40730,53660,69000
-51-9061,"Inspectors, Testers, Sorters, Samplers, and Weighers",detailed,28190,1.6,55920,0.4,39540,54760,75290
-51-9161,Computer Numerically Controlled Tool Operators,detailed,29440,2.8,54910,0.5,38640,53240,72660
 53-0000,Transportation and Material Moving Occupations,major,52110,1.6,47970,0.3,36560,46270,61330
-53-7062,"Laborers and Freight, Stock, and Material Movers, Hand",detailed,27730,1.7,45490,0.3,36200,45420,58080

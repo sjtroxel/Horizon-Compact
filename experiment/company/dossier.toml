@@ -1,0 +1,237 @@
+# RENDERED by `hc dossier render` from experiment/company/figures.toml and dossier.template.txt.
+# Do not edit by hand: `hc dossier check` fails if this file differs from a fresh render.
+
+title = "The Company: board pack for the year just ended"
+text = '''
+THE COMPANY
+Board pack for the year just ended
+
+This pack sets out the Company's position at the close of the year just ended: its results for that year and the two before it, its balance sheet and cash, how it allocates capital, its workforce, its plants, its customers and suppliers, its environmental spending, its use of technology, and the limits on each line of the budget. Figures are for the year just ended unless a line says otherwise. All amounts are in US dollars.
+
+SECTION ONE: THE COMPANY
+
+The Company designs, builds and services industrial machinery: metal-forming, cutting and material-handling equipment, and the controls and software that run it. Its customers are manufacturers. It sells new equipment, and it sells replacement parts and field service to the owners of machines it has built. It is publicly traded.
+
+Revenue in the year just ended: $1,500.0 million.
+Replacement parts and service, share of revenue: 25.0%, or $375.0 million.
+Employees at year end: 3,310.
+Plants: 6.
+
+The plants are named by region and number:
+Plant 1, Great Lakes
+Plant 2, Ohio Valley
+Plant 3, Upper Midwest
+Plant 4, Southeast
+Plant 5, South Central
+Plant 6, Great Plains
+
+The headquarters, the engineering center and the sales offices are separate from the plants. Section six gives each plant's revenue, headcount and operating result.
+
+SECTION TWO: RESULTS FOR THE LAST THREE YEARS
+
+Revenue
+Two years ago: $1,456.6 million
+Prior year: $1,449.3 million
+Year just ended: $1,500.0 million
+
+Revenue growth
+Prior year: -0.5%
+Year just ended: 3.5%
+
+Gross profit and gross margin
+Two years ago: $517.1 million, a gross margin of 35.5%
+Prior year: $537.7 million, a gross margin of 37.1%
+Year just ended: $562.5 million, a gross margin of 37.5%
+
+Operating income
+Two years ago: $212.7 million
+Prior year: $227.5 million
+Year just ended: $238.5 million
+
+Net income
+Two years ago: $142.7 million
+Prior year: $144.9 million
+Year just ended: $162.4 million
+
+What moved revenue. The Company sets list prices once a year. In the prior year it raised prices by 3.3% and revenue changed by -0.5%, so unit volume fell. In the year just ended it raised prices by 3.5%; the change in unit volume was 0.0%, and revenue grew by 3.5%.
+
+Income statement, year just ended
+Revenue: $1,500.0 million
+Gross profit: $562.5 million
+Selling, general and administrative expense: $294.0 million
+Research and development expense: $30.0 million
+Operating income: $238.5 million
+Operating margin: 15.9%
+Interest expense: $32.1 million
+Income before tax: $206.4 million
+Income tax: $44.0 million
+Net income: $162.4 million
+Net margin: 10.8%
+
+Depreciation and amortization, included in the costs above: $52.5 million
+EBITDA (operating income before depreciation and amortization): $291.0 million
+
+SECTION THREE: BALANCE SHEET AND LIQUIDITY
+
+At the end of the year just ended
+Cash: $144.9 million
+Receivables: $285.0 million
+Inventory: $249.0 million
+Payables to suppliers: $148.5 million
+Total debt, including leases: $669.3 million
+Shareholders' equity, at book value: $1,033.8 million
+
+Debt to EBITDA: 2.30 times
+Interest coverage (operating income divided by interest expense): 7.43 times
+
+Revolving credit facility, undrawn: $300.0 million
+Available liquidity (cash plus the undrawn facility): $444.9 million
+
+Minimum operating cash. The board's treasury policy keeps a minimum cash balance for day-to-day operations, set as a number of months of cash operating costs. Number of months: 1. Cash operating costs (revenue less EBITDA) in the year just ended: $1,209.0 million. Minimum operating cash: $100.8 million.
+
+Cash above the minimum operating level: $44.1 million.
+
+Debt was held level during the year just ended. No repayment of principal is scheduled for the coming year.
+
+SECTION FOUR: CAPITAL ALLOCATION
+
+Cash flow, year just ended
+Net income: $162.4 million
+Add depreciation and amortization: $52.5 million
+Less the increase in working capital: $12.4 million
+Cash from operations: $202.5 million
+Less capital spending: $36.0 million
+Free cash flow: $166.5 million
+Less dividends: $54.2 million
+Less share repurchases: $91.9 million
+Cash flow after capital spending, dividends and repurchases: $20.4 million
+
+Capital spending. Capital spending in the year just ended was $36.0 million, against depreciation and amortization of $52.5 million. It went to replacing machine tools at the plants, maintaining buildings, and information systems. Part of the amortization is of intangible assets acquired in past years, which require no capital spending to maintain.
+
+Research and development. Research and development expense in the year just ended was $30.0 million. It funds updates to current product lines, new models, and the controls and software that connect the Company's machines to customers' production systems. Engineering staff are counted in section five.
+
+Payments to shareholders. The board's payout policy sets the dividend at 33.4% of net income. The board also authorizes a share repurchase program each year. In the year just ended:
+Dividends: $54.2 million
+Share repurchases: $91.9 million
+Dividends and repurchases together: $146.1 million
+
+Dividends and repurchases as a share of net income: 90.0%.
+
+Market value of the Company's equity at year end: $4,325.6 million.
+Market value of equity divided by net income: 26.64 times.
+Dividend yield (dividends divided by the market value of equity): 1.3%.
+Return on equity (net income divided by shareholders' equity at book value): 15.7%.
+
+SECTION FIVE: WORKFORCE
+
+Employees at year end: 3,310.
+At the plants (production, maintenance and repair, warehouse and shipping): 1,900.
+At the headquarters, the engineering center and the sales offices: 1,410.
+
+Employees, average annual pay and payroll, by function
+Production: 1,560 employees, average pay $54,570, payroll $85.1 million
+Maintenance, repair and field service: 180 employees, average pay $67,030, payroll $12.1 million
+Warehouse and shipping: 160 employees, average pay $47,970, payroll $7.7 million
+Engineering: 350 employees, average pay $97,280, payroll $34.0 million
+Information technology: 90 employees, average pay $108,070, payroll $9.7 million
+Sales: 120 employees, average pay $92,830, payroll $11.1 million
+Office and administrative support: 280 employees, average pay $56,050, payroll $15.7 million
+Business and financial operations: 220 employees, average pay $91,780, payroll $20.2 million
+Management: 280 employees, average pay $156,950, payroll $43.9 million
+All other occupations: 70 employees, average pay $68,571, payroll $4.8 million
+Total: 3,310 employees, average pay $73,820, payroll $244.3 million
+
+Benefits. Employer-paid benefits (health insurance, retirement contributions, payroll taxes and paid leave) cost 26.8% of payroll: $65.5 million in the year just ended. Payroll and benefits together: $309.8 million.
+
+The largest occupations
+Assemblers and fabricators: 430 employees, average pay $48,510
+Welders: 190 employees, average pay $54,710
+Machinists: 180 employees, average pay $58,740
+Mechanical engineers: 130 employees, average pay $102,010
+Industrial machinery mechanics: 70 employees, average pay $67,310
+
+Average pay at the plants, across production, maintenance and warehouse staff: $55,211.
+
+Office and administrative support covers order entry, scheduling, purchasing and accounts processing, customer service, and administrative support to the plants and offices. Business and financial operations covers accounting and finance, buyers and purchasing agents, human resources, and project and program management.
+
+SECTION SIX: PLANTS
+
+Each plant's operating result is after its share of corporate costs, so the plants' results add up to the Company's operating income of $238.5 million. Plant headcount counts production, maintenance and warehouse staff.
+
+Plant 1, Great Lakes: revenue $360.0 million (24.0% of the Company), 450 employees, operating result $70.3 million, operating margin 19.5%
+Plant 2, Ohio Valley: revenue $300.0 million (20.0% of the Company), 380 employees, operating result $57.0 million, operating margin 19.0%
+Plant 3, Upper Midwest: revenue $270.0 million (18.0% of the Company), 340 employees, operating result $45.9 million, operating margin 17.0%
+Plant 4, Southeast: revenue $225.0 million (15.0% of the Company), 290 employees, operating result $45.0 million, operating margin 20.0%
+Plant 5, South Central: revenue $195.0 million (13.0% of the Company), 250 employees, operating result $29.3 million, operating margin 15.0%
+Plant 6, Great Plains: revenue $150.0 million (10.0% of the Company), 190 employees, operating result -$9.0 million, operating margin -6.0%
+
+Plant 6. Plant 6 is the Company's smallest plant. It builds the Company's lowest-volume product family, and its fixed costs (buildings, equipment and supervision) are spread over fewer units than at the other plants. Its operating result in the year just ended was -$9.0 million. Its payroll was $10.5 million for 190 employees.
+
+SECTION SEVEN: CUSTOMERS AND PRICING
+
+Customers. The Company's customers are manufacturers: makers of vehicles and vehicle parts, appliances, metal products, and other machinery. New equipment is sold by the Company's own sales force and by independent distributors. Replacement parts and field service, 25.0% of revenue, are sold to the owners of the Company's installed machines. Sales staff are counted in section five.
+
+Prices. List prices are set once a year. The Company's price increases in the last three years:
+Two years ago: 6.9%
+Prior year: 3.3%
+Year just ended: 3.5%
+
+The sales organization's estimate of the largest list-price increase customers would accept in the coming year without a loss of unit volume: 3.5%. On revenue for the year just ended, that increase is worth $52.5 million.
+
+SECTION EIGHT: SUPPLIERS
+
+Spending with suppliers in the year just ended: $753.0 million, or 50.2% of revenue. It covers steel and other metals, castings and forgings, motors, hydraulic and electrical components, electronic controls, parts bought for resale, contract machining, and the fuel and electricity the plants use.
+
+Payment terms. The Company takes an average of 72 days to pay its suppliers.
+
+Agreements. Supply agreements run for several years. The share of supplier spending under agreements that come up for renewal in the coming year: 30.0%. The purchasing department's estimate of the largest price reduction obtainable on those renewals: 4.0%. Together, the largest annual saving available from pressing suppliers on price: $9.0 million.
+
+SECTION NINE: ENVIRONMENTAL SPENDING
+
+Energy. The plants' spending on fuel and electricity in the year just ended: $8.9 million.
+
+Environmental spending in the year just ended: $7.5 million, in two parts.
+Compliance: $3.0 million. Air and water permits, emissions and discharge monitoring, and the handling and disposal of waste. These costs are required by the plants' permits.
+Environmental projects: $4.5 million. Energy-efficiency upgrades at the plants, reductions in emissions from paint and coating lines, and reductions in waste sent to landfill. The board sets this budget each year.
+
+SECTION TEN: TECHNOLOGY AND WORK
+
+Automation in use. The plants use computer-controlled machine tools for cutting and machining, and robotic welding cells at the larger plants. The warehouses use inventory-management software and barcode tracking. Orders, scheduling, purchasing and accounts run on a single enterprise system used by the plants and the offices.
+
+Hiring. In the year just ended the plants hired 500 people from outside the Company into production, maintenance and warehouse roles, to replace people who left and to fill new positions. These are positions an employee from another function could fill after retraining.
+
+Retraining. The Company's estimates for moving an employee from another function into a plant or field-service role:
+Cost per person, including instruction and paid training time: $15,000
+Months of training before the person works independently: 6
+Years until the cost of retraining is paid back, compared with hiring from outside: 2
+
+SECTION ELEVEN: LIMITS ON EACH LINE
+
+The largest amount available from each line of the budget in the coming year, based on the figures for the year just ended.
+
+Payroll by function, the most that can be removed by eliminating roles in that function:
+Production: $85.1 million
+Maintenance, repair and field service: $12.1 million
+Warehouse and shipping: $7.7 million
+Engineering: $34.0 million
+Information technology: $9.7 million
+Sales: $11.1 million
+Office and administrative support: $15.7 million
+Business and financial operations: $20.2 million
+Management: $43.9 million
+All other occupations: $4.8 million
+
+Wages and hours: the largest reduction in wages or hours the Company can make within a year is 10.0% of payroll, or $24.4 million.
+
+Research and development: the full budget, $30.0 million.
+
+Prices to customers: the largest increase customers would accept, 3.5%, worth $52.5 million.
+
+Environmental projects: the full budget, $4.5 million. Compliance spending of $3.0 million is required by permits and is not available.
+
+Dividends and repurchases: the full amount paid in the year just ended, $146.1 million.
+
+Cash: cash above the minimum operating level, $44.1 million. The undrawn credit facility of $300.0 million is available in addition, as borrowing.
+
+Suppliers: the largest annual saving from pressing suppliers on price, $9.0 million.
+'''

@@ -1,0 +1,252 @@
+@title The Company: board pack for the year just ended
+@group general
+THE COMPANY
+Board pack for the year just ended
+
+This pack sets out the Company's position at the close of the year just ended: its results for that year and the two before it, its balance sheet and cash, how it allocates capital, its workforce, its plants, its customers and suppliers, its environmental spending, its use of technology, and the limits on each line of the budget. Figures are for the year just ended unless a line says otherwise. All amounts are in US dollars.
+
+
+SECTION ONE: THE COMPANY
+
+The Company designs, builds and services industrial machinery: metal-forming, cutting and material-handling equipment, and the controls and software that run it. Its customers are manufacturers. It sells new equipment, and it sells replacement parts and field service to the owners of machines it has built. It is publicly traded.
+
+Revenue in the year just ended: {revenue_fy0}.
+Replacement parts and service, share of revenue: {aftermarket_share}, or {aftermarket_revenue_fy0}.
+Employees at year end: {headcount_total}.
+Plants: {plant_count}.
+
+The plants are named by region and number:
+Plant {plant_1_no}, Great Lakes
+Plant {plant_2_no}, Ohio Valley
+Plant {plant_3_no}, Upper Midwest
+Plant {plant_4_no}, Southeast
+Plant {plant_5_no}, South Central
+Plant {plant_6_no}, Great Plains
+
+The headquarters, the engineering center and the sales offices are separate from the plants. Section six gives each plant's revenue, headcount and operating result.
+
+
+SECTION TWO: RESULTS FOR THE LAST THREE YEARS
+
+Revenue
+Two years ago: {revenue_fy2}
+Prior year: {revenue_fy1}
+Year just ended: {revenue_fy0}
+
+Revenue growth
+Prior year: {rev_growth_fy1}
+Year just ended: {rev_growth_fy0}
+
+Gross profit and gross margin
+Two years ago: {gross_profit_fy2}, a gross margin of {ind_gm_fy2}
+Prior year: {gross_profit_fy1}, a gross margin of {ind_gm_fy1}
+Year just ended: {gross_profit_fy0}, a gross margin of {ind_gm_fy0}
+
+Operating income
+Two years ago: {op_income_fy2}
+Prior year: {op_income_fy1}
+Year just ended: {op_income_fy0}
+
+Net income
+Two years ago: {net_income_fy2}
+Prior year: {net_income_fy1}
+Year just ended: {net_income_fy0}
+
+What moved revenue. The Company sets list prices once a year. In the prior year it raised prices by {price_change_fy1} and revenue changed by {rev_growth_fy1}, so unit volume fell. In the year just ended it raised prices by {price_change_fy0}; the change in unit volume was {volume_change_fy0}, and revenue grew by {rev_growth_fy0}.
+
+Income statement, year just ended
+Revenue: {revenue_fy0}
+Gross profit: {gross_profit_fy0}
+Selling, general and administrative expense: {sga_fy0}
+Research and development expense: {rnd_fy0}
+Operating income: {op_income_fy0}
+Operating margin: {op_margin_fy0}
+Interest expense: {interest_fy0}
+Income before tax: {pretax_income_fy0}
+Income tax: {tax_fy0}
+Net income: {net_income_fy0}
+Net margin: {net_margin_fy0}
+
+Depreciation and amortization, included in the costs above: {da_fy0}
+EBITDA (operating income before depreciation and amortization): {ebitda_fy0}
+
+
+SECTION THREE: BALANCE SHEET AND LIQUIDITY
+
+At the end of the year just ended
+Cash: {cash}
+Receivables: {receivables}
+Inventory: {inventory}
+Payables to suppliers: {payables}
+Total debt, including leases: {debt}
+Shareholders' equity, at book value: {equity_book}
+
+Debt to EBITDA: {ind_debt_ebitda} times
+Interest coverage (operating income divided by interest expense): {interest_coverage} times
+
+Revolving credit facility, undrawn: {credit_facility}
+Available liquidity (cash plus the undrawn facility): {liquidity}
+
+Minimum operating cash. The board's treasury policy keeps a minimum cash balance for day-to-day operations, set as a number of months of cash operating costs. Number of months: {min_cash_months}. Cash operating costs (revenue less EBITDA) in the year just ended: {cash_costs_fy0}. Minimum operating cash: {min_operating_cash}.
+
+Cash above the minimum operating level: {cash_above_min}.
+
+Debt was held level during the year just ended. No repayment of principal is scheduled for the coming year.
+
+
+SECTION FOUR: CAPITAL ALLOCATION
+
+Cash flow, year just ended
+Net income: {net_income_fy0}
+Add depreciation and amortization: {da_fy0}
+Less the increase in working capital: {wc_increase_fy0}
+Cash from operations: {operating_cash_flow_fy0}
+Less capital spending: {capex_fy0}
+Free cash flow: {free_cash_flow_fy0}
+Less dividends: {dividends_fy0}
+Less share repurchases: {repurchases_fy0}
+Cash flow after capital spending, dividends and repurchases: {uncommitted_cash_flow}
+
+Capital spending. Capital spending in the year just ended was {capex_fy0}, against depreciation and amortization of {da_fy0}. It went to replacing machine tools at the plants, maintaining buildings, and information systems. Part of the amortization is of intangible assets acquired in past years, which require no capital spending to maintain.
+
+Research and development. Research and development expense in the year just ended was {rnd_fy0}. It funds updates to current product lines, new models, and the controls and software that connect the Company's machines to customers' production systems. Engineering staff are counted in section five.
+
+@group shareholders
+Payments to shareholders. The board's payout policy sets the dividend at {ind_payout} of net income. The board also authorizes a share repurchase program each year. In the year just ended:
+Dividends: {dividends_fy0}
+Share repurchases: {repurchases_fy0}
+Dividends and repurchases together: {shareholder_returns_fy0}
+
+Dividends and repurchases as a share of net income: {ind_cash_return}.
+
+Market value of the Company's equity at year end: {market_cap}.
+Market value of equity divided by net income: {pe_ratio} times.
+Dividend yield (dividends divided by the market value of equity): {dividend_yield}.
+Return on equity (net income divided by shareholders' equity at book value): {roe_fy0}.
+
+@group workforce
+
+SECTION FIVE: WORKFORCE
+
+Employees at year end: {headcount_total}.
+At the plants (production, maintenance and repair, warehouse and shipping): {plant_workforce}.
+At the headquarters, the engineering center and the sales offices: {office_workforce}.
+
+Employees, average annual pay and payroll, by function
+Production: {hc_prod} employees, average pay {oews_wage_prod}, payroll {payroll_prod}
+Maintenance, repair and field service: {hc_maint} employees, average pay {oews_wage_maint}, payroll {payroll_maint}
+Warehouse and shipping: {hc_logistics} employees, average pay {oews_wage_logistics}, payroll {payroll_logistics}
+Engineering: {hc_eng} employees, average pay {oews_wage_eng}, payroll {payroll_eng}
+Information technology: {hc_it} employees, average pay {oews_wage_it}, payroll {payroll_it}
+Sales: {hc_sales} employees, average pay {oews_wage_sales}, payroll {payroll_sales}
+Office and administrative support: {hc_office} employees, average pay {oews_wage_office}, payroll {payroll_office}
+Business and financial operations: {hc_business} employees, average pay {oews_wage_business}, payroll {payroll_business}
+Management: {hc_mgmt} employees, average pay {oews_wage_mgmt}, payroll {payroll_mgmt}
+All other occupations: {hc_other} employees, average pay {pay_other}, payroll {payroll_other}
+Total: {headcount_total} employees, average pay {oews_wage_all}, payroll {payroll_total}
+
+Benefits. Employer-paid benefits (health insurance, retirement contributions, payroll taxes and paid leave) cost {benefits_ratio} of payroll: {benefits_total} in the year just ended. Payroll and benefits together: {employment_cost}.
+
+The largest occupations
+Assemblers and fabricators: {hc_assemblers} employees, average pay {oews_wage_assemblers}
+Welders: {hc_welders} employees, average pay {oews_wage_welders}
+Machinists: {hc_machinists} employees, average pay {oews_wage_machinists}
+Mechanical engineers: {hc_mech_eng} employees, average pay {oews_wage_mech_eng}
+Industrial machinery mechanics: {hc_mechanics} employees, average pay {oews_wage_mechanics}
+
+Average pay at the plants, across production, maintenance and warehouse staff: {plant_avg_pay}.
+
+Office and administrative support covers order entry, scheduling, purchasing and accounts processing, customer service, and administrative support to the plants and offices. Business and financial operations covers accounting and finance, buyers and purchasing agents, human resources, and project and program management.
+
+@group general
+
+SECTION SIX: PLANTS
+
+Each plant's operating result is after its share of corporate costs, so the plants' results add up to the Company's operating income of {op_income_fy0}. Plant headcount counts production, maintenance and warehouse staff.
+
+Plant {plant_1_no}, Great Lakes: revenue {rev_p1} ({share_p1} of the Company), {hc_p1} employees, operating result {result_p1}, operating margin {margin_p1}
+Plant {plant_2_no}, Ohio Valley: revenue {rev_p2} ({share_p2} of the Company), {hc_p2} employees, operating result {result_p2}, operating margin {margin_p2}
+Plant {plant_3_no}, Upper Midwest: revenue {rev_p3} ({share_p3} of the Company), {hc_p3} employees, operating result {result_p3}, operating margin {margin_p3}
+Plant {plant_4_no}, Southeast: revenue {rev_p4} ({share_p4} of the Company), {hc_p4} employees, operating result {result_p4}, operating margin {margin_p4}
+Plant {plant_5_no}, South Central: revenue {rev_p5} ({share_p5} of the Company), {hc_p5} employees, operating result {result_p5}, operating margin {margin_p5}
+Plant {plant_6_no}, Great Plains: revenue {rev_p6} ({share_p6} of the Company), {hc_p6} employees, operating result {result_p6}, operating margin {margin_p6}
+
+Plant {plant_6_no}. Plant {plant_6_no} is the Company's smallest plant. It builds the Company's lowest-volume product family, and its fixed costs (buildings, equipment and supervision) are spread over fewer units than at the other plants. Its operating result in the year just ended was {result_p6}. Its payroll was {payroll_p6} for {hc_p6} employees.
+
+@group customers
+
+SECTION SEVEN: CUSTOMERS AND PRICING
+
+Customers. The Company's customers are manufacturers: makers of vehicles and vehicle parts, appliances, metal products, and other machinery. New equipment is sold by the Company's own sales force and by independent distributors. Replacement parts and field service, {aftermarket_share} of revenue, are sold to the owners of the Company's installed machines. Sales staff are counted in section five.
+
+Prices. List prices are set once a year. The Company's price increases in the last three years:
+Two years ago: {price_change_fy2}
+Prior year: {price_change_fy1}
+Year just ended: {price_change_fy0}
+
+The sales organization's estimate of the largest list-price increase customers would accept in the coming year without a loss of unit volume: {max_price_increase}. On revenue for the year just ended, that increase is worth {price_cap}.
+
+@group suppliers
+
+SECTION EIGHT: SUPPLIERS
+
+Spending with suppliers in the year just ended: {supplier_spend}, or {materials_share} of revenue. It covers steel and other metals, castings and forgings, motors, hydraulic and electrical components, electronic controls, parts bought for resale, contract machining, and the fuel and electricity the plants use.
+
+Payment terms. The Company takes an average of {payment_days} days to pay its suppliers.
+
+Agreements. Supply agreements run for several years. The share of supplier spending under agreements that come up for renewal in the coming year: {renegotiable_share}. The purchasing department's estimate of the largest price reduction obtainable on those renewals: {max_supplier_reduction}. Together, the largest annual saving available from pressing suppliers on price: {supplier_cap}.
+
+@group environment
+
+SECTION NINE: ENVIRONMENTAL SPENDING
+
+Energy. The plants' spending on fuel and electricity in the year just ended: {energy_spend}.
+
+Environmental spending in the year just ended: {env_total}, in two parts.
+Compliance: {env_compliance}. Air and water permits, emissions and discharge monitoring, and the handling and disposal of waste. These costs are required by the plants' permits.
+Environmental projects: {env_projects}. Energy-efficiency upgrades at the plants, reductions in emissions from paint and coating lines, and reductions in waste sent to landfill. The board sets this budget each year.
+
+@group workforce
+
+SECTION TEN: TECHNOLOGY AND WORK
+
+Automation in use. The plants use computer-controlled machine tools for cutting and machining, and robotic welding cells at the larger plants. The warehouses use inventory-management software and barcode tracking. Orders, scheduling, purchasing and accounts run on a single enterprise system used by the plants and the offices.
+
+Hiring. In the year just ended the plants hired {plant_hires} people from outside the Company into production, maintenance and warehouse roles, to replace people who left and to fill new positions. These are positions an employee from another function could fill after retraining.
+
+Retraining. The Company's estimates for moving an employee from another function into a plant or field-service role:
+Cost per person, including instruction and paid training time: {retraining_cost_pp}
+Months of training before the person works independently: {retraining_months}
+Years until the cost of retraining is paid back, compared with hiring from outside: {retraining_payback}
+
+@group general
+
+SECTION ELEVEN: LIMITS ON EACH LINE
+
+The largest amount available from each line of the budget in the coming year, based on the figures for the year just ended.
+
+Payroll by function, the most that can be removed by eliminating roles in that function:
+Production: {payroll_prod}
+Maintenance, repair and field service: {payroll_maint}
+Warehouse and shipping: {payroll_logistics}
+Engineering: {payroll_eng}
+Information technology: {payroll_it}
+Sales: {payroll_sales}
+Office and administrative support: {payroll_office}
+Business and financial operations: {payroll_business}
+Management: {payroll_mgmt}
+All other occupations: {payroll_other}
+
+Wages and hours: the largest reduction in wages or hours the Company can make within a year is {max_wage_cut} of payroll, or {wage_cut_cap}.
+
+Research and development: the full budget, {rnd_fy0}.
+
+Prices to customers: the largest increase customers would accept, {max_price_increase}, worth {price_cap}.
+
+Environmental projects: the full budget, {env_projects}. Compliance spending of {env_compliance} is required by permits and is not available.
+
+Dividends and repurchases: the full amount paid in the year just ended, {shareholder_returns_fy0}.
+
+Cash: cash above the minimum operating level, {cash_above_min}. The undrawn credit facility of {credit_facility} is available in addition, as borrowing.
+
+Suppliers: the largest annual saving from pressing suppliers on price, {supplier_cap}.
