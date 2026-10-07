@@ -11,7 +11,7 @@ import pytest
 
 from horizon_compact.experiment import load_experiment
 from horizon_compact.providers.base import DecisionRequest, RawDecision, Usage
-from horizon_compact.sweep.plan import SweepRefusal
+from horizon_compact.sweep.plan import SweepRefusal, build_plan
 from horizon_compact.sweep.runner import check_official, check_route
 from horizon_compact.sweep.status import summarize
 from horizon_compact.sweep.store import LocalStore
@@ -22,6 +22,7 @@ from sweep_helpers import (
     SONNET_ROUTE,
     FakeClock,
     ScriptedProvider,
+    company_like,
     make_plan,
     raw_error,
     raw_ok,
@@ -31,7 +32,7 @@ from sweep_helpers import (
 
 
 def objects(store: LocalStore, sweep_id: str, pattern: str) -> list[dict[str, Any]]:
-    keys = [k for k in store.list_keys(f"development/{sweep_id}/") if pattern in k]
+    keys = [k for k in store.list_keys(f"development/placeholder/{sweep_id}/") if pattern in k]
     return [json.loads(store.get(k) or "{}") for k in keys]
 
 
@@ -47,7 +48,7 @@ def test_a_full_session_writes_a_manifest_attempts_finals_and_a_summary(tmp_path
     assert result.stopped == "complete" and result.clean
     assert (result.runs_total, result.runs_finished_now, result.attempts_now) == (5, 5, 5)
     assert len(provider.requests) == 5
-    keys = store.list_keys(f"development/{plan.sweep_id}/")
+    keys = store.list_keys(f"development/placeholder/{plan.sweep_id}/")
     assert sum(k.endswith("manifest.json") for k in keys) == 1
     assert sum("/attempt-1.json" in k for k in keys) == 5
     assert sum(k.endswith("final.json") for k in keys) == 5
@@ -161,7 +162,7 @@ def test_an_interrupted_run_is_finished_on_relaunch_at_the_next_attempt_number(
     first = ScriptedProvider(lambda n, request: raw_ok(request, stop="max_tokens"))
     session(exp, plan, first, store, should_stop=lambda: len(first.requests) >= 1)
     run = plan.runs[0].run_id
-    base = f"development/{plan.sweep_id}/runs/{run}"
+    base = f"development/placeholder/{plan.sweep_id}/runs/{run}"
     assert store.get(f"{base}/attempt-1.json") and store.get(f"{base}/final.json") is None
     session(exp, plan, always(), store)
     assert json.loads(store.get(f"{base}/attempt-2.json") or "{}")["status"] == "valid"
@@ -181,19 +182,19 @@ def test_a_missing_final_is_written_from_the_stored_attempts_with_no_new_call(
     store = LocalStore(tmp_path)
     session(exp, plan, always(), store)
     victim = plan.runs[0].run_id
-    (tmp_path / f"development/{plan.sweep_id}/runs/{victim}/final.json").unlink()
+    (tmp_path / f"development/placeholder/{plan.sweep_id}/runs/{victim}/final.json").unlink()
     provider = always()
     result = session(exp, plan, provider, store)
     assert provider.requests == []
     assert result.stopped == "complete"
-    assert store.get(f"development/{plan.sweep_id}/runs/{victim}/final.json")
+    assert store.get(f"development/placeholder/{plan.sweep_id}/runs/{victim}/final.json")
 
 
 def test_a_changed_manifest_is_refused(tmp_path: Path) -> None:
     exp, plan = make_plan()
     store = LocalStore(tmp_path)
     session(exp, plan, always(), store)
-    path = tmp_path / f"development/{plan.sweep_id}/manifest.json"
+    path = tmp_path / f"development/placeholder/{plan.sweep_id}/manifest.json"
     manifest = json.loads(path.read_text())
     manifest["content_hash"] = "0" * 64
     path.write_text(json.dumps(manifest))
@@ -231,7 +232,9 @@ def test_retries_are_fresh_identical_requests_and_the_first_attempt_status_is_ke
         first_three[0] == first_three[1] == first_three[2]
     )  # same prompt, same order, no repair message
     run = plan.runs[0].run_id
-    final = json.loads(store.get(f"development/{plan.sweep_id}/runs/{run}/final.json") or "{}")
+    final = json.loads(
+        store.get(f"development/placeholder/{plan.sweep_id}/runs/{run}/final.json") or "{}"
+    )
     assert (final["status"], final["first_attempt_status"], final["attempts"]) == (
         "valid",
         "truncated",
@@ -263,7 +266,9 @@ def test_api_errors_back_off_are_stored_and_do_not_count_against_the_retry_budge
     provider = ScriptedProvider(script)
     session(exp, plan, provider, store, clock=clock)
     run = plan.runs[0].run_id
-    final = json.loads(store.get(f"development/{plan.sweep_id}/runs/{run}/final.json") or "{}")
+    final = json.loads(
+        store.get(f"development/placeholder/{plan.sweep_id}/runs/{run}/final.json") or "{}"
+    )
     assert (final["status"], final["attempts"], final["model_attempts"]) == ("valid", 5, 1)
     backoffs = [s for s in clock.sleeps if s > 0]
     assert len(backoffs) >= 4  # one backoff per api_error, growing cap 4, 8, 16, 32
@@ -352,9 +357,9 @@ def test_every_object_is_written_once(tmp_path: Path) -> None:
 def test_status_summarizes_a_sweep(tmp_path: Path) -> None:
     exp, plan = make_plan()
     store = LocalStore(tmp_path)
-    assert summarize(store, plan.sweep_id) is None
+    assert summarize(store, "placeholder", plan.sweep_id) is None
     session(exp, plan, always(), store)
-    summary = summarize(store, plan.sweep_id)
+    summary = summarize(store, "placeholder", plan.sweep_id)
     assert summary is not None
     assert (summary["runs_total"], summary["runs_finished"], summary["attempts"]) == (5, 5, 5)
     assert summary["final_statuses"] == {"valid": 5}
@@ -483,3 +488,41 @@ def test_a_stop_request_during_a_backoff_is_honoured_within_a_second(tmp_path: P
     assert result.stopped == "stop_requested"
     assert len(provider.requests) < 10
     assert all(s <= 3.75 + 1e-9 for s in clock.sleeps)  # slices, never one long sleep
+
+
+def test_a_session_over_two_scenarios_and_two_templates_stores_under_the_experiments_name(
+    tmp_path: Path,
+) -> None:
+    exp = company_like(tmp_path / "x", sealed="w3")
+    plan = build_plan(
+        exp, model_key="nova-lite", label="t", repeats=1, seed=4, templates=["w1", "w2"]
+    )
+    store = LocalStore(tmp_path / "runs")
+    provider = always()
+    result = session(exp, plan, provider, store)
+    assert result.stopped == "complete"
+    assert (result.runs_total, result.runs_finished_now) == (12, 12)
+    prefix = f"development/company/{plan.sweep_id}/"
+    keys = store.list_keys(prefix)
+    assert keys and all(k.startswith(prefix) for k in keys)
+    assert store.list_keys("development/placeholder/") == []
+    attempts = [json.loads(store.get(k) or "{}") for k in keys if "/attempt-" in k]
+    assert {(a["scenario_id"], a["wording_variant_id"]) for a in attempts} == {
+        (s, w) for s in ("s1", "s2") for w in ("w1", "w2")
+    }
+    assert {a["file_hashes"]["company/objectives.toml"] for a in attempts} == {
+        exp.file_hashes["company/objectives.toml"]
+    }
+    sentences = {r.user.split("\n\n")[1] for r in provider.requests}
+    assert any(s.startswith("The panel has set your aim") for s in sentences)
+    assert any(s.startswith("The panel has asked you to create value") for s in sentences)
+    assert not any("Over " in s and "the panel's aim" in s for s in sentences)  # w3 never ran
+
+
+def test_status_reads_a_sweep_under_its_experiments_name(tmp_path: Path) -> None:
+    exp = company_like(tmp_path / "x", sealed="w3")
+    plan = build_plan(exp, model_key="nova-lite", label="t", repeats=1, seed=4, templates=["w1"])
+    store = LocalStore(tmp_path / "runs")
+    session(exp, plan, always(), store)
+    assert summarize(store, "company", plan.sweep_id) is not None
+    assert summarize(store, "placeholder", plan.sweep_id) is None

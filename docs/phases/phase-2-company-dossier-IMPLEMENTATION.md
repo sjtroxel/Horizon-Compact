@@ -487,7 +487,7 @@ wording and neutrality matter (**Opus**). Steps 7 and 9 are his. Step 8 is Opus 
    | 4. He reviewed the assumptions table and the rendered dossier line by line | **Partial, and marked so** | Every assumption has a `review` line and he said he read section one and accepted the rest; **it is an acceptance by deferral, not an independent line-by-line check** (step 7 note). The independent check is DoD 5 |
    | 5. The realism read done and every point marked | **Met** | `realism-brief.md`, `realism-raw.md` (committed with this close-out); the verification table in step 8; $0.50 |
    | 6. No real company name, ticker or plant location | **Met** | The guard passes (pre-commit mode on the change set; history clean, 20 commits; `paths-check` clean) and the manual read above found nothing |
-   | 7. No official model called; `make check` and CI green | **Met** | No Bedrock or official-model call in this phase (the one outside call was the realism read, via OpenRouter, $0.50); `make check` green (442 tests); CI runs above. **The close-out commit's CI run is not yet recorded**: add its id after he pushes |
+   | 7. No official model called; `make check` and CI green | **Met** | No Bedrock or official-model call in this phase (the one outside call was the realism read, via OpenRouter, $0.50); `make check` green (442 tests); CI runs above; the close-out commit `4250ea3` (CI run `37534188137`, green, 2026-10-06) |
 
 Commit messages: `phase 2: ...`, one line, his to run.
 

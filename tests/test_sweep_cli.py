@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import boto3
 import pytest
 
 from horizon_compact import cli
+from sweep_helpers import company_like
 
 PLAN_ARGS = [
     "--experiment",
@@ -39,7 +41,7 @@ def test_plan_is_offline_and_shows_the_runs_the_pacing_and_the_bound(
     assert cli.main(["sweep", "plan", *PLAN_ARGS]) == 0
     out = capsys.readouterr().out
     assert "sweep_id:        skeleton-sonnet-4-6-" in out
-    assert "runs:            15 (5 objectives x 3)" in out
+    assert "runs:            15 (1 scenarios x 5 objectives x 1 templates x 3 repeats)" in out
     assert "one call start every 7.5s" in out
     assert "for the sweep (3 attempts per run)" in out
     assert out.count("repeat ") == 15
@@ -119,3 +121,53 @@ def test_stop_and_status_need_their_arguments() -> None:
     with pytest.raises(SystemExit) as exc:
         cli.main(["sweep", "stop"])
     assert exc.value.code == 2
+
+
+# --- Phase 2.5: the selection flags and the refusals reach the command line -----------------------
+
+
+def _company_args(tmp_path: Path, sealed: str, *extra: str) -> list[str]:
+    exp = company_like(tmp_path, sealed=sealed)
+    return [
+        "--experiment", "company",
+        "--experiment-dir", str(exp.root),
+        "--model", "nova-lite",
+        "--repeats", "1",
+        "--seed", "1",
+        "--label", "t",
+        *extra,
+    ]  # fmt: skip
+
+
+def test_plan_takes_scenario_and_template_flags(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    args = _company_args(tmp_path, "w3", "--scenario", "s1", "--template", "w1", "--template", "w2")
+    assert cli.main(["sweep", "plan", *args]) == 0
+    out = capsys.readouterr().out
+    assert "runs:            6 (1 scenarios x 3 objectives x 2 templates x 1 repeats)" in out
+    assert out.count("repeat ") == 6
+
+
+def test_the_sealed_template_is_refused_at_the_command_line(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    args = _company_args(tmp_path, "w2", "--template", "w2")
+    assert cli.main(["sweep", "plan", *args]) == 2
+    assert "sealed template (w2) is never part of a decision prompt" in capsys.readouterr().err
+
+
+def test_an_undrawn_template_blocks_every_decision_plan(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert cli.main(["sweep", "plan", *_company_args(tmp_path, "")]) == 2
+    assert "sealed template is not drawn yet" in capsys.readouterr().err
+
+
+def test_real_content_on_the_main_model_is_refused_at_the_command_line(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    args = _company_args(tmp_path, "w3", "--template", "w1")
+    args[args.index("nova-lite")] = "sonnet-4-6"
+    assert cli.main(["sweep", "plan", *args]) == 2
+    assert "sonnet-4-6 is not the development model" in capsys.readouterr().err

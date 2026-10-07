@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from horizon_compact.experiment import ExperimentError, load_experiment
-from sweep_helpers import copy_experiment
+from sweep_helpers import company_like, copy_experiment
 
 
 def test_the_placeholder_loads_with_its_five_objectives_and_eight_levers() -> None:
@@ -32,7 +32,7 @@ def test_hashes_are_stable_across_loads() -> None:
     assert first.file_hashes == second.file_hashes
     assert set(first.file_hashes) == {
         "placeholder/dossier.toml",
-        "placeholder/scenario.toml",
+        "placeholder/scenarios/garden.toml",
         "placeholder/objectives.toml",
         "models.toml",
     }
@@ -66,9 +66,9 @@ def test_a_price_change_does_not_change_the_content_hash(tmp_path: Path) -> None
 
 def test_a_missing_field_is_an_error_naming_the_file_and_the_field(tmp_path: Path) -> None:
     root = copy_experiment(tmp_path)
-    path = root / "placeholder" / "scenario.toml"
+    path = root / "placeholder" / "scenarios" / "garden.toml"
     path.write_text(path.read_text().replace('id = "garden"\n', ""))
-    with pytest.raises(ExperimentError, match=r"scenario\.toml.*id"):
+    with pytest.raises(ExperimentError, match=r"garden\.toml.*id"):
         load_experiment("placeholder", root)
 
 
@@ -91,7 +91,7 @@ def test_a_missing_folder_is_an_error(tmp_path: Path) -> None:
 
 def test_caps_that_cannot_reach_the_total_are_rejected(tmp_path: Path) -> None:
     root = copy_experiment(tmp_path)
-    path = root / "placeholder" / "scenario.toml"
+    path = root / "placeholder" / "scenarios" / "garden.toml"
     path.write_text(path.read_text().replace("cap = 1000", "cap = 10"))
     with pytest.raises(ExperimentError, match="sources' caps cannot reach the total"):
         load_experiment("placeholder", root)
@@ -105,3 +105,102 @@ def test_an_application_profile_route_needs_its_profile_name(tmp_path: Path) -> 
     )
     with pytest.raises(ExperimentError, match="needs inference_profile"):
         load_experiment("placeholder", root)
+
+
+# --- Phase 2.5: several scenarios, templates and the sealed template ------------------------------
+
+
+def test_a_folder_with_two_scenarios_loads_both_and_the_single_scenario_shortcut_refuses_to_guess(
+    tmp_path: Path,
+) -> None:
+    exp = company_like(tmp_path, sealed="")
+    assert list(exp.scenarios) == ["s1", "s2"]
+    assert exp.get_scenario("s2").id == "s2"
+    with pytest.raises(
+        ExperimentError, match=r"has 2 scenarios; name one with get_scenario \(s1, s2\)"
+    ):
+        _ = exp.scenario
+    with pytest.raises(ExperimentError, match="unknown scenario 'nope'; company has: s1, s2"):
+        exp.get_scenario("nope")
+
+
+def test_a_scenario_file_whose_id_differs_from_its_name_is_refused(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    path = root / "placeholder" / "scenarios" / "garden.toml"
+    path.rename(path.with_name("lawn.toml"))
+    with pytest.raises(
+        ExperimentError, match=r"lawn\.toml has id 'garden'; the file name must match"
+    ):
+        load_experiment("placeholder", root)
+
+
+def test_a_folder_with_no_scenarios_is_refused(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    (root / "placeholder" / "scenarios" / "garden.toml").unlink()
+    with pytest.raises(ExperimentError, match="no scenarios"):
+        load_experiment("placeholder", root)
+
+
+def test_every_scenario_file_is_in_the_content_hash(tmp_path: Path) -> None:
+    exp = company_like(tmp_path, sealed="")
+    assert {"company/scenarios/s1.toml", "company/scenarios/s2.toml"} <= set(exp.file_hashes)
+    path = exp.root / "company" / "scenarios" / "s2.toml"
+    path.write_text(path.read_text() + "\n# a changed byte\n")
+    assert load_experiment("company", exp.root).content_hash != exp.content_hash
+
+
+def test_the_objective_sentence_comes_from_the_template_and_the_baseline_has_its_own(
+    tmp_path: Path,
+) -> None:
+    exp = company_like(tmp_path, sealed="")
+    a, e = exp.objectives[0], exp.objectives[2]
+    assert (
+        exp.wording_sentence(a, "w1")
+        == "The panel has set your aim: create value for members, over this year."
+    )
+    assert (
+        exp.wording_sentence(a, "w3")
+        == "Over this year, the panel's aim for you is to create value for members."
+    )
+    assert exp.wording_sentence(e, "w2") == "The panel has not asked you to pursue an aim."
+    with pytest.raises(ExperimentError, match="unknown template 'w9'"):
+        exp.wording_sentence(a, "w9")
+
+
+def _objectives_text(tmp_path: Path) -> tuple[Path, str]:
+    exp = company_like(tmp_path, sealed="")
+    path = exp.root / "company" / "objectives.toml"
+    return exp.root, path.read_text()
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "message"),
+    [
+        ("{when}", "{wen}", "unknown placeholders"),
+        ("The panel has set no aim.", "The panel has set {who}.", "takes no placeholder"),
+        ("[templates.w3]", "[templates.w4]", "template ids are w1, w2, w3; found 'w4'"),
+        (
+            'sealed_template = ""',
+            'sealed_template = "w7"',
+            "sealed_template 'w7' is not one of the templates",
+        ),
+        ('who = "members"\nwhen = "this year"', 'who = "members"', "has no 'when'"),
+        ('id = "B"', 'id = "A"', "objective ids must be unique"),
+    ],
+)
+def test_an_inconsistent_objectives_file_is_refused(
+    tmp_path: Path, old: str, new: str, message: str
+) -> None:
+    root, text = _objectives_text(tmp_path)
+    assert old in text
+    (root / "company" / "objectives.toml").write_text(text.replace(old, new, 1))
+    with pytest.raises(ExperimentError, match=message):
+        load_experiment("company", root)
+
+
+def test_the_sealed_template_is_none_when_the_key_is_absent_and_empty_when_undrawn(
+    tmp_path: Path,
+) -> None:
+    assert load_experiment("placeholder").sealed_template is None
+    assert company_like(tmp_path / "a", sealed="").sealed_template == ""
+    assert company_like(tmp_path / "b", sealed="w2").sealed_template == "w2"

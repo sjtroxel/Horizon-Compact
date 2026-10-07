@@ -27,7 +27,7 @@ def test_an_exactly_balanced_decision_is_valid() -> None:
     assert result.status == "valid"
     assert result.problems == ()
     assert result.scaled_amounts is None
-    assert result.season == "spring"
+    assert result.choice == "spring"
     assert result.memo_words == 160
 
 

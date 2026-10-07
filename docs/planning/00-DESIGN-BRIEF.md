@@ -7,6 +7,8 @@
   on; see each doc's verified marks. Read `07` for the measurement design.)*
   Pre-IMPLEMENTATION-doc. **Amended by `08` (2026-10-03):** §5.1 objectives, §5.2 menu, §5.4 real-case wording, §8
   re-run wording (patches P1, P6, P7, P27, P34 in `09` §3).
+  **Patched 2026-10-07 (his, Phase 2.5 IMPLEMENTATION doc decision 4):** §5.1, C and D say "over the next twenty
+  years", so the horizon pairs differ only in the horizon.
 - **Date captured:** 2026-10-02
 - **Read order:** `00-DESIGN-BRIEF` (this) -> `01-DATA-SOURCES` -> `02-ARCHITECTURE` -> `03-COST-MODEL` ->
   `04-RISK-REGISTER` -> `05-EVOLUTION-PLAN` -> `06-NARRATIVE-AND-VOCABULARY` -> `07-EVAL-SPEC` ->
@@ -104,7 +106,7 @@ decisions split."* Most portfolios answer questions; this one runs an experiment
 |  | **Shareholders only** | **All stakeholders** |
 |---|---|---|
 | **Next four quarters** | **A.** Create value for shareholders, over the next four quarters | **B.** Create value for all of the company's stakeholders (customers, employees, suppliers, the communities in which it operates including their environment, and shareholders), over the next four quarters |
-| **Twenty years** | **C.** Create value for shareholders, over twenty years | **D.** Create value for all of the company's stakeholders (customers, employees, suppliers, the communities in which it operates including their environment, and shareholders), over twenty years |
+| **Twenty years** | **C.** Create value for shareholders, over the next twenty years | **D.** Create value for all of the company's stakeholders (customers, employees, suppliers, the communities in which it operates including their environment, and shareholders), over the next twenty years |
 
 **E. Baseline:** no objective. *"You are the CEO. Decide."* Shows what the model does by default **in this role,
 with this company and menu** (not a finding about the model's values in general; `08` §3.2).

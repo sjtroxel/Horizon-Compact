@@ -152,7 +152,14 @@ def _load(args: argparse.Namespace) -> tuple[Experiment, SweepPlan]:
     root = Path(args.experiment_dir) if args.experiment_dir else None
     experiment = load_experiment(args.experiment, root)
     plan_ = build_plan(
-        experiment, model_key=args.model, label=args.label, repeats=args.repeats, seed=args.seed
+        experiment,
+        model_key=args.model,
+        label=args.label,
+        repeats=args.repeats,
+        seed=args.seed,
+        scenarios=args.scenario or None,
+        templates=args.template or None,
+        official=getattr(args, "official", False),
     )
     return experiment, plan_
 
@@ -215,7 +222,9 @@ def cmd_sweep_plan(args: argparse.Namespace) -> int:
     print(f"sweep_id:        {plan_.sweep_id}")
     print(f"content hash:    {plan_.content_hash}")
     print(
-        f"runs:            {len(plan_.runs)} ({len(experiment.objectives)} objectives x {plan_.repeats})"
+        f"runs:            {len(plan_.runs)} ({len(plan_.scenarios)} scenarios x "
+        f"{len(experiment.objectives)} objectives x {len(plan_.templates)} templates x "
+        f"{plan_.repeats} repeats)"
     )
     print(
         f"pacing:          one call start every {60 / (config.requests_per_minute * experiment.models.pace_fraction):.1f}s"
@@ -226,10 +235,17 @@ def cmd_sweep_plan(args: argparse.Namespace) -> int:
     objectives = {o.id: o for o in experiment.objectives}
     for n, run in enumerate(plan_.runs, 1):
         print(
-            f"  {n:>3}  {run.run_id}  {run.objective_id:<12} repeat {run.repeat}  seed {run.menu_order_seed}"
+            f"  {n:>3}  {run.run_id}  {run.scenario_id:<8} {run.objective_id:<12} {run.wording_id} "
+            f"repeat {run.repeat}  seed {run.menu_order_seed}"
         )
         if args.show_prompts:
-            prompt = render_prompt(experiment, objectives[run.objective_id], run.menu_order_seed)
+            prompt = render_prompt(
+                experiment,
+                experiment.get_scenario(run.scenario_id),
+                objectives[run.objective_id],
+                run.wording_id,
+                run.menu_order_seed,
+            )
             if n == 1:
                 print("\n--- system (identical on every run) ---\n" + prompt.system)
             print(f"\n--- user, run {n} ---\n{prompt.user}\n")
@@ -307,6 +323,10 @@ def cmd_sweep_launch(args: argparse.Namespace) -> int:
         "--cap-usd", str(cap),
         "--max-minutes", str(args.max_minutes),
     ]  # fmt: skip
+    for scenario_id in args.scenario or []:
+        command += ["--scenario", scenario_id]
+    for template_id in args.template or []:
+        command += ["--template", template_id]
     if args.allow_over_cap:
         command.append("--allow-over-cap")
     arn = sweep_launch.launch_task(
@@ -324,7 +344,9 @@ def cmd_sweep_launch(args: argparse.Namespace) -> int:
 def cmd_sweep_status(args: argparse.Namespace) -> int:
     sweep_id = args.sweep_id or _load(args)[1].sweep_id
     identity = identify({}, _laptop_git)
-    summary = sweep_status.summarize(_store(args, _session(args, identity)), sweep_id)
+    summary = sweep_status.summarize(
+        _store(args, _session(args, identity)), args.experiment, sweep_id
+    )
     if summary is None:
         print(f"no manifest for {sweep_id}: nothing has run yet")
         return CLEAN_EXIT
@@ -397,6 +419,18 @@ def _add_plan_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--model", required=True, help="a key in experiment/models.toml")
     parser.add_argument("--repeats", type=int, required=True)
     parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument(
+        "--scenario",
+        action="append",
+        default=None,
+        help="a scenario id; repeat the flag for several; default: every scenario",
+    )
+    parser.add_argument(
+        "--template",
+        action="append",
+        default=None,
+        help="a wording template id (w1-w3); repeat for several; default: every template",
+    )
     parser.add_argument("--label", required=True)
     parser.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
 

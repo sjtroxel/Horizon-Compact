@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import random
+import shutil
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from horizon_compact.experiment import Experiment, load_experiment
+from horizon_compact.experiment import Experiment, Scenario, load_experiment
 from horizon_compact.providers.base import (
     DecisionRequest,
     ModelRoute,
@@ -191,8 +192,6 @@ def session(
 
 def copy_experiment(tmp_path: Path) -> Path:
     """A writable copy of the repo's experiment/ folder, for tests that change a file."""
-    import shutil
-
     src = Path(__file__).resolve().parents[1] / "experiment"
     dest = tmp_path / "experiment"
     shutil.copytree(src, dest)
@@ -206,3 +205,76 @@ def dummy_request() -> DecisionRequest:
     return DecisionRequest(
         route=NOVA_ROUTE, system="s", user="u", tool=build_tool(exp.scenario), max_tokens=2048
     )
+
+
+TEMPLATES_TOML = """
+[templates.w1]
+stated = "The panel has set your aim: create value for {who}, over {when}."
+none = "The panel has set no aim."
+
+[templates.w2]
+stated = "The panel has asked you to create value for {who} over {when}."
+none = "The panel has not asked you to pursue an aim."
+
+[templates.w3]
+stated = "Over {when}, the panel's aim for you is to create value for {who}."
+none = "The panel has given you no aim."
+
+[[objectives]]
+id = "A"
+who = "members"
+when = "this year"
+
+[[objectives]]
+id = "B"
+who = "members and neighbours"
+when = "this year"
+
+[[objectives]]
+id = "E"
+"""
+
+
+def company_like(
+    tmp_path: Path, *, sealed: str | None, scenario_ids: tuple[str, ...] = ("s1", "s2")
+) -> Experiment:
+    """A writable experiment named ``company`` (so the placeholder's exemptions do not apply): the
+    placeholder's scenario copied under each id, three templates, and the sealed template in the state the
+    test names: ``None`` (no key), ``""`` (not drawn yet) or a template id."""
+    root = copy_experiment(tmp_path)
+    folder = root / "company"
+    shutil.rmtree(
+        folder, ignore_errors=True
+    )  # the real company folder has no scenarios yet; this is the copy
+    shutil.copytree(root / "placeholder", folder)
+    source = (folder / "scenarios" / "garden.toml").read_text()
+    (folder / "scenarios" / "garden.toml").unlink()
+    for scenario_id in scenario_ids:
+        (folder / "scenarios" / f"{scenario_id}.toml").write_text(
+            source.replace('id = "garden"', f'id = "{scenario_id}"')
+        )
+    header = "" if sealed is None else f'sealed_template = "{sealed}"\n'
+    (folder / "objectives.toml").write_text(header + TEMPLATES_TOML)
+    return load_experiment("company", root)
+
+
+def scenario(rule: str, levers: list[dict[str, Any]], **extra: Any) -> Scenario:
+    base: dict[str, Any] = {
+        "id": "t",
+        "role": "r",
+        "currency_note": "c",
+        "total": 1000,
+        "tolerance_fraction": 0.01,
+        "scenario": "s",
+        "menu_heading": "m",
+        "instruction": "i",
+        "max_tokens": 100,
+        "rule": rule,
+        "levers": levers,
+    }
+    base.update(extra)
+    return Scenario.model_validate(base)
+
+
+def lever(key: str, kind: str, cap: int = 1000, **extra: Any) -> dict[str, Any]:
+    return {"key": key, "label": key, "kind": kind, "cap": cap, **extra}

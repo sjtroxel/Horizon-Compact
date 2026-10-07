@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 
+from horizon_compact.experiment import Experiment, Objective
 from horizon_compact.providers.base import DecisionRequest
 from horizon_compact.providers.bedrock import build_request
-from horizon_compact.sweep.prompt import TOOL_NAME, build_tool, render_prompt
-from sweep_helpers import NOVA_ROUTE, experiment, make_plan
+from horizon_compact.sweep.prompt import TOOL_NAME, RenderedPrompt, build_tool
+from horizon_compact.sweep.prompt import render_prompt as render_in
+from sweep_helpers import NOVA_ROUTE, company_like, experiment, lever, make_plan, scenario
 
 # The Phase 0.5 smoke list plus the words the placeholder must never lean on (Phase 1 IMPLEMENTATION doc,
 # section 13).
@@ -41,6 +44,11 @@ SUBJECT_WORDS = (
     "short-term",
     "chief executive",
 )
+
+
+def render_prompt(exp: Experiment, objective: Objective, seed: int) -> RenderedPrompt:
+    """The placeholder has one scenario and one template, so the tests name neither."""
+    return render_in(exp, exp.scenario, objective, "w1", seed)
 
 
 def _runs() -> list[tuple[str, str, tuple[str, ...], tuple[str, ...]]]:
@@ -175,3 +183,102 @@ def test_no_string_in_any_placeholder_file_uses_the_subjects_vocabulary() -> Non
         if found:
             hits[path.name] = found
     assert not hits, f"subject vocabulary in placeholder values: {hits}"
+
+
+# --- Phase 2.5: scenarios without a choice, people, notes and templates ---------------------------
+
+
+def test_a_scenario_without_a_choice_renders_no_options_block_and_the_tool_has_no_choice_field() -> (
+    None
+):
+    scn = scenario(
+        "uses_equal_total",
+        [
+            lever("keep", "use"),
+            lever("fund", "use"),
+            lever("roles", "not_offered", 0, note="not chosen directly"),
+        ],
+    )
+    tool = build_tool(scn)
+    assert list(tool.input_schema["properties"]) == ["amounts", "memo"]
+    assert tool.input_schema["required"] == ["amounts", "memo"]
+    exp = experiment()
+    p = render_in(exp, scn, exp.objectives[0], "w1", 5)
+    assert p.option_order == ()
+    blocks = p.user.split("\n\n")
+    assert (
+        len(blocks) == 4
+    )  # the scenario, the objective, the menu and the instruction: no options block
+    assert "- roles [roles]: not chosen directly" in blocks[2]
+
+
+def test_the_not_offered_line_shows_the_levers_own_note_or_a_plain_not_offered() -> None:
+    scn = scenario(
+        "uses_equal_total",
+        [
+            lever("keep", "use"),
+            lever("a", "not_offered", 0, note="held fixed by the board"),
+            lever("b", "not_offered", 0),
+        ],
+    )
+    exp = experiment()
+    user = render_in(exp, scn, exp.objectives[0], "w1", 5).user
+    assert "- a [a]: held fixed by the board" in user
+    assert "- b [b]: not offered\n" in user + "\n"
+
+
+def test_people_are_shown_as_a_count_and_the_tool_asks_for_integers() -> None:
+    scn = scenario(
+        "split_equals_headcount",
+        [lever("out", "use", 190), lever("kept", "use", 190)],
+        total=190,
+        unit="people",
+    )
+    exp = experiment()
+    user = render_in(exp, scn, exp.objectives[0], "w1", 5).user
+    assert "- out [out]: use, up to 190 people" in user
+    assert "$" not in user.split("\n\n")[2]  # the menu block
+    amounts = build_tool(scn).input_schema["properties"]["amounts"]["properties"]
+    assert {spec["type"] for spec in amounts.values()} == {"integer"}
+
+
+def test_dollars_are_shown_with_a_dollar_sign_and_the_tool_asks_for_numbers() -> None:
+    scn = scenario("uses_equal_total", [lever("keep", "use")])
+    exp = experiment()
+    assert (
+        "- keep [keep]: use, up to $1,000" in render_in(exp, scn, exp.objectives[0], "w1", 5).user
+    )
+    amounts = build_tool(scn).input_schema["properties"]["amounts"]["properties"]
+    assert amounts["keep"]["type"] == "number"
+
+
+def test_templates_change_only_the_objective_paragraph_and_the_template_is_recorded(
+    tmp_path: Path,
+) -> None:
+    exp = company_like(tmp_path, sealed="w3")
+    scn = exp.get_scenario("s1")
+    objective = exp.objectives[0]
+    first = render_in(exp, scn, objective, "w1", 11)
+    second = render_in(exp, scn, objective, "w2", 11)
+    assert (first.template_id, second.template_id) == ("w1", "w2")
+    assert first.system == second.system
+    assert (first.lever_order, first.option_order) == (second.lever_order, second.option_order)
+    a, b = first.user.split("\n\n"), second.user.split("\n\n")
+    assert len(a) == len(b)
+    assert [i for i, (x, y) in enumerate(zip(a, b, strict=True)) if x != y] == [
+        1
+    ]  # the second paragraph only
+    assert "create value for members, over this year" in a[1]
+    assert "create value for members over this year" in b[1]
+
+
+def test_the_baseline_gets_the_templates_none_sentence_in_the_same_position(tmp_path: Path) -> None:
+    exp = company_like(tmp_path, sealed="w3")
+    scn = exp.get_scenario("s1")
+    stated, baseline = exp.objectives[0], exp.objectives[2]
+    for template_id, none in (
+        ("w1", "The panel has set no aim."),
+        ("w2", "The panel has not asked you to pursue an aim."),
+    ):
+        assert render_in(exp, scn, baseline, template_id, 3).user.split("\n\n")[1] == none
+        assert render_in(exp, scn, stated, template_id, 3).user.split("\n\n")[1] != none

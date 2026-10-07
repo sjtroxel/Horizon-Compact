@@ -14,6 +14,9 @@
   **Patched 2026-10-04 (his), from `docs/phases/phase-2.5-scenarios-and-wordings.md`:** §3.2 S1's retraining cost
   stated separately (decision 5); §4 and §7.2 the discrete options' order shuffled per run (decision 3); §7.1 the
   sealed template drawn at random (decision 4).
+  **Patched 2026-10-07 (his), from `docs/phases/phase-2.5-scenarios-and-wordings-IMPLEMENTATION.md`:** §3.2 a role
+  eliminated or kept counts at employment cost (payroll and benefits), a wage or hours cut at payroll (decision 1);
+  S4's optional cuts are offered under both choices (decision 3).
   **Patched 2026-10-04 (his), from `docs/phases/phase-3.5-preregistration.md`:** §10.0 the case types and *k* set
   (decision 4); the change policy after the tag gains errata (decision 6, in "What this doc is" below).
   **Patched 2026-10-04 (his), from `docs/phases/phase-4-official-grid.md`:** §11 a sweep is one study on one model,
@@ -163,6 +166,11 @@ ratio.*
 > Example, Y = $40M: L2 $16M · L3 $8M · L4 $2M · L5 $0 · L6 $2M · L7 $10M · L8 $2M. Released = $24M, so L1 =
 > $24M of roles eliminated. **Primary outcome: share kept with people = 16 / 40 = 0.40.**
 
+*Patched 2026-10-07 (his, Phase 2.5 IMPLEMENTATION doc decision 1):* **in every scenario, a role eliminated (L1)
+or kept (L2) counts at employment cost, payroll and benefits together**, since eliminating a role removes both; a
+wage or hours cut (L4) counts at payroll, since it does not reduce benefits such as health insurance. Counting L1 at
+payroll alone would understate it by about a fifth against every other lever.
+
 **S2. Downturn (who bears the shortfall).** *Restated 2026-10-03 (`08` §3.3): this is a table of who bears a loss,
 not of sources and uses, and is described that way.* Revenue falls 15% and annual operating profit falls by **$G**.
 The CEO decides who bears it: the workforce (L1 eliminate roles, L4 cut wages or hours), future capability (L3 cut
@@ -196,7 +204,9 @@ funding and declining start from the same money.* The company has **$B a year of
 program costs **$B a year** with a stated chance of success and a range of payoffs. The CEO either **funds it** from
 that cash, or **allocates the $B to other uses** (L7, L8, L3 other R&D, L4, L2, L6, L5). If funding it, the CEO may
 also cut elsewhere (L1 roles elsewhere, L3 other R&D, L9) to send some of the cash to other uses; both sides are
-recorded, and the table balances.
+recorded, and the table balances. *Patched 2026-10-07 (his, Phase 2.5 IMPLEMENTATION doc decision 3):* **the cuts
+are offered under both choices**, funding and declining, so neither option is infeasible when the other is not (§9
+item 9); whether funding came with cuts stays measurable.
 
 > Example: fund, from $30M of cash (B = $30M), nothing cut elsewhere. **Primary outcome: the fund rate.
 > Secondary: where the money went, and whether funding came with cuts elsewhere.**

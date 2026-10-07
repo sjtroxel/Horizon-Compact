@@ -7,34 +7,33 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-06, afternoon
+> ## START HERE — where things stand, 2026-10-07, morning
 >
-> **Phase 2 `company-dossier` was started out of order (his, 2026-10-06)**, because everything ahead of it waits on
-> AWS; it needed no AWS and no official model. Its IMPLEMENTATION doc (approved, his, all five §15 decisions as
-> recommended): `docs/phases/phase-2-company-dossier-IMPLEMENTATION.md`.
-> **PHASE 2 `company-dossier` IS BUILT AND CLOSED (2026-10-06), pending one commit.** Steps 1-4 (`fe82c3f`), 5-6
-> (`891ee3c`) and 7 (`6262c82`) are committed and pushed; **steps 8 (Opus) and 9 (Sonnet) are UNCOMMITTED, and he
-> folds them into one commit (C4+C5)**. After he pushes it: **add that CI run's id to the IMPLEMENTATION doc's DoD 7
-> row** (the audit under §13 step 9 says where). **DoD audit: all seven met except DoD 4, marked partial** (an
-> acceptance by deferral). The manual rule-zero read found nothing; the guard passes on the change set and the
-> history; two tests were added for DoD 3. `ROADMAP.md` marks Phase 2 closed; `pyproject.toml` is unchanged (decision
-> 4). **TOMORROW (2026-10-07), in this order:**
-> 1. **Confirm the commit.** `git log -1` should show his "phase 2: realism read, close-out and audit" commit, pushed
->    and CI green; **add that CI run's id to the DoD 7 row** (IMPLEMENTATION doc, the audit under §13 step 9).
-> 2. **Bedrock check, once:** `scratch/throttle-check.py`, report only; then look at case 179121856900232 (BLOCKED
->    entry). **If Bedrock answers:** Phase 1 steps 3 and 9 first (they unblock 11 and 12), and Phase 0.5's billing
->    close-out the same day (WAITING entry), then Phase 2.5. **If still throttled (the expected case): Phase 2.5.**
-> 3. **Phase 2.5 `scenarios-and-wordings`: Opus writes its IMPLEMENTATION doc** (`docs/phases/phase-2.5-scenarios-and-wordings.md`,
->    "Left for the IMPLEMENTATION doc" is the list), shown to him for approval **before any build**. Needs no AWS:
->    the scenarios (S1-S4, `planning/07` §3), the three templates and the text check are data and code, and its
->    Ollama runs are local; **only its Nova Lite development runs wait on AWS.** Bring into it: **the S3 community
->    consequence (OPEN entry below, for Phase 3 or here, his call)**; the two simplifications kept after the realism
->    read (RECORDED entry); the neutrality checklist (`planning/07` §9) and the blind-reader method (this phase's
->    realism read is the working model: brief, one OpenRouter call about $1, raw reply committed, each point
->    verified; he needs a fresh key at the hidden prompt, and his OpenRouter keys can expire); the sealed template's
->    random draw; the sealed-template refusal test. **Phase 2's dossier is fixed input**: a wording or number change
->    there goes through `figures.toml` and a re-render (IMPLEMENTATION doc §13 step 7's method).
-> 4. Model note for him: Opus for the IMPLEMENTATION doc; Sonnet for the build after approval.
+> **PHASE 2.5 `scenarios-and-wordings`: IMPLEMENTATION doc WRITTEN (Opus) and APPROVED 2026-10-07 (his, all seven
+> §19 decisions as recommended)**: `docs/phases/phase-2.5-scenarios-and-wordings-IMPLEMENTATION.md`. Planning
+> patches applied the same day: `planning/00` §5.1 ("over the next twenty years"), `planning/07` §3.2 (employment
+> cost for L1 and L2; S4's cuts under both choices). The OPEN entry on S3's community consequence is CLOSED by
+> decision 5 (below). **Decision 7:** if Bedrock is still blocked at its step 16, Phase 2.5 closes on Ollama alone,
+> and **the Nova Lite probes and format runs become a prerequisite of Phase 3.5's tag** (they add to the Ollama
+> runs; nothing is re-run).
+> **BUILD, §17 STEPS 1-3 DONE 2026-10-07 (Sonnet), `make check` green, 514 tests, UNCOMMITTED.** Loader and layout
+> (`scenarios/*.toml`, `objectives.toml` with who/when and the templates `w1`-`w3`, `sealed_template`), the five
+> balancing rules and four extra rules, the planner across scenarios x objectives x templates x repeats, records
+> under `development/<experiment>/<sweep_id>/`, and the three refusals. **The placeholder is byte for byte what it
+> was** (`tests/golden/placeholder_prompts.json`, digests taken before the change). Deviations and one open point
+> for step 6 (rescaling and a pinned line) are in the doc's §17. **He commits steps 1-3 with the doc work in the tree
+> (his, 2026-10-07):** the IMPLEMENTATION doc, the planning patches, this block, the closed OPEN entry and Phase 2's
+> DoD 7 row (its close-out commit `4250ea3`, CI run `37534188137`, green).
+> **NEXT: §17 step 4, the Ollama provider (Sonnet; live checks first, shown to him one at a time), as its own
+> commit.** Then Opus for steps 5-7 (scenario rows and text) and his review.
+> **Bedrock at 8:51 AM CDT on 2026-10-07 (`scratch/throttle-check.py`, run once):** Nova Lite and Sonnet 4.6 both
+> still `ThrottlingException`, "Too many tokens per day", $0. No AWS reply on case 179121856900232. He will not buy
+> paid support (his, 2026-10-07).
+>
+> *Phase 2's close-out, kept as the record (2026-10-06):*
+> **PHASE 2 `company-dossier` IS BUILT AND CLOSED (2026-10-06)**, committed and pushed in full (`fe82c3f`, `891ee3c`,
+> `6262c82`, `4250ea3`). **DoD audit: all seven met except DoD 4, marked partial** (an acceptance by deferral). The
+> manual rule-zero read found nothing; `ROADMAP.md` marks Phase 2 closed; `pyproject.toml` is unchanged (decision 4).
 > The step 7 and 8 details follow.
 > **STEP 8 (the realism read) DONE 2026-10-06, Opus.** `experiment/company/figures.toml` (218 rows, 31 assumptions),
 > `dossier.template.txt`, the rendered `dossier.toml` and the public files under `docs/phases/evidence/phase-2/`;
@@ -101,6 +100,17 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
+## OPEN — for Phase 4: `hc sweep launch --official` does not pass `--official` to the task, 2026-10-07
+
+Found in Opus's review of Phase 2.5 steps 1-3. `cmd_sweep_launch` checks the protocol lock on the laptop when
+`--official` is given, but the container command it builds (`sweep run ...`) has no `--official`, so the task runs
+a development session. Before Phase 2.5 that only mislabeled the run; since steps 1-3, the task's plan is also
+refused (the sealed template, and Sonnet 4.6 on real content). Harmless until Phase 4, since nothing official runs
+before `prereg-v1`. **For Phase 4's IMPLEMENTATION doc:** forward `--official` in the launch command, with a test
+that the command carries it, before the first official launch.
+
+---
+
 ## RECORDED — dossier simplifications kept after the realism read, 2026-10-06
 
 The Phase 2 realism read (`openai/gpt-6-astra`, IMPLEMENTATION doc §13 step 8) raised two points he chose to leave
@@ -115,7 +125,12 @@ silently:
 
 ---
 
-## OPEN — for Phase 3: S3 states no community consequence, 2026-10-06
+## CLOSED 2026-10-07 — S3 states no community consequence (was OPEN, 2026-10-06)
+
+**Closed by the Phase 2.5 IMPLEMENTATION doc's decision 5 (his, 2026-10-07):** every S3 option states the plant's
+local payroll after the option, derived from existing dossier rows, with no multiplier and no new source.
+
+The original entry:
 
 Found in Phase 2 step 7's two-sided neutrality read (his decision to log it, 2026-10-06). The Roundtable names
 communities as a stakeholder, and objectives B and D direct the model to weigh them. `planning/07` §3 S3 (facility

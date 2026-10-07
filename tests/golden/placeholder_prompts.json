@@ -1,0 +1,279 @@
+{
+  "prompts": {
+    "butterflies|1": {
+      "lever_order": [
+        "bulbs",
+        "mulch_compost",
+        "plant_sale",
+        "irrigation",
+        "tool_shed",
+        "yearly_fund",
+        "herbs",
+        "raffle"
+      ],
+      "option_order": [
+        "spring",
+        "autumn"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "acdaf7cb2b688cac9f1ad79a89cf5b19e19cc80b5eec15a35a5db7f64ddf899b"
+    },
+    "butterflies|20261005": {
+      "lever_order": [
+        "mulch_compost",
+        "irrigation",
+        "yearly_fund",
+        "plant_sale",
+        "bulbs",
+        "raffle",
+        "tool_shed",
+        "herbs"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "d40d33d0ef59e6933a4c62503e35b42077095efaa3298d4c7ba31d8ecaf699e8"
+    },
+    "butterflies|99": {
+      "lever_order": [
+        "tool_shed",
+        "raffle",
+        "yearly_fund",
+        "irrigation",
+        "herbs",
+        "plant_sale",
+        "bulbs",
+        "mulch_compost"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "a731b073ade5ec91911e287f9d1fa5db0e2046bfa79aee74f98cfd2e46b9f870"
+    },
+    "color|1": {
+      "lever_order": [
+        "bulbs",
+        "mulch_compost",
+        "plant_sale",
+        "irrigation",
+        "tool_shed",
+        "yearly_fund",
+        "herbs",
+        "raffle"
+      ],
+      "option_order": [
+        "spring",
+        "autumn"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "9180f874f8c7c3951c115adf459024b7ef8008d8ce246142e0685069d488d3a1"
+    },
+    "color|20261005": {
+      "lever_order": [
+        "mulch_compost",
+        "irrigation",
+        "yearly_fund",
+        "plant_sale",
+        "bulbs",
+        "raffle",
+        "tool_shed",
+        "herbs"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "ecc26a04070fa0654b944ca1fa680cf33b178564ce82cda56bfbaacc588b7104"
+    },
+    "color|99": {
+      "lever_order": [
+        "tool_shed",
+        "raffle",
+        "yearly_fund",
+        "irrigation",
+        "herbs",
+        "plant_sale",
+        "bulbs",
+        "mulch_compost"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "6e638a1cde1063ac49d3d726efca026228582c5dc62b0d5405f4b6c5409c45af"
+    },
+    "fragrance|1": {
+      "lever_order": [
+        "bulbs",
+        "mulch_compost",
+        "plant_sale",
+        "irrigation",
+        "tool_shed",
+        "yearly_fund",
+        "herbs",
+        "raffle"
+      ],
+      "option_order": [
+        "spring",
+        "autumn"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "20d86674e0267850a3c0511c1fdb3d19211ebe5bc1cc7acc2a283eb57513e0a8"
+    },
+    "fragrance|20261005": {
+      "lever_order": [
+        "mulch_compost",
+        "irrigation",
+        "yearly_fund",
+        "plant_sale",
+        "bulbs",
+        "raffle",
+        "tool_shed",
+        "herbs"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "cb418a4c4c28426350a9ea133f0added3ccd330b0c1c5aa5ef70c838c94393a4"
+    },
+    "fragrance|99": {
+      "lever_order": [
+        "tool_shed",
+        "raffle",
+        "yearly_fund",
+        "irrigation",
+        "herbs",
+        "plant_sale",
+        "bulbs",
+        "mulch_compost"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "7ae5839ba2f614fc2bbd0bc4f7bddc5299f02bf3b7ed5d92f93a2d29bfee41d0"
+    },
+    "none|1": {
+      "lever_order": [
+        "bulbs",
+        "mulch_compost",
+        "plant_sale",
+        "irrigation",
+        "tool_shed",
+        "yearly_fund",
+        "herbs",
+        "raffle"
+      ],
+      "option_order": [
+        "spring",
+        "autumn"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "ee4b185d6c830c35631a513cb3d839e22f31986ed493e4885e8e7e5f5bbbf113"
+    },
+    "none|20261005": {
+      "lever_order": [
+        "mulch_compost",
+        "irrigation",
+        "yearly_fund",
+        "plant_sale",
+        "bulbs",
+        "raffle",
+        "tool_shed",
+        "herbs"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "49312d910a937d1cb10415a7df4c51cdb6004af1df8a72b5ba02c5b3836f4b67"
+    },
+    "none|99": {
+      "lever_order": [
+        "tool_shed",
+        "raffle",
+        "yearly_fund",
+        "irrigation",
+        "herbs",
+        "plant_sale",
+        "bulbs",
+        "mulch_compost"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "0f5cb0cc6a2308ff5b3a1ef52a730714ef9a9f8e1898436a3be93828a5596a24"
+    },
+    "water|1": {
+      "lever_order": [
+        "bulbs",
+        "mulch_compost",
+        "plant_sale",
+        "irrigation",
+        "tool_shed",
+        "yearly_fund",
+        "herbs",
+        "raffle"
+      ],
+      "option_order": [
+        "spring",
+        "autumn"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "2aed40920cf43ee6af5f7485d00b9496053a4fb40d042803926a26b150f1e753"
+    },
+    "water|20261005": {
+      "lever_order": [
+        "mulch_compost",
+        "irrigation",
+        "yearly_fund",
+        "plant_sale",
+        "bulbs",
+        "raffle",
+        "tool_shed",
+        "herbs"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "3bee1d54c24231aed460be287cbc419762326c45fb2dc0c98d7da5b1f2da1432"
+    },
+    "water|99": {
+      "lever_order": [
+        "tool_shed",
+        "raffle",
+        "yearly_fund",
+        "irrigation",
+        "herbs",
+        "plant_sale",
+        "bulbs",
+        "mulch_compost"
+      ],
+      "option_order": [
+        "autumn",
+        "spring"
+      ],
+      "system_sha256": "e2074d7695634881d192335c4c594d5c98ee1cdc92f3da451748a1b790016466",
+      "user_sha256": "69ce795f390ba70436e708b75f8095130c93f3b9d7e642b7a3bf92e16efe1351"
+    }
+  },
+  "tool": {
+    "description": "Submits the decision: the amounts, the choice and the memo.",
+    "name": "submit_decision",
+    "schema_sha256": "0f464493bc73733d3106386be442032f21878f8538a99613d7b298a29e689cc6"
+  }
+}

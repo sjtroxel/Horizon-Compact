@@ -46,6 +46,14 @@ from horizon_compact.sweep.store import Store
 RECORD_VERSION = 1
 SONNET_ROUTE_ENV = "HC_SONNET_ROUTE"
 PROTOCOL_LOCK = ("protocol", "prereg.lock")
+
+
+def sweep_prefix(experiment_name: str, sweep_id: str) -> str:
+    """Where a development sweep lives: the experiment's name is in the key, so placeholder and company runs
+    never share a folder (Phase 2.5 IMPLEMENTATION doc section 8.4)."""
+    return f"development/{experiment_name}/{sweep_id}/"
+
+
 _RUN_KEY = re.compile(
     r"runs/(?P<run>r-[0-9a-f]{12})/(?:attempt-(?P<n>\d+)|(?P<final>final))\.json$"
 )
@@ -254,7 +262,7 @@ def run_session(
 ) -> SessionResult:
     config: ModelConfig = experiment.model(plan.model_key)
     check_preflight(experiment, plan, cap_usd)
-    prefix = f"development/{plan.sweep_id}/"
+    prefix = sweep_prefix(plan.experiment, plan.sweep_id)
     _check_manifest(store, f"{prefix}manifest.json", plan)
 
     existing = _Existing(store, prefix)
@@ -263,8 +271,7 @@ def run_session(
         config.requests_per_minute, experiment.models.pace_fraction, monotonic, sleep
     )
     rng = rng or random.Random()
-    scenario = experiment.scenario
-    tool = build_tool(scenario)
+    tools = {sid: build_tool(experiment.get_scenario(sid)) for sid in plan.scenarios}
     objectives: dict[str, Objective] = {o.id: o for o in experiment.objectives}
     started = now()
     deadline = monotonic() + max_minutes * 60
@@ -300,7 +307,15 @@ def run_session(
             remaining -= step
 
     def run_one(position: int, spec: RunSpec) -> str | None:
-        prompt = render_prompt(experiment, objectives[spec.objective_id], spec.menu_order_seed)
+        scenario = experiment.get_scenario(spec.scenario_id)
+        tool = tools[spec.scenario_id]
+        prompt = render_prompt(
+            experiment,
+            scenario,
+            objectives[spec.objective_id],
+            spec.wording_id,
+            spec.menu_order_seed,
+        )
         request = DecisionRequest(
             route=route,
             system=prompt.system,
