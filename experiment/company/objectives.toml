@@ -6,7 +6,7 @@
 # `sealed_template` is empty until the sealed draw (section 13), then "w1", "w2" or "w3". While it is empty, the
 # harness refuses a non-official plan with a stated objective (section 8.4).
 
-sealed_template = ""
+sealed_template = "w2"
 
 [templates.w1]
 stated = "The board has set your objective: create value for {who}, over {when}."

@@ -17,13 +17,14 @@ Failures make the check fail; notes never do. Nothing here calls a model or read
 
 from __future__ import annotations
 
+import hashlib
 import re
 import tomllib
 from datetime import date
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from horizon_compact.dossier.check import Report
 from horizon_compact.dossier.figures import FigureError
@@ -96,13 +97,41 @@ class LogEntry(_Strict):
     reason: Literal["format", "clarity", "neutrality", "factual"]
 
 
+class SealedDraw(_Strict):
+    """The sealed draw (section 13). Setting ``sealed_template`` moves the content hash and is none of the
+    four reasons, so it is its own record, chained like an entry at the place ``after_entry`` names (the
+    number of entries before it), with no reason field. The check recomputes the template from the commit."""
+
+    date: date
+    commit: str = Field(pattern=r"^[0-9a-f]{40}$")
+    template: str
+    hash_before: str
+    hash_after: str
+    after_entry: int = Field(ge=0)
+
+
 class ChangeLog(_Strict):
     baseline: Baseline
     entries: list[LogEntry] = []
+    draw: SealedDraw | None = None
 
 
-def check_change_log(root: Path, content_hash: str) -> tuple[list[str], list[str]]:
-    """``(failures, notes)``. A missing log is a note: the baseline is step 9."""
+SEALED_DRAW_SUFFIX = "|sealed-template"
+SEALED_DRAW_TEMPLATES = ("w1", "w2", "w3")
+
+
+def sealed_draw(commit: str) -> str:
+    """``int(sha256(commit + "|sealed-template"), 16) % 3``, mapped to w1, w2, w3 (section 13). Anyone can
+    recompute it."""
+    digest = hashlib.sha256((commit + SEALED_DRAW_SUFFIX).encode("utf-8")).hexdigest()
+    return SEALED_DRAW_TEMPLATES[int(digest, 16) % len(SEALED_DRAW_TEMPLATES)]
+
+
+def check_change_log(
+    root: Path, content_hash: str, sealed_template: str | None = None
+) -> tuple[list[str], list[str]]:
+    """``(failures, notes)``. A missing log is a note: the baseline is step 9. A drawn ``sealed_template``
+    needs the draw record, and the record must match it and the computation."""
     path = root / CHANGELOG_PATH
     if not path.is_file():
         return [], [f"{CHANGELOG_PATH} does not exist yet (the baseline commit makes it)"]
@@ -111,14 +140,39 @@ def check_change_log(root: Path, content_hash: str) -> tuple[list[str], list[str
     except (OSError, tomllib.TOMLDecodeError, ValidationError) as exc:
         return [f"{CHANGELOG_PATH} is invalid: {exc}"], []
     failures: list[str] = []
-    previous = log.baseline.hash
-    for number, entry in enumerate(log.entries, start=1):
-        if entry.hash_before != previous:
+    draw = log.draw
+    if draw is not None:
+        if draw.after_entry > len(log.entries):
             failures.append(
-                f"{CHANGELOG_PATH}: entry {number} starts from {entry.hash_before[:12]}, "
+                f"{CHANGELOG_PATH}: the draw follows entry {draw.after_entry}, which does not exist"
+            )
+        if sealed_draw(draw.commit) != draw.template:
+            failures.append(
+                f"{CHANGELOG_PATH}: the draw records {draw.template}, but commit {draw.commit[:12]} draws "
+                f"{sealed_draw(draw.commit)}"
+            )
+        if sealed_template != draw.template:
+            failures.append(
+                f"{CHANGELOG_PATH}: the draw records {draw.template}, but objectives.toml's sealed_template is "
+                f"{sealed_template!r}"
+            )
+    elif sealed_template:
+        failures.append(
+            f"sealed_template is {sealed_template!r} but {CHANGELOG_PATH} has no draw record (section 13)"
+        )
+    previous = log.baseline.hash
+    links: list[tuple[str, str, str]] = [
+        (f"entry {n}", e.hash_before, e.hash_after) for n, e in enumerate(log.entries, start=1)
+    ]
+    if draw is not None and draw.after_entry <= len(log.entries):
+        links.insert(draw.after_entry, ("the draw", draw.hash_before, draw.hash_after))
+    for name, before, after in links:
+        if before != previous:
+            failures.append(
+                f"{CHANGELOG_PATH}: {name} starts from {before[:12]}, "
                 f"but the one before it ended at {previous[:12]}"
             )
-        previous = entry.hash_after
+        previous = after
     if content_hash != previous:
         failures.append(
             f"the instrument's content hash {content_hash[:12]} is not the log's latest "
@@ -266,7 +320,7 @@ def run_checks(root: Path) -> Report:
         return report
     report.failures.extend(template_failures(exp))
     report.failures.extend(_probe_failures(root, exp))
-    failures, notes = check_change_log(root, exp.content_hash)
+    failures, notes = check_change_log(root, exp.content_hash, exp.sealed_template)
     report.failures.extend(failures)
     report.notes.extend(notes)
     report.notes.append(

@@ -976,9 +976,21 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
     at 4 of 5); DoD 3 met on the current text.** The four misses are the probes1 slip again (an amount in millions,
     every value right), from two replies (S2 repeat 1, S3 repeat 4); both reworded questions at 5 of 5. Planning
     patch: `planning/07` §3.2 S4 (R5). F9: no change, as decided.
-14. **The sealed draw** (§13), one commit.
+14. **[done 2026-10-07, Opus]** **The sealed draw** (§13), one commit.
+    Seed: `67cfac640f1b93e17c4fd7c6c7677a963325176b` (the review commit, pushed, CI `37701059850` green, before the
+    draw was computed). sha256 mod 3 = 1: **`w2` is sealed** ("The board has asked you to..."); independently
+    recomputed with plain `python3`. Record: `docs/phases/evidence/phase-2.5/sealed-draw.md`. Content hash
+    `e7bd77d74cb9...` to `5bd849beef0d...`. **The change log's draw record is built** (§14's note): a `[draw]` table
+    (date, commit, template, hashes, `after_entry`), chained after entry 13; `hc scenarios check` recomputes the
+    template from the commit and fails if the record, `objectives.toml` and the computation disagree, or if a
+    template is set with no record (five canary tests). The development templates are now `w1` and `w3`.
 15. **Format runs** on `qwen-local`, 120; the blind report; failures read through the view; fixes logged; re-run the
     affected cells.
+    *Amended 2026-10-07 (Opus, recording decision 9 as amended by him at 4:45 PM):* **on `gpt-oss-openrouter`, not
+    `qwen-local`**, templates `w1` and `w3` (`w2` is sealed). Planned offline: 120 runs, worst case $0.27, sweep id
+    `format1-gpt-oss-openrouter-29603836` at seed 20261007. **Found while preparing it: the blind format report and
+    the failures view (§11.3) are specified but not built**; no run is made until they are, since nothing else may
+    read a company run's record.
 16. **Nova Lite**, if Bedrock answers: probes and format runs. If not, per decision 7.
 17. **Close-out:** the manual rule-zero read, the honor statement (both), the DoD audit, `ROADMAP.md`,
     `KNOWN-GAPS.md` START HERE, the spend.

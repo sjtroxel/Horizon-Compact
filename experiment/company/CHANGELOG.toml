@@ -124,3 +124,11 @@ hash_before = "975d06a3a144827ec031a26ce0cc9cbc9265c1dbc3cf78931c2f0711ba2dd305"
 hash_after = "e7bd77d74cb96e17e0320fe51f447c66b31795980cc652a8a978f6780c4f25cc"
 evidence = '''Opus's proofread of R5's rendered text (step 13): S4 called raising prices a cut without saying so; one clause defines the term'''
 reason = "clarity"
+
+[draw]
+date = 2026-10-07
+commit = "67cfac640f1b93e17c4fd7c6c7677a963325176b"
+template = "w2"
+hash_before = "e7bd77d74cb96e17e0320fe51f447c66b31795980cc652a8a978f6780c4f25cc"
+hash_after = "5bd849beef0d74e9c1df7d24126d4319382da527520ad4d6969127da794192a5"
+after_entry = 13

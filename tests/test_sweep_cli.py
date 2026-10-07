@@ -372,17 +372,21 @@ def test_the_plan_for_an_openrouter_model_prints_with_a_small_cost_bound(
     assert "one call start every 3.8s" in out
 
 
-def test_real_content_is_refused_for_the_sealed_draw_not_for_the_openrouter_model(
+def test_after_the_draw_real_content_runs_on_the_development_templates_only(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """The company's sealed template is undrawn, so no decision run is allowed on it, on any model; the
-    refusal names the draw. An official model is refused on real content on its own account."""
+    """The company's sealed template is drawn (w2): the development model may plan on w1 and w3, never on w2,
+    and an official model is refused on real content on its own account."""
     args = [*OPENROUTER_ARGS]
     args[args.index("placeholder")] = "company"
-    assert cli.main(["sweep", "plan", *args, "--template", "w1"]) == 2
-    err = capsys.readouterr().err
-    assert "sealed template is not drawn yet" in err
-    assert "is not the development model" not in err
+    assert cli.main(["sweep", "plan", *args, "--template", "w1", "--template", "w3"]) == 0
+    capsys.readouterr()
+    assert cli.main(["sweep", "plan", *args, "--template", "w2"]) == 2
+    assert "the sealed template (w2) is never part of a decision prompt" in capsys.readouterr().err
+    official = [*args]
+    official[official.index("gpt-oss-openrouter")] = "sonnet-4-6"
+    assert cli.main(["sweep", "plan", *official, "--template", "w1"]) == 2
+    assert "is not the development model" in capsys.readouterr().err
 
 
 # --- the spend warning, before the OpenRouter key -----------------------------------------------------------

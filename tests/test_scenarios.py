@@ -6,6 +6,8 @@ and the committed files are never touched. Every name in a test is a fictional c
 
 from __future__ import annotations
 
+import hashlib
+import re
 import shutil
 import tomllib
 from pathlib import Path
@@ -15,7 +17,7 @@ import pytest
 from horizon_compact.cli import main
 from horizon_compact.dossier.figures import FigureError
 from horizon_compact.experiment import Scenario, load_experiment
-from horizon_compact.scenarios.check import NEVER_USE, run_checks
+from horizon_compact.scenarios.check import NEVER_USE, run_checks, sealed_draw
 from horizon_compact.scenarios.render import ScenarioSourceError, render_all
 from horizon_compact.sweep.prompt import render_prompt
 
@@ -279,6 +281,15 @@ def current_hash(repo: Path) -> str:
     return load_experiment("company", repo / "experiment").content_hash
 
 
+def undraw(repo: Path) -> None:
+    """Put a repository copy back to before the sealed draw, for tests that build a log from scratch."""
+    path = repo / COMPANY / "objectives.toml"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(
+        re.sub(r'^sealed_template = "w[123]"$', 'sealed_template = ""', text, count=1, flags=re.M)
+    )
+
+
 def test_without_a_log_the_check_notes_it_and_passes(repo: Path) -> None:
     (repo / COMPANY / "CHANGELOG.toml").unlink()  # the real log exists since the baseline (step 9)
     report = run_checks(repo)
@@ -301,11 +312,13 @@ def test_the_real_log_holds_the_baseline_and_an_unlogged_change_to_the_real_text
 
 
 def test_a_log_whose_latest_hash_is_current_passes(repo: Path) -> None:
+    undraw(repo)
     (repo / COMPANY / "CHANGELOG.toml").write_text(log_text(current_hash(repo)))
     assert failures(repo) == []
 
 
 def test_a_content_change_without_an_entry_fails(repo: Path) -> None:
+    undraw(repo)
     (repo / COMPANY / "CHANGELOG.toml").write_text(log_text(current_hash(repo)))
     edit(repo, f"{COMPANY}/scenarios/s2.source.toml", "Decide who bears", "Decide who carries")
     assert main(["scenarios", "--root", str(repo), "render"]) == 0
@@ -313,6 +326,7 @@ def test_a_content_change_without_an_entry_fails(repo: Path) -> None:
 
 
 def test_a_logged_change_passes_and_a_broken_chain_fails(repo: Path) -> None:
+    undraw(repo)
     baseline = current_hash(repo)
     edit(repo, f"{COMPANY}/scenarios/s2.source.toml", "Decide who bears", "Decide who carries")
     assert main(["scenarios", "--root", str(repo), "render"]) == 0
@@ -325,6 +339,7 @@ def test_a_logged_change_passes_and_a_broken_chain_fails(repo: Path) -> None:
 
 
 def test_the_reason_has_four_values_and_no_fifth(repo: Path) -> None:
+    undraw(repo)
     baseline = current_hash(repo)
     log = repo / COMPANY / "CHANGELOG.toml"
     for reason in ("format", "clarity", "neutrality", "factual"):
@@ -355,7 +370,10 @@ def test_the_company_has_five_objectives_in_the_frame_and_the_baseline_has_neith
         ("", ""),
     ]
     assert exp.objectives[4].is_baseline
-    assert exp.sealed_template == ""  # undrawn until section 13
+    log = tomllib.loads((ROOT / COMPANY / "CHANGELOG.toml").read_text(encoding="utf-8"))
+    assert (
+        exp.sealed_template == "w2" == log["draw"]["template"] == sealed_draw(log["draw"]["commit"])
+    )
 
 
 def test_the_three_templates_are_word_for_word_the_sections_seven_table() -> None:
@@ -411,3 +429,97 @@ def test_the_objectives_change_only_the_objective_sentence_on_the_company(
         assert len(a) == len(b)
         assert [i for i, (x, y) in enumerate(zip(a, b, strict=True)) if x != y] in ([], [index])
         assert b[index] == exp.wording_sentence(objective, template_id)
+
+
+# --- the sealed draw (section 13) -------------------------------------------------------------------------
+
+CANARY_COMMIT = "0123456789abcdef0123456789abcdef01234567"
+
+
+def test_the_draw_is_the_documented_formula() -> None:
+    digest = hashlib.sha256((CANARY_COMMIT + "|sealed-template").encode()).hexdigest()
+    assert sealed_draw(CANARY_COMMIT) == ("w1", "w2", "w3")[int(digest, 16) % 3]
+    drawn = {sealed_draw(f"{n:040x}") for n in range(30)}
+    assert drawn == {"w1", "w2", "w3"}  # every template can be drawn
+
+
+def draw_record(commit: str, template: str, before: str, after: str, after_entry: int = 0) -> str:
+    return (
+        f'\n[draw]\ndate = 2026-10-09\ncommit = "{commit}"\ntemplate = "{template}"\n'
+        f'hash_before = "{before}"\nhash_after = "{after}"\nafter_entry = {after_entry}\n'
+    )
+
+
+def set_sealed(repo: Path, template: str) -> None:
+    edit(
+        repo,
+        f"{COMPANY}/objectives.toml",
+        'sealed_template = ""',
+        f'sealed_template = "{template}"',
+    )
+
+
+def test_a_recorded_draw_that_matches_passes(repo: Path) -> None:
+    undraw(repo)
+    baseline = current_hash(repo)
+    template = sealed_draw(CANARY_COMMIT)
+    set_sealed(repo, template)
+    after = current_hash(repo)
+    assert after != baseline  # the draw moves the content hash
+    log = repo / COMPANY / "CHANGELOG.toml"
+    log.write_text(log_text(baseline, draw_record(CANARY_COMMIT, template, baseline, after)))
+    assert failures(repo) == []
+
+
+def test_a_drawn_template_without_a_draw_record_fails(repo: Path) -> None:
+    undraw(repo)
+    baseline = current_hash(repo)
+    set_sealed(repo, "w2")
+    log = repo / COMPANY / "CHANGELOG.toml"
+    log.write_text(log_text(baseline, entry(baseline, current_hash(repo))))
+    assert any("has no draw record" in f for f in failures(repo))
+
+
+def test_a_draw_record_the_formula_does_not_give_fails(repo: Path) -> None:
+    undraw(repo)
+    baseline = current_hash(repo)
+    drawn = sealed_draw(CANARY_COMMIT)
+    other = next(t for t in ("w1", "w2", "w3") if t != drawn)
+    set_sealed(repo, other)
+    after = current_hash(repo)
+    log = repo / COMPANY / "CHANGELOG.toml"
+    log.write_text(log_text(baseline, draw_record(CANARY_COMMIT, other, baseline, after)))
+    assert any(f"draws {drawn}" in f for f in failures(repo))
+
+
+def test_a_draw_record_that_disagrees_with_objectives_fails(repo: Path) -> None:
+    undraw(repo)
+    baseline = current_hash(repo)
+    template = sealed_draw(CANARY_COMMIT)
+    log = repo / COMPANY / "CHANGELOG.toml"
+    log.write_text(log_text(baseline, draw_record(CANARY_COMMIT, template, baseline, baseline)))
+    assert any("sealed_template is ''" in f for f in failures(repo))
+
+
+def test_the_draw_sits_in_the_chain_where_it_says(repo: Path) -> None:
+    undraw(repo)
+    baseline = current_hash(repo)
+    template = sealed_draw(CANARY_COMMIT)
+    set_sealed(repo, template)
+    drawn = current_hash(repo)
+    edit(repo, f"{COMPANY}/scenarios/s2.source.toml", "Decide who bears", "Decide who carries")
+    assert main(["scenarios", "--root", str(repo), "render"]) == 0
+    after = current_hash(repo)
+    log = repo / COMPANY / "CHANGELOG.toml"
+    log.write_text(
+        log_text(
+            baseline, entry(drawn, after) + draw_record(CANARY_COMMIT, template, baseline, drawn, 0)
+        )
+    )
+    assert failures(repo) == []
+    log.write_text(
+        log_text(
+            baseline, entry(drawn, after) + draw_record(CANARY_COMMIT, template, baseline, drawn, 1)
+        )
+    )
+    assert any("starts from" in f for f in failures(repo))

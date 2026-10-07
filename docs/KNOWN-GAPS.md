@@ -82,8 +82,10 @@ case by its type and a neutral label. The names live only in the private longlis
 > spare payouts, prices and the environment, missed by the checklist. **R2-R5 MARKED (a) 5:52 PM (his). STEP 13 DONE
 > (Opus), uncommitted: 13 logged changes, content hash now `e7bd77d74cb9`; F10 test added; probes S3 q3 and S4 q4
 > updated; `planning/07` §3.2 patched (R5). PROBES RE-RUN 6:10 PM (his): all 40 pass on the changed text, $0.0063.**
-> **NEXT: (1) his review commit (steps 11-13, C7), then push and CI; (2) step 14, the sealed draw (Opus), seeded by
-> that commit's full hash, run once.**
+> **Review commit `67cfac6`, CI `37701059850` green. STEP 14 DONE (Opus): THE SEALED TEMPLATE IS `w2`**
+> (`sealed-draw.md`; draw record in the change log, checked by `hc scenarios check`), uncommitted for his commit C8.
+> **NEXT: step 15 on `gpt-oss-openrouter`, templates `w1` and `w3`; first BUILD the blind format report and the
+> failures view (§11.3), which were never built.** No company sweep runs before they exist.
 > *(Was: his marks on R2-R5.)* *(Was:)* **the blind reader** (a vendor that makes none of the tested models, chosen live
 > and shown to him before sending, cap $3; it reads the current text, before any change); **then step 13 (Opus)**,
 > the accepted changes F1-F8 and F10, each text change logged. *(The spend warning spec as written:)* Before the
