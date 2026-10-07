@@ -6,7 +6,6 @@ single attempt so every call is visible, and an API error is returned as a recor
 
 from __future__ import annotations
 
-import hashlib
 import json
 import time
 from collections.abc import Callable
@@ -17,7 +16,13 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 
-from horizon_compact.providers.base import DecisionRequest, Provenance, RawDecision, Usage
+from horizon_compact.providers.base import (
+    DecisionRequest,
+    Provenance,
+    RawDecision,
+    Usage,
+    prompt_sha256,
+)
 
 if TYPE_CHECKING:
     from mypy_boto3_bedrock_runtime import BedrockRuntimeClient
@@ -34,24 +39,6 @@ def make_runtime_client(profile: str | None, region: str = REGION) -> BedrockRun
     return boto3.Session(profile_name=profile, region_name=region).client(
         "bedrock-runtime", config=config
     )
-
-
-def prompt_sha256(request: DecisionRequest) -> str:
-    """Hash of the canonical system, user and tool JSON. Independent of the route, so one prompt, one hash."""
-    canonical = json.dumps(
-        {
-            "system": request.system,
-            "user": request.user,
-            "tool": {
-                "name": request.tool.name,
-                "description": request.tool.description,
-                "input_schema": request.tool.input_schema,
-            },
-        },
-        sort_keys=True,
-        separators=(",", ":"),
-    )
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def build_request(request: DecisionRequest) -> dict[str, Any]:
@@ -124,6 +111,9 @@ class BedrockConverseProvider:
         self._region = region
         self._now = now
         self._monotonic = monotonic
+
+    def request_body(self, request: DecisionRequest) -> dict[str, Any]:
+        return build_request(request)
 
     def decide(self, request: DecisionRequest) -> RawDecision:
         body = build_request(request)

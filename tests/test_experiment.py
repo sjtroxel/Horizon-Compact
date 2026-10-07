@@ -204,3 +204,33 @@ def test_the_sealed_template_is_none_when_the_key_is_absent_and_empty_when_undra
     assert load_experiment("placeholder").sealed_template is None
     assert company_like(tmp_path / "a", sealed="").sealed_template == ""
     assert company_like(tmp_path / "b", sealed="w2").sealed_template == "w2"
+
+
+# --- Phase 2.5 step 4: the local route ------------------------------------------------------------
+
+
+def test_a_local_route_needs_its_context_window(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    models = root / "models.toml"
+    models.write_text(models.read_text().replace("num_ctx = 16384\n", ""))
+    with pytest.raises(ExperimentError, match="a local route needs num_ctx"):
+        load_experiment("placeholder", root)
+
+
+def test_a_context_window_on_a_route_that_is_not_local_is_refused(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    models = root / "models.toml"
+    models.write_text(
+        models.read_text().replace(
+            'route = "in_region"\n', 'route = "in_region"\nnum_ctx = 4096\n', 1
+        )
+    )
+    with pytest.raises(ExperimentError, match="num_ctx is for a local route"):
+        load_experiment("placeholder", root)
+
+
+def test_the_local_model_is_a_development_model_with_zero_prices() -> None:
+    config = load_experiment("placeholder").model("qwen-local")
+    assert (config.model_id, config.route, config.role) == ("qwen3.5:4b", "local", "development")
+    assert (config.num_ctx, config.requests_per_minute) == (16384, 30)
+    assert config.prices.input == config.prices.output == 0.0

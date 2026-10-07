@@ -8,11 +8,13 @@ model (Phase 1).
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
-RouteKind = Literal["in_region", "geo_profile", "application_profile"]
+RouteKind = Literal["in_region", "geo_profile", "application_profile", "local"]
 
 
 @dataclass(frozen=True)
@@ -80,6 +82,9 @@ class Provenance:
     started_at: str
     finished_at: str
     latency_ms: int
+    # What else the provider knows about how this call was made (a local runtime's version, the model's
+    # digest, its context window). Empty for Bedrock, whose route and model id say it all.
+    details: Mapping[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -106,7 +111,29 @@ class RawDecision:
         return self.tool_calls[0]["input"] if self.tool_calls else None
 
 
+def prompt_sha256(request: DecisionRequest) -> str:
+    """Hash of the canonical system, user and tool JSON. Independent of the route, so one prompt, one hash."""
+    canonical = json.dumps(
+        {
+            "system": request.system,
+            "user": request.user,
+            "tool": {
+                "name": request.tool.name,
+                "description": request.tool.description,
+                "input_schema": request.tool.input_schema,
+            },
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 class Provider(Protocol):
     name: str
+
+    def request_body(self, request: DecisionRequest) -> dict[str, Any]:
+        """The request exactly as this provider sends it, for the attempt record."""
+        ...
 
     def decide(self, request: DecisionRequest) -> RawDecision: ...

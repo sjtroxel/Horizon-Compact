@@ -69,7 +69,9 @@ version, `qwen3.5:4b`'s context window and its thinking switch (step 4); the bli
    from rows the dossier already has, needs no multiplier and no new source, and is a number a board would see.
    Decision 5.
 9. **A local model has a short default context.** Ollama's default context window is smaller than the dossier plus a
-   scenario (about 2,850 words of dossier, so roughly 4,000 tokens with a scenario). A window that is too short
+   scenario (the dossier is 2,113 words, 14,153 characters; *corrected 2026-10-07:* at the 3 characters a token
+   measured in §17 step 4 that is about 4,700 tokens, so a call needs roughly 7,000 to 8,000 with a scenario, the
+   tool and the reply). A window that is too short
    silently drops the start of the prompt, so the dossier would be cut and every probe would "fail" for a reason
    that is not the text. The provider sets the window explicitly and records it, and step 4 checks the value live.
    Context length is not a sampling setting, so `planning/07` §2.3 is not touched.
@@ -174,6 +176,12 @@ a reason is written in terms of the industry or the dossier, never in terms of w
 The prompt follows `planning/07` §4: role and dossier (cached), then the situation, the objective sentence, the menu
 in the run's shuffled order, the options in the run's shuffled order (S3, S4), and the instruction. Every lever line
 states its unit and its maximum; a lever not offered says so, with the reason, in one sentence.
+
+**Drafting rule, added 2026-10-07 from step 4's diagnostic (Opus; APPROVED by him the same day, 11:45 AM):** every scenario's menu says,
+in one sentence placed with the menu, that **each maximum is a limit, not a target**, and states **the sum of the
+maximums against the amount to allocate** (for S3, against the headcount). Both development models filled every line
+to its maximum without it and balanced a one-sided table with it (§17 step 4). The sentence is the same in every
+scenario and leans toward no lever, which checklist items 3 and 5 confirm.
 
 ### 6.1 S1 — allocating capacity freed by AI tools (rule `uses_equal_total`)
 
@@ -527,13 +535,88 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    skipped only with `official=True`), each with a test at the library and at the command line: the sealed
    template in a plan; any stated objective while `sealed_template` is `""`; a model whose role is not
    `development` on any experiment but the placeholder. Tests: 514 pass; `make check` green.
-4. **Ollama provider** (§8.6). First, live: Ollama's version, `qwen3.5:4b`'s context limit and thinking switch, one
+4. **[done 2026-10-07, Sonnet; reviewed, and its sweep's finding diagnosed, by Opus]** **Ollama provider** (§8.6). First, live: Ollama's version, `qwen3.5:4b`'s context limit and thinking switch, one
    placeholder call. Then a placeholder sweep on `qwen-local`, 5 objectives x 1 repeat, to prove the path end to
    end (placeholder content, so its allocations may be read).
+   **Live checks DONE 2026-10-07, 10:50 AM CDT (Sonnet), before any code; none contradicts this doc.**
+   (a) Ollama **0.35.1**, reachable from WSL, unchanged since 2026-10-04.
+   (b) `qwen3.5:4b`: digest `2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd`, 4.66 billion parameters,
+   Q4_K_M, modified 2026-09-26; **maximum context 262,144 tokens** (far above the about 6,000 §3 item 9 needs);
+   capabilities `completion`, `vision`, `tools`, `thinking`; **thinking is switched off in `/api/chat` with
+   `"think": false`**. **The model file carries its own sampling defaults: temperature 1, top_k 20, top_p 0.95,
+   presence_penalty 1.5.** We never send a sampling option (§2.3), so a run uses these; provenance records them as
+   "the model's own defaults" and names them, not as "not set".
+   (c) One placeholder call by `curl` (system 5,286 characters, user 1,402, the one tool, `stream: false`,
+   `num_ctx` 16,384, `think: false`): **one tool call**, `arguments` a real object (not a string) with `amounts`,
+   `open_day_season` and `memo`; `done_reason: stop`; no `thinking` field and empty `content`;
+   `prompt_eval_count` **2,243** (about 3 characters a token, tool schema included), `eval_count` 430; 19.8 s with
+   11 s of model load. **At `num_ctx` 16,384 the model uses 3,379 MiB, all in VRAM, with 4,227 of 6,141 MiB used on
+   the card**, so 16,384 is the setting. **The decision did not balance** (sources $1,600 and uses $1,900 against
+   $1,500): the harness would classify it `sum_mismatch` and retry. A 4B model can call the tool but is not
+   reliably good at arithmetic, so the format runs (step 15) should expect retries and failures; that is a limit
+   of the development model (§10, §11.2), not of the text.
+   **BUILT (2026-10-07).** `providers/ollama.py`, standard library only, no `boto3`: one POST per call to
+   `/api/chat` (`stream: false`, `think: false`, `options` of `num_ctx` and `num_predict` only, **no sampling option
+   ever**, tested); the reply mapped to the Bedrock provider's `RawDecision`, so the classifier and runner changed
+   only in using `provider.request_body` (the stored request is now the provider's own); failures are records on
+   error names the classifier already knows (`EndpointConnectionError`, `ReadTimeoutError`,
+   `InternalServerException`; an unparseable tool call is `ModelErrorException`, a missing model
+   `ResourceNotFoundException`). Provenance carries a new `details` map: Ollama version, model digest, `num_ctx`,
+   `num_predict`, and the model's own sampling defaults. **Nanosecond durations are stored as milliseconds**
+   (`*_duration_ms`): a call over 100 s makes a 12-digit number, which the record writer refuses as a possible
+   account id, so a slow call would have crashed a sweep (tested both ways). `prompt_sha256` moved to
+   `providers/base.py`. `models.toml` has `[models.qwen-local]` (`route = "local"`, `num_ctx = 16384`, zero prices,
+   30 requests a minute); `ModelConfig` requires `num_ctx` for a local route and refuses it elsewhere. **The CLI:** a
+   local model creates no AWS session, calls no STS and needs no `--profile`; it refuses `--store s3`, the
+   container, and `hc sweep launch`; `HC_OLLAMA_URL` overrides the address; `hc sweep status --store local` needs no
+   session either. `tests/conftest.py` now lets a test connect to the **loopback address only** (every other address
+   is still refused, tested), so a stand-in server (`tests/fake_ollama.py`) can run. 550 tests; `make check` green.
+   **THE SWEEP (placeholder, `qwenlocal-qwen-local-8cadb319`, 5 objectives x 1 repeat, run by him 11:00 AM CDT):**
+   the whole path works (15 attempts, three per run, 5 finals, a summary, $0), **and 0 of 5 runs ended valid.**
+   Of the 15 attempts, 13 were `sum_mismatch`, 1 `truncated` and 1 `schema_invalid` (a line above its cap). Read
+   from the records (placeholder only): the harness measured correctly, and **the model does not balance**:
+   sources ran from $550 to $1,800 and uses from $1,285 to $2,200 against $1,500; once one side was exact and the
+   other not. It also ignored the memo length (166 to 940 words against 150-300 asked), and one attempt hit the
+   2,048-token limit while another came within 32 tokens of it (2,016). **A control with thinking ON** (the same prompt, three calls, by `curl`) still
+   did not balance (sources/uses $1,000/$2,000, $1,200/$1,800, $1,400/$1,500), so this is the model's arithmetic,
+   not a setting. Its tool calls are well formed every time.
+   **DIAGNOSED BY OPUS, 2026-10-07, 11:30 AM: not the model's arithmetic, mostly the prompt.** A placeholder-only
+   diagnostic on variant copies (the placeholder itself unchanged; $0; no AWS), 21 calls:
+   | Condition | Balanced |
+   |---|---|
+   | his sweep: the placeholder as is (both sides must total $1,500) | 0 of 15 attempts |
+   | A: the same, temperature 0 and presence_penalty 0 | 0 of 3 |
+   | B: one side only (uses total $1,500, the shape of S1), the model's defaults | 1 of 3 |
+   | C: B at temperature 0 and presence_penalty 0 | 0 of 3 |
+   | D: `qwen3:8b`, the placeholder as is | 0 of 2 |
+   | **E: B plus one sentence: "Each maximum is a limit, not a target. The maximums add up to $2,200, more than the $1,500 to spend, so the amounts you choose must add up to exactly $1,500."** | **4 of 4** |
+   | F: the placeholder plus the two-sided version of that sentence | 0 of 4 (one truncated) |
+   | **G: E on `qwen3:8b`** | **2 of 2** |
+   **What it shows.** (1) At temperature 0 both models set **every line to its maximum** (sources $1,700 = 1,000 +
+   400 + 300; uses $2,200 = 700 + 600 + 500 + 400): they read "up to $1,000" as "$1,000". **That is a clarity
+   failure of the menu's wording, the kind this phase exists to find,** and S1's uses are each capped at the whole
+   total, so it would hit the real scenarios. (2) One neutral sentence fixes it on a one-sided task, on both model
+   sizes. (3) The placeholder's two-sided rule is the hardest shape in the project and **no real scenario has it**
+   (S1 uses, S2 bearers, S3 people, S4 uses equal the cash plus cuts). (4) Turning the model's own sampling
+   defaults off did not help, so "never send a sampling option" stands, now with evidence.
+   **Consequences (Opus's recommendation, APPROVED by him 2026-10-07, 11:45 AM, after he ran `diagnose2.py`
+   himself and saw the same result: E 4 of 4, F 0 of 4, G 2 of 2):** §6's drafting rule below (the menu says the maximums
+   are limits and states their sum against the total); S4's shape, the one closest to two-sided, gets a
+   placeholder-style variant test before the baseline; **DoD 4 and decision 7(a) stand** (the development model can
+   balance a one-sided table); the placeholder stays as it is (its golden prompts keep Phase 1 comparable, and it is
+   no longer needed for development). Memos ran long (166 to 940 words), so step 6 sets each scenario's
+   `max_tokens` with room for an overlong memo on the development model.
+
 5. **Scenario rows** (Opus): every S1-S4 number in `scenario-figures.toml`; source searches first for the AI-exposed
    functions, S2's cost structure, S3's closure, retooling and sale economics, and S4's odds and payoff; anything
    unsourced is an assumption with a range and an industry reason.
-6. **Scenario text** (Opus): the four `sN.source.toml`, rendered, and `scenarios-cited.md`.
+6. **Scenario text** (Opus): the four `sN.source.toml`, rendered, and `scenarios-cited.md`. Every menu carries the
+   §6 drafting rule's sentence (the maximums are limits, not targets, and their sum against the total).
+6a. **S4's shape test** (added and APPROVED 2026-10-07, his): before the baseline, a placeholder-style copy of S4's
+   rule (`uses_equal_total_plus_sources`: the uses equal the cash plus whatever is cut), off the experiment's
+   subject, run on `qwen-local` through the harness, by him. It is the real shape closest to the placeholder's
+   two-sided one, which the 4B model cannot balance. If it fails the same way, S4's wording is changed, or S4's
+   development runs use `qwen3:8b` (slower, measured balancing 2 of 2 one-sided), his call then.
 7. **His review** of every new assumption and the four texts, the way Phase 2 step 7 ran. Changes before the
    baseline need no log entry: nothing has been seen.
 8. **Objectives and templates** in `objectives.toml`; the template text check; `hc scenarios check` in `make check`.

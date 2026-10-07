@@ -16,16 +16,28 @@ case by its type and a neutral label. The names live only in the private longlis
 > decision 5 (below). **Decision 7:** if Bedrock is still blocked at its step 16, Phase 2.5 closes on Ollama alone,
 > and **the Nova Lite probes and format runs become a prerequisite of Phase 3.5's tag** (they add to the Ollama
 > runs; nothing is re-run).
-> **BUILD, §17 STEPS 1-3 DONE 2026-10-07 (Sonnet), `make check` green, 514 tests, UNCOMMITTED.** Loader and layout
-> (`scenarios/*.toml`, `objectives.toml` with who/when and the templates `w1`-`w3`, `sealed_template`), the five
-> balancing rules and four extra rules, the planner across scenarios x objectives x templates x repeats, records
-> under `development/<experiment>/<sweep_id>/`, and the three refusals. **The placeholder is byte for byte what it
-> was** (`tests/golden/placeholder_prompts.json`, digests taken before the change). Deviations and one open point
-> for step 6 (rescaling and a pinned line) are in the doc's §17. **He commits steps 1-3 with the doc work in the tree
-> (his, 2026-10-07):** the IMPLEMENTATION doc, the planning patches, this block, the closed OPEN entry and Phase 2's
-> DoD 7 row (its close-out commit `4250ea3`, CI run `37534188137`, green).
-> **NEXT: §17 step 4, the Ollama provider (Sonnet; live checks first, shown to him one at a time), as its own
-> commit.** Then Opus for steps 5-7 (scenario rows and text) and his review.
+> **BUILD, §17 STEPS 1-3 DONE 2026-10-07 (Sonnet) AND COMMITTED: `3039526`, pushed, CI run `37640121903` green.**
+> Loader and layout (`scenarios/*.toml`, `objectives.toml` with who/when and the templates `w1`-`w3`,
+> `sealed_template`), the five balancing rules and four extra rules, the planner across scenarios x objectives x
+> templates x repeats, records under `development/<experiment>/<sweep_id>/`, and the three refusals. **The
+> placeholder is byte for byte what it was** (`tests/golden/placeholder_prompts.json`, digests taken before the
+> change). Deviations and one open point for step 6 (rescaling and a pinned line) are in the doc's §17. Phase 2's
+> DoD 7 row is closed with run `37534188137`.
+> **STEP 4, THE OLLAMA PROVIDER, DONE 2026-10-07 (Sonnet; reviewed by Opus); `make check` green, 550 tests;
+> committed as "phase 2.5: ollama provider, prompt diagnosis" (his).** Live checks first (Ollama 0.35.1; `qwen3.5:4b` digest `2a654d98e6fb...`, maximum context
+> 262,144, thinking off with `"think": false`, its own sampling defaults temperature 1 / top_k 20 / top_p 0.95 /
+> presence_penalty 1.5; `num_ctx` 16,384 uses 3,379 MiB, all in VRAM), then `providers/ollama.py`, the `local` route,
+> `qwen-local` in `models.toml`, and a CLI path with no AWS session at all. **The placeholder sweep ran (his,
+> 11:00 AM): the path works, and 0 of 5 runs ended valid** (13 `sum_mismatch`, 1 `truncated`, 1 `schema_invalid`).
+> **DIAGNOSED BY OPUS (11:30 AM, placeholder variants only, $0): mostly the prompt, not the model.** At temperature 0
+> both `qwen3.5:4b` and `qwen3:8b` set every line to its maximum ("up to $1,000" read as "$1,000"); one neutral
+> sentence ("each maximum is a limit, not a target", with the maximums' sum against the total) made a one-sided
+> table balance **4 of 4 (4B) and 2 of 2 (8B)**. The placeholder's two-sided rule is harder than any real scenario
+> and still fails on the 4B. **So DoD 4 and decision 7(a) stand;** the table is in the doc's §17 step 4. **He ran
+> the diagnostic himself (11:44 AM) and saw the same result, then APPROVED both of Opus's recommendations (11:45 AM):**
+> the drafting rule in §6 (every menu says the maximums are limits, not targets, and states their sum), and S4's
+> shape test, now §17 step 6a, before the baseline.
+> **NEXT: Opus, §17 step 5** (scenario rows; source searches first), then 6, 6a (S4's shape test, run by him) and 7.
 > **Bedrock at 8:51 AM CDT on 2026-10-07 (`scratch/throttle-check.py`, run once):** Nova Lite and Sonnet 4.6 both
 > still `ThrottlingException`, "Too many tokens per day", $0. No AWS reply on case 179121856900232. He will not buy
 > paid support (his, 2026-10-07).

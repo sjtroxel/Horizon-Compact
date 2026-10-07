@@ -22,7 +22,6 @@ from typing import Any
 
 from horizon_compact.experiment import Experiment, ModelConfig, Objective
 from horizon_compact.providers.base import DecisionRequest, ModelRoute, Provider, RawDecision
-from horizon_compact.providers.bedrock import build_request
 from horizon_compact.smoke.record import serialize_safely
 from horizon_compact.sweep.classify import (
     MAX_MODEL_ATTEMPTS,
@@ -175,7 +174,7 @@ def _attempt_record(
     experiment: Experiment,
     spec: RunSpec,
     prompt: RenderedPrompt,
-    request: DecisionRequest,
+    body: dict[str, Any],
     raw: RawDecision,
     outcome: Outcome,
     attempt: int,
@@ -206,6 +205,7 @@ def _attempt_record(
         "inference_profile": prov.inference_profile,
         "invoke_id": prov.invoke_id,
         "region": prov.region,
+        "provider_details": dict(prov.details),
         "effort": prov.effort,
         "thinking": prov.thinking,
         "temperature": prov.temperature,
@@ -225,7 +225,7 @@ def _attempt_record(
         "latency_ms": prov.latency_ms,
         "usage": dataclasses.asdict(raw.usage),
         "cost_usd": cost_usd,
-        "request": json.loads(json.dumps(build_request(request), default=str)),
+        "request": json.loads(json.dumps(body, default=str)),
         "raw_response": json.loads(json.dumps(raw.raw_response, default=str)),
         "stop_reason": raw.stop_reason,
         "tool_calls": raw.tool_calls,
@@ -356,7 +356,7 @@ def run_session(
                 experiment=experiment,
                 spec=spec,
                 prompt=prompt,
-                request=request,
+                body=provider.request_body(request),
                 raw=raw,
                 outcome=outcome,
                 attempt=next_n,

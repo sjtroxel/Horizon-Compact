@@ -191,3 +191,12 @@ def test_the_preflight_bound_covers_every_scenario_in_the_plan(tmp_path: Path) -
     assert preflight_bound_usd(exp, both) == pytest.approx(
         2 * preflight_bound_usd(exp, one), abs=1e-3
     )
+
+
+def test_the_local_model_may_run_real_content_because_it_is_the_development_model(
+    tmp_path: Path,
+) -> None:
+    exp = company_like(tmp_path, sealed="w3")
+    plan = build_plan(exp, model_key="qwen-local", label="t", repeats=1, seed=1, templates=["w1"])
+    assert plan.runs
+    assert preflight_bound_usd(exp, plan) == 0.0

@@ -39,3 +39,25 @@ input = 0.06
 output = 0.24
 cache_read = 0.015
 cache_write_5m = 0.0
+
+# A local model, run through Ollama on this laptop. It is the development model's first half (Phase 0.5 decision
+# 8: Ollama qwen3.5:4b plus Nova Lite): it tests format and plumbing, and never produces a result. `model_id` is the
+# Ollama tag. `num_ctx` is the context window sent on every call (Phase 2.5 IMPLEMENTATION doc section 17 step 4:
+# the model's own maximum is 262,144 tokens, and 16,384 uses 3,379 MiB of the laptop's 6,141 MiB, all in VRAM; the
+# company's dossier alone is about 4,700 tokens on this tokenizer, so a call with a scenario, the tool and the
+# reply needs roughly 7,000 to 8,000). No quota applies, and calls run one at a time, so the
+# rate only spaces call starts; it stays low enough that a slow GPU is never asked for more than it can do. Prices
+# are zero. It cannot run in the container and takes no AWS credentials.
+
+[models.qwen-local]
+model_id = "qwen3.5:4b"
+route = "local"
+num_ctx = 16384
+requests_per_minute = 30
+role = "development"
+
+[models.qwen-local.prices]
+input = 0.0
+output = 0.0
+cache_read = 0.0
+cache_write_5m = 0.0

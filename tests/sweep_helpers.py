@@ -13,9 +13,11 @@ from horizon_compact.providers.base import (
     DecisionRequest,
     ModelRoute,
     Provenance,
+    Provider,
     RawDecision,
     Usage,
 )
+from horizon_compact.providers.bedrock import build_request
 from horizon_compact.sweep.identity import RunnerIdentity
 from horizon_compact.sweep.plan import SweepPlan, build_plan
 from horizon_compact.sweep.prompt import TOOL_NAME
@@ -136,6 +138,9 @@ class ScriptedProvider:
         self._script = script or (lambda n, request: raw_ok(request))
         self.requests: list[DecisionRequest] = []
 
+    def request_body(self, request: DecisionRequest) -> dict[str, Any]:
+        return build_request(request)
+
     def decide(self, request: DecisionRequest) -> RawDecision:
         self.requests.append(request)
         return self._script(len(self.requests), request)
@@ -159,7 +164,7 @@ class FakeClock:
 def session(
     exp: Experiment,
     plan: SweepPlan,
-    provider: ScriptedProvider,
+    provider: Provider,
     store: Store,
     *,
     clock: FakeClock | None = None,

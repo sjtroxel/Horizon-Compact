@@ -9,7 +9,9 @@ import boto3
 import pytest
 
 from horizon_compact import cli
-from sweep_helpers import company_like
+from horizon_compact.sweep.plan import SweepRefusal
+from horizon_compact.sweep.runner import run_session
+from sweep_helpers import FARGATE, LAPTOP, FakeClock, ScriptedProvider, company_like
 
 PLAN_ARGS = [
     "--experiment",
@@ -171,3 +173,117 @@ def test_real_content_on_the_main_model_is_refused_at_the_command_line(
     args[args.index("nova-lite")] = "sonnet-4-6"
     assert cli.main(["sweep", "plan", *args]) == 2
     assert "sonnet-4-6 is not the development model" in capsys.readouterr().err
+
+
+# --- Phase 2.5 step 4: a local model needs no AWS at all ------------------------------------------
+
+
+@pytest.fixture
+def laptop_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """The repo's git answers, with the records folder moved into tmp: a test never writes to scratch/."""
+
+    def fake_git(*args: str) -> str:
+        return str(tmp_path) if "--show-toplevel" in args else ("abc1234" if "HEAD" in args else "")
+
+    monkeypatch.setattr(cli, "_git", fake_git)
+    return tmp_path
+
+
+@pytest.fixture
+def fake_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Run sessions on a clock that only pretends to wait, so spacing between calls costs no real time."""
+
+    def fast(**kwargs: Any) -> Any:
+        clock = FakeClock()
+        return run_session(**kwargs, monotonic=clock.monotonic, sleep=clock.sleep)
+
+    monkeypatch.setattr(cli, "run_session", fast)
+
+
+LOCAL_ARGS = [
+    "--experiment", "placeholder",
+    "--model", "qwen-local",
+    "--repeats", "1",
+    "--seed", "5",
+    "--label", "local",
+]  # fmt: skip
+
+
+def test_a_local_run_makes_its_records_without_any_aws_session_or_profile(
+    laptop_repo: Path,
+    fake_clock: None,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The autouse fixture makes ``boto3.Session`` raise: any AWS path in this run would fail the test."""
+    built: list[tuple[str, int]] = []
+
+    def fake_provider(url: str, num_ctx: int) -> ScriptedProvider:
+        built.append((url, num_ctx))
+        return ScriptedProvider()
+
+    monkeypatch.setattr(cli, "OllamaProvider", fake_provider)
+    assert cli.main(["sweep", "run", *LOCAL_ARGS, "--store", "local"]) == 0  # no --profile
+    out = capsys.readouterr().out
+    assert built == [("http://localhost:11434", 16384)]
+    assert "stopped:         complete" in out
+    assert "runs finished:   5 of 5" in out
+    assert "$0.0000" in out
+    assert list(
+        (laptop_repo / "scratch" / "runs" / "development" / "placeholder").rglob("final.json")
+    )
+
+
+def test_the_ollama_address_can_be_set_by_the_environment(
+    laptop_repo: Path, fake_clock: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    built: list[tuple[str, int]] = []
+    monkeypatch.setenv("HC_OLLAMA_URL", "http://127.0.0.1:5555")
+
+    def fake_provider(url: str, num_ctx: int) -> ScriptedProvider:
+        built.append((url, num_ctx))
+        return ScriptedProvider()
+
+    monkeypatch.setattr(cli, "OllamaProvider", fake_provider)
+    assert cli.main(["sweep", "run", *LOCAL_ARGS, "--store", "local"]) == 0
+    assert built == [("http://127.0.0.1:5555", 16384)]
+
+
+def test_a_local_model_refuses_the_s3_store(
+    laptop_repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert cli.main(["sweep", "run", *LOCAL_ARGS, "--store", "s3", "--bucket", "b"]) == 2
+    assert "a local model's runs stay on this laptop: use --store local" in capsys.readouterr().err
+
+
+def test_a_local_model_refuses_the_container() -> None:
+    args = cli.build_parser().parse_args(["sweep", "run", *LOCAL_ARGS, "--store", "local"])
+    with pytest.raises(SweepRefusal, match="runs on the laptop only"):
+        cli._check_local(args, FARGATE)
+    cli._check_local(args, LAPTOP)  # the laptop is fine
+
+
+def test_a_local_model_cannot_be_launched_as_a_fargate_task(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert cli.main(["sweep", "launch", *LOCAL_ARGS, "--profile", "p"]) == 2
+    assert (
+        "is a local model: it runs on this laptop, so use `hc sweep run`" in capsys.readouterr().err
+    )
+
+
+def test_status_of_a_local_store_needs_no_aws_session(
+    laptop_repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    args = ["sweep", "status", *LOCAL_ARGS, "--store", "local", "--sweep-id", "nothing-yet"]
+    assert cli.main(args) == 0
+    assert "no manifest for nothing-yet" in capsys.readouterr().out
+
+
+def test_the_plan_for_a_local_model_prints_with_zero_cost(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert cli.main(["sweep", "plan", *LOCAL_ARGS]) == 0
+    out = capsys.readouterr().out
+    assert "runs:            5 (1 scenarios x 5 objectives x 1 templates x 1 repeats)" in out
+    assert "one call start every 2.5s" in out

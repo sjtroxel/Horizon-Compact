@@ -30,8 +30,9 @@ from horizon_compact.dossier.render import (
     render_outputs,
 )
 from horizon_compact.experiment import Experiment, ExperimentError, load_experiment
-from horizon_compact.providers.base import ModelRoute
+from horizon_compact.providers.base import ModelRoute, Provider
 from horizon_compact.providers.bedrock import REGION, BedrockConverseProvider, make_runtime_client
+from horizon_compact.providers.ollama import DEFAULT_URL, OllamaProvider
 from horizon_compact.smoke import plan
 from horizon_compact.smoke.record import RedactionError
 from horizon_compact.smoke.runner import (
@@ -138,6 +139,10 @@ def cmd_run(args: argparse.Namespace, evidence_dir: Path) -> int:
 # --- sweep -----------------------------------------------------------------------------------------------
 
 RESULTS_BUCKET_ENV = "HC_RESULTS_BUCKET"
+OLLAMA_URL_ENV = "HC_OLLAMA_URL"
+# A local run has no AWS account. The record writer wants one id to redact, so it gets one that is plainly
+# not real.
+LOCAL_ACCOUNT_ID = "000000000000"
 REGION_ENV = "HC_REGION"
 PROFILE_ARN_ENV = "HC_SONNET_PROFILE_ARN"
 CLEAN_EXIT, REFUSED_EXIT, NOT_CLEAN_EXIT = 0, 2, 3
@@ -207,13 +212,22 @@ def _route(
     )
 
 
-def _store(args: argparse.Namespace, session: boto3.Session) -> Store:
+def _store(args: argparse.Namespace, session: boto3.Session | None) -> Store:
     if args.store == "local":
         return LocalStore(Path(_git("rev-parse", "--show-toplevel")) / "scratch" / "runs")
     bucket = args.bucket or os.environ.get(RESULTS_BUCKET_ENV)
     if not bucket:
         raise SweepRefusal(f"--store s3 needs --bucket or {RESULTS_BUCKET_ENV}")
+    assert session is not None  # an s3 store always comes with a session
     return S3Store(session.client("s3"), bucket)
+
+
+def _check_local(args: argparse.Namespace, identity: RunnerIdentity) -> None:
+    """A local model runs on this laptop, keeps its records here, and never touches AWS."""
+    if identity.runner != "laptop":
+        raise SweepRefusal("a local model runs on the laptop only: the container cannot reach it")
+    if args.store != "local":
+        raise SweepRefusal("a local model's runs stay on this laptop: use --store local")
 
 
 def cmd_sweep_plan(args: argparse.Namespace) -> int:
@@ -260,10 +274,25 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         check_official(experiment, identity)
     check_route(experiment, plan_.model_key, os.environ)
     check_preflight(experiment, plan_, cap)
-    session = _session(args, identity)
-    account_id = session.client("sts").get_caller_identity()["Account"]
-    route = _route(experiment, plan_.model_key, session, dict(os.environ))
-    store = _store(args, session)
+    config = experiment.model(plan_.model_key)
+    provider: Provider
+    if config.route == "local":
+        # Nothing on this path creates an AWS session, calls STS or reads a profile.
+        _check_local(args, identity)
+        assert config.num_ctx is not None  # a local route always has one (ModelConfig checks)
+        account_id = LOCAL_ACCOUNT_ID
+        route = ModelRoute(plan_.model_key, config.model_id, "local", invoke_id=config.model_id)
+        store = _store(args, None)
+        provider = OllamaProvider(os.environ.get(OLLAMA_URL_ENV, DEFAULT_URL), config.num_ctx)
+    else:
+        session = _session(args, identity)
+        account_id = session.client("sts").get_caller_identity()["Account"]
+        route = _route(experiment, plan_.model_key, session, dict(os.environ))
+        store = _store(args, session)
+        provider = BedrockConverseProvider(
+            make_runtime_client(args.profile, region=session.region_name or REGION),
+            region=session.region_name or REGION,
+        )
 
     stop_requested = {"flag": False}
 
@@ -273,10 +302,6 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
     signal.signal(signal.SIGTERM, request_stop)
     signal.signal(signal.SIGINT, request_stop)
 
-    provider = BedrockConverseProvider(
-        make_runtime_client(args.profile, region=session.region_name or REGION),
-        region=session.region_name or REGION,
-    )
     result = run_session(
         experiment=experiment,
         plan=plan_,
@@ -307,6 +332,10 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
 
 def cmd_sweep_launch(args: argparse.Namespace) -> int:
     experiment, plan_ = _load(args)
+    if experiment.model(plan_.model_key).route == "local":
+        raise SweepRefusal(
+            f"{plan_.model_key} is a local model: it runs on this laptop, so use `hc sweep run`"
+        )
     cap = _check_cap(args)
     if args.official:
         check_official(experiment, identify({}, _laptop_git))
@@ -344,9 +373,8 @@ def cmd_sweep_launch(args: argparse.Namespace) -> int:
 def cmd_sweep_status(args: argparse.Namespace) -> int:
     sweep_id = args.sweep_id or _load(args)[1].sweep_id
     identity = identify({}, _laptop_git)
-    summary = sweep_status.summarize(
-        _store(args, _session(args, identity)), args.experiment, sweep_id
-    )
+    session = None if args.store == "local" else _session(args, identity)
+    summary = sweep_status.summarize(_store(args, session), args.experiment, sweep_id)
     if summary is None:
         print(f"no manifest for {sweep_id}: nothing has run yet")
         return CLEAN_EXIT

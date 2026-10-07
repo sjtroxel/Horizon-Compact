@@ -9,8 +9,8 @@ import boto3
 import pytest
 from botocore.stub import Stubber
 
-from horizon_compact.providers.base import DecisionRequest, ModelRoute, ToolSpec
-from horizon_compact.providers.bedrock import BedrockConverseProvider, build_request, prompt_sha256
+from horizon_compact.providers.base import DecisionRequest, ModelRoute, ToolSpec, prompt_sha256
+from horizon_compact.providers.bedrock import BedrockConverseProvider, build_request
 
 TOOL = ToolSpec(
     name="record_thing",
