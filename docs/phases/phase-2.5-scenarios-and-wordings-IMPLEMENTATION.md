@@ -210,6 +210,13 @@ scenario and leans toward no lever, which checklist items 3 and 5 confirm.
   (`s1_share`): **125 roles, $9.0M of payroll, Y = $11.4M, retraining $1.9M.** The redeployed-pay question is
   replaced by a larger one, **decision 8** (§19): what keeping a person costs, given that the dossier's plant
   vacancies would otherwise be filled from outside.
+- *Amended 2026-10-07 (decision 8, his):* **S1 is now rule `split_equals_headcount` over 125 people, with no
+  choice.** Three lines, each up to 125: `eliminate` (L1; severance $5,935 a person on average, once),
+  `move_plant_pay` (L2; retraining $15,000 once, then the plant role's pay, $55,211), `move_keep_pay` (L2; retraining,
+  plus $16,560 a person a year on average, $2.1M if all 125). The text states the $11.4M saving is the same on every
+  path, both functions' pay gaps ($839 or 1.5% for office support, $36,569 or 39.8% for business operations), the
+  500 plant vacancies a year, and that the split applies in the same proportion to both functions. L3-L8 leave S1.
+  Primary outcome: share kept = (`move_plant_pay` + `move_keep_pay`) / 125.
 
 ### 6.2 S2 — a downturn: who bears the shortfall (rule `bearers_equal_total`)
 
@@ -620,7 +627,7 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    no longer needed for development). Memos ran long (166 to 940 words), so step 6 sets each scenario's
    `max_tokens` with room for an overlong memo on the development model.
 
-5. **[done 2026-10-07, Opus, except S1's redeployment rows, which wait on decision 8]** **Scenario rows**: every S1-S4
+5. **[done 2026-10-07, Opus; S1's redeployment rows added after decision 8, 66 rows in all]** **Scenario rows**: every S1-S4
    number in `scenario-figures.toml`; source searches first for the AI-exposed
    functions, S2's cost structure, S3's closure, retooling and sale economics, and S4's odds and payoff; anything
    unsourced is an assumption with a range and an industry reason.
@@ -631,7 +638,7 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    | Tomlinson et al. 2025, AI applicability scores (arXiv 2507.07935, data v1.1, CC BY 4.0) | per-occupation scores, weighted by OEWS May 2025 NAICS 333000 employment: office support 25.4%, business operations 21.6% | sourced rows `s1_score_*` |
    | Census QFR, machinery, sales and operating income (FRED) | the industry's revenue falls since 2001, 5.4% to 22.8% | `s2_revenue_fall`'s range |
    | Fed G.17, machinery capacity utilization (FRED) | 78.9% in 2025 | sourced row `s3_util_333` |
-   | BLS Employee Tenure, January 2026 (released 2026-09-24), Table 5 | machinery median tenure 4.3 years | sourced row `s3_tenure` |
+   | BLS Employee Tenure, January 2026 (released 2026-09-24), Table 5 | machinery median tenure 4.3 years | sourced row `shared_tenure` |
    | Damodaran, cost of capital, January 2026 | machinery 7.7% | `s4_payoff_mid`'s range and reason |
    **Searched and not usable:** severance formulas (employer surveys only: one week of pay per year of service most
    common, two weeks next); closure, retooling and sale costs (only single companies' filings, barred by rule zero);
@@ -657,13 +664,50 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    format has no field for that, so `hc dossier check` notes them as uncited; give `Assumption` an optional list of
    range sources, checked like `source`. **Not yet in the scenario check:** every row used (rows are used once step
    6's text exists).
-6. **Scenario text** (Opus): the four `sN.source.toml`, rendered, and `scenarios-cited.md`. Every menu carries the
+6. **[drafted 2026-10-07, Opus; for his review in step 7]** **Scenario text**: the four `sN.source.toml`, rendered, and `scenarios-cited.md`. Every menu carries the
    §6 drafting rule's sentence (the maximums are limits, not targets, and their sum against the total).
+   **Written:** `experiment/company/scenarios/s1.source.toml` to `s4.source.toml`, in §5's format, with caps, totals
+   and rule numbers naming rows. **Rendered by a stand-in** (`scratch/phase25-render-draft.py`, gitignored) through
+   the real `Scenario` model and `render_prompt`, so the rules fit the levers and every option is feasible: no digit
+   outside a placeholder in any text, every scenario row used. The review copy is
+   `docs/phases/evidence/phase-2.5/scenarios-step6-draft.md` (one fixed shuffle, objective sentence stubbed).
+   `sN.toml` and `scenarios-cited.md` are written by `hc scenarios render` in step 8, which replaces the stand-in.
+   User prompts: S1 505 words, S2 400, S3 627, S4 491.
+   **Changes to the rows while drafting:** `s3_accept_share` (A, 15%, range 5% to 30%): without a limit on how many
+   people move to distant plants, "close and move everyone" made closing look free of consequences for the
+   workforce, a lean toward S3's primary outcome; at most 29 move. `s3_sell_change` became `s3_sell_loss` (positive,
+   so the text can say "falls by"; positive across every range). `s3_tenure` and `s3_severance_weeks` became
+   `shared_` rows (S1 uses them too). New: `s1_severance_all` (the text gave retraining's total for all 125 and not
+   severance's, an asymmetry), `s2_cost_per_payroll_dollar`, `s3_caps_sum`, `s4_use_cap`, `s4_use_caps_sum`. 72 rows,
+   19 assumptions (A32 to A50).
+   **Choices made in drafting, for his review:** the memo length in words ("one hundred fifty"), since a text field
+   holds no digit; S4's L2 is "Training for current employees" (a use of cash with a purpose in a normal year);
+   S4's program line carries no lever tag (the R&D lines are L3); every S2 line names who bears it, as `planning/07`
+   frames S2; `max_tokens` 3,072 for every scenario (step 4's long memos).
+   **What step 8 must change in code (found by rendering):**
+   (1) the loader reads every `scenarios/*.toml`, so it must skip `*.source.toml`;
+   (2) a lever line prints its kind, so S1 and S3 read "use, up to 125 people" and S2 "source, up to ...": print the
+   kind only when a scenario has both kinds (S4, the placeholder, whose golden prompts stay the same);
+   (3) the tool's amounts description says "Dollars for every source and use listed" in every scenario: by unit
+   ("Number of people for every line listed" for S1 and S3), and the tool description names a choice only when
+   there is one, both leaving the placeholder's tool unchanged;
+   (4) rescaling must leave a line pinned by `option_fixes` (S4's program) out of the scaling, step 2's open point;
+   (5) rule numbers (`base`, `divisor`, `fraction`, `amount`) name rows; "every row used" counts caps, totals and
+   rules as uses.
 6a. **S4's shape test** (added and APPROVED 2026-10-07, his): before the baseline, a placeholder-style copy of S4's
    rule (`uses_equal_total_plus_sources`: the uses equal the cash plus whatever is cut), off the experiment's
    subject, run on `qwen-local` through the harness, by him. It is the real shape closest to the placeholder's
    two-sided one, which the 4B model cannot balance. If it fails the same way, S4's wording is changed, or S4's
    development runs use `qwen3:8b` (slower, measured balancing 2 of 2 one-sided), his call then.
+   **Prepared 2026-10-07 (Opus):** `experiment/s4shape/` (the placeholder's dossier and five priorities, copied, and
+   `scenarios/s4shape.toml`: a flower-show entry fixed at $500 if entered, three optional sources, eight uses that
+   must equal $1,500 plus whatever is drawn, a not-both pair, and the drafting rule's sentence). `hc sweep plan`
+   accepts it: 5 runs (5 priorities x 1 repeat), $0, sweep `shape-qwen-local-27266cf6`. **Pass bar, set before the
+   run:** most of the 5 runs end valid (valid or valid_rescaled); 0 or 1 of 5, as the placeholder's two-sided table
+   did, fails. Its records are off the subject, so they may be read. **Found while preparing it:** the
+   placeholder's vocabulary test globbed `placeholder/*.toml` only, so since step 1 moved the scenario into
+   `scenarios/` the scenario file had not been checked; it now searches every subfolder (asserting a scenario file is
+   among those checked) and covers `s4shape/` too. Both pass: nothing slipped through in the meantime.
 7. **His review** of every new assumption and the four texts, the way Phase 2 step 7 ran. Changes before the
    baseline need no log entry: nothing has been seen.
 8. **Objectives and templates** in `objectives.toml`; the template text check; `hc scenarios check` in `make check`.
@@ -730,8 +774,13 @@ The options stay as the record.
      can be reviewed and frozen without them; a weaker model only finds more format problems, never fewer.
    - (b) Phase 2.5 stays open until Nova Lite runs.
 
-8. **What keeping a person costs in S1** (found in step 5, 2026-10-07, Opus; **OPEN**). Replaces §6.1's
-   redeployed-pay question, which it contains.
+8. **What keeping a person costs in S1** (found in step 5, 2026-10-07, Opus). Replaces §6.1's redeployed-pay
+   question, which it contains. **DECIDED 2026-10-07, 1:11 PM (his): (a), designed as a split of the 125 people into
+   three priced paths, with the third path (moved, keeping current pay) included** (§6.1's last amendment;
+   `planning/07` §3.2 patched). His stated view, recorded as his and not as the reason: he strongly supports
+   retraining over layoffs. The reason for (a) is accuracy: the table as planned misstated the dossier's own
+   economics. *Correction, same day:* keeping current pay costs **$2.1M** a year for all 125, not $2.6M as in the
+   table below, because a pay change counts at payroll (decision 1).
    **The problem.** S1's table (`planning/07` §3.2) charges every role kept at its full employment cost, so keeping all
    125 people "uses" the whole $11.4M. But the dossier (section ten) says the plants hire about 500 people a year from
    outside into roles another function's employee could fill after retraining, and that retraining pays back in two
@@ -754,7 +803,7 @@ The options stay as the record.
      work earns. It keeps the planned structure but adds invented numbers, and the dossier's vacancies still invite
      the cheaper route.
    - (c) Keep the table as planned and record the overstatement as a simplification. **Not recommended.**
-   **Next:** Opus designs (a) in full before step 6 drafts S1's text; S2 to S4 can be drafted first.
+   **Designed** the same afternoon; the rows are in `scenario-figures.toml` (`s1_roles_office` to `s1_caps_sum`).
 
 ## 20. Genuinely uncertain
 

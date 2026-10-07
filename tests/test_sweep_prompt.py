@@ -6,6 +6,8 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
 from horizon_compact.experiment import Experiment, Objective
 from horizon_compact.providers.base import DecisionRequest
 from horizon_compact.providers.bedrock import build_request
@@ -161,9 +163,11 @@ def test_no_sampling_parameter_is_ever_sent() -> None:
     assert "additionalModelRequestFields" not in body
 
 
-def test_no_string_in_any_placeholder_file_uses_the_subjects_vocabulary() -> None:
+@pytest.mark.parametrize("name", ["placeholder", "s4shape"])
+def test_no_string_in_any_placeholder_file_uses_the_subjects_vocabulary(name: str) -> None:
     """The file headers name the forbidden words in comments; the values and TOML keys are what a prompt can
-    carry."""
+    carry. Every file in the folder, scenarios/ included (since Phase 2.5 step 1 the scenario lives there),
+    and the S4 shape test's folder too, which follows the placeholder rule."""
     import tomllib
 
     def strings(node: object) -> list[str]:
@@ -175,9 +179,13 @@ def test_no_string_in_any_placeholder_file_uses_the_subjects_vocabulary() -> Non
             return [s for value in node for s in strings(value)]
         return []
 
-    folder = experiment().root / "placeholder"
+    folder = experiment().root / name
+    paths = sorted(folder.rglob("*.toml"))
+    assert any(p.parent.name == "scenarios" for p in paths), (
+        "the scenario file must be among those checked"
+    )
     hits: dict[str, list[str]] = {}
-    for path in sorted(folder.glob("*.toml")):
+    for path in paths:
         text = "\n".join(strings(tomllib.loads(path.read_text(encoding="utf-8")))).lower()
         found = [w for w in SUBJECT_WORDS if re.search(rf"\b{re.escape(w)}\b", text)]
         if found:

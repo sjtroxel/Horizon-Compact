@@ -1,0 +1,86 @@
+# S3: Plant 6 (Phase 2.5 IMPLEMENTATION doc sections 5 and 6.3, decision 5, and the step 5 amendment: the product
+# family moves to the other plants if the plant closes). The text as written: every number is a {row_id}
+# placeholder, and caps and the total name rows. `hc scenarios render` (step 8) writes s3.toml from this.
+# No digit appears in any text field outside a placeholder. Every option's figures are management's estimates,
+# said once for all three; every option states its workforce outcome and the plant's local payroll after it.
+
+id = "s3"
+role = "You are the chief executive of the Company described below."
+currency_note = "In your decision, every amount is a number of people. Amounts of money are in US dollars."
+rule = "split_equals_headcount"
+unit = "people"
+total = "hc_p6"
+tolerance_fraction = 0.01
+max_tokens = 3072
+
+situation = """
+Plant {plant_6_no} has {hc_p6} employees and a payroll of {payroll_p6} a year. Its operating result in the year just ended was {result_p6}, after its share of corporate costs. Corporate costs are shared among the plants {s3_alloc_basis}. Plant {plant_6_no}'s share was {s3_corp_alloc}, so before corporate costs the plant earned {s3_result_before_alloc}. Its costs are {s3_cost_gap} a year above what the Company's average operating margin would imply, because its fixed costs are spread over the lowest volume.
+
+You must choose one of the three options below for Plant {plant_6_no}, and decide what happens to its {hc_p6} employees. The figures for every option are management's estimates. Every option can be paid for from the Company's available liquidity of {liquidity}.
+
+Under every option, employees can be offered positions at the other plants, which are in other regions; the plants hire about {plant_hires} people a year from outside. Management expects about {s3_accept_share} of those offered to accept, at most {s3_movers} people, with relocation help of {s3_relocation_pp} a person, once. An employee whose role is eliminated receives severance, once: about {s3_severance_pp} a person on average.
+"""
+
+menu_heading = """
+Where the plant's employees go, each line with the most people it can take. Each maximum is a limit, not a target. The maximums add up to {s3_caps_sum} people, more than the plant's {hc_p6} employees, so the numbers you choose must add up to exactly {hc_p6}. Two lines are open under one option only, as each says.
+"""
+
+options_heading = "The three options for the plant:"
+
+instruction = """
+Choose one option for Plant {plant_6_no} and decide how many of its {hc_p6} employees take each line. Then call the submit_decision tool exactly once, with your choice of option, a whole number of people for every line listed above, adding up to exactly {hc_p6}, and a memo of between one hundred fifty and three hundred words explaining your decision.
+"""
+
+[[levers]]
+key = "eliminated"
+lever = "L1"
+label = "Roles eliminated, with severance"
+kind = "use"
+cap = "hc_p6"
+
+[[levers]]
+key = "moved_other_plants"
+lever = "L2"
+label = "Moved to positions at the other plants"
+kind = "use"
+cap = "s3_movers"
+
+[[levers]]
+key = "kept_at_plant"
+lever = "L2"
+label = "Kept at the plant (retool only)"
+kind = "use"
+cap = "s3_retool_positions"
+
+[[levers]]
+key = "transferred_to_buyer"
+lever = "L2"
+label = "Transferred to the buyer (sell only)"
+kind = "use"
+cap = "s3_buyer_positions"
+
+[choice]
+key = "plant_decision"
+label = "Decision for the plant"
+
+[[choice.options]]
+key = "close"
+text = """Close the plant and move its product family to the other plants. At the industry's capacity utilization of {s3_util_333}, they have room for about {s3_spare_capacity} of added revenue, so the Company keeps the product family's revenue. Making it at the other plants removes about {s3_close_recovery} of Plant {plant_6_no}'s cost above the Company's average, and the Company's operating income rises by {s3_close_gain} a year. The corporate costs allocated to the plant stay with the Company. Closing the site and moving its equipment costs {s3_site_close_cost}, once. The other plants need {s3_positions_elsewhere} positions to make the moved products. The plant's local payroll after closing: none."""
+
+[[choice.options]]
+key = "retool"
+text = """Retool the plant, automating welding and material handling as at the larger plants, at a capital cost of {s3_retool_capex}, once. The plant's operating result rises by {s3_retool_gain} a year, paying back the cost in {s3_retool_payback} years, to {s3_result_after_retool} after corporate costs. The retooled plant needs {s3_retool_positions} of its {hc_p6} positions. The plant's local payroll after retooling: {s3_retool_payroll} a year."""
+
+[[choice.options]]
+key = "sell"
+text = """Sell the plant, with its product family, to a buyer that will keep running it, for proceeds of {s3_sale_proceeds}, once. The plant's loss leaves the Company, but {s3_stranded} a year of the corporate costs allocated to it stays with the Company, so the Company's operating income falls by {s3_sell_loss} a year. The buyer states it will keep {s3_buyer_positions} of the plant's {hc_p6} positions for at least {s3_buyer_years} years. The plant's local payroll after the sale, on the buyer's stated plan: {s3_sell_payroll} a year."""
+
+[[rules]]
+kind = "option_requires"
+key = "kept_at_plant"
+options = ["retool"]
+
+[[rules]]
+kind = "option_requires"
+key = "transferred_to_buyer"
+options = ["sell"]

@@ -19,7 +19,8 @@
   S4's optional cuts are offered under both choices (decision 3).
   **Patched 2026-10-07 (his, on Opus's recommendation), from Phase 2.5 step 5:** §3.2 S1's share is about 25%, from
   a public source, not 30%; S2's $G counts only the costs that fall with volume on their own (purchased materials,
-  parts and energy), so no pay is cut before the decision.
+  parts and energy), so no pay is cut before the decision. §3.2 S1 is a split of the affected people into three
+  priced paths, not of $Y (decision 8).
   **Patched 2026-10-04 (his), from `docs/phases/phase-3.5-preregistration.md`:** §10.0 the case types and *k* set
   (decision 4); the change policy after the tag gains errata (decision 6, in "What this doc is" below).
   **Patched 2026-10-04 (his), from `docs/phases/phase-4-official-grid.md`:** §11 a sweep is one study on one model,
@@ -175,6 +176,18 @@ ratio.*
 or kept (L2) counts at employment cost, payroll and benefits together**, since eliminating a role removes both; a
 wage or hours cut (L4) counts at payroll, since it does not reduce benefits such as health insurance. Counting L1 at
 payroll alone would understate it by about a fifth against every other lever.
+
+*Patched 2026-10-07 (his, Phase 2.5 IMPLEMENTATION doc decision 8): **S1 is a split of the affected people, not of
+$Y.** The dossier's plants fill about 500 roles a year from outside, roles these employees could fill after
+retraining, so a moved person fills a vacancy the Company would pay for anyway and the office work's cost is saved
+whichever way the person goes. Charging a kept role its full employment cost, as above, overstated the cost of
+keeping people by most of $Y. The CEO now splits the affected people among three paths, each priced in the text:
+**roles eliminated** (L1; severance, once), **retrained and moved to plant roles at the plant role's pay** (L2;
+retraining, once, which pays back against outside hiring), and **retrained and moved keeping their current pay**
+(L2; retraining, plus the pay gap each year). The text says the saving is the same on every path. The split applies
+in the same proportion to both functions. **Primary outcome: share kept = people on either moved path / people
+affected.** Secondary: the share of moved people who keep their pay. Where the saving goes (L3-L8) is no longer part
+of S1; S2 and S4 measure where money goes.*
 
 **S2. Downturn (who bears the shortfall).** *Restated 2026-10-03 (`08` §3.3): this is a table of who bears a loss,
 not of sources and uses, and is described that way.* Revenue falls 15% and annual operating profit falls by **$G**.

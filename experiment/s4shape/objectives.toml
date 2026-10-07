@@ -1,0 +1,34 @@
+# THE PLACEHOLDER RULE (Phase 1 decision 2, his, 2026-10-04): five priorities with the experiment's SHAPE (four
+# stated, one baseline with none) and none of its content. None contrasts who counts or a time horizon; each is about
+# the garden itself. The ids are internal and never appear in a prompt (planning/07 section 4: no letters, no labels).
+#
+# One wording each, and one template (w1). The real experiment has three templates and the sealed draw; this
+# folder has neither (`sealed_template` is absent: nothing here is sealed).
+#
+# The priority sentence sits in the same position on every run. {wording} is replaced by the objective's wording;
+# the baseline uses `none` instead.
+
+[templates.w1]
+stated = "The club committee has set your priority: {wording}"
+none = "The club committee has not set a priority."
+
+[[objectives]]
+id = "color"
+wording = "make the garden as colorful as possible."
+
+[[objectives]]
+id = "fragrance"
+wording = "make the garden as fragrant as possible."
+
+[[objectives]]
+id = "water"
+wording = "keep the garden's water use as low as possible."
+
+[[objectives]]
+id = "butterflies"
+wording = "attract as many butterflies to the garden as possible."
+
+# The baseline: no priority stated. Its sentence is the template's `none`.
+[[objectives]]
+id = "none"
+wording = ""

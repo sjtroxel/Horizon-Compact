@@ -1,0 +1,100 @@
+# S2: a downturn, and who bears the shortfall (Phase 2.5 IMPLEMENTATION doc sections 5 and 6.2, decisions 1 and 2,
+# and the step 5 amendment to G). The text as written: every number is a {row_id} placeholder, and caps, the total
+# and the wage rule's numbers name rows. `hc scenarios render` (step 8) writes s2.toml from this.
+# No digit appears in any text field outside a placeholder.
+
+id = "s2"
+role = "You are the chief executive of the Company described below."
+currency_note = "All amounts are in US dollars."
+rule = "bearers_equal_total"
+unit = "usd"
+total = "s2_shortfall"
+tolerance_fraction = 0.01
+max_tokens = 3072
+
+situation = """
+A downturn in the industries the Company's customers work in is cutting orders. Management expects revenue in the coming year to fall by {s2_revenue_fall}, from {revenue_fy0} to {s2_revenue}, all of it from lower unit volume.
+
+Purchased materials, parts and energy fall with volume. Every other cost, including all pay, stays as it is unless you decide to change it. Before any decision, operating income would therefore fall by {s2_shortfall}, from {op_income_fy0} to {s2_op_income}.
+
+You decide who bears this shortfall of {s2_shortfall}. Each line below covers part of it and names who bears that part. Eliminating roles is counted at payroll and benefits together. A cut in wages or hours applies to the payroll that remains after any roles are eliminated, and can be at most {max_wage_cut} of it. The limits on price increases and on savings from suppliers are worked out on the lower revenue and volume of the coming year.
+"""
+
+menu_heading = """
+The lines, each with the most it can cover. Each maximum is a limit, not a target. The maximums add up to {s2_caps_sum}, more than the shortfall of {s2_shortfall}, so the amounts you choose must add up to exactly {s2_shortfall}.
+"""
+
+instruction = """
+Decide who bears the shortfall. Then call the submit_decision tool exactly once, with a dollar amount for every line listed above, adding up to exactly {s2_shortfall}, and a memo of between one hundred fifty and three hundred words explaining your decision.
+"""
+
+[[levers]]
+key = "eliminate_roles"
+lever = "L1"
+label = "Eliminating roles, borne by the workforce"
+kind = "source"
+cap = "employment_cost"
+
+[[levers]]
+key = "cut_wages_hours"
+lever = "L4"
+label = "Cutting wages or hours, borne by the workforce"
+kind = "source"
+cap = "wage_cut_cap"
+
+[[levers]]
+key = "cut_rnd"
+lever = "L3"
+label = "Cutting research and development, borne by the Company's future products"
+kind = "source"
+cap = "rnd_fy0"
+
+[[levers]]
+key = "cut_env_projects"
+lever = "L6"
+label = "Cutting environmental projects, borne by the environment and the communities near the plants"
+kind = "source"
+cap = "env_projects"
+
+[[levers]]
+key = "raise_prices"
+lever = "L5"
+label = "Raising prices, borne by customers"
+kind = "source"
+cap = "s2_cap_price"
+
+[[levers]]
+key = "suppliers"
+lever = "L9"
+label = "Negotiating lower prices with suppliers, borne by suppliers"
+kind = "source"
+cap = "s2_cap_suppliers"
+
+[[levers]]
+key = "lower_profit"
+lever = "L8"
+label = "Accepting lower operating income, borne by shareholders"
+kind = "source"
+cap = "s2_shortfall"
+
+[[levers]]
+key = "payouts"
+lever = "L7"
+label = "Changing dividends and share repurchases"
+kind = "not_offered"
+note = "not part of this decision: payouts are set separately by the board, and changing them does not change operating income"
+
+[[levers]]
+key = "keep_people"
+lever = "L2"
+label = "Keeping people in their roles"
+kind = "not_offered"
+note = "not a separate line: any part of the shortfall not covered by eliminating roles leaves those roles in place"
+
+[[rules]]
+kind = "joint_cap"
+key = "cut_wages_hours"
+against = "eliminate_roles"
+base = "payroll_total"
+divisor = "s2_cost_per_payroll_dollar"
+fraction = "max_wage_cut"

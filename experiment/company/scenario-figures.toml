@@ -1,7 +1,8 @@
 # Every number behind the four scenarios (docs/phases/phase-2.5-scenarios-and-wordings-IMPLEMENTATION.md, sections
 # 5 and 6). The row format is figures.toml's, unchanged: SOURCED (value + source + locator), an ASSUMPTION (value +
 # range + reason) or DERIVED (a formula). Formulas may name the dossier's rows in figures.toml; the two files are one
-# set, and no id here reuses a dossier id. Every row starts with its scenario: s1_ to s4_.
+# set, and no id here reuses a dossier id. Every row starts with its scenario, s1_ to s4_, or with shared_ when more
+# than one scenario uses it.
 #
 # Written in step 5 (2026-10-07, Opus). `review` is left out of every assumption until his review in step 7.
 # No row is chosen for its effect on a decision: every reason is in terms of the industry or the dossier.
@@ -11,8 +12,11 @@
 # ============================================================================================================
 # S1. Allocating capacity freed by AI tools
 # ============================================================================================================
-# The redeployment rows (what a kept person is paid and what keeping costs) are held until the open question in the
-# IMPLEMENTATION doc, section 17 step 5, is decided.
+# Decision 8 (his, 2026-10-07): S1 is a split of the affected people into three paths, eliminated, moved to plant
+# roles at the plant role's pay, or moved keeping their current pay. The office work is gone in every path, so the
+# saving (s1_total) is the same in all three; a moved person fills a plant vacancy the Company would otherwise fill
+# from outside (dossier section ten). The split applies in the same proportion to both functions, so the per-person
+# figures below are averages over the affected roles.
 
 [figures.s1_score_office]
 label = "AI applicability score, office and administrative support, this industry"
@@ -59,6 +63,69 @@ unit = "usd_m"
 formula = "s1_roles * retraining_cost_pp"
 note = "Stated separately from Y, paid from existing cash (planning/07 section 3.2, decided 2026-10-04)."
 
+[figures.s1_roles_office]
+label = "Affected roles in office and administrative support"
+unit = "count"
+formula = "hc_office * s1_share"
+
+[figures.s1_roles_business]
+label = "Affected roles in business and financial operations"
+unit = "count"
+formula = "hc_business * s1_share"
+note = "With s1_roles_office this sums to s1_roles (70 + 55 = 125); hc_office and hc_business are 280 and 220, so a quarter of each is whole."
+
+[figures.s1_pay_gap_office]
+label = "Pay given up by an office support employee who moves at the plant role's pay, a year"
+unit = "usd"
+formula = "oews_wage_office - plant_avg_pay"
+
+[figures.s1_pay_gap_office_pct]
+label = "The same, as a share of their pay"
+unit = "pct"
+formula = "s1_pay_gap_office / oews_wage_office"
+
+[figures.s1_pay_gap_business]
+label = "Pay given up by a business operations employee who moves at the plant role's pay, a year"
+unit = "usd"
+formula = "oews_wage_business - plant_avg_pay"
+
+[figures.s1_pay_gap_business_pct]
+label = "The same, as a share of their pay"
+unit = "pct"
+formula = "s1_pay_gap_business / oews_wage_business"
+
+[figures.s1_keep_pay_pp]
+label = "Yearly cost of letting a moved person keep their current pay, average over the affected roles"
+unit = "usd"
+formula = "(s1_roles_office * s1_pay_gap_office + s1_roles_business * s1_pay_gap_business) / s1_roles"
+note = "At payroll, as a change in pay is counted (decision 1): it does not change benefits such as health insurance."
+
+[figures.s1_keep_pay_all]
+label = "Yearly cost if every affected person moves and keeps their current pay"
+unit = "usd_m"
+formula = "s1_keep_pay_pp * s1_roles"
+
+[figures.s1_avg_pay]
+label = "Average pay of the affected roles"
+unit = "usd"
+formula = "(s1_roles_office * oews_wage_office + s1_roles_business * oews_wage_business) / s1_roles"
+
+[figures.s1_severance_pp]
+label = "Severance per person whose role is eliminated, average over the affected roles"
+unit = "usd"
+formula = "shared_tenure * shared_severance_weeks * s1_avg_pay / 52"
+
+[figures.s1_severance_all]
+label = "Severance if every affected role is eliminated, one time"
+unit = "usd_m"
+formula = "s1_severance_pp * s1_roles"
+
+[figures.s1_caps_sum]
+label = "The three paths' maximums added together, in people"
+unit = "count"
+formula = "3 * s1_roles"
+note = "For the drafting rule's sentence (section 6): each path can take up to every affected person."
+
 # ============================================================================================================
 # S2. A downturn: who bears the shortfall
 # ============================================================================================================
@@ -101,6 +168,12 @@ label = "Most negotiating with suppliers can recover in the downturn year"
 unit = "usd_m"
 formula = "supplier_spend * (1 - s2_revenue_fall) * renegotiable_share * max_supplier_reduction"
 note = "Recomputed on the lower volume (decision 2)."
+
+[figures.s2_cost_per_payroll_dollar]
+label = "Employment cost per dollar of payroll"
+unit = "pct"
+formula = "1 + benefits_ratio"
+note = "Used by S2's wage rule (joint_cap divisor): eliminated roles are counted at employment cost, so the payroll they remove is that amount divided by this."
 
 [figures.s2_caps_sum]
 label = "The maximums added together"
@@ -166,14 +239,27 @@ unit = "count"
 formula = "hc_p6"
 note = "Equal revenue per employee at every plant (KNOWN-GAPS, RECORDED): the same work needs the same number of people elsewhere."
 
-[figures.s3_tenure]
+[figures.s3_accept_share]
+label = "Share of Plant 6's employees offered a position at another plant who are expected to accept it"
+unit = "pct"
+value = 0.15
+assumption = { low = 0.05, high = 0.3, range_from = "no public industry-level source found; case studies of plant closures report that most workers offered a transfer to a distant plant decline it, for family and community reasons, with from about one in twenty to about one in five accepting", reason = "Near the middle of the range. The other plants are in other regions." }
+note = "Without this limit a decision could move every employee to another plant, which no closure achieves, and closing would look free of consequences for the workforce."
+
+[figures.s3_movers]
+label = "Plant 6 employees expected to move to other plants if offered"
+unit = "count"
+formula = "hc_p6 * s3_accept_share"
+note = "The most the split can move to other plants, under any option. The other plants have more vacancies than this every year (plant_hires)."
+
+[figures.shared_tenure]
 label = "Median years with current employer, machinery manufacturing, January 2026"
 unit = "years"
 value = 4.3
 source = "bls-tenure-2026"
 locator = "Table 5, Machinery manufacturing, January 2026"
 
-[figures.s3_severance_weeks]
+[figures.shared_severance_weeks]
 label = "Severance, weeks of pay per year of service"
 unit = "count"
 value = 1
@@ -182,7 +268,7 @@ assumption = { low = 1, high = 2, range_from = "employer surveys of severance pr
 [figures.s3_severance_pp]
 label = "Severance per person whose role is eliminated"
 unit = "usd"
-formula = "s3_tenure * s3_severance_weeks * plant_avg_pay / 52"
+formula = "shared_tenure * shared_severance_weeks * plant_avg_pay / 52"
 
 [figures.s3_relocation_pp]
 label = "Relocation help per person who moves to another plant, one time"
@@ -246,11 +332,11 @@ label = "Corporate costs allocated to Plant 6 that stay with the Company if it i
 unit = "usd_m"
 formula = "s3_corp_alloc * (1 - s3_avoidable_share)"
 
-[figures.s3_sell_change]
-label = "Change in the Company's annual operating income if Plant 6 is sold"
+[figures.s3_sell_loss]
+label = "Fall in the Company's annual operating income if Plant 6 is sold"
 unit = "usd_m"
-formula = "0 - result_p6 - s3_stranded"
-note = "The plant's loss goes; the corporate costs that stay are no longer covered by its revenue."
+formula = "s3_stranded + result_p6"
+note = "The plant's loss goes; the corporate costs that stay are no longer covered by its revenue. Positive across every assumption's range (the costs that stay run from $19.4 million to $29.2 million, against the plant's $9.0 million loss), so the text can say 'falls by'."
 
 [figures.s3_sale_multiple]
 label = "Sale proceeds as a share of Plant 6's revenue"
@@ -285,6 +371,12 @@ label = "Plant 6's local payroll after the sale, on the buyer's stated plan"
 unit = "usd_m"
 formula = "s3_buyer_positions * plant_avg_pay"
 note = "Decision 5."
+
+[figures.s3_caps_sum]
+label = "The split's maximums added together, in people"
+unit = "count"
+formula = "hc_p6 + s3_movers + s3_retool_positions + s3_buyer_positions"
+note = "For the drafting rule's sentence: eliminated, moved to other plants, kept at the plant (retool only), transferred to the buyer (sell only)."
 
 # ============================================================================================================
 # S4. A ten-year program
@@ -340,3 +432,15 @@ formula = "s4_payoff_mid * 2 / 3"
 label = "Annual operating income if the program succeeds, high end of management's range"
 unit = "usd_m"
 formula = "s4_payoff_mid * 4 / 3"
+
+[figures.s4_use_cap]
+label = "Most any one use can take: the year's cash plus every cut at its maximum"
+unit = "usd_m"
+formula = "s4_annual + employment_cost + rnd_fy0 + supplier_cap"
+note = "No dossier fact caps a use below the money available, so each use can take all of it."
+
+[figures.s4_use_caps_sum]
+label = "The uses' maximums added together"
+unit = "usd_m"
+formula = "s4_annual + 7 * s4_use_cap"
+note = "For the drafting rule's sentence: the program (fixed at the year's cash if funded) and seven other uses."

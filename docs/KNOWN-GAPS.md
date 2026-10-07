@@ -37,7 +37,15 @@ case by its type and a neutral label. The names live only in the private longlis
 > the diagnostic himself (11:44 AM) and saw the same result, then APPROVED both of Opus's recommendations (11:45 AM):**
 > the drafting rule in §6 (every menu says the maximums are limits, not targets, and states their sum), and S4's
 > shape test, now §17 step 6a, before the baseline.
-> **STEP 5, THE SCENARIO ROWS, DONE 2026-10-07 (Opus), except S1's redeployment rows:**
+> **STEP 5 COMMITTED: `490a94e` "phase 2.5: scenario rows and sources", pushed, CI run `37663609137` green (Deploy
+> `37663608886` green).** **DECISION 8 DECIDED 1:11 PM (his):** S1 is a split of the 125 people into three priced
+> paths (eliminated; moved at plant pay; moved keeping current pay), and the $11.4M saving is stated as the same on
+> every path; `planning/07` §3.2 patched. **STEP 6 DRAFTED (Opus):** `scenarios/s1.source.toml` to `s4.source.toml`,
+> review copy `docs/phases/evidence/phase-2.5/scenarios-step6-draft.md`; 72 rows, 19 assumptions (new: S3's
+> transfer acceptance, 15%, at most 29 people move). Step 8 owes five code changes found by rendering (§17 step 6).
+> **STEP 6a PREPARED:** `experiment/s4shape/`; he runs it. **NEXT: 6a (his run), then 7 (his review of A32-A50 and
+> the four texts; look hardest at `s4_payoff_mid` and `s3_accept_share`), then 8 (Sonnet).**
+> *Earlier the same day:* **STEP 5, THE SCENARIO ROWS, DONE 2026-10-07 (Opus), except S1's redeployment rows:**
 > `experiment/company/scenario-figures.toml` (54 rows, 18 assumptions), six sources added to `sources.toml` with
 > extracts under `docs/phases/evidence/phase-2.5/sources/`; the doc's §17 step 5 has the table. **He accepted the
 > recommendations generally (12:31 PM), so these are decided:** S1's share is 25% from a public source, not 30%

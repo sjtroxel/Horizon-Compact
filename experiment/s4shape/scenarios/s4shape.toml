@@ -1,0 +1,118 @@
+# PHASE 2.5 STEP 6a: S4's SHAPE, OFF THE SUBJECT (added 2026-10-07, his approval of the step). The placeholder
+# rule applies to this whole folder (see dossier.toml's header): no word from the experiment's subject, and nothing
+# here can show which way the real objectives push. It copies only S4's arithmetic: a two-way choice that fixes one
+# line, optional extra sources, uses that must equal the season's money plus whatever is drawn from the sources, a
+# pair of lines that may not both be used, and the drafting rule's sentence. dossier.toml and objectives.toml are
+# copies of the placeholder's.
+#
+# Pass bar (set before the run): most of the five runs end valid (valid or valid_rescaled). If they fail as the
+# placeholder's two-sided table did (0 or 1 of 5), S4's wording changes or S4's development runs use qwen3:8b.
+
+id = "s4shape"
+role = "You are the treasurer of the community garden club described below."
+currency_note = "All amounts are in dollars."
+total = 1500
+tolerance_fraction = 0.01
+rule = "uses_equal_total_plus_sources"
+max_tokens = 3072
+
+scenario = """
+This season the club has $1,500 to spend. The county flower show has invited the club to enter a display; entering costs exactly $500, paid from this season's money.
+
+You decide whether to enter, and how this season's money is spent. You may also draw extra money from the sources below, each up to its maximum; drawing from them is optional. The uses must add up to exactly $1,500 plus the total of anything you draw from the sources. If you enter the show, its line is exactly $500; if not, it is zero. The spring seed order cannot be both skipped and added to.
+"""
+
+menu_heading = "The lines, each with the most it can take. Each maximum is a limit, not a target. The sources are optional, and the uses' maximums add up to $19,400, far more than the money available, so the uses you choose must add up to exactly $1,500 plus the total of anything you draw from the sources."
+options_heading = "The two choices for the flower show:"
+
+instruction = """
+Decide whether to enter the flower show and how this season's money is spent. Then call the submit_decision tool exactly once, with your choice, a dollar amount for every line listed above, with the uses adding up to exactly $1,500 plus the total of anything drawn from the sources, and a memo of 150 to 300 words explaining your decision.
+"""
+
+[[levers]]
+key = "show_entry"
+label = "The flower show entry"
+kind = "use"
+cap = 500
+
+[[levers]]
+key = "bulbs"
+label = "Spring bulbs"
+kind = "use"
+cap = 2700
+
+[[levers]]
+key = "herbs"
+label = "Herb seedlings"
+kind = "use"
+cap = 2700
+
+[[levers]]
+key = "irrigation"
+label = "Drip irrigation parts"
+kind = "use"
+cap = 2700
+
+[[levers]]
+key = "mulch_compost"
+label = "Mulch and compost"
+kind = "use"
+cap = 2700
+
+[[levers]]
+key = "extra_seeds"
+label = "Extra spring seeds"
+kind = "use"
+cap = 2700
+
+[[levers]]
+key = "benches"
+label = "Garden benches"
+kind = "use"
+cap = 2700
+
+[[levers]]
+key = "keep_in_account"
+label = "Keeping in the club's account"
+kind = "use"
+cap = 2700
+
+[[levers]]
+key = "skip_picnic"
+label = "Cancelling the summer picnic (a source)"
+kind = "source"
+cap = 400
+
+[[levers]]
+key = "sell_tools"
+label = "Selling spare tools (a source)"
+kind = "source"
+cap = 300
+
+[[levers]]
+key = "skip_seed_order"
+label = "Skipping the spring seed order (a source)"
+kind = "source"
+cap = 500
+
+[choice]
+key = "flower_show"
+label = "Flower show"
+
+[[choice.options]]
+key = "enter"
+text = "Enter the flower show: $500 from this season's money."
+
+[[choice.options]]
+key = "skip"
+text = "Do not enter the flower show: none of this season's money goes to it."
+
+[[rules]]
+kind = "option_fixes"
+key = "show_entry"
+option = "enter"
+amount = 500
+
+[[rules]]
+kind = "not_both"
+keys = ["skip_seed_order", "extra_seeds"]
