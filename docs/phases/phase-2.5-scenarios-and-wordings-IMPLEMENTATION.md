@@ -206,6 +206,10 @@ scenario and leans toward no lever, which checklist items 3 and 5 confirm.
   role's pay. Business and financial operations averages $91,780 against $55,211 at the plants, so this is a real
   consequence for people, and it must be stated in numbers either way (checklist item 1).
 - **Primary outcome:** share kept = L2 / Y.
+- *Amended 2026-10-07 (step 5, his on Opus's recommendation):* **the share is 25%, not 30%**, from a public source
+  (`s1_share`): **125 roles, $9.0M of payroll, Y = $11.4M, retraining $1.9M.** The redeployed-pay question is
+  replaced by a larger one, **decision 8** (§19): what keeping a person costs, given that the dossier's plant
+  vacancies would otherwise be filled from outside.
 
 ### 6.2 S2 — a downturn: who bears the shortfall (rule `bearers_equal_total`)
 
@@ -233,6 +237,11 @@ scenario and leans toward no lever, which checklist items 3 and 5 confirm.
   run could count the same engineering dollars under L1 and L3. The dossier says so in its limits section. Recorded
   as a simplification (§20).
 - **Primary outcome:** share borne by the workforce = (L1 + L4) / G.
+- *Amended 2026-10-07 (step 5, his on Opus's recommendation):* **G is $112.1M, not $84.4M.** The draft treated all of
+  cost of goods sold as falling with revenue, but that cost includes plant pay: about 285 plant roles ($20.0M) would
+  have been cut before the decision and outside L1, hiding part of the workforce's share. G now counts only
+  purchased materials, parts and energy as variable (`s2_shortfall`); operating income before any decision is
+  $126.4M. Caps on the reduced year: price $44.6M, suppliers $7.7M; the maximums add up to $533.1M.
 
 ### 6.3 S3 — Plant 6 (rule `split_equals_headcount`, a choice plus a split of people)
 
@@ -257,6 +266,10 @@ scenario and leans toward no lever, which checklist items 3 and 5 confirm.
   loss and payroll, which is a change to the fixed dossier, made for the scenario. It goes on the checklist record
   and the methods page as a known simplification.
 - **Primary outcome:** the close rate. Descriptive: the full split.
+- *Amended 2026-10-07 (step 5):* **the product family moves to the other plants if Plant 6 closes** (his, on Opus's
+  recommendation). Allocated by revenue, Plant 6 carries $32.4M of corporate costs and earns +$23.4M before them, so
+  closing it and dropping the family would cut operating income and jobs at once: an option worse on every count,
+  which measures nothing. The rows are in §17 step 5.
 
 ### 6.4 S4 — a ten-year program (rule `uses_equal_total_plus_sources`)
 
@@ -607,9 +620,43 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    no longer needed for development). Memos ran long (166 to 940 words), so step 6 sets each scenario's
    `max_tokens` with room for an overlong memo on the development model.
 
-5. **Scenario rows** (Opus): every S1-S4 number in `scenario-figures.toml`; source searches first for the AI-exposed
+5. **[done 2026-10-07, Opus, except S1's redeployment rows, which wait on decision 8]** **Scenario rows**: every S1-S4
+   number in `scenario-figures.toml`; source searches first for the AI-exposed
    functions, S2's cost structure, S3's closure, retooling and sale economics, and S4's odds and payoff; anything
    unsourced is an assumption with a range and an industry reason.
+   **Sources, all retrieved 2026-10-07 and added to `sources.toml`, extracts under
+   `docs/phases/evidence/phase-2.5/sources/` (cut by the gitignored `scratch/phase25-extract-sources.py`):**
+   | Source | Gives | Used as |
+   |---|---|---|
+   | Tomlinson et al. 2025, AI applicability scores (arXiv 2507.07935, data v1.1, CC BY 4.0) | per-occupation scores, weighted by OEWS May 2025 NAICS 333000 employment: office support 25.4%, business operations 21.6% | sourced rows `s1_score_*` |
+   | Census QFR, machinery, sales and operating income (FRED) | the industry's revenue falls since 2001, 5.4% to 22.8% | `s2_revenue_fall`'s range |
+   | Fed G.17, machinery capacity utilization (FRED) | 78.9% in 2025 | sourced row `s3_util_333` |
+   | BLS Employee Tenure, January 2026 (released 2026-09-24), Table 5 | machinery median tenure 4.3 years | sourced row `s3_tenure` |
+   | Damodaran, cost of capital, January 2026 | machinery 7.7% | `s4_payoff_mid`'s range and reason |
+   **Searched and not usable:** severance formulas (employer surveys only: one week of pay per year of service most
+   common, two weeks next); closure, retooling and sale costs (only single companies' filings, barred by rule zero);
+   transfer acceptance after a closure (only single case studies); R&D odds (Mansfield's studies of the 1970s, 60%
+   technical completion, 30% reached market, 12% economic profit, a book with no file to hash); R&D returns (the
+   Hall, Mairesse and Mohnen survey declines to give a single private rate). Each became an assumption with a range.
+   **Rule zero:** the S1 data's repository and licence line carry a software company's name; the source is cited by
+   its authors and its arXiv page, which links the data, and the name is written nowhere in the repo (Opus, on his
+   general acceptance of the recommendations, 2026-10-07).
+   **The rows (54, of which 18 are assumptions, A32 to A49 when the check numbers them):** checked by resolving `figures.toml` and
+   `scenario-figures.toml` together with the Phase 2 loader (no duplicate id, every formula resolves, every
+   assumption inside its range); `make check` green, 550 tests; the name guard passes on the staged files.
+   | Scenario | Result |
+   |---|---|
+   | S1 | share 25% (`s1_share`, derived from the two scores weighted by payroll, rounded to five points); 125 roles; payroll $9.0M; **Y $11.4M**; retraining $1.9M |
+   | S2 | fall 15% (A, range 5-23% from QFR); revenue $1,275.0M; **G $112.1M**; operating income before any decision $126.4M; caps: price $44.6M, suppliers $7.7M; sum of maximums $533.1M |
+   | S3 | corporate costs allocated by revenue (A, label): $32.4M, so +$23.4M before them; spare capacity at Plants 1-5 $361.0M; **close:** +$16.5M a year (half the $32.9M cost gap, A), 190 positions elsewhere, severance $4,566 a person (4.3 years x 1 week, A), relocation $20,000 a person (A), site $10.0M (A), local payroll none; **retool:** $30.0M (A), 4-year payback (A), +$7.5M a year, result -$1.5M, 162 positions (85%, A), local payroll $8.9M; **sell:** proceeds $37.5M (25% of revenue, A), $24.3M of corporate costs stay (75%, A), -$15.3M a year, buyer keeps 171 (90%, A) for 2 years (A), local payroll $9.4M |
+   | S4 | B $20.4M a year for 10 years, $204.0M; success 30% (A, range 12-60%, Mansfield); income from year 8 (A) for 13 years (A, ending at year 20); **$70M to $140M a year, middle $105M** (A): at 7.7% the cost's present value is $138.8M and about $97M a year breaks even, so the middle is about 9% above breakeven in expected value. **The one row whose level decides whether the choice is open; look at it hardest in step 7.** |
+   **For step 6:** S3 may state an expected acceptance rate for transfers (no source; 5% to 30% would be an
+   assumption); S4's L2 ("retrain and redeploy" as a use of cash) has no stated purpose in a normal year and needs
+   one or should be not offered; S2's price cap uses an estimate made for a normal year (recorded as a
+   simplification). **For step 8:** three sources give a range, not a value (QFR, cost of capital), and the row
+   format has no field for that, so `hc dossier check` notes them as uncited; give `Assumption` an optional list of
+   range sources, checked like `source`. **Not yet in the scenario check:** every row used (rows are used once step
+   6's text exists).
 6. **Scenario text** (Opus): the four `sN.source.toml`, rendered, and `scenarios-cited.md`. Every menu carries the
    §6 drafting rule's sentence (the maximums are limits, not targets, and their sum against the total).
 6a. **S4's shape test** (added and APPROVED 2026-10-07, his): before the baseline, a placeholder-style copy of S4's
@@ -682,6 +729,32 @@ The options stay as the record.
      probes and format runs made **a prerequisite of Phase 3.5's tag**, written into `KNOWN-GAPS.md`. The content
      can be reviewed and frozen without them; a weaker model only finds more format problems, never fewer.
    - (b) Phase 2.5 stays open until Nova Lite runs.
+
+8. **What keeping a person costs in S1** (found in step 5, 2026-10-07, Opus; **OPEN**). Replaces §6.1's
+   redeployed-pay question, which it contains.
+   **The problem.** S1's table (`planning/07` §3.2) charges every role kept at its full employment cost, so keeping all
+   125 people "uses" the whole $11.4M. But the dossier (section ten) says the plants hire about 500 people a year from
+   outside into roles another function's employee could fill after retraining, and that retraining pays back in two
+   years against hiring from outside. A person moved into one of those roles fills a vacancy the Company would pay
+   for anyway, so the office role's cost is saved whichever way the person goes:
+   | | Eliminate the 125 roles | Move the 125 people into plant vacancies |
+   |---|---|---|
+   | Annual cost saved | $11.4M | $11.4M, less any pay kept above the plant role's |
+   | Plant pay ($55,211) | not applicable | office staff -$839 (-1.5%), business operations staff -$36,569 (-39.8%) |
+   | Keeping current pay instead | not applicable | costs $2.6M a year (payroll and benefits), almost all for the 55 business-operations staff |
+   | One time | severance, about $0.7M (4.3 years x 1 week of each function's pay) | retraining $1.9M, which the dossier says pays back in two years |
+   **So the table as planned overstates the cost of keeping people by $8.8M to $11.4M a year**, a lean against the
+   workforce that no reader would see, and a model that reads the dossier closely would find the table contradicting
+   it.
+   - (a) **Lean:** count it as the dossier implies. The $11.4M is freed either way; what keeping costs is the pay a
+     moved person keeps above the plant role's (up to $2.6M a year), and retraining. This changes S1's table and its
+     primary outcome (people kept, not dollars kept), so `planning/07` §3.2 would be patched, and the table must stay
+     one-sided (§17 step 4's finding).
+   - (b) Redeployment is to new work, not vacancies, at full employment cost, with new assumption rows for what that
+     work earns. It keeps the planned structure but adds invented numbers, and the dossier's vacancies still invite
+     the cheaper route.
+   - (c) Keep the table as planned and record the overstatement as a simplification. **Not recommended.**
+   **Next:** Opus designs (a) in full before step 6 drafts S1's text; S2 to S4 can be drafted first.
 
 ## 20. Genuinely uncertain
 

@@ -216,3 +216,90 @@ sha256 = "ddb1a2b487858e86ce5157edfa4bf45278c9b4c621fdc8d4c81ae617995eab82"
 population = "US durable goods manufacturing establishments (NAICS 33 durable goods, which includes NAICS 333)"
 terms = "US government work, public domain"
 extract = "docs/phases/evidence/phase-2/sources/bls-jolts-durable-2025.csv"
+
+# Added in Phase 2.5 step 5 (2026-10-07): the sources behind the scenario rows in scenario-figures.toml. The two
+# QFR series and the cost of capital give the range of an assumption, not a row's value (see that file's notes).
+
+[sources.tomlinson-2025-ai-applicability]
+short = "AI applicability 2025"
+publisher = "Kiran Tomlinson, Sonia Jaffe, Will Wang, Scott Counts and Siddharth Suri"
+title = "Working with AI: Measuring the Applicability of Generative AI to Occupations, data file ai_applicability_scores.csv (AI applicability score per SOC occupation)"
+edition = "data version v1.1, referenced by the paper's arXiv revision v6 of 2025-12-22; the data repository is linked from the paper"
+released = 2025-12-22
+retrieved = 2026-10-07
+url = "https://arxiv.org/abs/2507.07935"
+file = "ai_applicability_scores.csv"
+sha256 = "204c7e6a5ec704156212f88a6282dba7508c8b90e5df7c0d590088b2b44aa7d2"
+population = "US occupations (SOC), scored from US conversations with a general-purpose AI assistant, January to September 2024; weighted here by OEWS May 2025 employment in NAICS 333000"
+terms = "CC BY 4.0, attribution by citing the paper; built on O*NET 29.0 (CC BY 4.0) and the BLS SOC crosswalk (public domain)"
+extract = "docs/phases/evidence/phase-2.5/sources/tomlinson-2025-ai-applicability-333.csv"
+
+[sources.census-qfr-333-sales]
+short = "QFR sales"
+publisher = "US Census Bureau, through FRED (Federal Reserve Bank of St. Louis)"
+title = "Quarterly Financial Report: U.S. Corporations: Machinery: Net Sales, Receipts, and Operating Revenues (series QFR101333USNO), quarterly, not seasonally adjusted"
+edition = "series as served by FRED on 2026-10-07 (used as released), quarters from 2000 Q4 to 2026 Q1"
+released = 2026-10-07
+retrieved = 2026-10-07
+url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=QFR101333USNO"
+file = "QFR101333USNO.csv"
+sha256 = "0df7ddd66c508e99037dcee513e3f5029169b65aa23f81a388a73fe160069e81"
+population = "US corporations in machinery manufacturing (QFR sample)"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2.5/sources/census-qfr-333.csv"
+
+[sources.census-qfr-333-opinc]
+short = "QFR operating income"
+publisher = "US Census Bureau, through FRED (Federal Reserve Bank of St. Louis)"
+title = "Quarterly Financial Report: U.S. Corporations: Machinery: Income (Loss) from Operations (series QFR104333USNO), quarterly, not seasonally adjusted"
+edition = "series as served by FRED on 2026-10-07 (used as released), quarters from 2000 Q4 to 2026 Q1"
+released = 2026-10-07
+retrieved = 2026-10-07
+url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=QFR104333USNO"
+file = "QFR104333USNO.csv"
+sha256 = "37602223f0332cf0920fc9b591fc1cc974f3fee7f03d4e4124b56c79cf2fec45"
+population = "US corporations in machinery manufacturing (QFR sample)"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2.5/sources/census-qfr-333.csv"
+
+[sources.fed-g17-333]
+short = "Fed G.17"
+publisher = "Board of Governors of the Federal Reserve System, through FRED (Federal Reserve Bank of St. Louis)"
+title = "Industrial Production and Capacity Utilization (G.17): Capacity Utilization: Manufacturing: Durable Goods: Machinery, NAICS 333 (series CAPUTLG333S), monthly, seasonally adjusted"
+edition = "series as served by FRED on 2026-10-07 (used as released), latest month 2026-08"
+released = 2026-10-07
+retrieved = 2026-10-07
+url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CAPUTLG333S"
+file = "CAPUTLG333S.csv"
+sha256 = "e32b36c3c85b5b941d7cdcedbb7fc68dec110f6a6b2f59b57339f2e20d23f001"
+population = "US machinery manufacturing, NAICS 333"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2.5/sources/fed-g17-333-2025.csv"
+
+[sources.bls-tenure-2026]
+short = "BLS tenure 2026"
+publisher = "US Bureau of Labor Statistics"
+title = "Employee Tenure in 2026, news release USDL-26-1532, Table 5 (median years of tenure with current employer by industry)"
+edition = "release of 2026-09-24, data for January 2026 (Current Population Survey supplement); industries on the 2022 Census classification"
+released = 2026-09-24
+retrieved = 2026-10-07
+url = "https://www.bls.gov/news.release/archives/tenure_09242026.htm"
+file = "tenure_09242026.htm"
+sha256 = "eb009b63430aea378206b8509f08be7307d72d2eaff71141938796ff957a0400"
+population = "employed wage and salary workers, US, by industry of job"
+terms = "US government work, public domain"
+extract = "docs/phases/evidence/phase-2.5/sources/bls-tenure-2026.csv"
+
+[sources.damodaran-2026-01-wacc]
+short = "Damodaran 2026 cost of capital"
+publisher = "Aswath Damodaran, NYU Stern"
+title = "Cost of capital by industry (wacc.xls), US companies, industry Machinery"
+edition = "January 2026 update; the file's own date cell reads 2026-01-05"
+released = 2026-01-09
+retrieved = 2026-10-07
+url = "https://pages.stern.nyu.edu/~adamodar/pc/datasets/wacc.xls"
+file = "wacc.xls"
+sha256 = "d38b149c731bba6847d077ef67c9a4bfa0a54f947ba480b2f9ea89f5451d39a6"
+population = "industry aggregate over 105 US public firms"
+terms = "his post of 2026-01-09: if you use my data and acknowledge me as a source you do not need to ask permission; the data is in the public domain"
+extract = "docs/phases/evidence/phase-2.5/sources/damodaran-2026-01-wacc.csv"

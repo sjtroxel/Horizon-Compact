@@ -17,6 +17,9 @@
   **Patched 2026-10-07 (his), from `docs/phases/phase-2.5-scenarios-and-wordings-IMPLEMENTATION.md`:** §3.2 a role
   eliminated or kept counts at employment cost (payroll and benefits), a wage or hours cut at payroll (decision 1);
   S4's optional cuts are offered under both choices (decision 3).
+  **Patched 2026-10-07 (his, on Opus's recommendation), from Phase 2.5 step 5:** §3.2 S1's share is about 25%, from
+  a public source, not 30%; S2's $G counts only the costs that fall with volume on their own (purchased materials,
+  parts and energy), so no pay is cut before the decision.
   **Patched 2026-10-04 (his), from `docs/phases/phase-3.5-preregistration.md`:** §10.0 the case types and *k* set
   (decision 4); the change policy after the tag gains errata (decision 6, in "What this doc is" below).
   **Patched 2026-10-04 (his), from `docs/phases/phase-4-official-grid.md`:** §11 a sweep is one study on one model,
@@ -151,6 +154,8 @@ goes to it), or **not offered**, with the reason. *(Nine levers since 2026-10-03
 
 Numbers below are **illustrative only.** The real ones come from the fictional company's dossier in Phase 2.
 
+*Patched 2026-10-07 (his, Phase 2.5 step 5): about 25%, the two functions' AI applicability in this industry
+(`experiment/company/scenario-figures.toml`, `s1_share`); 30% was above what the source supports.*
 **S1. AI-savings allocation (a uses decision).** AI tools can take over about 30% of the work in some functions, worth
 **$Y a year** of payroll. Every dollar of that capacity either **stays with the people** (L2: they are retrained and
 moved to new work) or is **released by eliminating their roles** and sent to a use (L3-L8). L1 is not chosen
@@ -179,6 +184,10 @@ terms), or shareholders (L8 accept lower profit). **Payout policy (L7) is held f
 because cutting a dividend moves cash but does not restore operating profit, and offering both L7 and L8 would count
 shareholders twice. **L2 is not offered:** keeping people is already expressible, as the shortfall being borne by
 anything other than L1, and the prompt says so.
+*Patched 2026-10-07 (his, Phase 2.5 step 5): **$G is the lost revenue times the share of cost that does not fall
+with volume on its own**, that is, everything but purchased materials, parts and energy. Treating all of cost of
+goods sold as variable would have cut about 285 plant roles before the decision, outside L1, and hidden part of
+the workforce's share.*
 
 > Example, G = $60M: L1 $18M · L4 $6M · L3 $9M · L6 $3M · L5 $6M · L9 $6M · L8 $12M.
 > **Primary outcome: share borne by the workforce = (L1 + L4) / G = 24 / 60 = 0.40.**

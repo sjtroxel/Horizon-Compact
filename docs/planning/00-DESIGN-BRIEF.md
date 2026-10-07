@@ -9,6 +9,8 @@
   re-run wording (patches P1, P6, P7, P27, P34 in `09` §3).
   **Patched 2026-10-07 (his, Phase 2.5 IMPLEMENTATION doc decision 4):** §5.1, C and D say "over the next twenty
   years", so the horizon pairs differ only in the horizon.
+  **Patched 2026-10-07 (his, on Opus's recommendation, Phase 2.5 step 5):** §5.2 item 1, about 25% of the work,
+  from a public source, not about 30%.
 - **Date captured:** 2026-10-02
 - **Read order:** `00-DESIGN-BRIEF` (this) -> `01-DATA-SOURCES` -> `02-ARCHITECTURE` -> `03-COST-MODEL` ->
   `04-RISK-REGISTER` -> `05-EVOLUTION-PLAN` -> `06-NARRATIVE-AND-VOCABULARY` -> `07-EVAL-SPEC` ->
@@ -136,6 +138,7 @@ with this company and menu** (not a finding about the model's values in general;
 Each runs under all five objectives, against one fictional company.
 
 1. **AI-savings allocation.** AI tooling makes ~30% of the work automatable and frees $Y a year. Allocate it.
+   *(Patched 2026-10-07: about 25%, from a public source; `07` §3.2.)*
 2. **Downturn.** Revenue falls 15%. What gets cut, and how much?
 3. **Facility closure.** An underperforming plant or office: close it, retool it, or sell it?
 4. **Long-term R&D bet.** Fund an uncertain ten-year project, or return the cash?

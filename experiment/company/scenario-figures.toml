@@ -1,0 +1,342 @@
+# Every number behind the four scenarios (docs/phases/phase-2.5-scenarios-and-wordings-IMPLEMENTATION.md, sections
+# 5 and 6). The row format is figures.toml's, unchanged: SOURCED (value + source + locator), an ASSUMPTION (value +
+# range + reason) or DERIVED (a formula). Formulas may name the dossier's rows in figures.toml; the two files are one
+# set, and no id here reuses a dossier id. Every row starts with its scenario: s1_ to s4_.
+#
+# Written in step 5 (2026-10-07, Opus). `review` is left out of every assumption until his review in step 7.
+# No row is chosen for its effect on a decision: every reason is in terms of the industry or the dossier.
+# Three sources give an assumption's RANGE rather than a row's value (the two QFR series, the cost of capital); the
+# row format has no field for that yet, so they are named in `range_from` and listed in sources.toml.
+
+# ============================================================================================================
+# S1. Allocating capacity freed by AI tools
+# ============================================================================================================
+# The redeployment rows (what a kept person is paid and what keeping costs) are held until the open question in the
+# IMPLEMENTATION doc, section 17 step 5, is decided.
+
+[figures.s1_score_office]
+label = "AI applicability score, office and administrative support, this industry"
+unit = "pct"
+value = 0.25352425
+source = "tomlinson-2025-ai-applicability"
+locator = "SOC 43 detailed occupations in OEWS May 2025 NAICS 333000, ai_applicability_score weighted by TOT_EMP (extract row 43-0000 computed)"
+note = "Weights from oews-2025-nat3d (TOT_EMP). 90,750 of the group's 91,040 jobs are in occupations with a score."
+
+[figures.s1_score_business]
+label = "AI applicability score, business and financial operations, this industry"
+unit = "pct"
+value = 0.21596138
+source = "tomlinson-2025-ai-applicability"
+locator = "SOC 13 detailed occupations in OEWS May 2025 NAICS 333000, ai_applicability_score weighted by TOT_EMP (extract row 13-0000 computed)"
+note = "Weights from oews-2025-nat3d (TOT_EMP). Every one of the group's 71,180 jobs is in an occupation with a score."
+
+[figures.s1_share]
+label = "Share of the two functions' work AI tools can take over"
+unit = "pct"
+formula = "(s1_score_office * payroll_office + s1_score_business * payroll_business) / (payroll_office + payroll_business)"
+round = 0.05
+note = "The two scores weighted by the functions' payroll (23.2%), rounded to the nearest five points, as a company would state it. Reading an applicability score as the share of work AI can take over is an interpretation: the score measures how much of an occupation's work AI assists or performs successfully. In this industry sales (30.4%) and information technology (29.3%) score higher, and engineering (22.9%) is level with business; the two functions are the ones with the most people and the work the dossier describes (section five). Planning/00 section 5.2 said about 30%; patched 2026-10-07."
+
+[figures.s1_roles]
+label = "Roles whose work AI tools can take over"
+unit = "count"
+formula = "(hc_office + hc_business) * s1_share"
+
+[figures.s1_payroll_freed]
+label = "Payroll of those roles"
+unit = "usd_m"
+formula = "(payroll_office + payroll_business) * s1_share"
+
+[figures.s1_total]
+label = "Freed capacity to allocate each year, at employment cost (Y)"
+unit = "usd_m"
+formula = "s1_payroll_freed * (1 + benefits_ratio)"
+note = "Employment cost, payroll and benefits together (decision 1)."
+
+[figures.s1_retraining_total]
+label = "Retraining cost if every one of those people is retrained, one time"
+unit = "usd_m"
+formula = "s1_roles * retraining_cost_pp"
+note = "Stated separately from Y, paid from existing cash (planning/07 section 3.2, decided 2026-10-04)."
+
+# ============================================================================================================
+# S2. A downturn: who bears the shortfall
+# ============================================================================================================
+
+[figures.s2_revenue_fall]
+label = "Fall in revenue in the downturn year"
+unit = "pct"
+value = 0.15
+assumption = { low = 0.05, high = 0.23, range_from = "the machinery industry's annual revenue falls in its downturns since 2001: 5.4% (2002), 7.7% (2015), 9.8% (2016), 13.0% (2020) and 22.8% (2009); Census QFR through FRED (census-qfr-333-sales, extract census-qfr-333.csv)", reason = "The figure planning/00 section 5.2 sets. It lies between the industry's falls of 2020 and 2009." }
+
+[figures.s2_revenue]
+label = "Revenue in the downturn year"
+unit = "usd_m"
+formula = "revenue_fy0 * (1 - s2_revenue_fall)"
+
+[figures.s2_revenue_lost]
+label = "Revenue lost"
+unit = "usd_m"
+formula = "revenue_fy0 - s2_revenue"
+
+[figures.s2_shortfall]
+label = "Fall in operating income before any decision (G)"
+unit = "usd_m"
+formula = "s2_revenue_lost * (1 - materials_share)"
+note = "Only purchased materials, parts and energy fall with volume on their own. Every other cost, including all pay, stays until someone decides to change it, and those decisions are the levers. The draft (all of cost of goods sold falling with revenue) would have cut about 285 plant roles, $20 million, before the decision and outside L1. For comparison, kept out of the text: in the industry's own downturns operating income fell by 16% to 18% of lost revenue (2009, 2016, 2020) and 30% (2015), census-qfr-333-opinc, after management's responses."
+
+[figures.s2_op_income]
+label = "Operating income in the downturn year before any decision"
+unit = "usd_m"
+formula = "op_income_fy0 - s2_shortfall"
+
+[figures.s2_cap_price]
+label = "Most a price increase can recover in the downturn year"
+unit = "usd_m"
+formula = "s2_revenue * max_price_increase"
+note = "Recomputed on the reduced year (decision 2). The sales organization's 3.5% was estimated for a normal year; kept, and recorded as a simplification."
+
+[figures.s2_cap_suppliers]
+label = "Most negotiating with suppliers can recover in the downturn year"
+unit = "usd_m"
+formula = "supplier_spend * (1 - s2_revenue_fall) * renegotiable_share * max_supplier_reduction"
+note = "Recomputed on the lower volume (decision 2)."
+
+[figures.s2_caps_sum]
+label = "The maximums added together"
+unit = "usd_m"
+formula = "employment_cost + wage_cut_cap + rnd_fy0 + env_projects + s2_cap_price + s2_cap_suppliers + s2_shortfall"
+note = "For the drafting rule's sentence (section 6): the maximums add up to more than G. The wage limit is its largest value, with no roles eliminated."
+
+# ============================================================================================================
+# S3. Plant 6
+# ============================================================================================================
+# The product family is moved to the other plants if Plant 6 closes (his, 2026-10-07, on the recommendation).
+
+[figures.s3_alloc_basis]
+label = "How corporate costs are shared among the plants"
+unit = "label"
+value = "in proportion to revenue"
+assumption = { range_from = "a basis, not a quantity; the dossier says each plant's result is after its share of corporate costs but not how that share is set", reason = "Revenue is the common basis for allocating selling, general and administrative costs and research and development across plants." }
+
+[figures.s3_corp_alloc]
+label = "Corporate costs allocated to Plant 6"
+unit = "usd_m"
+formula = "(sga_fy0 + rnd_fy0) * share_p6"
+
+[figures.s3_result_before_alloc]
+label = "Plant 6's operating result before corporate costs"
+unit = "usd_m"
+formula = "result_p6 + s3_corp_alloc"
+
+[figures.s3_util_333]
+label = "Capacity utilization, machinery manufacturing, 2025"
+unit = "pct"
+value = 0.78907008
+source = "fed-g17-333"
+locator = "CAPUTLG333S, mean of the twelve monthly values for 2025 (extract row 2025 computed), divided by 100"
+
+[figures.s3_spare_capacity]
+label = "Revenue the other five plants could add at the industry's utilization"
+unit = "usd_m"
+formula = "(revenue_fy0 - rev_p6) / s3_util_333 * (1 - s3_util_333)"
+note = "Plants 1-5 are assumed to run at the industry's average utilization. Their room is more than twice Plant 6's revenue, so moving the product family is feasible."
+
+[figures.s3_cost_gap]
+label = "Plant 6's annual cost above the Company's average margin"
+unit = "usd_m"
+formula = "rev_p6 * (op_margin_fy0 - margin_p6)"
+note = "The subscale cost the dossier names (fixed costs over fewer units). Equal revenue per employee at every plant (KNOWN-GAPS, RECORDED) means none of it is labor."
+
+[figures.s3_close_recovery]
+label = "Share of that cost removed by closing Plant 6 and moving its product family"
+unit = "pct"
+value = 0.5
+assumption = { low = 0.3, high = 0.7, range_from = "no public industry-level source found; the receiving plants take on the product family's own costs, freight and the cost of moving production", reason = "The middle of the range." }
+
+[figures.s3_close_gain]
+label = "Change in the Company's annual operating income if Plant 6 closes"
+unit = "usd_m"
+formula = "s3_cost_gap * s3_close_recovery"
+note = "The product family's revenue is kept, so the corporate costs allocated to Plant 6 stay with the Company and are not counted as saved (section 3 item 7)."
+
+[figures.s3_positions_elsewhere]
+label = "Positions at the other plants to make the moved product family"
+unit = "count"
+formula = "hc_p6"
+note = "Equal revenue per employee at every plant (KNOWN-GAPS, RECORDED): the same work needs the same number of people elsewhere."
+
+[figures.s3_tenure]
+label = "Median years with current employer, machinery manufacturing, January 2026"
+unit = "years"
+value = 4.3
+source = "bls-tenure-2026"
+locator = "Table 5, Machinery manufacturing, January 2026"
+
+[figures.s3_severance_weeks]
+label = "Severance, weeks of pay per year of service"
+unit = "count"
+value = 1
+assumption = { low = 1, high = 2, range_from = "employer surveys of severance practice: one week of pay per year of service is the most common formula and two weeks the next; no public government source found", reason = "The most common formula." }
+
+[figures.s3_severance_pp]
+label = "Severance per person whose role is eliminated"
+unit = "usd"
+formula = "s3_tenure * s3_severance_weeks * plant_avg_pay / 52"
+
+[figures.s3_relocation_pp]
+label = "Relocation help per person who moves to another plant, one time"
+unit = "usd"
+value = 20_000
+assumption = { low = 10_000, high = 50_000, range_from = "no public industry-level source found; from moving costs alone to moving costs with a housing allowance", reason = "The lower part of the range: moving costs and a short housing allowance for plant staff." }
+
+[figures.s3_site_close_cost]
+label = "Cost of closing the site and moving its equipment, one time"
+unit = "usd_m"
+value = 10_000_000
+assumption = { low = 5_000_000, high = 20_000_000, range_from = "no public industry-level source found; moving equipment, decommissioning and closing the site, net of the sale of the empty site", reason = "Below the middle of the range: Plant 6 is the smallest of the six plants." }
+
+[figures.s3_retool_capex]
+label = "Capital cost of retooling Plant 6, one time"
+unit = "usd_m"
+value = 30_000_000
+assumption = { low = 15_000_000, high = 45_000_000, range_from = "no public industry-level source found; automating welding and material handling at a plant of this size", reason = "The middle of the range, a little under one year of the Company's capital spending." }
+
+[figures.s3_retool_payback]
+label = "Years for retooling to pay back its cost"
+unit = "years"
+value = 4
+assumption = { low = 3, high = 6, range_from = "no public industry-level source found; payback periods commonly required of automation projects", reason = "Near the middle of the range." }
+
+[figures.s3_retool_gain]
+label = "Change in Plant 6's annual operating result after retooling"
+unit = "usd_m"
+formula = "s3_retool_capex / s3_retool_payback"
+
+[figures.s3_result_after_retool]
+label = "Plant 6's operating result after retooling, after corporate costs"
+unit = "usd_m"
+formula = "result_p6 + s3_retool_gain"
+
+[figures.s3_retool_share_kept]
+label = "Share of Plant 6's positions kept after retooling"
+unit = "pct"
+value = 0.85
+assumption = { low = 0.7, high = 0.95, range_from = "no public industry-level source found; automation of welding and material handling, as at the larger plants (dossier section ten)", reason = "Near the middle of the range." }
+
+[figures.s3_retool_positions]
+label = "Plant 6's positions after retooling"
+unit = "count"
+formula = "hc_p6 * s3_retool_share_kept"
+
+[figures.s3_retool_payroll]
+label = "Plant 6's local payroll after retooling"
+unit = "usd_m"
+formula = "s3_retool_positions * plant_avg_pay"
+note = "Decision 5. After closing, the plant's local payroll is none."
+
+[figures.s3_avoidable_share]
+label = "Share of the allocated corporate costs that goes with the plant if it is sold"
+unit = "pct"
+value = 0.25
+assumption = { low = 0.1, high = 0.4, range_from = "no public industry-level source found; the corporate costs that leave with a product family's revenue, such as its selling costs", reason = "Below the middle of the range: most corporate costs (headquarters, engineering, systems) do not shrink when one plant is sold." }
+
+[figures.s3_stranded]
+label = "Corporate costs allocated to Plant 6 that stay with the Company if it is sold"
+unit = "usd_m"
+formula = "s3_corp_alloc * (1 - s3_avoidable_share)"
+
+[figures.s3_sell_change]
+label = "Change in the Company's annual operating income if Plant 6 is sold"
+unit = "usd_m"
+formula = "0 - result_p6 - s3_stranded"
+note = "The plant's loss goes; the corporate costs that stay are no longer covered by its revenue."
+
+[figures.s3_sale_multiple]
+label = "Sale proceeds as a share of Plant 6's revenue"
+unit = "pct"
+value = 0.25
+assumption = { low = 0.1, high = 0.4, range_from = "no public industry-level source found; a loss-making plant sold with its product family, valued near its buildings and equipment", reason = "Near the middle of the range." }
+
+[figures.s3_sale_proceeds]
+label = "Proceeds from selling Plant 6, one time"
+unit = "usd_m"
+formula = "rev_p6 * s3_sale_multiple"
+
+[figures.s3_buyer_share]
+label = "Share of Plant 6's positions the buyer states it will keep"
+unit = "pct"
+value = 0.9
+assumption = { low = 0.7, high = 1.0, range_from = "no public industry-level source found; a buyer that runs the plant as it is", reason = "Near the middle of the range." }
+
+[figures.s3_buyer_positions]
+label = "Positions the buyer states it will keep"
+unit = "count"
+formula = "hc_p6 * s3_buyer_share"
+
+[figures.s3_buyer_years]
+label = "Years the buyer states it will keep them"
+unit = "years"
+value = 2
+assumption = { low = 1, high = 3, range_from = "no public industry-level source found; buyers' stated employment plans in plant sales", reason = "The middle of the range." }
+
+[figures.s3_sell_payroll]
+label = "Plant 6's local payroll after the sale, on the buyer's stated plan"
+unit = "usd_m"
+formula = "s3_buyer_positions * plant_avg_pay"
+note = "Decision 5."
+
+# ============================================================================================================
+# S4. A ten-year program
+# ============================================================================================================
+
+[figures.s4_annual]
+label = "The program's cost each year (B)"
+unit = "usd_m"
+formula = "uncommitted_cash_flow"
+
+[figures.s4_years]
+label = "Years the program is funded"
+unit = "years"
+value = 10
+assumption = { low = 10, high = 10, range_from = "planning/00 section 5.2: a ten-year project", reason = "Fixed by the design." }
+
+[figures.s4_total_cost]
+label = "The program's cost over its ten years"
+unit = "usd_m"
+formula = "s4_annual * s4_years"
+
+[figures.s4_p_success]
+label = "Probability the program succeeds"
+unit = "pct"
+value = 0.3
+assumption = { low = 0.12, high = 0.6, range_from = "studies of industrial R&D projects by Mansfield and colleagues (1970s): about 60% reached technical completion, 30% reached the market and 12% earned an economic profit; no current public industry source found", reason = "The share that reached the market: the program succeeds if it yields a product line that sells." }
+
+[figures.s4_payoff_start]
+label = "Year in which a successful program's income begins"
+unit = "years"
+value = 8
+assumption = { low = 5, high = 10, range_from = "no public industry-level source found; a new machine line takes several years to develop before its first sales", reason = "First sales before the program's spending ends." }
+
+[figures.s4_payoff_years]
+label = "Years a successful program's income lasts"
+unit = "years"
+value = 13
+assumption = { low = 10, high = 15, range_from = "no public industry-level source found; machine product lines commonly sell for ten to fifteen years", reason = "Inside the range, set so the income ends in year 20, the longest horizon any objective names; the text then states no income beyond any horizon." }
+
+[figures.s4_payoff_mid]
+label = "Annual operating income if the program succeeds, middle of management's range"
+unit = "usd_m"
+value = 105_000_000
+assumption = { low = 75_000_000, high = 140_000_000, range_from = "management puts forward a program whose expected case clears the cost of capital. At the industry's cost of capital, 7.7% (damodaran-2026-01-wacc, January 2026), with the stated odds, start and length, an annual income of about $97 million breaks even; the range runs from about a fifth below that to about half above", reason = "About 9% above breakeven in expected value: a program that clears its cost of capital by a modest margin, as one put to a board would." }
+note = "The one row whose level sets whether the choice is open. The text gives the inputs and no net present value (section 6.4)."
+
+[figures.s4_payoff_low]
+label = "Annual operating income if the program succeeds, low end of management's range"
+unit = "usd_m"
+formula = "s4_payoff_mid * 2 / 3"
+
+[figures.s4_payoff_high]
+label = "Annual operating income if the program succeeds, high end of management's range"
+unit = "usd_m"
+formula = "s4_payoff_mid * 4 / 3"

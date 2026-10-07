@@ -1,0 +1,46 @@
+OCC_CODE,OCC_TITLE,TOT_EMP,ai_applicability_score
+43-1011,First-Line Supervisors of Office and Administrative Support Workers,6660,0.24548268
+43-3011,Bill and Account Collectors,420,0.23318402
+43-3021,Billing and Posting Clerks,490,0.22290554
+43-3031,"Bookkeeping, Accounting, and Auditing Clerks",10090,0.24411733
+43-3051,Payroll and Timekeeping Clerks,800,0.21831861
+43-3061,Procurement Clerks,910,0.25645956
+43-3099,"Financial Clerks, All Other",**,
+43-4051,Customer Service Representatives,11920,0.40780368
+43-4071,File Clerks,240,0.25045786
+43-4151,Order Clerks,1200,0.3206906
+43-4161,"Human Resources Assistants, Except Payroll and Timekeeping",460,0.21702937
+43-4171,Receptionists and Information Clerks,1260,0.24059463
+43-4199,"Information and Record Clerks, All Other",60,
+43-5021,Couriers and Messengers,**,
+43-5032,"Dispatchers, Except Police, Fire, and Ambulance",290,0.23169247
+43-5061,"Production, Planning, and Expediting Clerks",12860,0.25835686
+43-5071,"Shipping, Receiving, and Inventory Clerks",23410,0.18386228
+43-5111,"Weighers, Measurers, Checkers, and Samplers, Recordkeeping",180,0.08906645
+43-6011,Executive Secretaries and Executive Administrative Assistants,1370,0.26113362
+43-6014,"Secretaries and Administrative Assistants, Except Legal, Medical, and Executive",6980,0.25648084
+43-9021,Data Entry Keyers,400,0.31503287
+43-9051,"Mail Clerks and Mail Machine Operators, Except Postal Service",40,0.083345453
+43-9061,"Office Clerks, General",10690,0.24181022
+43-9071,"Office Machine Operators, Except Computer",80,0.1617074
+43-9199,"Office and Administrative Support Workers, All Other",230,
+43-0000 computed,"employment-weighted score, rows with a score",90750,0.25352425
+13-1020,Buyers and Purchasing Agents,15760,0.20326944
+13-1041,Compliance Officers,1180,0.19911369
+13-1051,Cost Estimators,2300,0.25473605
+13-1071,Human Resources Specialists,6850,0.20071634
+13-1075,Labor Relations Specialists,60,0.067259312
+13-1081,Logisticians,6880,0.16231739
+13-1082,Project Management Specialists,9780,0.18239804
+13-1111,Management Analysts,2180,0.3528923
+13-1121,"Meeting, Convention, and Event Planners",100,0.14650793
+13-1141,"Compensation, Benefits, and Job Analysis Specialists",300,0.16715323
+13-1151,Training and Development Specialists,2440,0.24174764
+13-1161,Market Research Analysts and Marketing Specialists,5530,0.3497337
+13-1199,"Business Operations Specialists, All Other",4190,0.21852126
+13-2011,Accountants and Auditors,11550,0.1945956
+13-2031,Budget Analysts,160,0.23408585
+13-2041,Credit Analysts,160,0.16163234
+13-2051,Financial and Investment Analysts,1570,0.27835475
+13-2099,"Financial Specialists, All Other",190,0.24584332
+13-0000 computed,"employment-weighted score, rows with a score",71180,0.21596138

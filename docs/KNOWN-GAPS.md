@@ -24,7 +24,7 @@ case by its type and a neutral label. The names live only in the private longlis
 > change). Deviations and one open point for step 6 (rescaling and a pinned line) are in the doc's §17. Phase 2's
 > DoD 7 row is closed with run `37534188137`.
 > **STEP 4, THE OLLAMA PROVIDER, DONE 2026-10-07 (Sonnet; reviewed by Opus); `make check` green, 550 tests;
-> committed as "phase 2.5: ollama provider, prompt diagnosis" (his).** Live checks first (Ollama 0.35.1; `qwen3.5:4b` digest `2a654d98e6fb...`, maximum context
+> COMMITTED: `b5ae8fb` "phase 2.5: ollama provider, prompt diagnosis" (his), pushed, CI run `37655035891` green.** Live checks first (Ollama 0.35.1; `qwen3.5:4b` digest `2a654d98e6fb...`, maximum context
 > 262,144, thinking off with `"think": false`, its own sampling defaults temperature 1 / top_k 20 / top_p 0.95 /
 > presence_penalty 1.5; `num_ctx` 16,384 uses 3,379 MiB, all in VRAM), then `providers/ollama.py`, the `local` route,
 > `qwen-local` in `models.toml`, and a CLI path with no AWS session at all. **The placeholder sweep ran (his,
@@ -37,7 +37,16 @@ case by its type and a neutral label. The names live only in the private longlis
 > the diagnostic himself (11:44 AM) and saw the same result, then APPROVED both of Opus's recommendations (11:45 AM):**
 > the drafting rule in §6 (every menu says the maximums are limits, not targets, and states their sum), and S4's
 > shape test, now §17 step 6a, before the baseline.
-> **NEXT: Opus, §17 step 5** (scenario rows; source searches first), then 6, 6a (S4's shape test, run by him) and 7.
+> **STEP 5, THE SCENARIO ROWS, DONE 2026-10-07 (Opus), except S1's redeployment rows:**
+> `experiment/company/scenario-figures.toml` (54 rows, 18 assumptions), six sources added to `sources.toml` with
+> extracts under `docs/phases/evidence/phase-2.5/sources/`; the doc's §17 step 5 has the table. **He accepted the
+> recommendations generally (12:31 PM), so these are decided:** S1's share is 25% from a public source, not 30%
+> (Y $11.4M); S2's G counts only materials, parts and energy as variable ($112.1M, not $84.4M: the draft would have
+> cut about 285 plant roles before the decision); S3's product family moves to the other plants if it closes;
+> `planning/00` §5.2 and `planning/07` §3.2 patched. **OPEN, decision 8 (§19):** S1's table charges a kept person
+> full employment cost, but the dossier's plant vacancies make keeping cost at most $2.6M a year, not $11.4M.
+> **NEXT: Opus designs decision 8's option (a) and shows him; meanwhile step 6 can draft S2-S4,** then 6a (S4's shape
+> test, run by him) and 7 (his review of A32-A49; look hardest at S4's payoff, `s4_payoff_mid`).
 > **Bedrock at 8:51 AM CDT on 2026-10-07 (`scratch/throttle-check.py`, run once):** Nova Lite and Sonnet 4.6 both
 > still `ThrottlingException`, "Too many tokens per day", $0. No AWS reply on case 179121856900232. He will not buy
 > paid support (his, 2026-10-07).
