@@ -230,13 +230,13 @@ def _cell(text: str) -> str:
     return text.replace("|", "\\|").replace("\n", " ")
 
 
-def _table(header: list[str], rows: list[list[str]]) -> str:
+def table(header: list[str], rows: list[list[str]]) -> str:
     lines = ["| " + " | ".join(header) + " |", "|" + "|".join("---" for _ in header) + "|"]
     lines += ["| " + " | ".join(_cell(cell) for cell in row) + " |" for row in rows]
     return "\n".join(lines) + "\n"
 
 
-def _source_line(source: Source) -> str:
+def source_line(source: Source) -> str:
     return (
         f"- **{source.short}**: {source.publisher}, {source.title}. {source.edition}. Released "
         f"{source.released.isoformat()}, retrieved {source.retrieved.isoformat()}. {source.url} "
@@ -248,11 +248,11 @@ def _cited_markdown(template: Template, fs: FigureSet) -> str:
     used: dict[str, None] = {}
     for key in template.references():
         row = fs.rows[key]
-        for dependency in _sources_behind(fs, key):
+        for dependency in sources_behind(fs, key):
             used.setdefault(dependency)
         if row.source:
             used.setdefault(row.source)
-    sources = "\n".join(_source_line(fs.sources[name]) for name in used)
+    sources = "\n".join(source_line(fs.sources[name]) for name in used)
     return (
         f"# {template.title} (cited version)\n\n"
         "The text between the rules is the board pack the model reads, with a bracketed label after each "
@@ -263,14 +263,14 @@ def _cited_markdown(template: Template, fs: FigureSet) -> str:
     )
 
 
-def _sources_behind(fs: FigureSet, key: str) -> list[str]:
+def sources_behind(fs: FigureSet, key: str) -> list[str]:
     """Sources of every sourced row a derived row ultimately rests on."""
     found: list[str] = []
     for dependency in sorted(fs.references.get(key, frozenset())):
         row = fs.rows[dependency]
         if row.source:
             found.append(row.source)
-        found += _sources_behind(fs, dependency)
+        found += sources_behind(fs, dependency)
     return found
 
 
@@ -293,8 +293,7 @@ def _figures_markdown(template: Template, fs: FigureSet, ref: dict[str, str]) ->
         rows.append([f"`{key}`", row.label, resolved.shown, row.kind, basis])
     return (
         "# Figures\n\nEvery row behind the dossier. `As shown` is the value after rounding, which is the "
-        "value later formulas use.\n\n"
-        + _table(["ID", "Figure", "As shown", "Kind", "Basis"], rows)
+        "value later formulas use.\n\n" + table(["ID", "Figure", "As shown", "Kind", "Basis"], rows)
     )
 
 
@@ -326,7 +325,7 @@ def _assumptions_markdown(template: Template, fs: FigureSet, ref: dict[str, str]
         "# Assumptions\n\nEvery figure that is a chosen value, not a source's. His review is recorded in "
         "`figures.toml` (the `review` line of each assumption) and rendered here; a changed value is changed "
         "there and re-rendered, never in this table.\n\n"
-        + _table(
+        + table(
             [
                 "ID",
                 "Figure",

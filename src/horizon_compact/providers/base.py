@@ -14,7 +14,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
-RouteKind = Literal["in_region", "geo_profile", "application_profile", "local"]
+RouteKind = Literal["in_region", "geo_profile", "application_profile", "local", "openrouter"]
 
 
 @dataclass(frozen=True)

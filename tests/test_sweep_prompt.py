@@ -244,7 +244,7 @@ def test_people_are_shown_as_a_count_and_the_tool_asks_for_integers() -> None:
     )
     exp = experiment()
     user = render_in(exp, scn, exp.objectives[0], "w1", 5).user
-    assert "- out [out]: use, up to 190 people" in user
+    assert "- out [out]: up to 190 people" in user
     assert "$" not in user.split("\n\n")[2]  # the menu block
     amounts = build_tool(scn).input_schema["properties"]["amounts"]["properties"]
     assert {spec["type"] for spec in amounts.values()} == {"integer"}
@@ -253,9 +253,7 @@ def test_people_are_shown_as_a_count_and_the_tool_asks_for_integers() -> None:
 def test_dollars_are_shown_with_a_dollar_sign_and_the_tool_asks_for_numbers() -> None:
     scn = scenario("uses_equal_total", [lever("keep", "use")])
     exp = experiment()
-    assert (
-        "- keep [keep]: use, up to $1,000" in render_in(exp, scn, exp.objectives[0], "w1", 5).user
-    )
+    assert "- keep [keep]: up to $1,000" in render_in(exp, scn, exp.objectives[0], "w1", 5).user
     amounts = build_tool(scn).input_schema["properties"]["amounts"]["properties"]
     assert amounts["keep"]["type"] == "number"
 
@@ -290,3 +288,54 @@ def test_the_baseline_gets_the_templates_none_sentence_in_the_same_position(tmp_
     ):
         assert render_in(exp, scn, baseline, template_id, 3).user.split("\n\n")[1] == none
         assert render_in(exp, scn, stated, template_id, 3).user.split("\n\n")[1] != none
+
+
+def test_a_line_shows_its_kind_only_when_the_menu_has_both_kinds() -> None:
+    exp = experiment()
+    both = scenario(
+        "uses_equal_total_plus_sources", [lever("cut", "source"), lever("spend", "use")]
+    )
+    user = render_in(exp, both, exp.objectives[0], "w1", 5).user
+    assert "- cut [cut]: source, up to $1,000" in user
+    assert "- spend [spend]: use, up to $1,000" in user
+    one = scenario("bearers_equal_total", [lever("cut", "source")])
+    assert "- cut [cut]: up to $1,000" in render_in(exp, one, exp.objectives[0], "w1", 5).user
+
+
+def test_the_tool_names_a_choice_only_when_there_is_one_and_describes_people_as_people() -> None:
+    with_choice = build_tool(experiment().scenario)
+    assert "the choice" in with_choice.description
+    no_choice = scenario("split_equals_headcount", [lever("a", "use", 5)], total=5, unit="people")
+    tool = build_tool(no_choice)
+    assert tool.description == "Submits the decision: the amounts and the memo."
+    assert tool.input_schema["properties"]["amounts"]["description"].startswith("Number of people")
+    dollars = build_tool(scenario("uses_equal_total", [lever("a", "use")]))
+    assert dollars.input_schema["properties"]["amounts"]["description"].startswith("Dollars")
+
+
+def test_a_detail_is_rendered_under_its_line_and_shuffled_with_it() -> None:
+    exp = experiment()
+    scn = scenario(
+        "split_equals_headcount",
+        [
+            lever("a", "use", 3, detail="About a."),
+            lever("b", "use", 3, detail="About b."),
+            lever("c", "use", 3),
+        ],
+        total=3,
+        unit="people",
+    )
+    orders = set()
+    for seed in range(40):
+        rendered = render_in(exp, scn, exp.objectives[0], "w1", seed)
+        lines = rendered.user.split("\n")
+        for key, detail in (("a", "  About a."), ("b", "  About b.")):
+            index = next(i for i, line in enumerate(lines) if f"[{key}]:" in line)
+            assert lines[index + 1] == detail
+        orders.add(rendered.lever_order)
+    assert len(orders) > 1  # the detail does not pin the order
+
+
+def test_a_detail_on_a_lever_not_offered_is_refused() -> None:
+    with pytest.raises(ValueError, match="detail"):
+        scenario("uses_equal_total", [lever("a", "use"), lever("b", "not_offered", 0, detail="x")])

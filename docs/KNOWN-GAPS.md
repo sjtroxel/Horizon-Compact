@@ -50,9 +50,16 @@ case by its type and a neutral label. The names live only in the private longlis
 > text fixes applied (two were quiet leans: S2's research line now says it includes engineering pay; S1's
 > severance for salaried staff moved to the middle of its range, 1.5 weeks); T3 (S1 always describes elimination
 > first) waits for step 8's per-line `detail`. 73 rows, 20 assumptions.
-> **NEXT SESSION: step 8 (Sonnet)**, its seven code items in the doc's §17 step 6 and decision 9 (OpenRouter
-> provider; `hc scenarios render` and `check`; per-line `detail`; objectives and templates), then step 9, the
-> baseline commit.
+> **Committed and pushed: `de95e16` "phase 2.5: step 6a diagnostics, dec'n 9, step 7 rev." (CI run
+> `37685407688` green; Deploy `37685407768` green).**
+> **STEP 8, ITEMS 1-10, BUILT 2026-10-07 (Sonnet), UNCOMMITTED: `make check` green, 648 tests, the placeholder's golden
+> test untouched.** Objectives and templates, `hc scenarios render` and `check` (in `make check`), the loader, lever-line,
+> tool and per-line `detail` changes, pinned lines out of rescaling, `range_sources`, and the OpenRouter provider with
+> `gpt-oss-openrouter` (price re-checked live: $0.037 / $0.17 per million). **Item 11 is his run** (garden content,
+> under a cent; the doc's §17 step 8 gives the command). **Opus, 4:20 PM, on his delegation:** fixed two S1
+> sentences that pointed at a path by position or by "the same" (the paths are shuffled now), and accepted Sonnet's
+> change log format, with one gap for step 14 (the sealed draw moves the content hash). Detail in §17 step 8 and §14.
+> **NEXT: commit (his), then item 11 (his run), then step 9, the baseline commit.**
 > **STEP 5 COMMITTED: `490a94e` "phase 2.5: scenario rows and sources", pushed, CI run `37663609137` green (Deploy
 > `37663608886` green).** **DECISION 8 DECIDED 1:11 PM (his):** S1 is a split of the 125 people into three priced
 > paths (eliminated; moved at plant pay; moved keeping current pay), and the $11.4M saving is stated as the same on

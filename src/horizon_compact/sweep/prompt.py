@@ -19,7 +19,9 @@ from horizon_compact.providers.base import ToolSpec
 
 TOOL_NAME = "submit_decision"
 TOOL_DESCRIPTION = "Submits the decision: the amounts, the choice and the memo."
+TOOL_DESCRIPTION_NO_CHOICE = "Submits the decision: the amounts and the memo."
 AMOUNTS_DESCRIPTION = "Dollars for every source and use listed, keyed by the key in brackets."
+AMOUNTS_DESCRIPTION_PEOPLE = "Number of people for every line listed, keyed by the key in brackets."
 MEMO_DESCRIPTION = "150 to 300 words explaining the decision."
 
 
@@ -45,7 +47,9 @@ def build_tool(scenario: Scenario) -> ToolSpec:
     properties: dict[str, Any] = {
         "amounts": {
             "type": "object",
-            "description": AMOUNTS_DESCRIPTION,
+            "description": (
+                AMOUNTS_DESCRIPTION_PEOPLE if scenario.unit == "people" else AMOUNTS_DESCRIPTION
+            ),
             "properties": {key: {"type": amount_type} for key in offered},
             "required": offered,
             "additionalProperties": False,
@@ -65,18 +69,22 @@ def build_tool(scenario: Scenario) -> ToolSpec:
         "required": sorted(required),
         "additionalProperties": False,
     }
-    return ToolSpec(name=TOOL_NAME, description=TOOL_DESCRIPTION, input_schema=schema)
+    description = TOOL_DESCRIPTION if scenario.choice is not None else TOOL_DESCRIPTION_NO_CHOICE
+    return ToolSpec(name=TOOL_NAME, description=description, input_schema=schema)
 
 
 def _dollars(amount: int) -> str:
     return f"${amount:,}"
 
 
-def _lever_line(lever: Lever, unit: str) -> str:
+def _lever_line(lever: Lever, unit: str, show_kind: bool) -> str:
     if lever.kind == "not_offered":
         return f"- {lever.label} [{lever.key}]: {lever.note or 'not offered'}"
     cap = f"{lever.cap:,} people" if unit == "people" else _dollars(lever.cap)
-    return f"- {lever.label} [{lever.key}]: {lever.kind}, up to {cap}"
+    kind = f"{lever.kind}, " if show_kind else ""
+    line = f"- {lever.label} [{lever.key}]: {kind}up to {cap}"
+    # The detail travels with its line, so a shuffled menu never puts one line's text under another's.
+    return f"{line}\n  {lever.detail.strip()}" if lever.detail else line
 
 
 def _option_line(option: Option) -> str:
@@ -97,12 +105,18 @@ def render_prompt(
     options = list(scenario.choice.options) if scenario.choice else []
     rng.shuffle(options)
 
+    # A line's kind is printed only when the menu has both: S1-S3 offer one kind, and "use, up to" or
+    # "source, up to" there would be noise.
+    show_kind = bool(scenario.offered("source")) and bool(scenario.offered("use"))
     system = "\n\n".join([scenario.role, experiment.dossier.text.strip(), scenario.currency_note])
     parts = [
         scenario.scenario.strip(),
         experiment.wording_sentence(objective, template_id),
         "\n".join(
-            [scenario.menu_heading, *(_lever_line(lever, scenario.unit) for lever in levers)]
+            [
+                scenario.menu_heading,
+                *(_lever_line(lever, scenario.unit, show_kind) for lever in levers),
+            ]
         ),
     ]
     if scenario.choice is not None:

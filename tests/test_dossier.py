@@ -232,6 +232,32 @@ def test_bad_references_cycles_ranges_and_arithmetic_are_each_refused(
         load(rows)
 
 
+def test_an_assumption_may_cite_the_sources_its_range_comes_from() -> None:
+    row = (
+        '[figures.a]\nlabel = "a"\nunit = "usd"\nvalue = 2\n'
+        'assumption = {{ low = 1, high = 3, range_from = "r", reason = "w", range_sources = {sources} }}\n'
+    )
+    fs = load(row.format(sources='["src-a"]'))
+    assert fs.rows["a"].assumption is not None
+    assert fs.rows["a"].assumption.range_sources == ["src-a"]
+    with pytest.raises(FigureError, match="unknown range source 'nope'"):
+        load(row.format(sources='["nope"]'))
+    with pytest.raises(FigureError, match="non-empty list of distinct"):
+        load(row.format(sources="[]"))
+    with pytest.raises(FigureError, match="non-empty list of distinct"):
+        load(row.format(sources='["src-a", "src-a"]'))
+
+
+def test_a_source_cited_only_as_a_range_source_is_not_reported_as_uncited(tmp_path: Path) -> None:
+    from horizon_compact.dossier.check import cited_sources
+
+    rows = parse_rows(
+        '[figures.a]\nlabel = "a"\nunit = "usd"\nvalue = 2\n'
+        'assumption = { low = 1, high = 3, range_from = "r", reason = "w", range_sources = ["src-a"] }\n'
+    )
+    assert cited_sources(rows) == {"src-a"}
+
+
 @pytest.mark.parametrize(
     "formula",
     [

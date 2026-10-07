@@ -12,6 +12,7 @@ from horizon_compact.dossier.figures import (
     FIGURES_FILE,
     SOURCES_FILE,
     FigureError,
+    FigureRow,
     FigureSet,
     parse_rows,
     parse_sources,
@@ -30,6 +31,7 @@ from horizon_compact.dossier.render import (
 )
 
 LENGTH_WARNING_TOKENS = 7_000
+SCENARIO_FIGURES_FILE = "scenario-figures.toml"
 
 
 @dataclass
@@ -134,11 +136,36 @@ def run_checks(root: Path) -> Report:
         elif actual != expected:
             report.failures.append(f"{path} differs from a fresh render; run `hc dossier render`")
 
-    _add_notes(report, template, fs)
+    _add_notes(report, template, fs, _scenario_rows(company))
     return report
 
 
-def _add_notes(report: Report, template: Template, fs: FigureSet) -> None:
+def _scenario_rows(company: Path) -> dict[str, FigureRow]:
+    """The scenario rows, parsed and not resolved, only so the note below counts their citations. Their own
+    problems are ``hc scenarios check``'s to report."""
+    text = _read(company / SCENARIO_FIGURES_FILE)
+    if text is None:
+        return {}
+    try:
+        return parse_rows(text)
+    except FigureError:
+        return {}
+
+
+def cited_sources(rows: dict[str, FigureRow]) -> set[str]:
+    """Every source a row cites, as its value's source or as the source of an assumption's range."""
+    found: set[str] = set()
+    for row in rows.values():
+        if row.source:
+            found.add(row.source)
+        if row.assumption and row.assumption.range_sources:
+            found.update(row.assumption.range_sources)
+    return found
+
+
+def _add_notes(
+    report: Report, template: Template, fs: FigureSet, scenario_rows: dict[str, FigureRow]
+) -> None:
     words = balance_report(template, fs)
     total = sum(words.values())
     shares = ", ".join(f"{group} {count}" for group, count in words.items())
@@ -149,6 +176,6 @@ def _add_notes(report: Report, template: Template, fs: FigureSet) -> None:
         report.notes.append(
             f"WARNING: above {LENGTH_WARNING_TOKENS:,} tokens; say so before trimming anything"
         )
-    unused = sorted(set(fs.sources) - {row.source for row in fs.rows.values() if row.source})
+    unused = sorted(set(fs.sources) - cited_sources(fs.rows) - cited_sources(scenario_rows))
     if unused:
         report.notes.append(f"sources no row cites: {', '.join(unused)}")

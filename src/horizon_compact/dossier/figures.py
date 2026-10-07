@@ -105,6 +105,10 @@ class Assumption(_Strict):
     range_from: str
     reason: str
     review: str | None = None
+    # Sources the range (not the value) comes from, by id in sources.toml, checked like a row's ``source``:
+    # a range read from a public series is cited, not only described in ``range_from`` (Phase 2.5
+    # IMPLEMENTATION doc section 17 step 8, item 9).
+    range_sources: list[str] | None = None
 
 
 class FigureRow(_Strict):
@@ -164,6 +168,11 @@ class FigureRow(_Strict):
     def _check_assumption(self, assumption: Assumption) -> None:
         if not assumption.range_from.strip() or not assumption.reason.strip():
             raise ValueError("an assumption needs range_from and reason, both non-empty")
+        if assumption.range_sources is not None and (
+            not assumption.range_sources
+            or len(set(assumption.range_sources)) != len(assumption.range_sources)
+        ):
+            raise ValueError("range_sources is a non-empty list of distinct sources")
         if self.unit == "label":
             if assumption.low is not None or assumption.high is not None:
                 raise ValueError("a label assumption has no range: leave low and high out")
@@ -388,6 +397,10 @@ def resolve(rows: dict[str, FigureRow], sources: dict[str, Source]) -> FigureSet
     for key, row in rows.items():
         if row.source is not None and row.source not in sources:
             raise FigureError(f"{FIGURES_FILE}: {key}: unknown source {row.source!r}")
+        if row.assumption is not None:
+            for name in row.assumption.range_sources or ():
+                if name not in sources:
+                    raise FigureError(f"{FIGURES_FILE}: {key}: unknown range source {name!r}")
         if row.formula is not None:
             try:
                 refs = formula_references(row.formula)

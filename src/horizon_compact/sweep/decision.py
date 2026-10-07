@@ -95,17 +95,29 @@ def _extra_rule_problems(
     return problems
 
 
+def _pinned_keys(scenario: Scenario) -> set[str]:
+    """Lines an ``option_fixes`` rule fixes at an amount. Rescaling must not move them: the raw amounts are
+    valid only at that amount, so a scaled copy that moved one would contradict its own rule."""
+    return {rule.key for rule in scenario.rules if isinstance(rule, OptionFixes)}
+
+
 def _one_side(
     scenario: Scenario, amounts: dict[str, float], keys: list[str], target: float, label: str
 ) -> tuple[ValidationStatus, tuple[str, ...], dict[str, float] | None]:
-    """The side's sum must equal ``target``: exactly, or within the tolerance and then rescaled."""
+    """The side's sum must equal ``target``: exactly, or within the tolerance and then rescaled. A pinned line
+    stays as it is, and the rest are scaled to what is left of the target."""
     side = sum(amounts[key] for key in keys)
     if abs(side - target) <= _CENT:
         return "valid", (), None
     if abs(side - target) <= scenario.tolerance_fraction * scenario.total:
-        scaled = dict(amounts)
-        _scale(scaled, keys, side, target)
-        return "valid_rescaled", (), scaled
+        pinned = _pinned_keys(scenario)
+        movable = [key for key in keys if key not in pinned]
+        fixed = sum(amounts[key] for key in keys if key in pinned)
+        movable_sum = sum(amounts[key] for key in movable)
+        if movable_sum > 0 and target - fixed > 0:
+            scaled = dict(amounts)
+            _scale(scaled, movable, movable_sum, target - fixed)
+            return "valid_rescaled", (), scaled
     return "sum_mismatch", (f"{label} total {side:g}, against {target:g}",), None
 
 

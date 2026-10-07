@@ -25,6 +25,8 @@ RECORD_VERSION = 1
 PLACEHOLDER = "<account-id>"
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[A-Za-z]{2,}")
 _ACCOUNT_ID_SHAPE = re.compile(r"(?<![\w-])\d{12}(?![\w-])")
+# An OpenRouter key (sk-or-v1-...). A record that holds one is refused: the key is never stored anywhere.
+_API_KEY = re.compile(r"sk-or-[A-Za-z0-9_-]{8,}")
 
 
 class RedactionError(Exception):
@@ -147,6 +149,8 @@ def assert_clean(text: str, account_id: str) -> None:
         raise RedactionError("an email address is present in the record")
     if _ACCOUNT_ID_SHAPE.search(text):
         raise RedactionError("a 12-digit number is present in the record")
+    if _API_KEY.search(text):
+        raise RedactionError("an API key is present in the record")
 
 
 def serialize_safely(record: dict[str, Any], account_id: str) -> str:

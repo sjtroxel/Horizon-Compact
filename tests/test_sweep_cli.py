@@ -287,3 +287,97 @@ def test_the_plan_for_a_local_model_prints_with_zero_cost(
     out = capsys.readouterr().out
     assert "runs:            5 (1 scenarios x 5 objectives x 1 templates x 1 repeats)" in out
     assert "one call start every 2.5s" in out
+
+
+# --- Phase 2.5 step 8: an OpenRouter model needs no AWS either, and its key is typed here -----------------
+
+OPENROUTER_ARGS = [
+    "--experiment", "placeholder",
+    "--model", "gpt-oss-openrouter",
+    "--repeats", "1",
+    "--seed", "5",
+    "--label", "or",
+]  # fmt: skip
+MADE_UP_KEY = "sk-or-v1-0123456789abcdef0123456789abcdef"
+
+
+def test_an_openrouter_run_builds_its_provider_with_the_key_from_the_environment(
+    laptop_repo: Path,
+    fake_clock: None,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    built: list[str] = []
+
+    def fake_provider(key: str) -> ScriptedProvider:
+        built.append(key)
+        return ScriptedProvider()
+
+    monkeypatch.setattr(cli, "OpenRouterProvider", fake_provider)
+    monkeypatch.setenv("OPENROUTER_API_KEY", MADE_UP_KEY)
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 0  # no --profile
+    captured = capsys.readouterr()
+    assert built == [MADE_UP_KEY]
+    assert "runs finished:   5 of 5" in captured.out
+    assert MADE_UP_KEY not in captured.out + captured.err
+    for path in (laptop_repo / "scratch" / "runs").rglob("*"):
+        if path.is_file():
+            assert MADE_UP_KEY not in path.read_text(encoding="utf-8")
+
+
+def test_a_misshapen_key_is_refused_before_any_call_and_never_echoed(
+    laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(cli, "OpenRouterProvider", lambda key: pytest.fail("a provider was built"))
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-ant-api03-this-is-not-an-openrouter-key")
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 2
+    err = capsys.readouterr().err
+    assert "does not look like an OpenRouter key" in err
+    assert "this-is-not" not in err
+
+
+def test_an_openrouter_model_refuses_the_s3_store_before_asking_for_a_key(
+    laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def no_prompt(*args: Any, **kwargs: Any) -> str:
+        raise AssertionError("a refused run asked for the key")
+
+    monkeypatch.setattr("getpass.getpass", no_prompt)
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "s3", "--bucket", "b"]) == 2
+    assert "an OpenRouter model's runs stay on this laptop" in capsys.readouterr().err
+
+
+def test_an_openrouter_model_refuses_the_container() -> None:
+    args = cli.build_parser().parse_args(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"])
+    with pytest.raises(SweepRefusal, match="runs on the laptop only"):
+        cli._check_openrouter(args, FARGATE)
+    cli._check_openrouter(args, LAPTOP)
+
+
+def test_an_openrouter_model_cannot_be_launched_as_a_fargate_task(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert cli.main(["sweep", "launch", *OPENROUTER_ARGS, "--profile", "p"]) == 2
+    assert "is an OpenRouter model" in capsys.readouterr().err
+
+
+def test_the_plan_for_an_openrouter_model_prints_with_a_small_cost_bound(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert cli.main(["sweep", "plan", *OPENROUTER_ARGS]) == 0
+    out = capsys.readouterr().out
+    assert "runs:            5 (1 scenarios x 5 objectives x 1 templates x 1 repeats)" in out
+    assert "one call start every 3.8s" in out
+
+
+def test_real_content_is_refused_for_the_sealed_draw_not_for_the_openrouter_model(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The company's sealed template is undrawn, so no decision run is allowed on it, on any model; the
+    refusal names the draw. An official model is refused on real content on its own account."""
+    args = [*OPENROUTER_ARGS]
+    args[args.index("placeholder")] = "company"
+    assert cli.main(["sweep", "plan", *args, "--template", "w1"]) == 2
+    err = capsys.readouterr().err
+    assert "sealed template is not drawn yet" in err
+    assert "is not the development model" not in err

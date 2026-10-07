@@ -494,6 +494,11 @@ Phase 2.5 can close on Ollama alone while Bedrock is blocked.
   `factual`**. The loader refuses any other value.
 - **Mechanically enforced:** `hc scenarios check` fails if the current content hash is not the latest entry's
   "after" hash. A content change without an entry is a red check, not a forgotten note.
+- *Note 2026-10-07 (Opus, step 8):* **the sealed draw moves the content hash** (`sealed_template` is in
+  `objectives.toml`), and it is none of the four reasons; a fifth reason would break section 9. Step 14 adds a
+  separate draw record to the log's format (date, commit, template, hash before and after, chained like an entry, no
+  reason field), built with the draw so it matches `sealed-draw.md`. Until then the check fails on the draw's commit,
+  which is the safe direction.
 - **The close-out statement**, by him and by Claude: no allocation, choice or memo by objective was seen; it is
   honor-based and says so; the blind reports are what make it credible.
 
@@ -780,7 +785,93 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    staff at 1.5 weeks (the middle of the range), S3's plant staff at 1. 73 rows, 20 assumptions (A32 to A51).
    Re-rendered: every row used, no stray digit. **T3 (S1 always describes elimination first, though the menu is
    shuffled) needs code:** step 8 item (6) below.
-8. **Objectives and templates** in `objectives.toml`; the template text check; `hc scenarios check` in `make check`.
+8. **[built 2026-10-07, Sonnet; item 11 is his run]** **Objectives and templates** in `objectives.toml`; the template text check; `hc scenarios check` in `make check`.
+   **THE STEP 8 CHECKLIST (gathered 2026-10-07 by Opus from steps 5-7 and decisions 8-9; Sonnet builds it). Every
+   item keeps the placeholder byte for byte (`tests/test_placeholder_golden.py` must stay green untouched).**
+   1. **`objectives.toml`** for the company: the five objectives with `who` and `when` and the templates `w1`-`w3`
+      word for word from §7 ("the Company's" in B and D's `who`), `sealed_template = ""`.
+   2. **`hc scenarios render`**: resolves `figures.toml` + `scenario-figures.toml` as one set, fills each
+      `scenarios/sN.source.toml`, writes `scenarios/sN.toml` (the `Scenario` model's format: `situation` becomes
+      `scenario`; caps, `total` and rule numbers `base`/`divisor`/`fraction`/`amount` are row ids rendered as
+      integers or numbers; not-offered lines get cap 0) and `docs/phases/evidence/phase-2.5/scenarios-cited.md`
+      (each number with its row and source label, as the dossier's cited version). The gitignored stand-in
+      `scratch/phase25-render-draft.py` shows the mapping and is replaced by this; its output must match.
+   3. **`hc scenarios check`**, added to `make check`: every source renders to its committed `sN.toml` exactly; no
+      digit in source text outside a placeholder; every scenario row used (caps, totals and rule fields count as
+      uses); the §7 template text check; the change log check (§14) once `CHANGELOG.toml` exists.
+   4. **The loader skips `*.source.toml`** in `scenarios/` (it reads every `*.toml` today, and the file name must
+      equal the id).
+   5. **Lever lines print their kind only when a scenario has both sources and uses** (S4, the placeholder). S1,
+      S2 and S3 read "- label [key]: up to 125 people", not "use, up to ...".
+   6. **The tool's amounts description by unit** ("Number of people for every line listed, keyed by the key in
+      brackets." for `people`), and the tool description names a choice only when there is one.
+   7. **An optional `detail` on an offered line**, rendered on the line below it and shuffled with it; S1's three
+      path paragraphs then move from `situation` into the three lines' `detail` (step 7, T3: no path described first
+      on every run). The `detail` text keeps its placeholders and is rendered like the rest.
+   8. **Rescaling leaves a line pinned by `option_fixes` out of the scaling** (S4's program; step 2's open point),
+      with a test.
+   9. **`Assumption` gains an optional `range_sources` list**, checked like `source`, so the QFR series and the cost
+      of capital stop showing as uncited sources (step 5). Set it on `s2_revenue_fall` and `s4_payoff_mid`.
+   10. **The OpenRouter provider (decision 9):** standard library only, one POST to
+       `https://openrouter.ai/api/v1/chat/completions` with the system and user messages, the one tool,
+       `tool_choice: "auto"`, `max_tokens`, `usage: {include: true}`, **no sampling option ever** (tested); maps
+       the reply to `RawDecision` (tool call arguments arrive as a JSON string; `finish_reason: length` is
+       `truncated`; usage gives tokens and `cost`); provenance records the served model and provider. **The key:**
+       from `OPENROUTER_API_KEY` if set, else a hidden `getpass` prompt; never in argv, a record, a log or a file in
+       the repo; its shape checked (`sk-or-` prefix) before any call. A `route = "openrouter"` kind and
+       `[models.gpt-oss-openrouter]` (`model_id = "openai/gpt-oss-120b"`, `role = "development"`, prices checked
+       live at build time; 2026-10-07: $0.037 in, $0.17 out per million) so the refusals and the $5 sweep cap cover
+       it. Like `qwen-local`, no AWS session.
+   11. **First use, a check of the provider, on garden content:** `hc sweep run --experiment s4shape --model
+       gpt-oss-openrouter ...` (5 runs, under a cent; he runs it). It also tests step 7's clearer "at most one may be
+       above zero" wording, which the garden copy now has.
+   Code is Sonnet's; the texts are fixed by step 7, so step 8 changes no wording except moving S1's paragraphs
+   (item 7). Then step 9, the baseline commit.
+   **BUILT (2026-10-07, Sonnet), items 1-10; `make check` green, 648 tests; the placeholder's golden test was never
+   edited and stays green.** (1) `experiment/company/objectives.toml`: five objectives, `w1`-`w3` word for word,
+   "the Company's" in B and D, `sealed_template = ""`. (2) `hc scenarios render` (`src/horizon_compact/scenarios/`):
+   the two figure files resolved as one set (a scenario row reusing a dossier id is refused), each source filled and
+   validated through the real `Scenario` model, `s1.toml`-`s4.toml` and `scenarios-cited.md` written; **S2, S3 and S4
+   are identical to the gitignored stand-in's output, and S1 differs only by the moved `detail` text.** The cited
+   file numbers assumptions on from the dossier's (A32...), shows the range sources, and lists totals, caps and rule
+   numbers with their rows. (3) `hc scenarios check`, now in `make check` as `scenarios-check`: renders compared byte
+   for byte, a rendered scenario with no source refused, every scenario row used (caps, totals, rule numbers and
+   formulas count), the section 7 check (each template holds `{who}` and `{when}` once and no line break; no
+   never-use term from `planning/06` 3.1 in a template, objective or scenario; every scenario x objective x template
+   renders the same prompt once the objective sentence is masked out, the sentence appearing once), and the change
+   log. **The log's format is Sonnet's, reviewed and accepted by Opus (4:20 PM), with one gap for step 14 (section 14's
+   note):** `CHANGELOG.toml` holds `[baseline]` (date, hash) and
+   `[[entries]]` (date, files, hash_before, hash_after, evidence, reason with exactly four values); the check fails
+   unless the entries chain and the content hash equals the last `hash_after` (or the baseline's); without the file
+   it is a note. (4) The loader skips `*.source.toml`. (5) A lever line prints its kind only when the menu has both
+   kinds. (6) The tool's amounts description is by unit, and its description names a choice only when there is one.
+   (7) `Lever.detail`, rendered on an indented line under its lever and shuffled with it; refused on a lever not
+   offered; S1's three path paragraphs moved from `situation` into their lines, with no other wording changed.
+   (8) Rescaling leaves a line pinned by `option_fixes` where it is (the others scale to what is left; with nothing
+   movable it is a mismatch, not a crash). (9) `Assumption.range_sources`, checked like `source`, set on
+   `s2_revenue_fall` and `s4_payoff_mid`; `hc dossier check`'s uncited-sources note counts both figure files and
+   range sources, so it now names only `census-qfr-333-opinc`, which a row's note mentions and no row cites.
+   (10) `providers/openrouter.py`, `route = "openrouter"`, `[models.gpt-oss-openrouter]`. **Price checked live
+   2026-10-07 4:07 PM from OpenRouter's public model list: $0.037 in, $0.17 out per million, as the checklist said.**
+   The key comes from `OPENROUTER_API_KEY` or a hidden prompt (asked after every refusal, so a refused run never
+   prompts), must start `sk-or-` and be 20 characters or more, travels in one header, is scrubbed from error
+   messages, and the record writer now refuses any record holding `sk-or-...`; no sampling field is sent (the
+   architecture test covers `providers/`); the container and `--store s3` are refused; `hc sweep launch` refuses it.
+   The test conftest removes `OPENROUTER_API_KEY` from the environment. **Found, for him and Opus:**
+   (a) with S1's paths now shuffled, the situation text still said the paths differ "on the third path, in a pay
+   difference", and the third path is no longer a position in the prompt. **Fixed by Opus the same day (4:20 PM, on
+   his delegation), a clarity change before the baseline, so no log entry:** "on the path that keeps current pay".
+   Opus found a second of the same kind: the keep-pay line's detail said "Retraining costs the same", pointing at a
+   line that may now come after it; it now reads "Retraining is the same as on the other retraining path, $15,000 a
+   person, once". Every S1 line now reads whole in any order; S3's and S4's lines and options refer to none by
+   position. (b) A company plan is refused on any model until the sealed draw (section 8.4, as built in
+   step 3), so item 11 runs on the garden content, `s4shape`, as the checklist says. (c) Dossier helpers
+   `table`, `source_line` and `sources_behind` lost their leading underscore, so the scenario renderer can share
+   them; the dossier's rendered files are unchanged.
+   **Item 11, his run:** `uv run hc sweep run --experiment s4shape --model gpt-oss-openrouter --repeats 1 --seed 5
+   --label orcheck --store local` (5 runs; the plan's bound is $0.01; the key is typed at a hidden prompt or read from
+   `OPENROUTER_API_KEY`). Look for: `runs finished:   5 of 5`, a cost line under a cent, and how many of the 5 final
+   records are valid (`hc sweep status`, same arguments plus `--store local`).
 9. **The baseline commit (C5).** From here every content change needs a log entry.
 10. **Probes:** questions and keys (Opus), run on `qwen-local` x 5; failures traced; fixes logged; re-run.
 11. **Claude's neutrality checklist** (Opus).

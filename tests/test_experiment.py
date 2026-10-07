@@ -234,3 +234,10 @@ def test_the_local_model_is_a_development_model_with_zero_prices() -> None:
     assert (config.model_id, config.route, config.role) == ("qwen3.5:4b", "local", "development")
     assert (config.num_ctx, config.requests_per_minute) == (16384, 30)
     assert config.prices.input == config.prices.output == 0.0
+
+
+def test_the_loader_skips_a_scenario_as_written(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    folder = root / "placeholder" / "scenarios"
+    (folder / "garden.source.toml").write_text("this is not valid TOML for the loader = ")
+    assert list(load_experiment("placeholder", root).scenarios) == ["garden"]

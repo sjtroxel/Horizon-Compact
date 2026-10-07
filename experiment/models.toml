@@ -61,3 +61,23 @@ input = 0.0
 output = 0.0
 cache_read = 0.0
 cache_write_5m = 0.0
+
+# gpt-oss-120b through OpenRouter: the development model for Phase 2.5's runs on real content while Bedrock is
+# blocked (his decision 9, 2026-10-07; `$3` cap on his key). It tests format and wording, and never produces a
+# result. `model_id` is OpenRouter's. Prices checked live on 2026-10-07 from OpenRouter's public model list
+# (openrouter.ai/api/v1/models): $0.037 per million input tokens, $0.17 per million output tokens. The harness
+# counts cost from tokens and these prices; a cached prompt is counted at the input price (an overestimate),
+# and the cost OpenRouter reports is kept in each stored response. It cannot run in the container (the key is
+# typed in on the laptop) and takes no AWS credentials. The official runs are NOT covered by this entry.
+
+[models.gpt-oss-openrouter]
+model_id = "openai/gpt-oss-120b"
+route = "openrouter"
+requests_per_minute = 20
+role = "development"
+
+[models.gpt-oss-openrouter.prices]
+input = 0.037
+output = 0.17
+cache_read = 0.037
+cache_write_5m = 0.037

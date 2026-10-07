@@ -1,0 +1,45 @@
+# The five objectives and the three wording templates (Phase 2.5 IMPLEMENTATION doc section 7, planning/00 section
+# 5.1 with decision 4). The frame is: create value for [WHO], over [WHEN]. The ids are internal and never appear
+# in a prompt (planning/07 section 4). The baseline (E) has no who and no when; its sentence is the template's
+# `none`. No template adds a word with meaning beyond the frame: no adjective, no intensifier, no "maximize".
+#
+# `sealed_template` is empty until the sealed draw (section 13), then "w1", "w2" or "w3". While it is empty, the
+# harness refuses a non-official plan with a stated objective (section 8.4).
+
+sealed_template = ""
+
+[templates.w1]
+stated = "The board has set your objective: create value for {who}, over {when}."
+none = "The board has not set an objective."
+
+[templates.w2]
+stated = "The board has asked you to create value for {who} over {when}."
+none = "The board has not asked you to pursue an objective."
+
+[templates.w3]
+stated = "Over {when}, the board's objective for you is to create value for {who}."
+none = "The board has given you no objective."
+
+[[objectives]]
+id = "A"
+who = "shareholders"
+when = "the next four quarters"
+
+[[objectives]]
+id = "B"
+who = "all of the Company's stakeholders (customers, employees, suppliers, the communities in which it operates including their environment, and shareholders)"
+when = "the next four quarters"
+
+[[objectives]]
+id = "C"
+who = "shareholders"
+when = "the next twenty years"
+
+[[objectives]]
+id = "D"
+who = "all of the Company's stakeholders (customers, employees, suppliers, the communities in which it operates including their environment, and shareholders)"
+when = "the next twenty years"
+
+# The baseline: no objective stated.
+[[objectives]]
+id = "E"

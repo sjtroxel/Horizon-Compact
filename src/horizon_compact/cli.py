@@ -1,7 +1,7 @@
 """``hc``: the harness command line. ``smoke`` (Phase 0.5) makes single recorded calls; ``sweep`` (Phase 1)
 plans, runs, launches, inspects and stops a sweep; ``dossier`` (Phase 2) renders and checks the fictional
-company's dossier and calls nothing. Every command that calls a model or authenticates to AWS is typed by
-him."""
+company's dossier and calls nothing; ``scenarios`` (Phase 2.5) renders and checks the four scenarios and
+calls nothing. Every command that calls a model or authenticates to AWS is typed by him."""
 
 from __future__ import annotations
 
@@ -33,6 +33,9 @@ from horizon_compact.experiment import Experiment, ExperimentError, load_experim
 from horizon_compact.providers.base import ModelRoute, Provider
 from horizon_compact.providers.bedrock import REGION, BedrockConverseProvider, make_runtime_client
 from horizon_compact.providers.ollama import DEFAULT_URL, OllamaProvider
+from horizon_compact.providers.openrouter import OpenRouterKeyError, OpenRouterProvider, read_key
+from horizon_compact.scenarios.check import run_checks as scenarios_run_checks
+from horizon_compact.scenarios.render import ScenarioSourceError, render_all
 from horizon_compact.smoke import plan
 from horizon_compact.smoke.record import RedactionError
 from horizon_compact.smoke.runner import (
@@ -230,6 +233,14 @@ def _check_local(args: argparse.Namespace, identity: RunnerIdentity) -> None:
         raise SweepRefusal("a local model's runs stay on this laptop: use --store local")
 
 
+def _check_openrouter(args: argparse.Namespace, identity: RunnerIdentity) -> None:
+    """An OpenRouter model runs on this laptop, with a key typed here, and keeps its records here."""
+    if identity.runner != "laptop":
+        raise SweepRefusal("an OpenRouter model runs on the laptop only: the container has no key")
+    if args.store != "local":
+        raise SweepRefusal("an OpenRouter model's runs stay on this laptop: use --store local")
+
+
 def cmd_sweep_plan(args: argparse.Namespace) -> int:
     experiment, plan_ = _load(args)
     config = experiment.model(plan_.model_key)
@@ -276,7 +287,20 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
     check_preflight(experiment, plan_, cap)
     config = experiment.model(plan_.model_key)
     provider: Provider
-    if config.route == "local":
+    if config.route == "openrouter":
+        # No AWS session either. The key is asked for last, after every refusal, so a refused run never
+        # prompts; it lives in the provider and nowhere else.
+        _check_openrouter(args, identity)
+        account_id = LOCAL_ACCOUNT_ID
+        route = ModelRoute(
+            plan_.model_key, config.model_id, "openrouter", invoke_id=config.model_id
+        )
+        store = _store(args, None)
+        try:
+            provider = OpenRouterProvider(read_key(os.environ))
+        except OpenRouterKeyError as exc:
+            raise SweepRefusal(str(exc)) from exc
+    elif config.route == "local":
         # Nothing on this path creates an AWS session, calls STS or reads a profile.
         _check_local(args, identity)
         assert config.num_ctx is not None  # a local route always has one (ModelConfig checks)
@@ -332,9 +356,15 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
 
 def cmd_sweep_launch(args: argparse.Namespace) -> int:
     experiment, plan_ = _load(args)
-    if experiment.model(plan_.model_key).route == "local":
+    launch_route = experiment.model(plan_.model_key).route
+    if launch_route == "local":
         raise SweepRefusal(
             f"{plan_.model_key} is a local model: it runs on this laptop, so use `hc sweep run`"
+        )
+    if launch_route == "openrouter":
+        raise SweepRefusal(
+            f"{plan_.model_key} is an OpenRouter model: it runs on this laptop with a key typed "
+            "here, so use `hc sweep run`"
         )
     cap = _check_cap(args)
     if args.official:
@@ -440,6 +470,41 @@ def cmd_dossier(args: argparse.Namespace) -> int:
     return cmd_dossier_check(root) if args.action == "check" else cmd_dossier_render(root)
 
 
+# --- scenarios -------------------------------------------------------------------------------------------
+
+
+def cmd_scenarios_check(root: Path) -> int:
+    report = scenarios_run_checks(root)
+    for note in report.notes:
+        print(f"note: {note}")
+    for failure in report.failures:
+        print(f"FAIL: {failure}", file=sys.stderr)
+    if report.ok:
+        print("scenarios check: ok")
+    return CLEAN_EXIT if report.ok else CHECK_FAILED_EXIT
+
+
+def cmd_scenarios_render(root: Path) -> int:
+    try:
+        outputs = render_all(root)
+    except (FigureError, ScenarioSourceError, OSError) as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return REFUSED_EXIT
+    for relative, content in outputs.files.items():
+        path = root / relative
+        unchanged = path.is_file() and path.read_text(encoding="utf-8") == content
+        if not unchanged:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8", newline="\n")
+        print(f"{'unchanged' if unchanged else 'wrote':<10} {relative}")
+    return CLEAN_EXIT
+
+
+def cmd_scenarios(args: argparse.Namespace) -> int:
+    root: Path = args.root or default_repo_root()
+    return cmd_scenarios_check(root) if args.action == "check" else cmd_scenarios_render(root)
+
+
 def _add_plan_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--experiment", required=True, help="folder under experiment/, e.g. placeholder"
@@ -525,6 +590,20 @@ def build_parser() -> argparse.ArgumentParser:
     dossier_actions.add_parser(
         "check", help="Check the figures, the template and that every rendered file is fresh"
     )
+
+    scenarios = groups.add_parser(
+        "scenarios", help="Phase 2.5 scenarios and wordings. Offline; calls no model."
+    )
+    scenarios.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
+    scenario_actions = scenarios.add_subparsers(dest="action", required=True)
+    scenario_actions.add_parser(
+        "render",
+        help="Write each scenario and the cited public version from the sources and figures",
+    )
+    scenario_actions.add_parser(
+        "check",
+        help="Check the sources, that every rendered file is fresh, the templates and the log",
+    )
     return parser
 
 
@@ -541,6 +620,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.group == "dossier":
         return cmd_dossier(args)
+    if args.group == "scenarios":
+        return cmd_scenarios(args)
     if args.group == "sweep":
         try:
             return SWEEP_COMMANDS[args.action](args)

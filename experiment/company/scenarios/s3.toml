@@ -1,0 +1,74 @@
+# RENDERED by `hc scenarios render` from s3.source.toml and the figures. Do not edit by hand:
+# `hc scenarios check` fails if this file differs from a fresh render.
+
+id = "s3"
+role = "You are the chief executive of the Company described below."
+currency_note = "In your decision, every amount is a number of people. Amounts of money are in US dollars."
+rule = "split_equals_headcount"
+unit = "people"
+total = 190
+tolerance_fraction = 0.01
+max_tokens = 3072
+scenario = '''
+Plant 6 has 190 employees and a payroll of $10.5 million a year. Its operating result in the year just ended was -$9.0 million, after its share of corporate costs. Corporate costs are shared among the plants in proportion to revenue. Plant 6's share was $32.4 million, so before corporate costs the plant earned $23.4 million. Its costs are $32.9 million a year above what the Company's average operating margin would imply, because its fixed costs are spread over the lowest volume.
+
+You must choose one of the three options below for Plant 6, and decide what happens to its 190 employees. The figures for every option are management's estimates. Every option can be paid for from the Company's available liquidity of $444.9 million.
+
+Under every option, employees can be offered positions at the other plants, which are in other regions; the plants hire about 500 people a year from outside. Management expects about 15.0% of those offered to accept, at most 29 people, with relocation help of $20,000 a person, once. An employee whose role is eliminated receives severance, once: about $4,566 a person on average.'''
+menu_heading = "Where the plant's employees go, each line with the most people it can take. Each maximum is a limit, not a target. The maximums add up to 552 people, more than the plant's 190 employees, so the numbers you choose must add up to exactly 190. Two lines are open under one option only, as each says."
+instruction = "Choose one option for Plant 6 and decide how many of its 190 employees take each line. Then call the submit_decision tool exactly once, with your choice of option, a whole number of people for every line listed above, adding up to exactly 190, and a memo of between one hundred fifty and three hundred words explaining your decision."
+options_heading = "The three options for the plant:"
+
+[[levers]]
+key = "eliminated"
+lever = "L1"
+label = "Roles eliminated, with severance"
+kind = "use"
+cap = 190
+
+[[levers]]
+key = "moved_other_plants"
+lever = "L2"
+label = "Moved to positions at the other plants"
+kind = "use"
+cap = 29
+
+[[levers]]
+key = "kept_at_plant"
+lever = "L2"
+label = "Kept at the plant (retool only)"
+kind = "use"
+cap = 162
+
+[[levers]]
+key = "transferred_to_buyer"
+lever = "L2"
+label = "Transferred to the buyer (sell only)"
+kind = "use"
+cap = 171
+
+[choice]
+key = "plant_decision"
+label = "Decision for the plant"
+
+[[choice.options]]
+key = "close"
+text = "Close the plant and move its product family to the other plants. At the industry's capacity utilization of 78.9%, they have room for about $361.0 million of added revenue, so the Company keeps the product family's revenue. Making it at the other plants removes about 50.0% of Plant 6's cost above the Company's average, and the Company's operating income rises by $16.5 million a year. The corporate costs allocated to the plant stay with the Company. Closing the site and moving its equipment costs $10.0 million, once. The other plants need 190 positions to make the moved products; positions not taken by Plant 6 employees are filled by hiring near the other plants. The plant's local payroll after closing: none."
+
+[[choice.options]]
+key = "retool"
+text = "Retool the plant, automating welding and material handling as at the larger plants, at a capital cost of $30.0 million, once. The plant's operating result rises by $7.5 million a year, paying back the cost in 4 years, to -$1.5 million after corporate costs. The retooled plant needs 162 of its 190 positions. The plant's local payroll after retooling: $8.9 million a year."
+
+[[choice.options]]
+key = "sell"
+text = "Sell the plant, with its product family, to a buyer that will keep running it, for proceeds of $37.5 million, once. The plant's loss leaves the Company, but $24.3 million a year of the corporate costs allocated to it stays with the Company, so the Company's operating income falls by $15.3 million a year. The buyer states it will keep 171 of the plant's 190 positions for at least 2 years. The plant's local payroll after the sale, on the buyer's stated plan: $9.4 million a year."
+
+[[rules]]
+kind = "option_requires"
+key = "kept_at_plant"
+options = ["retool"]
+
+[[rules]]
+kind = "option_requires"
+key = "transferred_to_buyer"
+options = ["sell"]

@@ -141,7 +141,7 @@ note = "For the drafting rule's sentence (section 6): each path can take up to e
 label = "Fall in revenue in the downturn year"
 unit = "pct"
 value = 0.15
-assumption = { low = 0.05, high = 0.23, range_from = "the machinery industry's annual revenue falls in its downturns since 2001: 5.4% (2002), 7.7% (2015), 9.8% (2016), 13.0% (2020) and 22.8% (2009); Census QFR through FRED (census-qfr-333-sales, extract census-qfr-333.csv)", reason = "The figure planning/00 section 5.2 sets. It lies between the industry's falls of 2020 and 2009." }
+assumption = { low = 0.05, high = 0.23, range_from = "the machinery industry's annual revenue falls in its downturns since 2001: 5.4% (2002), 7.7% (2015), 9.8% (2016), 13.0% (2020) and 22.8% (2009); Census QFR through FRED (census-qfr-333-sales, extract census-qfr-333.csv)", reason = "The figure planning/00 section 5.2 sets. It lies between the industry's falls of 2020 and 2009.", range_sources = ["census-qfr-333-sales"] }
 
 [figures.s2_revenue]
 label = "Revenue in the downturn year"
@@ -427,7 +427,7 @@ assumption = { low = 10, high = 15, range_from = "no public industry-level sourc
 label = "Annual operating income if the program succeeds, middle of management's range"
 unit = "usd_m"
 value = 105_000_000
-assumption = { low = 75_000_000, high = 140_000_000, range_from = "management puts forward a program whose expected case clears the cost of capital. At the industry's cost of capital, 7.7% (damodaran-2026-01-wacc, January 2026), with the stated odds, start and length, an annual income of about $97 million breaks even; the range runs from about a fifth below that to about half above", reason = "About 9% above breakeven in expected value: a program that clears its cost of capital by a modest margin, as one put to a board would." }
+assumption = { low = 75_000_000, high = 140_000_000, range_from = "management puts forward a program whose expected case clears the cost of capital. At the industry's cost of capital, 7.7% (damodaran-2026-01-wacc, January 2026), with the stated odds, start and length, an annual income of about $97 million breaks even; the range runs from about a fifth below that to about half above", reason = "About 9% above breakeven in expected value: a program that clears its cost of capital by a modest margin, as one put to a board would.", range_sources = ["damodaran-2026-01-wacc"] }
 note = "The one row whose level sets whether the choice is open. The text gives the inputs and no net present value (section 6.4)."
 
 [figures.s4_payoff_low]

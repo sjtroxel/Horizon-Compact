@@ -237,6 +237,23 @@ def test_a_line_fixed_by_an_option_must_equal_its_amount_or_zero() -> None:
     )
 
 
+def test_rescaling_leaves_a_line_fixed_by_an_option_where_it_is() -> None:
+    """Scaling every use would move the program off its fixed amount while the raw amounts stay valid."""
+    funded = {"cut_rd": 0, "cut_roles": 0, "program": 600, "add_rd": 0, "payout": 405}
+    result = decide(FUND, funded, "fund")
+    assert result.status == "valid_rescaled"
+    assert result.scaled_amounts is not None
+    assert result.scaled_amounts["program"] == 600
+    assert result.scaled_amounts["payout"] == pytest.approx(400, abs=0.01)
+    assert result.amounts["payout"] == 405  # the raw amounts are kept as given
+
+
+def test_a_rescale_with_nothing_movable_is_a_mismatch_not_a_crash() -> None:
+    only_the_fixed_line = {"cut_rd": 0, "cut_roles": 0, "program": 600, "add_rd": 0, "payout": 0}
+    # 600 against 1,000 is far outside the tolerance, so this is the plain mismatch.
+    assert decide(FUND, only_the_fixed_line, "fund").status == "sum_mismatch"
+
+
 def test_two_lines_that_exclude_each_other_cannot_both_be_used() -> None:
     both = {"cut_rd": 50, "cut_roles": 0, "program": 600, "add_rd": 50, "payout": 400}
     result = decide(FUND, both, "fund")

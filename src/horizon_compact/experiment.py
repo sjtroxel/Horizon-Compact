@@ -25,6 +25,9 @@ EXPERIMENT_DIR_ENV = "HC_EXPERIMENT_DIR"
 MODELS_FILE = "models.toml"
 EXPERIMENT_FILES = ("dossier.toml", "objectives.toml")
 SCENARIOS_DIR = "scenarios"
+# A scenario as written (text with {row} placeholders); `hc scenarios render` turns it into the file the
+# harness reads. The loader never reads it (Phase 2.5 IMPLEMENTATION doc section 4).
+SOURCE_SUFFIX = ".source.toml"
 # The one experiment that may run on any model, official ones included: it has none of the real content.
 PLACEHOLDER_EXPERIMENT = "placeholder"
 TEMPLATE_IDS = ("w1", "w2", "w3")
@@ -49,6 +52,15 @@ class Lever(_Strict):
     note: str = ""
     # The canonical lever (L1-L9, planning/07 section 3.1), for analysis. Never shown in a prompt.
     lever: str = ""
+    # For an offered lever, optional text shown on the line below it and shuffled with it (Phase 2.5
+    # IMPLEMENTATION doc section 17 step 8, item 7): a description that must not be first on every run.
+    detail: str = ""
+
+    @model_validator(mode="after")
+    def _detail_is_for_an_offered_lever(self) -> Lever:
+        if self.detail and self.kind == "not_offered":
+            raise ValueError("detail is for an offered lever; a lever not offered has a note")
+        return self
 
 
 class Option(_Strict):
@@ -288,7 +300,7 @@ class Prices(_Strict):
 
 class ModelConfig(_Strict):
     model_id: str
-    route: Literal["in_region", "geo_profile", "application_profile", "local"]
+    route: Literal["in_region", "geo_profile", "application_profile", "local", "openrouter"]
     role: str
     requests_per_minute: int = Field(gt=0)
     prices: Prices
@@ -408,7 +420,13 @@ def _parse[T: BaseModel](model: type[T], path: Path, data: bytes) -> T:
 
 def _scenario_paths(folder: Path) -> list[Path]:
     paths = (
-        sorted((folder / SCENARIOS_DIR).glob("*.toml")) if (folder / SCENARIOS_DIR).is_dir() else []
+        sorted(
+            path
+            for path in (folder / SCENARIOS_DIR).glob("*.toml")
+            if not path.name.endswith(SOURCE_SUFFIX)
+        )
+        if (folder / SCENARIOS_DIR).is_dir()
+        else []
     )
     if not paths:
         raise ExperimentError(f"no scenarios: {folder / SCENARIOS_DIR} holds no .toml file")
