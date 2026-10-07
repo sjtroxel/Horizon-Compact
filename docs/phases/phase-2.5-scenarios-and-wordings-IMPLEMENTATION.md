@@ -458,6 +458,13 @@ model (`planning/07` §5.2's 10% exclusion rule is Phase 4's, on the official mo
   needs exactly this. The scope doc accepts the small leak, and the change log records which failures were read.
 - **Nothing else reads a company run's record.** Claude does not open one by hand, and says so in the close-out
   statement (DoD 6).
+- *Amended 2026-10-07 (Opus, building it before step 15):* **the failures view never prints the model's text
+  outside the tool call, only its shape** (words, whether it reads as a decline, whether it names the tool). The
+  module's test found that a run failing by not calling the tool usually writes its decision as prose, which
+  masking digits and option keys does not hide. Built as `src/horizon_compact/sweep/blind.py` and `hc sweep
+  report` (plan arguments), writing `<sweep_id>.md` and `<sweep_id>-failures.md` under
+  `docs/phases/evidence/phase-2.5/format/`; five tests plant amounts, a choice, a memo and text and check none
+  reaches either file.
 
 ### 11.4 Nova Lite
 
@@ -989,8 +996,9 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
     *Amended 2026-10-07 (Opus, recording decision 9 as amended by him at 4:45 PM):* **on `gpt-oss-openrouter`, not
     `qwen-local`**, templates `w1` and `w3` (`w2` is sealed). Planned offline: 120 runs, worst case $0.27, sweep id
     `format1-gpt-oss-openrouter-29603836` at seed 20261007. **Found while preparing it: the blind format report and
-    the failures view (§11.3) are specified but not built**; no run is made until they are, since nothing else may
-    read a company run's record.
+    the failures view (§11.3) were specified but not built. BUILT 2026-10-07 (Opus), §11.3's amendment:** `hc sweep
+    report`. His run: `hc sweep run` with the plan above (`--max-minutes 60`), then `hc sweep report` with the same
+    plan arguments; Opus reads only those two files.
 16. **Nova Lite**, if Bedrock answers: probes and format runs. If not, per decision 7.
 17. **Close-out:** the manual rule-zero read, the honor statement (both), the DoD audit, `ROADMAP.md`,
     `KNOWN-GAPS.md` START HERE, the spend.

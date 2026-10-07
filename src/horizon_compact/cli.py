@@ -64,6 +64,7 @@ from horizon_compact.smoke.runner import (
 )
 from horizon_compact.sweep import launch as sweep_launch
 from horizon_compact.sweep import status as sweep_status
+from horizon_compact.sweep.blind import failures_view, format_report
 from horizon_compact.sweep.identity import IdentityError, RunnerIdentity, identify
 from horizon_compact.sweep.plan import (
     SweepPlan,
@@ -467,6 +468,28 @@ def cmd_sweep_status(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+FORMAT_REPORT_DIR = "docs/phases/evidence/phase-2.5/format"
+
+
+def cmd_sweep_report(args: argparse.Namespace) -> int:
+    """The blind format report and the failures view (Phase 2.5 IMPLEMENTATION doc section 11.3): the only
+    readers of a company run's records. Offline for a local store."""
+    experiment, plan_ = _load(args)
+    session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+    store = _store(args, session)
+    top = Path(_git("rev-parse", "--show-toplevel"))
+    folder = top / FORMAT_REPORT_DIR
+    folder.mkdir(parents=True, exist_ok=True)
+    for name, text in (
+        (f"{plan_.sweep_id}.md", format_report(store, experiment, plan_)),
+        (f"{plan_.sweep_id}-failures.md", failures_view(store, experiment, plan_)),
+    ):
+        path = folder / name
+        path.write_text(text.rstrip("\n") + "\n", encoding="utf-8", newline="\n")
+        print(f"wrote {path.relative_to(top)}")
+    return CLEAN_EXIT
+
+
 def cmd_sweep_stop(args: argparse.Namespace) -> int:
     session = _session(args, identify({}, _laptop_git))
     stopped = sweep_launch.stop_tasks(session.client("ecs"), args.model)
@@ -700,6 +723,14 @@ def build_parser() -> argparse.ArgumentParser:
     status_parser.add_argument("--store", choices=("local", "s3"), default="s3")
     status_parser.add_argument("--bucket", default=None)
     status_parser.add_argument("--profile", default=None)
+    report_parser = sweep_actions.add_parser(
+        "report",
+        help="Write the blind format report and the failures view. No amounts, choices or memos.",
+    )
+    _add_plan_arguments(report_parser)
+    report_parser.add_argument("--store", choices=("local", "s3"), default="local")
+    report_parser.add_argument("--bucket", default=None)
+    report_parser.add_argument("--profile", default=None)
     stop_parser = sweep_actions.add_parser("stop", help="Stop a model's running sweep task")
     stop_parser.add_argument("--model", required=True)
     stop_parser.add_argument("--profile", default=None)
@@ -761,6 +792,7 @@ SWEEP_COMMANDS = {
     "run": cmd_sweep_run,
     "launch": cmd_sweep_launch,
     "status": cmd_sweep_status,
+    "report": cmd_sweep_report,
     "stop": cmd_sweep_stop,
 }
 

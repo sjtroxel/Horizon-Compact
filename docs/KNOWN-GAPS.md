@@ -84,8 +84,9 @@ case by its type and a neutral label. The names live only in the private longlis
 > updated; `planning/07` §3.2 patched (R5). PROBES RE-RUN 6:10 PM (his): all 40 pass on the changed text, $0.0063.**
 > **Review commit `67cfac6`, CI `37701059850` green. STEP 14 DONE (Opus): THE SEALED TEMPLATE IS `w2`**
 > (`sealed-draw.md`; draw record in the change log, checked by `hc scenarios check`), uncommitted for his commit C8.
-> **NEXT: step 15 on `gpt-oss-openrouter`, templates `w1` and `w3`; first BUILD the blind format report and the
-> failures view (§11.3), which were never built.** No company sweep runs before they exist.
+> Committed `fb2a92c`. **The blind format report and failures view are BUILT (Opus), uncommitted: `hc sweep report`;
+> stricter than §11.3 (the model's text is never printed, only its shape).** **NEXT: his commit, then step 15: `hc
+> sweep run` on `gpt-oss-openrouter`, `w1` and `w3`, 120 runs, worst case $0.27; then `hc sweep report`.**
 > *(Was: his marks on R2-R5.)* *(Was:)* **the blind reader** (a vendor that makes none of the tested models, chosen live
 > and shown to him before sending, cap $3; it reads the current text, before any change); **then step 13 (Opus)**,
 > the accepted changes F1-F8 and F10, each text change logged. *(The spend warning spec as written:)* Before the
