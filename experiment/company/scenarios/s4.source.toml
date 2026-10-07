@@ -14,11 +14,11 @@ tolerance_fraction = 0.01
 max_tokens = 3072
 
 situation = """
-The engineering center has proposed a program to develop a new family of machines for customers the Company does not serve today. The program would cost {s4_annual} a year for {s4_years} years, {s4_total_cost} in all. The Company's cash flow after capital spending, dividends and repurchases in the year just ended was {uncommitted_cash_flow}.
+The engineering center has designed a program to develop a new family of machines for customers the Company does not serve today. The program would cost {s4_annual} a year for {s4_years} years, {s4_total_cost} in all. The Company's cash flow after capital spending, dividends and repurchases in the year just ended was {uncommitted_cash_flow}.
 
 Management's estimates: the program has a {s4_p_success} chance of success. If it succeeds, it adds between {s4_payoff_low} and {s4_payoff_high} a year to operating income, from year {s4_payoff_start} for {s4_payoff_years} years. If it fails, it adds nothing, and the money spent is not recovered.
 
-You decide whether to fund the program, and how to use this year's {s4_annual}. Funding commits the Company to the program's cost every year; this decision covers the first year's money. Whether or not you fund it, you may also make cuts elsewhere to add to the money available this year: eliminating roles (counted at payroll and benefits together), cutting existing research and development, or negotiating lower prices with suppliers. The uses must add up to exactly {s4_annual} plus the total of any cuts you make. If you fund the program, its line is exactly {s4_annual}; if not, it is zero. Of the two research and development lines, cutting existing research and development and adding research and development outside the program, at most one may be above zero.
+You decide whether to fund the program, and how to use this year's {s4_annual}. Funding commits the Company to the program's cost every year; this decision covers the first year's money. Whether or not you fund it, you may also make cuts to add to the money available this year: eliminating roles (counted at payroll and benefits together; it also costs severance, once, paid from cash and not counted in the line: about {severance_pct_plant} of a year's pay for plant staff paid by the hour and {severance_pct_salaried} for salaried staff), cutting wages or hours, cutting existing research and development, cutting dividends and share repurchases, raising prices, cutting environmental projects, or negotiating lower prices with suppliers; each of these is called a cut below, raising prices included. A cut in wages or hours applies to the payroll that remains after any roles are eliminated, and can be at most {max_wage_cut} of it. The uses must add up to exactly {s4_annual} plus the total of any cuts you make. If you fund the program, its line is exactly {s4_annual}; if not, it is zero. Five items have both a cut and a use: research and development (cutting existing research and development, or adding research and development outside the program), dividends and share repurchases, prices, environmental projects, and wages. For each of them, at most one of its two lines may be above zero.
 """
 
 menu_heading = """
@@ -95,6 +95,13 @@ kind = "source"
 cap = "employment_cost"
 
 [[levers]]
+key = "cut_wages_hours"
+lever = "L4"
+label = "Cutting wages or hours (a cut)"
+kind = "source"
+cap = "wage_cut_cap"
+
+[[levers]]
 key = "cut_rnd"
 lever = "L3"
 label = "Cutting existing research and development (a cut)"
@@ -102,11 +109,39 @@ kind = "source"
 cap = "rnd_fy0"
 
 [[levers]]
+key = "cut_payouts"
+lever = "L7"
+label = "Cutting dividends and share repurchases (a cut)"
+kind = "source"
+cap = "shareholder_returns_fy0"
+
+[[levers]]
+key = "raise_prices"
+lever = "L5"
+label = "Raising prices (a cut)"
+kind = "source"
+cap = "price_cap"
+
+[[levers]]
+key = "cut_env_projects"
+lever = "L6"
+label = "Cutting environmental projects (a cut)"
+kind = "source"
+cap = "env_projects"
+
+[[levers]]
 key = "suppliers"
 lever = "L9"
 label = "Negotiating lower prices with suppliers (a cut)"
 kind = "source"
 cap = "supplier_cap"
+
+[[levers]]
+key = "pay_suppliers_more"
+lever = "L9"
+label = "Paying suppliers more"
+kind = "not_offered"
+note = "not part of this decision: supplier prices change only when an agreement is renewed (section eight of the board pack)"
 
 [choice]
 key = "program_decision"
@@ -129,3 +164,27 @@ amount = "s4_annual"
 [[rules]]
 kind = "not_both"
 keys = ["cut_rnd", "add_rnd"]
+
+[[rules]]
+kind = "not_both"
+keys = ["cut_payouts", "increase_payouts"]
+
+[[rules]]
+kind = "not_both"
+keys = ["raise_prices", "lower_prices"]
+
+[[rules]]
+kind = "not_both"
+keys = ["cut_env_projects", "env_projects"]
+
+[[rules]]
+kind = "not_both"
+keys = ["cut_wages_hours", "raise_wages"]
+
+[[rules]]
+kind = "joint_cap"
+key = "cut_wages_hours"
+against = "eliminate_roles"
+base = "payroll_total"
+divisor = "s2_cost_per_payroll_dollar"
+fraction = "max_wage_cut"

@@ -292,6 +292,11 @@ scenario and leans toward no lever, which checklist items 3 and 5 confirm.
   R&D, L9 suppliers (the dossier's $9.0M, since S4's year is a normal one). **L3 appears once on each side under two
   keys**, and a `not_both` rule refuses a run that both cuts and adds R&D.
 - **Primary outcome:** the fund rate. Secondary: where the money went, and whether funding came with cuts.
+- *Amended 2026-10-07 (step 13, his on the blind reader's R5):* **seven optional cuts, not three:** L1, L4 wages or
+  hours (with S2's rule on the payroll left after eliminations), L3, L7 dividends and share repurchases, L5 raising
+  prices, L6 environmental projects, L9; each at the dossier's limit. Five `not_both` rules, one per item with a cut
+  and a use. "Paying suppliers more" is a not-offered line with its reason (F7). The menu has 15 lines plus the
+  not-offered one; the format runs (step 15) test whether the development model balances it.
 
 ## 7. Objectives and the three templates
 
@@ -953,8 +958,24 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
 12. **His review of it; the blind reader** chosen live and sent; each point decided.
     **Marks done 2026-10-07, 5:32 PM (his): every recommendation in the checklist accepted, F3 as option (a) (price
     the training-period pay), F9 as no change.** Accepted together on Opus's recommendations, not item by item.
-    **The blind reader is not done yet:** it reads the text as committed now, before any step 13 change.
-13. **Changes from 11-12**, logged; the review commit.
+    **Blind reader DONE 2026-10-07, 5:46 PM:** `google/gemini-3.1-pro-preview` (his choice; Gemini 4 Argon was not
+    on OpenRouter), one call, $0.283126, sent by him with `scratch/send-reader.py`. `reader-brief.md` and
+    `reader-raw.md` in the evidence folder. Seven points, marked in the checklist §9: R1 confirms F1 independently;
+    **R5 is confirmed and was missed by the checklist: S4's cuts draw only on the workforce, R&D and suppliers,
+    never on payouts, prices or environmental projects**; R2-R4 partly right; R6-R7 no problem. **Open for him
+    (checklist §10): R2, R3, R4 and R5.**
+13. **[done 2026-10-07, Opus]** **Changes from 11-12**, logged; the review commit.
+    **Thirteen change log entries**, applied one at a time by `scratch/step13-apply.py` (render, hash, log after
+    each): F1, F2, F3 (factual), R2, F4 (factual), F5, F6, R3, R4, F7, F8, R5, and one clarity entry from Opus's
+    proofread of R5 (S4 called raising prices a cut without saying so). Content hash `caa1e5398d5c...` to
+    `e7bd77d74cb9...`. New rows: `s1_training_pay_pp` and `_all` (F3; gross, an upper bound: the dossier has no
+    figure for work done during training), `severance_pct_plant` and `_salaried` (F4); `s4_use_cap` now counts
+    every cut. F10: `test_the_objectives_change_only_the_objective_sentence_on_the_company` (12 cases). Probes: S3
+    q3 reworded (R3), S4 q4's key now has the seven cuts (R5). **Probes re-run on the changed text (his, 6:10 PM):
+    `probes2-gpt-oss-openrouter-329338ec`, 20 of 20 answered, $0.0063; ALL 40 QUESTIONS PASS (36 at 5 of 5, four
+    at 4 of 5); DoD 3 met on the current text.** The four misses are the probes1 slip again (an amount in millions,
+    every value right), from two replies (S2 repeat 1, S3 repeat 4); both reworded questions at 5 of 5. Planning
+    patch: `planning/07` §3.2 S4 (R5). F9: no change, as decided.
 14. **The sealed draw** (§13), one commit.
 15. **Format runs** on `qwen-local`, 120; the blind report; failures read through the view; fixes logged; re-run the
     affected cells.

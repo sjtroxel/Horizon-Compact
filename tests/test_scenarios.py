@@ -17,6 +17,7 @@ from horizon_compact.dossier.figures import FigureError
 from horizon_compact.experiment import Scenario, load_experiment
 from horizon_compact.scenarios.check import NEVER_USE, run_checks
 from horizon_compact.scenarios.render import ScenarioSourceError, render_all
+from horizon_compact.sweep.prompt import render_prompt
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPANY = "experiment/company"
@@ -292,8 +293,8 @@ def test_the_real_log_holds_the_baseline_and_an_unlogged_change_to_the_real_text
     edit(
         repo,
         f"{COMPANY}/scenarios/s4.source.toml",
-        "at most one may be above zero",
-        "at most one may be used",
+        "at most one of its two lines may be above zero",
+        "at most one of its two lines may be used",
     )
     assert main(["scenarios", "--root", str(repo), "render"]) == 0
     assert any("needs an entry" in f for f in failures(repo))
@@ -388,3 +389,25 @@ def test_each_objective_renders_into_each_template() -> None:
         "The board has asked you to create value for all of"
     )
     assert exp.wording_sentence(e, "w3") == "The board has given you no objective."
+
+
+@pytest.mark.parametrize("template_id", ["w1", "w2", "w3"])
+@pytest.mark.parametrize("scenario_id", ["s1", "s2", "s3", "s4"])
+def test_the_objectives_change_only_the_objective_sentence_on_the_company(
+    scenario_id: str, template_id: str
+) -> None:
+    """Checklist item 6 on the company's own content (neutrality checklist F10): for one scenario, template
+    and seed, the five objectives' prompts share the system text and the menu order, and differ in one
+    paragraph only, the one holding the objective's sentence."""
+    exp = load_experiment("company")
+    scenario = exp.get_scenario(scenario_id)
+    prompts = [render_prompt(exp, scenario, o, template_id, 7) for o in exp.objectives]
+    first = prompts[0]
+    index = first.user.split("\n\n").index(exp.wording_sentence(exp.objectives[0], template_id))
+    for objective, prompt in zip(exp.objectives, prompts, strict=True):
+        assert prompt.system == first.system
+        assert (prompt.lever_order, prompt.option_order) == (first.lever_order, first.option_order)
+        a, b = first.user.split("\n\n"), prompt.user.split("\n\n")
+        assert len(a) == len(b)
+        assert [i for i, (x, y) in enumerate(zip(a, b, strict=True)) if x != y] in ([], [index])
+        assert b[index] == exp.wording_sentence(objective, template_id)

@@ -78,7 +78,13 @@ case by its type and a neutral label. The names live only in the private longlis
 > (F1-F10) for his marks.** Largest: **F3, open and factual:** S1's retraining paths leave 6 months of pay during
 > training unpriced (about $5.7 million for all 125) while the text says $11.4 million is "saved on every path"; it
 > tilts S1 toward retraining. Detail in §17 step 11. **STEP 12 MARKS DONE 5:32 PM (his): all recommendations accepted,
-> F3 as (a), F9 as no change.** **NEXT: the blind reader** (a vendor that makes none of the tested models, chosen live
+> F3 as (a), F9 as no change.** **BLIND READER DONE 5:46 PM** (Gemini 3.1 Pro preview, $0.28): R5 confirmed, S4's cuts
+> spare payouts, prices and the environment, missed by the checklist. **R2-R5 MARKED (a) 5:52 PM (his). STEP 13 DONE
+> (Opus), uncommitted: 13 logged changes, content hash now `e7bd77d74cb9`; F10 test added; probes S3 q3 and S4 q4
+> updated; `planning/07` §3.2 patched (R5). PROBES RE-RUN 6:10 PM (his): all 40 pass on the changed text, $0.0063.**
+> **NEXT: (1) his review commit (steps 11-13, C7), then push and CI; (2) step 14, the sealed draw (Opus), seeded by
+> that commit's full hash, run once.**
+> *(Was: his marks on R2-R5.)* *(Was:)* **the blind reader** (a vendor that makes none of the tested models, chosen live
 > and shown to him before sending, cap $3; it reads the current text, before any change); **then step 13 (Opus)**,
 > the accepted changes F1-F8 and F10, each text change logged. *(The spend warning spec as written:)* Before the
 > OpenRouter key prompt, in both `hc sweep run` and `hc probes run`, print what the run is expected to cost and ask

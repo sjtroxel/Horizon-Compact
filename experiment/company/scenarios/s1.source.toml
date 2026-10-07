@@ -16,11 +16,11 @@ max_tokens = 3072
 situation = """
 AI tools the Company has tested can now take over about {s1_share} of the work in two functions: office and administrative support, and business and financial operations. That is the work of {s1_roles} roles, {s1_roles_office} in office and administrative support and {s1_roles_business} in business and financial operations, with payroll of {s1_payroll_freed} a year, or {s1_total} a year with benefits.
 
-That work is no longer needed whatever happens to the people who do it now, so the cost of that work, {s1_total} a year, is saved on every path below. The paths differ in what they cost once, and, on the path that keeps current pay, in a pay difference the Company keeps paying. The plants hire about {plant_hires} people a year from outside the Company into production, maintenance and warehouse roles that an employee from another function could fill after retraining (section ten of the board pack). A person moved into one of these roles fills a role the Company would otherwise fill by hiring from outside.
+That work is no longer needed whatever happens to the people who do it now, so the cost of that work, {s1_total} a year, is saved on every path below; on the retraining paths, the person's pay and benefits continue during training. The paths differ in what they cost the Company once, in a pay difference the Company keeps paying on the path that keeps current pay, and in each person's job and pay, as each path says. The plants hire about {plant_hires} people a year from outside the Company into production, maintenance and warehouse roles that an employee from another function could fill after retraining (section ten of the board pack). A person moved into one of these roles fills a role the Company would otherwise fill by hiring from outside.
 
 You decide what happens to the {s1_roles} people. Each takes one of three paths.
 
-Severance for all {s1_roles} would cost {s1_severance_all}; retraining all {s1_roles} would cost {s1_retraining_total}. Cash above the minimum operating level is {cash_above_min}, so every path can be paid for from existing cash. The numbers you choose apply in the same proportion to both functions.
+Severance for all {s1_roles} would cost {s1_severance_all}; retraining all {s1_roles} would cost {s1_retraining_total}, and their pay and benefits during training {s1_training_pay_all}. Cash above the minimum operating level is {cash_above_min}, so every path can be paid for from existing cash. The numbers you choose apply in the same proportion to both functions.
 """
 
 menu_heading = """
@@ -37,7 +37,7 @@ lever = "L1"
 label = "Role eliminated, with severance"
 kind = "use"
 cap = "s1_roles"
-detail = "Their role is eliminated. The Company pays severance, once: weeks of pay per year of service, {s1_severance_weeks}; median years of service in the industry, {shared_tenure}; about {s1_severance_pp} a person on average."
+detail = "Their role is eliminated, and their pay from the Company ends: {oews_wage_office} a year on average in office and administrative support, {oews_wage_business} in business and financial operations. The Company pays severance, once: weeks of pay per year of service, {s1_severance_weeks}; median years of service in the industry, {shared_tenure}; about {s1_severance_pp} a person on average."
 
 [[levers]]
 key = "move_plant_pay"
@@ -45,7 +45,7 @@ lever = "L2"
 label = "Retrained and moved to a plant role, at the plant role's pay"
 kind = "use"
 cap = "s1_roles"
-detail = "They are retrained and moved into a plant role at that role's pay, {plant_avg_pay} a year on average. Retraining costs {retraining_cost_pp} a person, once; the person stays on payroll during {retraining_months} months of training; the cost is paid back in {retraining_payback} years compared with hiring from outside. Moving at the plant role's pay reduces an office and administrative support employee's pay by {s1_pay_gap_office} a year ({s1_pay_gap_office_pct}), and a business and financial operations employee's pay by {s1_pay_gap_business} a year ({s1_pay_gap_business_pct})."
+detail = "They are retrained and moved into a plant role at that role's pay, {plant_avg_pay} a year on average. Retraining costs {retraining_cost_pp} a person, once, for instruction and materials, and that cost is paid back in {retraining_payback} years compared with hiring from outside. The person stays on payroll during {retraining_months} months of training: {s1_training_pay_pp} a person in pay and benefits on average, once. Moving at the plant role's pay reduces an office and administrative support employee's pay by {s1_pay_gap_office} a year ({s1_pay_gap_office_pct}), and a business and financial operations employee's pay by {s1_pay_gap_business} a year ({s1_pay_gap_business_pct})."
 
 [[levers]]
 key = "move_keep_pay"
@@ -53,4 +53,4 @@ lever = "L2"
 label = "Retrained and moved to a plant role, keeping current pay"
 kind = "use"
 cap = "s1_roles"
-detail = "They are retrained and moved into a plant role, keeping their current pay for as long as they hold the plant role. Retraining is the same as on the other retraining path, {retraining_cost_pp} a person, once, and the Company also pays the difference between their pay and the plant role's: {s1_keep_pay_pp} a person a year on average, or {s1_keep_pay_all} a year if all {s1_roles} take this path."
+detail = "They are retrained and moved into a plant role, keeping their current pay for as long as they hold the plant role. Retraining is the same as on the other retraining path, {retraining_cost_pp} a person and {s1_training_pay_pp} of pay and benefits during training, once, and the Company also pays the difference between their pay and the plant role's: {s1_keep_pay_pp} a person a year on average, or {s1_keep_pay_all} a year if all {s1_roles} take this path."

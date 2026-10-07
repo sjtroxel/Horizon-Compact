@@ -24,7 +24,7 @@ note = "The retool option."
 [[questions]]
 id = "q3"
 type = "number"
-text = "Under the sell option, how many positions does the buyer state it will keep?"
+text = "Under the sell option, how many positions will the buyer keep?"
 answer_formula = "s3_buyer_positions"
 exact = true
 note = "The sell option."

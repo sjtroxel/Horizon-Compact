@@ -10,11 +10,11 @@ The text of each scenario is as the model reads it, with a bracketed label after
 
 AI tools the Company has tested can now take over about 25.0% [derived D120] of the work in two functions: office and administrative support, and business and financial operations. That is the work of 125 [derived D121] roles, 70 [derived D125] in office and administrative support and 55 [derived D126] in business and financial operations, with payroll of $9.0 million [derived D122] a year, or $11.4 million [derived D123] a year with benefits.
 
-That work is no longer needed whatever happens to the people who do it now, so the cost of that work, $11.4 million [derived D123] a year, is saved on every path below. The paths differ in what they cost once, and, on the path that keeps current pay, in a pay difference the Company keeps paying. The plants hire about 500 [derived D113] people a year from outside the Company into production, maintenance and warehouse roles that an employee from another function could fill after retraining (section ten of the board pack). A person moved into one of these roles fills a role the Company would otherwise fill by hiring from outside.
+That work is no longer needed whatever happens to the people who do it now, so the cost of that work, $11.4 million [derived D123] a year, is saved on every path below; on the retraining paths, the person's pay and benefits continue during training. The paths differ in what they cost the Company once, in a pay difference the Company keeps paying on the path that keeps current pay, and in each person's job and pay, as each path says. The plants hire about 500 [derived D113] people a year from outside the Company into production, maintenance and warehouse roles that an employee from another function could fill after retraining (section ten of the board pack). A person moved into one of these roles fills a role the Company would otherwise fill by hiring from outside.
 
 You decide what happens to the 125 [derived D121] people. Each takes one of three paths.
 
-Severance for all 125 [derived D121] would cost $1.1 million [derived D135]; retraining all 125 [derived D121] would cost $1.9 million [derived D124]. Cash above the minimum operating level is $44.1 million [derived D38], so every path can be paid for from existing cash. The numbers you choose apply in the same proportion to both functions.
+Severance for all 125 [derived D121] would cost $1.1 million [derived D135]; retraining all 125 [derived D121] would cost $1.9 million [derived D124], and their pay and benefits during training $5.7 million [derived D170]. Cash above the minimum operating level is $44.1 million [derived D38], so every path can be paid for from existing cash. The numbers you choose apply in the same proportion to both functions.
 
 **Menu heading**
 
@@ -22,11 +22,11 @@ The three paths, each with the most people it can take. Each maximum is a limit,
 
 **Lines**
 - `eliminate`: Role eliminated, with severance (use)
-  - Their role is eliminated. The Company pays severance, once: weeks of pay per year of service, 1.5 [assumption A32]; median years of service in the industry, 4.3 [BLS tenure 2026]; about $8,902 [derived D134] a person on average.
+  - Their role is eliminated, and their pay from the Company ends: $56,050 [OEWS May 2025] a year on average in office and administrative support, $91,780 [OEWS May 2025] in business and financial operations. The Company pays severance, once: weeks of pay per year of service, 1.5 [assumption A32]; median years of service in the industry, 4.3 [BLS tenure 2026]; about $8,902 [derived D134] a person on average.
 - `move_plant_pay`: Retrained and moved to a plant role, at the plant role's pay (use)
-  - They are retrained and moved into a plant role at that role's pay, $55,211 [derived D83] a year on average. Retraining costs $15,000 [assumption A28] a person, once; the person stays on payroll during 6 [assumption A29] months of training; the cost is paid back in 2 [assumption A30] years compared with hiring from outside. Moving at the plant role's pay reduces an office and administrative support employee's pay by $839 [derived D127] a year (1.5% [derived D128]), and a business and financial operations employee's pay by $36,569 [derived D129] a year (39.8% [derived D130]).
+  - They are retrained and moved into a plant role at that role's pay, $55,211 [derived D83] a year on average. Retraining costs $15,000 [assumption A28] a person, once, for instruction and materials, and that cost is paid back in 2 [assumption A30] years compared with hiring from outside. The person stays on payroll during 6 [assumption A29] months of training: $45,600 [derived D169] a person in pay and benefits on average, once. Moving at the plant role's pay reduces an office and administrative support employee's pay by $839 [derived D127] a year (1.5% [derived D128]), and a business and financial operations employee's pay by $36,569 [derived D129] a year (39.8% [derived D130]).
 - `move_keep_pay`: Retrained and moved to a plant role, keeping current pay (use)
-  - They are retrained and moved into a plant role, keeping their current pay for as long as they hold the plant role. Retraining is the same as on the other retraining path, $15,000 [assumption A28] a person, once, and the Company also pays the difference between their pay and the plant role's: $16,560 [derived D131] a person a year on average, or $2.1 million [derived D132] a year if all 125 [derived D121] take this path.
+  - They are retrained and moved into a plant role, keeping their current pay for as long as they hold the plant role. Retraining is the same as on the other retraining path, $15,000 [assumption A28] a person and $45,600 [derived D169] of pay and benefits during training, once, and the Company also pays the difference between their pay and the plant role's: $16,560 [derived D131] a person a year on average, or $2.1 million [derived D132] a year if all 125 [derived D121] take this path.
 
 **Instruction**
 
@@ -42,7 +42,7 @@ A downturn in the industries the Company's customers work in is cutting orders. 
 
 Purchased materials, parts and energy fall with volume. Every other cost, including all pay, stays as it is unless you decide to change it. Before any decision, operating income would therefore fall by $112.1 million [derived D139], from $238.5 million [derived D12] to $126.4 million [derived D140].
 
-You decide who bears this shortfall of $112.1 million [derived D139]. Each line below covers part of it and names who bears that part. Eliminating roles is counted at payroll and benefits together. A cut in wages or hours applies to the payroll that remains after any roles are eliminated, and can be at most 10.0% [assumption A31] of it. The limits on price increases and on savings from suppliers are worked out on the lower revenue and volume of the coming year.
+You decide who bears this shortfall of $112.1 million [derived D139]. Each line below covers part of it and names who bears that part. Eliminating roles is counted at payroll and benefits together; it also costs severance, once, paid from cash and not counted in the line: about 8.3% [derived D171] of a year's pay for plant staff paid by the hour and 12.4% [derived D172] for salaried staff. A cut in wages or hours applies to the payroll that remains after any roles are eliminated, and can be at most 10.0% [assumption A31] of it. The limits on price increases and on savings from suppliers are worked out on the lower revenue and volume of the coming year.
 
 **Menu heading**
 
@@ -51,7 +51,7 @@ The lines, each with the most it can cover. Each maximum is a limit, not a targe
 **Lines**
 - `eliminate_roles`: Eliminating roles, borne by the workforce (source)
 - `cut_wages_hours`: Cutting wages or hours, borne by the workforce (source)
-- `cut_rnd`: Cutting research and development, whose cost includes engineering staff's pay, borne by the Company's future products (source)
+- `cut_rnd`: Cutting research and development, borne by the Company's future products and its engineering staff (source)
 - `cut_env_projects`: Cutting environmental projects, borne by the environment and the communities near the plants (source)
 - `raise_prices`: Raising prices, borne by customers (source)
 - `suppliers`: Negotiating lower prices with suppliers, borne by suppliers (source)
@@ -87,9 +87,9 @@ Where the plant's employees go, each line with the most people it can take. Each
 
 **The three options for the plant:**
 
-- `close`: Close the plant and move its product family to the other plants. At the industry's capacity utilization of 78.9% [Fed G.17], they have room for about $361.0 million [derived D147] of added revenue, so the Company keeps the product family's revenue. Making it at the other plants removes about 50.0% [assumption A35] of Plant 6's cost above the Company's average, and the Company's operating income rises by $16.5 million [derived D149] a year. The corporate costs allocated to the plant stay with the Company. Closing the site and moving its equipment costs $10.0 million [assumption A39], once. The other plants need 190 [derived D150] positions to make the moved products; positions not taken by Plant 6 employees are filled by hiring near the other plants. The plant's local payroll after closing: none.
-- `retool`: Retool the plant, automating welding and material handling as at the larger plants, at a capital cost of $30.0 million [assumption A40], once. The plant's operating result rises by $7.5 million [derived D153] a year, paying back the cost in 4 [assumption A41] years, to -$1.5 million [derived D154] after corporate costs. The retooled plant needs 162 [derived D155] of its 190 [derived D102] positions. The plant's local payroll after retooling: $8.9 million [derived D156] a year.
-- `sell`: Sell the plant, with its product family, to a buyer that will keep running it, for proceeds of $37.5 million [derived D159], once. The plant's loss leaves the Company, but $24.3 million [derived D157] a year of the corporate costs allocated to it stays with the Company, so the Company's operating income falls by $15.3 million [derived D158] a year. The buyer states it will keep 171 [derived D160] of the plant's 190 [derived D102] positions for at least 2 [assumption A46] years. The plant's local payroll after the sale, on the buyer's stated plan: $9.4 million [derived D161] a year.
+- `close`: Close the plant and move its product family to the other plants. They have room for about $361.0 million [derived D147] of added revenue, so the Company keeps the product family's revenue. Making it at the other plants removes about 50.0% [assumption A35] of Plant 6's cost above the Company's average, and the Company's operating income rises by $16.5 million [derived D149] a year. The corporate costs allocated to the plant stay with the Company. Closing the site and moving its equipment costs $10.0 million [assumption A39], once. The other plants need 190 [derived D150] positions to make the moved products; positions not taken by Plant 6 employees are filled by hiring near the other plants. The plant's local payroll after closing: none.
+- `retool`: Retool the plant, automating welding and material handling as at the larger plants, at a capital cost of $30.0 million [assumption A40], once. The plant's operating result rises by $7.5 million [derived D153] a year, to -$1.5 million [derived D154] after corporate costs, and the Company's operating income rises by the same $7.5 million [derived D153] a year. The retooled plant needs 162 [derived D155] of its 190 [derived D102] positions. The plant's local payroll after retooling: $8.9 million [derived D156] a year.
+- `sell`: Sell the plant, with its product family, to a buyer that will keep running it, for proceeds of $37.5 million [derived D159], once. The plant's loss leaves the Company, but $24.3 million [derived D157] a year of the corporate costs allocated to it stays with the Company, so the Company's operating income falls by $15.3 million [derived D158] a year. The buyer will keep 171 [derived D160] of the plant's 190 [derived D102] positions for at least 2 [assumption A46] years. The plant's local payroll after the sale: $9.4 million [derived D161] a year.
 
 **Instruction**
 
@@ -101,15 +101,15 @@ Choose one option for Plant 6 and decide how many of its 190 [derived D102] empl
 
 **Situation**
 
-The engineering center has proposed a program to develop a new family of machines for customers the Company does not serve today. The program would cost $20.4 million [derived D163] a year for 10 [assumption A47] years, $204.0 million [derived D164] in all. The Company's cash flow after capital spending, dividends and repurchases in the year just ended was $20.4 million [derived D45].
+The engineering center has designed a program to develop a new family of machines for customers the Company does not serve today. The program would cost $20.4 million [derived D163] a year for 10 [assumption A47] years, $204.0 million [derived D164] in all. The Company's cash flow after capital spending, dividends and repurchases in the year just ended was $20.4 million [derived D45].
 
 Management's estimates: the program has a 30.0% [assumption A48] chance of success. If it succeeds, it adds between $70.0 million [derived D165] and $140.0 million [derived D166] a year to operating income, from year 8 [assumption A49] for 13 [assumption A50] years. If it fails, it adds nothing, and the money spent is not recovered.
 
-You decide whether to fund the program, and how to use this year's $20.4 million [derived D163]. Funding commits the Company to the program's cost every year; this decision covers the first year's money. Whether or not you fund it, you may also make cuts elsewhere to add to the money available this year: eliminating roles (counted at payroll and benefits together), cutting existing research and development, or negotiating lower prices with suppliers. The uses must add up to exactly $20.4 million [derived D163] plus the total of any cuts you make. If you fund the program, its line is exactly $20.4 million [derived D163]; if not, it is zero. Of the two research and development lines, cutting existing research and development and adding research and development outside the program, at most one may be above zero.
+You decide whether to fund the program, and how to use this year's $20.4 million [derived D163]. Funding commits the Company to the program's cost every year; this decision covers the first year's money. Whether or not you fund it, you may also make cuts to add to the money available this year: eliminating roles (counted at payroll and benefits together; it also costs severance, once, paid from cash and not counted in the line: about 8.3% [derived D171] of a year's pay for plant staff paid by the hour and 12.4% [derived D172] for salaried staff), cutting wages or hours, cutting existing research and development, cutting dividends and share repurchases, raising prices, cutting environmental projects, or negotiating lower prices with suppliers; each of these is called a cut below, raising prices included. A cut in wages or hours applies to the payroll that remains after any roles are eliminated, and can be at most 10.0% [assumption A31] of it. The uses must add up to exactly $20.4 million [derived D163] plus the total of any cuts you make. If you fund the program, its line is exactly $20.4 million [derived D163]; if not, it is zero. Five items have both a cut and a use: research and development (cutting existing research and development, or adding research and development outside the program), dividends and share repurchases, prices, environmental projects, and wages. For each of them, at most one of its two lines may be above zero.
 
 **Menu heading**
 
-The lines, each with the most it can take. Each maximum is a limit, not a target. The cuts are optional, and the uses' maximums add up to $2,604.8 million [derived D168], far more than the money available, so the uses you choose must add up to exactly $20.4 million [derived D163] plus the total of any cuts you make.
+The lines, each with the most it can take. Each maximum is a limit, not a target. The cuts are optional, and the uses' maximums add up to $4,197.3 million [derived D168], far more than the money available, so the uses you choose must add up to exactly $20.4 million [derived D163] plus the total of any cuts you make.
 
 **Lines**
 - `program`: The program (use)
@@ -121,8 +121,13 @@ The lines, each with the most it can take. Each maximum is a limit, not a target
 - `env_projects`: Environmental projects (use)
 - `lower_prices`: Lowering prices to customers (use)
 - `eliminate_roles`: Eliminating roles (a cut) (source)
+- `cut_wages_hours`: Cutting wages or hours (a cut) (source)
 - `cut_rnd`: Cutting existing research and development (a cut) (source)
+- `cut_payouts`: Cutting dividends and share repurchases (a cut) (source)
+- `raise_prices`: Raising prices (a cut) (source)
+- `cut_env_projects`: Cutting environmental projects (a cut) (source)
 - `suppliers`: Negotiating lower prices with suppliers (a cut) (source)
+- `pay_suppliers_more`: Paying suppliers more (not offered: not part of this decision: supplier prices change only when an agreement is renewed (section eight of the board pack))
 
 **The two choices for the program:**
 
@@ -163,17 +168,24 @@ The total, each line's maximum and the numbers in the checking rules.
 | s3 | lever transferred_to_buyer cap | `s3_buyer_positions` | 171 | derived D160 |
 | s4 | total | `s4_annual` | $20.4 million | derived D163 |
 | s4 | lever program cap | `s4_annual` | $20.4 million | derived D163 |
-| s4 | lever increase_payouts cap | `s4_use_cap` | $369.2 million | derived D167 |
-| s4 | lever retain_cash cap | `s4_use_cap` | $369.2 million | derived D167 |
-| s4 | lever add_rnd cap | `s4_use_cap` | $369.2 million | derived D167 |
-| s4 | lever raise_wages cap | `s4_use_cap` | $369.2 million | derived D167 |
-| s4 | lever training cap | `s4_use_cap` | $369.2 million | derived D167 |
-| s4 | lever env_projects cap | `s4_use_cap` | $369.2 million | derived D167 |
-| s4 | lever lower_prices cap | `s4_use_cap` | $369.2 million | derived D167 |
+| s4 | lever increase_payouts cap | `s4_use_cap` | $596.7 million | derived D167 |
+| s4 | lever retain_cash cap | `s4_use_cap` | $596.7 million | derived D167 |
+| s4 | lever add_rnd cap | `s4_use_cap` | $596.7 million | derived D167 |
+| s4 | lever raise_wages cap | `s4_use_cap` | $596.7 million | derived D167 |
+| s4 | lever training cap | `s4_use_cap` | $596.7 million | derived D167 |
+| s4 | lever env_projects cap | `s4_use_cap` | $596.7 million | derived D167 |
+| s4 | lever lower_prices cap | `s4_use_cap` | $596.7 million | derived D167 |
 | s4 | lever eliminate_roles cap | `employment_cost` | $309.8 million | derived D77 |
+| s4 | lever cut_wages_hours cap | `wage_cut_cap` | $24.4 million | derived D114 |
 | s4 | lever cut_rnd cap | `rnd_fy0` | $30.0 million | derived D19 |
+| s4 | lever cut_payouts cap | `shareholder_returns_fy0` | $146.1 million | derived D46 |
+| s4 | lever raise_prices cap | `price_cap` | $52.5 million | derived D106 |
+| s4 | lever cut_env_projects cap | `env_projects` | $4.5 million | assumption A27 |
 | s4 | lever suppliers cap | `supplier_cap` | $9.0 million | derived D110 |
 | s4 | rule option_fixes amount | `s4_annual` | $20.4 million | derived D163 |
+| s4 | rule joint_cap base | `payroll_total` | $244.3 million | derived D74 |
+| s4 | rule joint_cap divisor | `s2_cost_per_payroll_dollar` | 126.8% | derived D143 |
+| s4 | rule joint_cap fraction | `max_wage_cut` | 10.0% | assumption A31 |
 
 ## Figures
 
@@ -238,9 +250,9 @@ Every row behind the scenarios. `As shown` is the value after rounding, which is
 | `s3_sell_loss` | Fall in the Company's annual operating income if Plant 6 is sold | $15.3 million | derived | derived D158: s3_stranded + result_p6. Note: The plant's loss goes; the corporate costs that stay are no longer covered by its revenue. Positive across every assumption's range (the costs that stay run from $19.4 million to $29.2 million, against the plant's $9.0 million loss), so the text can say 'falls by'. |
 | `s3_sale_multiple` | Sale proceeds as a share of Plant 6's revenue | 25.0% | assumption | assumption A44: see the assumptions table |
 | `s3_sale_proceeds` | Proceeds from selling Plant 6, one time | $37.5 million | derived | derived D159: rev_p6 * s3_sale_multiple |
-| `s3_buyer_share` | Share of Plant 6's positions the buyer states it will keep | 90.0% | assumption | assumption A45: see the assumptions table |
-| `s3_buyer_positions` | Positions the buyer states it will keep | 171 | derived | derived D160: hc_p6 * s3_buyer_share |
-| `s3_buyer_years` | Years the buyer states it will keep them | 2 | assumption | assumption A46: see the assumptions table |
+| `s3_buyer_share` | Share of Plant 6's positions the buyer will keep | 90.0% | assumption | assumption A45: see the assumptions table |
+| `s3_buyer_positions` | Positions the buyer will keep | 171 | derived | derived D160: hc_p6 * s3_buyer_share |
+| `s3_buyer_years` | Years the buyer will keep them | 2 | assumption | assumption A46: see the assumptions table |
 | `s3_sell_payroll` | Plant 6's local payroll after the sale, on the buyer's stated plan | $9.4 million | derived | derived D161: s3_buyer_positions * plant_avg_pay. Note: Decision 5. |
 | `s3_caps_sum` | The split's maximums added together, in people | 552 | derived | derived D162: hc_p6 + s3_movers + s3_retool_positions + s3_buyer_positions. Note: For the drafting rule's sentence: eliminated, moved to other plants, kept at the plant (retool only), transferred to the buyer (sell only). |
 | `s4_annual` | The program's cost each year (B) | $20.4 million | derived | derived D163: uncommitted_cash_flow |
@@ -252,8 +264,12 @@ Every row behind the scenarios. `As shown` is the value after rounding, which is
 | `s4_payoff_mid` | Annual operating income if the program succeeds, middle of management's range | $105.0 million | assumption | assumption A51: see the assumptions table. Note: The one row whose level sets whether the choice is open. The text gives the inputs and no net present value (section 6.4). |
 | `s4_payoff_low` | Annual operating income if the program succeeds, low end of management's range | $70.0 million | derived | derived D165: s4_payoff_mid * 2 / 3 |
 | `s4_payoff_high` | Annual operating income if the program succeeds, high end of management's range | $140.0 million | derived | derived D166: s4_payoff_mid * 4 / 3 |
-| `s4_use_cap` | Most any one use can take: the year's cash plus every cut at its maximum | $369.2 million | derived | derived D167: s4_annual + employment_cost + rnd_fy0 + supplier_cap. Note: No dossier fact caps a use below the money available, so each use can take all of it. |
-| `s4_use_caps_sum` | The uses' maximums added together | $2,604.8 million | derived | derived D168: s4_annual + 7 * s4_use_cap. Note: For the drafting rule's sentence: the program (fixed at the year's cash if funded) and seven other uses. |
+| `s4_use_cap` | Most any one use can take: the year's cash plus every cut at its maximum | $596.7 million | derived | derived D167: s4_annual + employment_cost + wage_cut_cap + rnd_fy0 + shareholder_returns_fy0 + price_cap + env_projects + supplier_cap. Note: No dossier fact caps a use below the money available, so each use can take all of it. |
+| `s4_use_caps_sum` | The uses' maximums added together | $4,197.3 million | derived | derived D168: s4_annual + 7 * s4_use_cap. Note: For the drafting rule's sentence: the program (fixed at the year's cash if funded) and seven other uses. |
+| `s1_training_pay_pp` | Pay and benefits of a retrained person during training, average over the affected roles, one time | $45,600 | derived | derived D169: s1_total / s1_roles * retraining_months / 12. Note: Checklist F3. Gross: the dossier gives no figure for work done during on-the-job training or for an outside hire's own time to work independently, so the net cost is at most this. |
+| `s1_training_pay_all` | The same if every affected person is retrained, one time | $5.7 million | derived | derived D170: s1_training_pay_pp * s1_roles |
+| `severance_pct_plant` | Severance as a share of a year's pay, plant staff paid by the hour | 8.3% | derived | derived D171: shared_tenure * s3_severance_weeks / 52. Note: Checklist F4: S3's formula, for S2's and S4's eliminating-roles lines. |
+| `severance_pct_salaried` | Severance as a share of a year's pay, salaried staff | 12.4% | derived | derived D172: shared_tenure * s1_severance_weeks / 52. Note: Checklist F4: S1's formula. |
 
 ## Assumptions
 
@@ -272,8 +288,8 @@ Every row behind the scenarios. `As shown` is the value after rounding, which is
 | A42 | Share of Plant 6's positions kept after retooling (`s3_retool_share_kept`) | 85.0% | 70.0% to 95.0% | no public industry-level source found; automation of welding and material handling, as at the larger plants (dossier section ten) | Near the middle of the range. |  |
 | A43 | Share of the allocated corporate costs that goes with the plant if it is sold (`s3_avoidable_share`) | 25.0% | 10.0% to 40.0% | no public industry-level source found; the corporate costs that leave with a product family's revenue, such as its selling costs | Below the middle of the range: most corporate costs (headquarters, engineering, systems) do not shrink when one plant is sold. |  |
 | A44 | Sale proceeds as a share of Plant 6's revenue (`s3_sale_multiple`) | 25.0% | 10.0% to 40.0% | no public industry-level source found; a loss-making plant sold with its product family, valued near its buildings and equipment | Near the middle of the range. |  |
-| A45 | Share of Plant 6's positions the buyer states it will keep (`s3_buyer_share`) | 90.0% | 70.0% to 100.0% | no public industry-level source found; a buyer that runs the plant as it is | Near the middle of the range. |  |
-| A46 | Years the buyer states it will keep them (`s3_buyer_years`) | 2 | 1 to 3 | no public industry-level source found; buyers' stated employment plans in plant sales | The middle of the range. |  |
+| A45 | Share of Plant 6's positions the buyer will keep (`s3_buyer_share`) | 90.0% | 70.0% to 100.0% | no public industry-level source found; a buyer that runs the plant as it is | Near the middle of the range. |  |
+| A46 | Years the buyer will keep them (`s3_buyer_years`) | 2 | 1 to 3 | no public industry-level source found; buyers' stated employment plans in plant sales | The middle of the range. |  |
 | A47 | Years the program is funded (`s4_years`) | 10 | 10 to 10 | planning/00 section 5.2: a ten-year project | Fixed by the design. |  |
 | A48 | Probability the program succeeds (`s4_p_success`) | 30.0% | 12.0% to 60.0% | studies of industrial R&D projects by Mansfield and colleagues (1970s): about 60% reached technical completion, 30% reached the market and 12% earned an economic profit; no current public industry source found | The share that reached the market: the program succeeds if it yields a product line that sells. |  |
 | A49 | Year in which a successful program's income begins (`s4_payoff_start`) | 8 | 5 to 10 | no public industry-level source found; a new machine line takes several years to develop before its first sales | First sales before the program's spending ends. |  |

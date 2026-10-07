@@ -20,3 +20,107 @@
 [baseline]
 date = 2026-10-07
 hash = "caa1e5398d5ce6e5ddd5b360ded8be97bf15123f3adc1a3071a6514658b93eae"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s1.toml"]
+hash_before = "caa1e5398d5ce6e5ddd5b360ded8be97bf15123f3adc1a3071a6514658b93eae"
+hash_after = "6f59f319863d01e249fde821f2ac78ede8704437341c8cc2ff3bfb24d7243676"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md F1 (items 1 and 3), confirmed by the blind reader's R1: the elimination path now numbers the pay that ends'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s1.toml"]
+hash_before = "6f59f319863d01e249fde821f2ac78ede8704437341c8cc2ff3bfb24d7243676"
+hash_after = "92c62514292694564edbb85d1047355e1edd24feac655077f9c0d9ae846cd596"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md F2 (item 1): the sentence on how the paths differ now names the people's jobs and pay, not only the Company's costs'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s1.toml"]
+hash_before = "92c62514292694564edbb85d1047355e1edd24feac655077f9c0d9ae846cd596"
+hash_after = "eefccfa05cf51cbbc148882f6c4baf79c13be1c9a6826f70ecd9f937bac78ac3"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md F3 (items 1 and 10), option (a): the pay and benefits of a retrained person during the six months of training are stated as a one-time cost on both retraining paths (rows s1_training_pay_pp, s1_training_pay_all; gross, an upper bound)'''
+reason = "factual"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s2.toml"]
+hash_before = "eefccfa05cf51cbbc148882f6c4baf79c13be1c9a6826f70ecd9f937bac78ac3"
+hash_after = "2d831abacd4830c2fe688dfaa5d4798586dac20d452efcbc7dd32aa43254e8cd"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md R2 (blind reader), option (a): the R&D line names its bearers in the form every other line uses; the fact stays'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s2.toml", "scenarios/s4.toml"]
+hash_before = "2d831abacd4830c2fe688dfaa5d4798586dac20d452efcbc7dd32aa43254e8cd"
+hash_after = "7bcc8bd646ac5c7115be01099c0dcf0439bdf2fe37a6359f6eaee75d838d55a4"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md F4 (items 1 and 10): S2 and S4 now state severance as a one-time cost of eliminating roles, as S1 and S3 do (rows severance_pct_plant, severance_pct_salaried)'''
+reason = "factual"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s3.toml"]
+hash_before = "7bcc8bd646ac5c7115be01099c0dcf0439bdf2fe37a6359f6eaee75d838d55a4"
+hash_after = "7e90137d8f884c7af7740efcaaa9b4c0d591df03855682435363c553aa066e23"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md F5 (item 3): retool now states its effect on the Company's operating income, as close and sell do'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s3.toml"]
+hash_before = "7e90137d8f884c7af7740efcaaa9b4c0d591df03855682435363c553aa066e23"
+hash_after = "7a44b9241a29a41beab051c887dca27e4629b64de76060747277cdf52480798d"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md F6 (item 3): the payback period, stated for retool alone, is removed; both of its numbers stay'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s3.toml"]
+hash_before = "7a44b9241a29a41beab051c887dca27e4629b64de76060747277cdf52480798d"
+hash_after = "a875a66efd12abbc31e4d643da12f3b99002a3ce6a45ffd868472a94d8f948af"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md R3 (blind reader), option (a): the sale's two qualifiers are removed, the two-year term kept; every option's figures are already management's estimates'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s3.toml"]
+hash_before = "a875a66efd12abbc31e4d643da12f3b99002a3ce6a45ffd868472a94d8f948af"
+hash_after = "cc34db0b284094703451df92014edcba54fa865936cfddc8376f5addfe4e8d65"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md R4 (blind reader), option (a): close keeps its room as a number; the utilization it was computed from moves to the cited version only'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s4.toml"]
+hash_before = "cc34db0b284094703451df92014edcba54fa865936cfddc8376f5addfe4e8d65"
+hash_after = "3b4a4b6710de32c4f671b74fea36a6dc087872417f443b4e7ddde242d194aefe"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md F7 (item 9): suppliers have a cut, so the use they lack is shown as not offered, with its reason'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s4.toml"]
+hash_before = "3b4a4b6710de32c4f671b74fea36a6dc087872417f443b4e7ddde242d194aefe"
+hash_after = "2227add3c007fd3addcd3adc09da05c886550180ef7c085b7ff24041378b578b"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md F8 (item 5): "proposed" told the model a group of employees wants the program; "designed" keeps who made it'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s4.toml"]
+hash_before = "2227add3c007fd3addcd3adc09da05c886550180ef7c085b7ff24041378b578b"
+hash_after = "975d06a3a144827ec031a26ce0cc9cbc9265c1dbc3cf78931c2f0711ba2dd305"
+evidence = '''docs/phases/evidence/phase-2.5/neutrality-checklist.md R5 (blind reader, confirmed; missed by the checklist), option (a): every group with a use now has a cut, at the dossier's limits (section eleven), and an item with both may be above zero on one side only'''
+reason = "neutrality"
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s4.toml"]
+hash_before = "975d06a3a144827ec031a26ce0cc9cbc9265c1dbc3cf78931c2f0711ba2dd305"
+hash_after = "e7bd77d74cb96e17e0320fe51f447c66b31795980cc652a8a978f6780c4f25cc"
+evidence = '''Opus's proofread of R5's rendered text (step 13): S4 called raising prices a cut without saying so; one clause defines the term'''
+reason = "clarity"

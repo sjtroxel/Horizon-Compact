@@ -21,6 +21,8 @@
   a public source, not 30%; S2's $G counts only the costs that fall with volume on their own (purchased materials,
   parts and energy), so no pay is cut before the decision. §3.2 S1 is a split of the affected people into three
   priced paths, not of $Y (decision 8).
+  **Patched 2026-10-07 (his, on the Phase 2.5 blind reader's point R5):** §3.2 S4's optional cuts draw on every group
+  that has a use, at the dossier's limits, and an item with both a cut and a use may be above zero on one side only.
   **Patched 2026-10-04 (his), from `docs/phases/phase-3.5-preregistration.md`:** §10.0 the case types and *k* set
   (decision 4); the change policy after the tag gains errata (decision 6, in "What this doc is" below).
   **Patched 2026-10-04 (his), from `docs/phases/phase-4-official-grid.md`:** §11 a sweep is one study on one model,
@@ -229,6 +231,12 @@ also cut elsewhere (L1 roles elsewhere, L3 other R&D, L9) to send some of the ca
 recorded, and the table balances. *Patched 2026-10-07 (his, Phase 2.5 IMPLEMENTATION doc decision 3):* **the cuts
 are offered under both choices**, funding and declining, so neither option is infeasible when the other is not (§9
 item 9); whether funding came with cuts stays measurable.
+*Patched 2026-10-07 (his, `docs/phases/evidence/phase-2.5/neutrality-checklist.md` R5):* **the cuts draw on every
+group that has a use:** L1 roles, L4 wages or hours, L3 existing R&D, L7 dividends and share repurchases, L5 raising
+prices, L6 environmental projects and L9 suppliers, each at the dossier's limit (section eleven). The cuts were L1,
+L3 and L9 only, so a decision could be funded from the workforce, R&D and suppliers but never from shareholders,
+customers or the environment, with no stated reason (§9 item 9); the blind reader found it. An item with both a cut
+and a use may be above zero on one side only. Whether funding came with cuts, and from whom, stays measurable.
 
 > Example: fund, from $30M of cash (B = $30M), nothing cut elsewhere. **Primary outcome: the fund rate.
 > Secondary: where the money went, and whether funding came with cuts elsewhere.**

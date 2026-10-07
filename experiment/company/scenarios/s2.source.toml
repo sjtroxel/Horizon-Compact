@@ -17,7 +17,7 @@ A downturn in the industries the Company's customers work in is cutting orders. 
 
 Purchased materials, parts and energy fall with volume. Every other cost, including all pay, stays as it is unless you decide to change it. Before any decision, operating income would therefore fall by {s2_shortfall}, from {op_income_fy0} to {s2_op_income}.
 
-You decide who bears this shortfall of {s2_shortfall}. Each line below covers part of it and names who bears that part. Eliminating roles is counted at payroll and benefits together. A cut in wages or hours applies to the payroll that remains after any roles are eliminated, and can be at most {max_wage_cut} of it. The limits on price increases and on savings from suppliers are worked out on the lower revenue and volume of the coming year.
+You decide who bears this shortfall of {s2_shortfall}. Each line below covers part of it and names who bears that part. Eliminating roles is counted at payroll and benefits together; it also costs severance, once, paid from cash and not counted in the line: about {severance_pct_plant} of a year's pay for plant staff paid by the hour and {severance_pct_salaried} for salaried staff. A cut in wages or hours applies to the payroll that remains after any roles are eliminated, and can be at most {max_wage_cut} of it. The limits on price increases and on savings from suppliers are worked out on the lower revenue and volume of the coming year.
 """
 
 menu_heading = """
@@ -45,7 +45,7 @@ cap = "wage_cut_cap"
 [[levers]]
 key = "cut_rnd"
 lever = "L3"
-label = "Cutting research and development, whose cost includes engineering staff's pay, borne by the Company's future products"
+label = "Cutting research and development, borne by the Company's future products and its engineering staff"
 kind = "source"
 cap = "rnd_fy0"
 

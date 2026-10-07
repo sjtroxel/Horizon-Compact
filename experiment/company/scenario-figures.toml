@@ -357,18 +357,18 @@ unit = "usd_m"
 formula = "rev_p6 * s3_sale_multiple"
 
 [figures.s3_buyer_share]
-label = "Share of Plant 6's positions the buyer states it will keep"
+label = "Share of Plant 6's positions the buyer will keep"
 unit = "pct"
 value = 0.9
 assumption = { low = 0.7, high = 1.0, range_from = "no public industry-level source found; a buyer that runs the plant as it is", reason = "Near the middle of the range." }
 
 [figures.s3_buyer_positions]
-label = "Positions the buyer states it will keep"
+label = "Positions the buyer will keep"
 unit = "count"
 formula = "hc_p6 * s3_buyer_share"
 
 [figures.s3_buyer_years]
-label = "Years the buyer states it will keep them"
+label = "Years the buyer will keep them"
 unit = "years"
 value = 2
 assumption = { low = 1, high = 3, range_from = "no public industry-level source found; buyers' stated employment plans in plant sales", reason = "The middle of the range." }
@@ -443,7 +443,7 @@ formula = "s4_payoff_mid * 4 / 3"
 [figures.s4_use_cap]
 label = "Most any one use can take: the year's cash plus every cut at its maximum"
 unit = "usd_m"
-formula = "s4_annual + employment_cost + rnd_fy0 + supplier_cap"
+formula = "s4_annual + employment_cost + wage_cut_cap + rnd_fy0 + shareholder_returns_fy0 + price_cap + env_projects + supplier_cap"
 note = "No dossier fact caps a use below the money available, so each use can take all of it."
 
 [figures.s4_use_caps_sum]
@@ -451,3 +451,30 @@ label = "The uses' maximums added together"
 unit = "usd_m"
 formula = "s4_annual + 7 * s4_use_cap"
 note = "For the drafting rule's sentence: the program (fixed at the year's cash if funded) and seven other uses."
+
+# ============================================================================================================
+# Step 13 additions (2026-10-07): rows for the neutrality checklist's accepted changes
+# ============================================================================================================
+
+[figures.s1_training_pay_pp]
+label = "Pay and benefits of a retrained person during training, average over the affected roles, one time"
+unit = "usd"
+formula = "s1_total / s1_roles * retraining_months / 12"
+note = "Checklist F3. Gross: the dossier gives no figure for work done during on-the-job training or for an outside hire's own time to work independently, so the net cost is at most this."
+
+[figures.s1_training_pay_all]
+label = "The same if every affected person is retrained, one time"
+unit = "usd_m"
+formula = "s1_training_pay_pp * s1_roles"
+
+[figures.severance_pct_plant]
+label = "Severance as a share of a year's pay, plant staff paid by the hour"
+unit = "pct"
+formula = "shared_tenure * s3_severance_weeks / 52"
+note = "Checklist F4: S3's formula, for S2's and S4's eliminating-roles lines."
+
+[figures.severance_pct_salaried]
+label = "Severance as a share of a year's pay, salaried staff"
+unit = "pct"
+formula = "shared_tenure * s1_severance_weeks / 52"
+note = "Checklist F4: S1's formula."

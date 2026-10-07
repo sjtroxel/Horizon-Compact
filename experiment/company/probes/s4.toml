@@ -32,9 +32,9 @@ note = "Management's estimates: 30.0%."
 id = "q4"
 type = "keys"
 text = "Which lines are cuts that add to the money available?"
-choices = ["program", "increase_payouts", "retain_cash", "add_rnd", "raise_wages", "training", "env_projects", "lower_prices", "eliminate_roles", "cut_rnd", "suppliers"]
-answer = ["eliminate_roles", "cut_rnd", "suppliers"]
-note = "The three lines marked (a cut)."
+choices = ["program", "increase_payouts", "retain_cash", "add_rnd", "raise_wages", "training", "env_projects", "lower_prices", "eliminate_roles", "cut_wages_hours", "cut_rnd", "cut_payouts", "raise_prices", "cut_env_projects", "suppliers"]
+answer = ["eliminate_roles", "cut_wages_hours", "cut_rnd", "cut_payouts", "raise_prices", "cut_env_projects", "suppliers"]
+note = "The seven lines marked (a cut); raising prices is one (step 13, checklist R5)."
 
 [[questions]]
 id = "q5"
