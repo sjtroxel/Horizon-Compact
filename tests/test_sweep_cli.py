@@ -315,6 +315,7 @@ def test_an_openrouter_run_builds_its_provider_with_the_key_from_the_environment
 
     monkeypatch.setattr(cli, "OpenRouterProvider", fake_provider)
     monkeypatch.setenv("OPENROUTER_API_KEY", MADE_UP_KEY)
+    monkeypatch.setattr("builtins.input", lambda prompt="": "y")
     assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 0  # no --profile
     captured = capsys.readouterr()
     assert built == [MADE_UP_KEY]
@@ -328,6 +329,7 @@ def test_an_openrouter_run_builds_its_provider_with_the_key_from_the_environment
 def test_a_misshapen_key_is_refused_before_any_call_and_never_echoed(
     laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    monkeypatch.setattr("builtins.input", lambda prompt="": "y")
     monkeypatch.setattr(cli, "OpenRouterProvider", lambda key: pytest.fail("a provider was built"))
     monkeypatch.setenv("OPENROUTER_API_KEY", "sk-ant-api03-this-is-not-an-openrouter-key")
     assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 2
@@ -381,3 +383,110 @@ def test_real_content_is_refused_for_the_sealed_draw_not_for_the_openrouter_mode
     err = capsys.readouterr().err
     assert "sealed template is not drawn yet" in err
     assert "is not the development model" not in err
+
+
+# --- the spend warning, before the OpenRouter key -----------------------------------------------------------
+
+
+def _no_key_and_no_provider(monkeypatch: pytest.MonkeyPatch) -> None:
+    def no_prompt(*args: Any, **kwargs: Any) -> str:
+        raise AssertionError("a refused run asked for the key")
+
+    monkeypatch.setattr("getpass.getpass", no_prompt)
+    monkeypatch.setattr(cli, "OpenRouterProvider", lambda key: pytest.fail("a provider was built"))
+
+
+def test_the_spend_warning_states_calls_costs_cap_and_assumption_then_asks(
+    laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    asked: list[str] = []
+
+    def answer_no(prompt: str = "") -> str:
+        asked.append(prompt)
+        return "n"
+
+    monkeypatch.setattr("builtins.input", answer_no)
+    _no_key_and_no_provider(monkeypatch)
+    monkeypatch.setenv("OPENROUTER_API_KEY", MADE_UP_KEY)  # set, and still it is asked first
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 2
+    captured = capsys.readouterr()
+    assert asked == ["Continue? [y/N] "]
+    assert "calls planned:  5 (runs not yet finished)" in captured.out
+    assert "likely cost:    $" in captured.out
+    assert "1,000 output tokens" in captured.out
+    assert "worst case:     $" in captured.out
+    assert "cap:            $5.00" in captured.out
+    assert "about $0.0003 a call" in captured.out
+    assert "not confirmed: nothing was sent" in captured.err
+    assert MADE_UP_KEY not in captured.out + captured.err
+    assert not (laptop_repo / "scratch" / "runs").exists() or not any(
+        p.is_file() for p in (laptop_repo / "scratch" / "runs").rglob("*")
+    )
+
+
+@pytest.mark.parametrize("answer", ["", "n", "yes please", "no", " "])
+def test_anything_but_y_sends_nothing_and_asks_for_no_key(
+    answer: str,
+    laptop_repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr("builtins.input", lambda prompt="": answer)
+    _no_key_and_no_provider(monkeypatch)
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 2
+    assert "not confirmed" in capsys.readouterr().err
+
+
+def test_no_answer_at_all_is_a_refusal(
+    laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def closed(prompt: str = "") -> str:
+        raise EOFError
+
+    monkeypatch.setattr("builtins.input", closed)
+    _no_key_and_no_provider(monkeypatch)
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 2
+    assert "not confirmed" in capsys.readouterr().err
+
+
+def test_a_run_refused_for_another_reason_is_not_asked_to_confirm(
+    laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def no_question(prompt: str = "") -> str:
+        raise AssertionError("a refused run was asked to confirm")
+
+    monkeypatch.setattr("builtins.input", no_question)
+    _no_key_and_no_provider(monkeypatch)
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "s3", "--bucket", "b"]) == 2
+    assert "an OpenRouter model's runs stay on this laptop" in capsys.readouterr().err
+
+
+def test_only_the_openrouter_route_is_asked(
+    laptop_repo: Path,
+    fake_clock: None,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def no_question(prompt: str = "") -> str:
+        raise AssertionError("a local run was asked to confirm")
+
+    monkeypatch.setattr("builtins.input", no_question)
+    monkeypatch.setattr(cli, "OllamaProvider", lambda url, num_ctx: ScriptedProvider())
+    assert cli.main(["sweep", "run", *LOCAL_ARGS, "--store", "local"]) == 0
+    assert "calls planned" not in capsys.readouterr().out
+
+
+def test_a_resumed_sweep_counts_only_the_runs_not_yet_finished(
+    laptop_repo: Path,
+    fake_clock: None,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(cli, "OpenRouterProvider", lambda key: ScriptedProvider())
+    monkeypatch.setenv("OPENROUTER_API_KEY", MADE_UP_KEY)
+    monkeypatch.setattr("builtins.input", lambda prompt="": "y")
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 0
+    capsys.readouterr()
+    monkeypatch.setattr("builtins.input", lambda prompt="": "n")
+    assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 2
+    assert "calls planned:  0 (runs not yet finished)" in capsys.readouterr().out

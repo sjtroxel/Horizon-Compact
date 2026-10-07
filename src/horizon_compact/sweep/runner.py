@@ -57,6 +57,17 @@ _RUN_KEY = re.compile(
     r"runs/(?P<run>r-[0-9a-f]{12})/(?:attempt-(?P<n>\d+)|(?P<final>final))\.json$"
 )
 
+
+def finished_run_ids(store: Store, prefix: str) -> set[str]:
+    """The runs of a sweep that already have a ``final.json``: a re-launch skips them."""
+    found: set[str] = set()
+    for key in store.list_keys(f"{prefix}runs/"):
+        match = _RUN_KEY.search(key)
+        if match is not None and match.group("final"):
+            found.add(match.group("run"))
+    return found
+
+
 # Why a session stopped. "complete" and the first three are clean: a re-launch resumes. The last two are not.
 CLEAN_STOPS = frozenset({"complete", "cap_reached", "max_minutes", "stop_requested"})
 # This many api_errors in a row, across runs, means the problem is not transient: stop and say so. (Phase 1

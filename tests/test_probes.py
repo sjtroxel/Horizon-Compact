@@ -454,3 +454,53 @@ def test_probes_run_then_report_from_the_command_line(
     assert report.endswith("|\n")  # exactly one final newline: the end-of-file hook passes
     assert "## s3" in report
     assert report.count("| 2 of 2 | yes |") == 10
+
+
+# --- the spend warning, before the OpenRouter key -----------------------------------------------------------
+
+PROBE_CLI = [
+    "probes", "run",
+    "--experiment", "company",
+    "--model", "gpt-oss-openrouter",
+    "--label", "warn",
+]  # fmt: skip
+A_KEY = "sk-or-v1-0123456789abcdef0123456789abcdef"
+
+
+def test_probes_state_the_spend_and_a_refusal_sends_nothing_and_asks_for_no_key(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def no_prompt(*args: Any, **kwargs: Any) -> str:
+        raise AssertionError("a refused run asked for the key")
+
+    monkeypatch.setattr(cli, "_git", lambda *a: str(tmp_path))
+    monkeypatch.setattr("getpass.getpass", no_prompt)
+    monkeypatch.setattr(cli, "OpenRouterProvider", lambda key: pytest.fail("a provider was built"))
+    monkeypatch.setenv("OPENROUTER_API_KEY", A_KEY)
+    monkeypatch.setattr("builtins.input", lambda prompt="": "")
+    assert cli.main(PROBE_CLI) == 2
+    captured = capsys.readouterr()
+    assert "calls planned:  20 (probe repeats not yet recorded)" in captured.out
+    assert "likely cost:    $" in captured.out
+    assert "worst case:     $" in captured.out
+    assert "cap:            $5.00" in captured.out
+    assert "not confirmed: nothing was sent" in captured.err
+    assert A_KEY not in captured.out + captured.err
+    assert not (tmp_path / "scratch").exists()
+
+
+def test_probes_go_on_to_the_key_after_a_y(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    class Reached(Exception):
+        pass
+
+    def provider(key: str) -> Any:
+        raise Reached(key)
+
+    monkeypatch.setattr(cli, "_git", lambda *a: str(tmp_path))
+    monkeypatch.setattr(cli, "OpenRouterProvider", provider)
+    monkeypatch.setenv("OPENROUTER_API_KEY", A_KEY)
+    monkeypatch.setattr("builtins.input", lambda prompt="": "y")
+    with pytest.raises(Reached):
+        cli.main(PROBE_CLI)

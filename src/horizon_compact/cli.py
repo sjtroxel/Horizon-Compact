@@ -11,7 +11,7 @@ import random
 import signal
 import subprocess
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from types import FrameType
 
@@ -35,6 +35,7 @@ from horizon_compact.probes.run import (
     ProbeSet,
     check_probe_model,
     load_probe_sets,
+    probe_estimate,
     probe_report,
     probe_run_id,
     run_probes,
@@ -76,6 +77,7 @@ from horizon_compact.sweep.prompt import render_prompt
 from horizon_compact.sweep.runner import check_official, check_route, run_session
 from horizon_compact.sweep.spend import DEVELOPMENT_CAP_USD
 from horizon_compact.sweep.store import LocalStore, S3Store, Store
+from horizon_compact.sweep.warning import SpendEstimate, format_warning, sweep_estimate
 
 EVIDENCE_RELATIVE = Path("docs/phases/evidence/phase-0.5/smoke")
 # "Dirty" means code or docs differ from the commit, not that earlier evidence records are uncommitted.
@@ -254,23 +256,44 @@ def _check_openrouter(args: argparse.Namespace, identity: RunnerIdentity) -> Non
         raise SweepRefusal("an OpenRouter model's runs stay on this laptop: use --store local")
 
 
+def _confirm_spend(
+    estimate: Callable[[Store], SpendEstimate], model_key: str, cap_usd: float, store: Store
+) -> None:
+    """Print what the run is expected to cost and ask. Anything but ``y`` (or no answer at all) is a refusal,
+    so nothing is sent and no key is asked for."""
+    print(format_warning(model_key, estimate(store), cap_usd))
+    try:
+        answer = input("Continue? [y/N] ")
+    except EOFError:
+        answer = ""
+    if answer.strip().lower() != "y":
+        raise SweepRefusal("not confirmed: nothing was sent")
+
+
 def _connect(
-    args: argparse.Namespace, experiment: Experiment, model_key: str, identity: RunnerIdentity
+    args: argparse.Namespace,
+    experiment: Experiment,
+    model_key: str,
+    identity: RunnerIdentity,
+    estimate: Callable[[Store], SpendEstimate],
+    cap_usd: float,
 ) -> tuple[Provider, ModelRoute, Store, str]:
     """The provider, route, store and account id for a run on this machine: a sweep or a probe run. A local or
     OpenRouter model touches no AWS; a Bedrock model needs a session."""
     config = experiment.model(model_key)
     provider: Provider
     if config.route == "openrouter":
-        # No AWS session either. The key is asked for last, after every refusal, so a refused run never
-        # prompts; it lives in the provider and nowhere else.
+        # No AWS session either. The spend warning comes after every refusal and before the key, and the key
+        # is asked for last, so a refused run never prompts; it lives in the provider and nowhere else.
         _check_openrouter(args, identity)
         route = ModelRoute(model_key, config.model_id, "openrouter", invoke_id=config.model_id)
+        store = _store(args, None)
+        _confirm_spend(estimate, model_key, cap_usd, store)
         try:
             provider = OpenRouterProvider(read_key(os.environ))
         except OpenRouterKeyError as exc:
             raise SweepRefusal(str(exc)) from exc
-        return provider, route, _store(args, None), LOCAL_ACCOUNT_ID
+        return provider, route, store, LOCAL_ACCOUNT_ID
     if config.route == "local":
         # Nothing on this path creates an AWS session, calls STS or reads a profile.
         _check_local(args, identity)
@@ -332,7 +355,14 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         check_official(experiment, identity)
     check_route(experiment, plan_.model_key, os.environ)
     check_preflight(experiment, plan_, cap)
-    provider, route, store, account_id = _connect(args, experiment, plan_.model_key, identity)
+    provider, route, store, account_id = _connect(
+        args,
+        experiment,
+        plan_.model_key,
+        identity,
+        lambda store: sweep_estimate(experiment, plan_, store),
+        cap,
+    )
 
     stop_requested = {"flag": False}
 
@@ -505,7 +535,14 @@ def cmd_probes_run(args: argparse.Namespace) -> int:
     experiment, sets = _probe_sets(args)
     cap = _check_cap(args)
     identity = identify(os.environ, _laptop_git)
-    provider, route, store, account_id = _connect(args, experiment, args.model, identity)
+    provider, route, store, account_id = _connect(
+        args,
+        experiment,
+        args.model,
+        identity,
+        lambda store: probe_estimate(experiment, args.model, args.label, args.repeats, sets, store),
+        cap,
+    )
     stop_requested = {"flag": False}
 
     def request_stop(signum: int, frame: FrameType | None) -> None:

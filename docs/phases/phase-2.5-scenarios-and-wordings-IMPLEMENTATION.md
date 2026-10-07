@@ -929,8 +929,31 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
     15:** a decision could make the same slip (amounts in millions against a total in dollars), which the harness
     would record as `sum_mismatch`; the menus already show every maximum in full dollars, and the format runs will
     show whether it happens.
-11. **Claude's neutrality checklist** (Opus).
+    **SPEND WARNING BUILT (his request, 2026-10-07, 4:44 PM; Sonnet):** before the OpenRouter key is asked for, in both
+    `hc sweep run` and `hc probes run`, the run prints the calls planned (runs or probe repeats not yet finished or
+    recorded), a likely cost (one call each at the estimated input tokens plus 1,000 output tokens), the worst case,
+    the cap and the measured reference (about $0.0003 a call), then `Continue? [y/N]`. Anything but `y`, or no answer
+    at all, is a refusal (exit 2, "not confirmed: nothing was sent"): no key prompt, no provider, no record. It sits in
+    `_connect` after every existing refusal and before `read_key`, only on the `openrouter` route, and also when
+    `OPENROUTER_API_KEY` is set. No new flag. Code: `sweep/warning.py` (the estimate type and the text),
+    `sweep_estimate` there, `probe_estimate` in `probes/run.py`, `finished_run_ids` in `sweep/runner.py`. Worst case
+    for a sweep is counted over the runs still to do (three attempts each), which equals `preflight_bound_usd` on a
+    fresh sweep and is smaller on a resumed one. Tests answer through a patched `input`; none reaches OpenRouter.
+11. **[done 2026-10-07, Opus]** **Claude's neutrality checklist** (Opus).
+    `docs/phases/evidence/phase-2.5/neutrality-checklist.md`: the ten items for S1-S4 and the three templates, plus
+    the dossier, both RECORDED simplifications and decision 5, read as rendered offline (no model call). **Ten
+    findings, F1-F10, for his marks in step 12.** The largest is **F3, factual and open:** S1 says $11.4 million is
+    "saved on every path" while a retrained person stays on payroll for 6 months unpriced (about $45,600 a person,
+    $5.7 million for all 125, three times the stated retraining cost), which tilts S1 toward retraining. Also: S1's
+    elimination path does not number the person's lost pay (F1, F2); S2 and S4 omit severance on eliminating roles
+    (F4); S3's retool is measured on a different basis from close and sell, and alone has a payback (F5, F6); S4
+    gives suppliers a cut but no use (F7) and says the program was "proposed" (F8); F9 (only the program has an
+    outcome) is recommended as no change; F10 is a missing test, not text. Nothing was changed: changes are step 13,
+    after the blind reader reads the current text.
 12. **His review of it; the blind reader** chosen live and sent; each point decided.
+    **Marks done 2026-10-07, 5:32 PM (his): every recommendation in the checklist accepted, F3 as option (a) (price
+    the training-period pay), F9 as no change.** Accepted together on Opus's recommendations, not item by item.
+    **The blind reader is not done yet:** it reads the text as committed now, before any step 13 change.
 13. **Changes from 11-12**, logged; the review commit.
 14. **The sealed draw** (§13), one commit.
 15. **Format runs** on `qwen-local`, 120; the blind report; failures read through the view; fixes logged; re-run the

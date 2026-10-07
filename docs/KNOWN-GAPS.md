@@ -69,8 +69,32 @@ case by its type and a neutral label. The names live only in the private longlis
 > `gpt-oss-openrouter` for the probes and every Phase 2.5 development run from here, not the 4B.** Counts are scored
 > exactly; model failures are not retried. **PROBES RUN (his, 4:55 PM): all 40 questions pass (34 at
 > 5 of 5, six at 4 of 5), $0.0062; DoD 3 met.** The six misses are two replies giving money in millions, every value
-> right: the answer's unit, not the text; no change, no log entry. **NEXT: commit (his); then the spend warning before
-> the key prompt (his request, Sonnet); then step 11, the neutrality checklist (Opus).** Detail in §17 step 10.
+> right: the answer's unit, not the text; no change, no log entry. **Committed and pushed: `4dfbf33` "phase 2.5: steps
+> 9-10, baseline log, probes", CI `37693331218` green (Deploy `37693331046`).** Detail in §17 step 10.
+> **SPEND WARNING BUILT 2026-10-07 (Sonnet), uncommitted, for his commit; 698 tests, `make check` green.** The spec below
+> was followed; `sweep/warning.py` holds the text, `finished_run_ids` is new in `sweep/runner.py`, `probe_estimate` in
+> `probes/run.py`; detail in §17 step 10. One refinement: a sweep's worst case counts only the runs still to do.
+> **STEP 11 DONE 2026-10-07 (Opus), uncommitted: `docs/phases/evidence/phase-2.5/neutrality-checklist.md`, ten findings
+> (F1-F10) for his marks.** Largest: **F3, open and factual:** S1's retraining paths leave 6 months of pay during
+> training unpriced (about $5.7 million for all 125) while the text says $11.4 million is "saved on every path"; it
+> tilts S1 toward retraining. Detail in §17 step 11. **STEP 12 MARKS DONE 5:32 PM (his): all recommendations accepted,
+> F3 as (a), F9 as no change.** **NEXT: the blind reader** (a vendor that makes none of the tested models, chosen live
+> and shown to him before sending, cap $3; it reads the current text, before any change); **then step 13 (Opus)**,
+> the accepted changes F1-F8 and F10, each text change logged. *(The spend warning spec as written:)* Before the
+> OpenRouter key prompt, in both `hc sweep run` and `hc probes run`, print what the run is expected to cost and ask
+> to continue; anything but `y` sends nothing and exits refused. **The spec (Opus):**
+> - **Where:** only on the `openrouter` route (the one that spends his own money; Bedrock spends AWS credits, local
+>   is free). After every existing refusal, before `read_key`, also when `OPENROUTER_API_KEY` is set. One place in
+>   `cli.py` serves both commands (`_connect` builds the OpenRouter provider for both).
+> - **What it prints:** the number of calls planned (a sweep: runs not yet finished; probes: repeats not yet
+>   recorded); **likely** cost, one call each at the estimated input tokens (`estimate_input_tokens`) plus 1,000
+>   output tokens, with that assumption printed; **worst case**, the existing bound (a sweep: three attempts each
+>   at full `max_tokens`, `preflight_bound_usd`; probes: one call each at full `max_tokens`); the `--cap-usd` cap;
+>   and the measured reference, about $0.0003 a call (the probes, 2026-10-07: 20 calls, $0.0062). Then
+>   `Continue? [y/N]`.
+> - **No new flag.** Tests answer the question through a patched `input`. A refused run asks for no key and writes
+>   nothing (test both, and that `y` proceeds). `make check` green; the placeholder golden test untouched.
+> **Then step 11 (Opus):** Claude's neutrality checklist (§12, §17 step 11).
 > **STEP 5 COMMITTED: `490a94e` "phase 2.5: scenario rows and sources", pushed, CI run `37663609137` green (Deploy
 > `37663608886` green).** **DECISION 8 DECIDED 1:11 PM (his):** S1 is a split of the 125 people into three priced
 > paths (eliminated; moved at plant pay; moved keeping current pay), and the $11.4M saving is stated as the same on

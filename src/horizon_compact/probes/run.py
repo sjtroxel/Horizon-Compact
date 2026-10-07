@@ -50,6 +50,7 @@ from horizon_compact.sweep.spend import (
     worst_case_attempt_usd,
 )
 from horizon_compact.sweep.store import Store
+from horizon_compact.sweep.warning import SpendEstimate, likely_call_usd
 
 RECORD_VERSION = 1
 MAX_CONSECUTIVE_API_ERRORS = 10
@@ -111,6 +112,48 @@ def probe_run_id(
         sort_keys=True,
     )
     return f"{label}-{model_key}-{hashlib.sha256(basis.encode()).hexdigest()[:8]}"
+
+
+def probe_estimate(
+    experiment: Experiment,
+    model_key: str,
+    label: str,
+    repeats: int,
+    sets: list[ProbeSet],
+    store: Store,
+) -> SpendEstimate:
+    """What the repeats not yet recorded should cost: one call each, as a model failure is not retried."""
+    prices = experiment.model(model_key).prices
+    prefix = probe_prefix(
+        experiment.name, probe_run_id(experiment, model_key, label, repeats, sets)
+    )
+    existing = set(store.list_keys(prefix))
+    calls = 0
+    likely = 0.0
+    worst = 0.0
+    for probe_set in sets:
+        pending = sum(
+            1
+            for n in range(1, repeats + 1)
+            if f"{prefix}{probe_set.scenario_id}/repeat-{n}.json" not in existing
+        )
+        if not pending:
+            continue
+        scenario = experiment.get_scenario(probe_set.scenario_id)
+        prompt = render_probe(experiment, scenario, probe_set.probe)
+        tokens = estimate_input_tokens(
+            prompt.system, prompt.user, build_probe_tool(probe_set.probe)
+        )
+        calls += pending
+        likely += pending * likely_call_usd(tokens, prices.input, prices.output)
+        worst += pending * worst_case_attempt_usd(tokens, scenario.max_tokens, prices)
+    return SpendEstimate(
+        what="probe repeats not yet recorded",
+        calls=calls,
+        likely_usd=likely,
+        worst_usd=worst,
+        worst_basis="one call each at the full output allowance; a model failure is not retried",
+    )
 
 
 def probe_prefix(experiment_name: str, run_id: str) -> str:
