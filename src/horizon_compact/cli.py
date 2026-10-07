@@ -30,12 +30,25 @@ from horizon_compact.dossier.render import (
     render_outputs,
 )
 from horizon_compact.experiment import Experiment, ExperimentError, load_experiment
+from horizon_compact.probes.questions import ProbeError
+from horizon_compact.probes.run import (
+    ProbeSet,
+    check_probe_model,
+    load_probe_sets,
+    probe_report,
+    probe_run_id,
+    run_probes,
+)
 from horizon_compact.providers.base import ModelRoute, Provider
 from horizon_compact.providers.bedrock import REGION, BedrockConverseProvider, make_runtime_client
 from horizon_compact.providers.ollama import DEFAULT_URL, OllamaProvider
 from horizon_compact.providers.openrouter import OpenRouterKeyError, OpenRouterProvider, read_key
 from horizon_compact.scenarios.check import run_checks as scenarios_run_checks
-from horizon_compact.scenarios.render import ScenarioSourceError, render_all
+from horizon_compact.scenarios.render import (
+    ScenarioSourceError,
+    load_scenario_figures,
+    render_all,
+)
 from horizon_compact.smoke import plan
 from horizon_compact.smoke.record import RedactionError
 from horizon_compact.smoke.runner import (
@@ -241,6 +254,40 @@ def _check_openrouter(args: argparse.Namespace, identity: RunnerIdentity) -> Non
         raise SweepRefusal("an OpenRouter model's runs stay on this laptop: use --store local")
 
 
+def _connect(
+    args: argparse.Namespace, experiment: Experiment, model_key: str, identity: RunnerIdentity
+) -> tuple[Provider, ModelRoute, Store, str]:
+    """The provider, route, store and account id for a run on this machine: a sweep or a probe run. A local or
+    OpenRouter model touches no AWS; a Bedrock model needs a session."""
+    config = experiment.model(model_key)
+    provider: Provider
+    if config.route == "openrouter":
+        # No AWS session either. The key is asked for last, after every refusal, so a refused run never
+        # prompts; it lives in the provider and nowhere else.
+        _check_openrouter(args, identity)
+        route = ModelRoute(model_key, config.model_id, "openrouter", invoke_id=config.model_id)
+        try:
+            provider = OpenRouterProvider(read_key(os.environ))
+        except OpenRouterKeyError as exc:
+            raise SweepRefusal(str(exc)) from exc
+        return provider, route, _store(args, None), LOCAL_ACCOUNT_ID
+    if config.route == "local":
+        # Nothing on this path creates an AWS session, calls STS or reads a profile.
+        _check_local(args, identity)
+        assert config.num_ctx is not None  # a local route always has one (ModelConfig checks)
+        route = ModelRoute(model_key, config.model_id, "local", invoke_id=config.model_id)
+        provider = OllamaProvider(os.environ.get(OLLAMA_URL_ENV, DEFAULT_URL), config.num_ctx)
+        return provider, route, _store(args, None), LOCAL_ACCOUNT_ID
+    session = _session(args, identity)
+    account_id = session.client("sts").get_caller_identity()["Account"]
+    route = _route(experiment, model_key, session, dict(os.environ))
+    provider = BedrockConverseProvider(
+        make_runtime_client(args.profile, region=session.region_name or REGION),
+        region=session.region_name or REGION,
+    )
+    return provider, route, _store(args, session), account_id
+
+
 def cmd_sweep_plan(args: argparse.Namespace) -> int:
     experiment, plan_ = _load(args)
     config = experiment.model(plan_.model_key)
@@ -285,38 +332,7 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         check_official(experiment, identity)
     check_route(experiment, plan_.model_key, os.environ)
     check_preflight(experiment, plan_, cap)
-    config = experiment.model(plan_.model_key)
-    provider: Provider
-    if config.route == "openrouter":
-        # No AWS session either. The key is asked for last, after every refusal, so a refused run never
-        # prompts; it lives in the provider and nowhere else.
-        _check_openrouter(args, identity)
-        account_id = LOCAL_ACCOUNT_ID
-        route = ModelRoute(
-            plan_.model_key, config.model_id, "openrouter", invoke_id=config.model_id
-        )
-        store = _store(args, None)
-        try:
-            provider = OpenRouterProvider(read_key(os.environ))
-        except OpenRouterKeyError as exc:
-            raise SweepRefusal(str(exc)) from exc
-    elif config.route == "local":
-        # Nothing on this path creates an AWS session, calls STS or reads a profile.
-        _check_local(args, identity)
-        assert config.num_ctx is not None  # a local route always has one (ModelConfig checks)
-        account_id = LOCAL_ACCOUNT_ID
-        route = ModelRoute(plan_.model_key, config.model_id, "local", invoke_id=config.model_id)
-        store = _store(args, None)
-        provider = OllamaProvider(os.environ.get(OLLAMA_URL_ENV, DEFAULT_URL), config.num_ctx)
-    else:
-        session = _session(args, identity)
-        account_id = session.client("sts").get_caller_identity()["Account"]
-        route = _route(experiment, plan_.model_key, session, dict(os.environ))
-        store = _store(args, session)
-        provider = BedrockConverseProvider(
-            make_runtime_client(args.profile, region=session.region_name or REGION),
-            region=session.region_name or REGION,
-        )
+    provider, route, store, account_id = _connect(args, experiment, plan_.model_key, identity)
 
     stop_requested = {"flag": False}
 
@@ -470,6 +486,77 @@ def cmd_dossier(args: argparse.Namespace) -> int:
     return cmd_dossier_check(root) if args.action == "check" else cmd_dossier_render(root)
 
 
+# --- probes ----------------------------------------------------------------------------------------------
+
+PROBE_REPORT_DIR = "docs/phases/evidence/phase-2.5/probes"
+
+
+def _probe_sets(args: argparse.Namespace) -> tuple[Experiment, list[ProbeSet]]:
+    root = Path(args.experiment_dir) if args.experiment_dir else None
+    experiment = load_experiment(args.experiment, root)
+    check_probe_model(experiment, args.model)  # before anything else is read or asked
+    if args.repeats < 1:
+        raise SweepRefusal("repeats must be at least 1")
+    figures = load_scenario_figures(experiment.root.parent)
+    return experiment, load_probe_sets(experiment, figures, args.scenario or None)
+
+
+def cmd_probes_run(args: argparse.Namespace) -> int:
+    experiment, sets = _probe_sets(args)
+    cap = _check_cap(args)
+    identity = identify(os.environ, _laptop_git)
+    provider, route, store, account_id = _connect(args, experiment, args.model, identity)
+    stop_requested = {"flag": False}
+
+    def request_stop(signum: int, frame: FrameType | None) -> None:
+        stop_requested["flag"] = True
+
+    signal.signal(signal.SIGTERM, request_stop)
+    signal.signal(signal.SIGINT, request_stop)
+    result = run_probes(
+        experiment=experiment,
+        model_key=args.model,
+        sets=sets,
+        repeats=args.repeats,
+        label=args.label,
+        route=route,
+        provider=provider,
+        store=store,
+        identity=identity,
+        account_id=account_id,
+        cap_usd=cap,
+        max_minutes=args.max_minutes,
+        harness_version=horizon_compact.__version__,
+        rng=random.Random(),
+        should_stop=lambda: stop_requested["flag"],
+        progress=lambda line: print(line, file=sys.stderr, flush=True),
+    )
+    print(f"probe run:       {result.run_id}")
+    print(f"stopped:         {result.stopped}")
+    print(
+        f"repeats done:    {result.repeats_done_before + result.repeats_done_now} of {result.repeats_total}"
+    )
+    print(f"this session:    {result.calls_now} calls, ${result.cost_usd_now:.4f}")
+    print("report:          hc probes report (same arguments) writes it under " + PROBE_REPORT_DIR)
+    return CLEAN_EXIT if result.clean else NOT_CLEAN_EXIT
+
+
+def cmd_probes_report(args: argparse.Namespace) -> int:
+    experiment, sets = _probe_sets(args)
+    run_id = probe_run_id(experiment, args.model, args.label, args.repeats, sets)
+    top = Path(_git("rev-parse", "--show-toplevel"))
+    store = LocalStore(top / "scratch" / "runs")
+    report = probe_report(store, experiment, run_id, sets, args.repeats)
+    path = top / PROBE_REPORT_DIR / f"{run_id}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(report.rstrip("\n") + "\n", encoding="utf-8", newline="\n")
+    print(f"wrote {path.relative_to(top)}")
+    return CLEAN_EXIT
+
+
+PROBE_COMMANDS = {"run": cmd_probes_run, "report": cmd_probes_report}
+
+
 # --- scenarios -------------------------------------------------------------------------------------------
 
 
@@ -591,6 +678,31 @@ def build_parser() -> argparse.ArgumentParser:
         "check", help="Check the figures, the template and that every rendered file is fresh"
     )
 
+    probes = groups.add_parser(
+        "probes", help="Phase 2.5 comprehension probes. Development models only; no objective."
+    )
+    probe_actions = probes.add_subparsers(dest="action", required=True)
+    for name, text in (
+        ("run", "Ask each scenario's questions; one call per repeat"),
+        ("report", "Write the report from the stored records. Offline."),
+    ):
+        probe_parser = probe_actions.add_parser(name, help=text)
+        probe_parser.add_argument("--experiment", required=True)
+        probe_parser.add_argument("--model", required=True, help="a development model")
+        probe_parser.add_argument("--repeats", type=int, default=5)
+        probe_parser.add_argument("--label", required=True)
+        probe_parser.add_argument(
+            "--scenario", action="append", default=None, help="repeat for several; default all"
+        )
+        probe_parser.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
+        if name == "run":
+            probe_parser.add_argument("--profile", default=None, help="AWS profile, Bedrock only")
+            probe_parser.add_argument("--cap-usd", type=float, default=DEVELOPMENT_CAP_USD)
+            probe_parser.add_argument("--allow-over-cap", action="store_true")
+            probe_parser.add_argument("--max-minutes", type=float, default=30.0)
+            probe_parser.add_argument("--store", choices=("local", "s3"), default="local")
+            probe_parser.add_argument("--bucket", default=None)
+
     scenarios = groups.add_parser(
         "scenarios", help="Phase 2.5 scenarios and wordings. Offline; calls no model."
     )
@@ -622,6 +734,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         return cmd_dossier(args)
     if args.group == "scenarios":
         return cmd_scenarios(args)
+    if args.group == "probes":
+        try:
+            return PROBE_COMMANDS[args.action](args)
+        except (SweepRefusal, ExperimentError, ProbeError, FigureError, ScenarioSourceError) as exc:
+            print(f"refused: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
+        except IdentityError as exc:
+            print(f"cannot tell where this is running: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
+        except (BotoCoreError, ClientError) as exc:
+            print(f"AWS error: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
     if args.group == "sweep":
         try:
             return SWEEP_COMMANDS[args.action](args)

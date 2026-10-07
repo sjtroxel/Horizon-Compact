@@ -1,0 +1,22 @@
+# The instrument's change log (Phase 2.5 IMPLEMENTATION doc section 14, DoD 6).
+#
+# The instrument is what a model reads: dossier.toml, objectives.toml and scenarios/s1.toml to s4.toml. Their
+# content hash is `hc` content_hash for the experiment `company` (this file is not part of it). `hc scenarios
+# check`, in `make check`, fails unless the current content hash equals the last entry's `hash_after`, or the
+# baseline's `hash` when there are no entries, and unless each entry's `hash_before` is the previous hash.
+#
+# THE BASELINE (step 9, 2026-10-07): the content first committed whole in 5f02092 ("phase 2.5: step 8, scenario
+# render/check, openrouter"): the dossier, the four scenarios and the three wording templates, with
+# sealed_template still "". Before it, no model had made a decision on, or answered a probe about, this content:
+# the harness refuses every run on it until the sealed draw, and the step 6a and step 8 checks ran on garden
+# copies only (experiment/s4shape and scratch scripts). Changes before the baseline needed no entry.
+#
+# EVERY ENTRY after the baseline: date, the files changed, the content hash before and after, the evidence (a
+# probe question id, a failure type, a checklist item, a reader's point number) and the reason, which is one of
+# format, clarity, neutrality or factual. There is no fifth reason: a change made because of how a model
+# allocated is not a change this log can record. The sealed draw (step 14) moves the hash too; its record type is
+# added with the draw (section 14's note of 2026-10-07).
+
+[baseline]
+date = 2026-10-07
+hash = "caa1e5398d5ce6e5ddd5b360ded8be97bf15123f3adc1a3071a6514658b93eae"

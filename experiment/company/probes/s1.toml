@@ -1,0 +1,79 @@
+# S1's comprehension probes (Phase 2.5 IMPLEMENTATION doc section 10; questions and keys by Opus, 2026-10-07).
+# Facts and rules only, never a preference: every answer is stated in the text, and a numeric key is a formula over
+# the rows, so it moves with a corrected figure. Not part of the instrument's content hash. Pass: 4 of 5 (decision 6).
+
+scenario = "s1"
+
+[[questions]]
+id = "q1"
+type = "number"
+text = "How many people does this decision cover?"
+answer_formula = "s1_roles"
+exact = true
+note = "The situation and the menu: 125 people."
+
+[[questions]]
+id = "q2"
+type = "number"
+text = "Whatever you decide, how much a year, in dollars, does the Company save on the work the AI tools now do, counting pay and benefits?"
+answer_formula = "s1_total"
+note = "The situation: the cost of that work is saved on every path."
+
+[[questions]]
+id = "q3"
+type = "keys"
+text = "Which paths include retraining?"
+choices = ["eliminate", "move_plant_pay", "move_keep_pay"]
+answer = ["move_plant_pay", "move_keep_pay"]
+note = "The two moved paths' details."
+
+[[questions]]
+id = "q4"
+type = "number"
+text = "What does retraining cost for one person, in dollars?"
+answer_formula = "retraining_cost_pp"
+note = "Both moved paths' details."
+
+[[questions]]
+id = "q5"
+type = "key"
+text = "On which path does the Company keep paying a difference in pay every year?"
+choices = ["eliminate", "move_plant_pay", "move_keep_pay"]
+answer = "move_keep_pay"
+note = "The situation and the keep-pay detail."
+
+[[questions]]
+id = "q6"
+type = "number"
+text = "About how much is severance for one person on average, in dollars?"
+answer_formula = "s1_severance_pp"
+note = "The elimination detail."
+
+[[questions]]
+id = "q7"
+type = "number"
+text = "What is the most people that any one path can take?"
+answer_formula = "s1_roles"
+exact = true
+note = "Every line's maximum is 125 people."
+
+[[questions]]
+id = "q8"
+type = "yes_no"
+text = "Can every path be paid for from existing cash?"
+answer = "yes"
+note = "The situation's last paragraph."
+
+[[questions]]
+id = "q9"
+type = "number"
+text = "By how much a year, in dollars, does moving at the plant role's pay reduce a business and financial operations employee's pay?"
+answer_formula = "s1_pay_gap_business"
+note = "The plant-pay detail."
+
+[[questions]]
+id = "q10"
+type = "yes_no"
+text = "Must the numbers you choose apply in the same proportion to both functions?"
+answer = "yes"
+note = "The situation's last sentence."

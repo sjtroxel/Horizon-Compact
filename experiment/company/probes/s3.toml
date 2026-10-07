@@ -1,0 +1,82 @@
+# S3's comprehension probes (Phase 2.5 IMPLEMENTATION doc section 10; questions and keys by Opus, 2026-10-07).
+# Facts and rules only, never a preference: every answer is stated in the text, and a numeric key is a formula over
+# the rows, so it moves with a corrected figure. Each option is asked about. Not part of the instrument's content
+# hash. Pass: 4 of 5 (decision 6).
+
+scenario = "s3"
+
+[[questions]]
+id = "q1"
+type = "number"
+text = "How many employees does the plant have?"
+answer_formula = "hc_p6"
+exact = true
+note = "The situation's first sentence."
+
+[[questions]]
+id = "q2"
+type = "number"
+text = "Under the retool option, how many positions does the plant need?"
+answer_formula = "s3_retool_positions"
+exact = true
+note = "The retool option."
+
+[[questions]]
+id = "q3"
+type = "number"
+text = "Under the sell option, how many positions does the buyer state it will keep?"
+answer_formula = "s3_buyer_positions"
+exact = true
+note = "The sell option."
+
+[[questions]]
+id = "q4"
+type = "number"
+text = "At most how many employees can move to positions at the other plants?"
+answer_formula = "s3_movers"
+exact = true
+note = "The situation (at most 29) and the line's maximum."
+
+[[questions]]
+id = "q5"
+type = "key"
+text = "Under which option can employees be kept at the plant?"
+choices = ["close", "retool", "sell"]
+answer = "retool"
+note = "The line's label: retool only."
+
+[[questions]]
+id = "q6"
+type = "key"
+text = "Under which option can employees be transferred to a buyer?"
+choices = ["close", "retool", "sell"]
+answer = "sell"
+note = "The line's label: sell only."
+
+[[questions]]
+id = "q7"
+type = "number"
+text = "If the plant is closed, by how much a year, in dollars, does the Company's operating income rise?"
+answer_formula = "s3_close_gain"
+note = "The close option."
+
+[[questions]]
+id = "q8"
+type = "number"
+text = "If the plant is sold, by how much a year, in dollars, does the Company's operating income fall?"
+answer_formula = "s3_sell_loss"
+note = "The sell option."
+
+[[questions]]
+id = "q9"
+type = "yes_no"
+text = "If the plant is closed, do the corporate costs allocated to it go away?"
+answer = "no"
+note = "The close option: they stay with the Company."
+
+[[questions]]
+id = "q10"
+type = "number"
+text = "What is the plant's local payroll after retooling, in dollars a year?"
+answer_formula = "s3_retool_payroll"
+note = "The retool option."

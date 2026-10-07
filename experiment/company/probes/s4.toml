@@ -1,0 +1,80 @@
+# S4's comprehension probes (Phase 2.5 IMPLEMENTATION doc section 10; questions and keys by Opus, 2026-10-07).
+# Facts and rules only, never a preference: every answer is stated in the text, and a numeric key is a formula over
+# the rows, so it moves with a corrected figure. q6 tests the rule that broke the development models in step 6a
+# (the uses equal the money plus the cuts). Not part of the instrument's content hash. Pass: 4 of 5 (decision 6).
+
+scenario = "s4"
+
+[[questions]]
+id = "q1"
+type = "number"
+text = "How much does the program cost each year, in dollars?"
+answer_formula = "s4_annual"
+note = "The situation's first paragraph."
+
+[[questions]]
+id = "q2"
+type = "number"
+text = "For how many years would the program run?"
+answer_formula = "s4_years"
+exact = true
+note = "The situation's first paragraph."
+
+[[questions]]
+id = "q3"
+type = "number"
+text = "What is the program's chance of success, as a percentage? Give it as a number, for example 25 for 25%."
+answer_formula = "s4_p_success * 100"
+exact = true
+note = "Management's estimates: 30.0%."
+
+[[questions]]
+id = "q4"
+type = "keys"
+text = "Which lines are cuts that add to the money available?"
+choices = ["program", "increase_payouts", "retain_cash", "add_rnd", "raise_wages", "training", "env_projects", "lower_prices", "eliminate_roles", "cut_rnd", "suppliers"]
+answer = ["eliminate_roles", "cut_rnd", "suppliers"]
+note = "The three lines marked (a cut)."
+
+[[questions]]
+id = "q5"
+type = "number"
+text = "If you fund the program, what must the program's line be, in dollars?"
+answer_formula = "s4_annual"
+note = "The situation: exactly this year's money."
+
+[[questions]]
+id = "q6"
+type = "number"
+text = "If you decline the program and cut 5000000 dollars from suppliers and make no other cut, what must the uses add up to, in dollars?"
+answer_formula = "s4_annual + 5000000"
+note = "The rule: the uses equal this year's money plus the cuts."
+
+[[questions]]
+id = "q7"
+type = "yes_no"
+text = "May existing research and development be cut and research and development outside the program be added in the same decision?"
+answer = "no"
+note = "The situation: at most one of the two may be above zero."
+
+[[questions]]
+id = "q8"
+type = "number"
+text = "If the program succeeds, from which year does it add to operating income?"
+answer_formula = "s4_payoff_start"
+exact = true
+note = "Management's estimates."
+
+[[questions]]
+id = "q9"
+type = "yes_no"
+text = "If the program fails, is the money spent recovered?"
+answer = "no"
+note = "Management's estimates: it is not recovered."
+
+[[questions]]
+id = "q10"
+type = "yes_no"
+text = "Must you make cuts in order to fund the program?"
+answer = "no"
+note = "The situation and the menu heading: the cuts are optional."

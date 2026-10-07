@@ -872,8 +872,63 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    --label orcheck --store local` (5 runs; the plan's bound is $0.01; the key is typed at a hidden prompt or read from
    `OPENROUTER_API_KEY`). Look for: `runs finished:   5 of 5`, a cost line under a cent, and how many of the 5 final
    records are valid (`hc sweep status`, same arguments plus `--store local`).
-9. **The baseline commit (C5).** From here every content change needs a log entry.
-10. **Probes:** questions and keys (Opus), run on `qwen-local` x 5; failures traced; fixes logged; re-run.
+   **RUN (his, 2026-10-07, 4:21 PM, after `5f02092` was pushed; CI `37688590949` and Deploy `37688590950` green):
+   sweep `orcheck-gpt-oss-openrouter-4ee2f4c6`, 5 of 5 valid on the first attempt, $0.0017.** Read from the records
+   (garden content, so they may be read): no stored file holds `sk-or-`; no run used both research-style lines, so step
+   7's "at most one may be above zero" held where the older wording failed four times; every run chose `skip`, so the
+   entry fixed at $500 and step 8's pinned-line rescaling were not exercised live (unit tests cover them). The calls
+   were served by two hosts (DeepInfra, DekaLLM): OpenRouter can switch hosts between calls, and each record names
+   its host. **The provider works end to end.**
+9. **[done 2026-10-07, Opus; committed by him]** **The baseline commit (C5).** From here every content change needs a log entry.
+   **Built:** `experiment/company/CHANGELOG.toml` with its `[baseline]` (2026-10-07, content hash
+   `caa1e5398d5ce6e5ddd5b360ded8be97bf15123f3adc1a3071a6514658b93eae`), the hash of the dossier, `objectives.toml`
+   and the four rendered scenarios as first committed whole in `5f02092` (`experiment/` unchanged since; CI's
+   `scenarios-check` reproduced those bytes). **Before it, no model had decided on or been asked about this content:**
+   no company run exists in `scratch/runs`, the harness refuses every company run until the draw, and the step 6a and
+   item 11 checks ran on garden copies. The log is not part of the hash. **Checked both ways:** `hc scenarios check`
+   passes on the repo, and on a scratch copy with one word changed in a rendered scenario it fails, "a content change
+   needs an entry". One test changed because the log now exists (the no-log case removes it from its copy), and one was
+   added (an unlogged change to the real text fails). `make check` green, 649 tests.
+10. **[built 2026-10-07, Opus (code and questions); the run is his]** **Probes:** questions and keys (Opus), run on `qwen-local` x 5; failures traced; fixes logged; re-run.
+    **The model:** `qwen-local`, as decision 9 (amended) already says ("the 4B stays for S1 and the comprehension
+    probes"); Opus had recommended `gpt-oss-openrouter` in chat before re-reading it, and withdrew that. A question
+    that fails on the 4B can be re-asked on `gpt-oss-openrouter` to tell the model from the text (the command takes
+    any development model).
+    **Built:** `experiment/company/probes/s1.toml` to `s4.toml`, ten questions each (facts and rules only; every
+    option of S3 and S4 is asked about; each question has a note saying where the text states its answer; all 40 keys
+    checked by hand against the rendered prompts). A numeric key is a formula over the rows (`answer_formula`), so a
+    corrected figure moves its key. `src/horizon_compact/probes/`: the probe prompt (the situation, the section 10
+    sentence, the menu and options in one fixed order, seed 1, then the questions and a call instruction; no objective
+    sentence and no decision instruction, tested), the `submit_answers` tool (one typed field per question), scoring,
+    the runner and the report. `hc probes run` and `hc probes report`; `hc scenarios check` now also requires a probe
+    file per scenario whose keys resolve and whose choices are that scenario's own keys. Probe files are outside the
+    content hash (still `caa1e5398d5c`). `make check` green, 686 tests.
+    **Decided while building (Opus):** (a) **counts are exact.** Section 10's "within 1%" exists for money the text
+    rounds ($11.4 million); on a count it would pass 124 people for 125. Questions marked `exact` (people, years, the
+    stated percentages; 11 of 40) need the exact key. (b) **A model failure is not retried:** a repeat is a
+    measurement, and a retry would raise the pass rate by hiding failures; it scores every question wrong and is
+    listed by reply type in the report. API errors are retried with backoff and not stored (they carry no answer).
+    (c) Only a development model may run probes on real content (the same rule as a sweep, refused in code and at the
+    command line before anything else). (d) Refactors: `sweep/prompt.py` builds both prompts from one
+    `situation_blocks` (the placeholder's golden test unchanged); the CLI's provider setup is one `_connect` shared by
+    sweeps and probes; `classify_error` is public.
+    **AMENDED 4:45 PM (his): `gpt-oss-openrouter` for the probes and for every Phase 2.5 development run from here,
+    not the 4B** ("I do want to use [it] from now on"); decision 9 below is amended the same way. Reason: a 4B miss
+    cannot be told apart from a text problem, so its runs would have been redone on gpt-oss anyway.
+    **His run** (20 calls, under two cents, the key at the hidden prompt):
+    `uv run hc probes run --experiment company --model gpt-oss-openrouter --repeats 5 --label probes1`, then the same
+    with `report` in place of `run`, which writes
+    `docs/phases/evidence/phase-2.5/probes/probes1-gpt-oss-openrouter-<id>.md`. Opus reads that report (probe answers carry no
+    objective, so they may be read) and traces each question below 4 of 5.
+    **RUN (his, 4:45-4:55 PM): `probes1-gpt-oss-openrouter-8470caa8`, 20 of 20 answered, $0.0062. EVERY ONE OF THE 40
+    QUESTIONS PASSES (34 at 5 of 5, six at 4 of 5); DoD 3 met on the development model.** Traced by Opus from the
+    report: all six misses are the same thing, a dollar amount given in millions (112.1 for $112,100,000), and all
+    come from two replies (S2 repeat 3, S3 repeat 2), in which every money question was answered that way and every
+    value was right. **That is the unit of the answer, not comprehension of the text: no scenario change, no log
+    entry.** The probe files stay as they are (a reworded question would be a new probe run for no gain). **For step
+    15:** a decision could make the same slip (amounts in millions against a total in dollars), which the harness
+    would record as `sum_mismatch`; the menus already show every maximum in full dollars, and the format runs will
+    show whether it happens.
 11. **Claude's neutrality checklist** (Opus).
 12. **His review of it; the blind reader** chosen live and sent; each point decided.
 13. **Changes from 11-12**, logged; the review commit.
@@ -982,7 +1037,8 @@ The options stay as the record.
    repo), a `route = "openrouter"` kind, and `[models.gpt-oss-openrouter]` in `models.toml` with
    `role = "development"` and its live prices, so the existing refusals and the $5 sweep cap cover it. The 4B and 8B cannot
    balance tables of seven lines or keep a choice and its lines consistent (§17 step 6a), and the 14B does not fit
-   the card. The 4B stays the model for S1 and for the comprehension probes (single questions).
+   the card. The 4B stays the model for S1 and for the comprehension probes (single questions). *Amended 2026-10-07, 4:45 PM (his): `gpt-oss-openrouter` for the probes and every Phase 2.5
+   development run from here, the 4B for none.*
    - (a) **Recommended:** a capable, inexpensive model through his OpenRouter balance as the development model for
      S2-S4 format runs, chosen live by price and capability (comparable to Nova Lite, the planned development model;
      never a model in the v1 official set). Cost: likely well under a dollar for the format runs; verified live

@@ -93,7 +93,8 @@ class Outcome:
         return self.status not in NON_MODEL_STATUSES
 
 
-def _classify_error(raw: RawDecision) -> Outcome:
+def classify_error(raw: RawDecision) -> Outcome:
+    """An API error's outcome: retried with backoff, or the session stops (also used by the probes)."""
     code = (raw.error or {}).get("code", "")
     message = (raw.error or {}).get("message", "")
     # A *daily* limit will not clear in minutes, so retrying inside a 30-minute session only hides it (seen
@@ -115,7 +116,7 @@ def _classify_error(raw: RawDecision) -> Outcome:
 
 def classify(raw: RawDecision, scenario: Scenario) -> Outcome:
     if raw.status == "api_error":
-        return _classify_error(raw)
+        return classify_error(raw)
 
     stop = raw.stop_reason
     if stop == "max_tokens":

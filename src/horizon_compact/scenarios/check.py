@@ -10,7 +10,8 @@ Failures make the check fail; notes never do. Nothing here calls a model or read
    baseline sentence holds neither, no term from ``planning/06`` section 3.1's never-use list appears in a
    template, an objective or a scenario, and for every scenario, objective and template the rendered prompts
    differ only in the objective sentence, which is in one place.
-4. The change log (section 14), once ``CHANGELOG.toml`` exists: the current content hash is the latest entry's
+4. The comprehension probes (section 10): one file per scenario, every key resolvable.
+5. The change log (section 14), once ``CHANGELOG.toml`` exists: the current content hash is the latest entry's
    "after" hash, and the entries chain.
 """
 
@@ -34,13 +35,17 @@ from horizon_compact.experiment import (
     ExperimentError,
     load_experiment,
 )
+from horizon_compact.probes.questions import ProbeError
+from horizon_compact.probes.run import load_probe_sets
 from horizon_compact.scenarios.render import (
     SCENARIO_FIGURES_FILE,
     SCENARIOS_DIR,
     ScenarioSourceError,
+    load_scenario_figures,
     render_all,
     scenario_row_ids,
 )
+from horizon_compact.sweep.plan import SweepRefusal
 from horizon_compact.sweep.prompt import render_prompt
 
 COMPANY_EXPERIMENT = "company"
@@ -200,6 +205,20 @@ def _prompt_difference_failures(exp: Experiment) -> list[str]:
     return failures
 
 
+# --- the probes (section 10) ------------------------------------------------------------------------------
+
+
+def _probe_failures(root: Path, exp: Experiment) -> list[str]:
+    """Every scenario has a probe file whose questions parse, whose choices are the scenario's own keys and
+    whose numeric keys resolve from the rows. The probes are not part of the content hash; a broken key would
+    still make a probe report wrong."""
+    try:
+        load_probe_sets(exp, load_scenario_figures(root), None)
+    except (ProbeError, SweepRefusal, FigureError) as exc:
+        return [f"probes: {exc}"]
+    return []
+
+
 # --- everything ------------------------------------------------------------------------------------------
 
 
@@ -246,6 +265,7 @@ def run_checks(root: Path) -> Report:
         report.failures.append(str(exc))
         return report
     report.failures.extend(template_failures(exp))
+    report.failures.extend(_probe_failures(root, exp))
     failures, notes = check_change_log(root, exp.content_hash)
     report.failures.extend(failures)
     report.notes.extend(notes)

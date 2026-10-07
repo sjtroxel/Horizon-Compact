@@ -59,7 +59,18 @@ case by its type and a neutral label. The names live only in the private longlis
 > under a cent; the doc's §17 step 8 gives the command). **Opus, 4:20 PM, on his delegation:** fixed two S1
 > sentences that pointed at a path by position or by "the same" (the paths are shuffled now), and accepted Sonnet's
 > change log format, with one gap for step 14 (the sealed draw moves the content hash). Detail in §17 step 8 and §14.
-> **NEXT: commit (his), then item 11 (his run), then step 9, the baseline commit.**
+> **Committed and pushed: `5f02092`, CI `37688590949` green (Deploy `37688590950`). Item 11 DONE (his, 4:21 PM): the
+> OpenRouter provider ran `s4shape` 5 of 5 valid, first attempts, $0.0017; no key in any record.**
+> **STEP 9, THE BASELINE, DONE 2026-10-07 (Opus), for his commit: `experiment/company/CHANGELOG.toml`, baseline hash
+> `caa1e5398d5c...` (the content of `5f02092`). FROM HERE, EVERY CHANGE TO WHAT A MODEL READS NEEDS A LOG ENTRY** (date,
+> files, hash before and after, evidence, reason: format, clarity, neutrality or factual); `make check` fails otherwise.
+> **STEP 10, PROBES, BUILT 2026-10-07 (Opus), uncommitted: forty questions (ten per scenario, keys checked by hand),
+> `hc probes run` and `report`, probe files checked in `make check`; 686 tests. **Decision 9 AMENDED 4:45 PM (his):
+> `gpt-oss-openrouter` for the probes and every Phase 2.5 development run from here, not the 4B.** Counts are scored
+> exactly; model failures are not retried. **PROBES RUN (his, 4:55 PM): all 40 questions pass (34 at
+> 5 of 5, six at 4 of 5), $0.0062; DoD 3 met.** The six misses are two replies giving money in millions, every value
+> right: the answer's unit, not the text; no change, no log entry. **NEXT: commit (his); then the spend warning before
+> the key prompt (his request, Sonnet); then step 11, the neutrality checklist (Opus).** Detail in §17 step 10.
 > **STEP 5 COMMITTED: `490a94e` "phase 2.5: scenario rows and sources", pushed, CI run `37663609137` green (Deploy
 > `37663608886` green).** **DECISION 8 DECIDED 1:11 PM (his):** S1 is a split of the 125 people into three priced
 > paths (eliminated; moved at plant pay; moved keeping current pay), and the $11.4M saving is stated as the same on

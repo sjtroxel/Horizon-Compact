@@ -1,0 +1,79 @@
+# S2's comprehension probes (Phase 2.5 IMPLEMENTATION doc section 10; questions and keys by Opus, 2026-10-07).
+# Facts and rules only, never a preference: every answer is stated in the text, and a numeric key is a formula over
+# the rows, so it moves with a corrected figure. Not part of the instrument's content hash. Pass: 4 of 5 (decision 6).
+
+scenario = "s2"
+
+[[questions]]
+id = "q1"
+type = "number"
+text = "What is the shortfall that the lines must cover, in dollars?"
+answer_formula = "s2_shortfall"
+note = "The situation and the menu heading."
+
+[[questions]]
+id = "q2"
+type = "keys"
+text = "Which lines does the menu say are borne by the workforce?"
+choices = ["eliminate_roles", "cut_wages_hours", "cut_rnd", "cut_env_projects", "raise_prices", "suppliers", "lower_profit", "payouts", "keep_people"]
+answer = ["eliminate_roles", "cut_wages_hours"]
+note = "The labels: only these two say 'borne by the workforce'. The research line says its cost includes engineering pay and is borne by future products; q6 asks about that separately."
+
+[[questions]]
+id = "q3"
+type = "keys"
+text = "Which lines are not offered in this decision?"
+choices = ["eliminate_roles", "cut_wages_hours", "cut_rnd", "cut_env_projects", "raise_prices", "suppliers", "lower_profit", "payouts", "keep_people"]
+answer = ["payouts", "keep_people"]
+note = "The two lines with a note instead of a maximum."
+
+[[questions]]
+id = "q4"
+type = "number"
+text = "What is the most that raising prices can cover, in dollars?"
+answer_formula = "s2_cap_price"
+note = "The price line's maximum."
+
+[[questions]]
+id = "q5"
+type = "number"
+text = "At most what percentage of the remaining payroll can a cut in wages or hours be? Give the percentage as a number, for example 25 for 25%."
+answer_formula = "max_wage_cut * 100"
+exact = true
+note = "The situation: at most 10.0% of the payroll that remains."
+
+[[questions]]
+id = "q6"
+type = "yes_no"
+text = "Does the cost of research and development include engineering staff's pay?"
+answer = "yes"
+note = "The research line's label (step 7, T4)."
+
+[[questions]]
+id = "q7"
+type = "keys"
+text = "Which lines have a maximum at least as large as the whole shortfall?"
+choices = ["eliminate_roles", "cut_wages_hours", "cut_rnd", "cut_env_projects", "raise_prices", "suppliers", "lower_profit"]
+answer = ["eliminate_roles", "lower_profit"]
+note = "Maximums: roles $309.8M and lower operating income $112.1M reach the $112.1M shortfall; no other line does."
+
+[[questions]]
+id = "q8"
+type = "number"
+text = "What is revenue in the coming year before any decision, in dollars?"
+answer_formula = "s2_revenue"
+note = "The situation's first paragraph."
+
+[[questions]]
+id = "q9"
+type = "yes_no"
+text = "Can changing dividends and share repurchases cover part of the shortfall?"
+answer = "no"
+note = "The payouts line: not part of this decision, and it does not change operating income."
+
+[[questions]]
+id = "q10"
+type = "yes_no"
+text = "Is eliminating roles counted at payroll alone, without benefits?"
+answer = "no"
+note = "The situation: counted at payroll and benefits together."

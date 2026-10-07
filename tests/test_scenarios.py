@@ -279,9 +279,24 @@ def current_hash(repo: Path) -> str:
 
 
 def test_without_a_log_the_check_notes_it_and_passes(repo: Path) -> None:
+    (repo / COMPANY / "CHANGELOG.toml").unlink()  # the real log exists since the baseline (step 9)
     report = run_checks(repo)
     assert report.ok
     assert any("CHANGELOG.toml does not exist yet" in note for note in report.notes)
+
+
+def test_the_real_log_holds_the_baseline_and_an_unlogged_change_to_the_real_text_fails(
+    repo: Path,
+) -> None:
+    assert failures(repo) == []  # the copied log, as committed
+    edit(
+        repo,
+        f"{COMPANY}/scenarios/s4.source.toml",
+        "at most one may be above zero",
+        "at most one may be used",
+    )
+    assert main(["scenarios", "--root", str(repo), "render"]) == 0
+    assert any("needs an entry" in f for f in failures(repo))
 
 
 def test_a_log_whose_latest_hash_is_current_passes(repo: Path) -> None:

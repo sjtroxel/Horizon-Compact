@@ -91,13 +91,21 @@ def _option_line(option: Option) -> str:
     return f"- {option.text} [{option.key}]"
 
 
-def render_prompt(
-    experiment: Experiment,
-    scenario: Scenario,
-    objective: Objective,
-    template_id: str,
-    seed: int,
-) -> RenderedPrompt:
+@dataclass(frozen=True)
+class SituationBlocks:
+    """The parts of a user prompt that every prompt on a scenario shares: the situation, the shuffled menu and
+    the shuffled options. A decision prompt and a comprehension probe are both built from these, so a probe
+    reads the menu exactly as a decision run does."""
+
+    system: str
+    situation: str
+    menu: str
+    options: str | None
+    lever_order: tuple[str, ...]
+    option_order: tuple[str, ...]
+
+
+def situation_blocks(experiment: Experiment, scenario: Scenario, seed: int) -> SituationBlocks:
     """One ``random.Random(seed)`` shuffles the levers, then the options, in that order."""
     rng = random.Random(seed)
     levers = list(scenario.levers)
@@ -108,24 +116,43 @@ def render_prompt(
     # A line's kind is printed only when the menu has both: S1-S3 offer one kind, and "use, up to" or
     # "source, up to" there would be noise.
     show_kind = bool(scenario.offered("source")) and bool(scenario.offered("use"))
-    system = "\n\n".join([scenario.role, experiment.dossier.text.strip(), scenario.currency_note])
-    parts = [
-        scenario.scenario.strip(),
-        experiment.wording_sentence(objective, template_id),
-        "\n".join(
+    return SituationBlocks(
+        system="\n\n".join(
+            [scenario.role, experiment.dossier.text.strip(), scenario.currency_note]
+        ),
+        situation=scenario.scenario.strip(),
+        menu="\n".join(
             [
                 scenario.menu_heading,
                 *(_lever_line(lever, scenario.unit, show_kind) for lever in levers),
             ]
         ),
-    ]
-    if scenario.choice is not None:
-        parts.append("\n".join([scenario.options_heading, *(_option_line(o) for o in options)]))
-    parts.append(scenario.instruction.strip())
-    return RenderedPrompt(
-        system=system,
-        user="\n\n".join(parts),
+        options=(
+            "\n".join([scenario.options_heading, *(_option_line(o) for o in options)])
+            if scenario.choice is not None
+            else None
+        ),
         lever_order=tuple(lever.key for lever in levers),
         option_order=tuple(o.key for o in options),
+    )
+
+
+def render_prompt(
+    experiment: Experiment,
+    scenario: Scenario,
+    objective: Objective,
+    template_id: str,
+    seed: int,
+) -> RenderedPrompt:
+    blocks = situation_blocks(experiment, scenario, seed)
+    parts = [blocks.situation, experiment.wording_sentence(objective, template_id), blocks.menu]
+    if blocks.options is not None:
+        parts.append(blocks.options)
+    parts.append(scenario.instruction.strip())
+    return RenderedPrompt(
+        system=blocks.system,
+        user="\n\n".join(parts),
+        lever_order=blocks.lever_order,
+        option_order=blocks.option_order,
         template_id=template_id,
     )
