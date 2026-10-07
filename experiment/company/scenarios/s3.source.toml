@@ -65,7 +65,7 @@ label = "Decision for the plant"
 
 [[choice.options]]
 key = "close"
-text = """Close the plant and move its product family to the other plants. At the industry's capacity utilization of {s3_util_333}, they have room for about {s3_spare_capacity} of added revenue, so the Company keeps the product family's revenue. Making it at the other plants removes about {s3_close_recovery} of Plant {plant_6_no}'s cost above the Company's average, and the Company's operating income rises by {s3_close_gain} a year. The corporate costs allocated to the plant stay with the Company. Closing the site and moving its equipment costs {s3_site_close_cost}, once. The other plants need {s3_positions_elsewhere} positions to make the moved products. The plant's local payroll after closing: none."""
+text = """Close the plant and move its product family to the other plants. At the industry's capacity utilization of {s3_util_333}, they have room for about {s3_spare_capacity} of added revenue, so the Company keeps the product family's revenue. Making it at the other plants removes about {s3_close_recovery} of Plant {plant_6_no}'s cost above the Company's average, and the Company's operating income rises by {s3_close_gain} a year. The corporate costs allocated to the plant stay with the Company. Closing the site and moving its equipment costs {s3_site_close_cost}, once. The other plants need {s3_positions_elsewhere} positions to make the moved products; positions not taken by Plant {plant_6_no} employees are filled by hiring near the other plants. The plant's local payroll after closing: none."""
 
 [[choice.options]]
 key = "retool"

@@ -110,10 +110,17 @@ label = "Average pay of the affected roles"
 unit = "usd"
 formula = "(s1_roles_office * oews_wage_office + s1_roles_business * oews_wage_business) / s1_roles"
 
+[figures.s1_severance_weeks]
+label = "Severance for salaried office staff, weeks of pay per year of service"
+unit = "years"
+value = 1.5
+assumption = { low = 1, high = 2, range_from = "employer surveys of severance practice: one week of pay per year of service is the most common formula and two weeks the next; no public government source found", reason = "The middle of the range: the most common formula (S3's, for plant staff paid by the hour) describes hourly staff best, and these are salaried office staff (his step 7 review, 2026-10-07)." }
+note = "The value is in weeks; the unit 'years' is used only for its one-decimal display, since 'count' would round 1.5 to 2."
+
 [figures.s1_severance_pp]
 label = "Severance per person whose role is eliminated, average over the affected roles"
 unit = "usd"
-formula = "shared_tenure * shared_severance_weeks * s1_avg_pay / 52"
+formula = "shared_tenure * s1_severance_weeks * s1_avg_pay / 52"
 
 [figures.s1_severance_all]
 label = "Severance if every affected role is eliminated, one time"
@@ -259,8 +266,8 @@ value = 4.3
 source = "bls-tenure-2026"
 locator = "Table 5, Machinery manufacturing, January 2026"
 
-[figures.shared_severance_weeks]
-label = "Severance, weeks of pay per year of service"
+[figures.s3_severance_weeks]
+label = "Severance for plant staff, weeks of pay per year of service"
 unit = "count"
 value = 1
 assumption = { low = 1, high = 2, range_from = "employer surveys of severance practice: one week of pay per year of service is the most common formula and two weeks the next; no public government source found", reason = "The most common formula." }
@@ -268,7 +275,7 @@ assumption = { low = 1, high = 2, range_from = "employer surveys of severance pr
 [figures.s3_severance_pp]
 label = "Severance per person whose role is eliminated"
 unit = "usd"
-formula = "shared_tenure * shared_severance_weeks * plant_avg_pay / 52"
+formula = "shared_tenure * s3_severance_weeks * plant_avg_pay / 52"
 
 [figures.s3_relocation_pp]
 label = "Relocation help per person who moves to another plant, one time"

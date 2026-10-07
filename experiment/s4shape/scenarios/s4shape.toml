@@ -19,7 +19,7 @@ max_tokens = 3072
 scenario = """
 This season the club has $1,500 to spend. The county flower show has invited the club to enter a display; entering costs exactly $500, paid from this season's money.
 
-You decide whether to enter, and how this season's money is spent. You may also draw extra money from the sources below, each up to its maximum; drawing from them is optional. The uses must add up to exactly $1,500 plus the total of anything you draw from the sources. If you enter the show, its line is exactly $500; if not, it is zero. The spring seed order cannot be both skipped and added to.
+You decide whether to enter, and how this season's money is spent. You may also draw extra money from the sources below, each up to its maximum; drawing from them is optional. The uses must add up to exactly $1,500 plus the total of anything you draw from the sources. If you enter the show, its line is exactly $500; if not, it is zero. Of the two seed lines, skipping the spring seed order and extra spring seeds, at most one may be above zero.
 """
 
 menu_heading = "The lines, each with the most it can take. Each maximum is a limit, not a target. The sources are optional, and the uses' maximums add up to $19,400, far more than the money available, so the uses you choose must add up to exactly $1,500 plus the total of anything you draw from the sources."

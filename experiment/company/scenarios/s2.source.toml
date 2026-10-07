@@ -45,7 +45,7 @@ cap = "wage_cut_cap"
 [[levers]]
 key = "cut_rnd"
 lever = "L3"
-label = "Cutting research and development, borne by the Company's future products"
+label = "Cutting research and development, whose cost includes engineering staff's pay, borne by the Company's future products"
 kind = "source"
 cap = "rnd_fy0"
 

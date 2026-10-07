@@ -37,13 +37,29 @@ case by its type and a neutral label. The names live only in the private longlis
 > the diagnostic himself (11:44 AM) and saw the same result, then APPROVED both of Opus's recommendations (11:45 AM):**
 > the drafting rule in §6 (every menu says the maximums are limits, not targets, and states their sum), and S4's
 > shape test, now §17 step 6a, before the baseline.
+> **STEP 6a, 2026-10-07 afternoon: the local models cannot do S2-S4.** The S4 shape test failed (0 of 5), and four
+> diagnostic rounds on garden copies found the cause: the 4B balances 3-4 lines (S1's shape 4 of 4) but not 7, the
+> 8B about half of S2, the 14B does not fit the card. **Through OpenRouter (his runs): Nova Lite failed the same
+> way; `gpt-oss-120b` did S1-S3 and half of S4 for half a cent; Sonnet 4.6, on garden content only, did 10 of 10.
+> The format is sound; the weak models were the problem.** `gpt-oss-120b`'s S4 failures all broke the "not both"
+> rule, so step 7 looks at S4's matching sentence. **DECISION 9 (his, amended 3:44 PM): `gpt-oss-120b` through
+> OpenRouter for Phase 2.5's development runs, until Bedrock answers; $3 cap** (his key; about $0.24 spent today).
+> **The official runs are NOT covered:** if Bedrock is still blocked at Phase 3.5's pilot, that is its own decision.
+> Step 8 adds an OpenRouter provider and `models.toml` entry (Sonnet).
+> **STEP 7 DONE 3:50 PM (his, accepted all on Opus's review packet, `evidence/phase-2.5/step7-review.md`):** five
+> text fixes applied (two were quiet leans: S2's research line now says it includes engineering pay; S1's
+> severance for salaried staff moved to the middle of its range, 1.5 weeks); T3 (S1 always describes elimination
+> first) waits for step 8's per-line `detail`. 73 rows, 20 assumptions.
+> **NEXT SESSION: step 8 (Sonnet)**, its seven code items in the doc's §17 step 6 and decision 9 (OpenRouter
+> provider; `hc scenarios render` and `check`; per-line `detail`; objectives and templates), then step 9, the
+> baseline commit.
 > **STEP 5 COMMITTED: `490a94e` "phase 2.5: scenario rows and sources", pushed, CI run `37663609137` green (Deploy
 > `37663608886` green).** **DECISION 8 DECIDED 1:11 PM (his):** S1 is a split of the 125 people into three priced
 > paths (eliminated; moved at plant pay; moved keeping current pay), and the $11.4M saving is stated as the same on
 > every path; `planning/07` §3.2 patched. **STEP 6 DRAFTED (Opus):** `scenarios/s1.source.toml` to `s4.source.toml`,
 > review copy `docs/phases/evidence/phase-2.5/scenarios-step6-draft.md`; 72 rows, 19 assumptions (new: S3's
 > transfer acceptance, 15%, at most 29 people move). Step 8 owes five code changes found by rendering (§17 step 6).
-> **STEP 6a PREPARED:** `experiment/s4shape/`; he runs it. **NEXT: 6a (his run), then 7 (his review of A32-A50 and
+> **STEP 6a PREPARED:** `experiment/s4shape/`; he ran it (results above). *(Superseded: the NEXT SESSION line above governs.)* **Was: 6a (his run), then 7 (his review of A32-A50 and
 > the four texts; look hardest at `s4_payoff_mid` and `s3_accept_share`), then 8 (Sonnet).**
 > *Earlier the same day:* **STEP 5, THE SCENARIO ROWS, DONE 2026-10-07 (Opus), except S1's redeployment rows:**
 > `experiment/company/scenario-figures.toml` (54 rows, 18 assumptions), six sources added to `sources.toml` with

@@ -693,7 +693,11 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    there is one, both leaving the placeholder's tool unchanged;
    (4) rescaling must leave a line pinned by `option_fixes` (S4's program) out of the scaling, step 2's open point;
    (5) rule numbers (`base`, `divisor`, `fraction`, `amount`) name rows; "every row used" counts caps, totals and
-   rules as uses.
+   rules as uses;
+   (6) *added in step 7:* an offered line may carry a short `detail`, rendered under the line and shuffled with
+   it (the placeholder has none, so its golden prompts stay the same); S1's three path paragraphs then move from
+   the situation text into their lines' details, so no path is described first on every run;
+   (7) *added by decision 9:* the OpenRouter provider and `gpt-oss-openrouter` model entry.
 6a. **S4's shape test** (added and APPROVED 2026-10-07, his): before the baseline, a placeholder-style copy of S4's
    rule (`uses_equal_total_plus_sources`: the uses equal the cash plus whatever is cut), off the experiment's
    subject, run on `qwen-local` through the harness, by him. It is the real shape closest to the placeholder's
@@ -708,8 +712,74 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
    placeholder's vocabulary test globbed `placeholder/*.toml` only, so since step 1 moved the scenario into
    `scenarios/` the scenario file had not been checked; it now searches every subfolder (asserting a scenario file is
    among those checked) and covers `s4shape/` too. Both pass: nothing slipped through in the meantime.
-7. **His review** of every new assumption and the four texts, the way Phase 2 step 7 ran. Changes before the
+   **RUN (his, 2026-10-07, 1:47 PM): FAILED, 0 of 5** (15 attempts: 10 `sum_mismatch`, 2 `schema_invalid` for
+   using both seed lines, 3 `truncated` after reasoning in plain text up to the 3,072-token limit). The uses ran to
+   $3,800-$13,000 against targets of $1,500-$2,700.
+   **Diagnostic, two rounds, run by him (`scratch/diagnose-s4shape.py`, garden content, $0), every verdict from the
+   harness's validator:**
+   | Variant | Model | Valid |
+   |---|---|---|
+   | A: use caps $500 each ($4,000 in all) instead of $2,700 | 4B | 0 of 4 |
+   | B: no optional sources, fixed $1,500 total | 4B | 0 of 4 |
+   | C: as run | 8B | 0 of 4 |
+   | D: A and B together | 4B | 0 of 4 |
+   | E: D plus a sentence doing the leftover arithmetic ("the other uses get $1,000") | 4B | 0 of 4 |
+   | F: A plus that sentence | 4B | 0 of 4 |
+   | G: as run plus that sentence | 4B | 0 of 4 |
+   | H: G on the 8B | 8B | 0 of 4 (three replies the script could not parse) |
+   **What it shows.** (1) **The fixed line is counted on top of the money:** with small caps the model spent about
+   $1,500 on the other lines and added the $500 entry (A, D, and again in E and F despite the sentence). S4 has the
+   same trap, stronger: funding puts all of the year's money in the program line. (2) **Caps far above the money pull
+   amounts up** (B, C, G: $2,700-$5,900). (3) The 8B does no better. **Stopped rewording at that point (Opus):**
+   adding sentences until a 4B passes would tune the instrument's text to the weakest model in the project. Round 3,
+   a survey of every real shape on garden content (`scratch/survey-shapes.py`), asks whether the 4B fails only on
+   S4's shape or on all of them, and tests an S4 redesign with no fixed line in the table.
+   **Rounds 3 and 4 (his runs, 2:30-2:55 PM; `scratch/survey-shapes.py`; garden copies of every real shape):**
+   | Shape (garden copy) | Lines | 4B | 8B |
+   |---|---|---|---|
+   | S1: 12 helpers among three tasks | 3 | **4 of 4** | not run |
+   | S2: a $1,500 loss covered from seven lines | 7 | 0 of 4 (lines filled toward their caps) | 2 of 4 (one used a line not offered; one empty reply) |
+   | S3: the shed's choice plus where 20 helpers go | 4 + rules | 1 of 4 | 1 of 4 (crews used under the wrong choice) |
+   | S4 redesigned: no fixed line; the table shares $1,000 or $1,500 by the choice | 7 | 0 of 4 | 0 of 4 (totals swapped between the choices) |
+   `qwen3:14b` cannot load on the 6 GB card at any context tried ("CUDA error: out of memory"). One 8B memo reads
+   "This leaves $1,000 to be allocated" above an answer totalling $1,500: it read the text right and added wrong.
+   **Finding: the local development models' ceiling, not the texts.** The 4B balances 3 or 4 lines and not 7, even
+   on the simplest one-sided shape with the limits sentence; the 8B does about half of S2 and a quarter of S3. S4's
+   redesign did not help, so S4 keeps its design. **This contradicts decision 7(a)'s premise** ("a weaker model only
+   finds more format problems, never fewer"): on S2-S4 these models mostly find their own arithmetic, so format runs
+   on them would be noise, not evidence about the text. The development model for S2-S4 is his decision (§19,
+   decision 9).
+   **Rounds 5 and 6 (his runs, 3:03-3:40 PM, through OpenRouter, garden copies, his key):**
+   | Shape (garden copy) | Nova Lite | `gpt-oss-120b` | **Sonnet 4.6** |
+   |---|---|---|---|
+   | S1 | 3 of 3 | 3 of 3 | 2 of 2 |
+   | S2 | 1 of 4 (two stopped after reasoning in text) | **4 of 4** | 2 of 2 |
+   | S3 | 0 of 4 (invented tasks outside the lines) | **4 of 4** | 2 of 2 |
+   | S4 as designed | 0 of 4 | 2 of 4 | 2 of 2 |
+   | S4 with the leftover sentence | 0 of 3 | 2 of 4 | 2 of 2 |
+   | Cost | $0.0056 for 18 calls | $0.0047 for 19 | $0.234 for 10 |
+   **Finding: the format is sound.** The official model balanced every shape (10 of 10), S4 included, so the
+   failures above were the weak models'. Nova Lite, the planned development model, does no better than the local 8B.
+   **`gpt-oss-120b` does S1-S3 and half of S4, at about $0.00025 a call**, and **all four of its S4 failures broke the
+   same rule**, using both "skip the seed order" and "extra seeds" (`not_both`). That is a clarity signal of the kind
+   the development runs exist for: the real S4 has the same rule ("Research and development cannot be both cut and
+   added to"), and step 7 should look at its wording. Sonnet was run on garden content only (no pre-registered
+   scenario), as Phase 0.5's smoke calls ran it on the placeholder; this was a one-off check, not a development model.
+   OpenRouter spend today: about $0.24 of the $3 cap. (A first attempt with a different key failed at OpenRouter,
+   "User not found", at no cost.)
+7. **[done 2026-10-07, 3:50 PM]** **His review** of every new assumption and the four texts, the way Phase 2 step 7 ran. Changes before the
    baseline need no log entry: nothing has been seen.
+   **Done as Phase 2's was:** Opus wrote a review packet (`docs/phases/evidence/phase-2.5/step7-review.md`), six
+   text findings and a verdict on each of A32-A50, in plain language; he accepted all as recommended (an acceptance
+   on the recommendations, recorded as such). **Applied:** T1 (S1: the work's cost is saved on every path, and the
+   paths differ in one-time cost and the third path's pay difference, where the text had contradicted itself);
+   T2 (S1: pay kept "for as long as they hold the plant role"); T4 (S2: the research line says its cost includes
+   engineering staff's pay, so cutting it is not shown as sparing the workforce); T5 (S3: positions not taken by
+   Plant 6 staff are filled by hiring near the other plants); T6 (S4 and its garden copy: "at most one may be above
+   zero" for the two research lines, after `gpt-oss-120b` broke the vaguer rule four times); A36 split, S1's salaried
+   staff at 1.5 weeks (the middle of the range), S3's plant staff at 1. 73 rows, 20 assumptions (A32 to A51).
+   Re-rendered: every row used, no stray digit. **T3 (S1 always describes elimination first, though the menu is
+   shuffled) needs code:** step 8 item (6) below.
 8. **Objectives and templates** in `objectives.toml`; the template text check; `hc scenarios check` in `make check`.
 9. **The baseline commit (C5).** From here every content change needs a log entry.
 10. **Probes:** questions and keys (Opus), run on `qwen-local` x 5; failures traced; fixes logged; re-run.
@@ -804,6 +874,33 @@ The options stay as the record.
      the cheaper route.
    - (c) Keep the table as planned and record the overstatement as a simplification. **Not recommended.**
    **Designed** the same afternoon; the rows are in `scenario-figures.toml` (`s1_roles_office` to `s1_caps_sum`).
+
+9. **The development model for S2-S4** (found in step 6a, 2026-10-07, Opus). **DECIDED 2026-10-07, 3:01 PM (his):
+   Nova Lite itself (`amazon/nova-lite-v1`, the planned development model) through OpenRouter, for Phase 2.5's
+   development runs only, with a $3 limit** (his existing key, $3.49 left on it; scripts stop themselves well below).
+   Live price 2026-10-07: $0.06 in, $0.24 out per million tokens, about $0.0006 a call. **The official runs are not
+   part of this decision:** if Bedrock is still blocked at Phase 3.5's pilot, how the official model runs is a
+   separate decision, his. First use: the garden shape survey on Nova Lite, before any harness work.
+   **AMENDED 2026-10-07, 3:44 PM (his): `openai/gpt-oss-120b` through OpenRouter, not Nova Lite**, which failed the
+   survey as the local 8B did (§17 step 6a, round 5). `gpt-oss-120b` did S1-S3 and half of S4, its failures pointing
+   at a wording (round 6); live price $0.037 in, $0.17 out per million tokens, about $0.00025 a call. Not in the
+   official set (Sonnet 4.6, Nova Pro). **Until Bedrock answers;** then development returns to Bedrock, and Nova
+   Lite's runs there stay owed before Phase 3.5's tag (decision 7). The same $3 cap; development runs only. The 4B
+   stays for S1 and the comprehension probes. **Step 8 (Sonnet) adds:** an OpenRouter provider in the harness
+   (chat completions with the one tool, `auto` choice, no sampling option, the key never in argv or a file in the
+   repo), a `route = "openrouter"` kind, and `[models.gpt-oss-openrouter]` in `models.toml` with
+   `role = "development"` and its live prices, so the existing refusals and the $5 sweep cap cover it. The 4B and 8B cannot
+   balance tables of seven lines or keep a choice and its lines consistent (§17 step 6a), and the 14B does not fit
+   the card. The 4B stays the model for S1 and for the comprehension probes (single questions).
+   - (a) **Recommended:** a capable, inexpensive model through his OpenRouter balance as the development model for
+     S2-S4 format runs, chosen live by price and capability (comparable to Nova Lite, the planned development model;
+     never a model in the v1 official set). Cost: likely well under a dollar for the format runs; verified live
+     before any call. Needs an OpenRouter provider in the harness (step 8, Sonnet) and a `role = "development"`
+     entry in `models.toml`; the refusals already keep every non-development model off real content. Revisits
+     decision 7: Phase 2.5 could close on this model, with Nova Lite's runs still owed before Phase 3.5's tag.
+   - (b) Wait for Nova Lite on Bedrock. No date; Phase 2.5's format runs on S2-S4 wait with it.
+   - (c) Run S2-S4 format runs on the 8B anyway and read its failures as the model's. Not recommended: about half
+     of its answers fail for reasons that say nothing about the text.
 
 ## 20. Genuinely uncertain
 
