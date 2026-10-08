@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import math
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Literal
 
@@ -51,6 +51,10 @@ BOUNDARY_TOLERANCE = 1e-9
 
 Verdict = Literal["split", "no_split", "inconclusive"]
 Role = Literal["primary", "secondary"]
+
+
+def label_for(role: Role) -> str:
+    return "primary" if role == "primary" else "secondary: the expected comparison"
 
 
 @dataclass(frozen=True)
@@ -126,7 +130,7 @@ class Comparison:
         return self.interval.estimate
 
 
-def _one_value(rows: Sequence[RunRow], field: str) -> str:
+def one_value(rows: Sequence[RunRow], field: str) -> str:
     values = {getattr(row, field) for row in rows}
     if len(values) != 1:
         raise ValueError(
@@ -135,32 +139,39 @@ def _one_value(rows: Sequence[RunRow], field: str) -> str:
     return str(values.pop())
 
 
-def compare(
+@dataclass(frozen=True)
+class CellSet:
+    """The outcomes a comparison reads, as objective -> wording -> one number per run. The failure rules build
+    a second set from the first with failed runs filled in at 0 or 1 (the worst-case bound, section 9.4)."""
+
+    scenario_id: str
+    sweep_id: str
+    first: str
+    second: str
+    wordings: tuple[str, ...]
+    cells: Mapping[str, Mapping[str, Sequence[float]]]
+
+
+def gather_cells(
     outcomes: ScenarioOutcomes,
     rows: Sequence[RunRow],
     first: str,
     second: str,
     *,
-    role: Role = "primary",
     wordings: Sequence[str] | None = None,
-    alpha: float = ALPHA,
-    resamples: int = RESAMPLES,
-    name: str | None = None,
-) -> Comparison:
-    """``first`` minus ``second`` on the scenario's primary outcome, over ``wordings`` (default: every wording
-    either side has a valid run in). Every wording compared must have a valid run on both sides: dropping a
-    wording is the failure rules' decision (decision 6), made before this is called, never here.
-
-    The bootstrap's seed comes from the sweep id and ``name`` (default ``"<scenario>:<first>-<second>"``).
-    """
+) -> CellSet:
+    """The valid runs' primary outcomes of ``first`` and ``second``, by wording, over ``wordings`` (default:
+    every wording either side has a valid run in). Every wording compared must have a valid run on both
+    sides: dropping a wording is the failure rules' decision (decision 6), made before this is called, never
+    here."""
     scenario_id = outcomes.scenario.id
     if first == second:
         raise ValueError("a comparison needs two different objectives")
     scoped = [r for r in rows if r.scenario_id == scenario_id and r.objective_id in (first, second)]
     if not scoped:
         raise ValueError(f"no runs of {first} or {second} on {scenario_id}")
-    sweep_id = _one_value(scoped, "sweep_id")
-    _one_value(scoped, "model_key")
+    sweep_id = one_value(scoped, "sweep_id")
+    one_value(scoped, "model_key")
     valid = [r for r in scoped if r.valid]
 
     by_side: dict[str, dict[str, list[float]]] = {first: {}, second: {}}
@@ -181,9 +192,24 @@ def compare(
                     "rules drop a wording from both sides before a comparison, never inside it"
                 )
     cells = {side: {w: by_side[side][w] for w in chosen} for side in (first, second)}
+    return CellSet(scenario_id, sweep_id, first, second, chosen, cells)
 
+
+def compare_cells(
+    outcomes: ScenarioOutcomes,
+    cellset: CellSet,
+    *,
+    role: Role = "primary",
+    alpha: float = ALPHA,
+    resamples: int = RESAMPLES,
+    name: str | None = None,
+) -> Comparison:
+    """The interval and the verdict from a set of cells. The bootstrap's seed comes from the sweep id and
+    ``name`` (default ``"<scenario>:<first>-<second>"``)."""
+    scenario_id, first, second = cellset.scenario_id, cellset.first, cellset.second
+    chosen, cells = cellset.wordings, cellset.cells
     if outcomes.kind == "share":
-        seed = comparison_seed(sweep_id, name or f"{scenario_id}:{first}-{second}")
+        seed = comparison_seed(cellset.sweep_id, name or f"{scenario_id}:{first}-{second}")
         interval = stratified_bootstrap_difference(
             cells[first], cells[second], seed=seed, alpha=alpha, resamples=resamples
         )
@@ -203,7 +229,7 @@ def compare(
         first=first,
         second=second,
         role=role,
-        label="primary" if role == "primary" else "secondary: the expected comparison",
+        label=label_for(role),
         outcome=outcomes.primary_name,
         kind=outcomes.kind,
         threshold=outcomes.threshold,
@@ -213,6 +239,24 @@ def compare(
         decision=decide(interval.estimate, interval.low, interval.high, outcomes.threshold),
         degenerate_interval=interval.width <= BOUNDARY_TOLERANCE,
     )
+
+
+def compare(
+    outcomes: ScenarioOutcomes,
+    rows: Sequence[RunRow],
+    first: str,
+    second: str,
+    *,
+    role: Role = "primary",
+    wordings: Sequence[str] | None = None,
+    alpha: float = ALPHA,
+    resamples: int = RESAMPLES,
+    name: str | None = None,
+) -> Comparison:
+    """``first`` minus ``second`` on the scenario's primary outcome, among valid runs, over ``wordings``
+    (default: every wording either side has a valid run in): ``gather_cells`` then ``compare_cells``."""
+    cellset = gather_cells(outcomes, rows, first, second, wordings=wordings)
+    return compare_cells(outcomes, cellset, role=role, alpha=alpha, resamples=resamples, name=name)
 
 
 def compare_scenario(

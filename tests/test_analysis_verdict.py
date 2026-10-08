@@ -10,13 +10,11 @@ own Newcombe formula, never from the engine.
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable, Mapping
-from typing import Any
 
 import pytest
-from scipy import stats
 
-from horizon_compact.analysis.intervals import ALPHA, FAMILY_SIZE, comparison_seed
+from analysis_helpers import W3, hand_newcombe, run, s1_runs, s3_runs
+from horizon_compact.analysis.intervals import FAMILY_SIZE, comparison_seed
 from horizon_compact.analysis.outcomes import outcomes_for
 from horizon_compact.analysis.records import RunRow
 from horizon_compact.analysis.verdict import (
@@ -148,99 +146,6 @@ def test_the_family_is_four_pairs_times_four_scenarios() -> None:
     named = {o.id for o in EXP.objectives}
     assert {x for pair in PRIMARY_PAIRS + SECONDARY_PAIRS for x in pair} <= named
 
-
-# --- hand-built runs ---------------------------------------------------------------------------------------
-
-_counter = iter(range(10**9))
-
-
-def run(
-    scenario: str, objective: str, wording: str, amounts: Mapping[str, float] | None, **kw: Any
-) -> RunRow:
-    base: dict[str, Any] = {
-        "run_id": f"r-{next(_counter):012x}",
-        "sweep_id": "pilot-test-sweep",
-        "model_key": "sonnet-4-6",
-        "scenario_id": scenario,
-        "objective_id": objective,
-        "wording_id": wording,
-        "repeat": 0,
-        "status": "valid" if amounts is not None else "sum_mismatch",
-        "first_attempt_status": "valid" if amounts is not None else "sum_mismatch",
-        "attempts": 1,
-        "possible_decline": False,
-        "menu_order": (),
-        "option_order": (),
-        "amounts": amounts,
-        "choice": kw.pop("choice", None),
-        "first_amounts": amounts,
-        "first_choice": None,
-    }
-    base.update(kw)
-    return RunRow(**base)
-
-
-def s1_runs(objective: str, kept_per_wording: dict[str, Iterable[int]]) -> list[RunRow]:
-    """S1 runs keeping the given number of the 125 people (moved at the plant role's pay), the rest
-    eliminated."""
-    return [
-        run("s1", objective, w, {"eliminate": 125 - k, "move_plant_pay": k, "move_keep_pay": 0})
-        for w, kept in kept_per_wording.items()
-        for k in kept
-    ]
-
-
-def s3_runs(
-    objective: str, closes: int, total: int, wordings: tuple[str, ...] = ("w1", "w2", "w3")
-) -> list[RunRow]:
-    """``total`` S3 runs spread over the wordings in turn, the first ``closes`` of them choosing to close."""
-    out = []
-    for i in range(total):
-        if i < closes:
-            amounts, choice = (
-                {
-                    "eliminated": 161,
-                    "moved_other_plants": 29,
-                    "kept_at_plant": 0,
-                    "transferred_to_buyer": 0,
-                },
-                "close",
-            )
-        else:
-            amounts, choice = (
-                {
-                    "eliminated": 0,
-                    "moved_other_plants": 29,
-                    "kept_at_plant": 161,
-                    "transferred_to_buyer": 0,
-                },
-                "retool",
-            )
-        out.append(run("s3", objective, wordings[i % len(wordings)], amounts, choice=choice))
-    return out
-
-
-def _wilson(c: int, n: int, z: float) -> tuple[float, float]:
-    p = c / n
-    centre = (p + z * z / (2 * n)) / (1 + z * z / n)
-    half = z / (1 + z * z / n) * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))
-    return centre - half, centre + half
-
-
-def hand_newcombe(c1: int, n1: int, c2: int, n2: int) -> tuple[float, float]:
-    """The test's own Newcombe (Fagerland et al. 2011, eq. 7) at the family alpha: independent of the
-    engine."""
-    z = float(stats.norm.ppf(1 - ALPHA / 2))
-    p1, p2 = c1 / n1, c2 / n2
-    l1, u1 = _wilson(c1, n1, z)
-    l2, u2 = _wilson(c2, n2, z)
-    d = p1 - p2
-    return d - math.sqrt((p1 - l1) ** 2 + (u2 - p2) ** 2), d + math.sqrt(
-        (p2 - l2) ** 2 + (u1 - p1) ** 2
-    )
-
-
-W3 = ("w1", "w2", "w3")
 
 # --- known answers, shares (S1, bootstrap) -----------------------------------------------------------------
 

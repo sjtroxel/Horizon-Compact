@@ -667,9 +667,176 @@ for routine code; he switches with `/model`).
    (d) §8.3's remaining fields (the worst-case verdict, the wording label, the final verdict and the downgrade
    reason) belong to steps 5 and 6, which extend `Comparison`; this step returns the verdict among valid runs only.
 
-5. **[Sonnet] The failure rules** (§9), including decision 3's bound both ways and decision 6's exclusion.
-6. **[Sonnet] The robustness rules** (§10).
-7. **[Sonnet] The descriptive analyses** (§11) and `results.py`, the versioned object.
+5. **[done 2026-10-08, Sonnet] The failure rules** (§9), including decision 3's bound both ways and decision 6's exclusion.
+   *As built.* `analysis/failures.py`. **Refactor first:** `verdict.compare()` is now `gather_cells()` (the valid
+   runs' outcomes by objective and wording, a `CellSet`) then `compare_cells()` (interval and decision); `compare()`
+   calls both, so its behavior is unchanged and the 54 step-4 tests pass unedited. `verdict.one_value` and
+   `verdict.label_for` became public for `failures.py`. **Counting:** `classify_run` gives valid, valid_rescaled,
+   refusal or failure; a `no_tool_call` is a refusal only through `refusal-calls.json` beside the sweep, an object of
+   run id to a non-empty reason (`parse_refusal_calls`, `read_refusal_calls`); a call naming an unknown run, or a
+   run whose final status is not `no_tool_call`, is a `RefusalCallError`, checked against every run given so a typo
+   cannot pass; `decline_candidates` lists flagged runs and decides nothing. **Cells:** `cell_rates` (attempted,
+   valid, rescaled, refused, failures by type); `exceeds_limit` compares integers, strictly greater than 1/10 (3 of
+   30 kept, 4 of 30 dropped). **Decision 6:** `assess_comparison` drops a wording from both sides when either side's
+   cell is over the limit, says which and why (`scope`), and returns `not_assessable` when none is left; a wording
+   with no run at all on one side is refused, not dropped. **Decision 3:** one `BoundCheck` per setting, each a full
+   recompute through `compare_cells` (interval included) with its own seed name (`<name>:bound:<label>`); a split
+   gets the narrowing setting (the sign of the difference picks the direction), a no split gets both widening
+   signs; the first overturning check sets `worst_case_verdict`, and the final verdict is inconclusive with the
+   reason spelled out. Failed runs in a dropped wording are not imputed; no failed run, or an already inconclusive
+   verdict, means no bound. **9.3:** `first_attempt_rows` re-reads each run as its first attempt (status, amounts,
+   choice) and the same assessment runs on that view, exclusion and bound included, under seed names ending
+   `:first-attempt`; a test shows the view scores exactly as `outcomes.score_first_attempt` does. **9.5:**
+   `objective_rates` and `pair_rates` (failure, refusal and either, as first minus second, each by Newcombe).
+   `assess_scenario` returns all of it for one scenario. Tests: `tests/test_analysis_failures.py` (53; 917 tests in all), hand-built
+   runs only, expected intervals from the test's own Newcombe; every boundary named in the brief is a test (exactly
+   10%; a narrowed difference of exactly 0.20 kept as a split, one run short overturned; a no split overturned only
+   by the negative sign, and separately only by the positive; a no split the bound turns into a split; failures in a
+   dropped wording). `tests/analysis_helpers.py` now holds `run`, `s1_runs`, `s3_runs`, `hand_newcombe`, `failed`
+   and `s3_cell`. **Mutation check:** 24 deliberate bugs planted in `failures.py`, one at a time (limit `>=`, a
+   float limit, refusals left out, calls ignored, the flag deciding, either-side and both-side exclusion, inverted
+   narrowing, one widening sign only, no split not bounded, only "inconclusive" counting as overturned, the final
+   verdict not downgraded, failures counted from dropped wordings, imputed values swapped, each first-attempt field
+   left at its final value, a shared seed, and more); all 24 failed the tests; the file was restored.
+   **Findings, for step 12's list and his review (none changes a rule's intent):**
+   (a) **Decision 3's two signs is an interpretation, implemented as asked:** a no split's difference can sit near
+   zero, so raising it and lowering it are different tests and either one overturning downgrades. Without the
+   second sign, a one-sided design (failures only on the second objective, both rates 0) passes the raising check
+   and is overturned only by the lowering one; a test holds each case.
+   (b) **The bound also reaches decision 10's case:** the all-agree share "no split" ([0, 0]) is downgraded
+   whenever failed runs exist in the kept wordings (C at 1.0, D's failures at 0 gives a 0.10 difference). It is
+   kept only when nothing failed. That narrows decision 10 to the failure-free all-agree case.
+   (c) **At small cells a single failure excludes a wording:** 1 of 6 is 16.7%, over the limit; 1 of 10 is exactly
+   10% and kept. `planning/07` §8's repeat floor is 6 per wording, so at 6 to 9 repeats one failure drops that
+   wording from every comparison its cell is in. The rule is pre-registered as written; the simulations (step 10)
+   should measure how often it bites at the repeat counts the rule produces.
+   (d) **`planning/07` §5.1 names a "logged human call" and no format.** The format is now `refusal-calls.json`,
+   beside the sweep; Phase 4's IMPLEMENTATION doc must say who writes it and when (before any official analysis).
+   (e) **9.5's interval level is not stated in the planning.** Built first at the family `ALPHA`; **changed after
+   Opus's review (his, 2026-10-08) to `DESCRIPTIVE_ALPHA` = 0.05**, see below.
+   (f) **Unfinished runs are invisible to the rates:** `RunSet.unfinished` is not in the rows, so a cell's
+   "attempted" counts finished runs only. Phase 4 should refuse analysis while anything is unfinished.
+   (g) **The first-attempt view ignores human calls** (they are about a final status); a first-attempt
+   `no_tool_call` stays a failure by type, which counts the same toward every rule.
+   *Opus review, same day (his decisions):* (a) kept: "worst case" is the worse of the two settings, and near zero the
+   difference's sign is noise. **`DESCRIPTIVE_ALPHA` = 0.05** in `intervals.py`, for every descriptive interval (9.5
+   now, §10.3 next): as decision 9, a reading not a test, and here the narrower interval is the cautious one, since
+   9.5 exists to show a failure difference by objective that could bias the comparison. `assess_scenario` takes it
+   as its own `descriptive_alpha`, so the family `alpha` cannot leak into the table (a test holds it). **Renamed
+   away from "imputed"** (`set_first`, `set_second`, `_set_failed`): `planning/07` §5.2 says "no imputation", and
+   the bound is a sensitivity bound whose field names reach the results object. **For the methods page:** the
+   bound is the worst case for the *difference* (§5.2's words); splitting failed runs between 0 and 1 can widen an
+   interval more without moving the mean, which the rule does not check, and need not. **For Phase 4's OPEN
+   list:** refusal calls made with the objective hidden and written once before analysis; analysis refused while
+   any run is unfinished (finding f). **For step 12:** finding (a)'s two signs, `DESCRIPTIVE_ALPHA`, and finding
+   (c), to be judged on step 10's evidence.
+6. **[done 2026-10-08, Sonnet] The robustness rules** (§10).
+   *As built.* `analysis/robustness.py`. **10.1:** `wording_direction` reads the per-wording difference (first minus
+   second, among valid runs; the mean share, or the choice rate) over the wordings `assess_comparison` **kept**, so a
+   dropped wording can neither support nor break a split; each difference is `same`, `opposite` or `zero` against the
+   pooled sign (`zero` is within `BOUNDARY_TOLERANCE`, which a test shows catches a -1.4e-17 float residue), or
+   `undefined` when the pooled difference has no sign. A split that survived the bound is `robust` only if every
+   wording is `same`, otherwise `wording_sensitive`; any other final verdict has the differences and no label.
+   `RobustComparison` wraps the `AssessedComparison` and adds `headline`, the claim as published ("split, robust: ..."
+   / "split, wording-sensitive: w3 reverses (-0.600), over wordings ..."). **10.2:** `sealed_wording_of(experiment)`
+   reads the id from the loaded experiment (a test reads `objectives.toml` itself), and `sealed_result` reruns the
+   whole assessment, bound included, on that wording's runs under seed name `<scenario>:<first>-<second>:sealed`,
+   labeled "sealed wording only; outside the family of 16", with the pooled final verdict and whether they agree.
+   **10.3:** `position_effects`: per offered line, mean share of the total at each menu position and the
+   least-squares slope; per option of S3 and S4, the choice rate when listed first against not first with a
+   Newcombe interval at `DESCRIPTIVE_ALPHA` (`None`, not invented, when a group is empty). `robustness_scenario`
+   returns all of it for one scenario's assessment. Tests: `tests/test_analysis_robustness.py` (26), hand-built runs,
+   expected intervals from the test's own Newcombe, the position cases worked out by hand in the comments. The
+   `s3_design` and `with_failures` helpers moved to `tests/analysis_helpers.py`. **Mutation check:** 25 deliberate bugs
+   (zero not recognised or counted as agreement, the sign test inverted, any-agrees instead of all, a label on a
+   non-split or from the pre-bound verdict, dropped wordings read, the difference reversed, a wording-sensitive split
+   downgraded, a sealed rerun that shares the pooled seed, reads every wording, hard-codes the id, drops the pair's
+   role or always agrees, 0-based positions, a share not over the total, the slope's sign, a slope for a constant
+   position, the first-listed test, the family alpha in the option interval, an invented interval for an empty group,
+   failed runs read); 23 failed the tests on the first pass and two survived, which showed two real gaps (the pair's
+   role was never checked in the rerun, and the sealed id was always `w2`, so a typed `"w2"` was invisible); both
+   are now tested and caught, 25 of 25.
+   **To flag to him (the rule I was asked to decide and state):** *a wording-sensitive split keeps its verdict,
+   `split`, and carries the label.* The planning words are "reported as wording-sensitive" (`planning/07` 7.1) and
+   "marks a split as wording-sensitive" (scope doc); making it inconclusive would be a new rule. The cost is that
+   the headline, not the verdict field, carries the qualification, so the results page must show the headline.
+   **Findings for step 12 and step 10:**
+   (a) **"Robust" is demanding at small cells.** Per-wording differences rest on 6 to 20 runs a side; a real split
+   can show a zero or opposite difference in one wording by chance. Step 10 should measure how often a true split
+   is labeled wording-sensitive at the repeat counts the rule produces (its table has the reversed-shift case, not
+   this false-alarm rate).
+   (b) **A split over one kept wording is labeled robust trivially.** Its scope says "over wording w1"; the results
+   page should not show "robust" without the scope.
+   (c) **The sealed rerun uses the family `ALPHA` and one third of the runs.** It repeats "the whole verdict
+   computation" as asked, so it is the same test on less data: an inconclusive sealed result beside a pooled split
+   usually means power, not disagreement. `agrees_with_pooled` was strict (identical final verdicts); **replaced in step 7 by a relation** after Opus's
+   review (see step 7). Whether the sealed result should be judged at 95% is for step 12; Opus advised keeping the
+   family level, since 95% would make the sealed wording easier to pass than the pooled test.
+   (d) **Position effects:** positions are those shown, including lines not offered; the pooling crosses objectives
+   and wordings (shuffling is independent of both); the slope has no interval, as §10.3 says. A standard error or an
+   interval at `DESCRIPTIVE_ALPHA` on the slope is a small addition if he wants one.
+   (e) **§8.3's "final verdict after both":** the wording check never downgrades, so it equals the failure rules'
+   final verdict; the wording label is a separate field.
+7. **[done 2026-10-08, Sonnet] The descriptive analyses** (§11) and `results.py`, the versioned object.
+   *First, Opus's step 6 review (his decision):* `SealedResult.agrees_with_pooled` is replaced by a **relation**
+   (`robustness.relate`), because the sealed rerun is the same test on about a third of the data and a real result
+   can come back less certain without any wording disagreeing. Four values, not three: **`same_verdict`** (same
+   verdict; two splits must also share a sign), **`same_direction_less_certain`** (sealed inconclusive, and either the
+   pooled split's sign with a nonzero difference, or a pooled no split with the sealed point estimate strictly inside
+   the band, `|d| < T - eps`), **`different`** (everything else, including a sealed difference of zero beside a
+   pooled split and a sealed estimate at or past T beside a pooled no split), and **`not_comparable`** (either side
+   not assessable). *The fourth is my addition to Opus's three:* a sealed cell over the failure limit is "nothing to
+   compare", not a disagreement. Defined exactly in the module docstring; 29 boundary cases plus integration tests;
+   mutation check 14 of 14 (two gaps first: the integration tests never had the sealed difference pointing the other
+   way or the threshold in play). *As built, §11:* `analysis/descriptive.py`: per scenario, valid runs only, every
+   offered line's share of the total (count, mean, sample sd, median, range) per objective x wording and pooled over
+   wordings, and by choice (pooled over wordings) for S3 and S4; the display groups (`planning/07` §3.3, overlapping;
+   uses and sources summed apart in S4; S4's program, which has no canonical lever, in none); the choice split per
+   objective and wording with zeros kept; the secondaries (S1 with `n_defined` beside `n_runs`, S3's retained share,
+   S4's any-cuts) per cell and by choice; **E's distance to each objective beside each objective's own distance**
+   (`run_distance`: total variation on the lever-level vector, plus a 0/1 choice term where the scenario has a
+   choice, the mean of the two when both exist; an undefined vector (S4, all zero) distances on the choice alone and
+   the pair is counted as choice-only); and every valid run's values kept whole (`per_run`) so spread can be drawn.
+   `results.py`: `build_results(experiment, runset, ...)` returns **`ModelResults`**: the version, sweep, model,
+   alphas, resamples, the sealed wording (read from the experiment), the refusal calls with their reasons, and per
+   scenario the flat **`ComparisonResult`** for each pair (method, difference, interval, seed, verdict among valid,
+   kept and dropped wordings with the cells that dropped them, runs per wording, failed runs per side, **the bound's
+   settings and recomputed verdicts**, the worst-case verdict, **the wording label as its own field**, the
+   per-wording differences, **reversed and zero wordings as separate fields**, the final verdict and the downgrade
+   reason, the sealed summary with its relation, the first-attempt summary, and `headline`), the failure-rule cells
+   and pair rates, position effects and the descriptive output. `headline` is documented in the class docstring as a
+   **diagnostic string, not published text**; the site's wording is written when Phase 1.5 is built. Everything in the
+   object is numbers, strings, booleans, `None` and tuples of frozen dataclasses of those, and a test walks it with
+   `dataclasses.asdict` and `json.dumps`. **`RESULTS_VERSION` stays 1:** the object did not exist before this step and
+   nothing has serialized an earlier shape; a test pins every field name of the result types, so any later change
+   fails it until the version is bumped. **`build_results` refuses an unfinished sweep** (the `RunSet` carries
+   `unfinished`), runs on a scenario the experiment does not have, an experiment with no sealed template, and calls
+   that name no run (checked once, downstream, by the failure rules). A scenario in the experiment with no runs is
+   listed in `scenarios_without_runs`, not dropped silently. Tests: `tests/test_analysis_descriptive.py` (19; every
+   expected number worked out by hand in its comment), `tests/test_analysis_results.py` (17), and 32 more in
+   `tests/test_analysis_robustness.py`. **Mutation checks:** descriptive 23 of 23, results 23 of 23 non-equivalent
+   (one planted bug, removing the calls check from `build_results`, was equivalent because `assess_scenario` checks
+   the same calls, so the redundant line was deleted). Gaps the mutation checks showed, now tested: a median equal to
+   the mean in every sample, a choice-less scenario that happened to give the same distance from the vector and
+   the choice, and result tests whose designs were all symmetric (equal failures per side), all default alphas, or
+   with first attempts equal to finals.
+   **For step 9 (Opus), flagged:** `run_distance` is defined here, on the full vector, because §11 item 5 needs it
+   now and §13.1 defines it; the matcher restricts the vector to observable lines and renormalizes before calling
+   the same function. If step 9 prefers the definition to live in `matcher.py`, it moves; its tests are here.
+   **Findings for step 12 and the site, none changing a rule:**
+   (a) **Position-effect slopes are pooled across objectives** (step 6 note (d)); a per-cell fit would be tighter,
+   noted for a later protocol version (§16).
+   (b) **E's distance pools all wordings.** The mean is over every (E run, other-objective run) pair, as §11 item 5
+   says; a like-with-like version (the same wording only) is a one-line change if he prefers it.
+   (c) **The allocation summaries use the share of the scenario's total**, S4's uses and sources each against
+   $20.4 million (not against their own sum, as the matcher's vector does).
+   (d) **`build_results` needs `menu_order` and `option_order` on every valid run** (position effects refuse
+   otherwise). The runner always writes them; a hand-built or old record without them is refused loudly, not
+   skipped.
+   *Opus review, same day, before C4:* one fix. A comparison that was not assessable got made-up values in the
+   object (`outcome` and `kind` empty, `threshold` and `alpha` 0.0); they now come from the scenario and the run
+   settings, which are known either way, and only what depends on valid runs is `None` (a test holds it). No field
+   name changed, so `RESULTS_VERSION` stays 1. Sonnet's fourth sealed relation, `not_comparable`, is right and kept.
 8. **[Sonnet] The repeat rule** (§12), tested on `planning/07` §8's worked example.
 9. **[Opus] The matcher** (§13) and its synthetic cases.
 10. **[Opus] The simulations** (§14): the timing run, then the full run, then the report. Opus reads every number

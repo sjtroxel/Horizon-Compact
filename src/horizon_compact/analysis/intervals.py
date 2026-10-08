@@ -34,6 +34,11 @@ FAMILY_SIZE = 16  # 4 scenarios x 4 primary comparisons, per model (section 8.1)
 ALPHA = 0.05 / FAMILY_SIZE  # 0.003125 exactly: a 99.6875% interval, "99.7%" in prose
 Z = float(norm.ppf(1 - ALPHA / 2))  # 2.9552
 RESAMPLES = 100_000
+# Descriptive intervals (no verdict): failure rates by objective (section 9.5), position effects
+# (section 10.3). 95%, as for the matcher's tie (decision 9): a reading, not a test. Here the narrower
+# interval is the cautious one, since its job is to show a difference by objective that could bias the
+# comparison. Decided 2026-10-08 (his).
+DESCRIPTIVE_ALPHA = 0.05
 
 Method = Literal["newcombe", "stratified_bootstrap"]
 

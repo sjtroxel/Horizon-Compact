@@ -9,14 +9,55 @@ case by its type and a neutral label. The names live only in the private longlis
 
 > ## START HERE — where things stand, 2026-10-08, midday
 >
+> **PHASE 3 STEP 7 (DESCRIPTIVE ANALYSES AND THE RESULTS OBJECT) DONE 2026-10-08 (Sonnet), COMPLETING C4 (steps
+> 5-7: `phase 3: failure, robustness, descriptive`); `make check` green, 1011 tests.** First, Opus's step 6 review:
+> the sealed wording's `agrees_with_pooled` is now a **relation** (`same_verdict` / `same_direction_less_certain` /
+> `different`, plus a fourth I added, `not_comparable`, for a sealed result with nothing to compare). Then
+> `analysis/descriptive.py` (§11: allocation cells, display groups, choice splits, secondaries, E's distance beside
+> each objective's own, per-run values kept) and `analysis/results.py`: `build_results` returns the versioned
+> `ModelResults` of flat, serializable dataclasses; `headline` is a diagnostic string, not published text;
+> `RESULTS_VERSION` stays 1 (the object is new) and a test pins every field name. `build_results` refuses an
+> unfinished sweep. Mutation checks: relation 14 of 14, descriptive 23 of 23, results 23 of 23 non-equivalent.
+> Findings for step 12 and a flag for step 9 (`run_distance` lives in `descriptive.py` for now) are in the
+> IMPLEMENTATION doc §18 step 7. **NEXT: his commit C4, then step 8, the repeat rule (Sonnet).** No model call, no
+> AWS, nothing under `scratch/runs/` read.
+>
+> **PHASE 3 STEP 6 (THE ROBUSTNESS RULES) DONE 2026-10-08 (Sonnet), for his commit C4 (steps 5-7; step 7 is still
+> to build).** `analysis/robustness.py`: per-wording direction over the kept wordings (a split is robust only if every
+> wording agrees in sign and none is zero), the sealed-wording rerun (id read from the experiment, own seed name,
+> outside the family), position effects at `DESCRIPTIVE_ALPHA`. `make check` green, 943 tests. **The rule I was asked
+> to decide, for him:** a wording-sensitive split **keeps its verdict `split` and carries the label** (the planning's
+> "reported as" / "marks"), so the published claim is the `headline`. The two Phase 4 OPEN entries from Opus's review
+> are in. Five findings for step 10 and step 12 are in the IMPLEMENTATION doc §18 step 6: the "robust" label is
+> demanding at small cells (step 10 should measure its false alarms); one-wording "robust" is trivial; the sealed
+> rerun is the same test on a third of the data; position-effect notes; the wording check never downgrades.
+> **NEXT: step 7, the descriptive analyses and `results.py` (Sonnet).** No model call, no AWS, nothing under
+> `scratch/runs/` read.
+>
+> **PHASE 3 STEP 5 (THE FAILURE RULES) DONE 2026-10-08 (Sonnet), for his commit C4 (which will cover steps 5-7,
+> so steps 6 and 7 are still to build).** `analysis/failures.py`: per-cell rates and the 10% exclusion (strictly
+> over, integers), decision 6 (a wording dropped from both sides, "not assessable" when none is left), decision 3's
+> worst-case bound both ways (a split narrowed; a no split widened in both signs; each a full recompute), first
+> attempt beside final, per-objective failure and refusal rates with Newcombe intervals. `verdict.compare()` was
+> split into `gather_cells` and `compare_cells` (the 54 step-4 tests unedited). `make check` green. Seven findings
+> for him and for step 12 are in the IMPLEMENTATION doc §18 step 5: **(a)** decision 3's two-sign check is an
+> interpretation, implemented; **(b)** the bound also downgrades decision 10's all-agree "no split" whenever
+> failures exist; **(c)** at 6 to 9 repeats per wording a single failure excludes the wording; **(d)** the
+> refusal-call file format (`refusal-calls.json`) is new and Phase 4 must say who writes it; **(e)** 9.5's interval
+> level, **now 95% (`DESCRIPTIVE_ALPHA`, his decision after Opus's review)**; **(f)** unfinished runs are invisible to
+> the rates; **(g)** human calls are not applied to the first-attempt view. **Opus reviewed step 5 (12:40 PM):** no
+> bug; the bound's fields renamed away from "imputed" (`planning/07` §5.2 says no imputation); the review's notes
+> close §18 step 5. **NEXT: step 6, the robustness rules (Sonnet).** No model call, no AWS, nothing under
+> `scratch/runs/` read.
+>
 > **PHASE 3 STEPS 3-4 (INTERVALS, VERDICT ENGINE) DONE 2026-10-08 (Opus), for his commit C3** `phase 3: intervals
 > and verdict engine`; `make check` green, 864 tests. C2 is committed (`8e391c7`). `analysis/intervals.py` (Newcombe,
 > checked against Newcombe's Table II via a reproduction and Fagerland 2011; the stratified bootstrap, checked by exact
 > enumeration and against scipy) and `analysis/verdict.py` (the three verdicts, every boundary tested, known answers
 > built without the engine, a mutation check). **For him, from step 4:** decision 10 is already triggered by
 > arithmetic (all-identical shares give a [0, 0] interval and a "no split"); the engine flags it, and the fix comes to
-> him before C7. Four findings for step 12's patch list are in the IMPLEMENTATION doc §18 step 4. **NEXT: step 5,
-> the failure rules (Sonnet).**
+> him before C7. Four findings for step 12's patch list are in the IMPLEMENTATION doc §18 step 4. **(Was NEXT: step 5,
+> the failure rules; done above.)**
 >
 > **PHASE 3 BUILD, STEPS 1-2 DONE 2026-10-08 (Sonnet), for his commit C2 `phase 3: analysis group, run reader,
 > outcomes`; `make check` green, 762 tests.** The `analysis` dependency group (numpy 2.5.3, scipy 1.18.1, statsmodels
@@ -275,6 +316,18 @@ inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-son
 - **The `possible_decline` flag matches S4's option name** ("decline"; Phase 2.5 IMPLEMENTATION doc §22.4). It is
   only a candidate list for the logged human call (Phase 3 doc §9.1), so it decides nothing, but it will list every
   S4 text answer that names the option. Narrow the pattern in run code before the grid, with a test.
+- **Refusal calls are made blind, once** *(added 2026-10-08, from Opus's review of Phase 3 step 5)*. The human call
+  that turns a `no_tool_call` into a refusal (`refusal-calls.json` beside the sweep; Phase 3 doc §9.1) is made with
+  the run's objective hidden, and the file is written once, before any official analysis. A call cannot change a
+  verdict (a refusal and a failure count the same toward exclusion and the worst-case bound), but it moves a run
+  between two columns and changes the refusal-rate table (§9.5), so it should not lean by objective. Phase 4's
+  IMPLEMENTATION doc says who writes the file, how the objective is hidden from them, and when.
+- **Analysis is refused while any run is unfinished** *(same date and source; the library half is done)*.
+  `records.RunSet.unfinished` lists manifest runs with no `final.json`; the failure rules count finished runs
+  only, so a half-finished sweep would understate every cell's attempts and failures. **`results.build_results`
+  now refuses a `RunSet` whose `unfinished` is non-empty** (Phase 3 step 7, tested). What stays for Phase 4: the
+  command that points the engine at real records must pass the `RunSet` itself, never just its `rows`, or the
+  guard is bypassed.
 
 ---
 
