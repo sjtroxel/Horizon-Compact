@@ -652,6 +652,29 @@ def cmd_scenarios(args: argparse.Namespace) -> int:
     return cmd_scenarios_check(root) if args.action == "check" else cmd_scenarios_render(root)
 
 
+# --- simulate (Phase 3 step 10) ---------------------------------------------------------------------------
+
+SIMULATION_EVIDENCE = Path("docs/phases/evidence/phase-3")
+SIMULATION_QUICK = Path("scratch/simulation-quick")
+
+
+def cmd_simulate(args: argparse.Namespace) -> int:
+    """The simulations need the analysis group (numpy, scipy, statsmodels), which the container image leaves
+    out, so they are imported here and never at the top of this module."""
+    from horizon_compact.simulation import report, runner
+
+    root: Path = args.root or default_repo_root()
+    if args.action == "run":
+        plan = runner.QUICK if args.quick else runner.FULL
+        folder = root / (SIMULATION_QUICK if args.quick else SIMULATION_EVIDENCE)
+        runner.run(plan, folder / report.RESULTS_NAME, root=root, workers=args.workers)
+        return CLEAN_EXIT
+    folder = root / (SIMULATION_QUICK if args.quick else SIMULATION_EVIDENCE)
+    for path in report.write_reports(folder):
+        print(f"wrote {path}")
+    return CLEAN_EXIT
+
+
 def _add_plan_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--experiment", required=True, help="folder under experiment/, e.g. placeholder"
@@ -784,6 +807,25 @@ def build_parser() -> argparse.ArgumentParser:
         "check",
         help="Check the sources, that every rendered file is fresh, the templates and the log",
     )
+
+    simulate = groups.add_parser(
+        "simulate", help="Phase 3 simulations. Offline; calls no model and no AWS."
+    )
+    simulate.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
+    simulate_actions = simulate.add_subparsers(dest="action", required=True)
+    simulate_run = simulate_actions.add_parser(
+        "run",
+        help="Run every simulation into simulation-results.json (about an hour; --quick: seconds)",
+    )
+    simulate_run.add_argument(
+        "--quick", action="store_true", help="a small slice of each family, written under scratch/"
+    )
+    simulate_run.add_argument("--workers", type=int, default=None, help="default: up to 12")
+    simulate_report = simulate_actions.add_parser(
+        "report",
+        help="Write simulation-summary.md and matcher-calibration.md from the results file",
+    )
+    simulate_report.add_argument("--quick", action="store_true", help="report the quick run's file")
     return parser
 
 
@@ -803,6 +845,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         return cmd_dossier(args)
     if args.group == "scenarios":
         return cmd_scenarios(args)
+    if args.group == "simulate":
+        if args.action == "run" and args.workers is None:
+            args.workers = max(1, min(12, (os.cpu_count() or 2) - 2))
+        return cmd_simulate(args)
     if args.group == "probes":
         try:
             return PROBE_COMMANDS[args.action](args)

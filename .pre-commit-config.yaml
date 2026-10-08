@@ -55,6 +55,8 @@ repos:
     hooks:
       - id: check-added-large-files
         args: [--maxkb=1024]
+        # Phase 3 step 10's generated evidence (2.6 MB of text); the only file allowed past the limit.
+        exclude: ^docs/phases/evidence/phase-3/simulation-results\.json$
       - id: check-merge-conflict
       - id: check-toml
       - id: check-yaml

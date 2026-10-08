@@ -79,3 +79,31 @@ from synthetic cases with a known answer before any real case is run, so neither
 
 **A known limit, for step 12.** One disclosed line on its own carries no information: rescaled to add to 1, every
 run that put anything there looks identical to the company.
+
+## The simulations (step 10, 2026-10-08)
+
+**What they are for.** Before any model's decisions are seen, the rules are run on made-up decisions whose
+true answer is known: two objectives that truly do not differ, or that differ by exactly the threshold, or by
+more. Counting how often the rules get those wrong shows what the rules can and cannot claim. Every number the
+protocol quotes about error rates comes from here.
+
+**A shortcut that is not a shortcut.** The resampling interval re-draws the runs 100,000 times and reads off
+the extremes. Doing that for every one of millions of made-up comparisons would take about ten days of
+computing. But when every run's share is a whole number of people out of 125, every possible re-draw can be
+counted at once, exactly, by a standard trick (the fast Fourier transform). That gives the answer the
+re-drawing approaches as the number of re-draws grows without limit, so the simulation measures the rule
+itself, free of the re-drawing's own small randomness. A separate check runs the real 100,000-draw version on
+a thousand comparisons and confirms the two agree.
+
+**Choice rates need no simulation at all.** Whether a choice rate's comparison says "split" depends only on two
+counts (how many runs of each objective chose to close, say), so every possible pair of counts can be weighed
+by its exact probability. Those error rates are exact.
+
+**What they found, in brief** (detail: the Phase 3 IMPLEMENTATION doc §20a). When two objectives truly do not
+differ, the share rule was supposed to say "split" by mistake at most about 3 times in 1,000. It does so up to about
+22 times in 1,000 when models go all in on one answer, which they often do. That is the known weak spot of the
+resampling interval at these sample sizes, and it is fixed before anything is pre-registered. When every run agrees
+almost exactly, the rule can call two objectives the same with a confidence it has not earned; that has a fix too.
+Failed runs cost more than expected, so a model's reliability matters as much as its cost. And the matcher can tell
+an objective from its opposite, but with five objectives one of them usually lands near any decision, so "no good
+match" will be rare.

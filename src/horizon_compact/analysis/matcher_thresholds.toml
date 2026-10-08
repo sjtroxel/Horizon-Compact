@@ -1,0 +1,21 @@
+# The matcher's thresholds per scenario shape (Phase 3 IMPLEMENTATION doc sections 13.3 and 14.2).
+# Written from docs/phases/evidence/phase-3/simulation-results.json by
+# horizon_compact.simulation.report.thresholds_toml; a test holds the two equal. Data, not code, so
+# that writing it leaves the hash the results record unchanged. Frozen with analysis/ at the tag.
+# Results code hash: 7d1a8f029b758c56139015a3533d53b458b1156532f2f350d746b311b89d192d
+
+[shapes.s1]
+d_star = 0.34845088127426144
+k_star = 2
+
+[shapes.s2]
+d_star = 0.6794453761344973
+k_star = 3
+
+[shapes.s3]
+d_star = 0.5456778377115402
+k_star = 2
+
+[shapes.s4]
+d_star = 0.6555312294739376
+k_star = 3

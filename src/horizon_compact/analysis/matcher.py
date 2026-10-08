@@ -30,15 +30,19 @@ says "tie". All five distances and their spreads are returned whatever the label
 separately. ``depends_on_reading`` is set when the nearest objective is not the same across every reading
 that was matched (a reading labelled ``not_enough_disclosed`` has no nearest and does not count).
 
-``d_star`` and ``k_star`` are set by the simulations (step 10, section 14.2) and frozen here as ``D_STAR`` and
-``K_STAR``; until then they are ``None`` and the matcher refuses to label without them being passed.
+``d_star`` and ``k_star`` are set by the simulations (step 10, section 14.2), one pair per scenario shape, and
+kept as data in ``matcher_thresholds.toml`` beside this file (frozen with the folder). They are data, not
+code, so that writing them does not change the code the simulations' results record a hash of. A shape with no
+entry is not calibrated, and the matcher refuses to label it unless both are passed.
 """
 
 from __future__ import annotations
 
 import math
+import tomllib
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from horizon_compact.analysis.descriptive import distance
@@ -53,9 +57,7 @@ from horizon_compact.analysis.records import RunRow
 from horizon_compact.analysis.verdict import BOUNDARY_TOLERANCE, one_value
 from horizon_compact.experiment import Scenario
 
-# Set by the simulations (step 10, section 14.2), then frozen with the rest of this folder.
-D_STAR: float | None = None
-K_STAR: int | None = None
+THRESHOLDS_FILE = Path(__file__).with_name("matcher_thresholds.toml")
 
 PRIMARY_READING = "primary"
 
@@ -136,6 +138,28 @@ class CaseMatch:
     resamples: int
     readings: tuple[ReadingMatch, ...]  # the primary first, then the alternatives as given
     depends_on_reading: bool
+
+
+@dataclass(frozen=True)
+class Thresholds:
+    d_star: float
+    k_star: int
+
+
+def load_thresholds(path: Path = THRESHOLDS_FILE) -> dict[str, Thresholds]:
+    """The calibrated thresholds by scenario shape; empty when the file does not exist yet."""
+    if not path.is_file():
+        return {}
+    data = tomllib.loads(path.read_text(encoding="utf-8"))
+    out = {}
+    for shape, entry in data.get("shapes", {}).items():
+        d, k = entry["d_star"], entry["k_star"]
+        if not (isinstance(d, float) and d > 0 and isinstance(k, int) and k >= 1):
+            raise MatcherError(
+                f"{path.name}: {shape} needs a positive d_star and an integer k_star >= 1"
+            )
+        out[shape] = Thresholds(d, k)
+    return out
 
 
 def observable_vector(
@@ -360,17 +384,25 @@ def match_case(
     objectives: Sequence[str],
     d_star: float | None = None,
     k_star: int | None = None,
+    shape: str | None = None,
     alpha: float = DESCRIPTIVE_ALPHA,
     resamples: int = RESAMPLES,
 ) -> CaseMatch:
     """Every reading of one case. ``readings[0]`` is the primary; the rest are the uncertain calls'
-    alternatives. ``d_star`` and ``k_star`` default to the frozen ``D_STAR`` and ``K_STAR``."""
-    d = D_STAR if d_star is None else d_star
-    k = K_STAR if k_star is None else k_star
-    if d is None or k is None:
-        raise MatcherError(
-            "the matcher is not calibrated: D_STAR and K_STAR are set by the simulations"
-        )
+    alternatives. ``d_star`` and ``k_star`` default to the calibrated pair for ``shape`` (default: the
+    scenario's id) in ``matcher_thresholds.toml``; both are given, or neither."""
+    if (d_star is None) != (k_star is None):
+        raise MatcherError("pass both d_star and k_star, or neither")
+    if d_star is not None and k_star is not None:
+        d, k = d_star, k_star
+    else:
+        key = shape or scenario.id
+        calibrated = load_thresholds(THRESHOLDS_FILE).get(key)
+        if calibrated is None:
+            raise MatcherError(
+                f"the matcher is not calibrated for shape {key!r}: matcher_thresholds.toml has no entry"
+            )
+        d, k = calibrated.d_star, calibrated.k_star
     if not readings:
         raise MatcherError(f"{case_id}: no reading to match")
     names = [r.reading for r in readings]

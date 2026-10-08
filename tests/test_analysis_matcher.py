@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 from collections.abc import Sequence
+from pathlib import Path
 
 import pytest
 
@@ -335,12 +336,49 @@ def test_the_match_is_reproducible() -> None:
 # --- refusals ----------------------------------------------------------------------------------------------
 
 
-def test_the_matcher_refuses_without_calibration() -> None:
-    assert matcher.D_STAR is None and matcher.K_STAR is None  # set by step 10
-    with pytest.raises(MatcherError, match="not calibrated"):
+def test_the_matcher_refuses_a_shape_without_calibration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(matcher, "THRESHOLDS_FILE", tmp_path / "missing.toml")
+    with pytest.raises(MatcherError, match="not calibrated for shape 's3'"):
         match_case(S3, case_rows(), [COMPANY], case_id="c", objectives=list("ABDE"))
-    with pytest.raises(MatcherError, match="not calibrated"):
+    with pytest.raises(MatcherError, match="both d_star and k_star, or neither"):
         match_case(S3, case_rows(), [COMPANY], case_id="c", objectives=list("ABDE"), d_star=0.5)
+
+
+def test_thresholds_load_by_shape_and_a_bad_entry_is_refused(tmp_path: Path) -> None:
+    good = tmp_path / "t.toml"
+    good.write_text("[shapes.s3]\nd_star = 0.4\nk_star = 3\n", encoding="utf-8")
+    assert matcher.load_thresholds(good) == {"s3": matcher.Thresholds(0.4, 3)}
+    assert matcher.load_thresholds(tmp_path / "none.toml") == {}
+    bodies = (
+        "d_star = 0.4\nk_star = 0",
+        "d_star = 0\nk_star = 3",
+        "d_star = 0.0\nk_star = 3",
+        "d_star = 1\nk_star = 3",
+    )
+    for body in bodies:
+        bad = tmp_path / "bad.toml"
+        bad.write_text(f"[shapes.s3]\n{body}\n", encoding="utf-8")
+        with pytest.raises(MatcherError, match="positive d_star and an integer k_star"):
+            matcher.load_thresholds(bad)
+
+
+def test_the_calibrated_pair_for_the_shape_is_used(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "t.toml"
+    path.write_text(
+        "[shapes.s3]\nd_star = 0.1\nk_star = 4\n[shapes.s1]\nd_star = 0.9\nk_star = 1\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(matcher, "THRESHOLDS_FILE", path)
+    got = match_case(S3, case_rows(), [COMPANY], case_id="c", objectives=list("ABDE"))
+    assert (got.d_star, got.k_star) == (0.1, 4)
+    assert got.readings[0].label == "not_enough_disclosed"  # three dimensions, fewer than 4
+    other = match_case(S3, case_rows(), [COMPANY], case_id="c", objectives=list("ABDE"), shape="s1")
+    assert (other.d_star, other.k_star) == (0.9, 1)
+    assert other.readings[0].label == "match"
 
 
 @pytest.mark.parametrize(

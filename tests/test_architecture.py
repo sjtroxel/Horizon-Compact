@@ -568,3 +568,25 @@ def test_the_image_leaves_the_analysis_group_out() -> None:
     assert len(syncs) == 2
     for line in syncs:
         assert "--no-default-groups" in line and "--no-dev" not in line, line
+
+
+def test_the_command_line_imports_the_simulations_only_inside_their_command() -> None:
+    """``hc`` is the container image's entry point and the image has no numpy: a module-level import of the
+    simulation (or the analysis) in cli.py would crash every command there, sweeps included."""
+    tree = ast.parse((SRC / "cli.py").read_text(encoding="utf-8"))
+    top_level = [
+        node.module if isinstance(node, ast.ImportFrom) else alias.name
+        for node in tree.body
+        if isinstance(node, ast.Import | ast.ImportFrom)
+        for alias in node.names
+    ]
+    offenders = [
+        name
+        for name in top_level
+        if name
+        and (
+            name.startswith("horizon_compact.simulation")
+            or name.startswith("horizon_compact.analysis")
+        )
+    ]
+    assert not offenders, offenders

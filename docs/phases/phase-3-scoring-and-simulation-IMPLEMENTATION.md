@@ -954,8 +954,55 @@ for routine code; he switches with `/model`).
    point distances; `k*` needs the tie, so step 10 should time it and set `resamples` for the simulation openly.
    (h) **The rubric's format is Phase 5's.** The matcher takes `CompanyDecision`; Phase 5's IMPLEMENTATION doc writes
    the loader from the committed rubric to it, uncertain calls to alternative readings included.
-10. **[Opus] The simulations** (§14): the timing run, then the full run, then the report. Opus reads every number
+10. **[done 2026-10-08, Opus] The simulations** (§14): the timing run, then the full run, then the report. Opus reads every number
     against its target and writes the findings into this doc's §20.
+    *As built.* **The findings are §20a (ten, for him and step 12); this entry is how they were produced.**
+    **The timing run decided the method.** One engine comparison costs about 50 ms; §14.1's grid is about 17.3 million
+    replicates (20,000 at every null and threshold point), so the engine itself would need about 240 core-hours, and the
+    null and threshold points that may never be thinned are 14.4 million of them. So **the no-failure share grid uses the
+    exact bootstrap** (`simulation/exact.py`): on a lattice the engine's resampling distribution is a convolution,
+    computed by FFT, whose percentile ends are the engine's ends with infinitely many resamples. It equals a brute-force
+    enumeration of every resample (a test, three alphas); the engine at 1,000,000 resamples lands within 0.0013 of it;
+    and in the run itself 954 of 960 verdicts agree with the engine at 100,000 (the six others sit at a boundary within
+    the engine's own Monte Carlo error). Every verdict is `verdict.decide`. **Choice rates are exact** (binomial sums over
+    the analysis's own Newcombe and `decide`). **The engine itself, end to end on run rows,** carries failures and the
+    bound (162 settings, with an independent rebuild of the bound on every replicate), the wording rule (36 settings,
+    label recomputed independently), the resample count (§14.3) and the matcher (the analysis's `match_case`, 10,000
+    resamples for its 95% gap interval, recorded). Throughput was bounded by memory bandwidth (about 2,300 replicates a
+    second at any worker count above 8), so the exact routine sizes each transform to the cells' own ranges and works
+    in chunks of 4: about 6,500 a second. **The full grid ran unthinned in 68 minutes on 10 workers**; thinning the
+    only points §14.1 allows to be thinned would have saved about 4 minutes, so the "about an hour" guide was exceeded
+    by choice, recorded here.
+    **Added to §14.1's families, each saying why in the summary:** the repeat rule's own n (power at 1.5 T, "no split
+    reachable" at 0); a near-all-agree family with decision 10's candidate and a wider reading, plus an interior
+    all-agree case; a finer lattice (1/1000) beside S1's; a 0.10 wording shift (the planning's 0.03 and 0.05 never
+    reverse a split-sized difference); a count of interval ends near a boundary (how many verdicts the seed can move).
+    The share distributions are exact on the lattice: the Beta part's mean is solved so the mixture's mean is the
+    stated one, so two sides differ by exactly the stated difference.
+    **Outputs, all by code:** `hc simulate run` writes `evidence/phase-3/simulation-results.json` (2.6 MB; every point,
+    its seeds, its counts); `hc simulate report` writes `simulation-summary.md` and `matcher-calibration.md`; a test holds
+    both equal to what the report makes of the committed JSON. **Reproducibility:** each task's seed is derived from its
+    name, so the file does not depend on worker count or finish order (the quick run is byte-identical at 10 and 3
+    workers). The file records a **sha256 of the code and data it depends on** (the analysis package, the simulation
+    package except its report, the company experiment, `uv.lock`) instead of a git sha, since a file cannot name the
+    commit that contains it; checked equal to the code as committed after the run and after the mutation check.
+    **`D*` and `k*` live in `analysis/matcher_thresholds.toml`**, per shape, read by `match_case` (a `shape` argument,
+    default the scenario's id), because writing them into code would change the hash the results record; Phase 3.5's
+    folder hash still freezes them, and a test holds the file equal to the report's rendering of the results.
+    `hc simulate` imports the simulation inside its command (a new architecture test), since the container image has
+    no numpy and `hc` is its entry point. **Progress lines are block-buffered** when the run's output goes to a file;
+    set `PYTHONUNBUFFERED=1` to watch them.
+    **The results file is 2.6 MB, over the 1,024 KB large-file hook** (1.8 MB even compact; compressing it would make a
+    binary the name guard cannot scan). With his approval (2026-10-08), `.pre-commit-config.yaml` excludes that one path
+    from `check-added-large-files`; checked that it passes while any other file over the limit is still refused.
+    **Mutation checks:** simulation code, 43 planted, 42 caught, one equivalent (the transforms' scale, which the
+    quantile search divides out); the first pass caught 33 and showed ten gaps, now tested with cases built so the
+    outcome is forced (point masses that make the bound overturn, a wording whose difference is exactly zero beside a
+    negative split, the candidates' threshold where 0.1 and 0.2 differ, and more). The thresholds loader, 8 planted,
+    8 caught after one gap (`d_star = 0.0`). Tests: `tests/test_simulation_exact.py`, `test_simulation_verdicts.py`,
+    `test_simulation_report.py`; 1176 in all.
+    **Step 9's flags, resolved:** `run_distance` stays in `descriptive.py`; `D*`/`k*` are set; the matcher's refusal of
+    an objective with nothing to distance (finding (b)) occurs in 90 of 270,000 synthetic trials.
 11. **[Opus] `plain-english.md`**, finished from the notes kept since step 3.
 12. **[Opus, then him] The patches:** decisions 3, 4, 6 and 7, plus anything step 10 found (decision 10 included),
     as dated patches to `planning/07`, each shown to him before it is applied.
@@ -986,6 +1033,95 @@ split" target.
   from a live source.
 - **Whether `D*` and `k*` come out usable.** If the true-match and opposite cases overlap at the largest spread, no
   threshold separates them; then "no good match" is defined at the design spread only, and the methods page says so.
+
+**Settled by step 10 (2026-10-08, Opus), each in a line; the evidence is in `evidence/phase-3/simulation-summary.md`
+and `matcher-calibration.md`, every number from `simulation-results.json`:**
+- *How narrow the bootstrap runs:* **narrower than it claims, as predicted.** Finding 1 below.
+- *Run time:* the engine itself on §14.1's grid would take about 240 hours on one core; the exact bootstrap (step 10
+  as built) ran the full grid, unthinned, in 68 minutes. The estimate "well under an hour" was wrong by two orders of
+  magnitude for the engine and about right for the method used.
+- *Newcombe's table:* settled in step 3.
+- *`D*` and `k*`:* both come out, per shape; `D*` does not separate opposite cases from true matches. Finding 6.
+
+### 20a. Step 10's findings, for him and for step 12
+
+Targets are per comparison, 0.05 / 16 = 0.3125%. "Clearly missed" means the 95% Wilson interval's lower end is over
+the target. Each finding names what step 12 should decide; none is decided here.
+
+1. **False split, shares: clearly missed across most of the grid.** At a true difference of 0, the share rule says
+   "split" more often than 0.3125% at 272 of 360 points (267 clearly); median 0.59%, worst 2.22%. By pi (the share of
+   all-in runs): pi = 0, 50 of 120 points over, median 0.10%, and **within target everywhere sigma <= 0.10** (worst
+   0.28%); pi = 0.2, 102 of 120, median 0.62%; pi = 0.5, all 120, median 0.76%. By repeats per wording: worst 2.22%
+   at 6, 1.49% at 10, 0.98% at 15, 0.67% at 20, so even the cap does not reach the target once runs go all in, which
+   models often do. A finer lattice (1/1000) gives the same rates, and a wording shift shared by both objectives
+   changes nothing, so this is the percentile bootstrap's known narrowness in the tails at small samples, not the
+   lattice or the design. **Consequence:** the family-wise false-split rate for the eight share comparisons is not
+   held at the 5% the design claims; at the worst points it could be several times that. **For step 12:** a dated patch
+   to `planning/07` §6.3 replacing or correcting the share interval, evaluated by re-running this grid. Candidates,
+   all standard and all pre-registrable: a studentized (bootstrap-t) interval; the "expanded" percentile interval
+   (Hesterberg's small-sample correction); BCa; or an alpha calibrated on this grid so the worst point meets the
+   target. The cost of each in power must be measured beside its false-split rate. **Opus's recommendation: evaluate
+   the studentized and expanded intervals first**; a calibrated alpha is simplest but fits the correction to this grid.
+2. **False no split, shares (decision 4): missed at some points, mostly mildly.** At a true difference of exactly T,
+   "no split" more often than target at 49 of 360 points (34 clearly); median 0.015%, worst 1.29%. The misses sit at
+   small spreads with rare all-in runs (worst: mu 0.1, sigma 0.02, pi 0.2, 20 per wording), where a sample with few
+   runs at 1 gives a narrow interval. Finding 1's fix should be judged on this target too, and finding 3's.
+3. **Decision 10 is triggered, and the candidate as written is not enough.** Near-all-agree runs (one objective all in
+   at 1 always, the other 90% of the time; a true difference of exactly T) give a false "no split" 15.5% of the time
+   at 6 per wording, every one from a zero-width interval; 4.1% at 10. **The candidate as written (c1: every run of
+   both objectives at one boundary value, then Newcombe on the share at that value, less certain verdict kept)** fixes
+   the exactly-identical cases only: near-identical ones still give up to 3.55% false "no split" (mixture, 1 vs 0.8,
+   6 per wording), and it never fires when every run sits at the same interior value (all keep 100 of 125), which
+   gives the same [0, 0] and up to 3.5% false "no split" at a true difference of T. **A wider reading (c2: every run of
+   either objective at one boundary value)** removes nearly all of the false "no splits" but costs power where the
+   runs go all in (a 45% split rate falls to 7% in one setting). On the main grid both are nearly free (c1 changes 17
+   of 17.28 million verdicts; c2 1,377, of which 852 splits). **For him, before C7 (as agreed in decision 10):** the
+   evidence says the fix must cover near-identical runs and interior values, not only exact boundary agreement. Opus's
+   recommendation: let finding 1's corrected interval carry most of it, and add a degenerate-interval rule for what
+   remains (a share comparison whose interval is narrower than the outcome's own grid step, 1/125 for S1, is never a
+   "no split"), re-run on this family. Detail: summary section 4.
+4. **Failures cost far more than the planning assumed (decisions 3 and 6, measured).** The rules are correct: in 162
+   failure settings run through the engine, **no verdict was kept that the bound overturns, and the engine agreed with
+   an independent rebuild of the bound on every replicate.** But at 20 per wording a true 15-point difference is a
+   split 93.5% of the time with no failures, 74% at 2% random failures, 40% at 5%, 6% at 10%; at 6 per wording any
+   one failure drops its wording, so at 10% failures over a third of comparisons are "not assessable". Decision 3
+   priced the bound at "up to the failure rate"; the measured cost is several times that, because the bound widens the
+   interval as well as moving the difference, and the 10% exclusion bites early in small cells (step 5 finding (c)).
+   **For step 12 and Phase 3.5's model choice:** a model's failure rate is a first-order factor in what the study
+   can conclude. Whether to soften the bound (for example, applying it only when failures exceed a stated rate) is a
+   design question for him; the planning's intent (failures must not manufacture a verdict) holds as built.
+5. **The wording rule works; the planning's shifts never test a reversal.** No false alarm above 0.5% of splits with
+   no shift; a true reversal in one wording flagged in 87-100% of splits; 0 labels differing from an independent
+   recomputation. But §14.1's shifts (0.03 and 0.05) cannot reverse a split-sized difference in any wording; step 10
+   added a 0.10 shift to test it. The summary says so; step 12 can widen §14.1's grid or note it.
+6. **The matcher: `D*` and `k*` set; "opposite" is missed, and "no good match" is weak.** `D*` (from the true matches
+   at sigma 0.20): S1 0.348, S2 0.679, S3 0.546, S4 0.656. `k*` (80% identification at sigma 0.10): S1 2, S2 3, S3 2,
+   S4 3. **The opposite check (95% of opposite cases beyond `D*`) is missed on every shape: 15-65%.** Yet 99.8-100% of
+   opposite cases are beyond `D*` from their *own* objective: with five random profiles, another objective usually
+   sits near the "opposite" decision. So the matcher separates an objective from its opposite, and "no good match"
+   rarely fires because the nearest of five is usually close enough. Ties are common (true matches at sigma 0.20: tie
+   45-59%). In S4, identification peaks near 92% at 8 dimensions and falls slightly with more (more lines, more
+   noise). Unmatchable cases (step 9 finding (b)): 90 of 270,000 trials, all with a single dimension. **For step 12:**
+   (a) whether the opposite check should be judged against the generating objective's distance, as it now reads,
+   or kept and reported as missed; (b) whether `D*` should come from the spread the official grid actually shows (its
+   runs are known before any real case runs, and nothing about the cases), which would make "no good match" mean
+   something at realistic spreads. The thresholds are set as computed (`analysis/matcher_thresholds.toml`).
+7. **Choice rates: Newcombe slightly over at 50%.** False split 0.417% at p = 0.5, 15 per wording, and 0.394% at 6:
+   2 of 28 points, both just over; exact, not sampled. False no split met everywhere (worst 0.094%). The repeat rule
+   sends choice rates to 20, where the 50% point is 0.28%, inside. Step 12 can note it; no change is needed at the cap.
+8. **The repeat rule's stated numbers.** About +-8 points at sd 0.15 and the cap: **7.9**. Choice +-27 and +-12:
+   **25.2 and 15.9** (step 8). A 30-point choice difference near 50% a split 63%: **62.9%**; 35 points, 80%: **81.9%**.
+   80% power for 15 points at sd 0.15 and 10 per wording: **84.4%**. "No split reachable about 54%" at rule (b)'s n:
+   **48.6% at worst** where the cap does not bind (higher where the floor of 6 binds); where the cap binds it falls to
+   0.4% (median), so for wide or all-in spreads "no split" is unreachable at 20 per wording. Power at 1.5 T where the
+   cap does not bind: 96.8-100%; where it binds: median 61%, worst 22%.
+9. **Decision 7 is supported.** Near a boundary, a verdict flips with the engine's seed on 33% (no split) and 16%
+   (split) of 200 seeds at 10,000 resamples, and on 13.5% and 0% at 100,000. Across the grid, 1.70% of replicates had
+   an interval end within 0.001 of a boundary and 4.98% within 0.003, so at most a few percent of verdicts can depend
+   on the seed, and the seed is fixed by rule. The exact bootstrap and the engine agreed on 954 of 960 validation
+   verdicts; all six disagreements sit at a boundary within the engine's Monte Carlo error.
+10. **For the methods page:** the share rule as pre-registered would have had a false-split rate above its stated
+    level; the simulation found it before any real result existed, which is what the simulation is for.
 
 ## 21. Cost
 
