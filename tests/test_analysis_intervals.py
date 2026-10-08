@@ -19,6 +19,7 @@ from horizon_compact.analysis.intervals import (
     mean_of_wording_means,
     newcombe_difference,
     stratified_bootstrap_difference,
+    stratified_bootstrap_value,
 )
 
 # --- the frozen fine print (decision 7) ------------------------------------------------------------------
@@ -276,3 +277,43 @@ def test_the_bootstrap_refuses_what_is_not_a_like_with_like_comparison(
 ) -> None:
     with pytest.raises(ValueError):
         stratified_bootstrap_difference(first, second, seed=1, resamples=10)
+
+
+# --- one side's value (the matcher's spread, section 13.1) -------------------------------------------------
+
+
+def test_one_sides_value_by_exact_enumeration() -> None:
+    # One wording, runs (0, 1, 1): 27 equally likely resamples whose means are k/3 with k ~ Binomial(3, 2/3):
+    # P(0) = 1/27, P(1/3) = 6/27, P(2/3) = 12/27, P(1) = 8/27. The 95% percentile interval of 200,000 draws
+    # must therefore start at 0 or 1/3 (the 2.5% quantile: P(0) = 3.7% > 2.5%, so 0) and end at 1.
+    got = stratified_bootstrap_value({"w1": [0.0, 1.0, 1.0]}, seed=5, alpha=0.05, resamples=200_000)
+    assert got.estimate == pytest.approx(2 / 3)
+    assert got.low == 0.0 and got.high == 1.0
+    assert got.method == "stratified_bootstrap" and got.alpha == 0.05 and got.seed == 5
+
+
+def test_one_sides_value_is_the_mean_of_wording_means_and_stays_in_each_cells_range() -> None:
+    cells = {
+        "w1": [0.0, 0.0, 0.0],
+        "w2": [0.4, 0.6],
+    }  # (0 + 0.5) / 2 = 0.25; resampled values in [0.2, 0.3]
+    got = stratified_bootstrap_value(cells, seed=1, alpha=0.05, resamples=20_000)
+    assert got.estimate == pytest.approx(0.25)
+    assert 0.2 <= got.low < 0.25 < got.high <= 0.3
+
+
+def test_one_sides_value_is_zero_width_when_every_run_agrees_and_refuses_no_resamples() -> None:
+    got = stratified_bootstrap_value({"w1": [0.3, 0.3]}, seed=1, alpha=0.05, resamples=100)
+    assert (got.low, got.high) == (0.3, 0.3)
+    with pytest.raises(ValueError, match="resamples"):
+        stratified_bootstrap_value({"w1": [0.3]}, seed=1, alpha=0.05, resamples=0)
+    with pytest.raises(ValueError, match="no valid run"):
+        stratified_bootstrap_value({"w1": []}, seed=1, alpha=0.05)
+
+
+def test_one_sides_value_is_fixed_by_its_seed_and_moves_with_it() -> None:
+    cells = {"w1": [0.1 * i for i in range(10)], "w2": [0.05 * i for i in range(7)]}
+    one = stratified_bootstrap_value(cells, seed=11, alpha=0.05, resamples=2_000)
+    assert one == stratified_bootstrap_value(cells, seed=11, alpha=0.05, resamples=2_000)
+    other = stratified_bootstrap_value(cells, seed=12, alpha=0.05, resamples=2_000)
+    assert (one.low, one.high) != (other.low, other.high)

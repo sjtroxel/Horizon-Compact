@@ -837,8 +837,123 @@ for routine code; he switches with `/model`).
    object (`outcome` and `kind` empty, `threshold` and `alpha` 0.0); they now come from the scenario and the run
    settings, which are known either way, and only what depends on valid runs is `None` (a test holds it). No field
    name changed, so `RESULTS_VERSION` stays 1. Sonnet's fourth sealed relation, `not_comparable`, is right and kept.
-8. **[Sonnet] The repeat rule** (§12), tested on `planning/07` §8's worked example.
-9. **[Opus] The matcher** (§13) and its synthetic cases.
+8. **[done 2026-10-08, Sonnet] The repeat rule** (§12), tested on `planning/07` §8's worked example.
+   *As built.* `analysis/repeats.py`. `repeats_for_scenario(outcomes, rows)` returns a `ShareRepeats` (S1, S2:
+   `scenario_id`, `pooled_sd`, `degrees_of_freedom`, `n_power`, `n_both_reachable`, `repeats`, `cap_binds`,
+   `achieved_half_width`, set only when the cap binds) or a `ChoiceRepeats` (S3, S4: `scenario_id`, `repeats` = 20,
+   `half_width_at_50`, `half_width_at_5`); `repeats_for_pilot` gives one per scenario in the order asked. Cells are
+   one objective under one wording; valid runs only; a cell of one run adds neither squares nor degrees of freedom;
+   no cell with two runs is a `RepeatRuleError`, as are no runs and (via the verdict engine's own check) runs of two
+   sweeps or two models. Rules (a) and (b) use `Z` from `intervals.py`, the threshold from the scenario's outcomes
+   and `WORDINGS` = 3; `0.84` is the planning's number as written. Counts are rounded up with a 1e-9 guard so a
+   value that is a whole number to rounding error is not pushed to the next (`round_up`, tested). The cap binds
+   only when the larger count is *over* 20 (exactly 20 does not). Achieved precision is `Z sd sqrt(2 / (3 n))` at
+   n = 20; for choice rates it is half of Newcombe's interval width at the family level for equal rates of 30 of 60
+   and 3 of 60 a side. **No direction in the output:** a test pins the field names for both types, checks none
+   contains a direction word (mean, diff, objective, label, first, second, winner, split, verdict), and shows the
+   output is identical when an objective's runs are shifted up or down by 0.4 or the objectives are relabelled.
+   Tests: `tests/test_analysis_repeats.py` (47): the worked example, every clamp edge (0, 5, 6, 7, 19, 20 and just
+   over 20), sd 0, a one-run cell, cells keyed by objective and wording, the frozen Z against rounding edges,
+   by-hand pooled sd. **Mutation check:** 66 deliberate bugs planted one at a time (a typed 2.96 in each rule and in
+   the half-width, 0.8416 for 0.84, floor and cap off by one, min for max, either rule alone, the cap test `>=`,
+   rounding down, to nearest or with no guard, wrong multiples, wordings or threshold typed or not passed down,
+   df off, cells keyed wrongly, failed runs counted, other scenarios' runs read, choice rates, widths and
+   wordings changed, and more); 62 failed the tests and four are equivalent (rule (b) alone, the clamp applied in
+   the other order, `half_width` at the clamped n instead of 20, and counting a one-run cell, which adds 0 and 0).
+   Three gaps showed first and are tested: rule (a) was never near a rounding edge, so a typed 2.96 or 0.8416 there
+   survived; and `wordings` was never passed through the scenario or pilot functions. **The worked example holds
+   with the frozen Z: no rounding changed** (sd 0.15 gives 10 and 21, so 20; sd 0.10 gives 5 and 10, so 10; the
+   unrounded values with Z and with 2.96 are in a test comment).
+   **Findings, for step 12's patch list (none changes a rule):**
+   (a) **`planning/07` §8's choice-rate precision figures do not match the method it names.** It says about ±27
+   points at 50% and about ±12 at 5% (60 runs a side). Those are the Wald figures (2.96 sqrt(2 p (1-p) / 60) gives
+   0.270 and 0.118). Newcombe, the method §6.3 chose, gives **±25.2 and ±15.9**, hand-checked against Fagerland's
+   equation 7. The code reports Newcombe; the planning text and the methods page should say 25 and 16. At 5% the
+   gap matters most: "no split" is somewhat harder to reach there than §8 says.
+   (b) **Rule (a) can never set the count:** the ratio (a)/(b) is (Z + 0.84)² / Z² / (1.5/0.8)² = 0.47 whatever the
+   spread, so rule (b) always decides. Rule (a) stays in the output, as the planning wrote it, but it is dead
+   weight in the rule as amended; the patch can say so.
+   (c) `0.84` is a rounded 0.8416; kept as written. At rule (a)'s rounding edges the two differ, but (a) never sets
+   the count (finding b), so the repeats cannot move.
+   (d) **For Phase 4 (already noted at the top of §12):** the planner takes one repeat count and the grid needs one
+   per scenario. Also, the rule reads a pilot of **two development wordings** but divides by **three**, the study's
+   wordings (the spread is per cell and the third wording is sealed); a pilot with a different shape should
+   pass `wordings` explicitly.
+   *Opus review, same day, before step 9:* no bug. The formulas, the clamp, the pooled sd and the no-direction tests
+   were read against `planning/07` §8; the Newcombe half-widths (0.2520, 0.1586) and the (a)/(b) ratio (0.469) were
+   recomputed by hand. Three `# type: ignore` comments in the test file became real annotations. **One consequence
+   of finding (b), for step 10:** §14.1's power row ("at least 80% for shares where rule (a) sets n") is vacuous,
+   because rule (a) never sets n. At rule (b)'s n, power at 1.5 T is above 80% unless the cap binds. Step 10 should
+   report power at the n rule (b) gives and at the cap, and the row should be reworded in step 12.
+9. **[done 2026-10-08, Opus] The matcher** (§13) and its synthetic cases.
+   *As built.* **One definition of the distance:** `descriptive.distance(vector_a, vector_b, choice_a, choice_b)`
+   (total variation where both vectors exist, 0/1 on the choice where both are given, their mean when both, `None`
+   when neither); step 7's `run_distance` now calls it, its tests unchanged, so step 7's flag closes with the
+   definition staying in `descriptive.py`. **`analysis/matcher.py`:** `CompanyDecision(reading, amounts, choice)`
+   is one reading from the rubric, observable lines only, in any unit; `match_case(scenario, rows, readings, *,
+   case_id, objectives, d_star, k_star)` returns a `CaseMatch` with one `ReadingMatch` per reading (the primary
+   first). Each reading carries its observable lines (file order), whether the choice is observable, its
+   dimension count, the company side's basis, the label and why, the nearest, the tied objective, the `Gap` (second
+   minus nearest, with its 95% interval and seed) and every objective's `ObjectiveDistance` (distance, 95% spread,
+   seed, runs distanced, choice-only runs, undistanced runs). The matcher takes a `Scenario`, not
+   `ScenarioOutcomes`, because a real case's scenario will have its own id and `outcomes_for` accepts only S1-S4.
+   **The label, in order:** not enough disclosed (dimensions below `k_star`, or nothing to distance on); no good
+   match (nearest strictly above `d_star`; equal to it within `BOUNDARY_TOLERANCE` is not above, which is what makes
+   "a true match is called no good match at most 5% of the time" true when `d_star` is a 95th percentile, since
+   distances on a choice are discrete); tie (the gap's 95% interval includes zero); match. The nearest is the
+   smallest distance, an exact equality broken by objective id (the tie rule then says tie). **`D_STAR` and `K_STAR`
+   are `None` until step 10,** and the matcher refuses to label without them. An objective's distance is the mean of
+   its per-wording means, with a 95% stratified bootstrap spread; `intervals.stratified_bootstrap_value` was added
+   for it (one side, same resampling as the difference), tested by exact enumeration. Seeds come from the sweep id
+   and `match:<case>:<reading>:<objective>` (the gap: `...:<nearest>-<second>`). Refused: an uncalibrated call, no
+   reading, repeated reading names, fewer than two distinct objectives, an objective with no valid run, runs of two
+   sweeps or two models, a line, option or choice the scenario lacks, a negative or missing amount, objectives whose
+   distanced runs cover different wordings, and an objective none of whose runs can be distanced.
+   **`simulation/matcher_cases.py`** (a new package outside the frozen folder; the architecture test already
+   forbids the analysis importing it): `build_case(scenario, kind, *, seed, sigma, repeats, k)` gives one synthetic
+   case fixed by its seed, of the five kinds in §13.4. Profiles are flat Dirichlet draws (mean allocation over the
+   offered lines; choice probabilities over the options, which for two options is a uniform rate); runs are
+   Dirichlet draws around the mean, with a concentration that gives a line at share 1/K the standard deviation
+   `sigma`, floored at 0.05; three wordings, five objectives; the generating objective is drawn among the five.
+   Opposite: all the money on the line the objective funds least, and its least likely choice. Sparse: the
+   identical case on `k` of its dimensions drawn without replacement, the choice being one. True match: one more
+   draw from the objective's runs. Tests: `tests/test_analysis_matcher.py` (37), `tests/test_simulation_matcher_cases.py`
+   (19), and 4 more in `tests/test_analysis_intervals.py`; 1119 tests in all, `make check` green.
+   **Mutation checks:** matcher and the shared distance, 63 planted; 60 caught, 3 equivalent (each changes one side
+   of a choice comparison whose other side is `None`; planted on both sides at once, it is caught). The cases, 20
+   planted, 20 caught. `stratified_bootstrap_value`, 4 planted, 4 caught. **Gaps the checks showed first, now
+   tested:** lines given out of file order; a non-valid run carrying amounts; the spread's level (the first test's
+   data had the same quantiles at 95% and 99.7%); a tie with a positive gap estimate; the generating objective
+   never shown to vary; a true match equal to the mean passing whenever its choice differed; the bootstrap's seed.
+   **Findings, for step 12 and for him (none changes a rule as written):**
+   (a) **A lone observable line carries no information.** Renormalized over one line, every run that puts anything
+   there is identical to the company (distance 0). `planning/07` §10.4 counts each observable line as a dimension,
+   so one line plus the choice counts as 2 but tells only as much as the choice. A test holds the behavior. The
+   options for step 12: count a line toward `k_star` only when at least two lines are observable, or let step 10's
+   `k*` absorb it (its sparse cases draw one-line subsets, so the measured `k*` will already show the cost).
+   (b) **A run with nothing on the observable lines and no observable choice has no distance.** The planning says
+   such a run is distanced "on the choice alone" and is silent when there is no choice. Built as: left out and
+   counted (`undistanced_runs`), and an objective with no distanceable run is refused. The alternative, a distance
+   of 1 when exactly one side put nothing on the observable lines, would score the objective that did nothing there
+   as far from a company that did, which is arguably the honest reading; it is his call.
+   (c) **An objective's distance is the mean of its per-wording means** (decision 5 by analogy); `planning/07` §10.4
+   says "the average of its runs' distances". The two are the same unless runs failed.
+   (d) **"Depends on reading" follows the planning literally:** set when the nearest objective changes. When two
+   objectives tie, which one is nearest can flip between readings by noise, so a tie can produce "depends on
+   reading" without any real change. Comparing the matched sets (one objective, or the tied pair) would avoid it.
+   (e) **The failure rules do not reach the matcher.** `planning/07` says nothing of a cell's 10% exclusion for real
+   cases; failed runs are simply not distanced. Phase 5's IMPLEMENTATION doc should say whether that is enough.
+   (f) **The synthetic choice is drawn independently of the allocation.** In the real scenarios the two are coupled
+   (S3's lines follow the plant decision); the generator says so in its docstring.
+   (g) **For step 10, from a 30-seed smoke run (not a calibration):** at `sigma` 0.2 on S3 and S4, an opposite
+   case's nearest distance (median about 0.53-0.58) overlaps a true match's largest (about 0.62), so "opposite
+   exceeds `D*` in at least 95% of trials" may fail at the largest spread, which §20 anticipated. Part of the cause
+   is the design: "opposite" is opposite to the generating objective only, and with five random profiles another
+   objective can sit near it. Step 10 should report the opposite case's distance to the generating objective
+   beside its nearest distance. **Cost:** one match runs six bootstraps at 100,000 resamples. `D*` needs only the
+   point distances; `k*` needs the tie, so step 10 should time it and set `resamples` for the simulation openly.
+   (h) **The rubric's format is Phase 5's.** The matcher takes `CompanyDecision`; Phase 5's IMPLEMENTATION doc writes
+   the loader from the committed rubric to it, uncertain calls to alternative readings included.
 10. **[Opus] The simulations** (§14): the timing run, then the full run, then the report. Opus reads every number
     against its target and writes the findings into this doc's §20.
 11. **[Opus] `plain-english.md`**, finished from the notes kept since step 3.

@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import statistics
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from itertools import combinations
 
@@ -162,23 +162,41 @@ def total_variation(a: dict[str, float], b: dict[str, float]) -> float:
     return 0.5 * sum(abs(a[k] - b[k]) for k in a)
 
 
-def run_distance(a: RunOutcome, b: RunOutcome, *, has_choice: bool) -> RunDistance:
-    """The per-run distance of `planning/07` 10.4 (doc 13.1) on the full lever-level vector: the total
-    variation distance of the two vectors, and where the scenario has a choice, 0 if the two runs chose the
-    same and 1 if not; the mean of the two when both exist. A vector that is undefined (S4, every line zero)
-    leaves the choice alone, and ``basis`` records it. The matcher (step 9) restricts the vector to
-    observable lines and uses this same definition."""
+def distance(
+    vector_a: Mapping[str, float] | None,
+    vector_b: Mapping[str, float] | None,
+    choice_a: str | None,
+    choice_b: str | None,
+) -> RunDistance | None:
+    """The one definition of the per-run distance (`planning/07` 10.4, doc 13.1): the total variation
+    distance of the two vectors where both are defined; 0 if the two choices are the same and 1 if not,
+    where both are given; the mean of the two when both exist. ``basis`` records which. ``None`` when
+    there is neither. ``run_distance`` (section 11) and the matcher (section 13) both call it."""
     parts: list[float] = []
     basis = []
-    if a.vector is not None and b.vector is not None:
-        parts.append(total_variation(dict(a.vector), dict(b.vector)))
+    if vector_a is not None and vector_b is not None:
+        parts.append(total_variation(dict(vector_a), dict(vector_b)))
         basis.append("vector")
-    if has_choice and a.choice is not None and b.choice is not None:
-        parts.append(0.0 if a.choice == b.choice else 1.0)
+    if choice_a is not None and choice_b is not None:
+        parts.append(0.0 if choice_a == choice_b else 1.0)
         basis.append("choice")
     if not parts:
-        raise ValueError("these runs have neither a vector nor a choice to distance")
+        return None
     return RunDistance(sum(parts) / len(parts), "both" if len(parts) == 2 else basis[0])
+
+
+def run_distance(a: RunOutcome, b: RunOutcome, *, has_choice: bool) -> RunDistance:
+    """The per-run distance between two runs on the full lever-level vector (`distance`). A vector that
+    is undefined (S4, every line zero) leaves the choice alone, and ``basis`` records it."""
+    got = distance(
+        a.vector,
+        b.vector,
+        a.choice if has_choice else None,
+        b.choice if has_choice else None,
+    )
+    if got is None:
+        raise ValueError("these runs have neither a vector nor a choice to distance")
+    return got
 
 
 @dataclass(frozen=True)

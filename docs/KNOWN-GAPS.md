@@ -9,6 +9,33 @@ case by its type and a neutral label. The names live only in the private longlis
 
 > ## START HERE — where things stand, 2026-10-08, midday
 >
+> **PHASE 3 STEP 9 (THE MATCHER) DONE 2026-10-08 (Opus), for his commit C5 with step 8; `make check` green, 1119
+> tests.** First, Opus reviewed step 8: no bug; tests' `type: ignore`s typed; finding (b) also makes §14.1's power
+> row vacuous (noted for step 10). `analysis/matcher.py`: per-run distance on the observable dimensions only
+> (`descriptive.distance`, the one definition `run_distance` now shares), each objective's distance as the mean of
+> its per-wording means with a 95% spread, the four labels in order (not enough disclosed, no good match strictly
+> above `d_star`, tie when the gap's 95% interval includes zero, match), one result per reading and "depends on
+> reading". **`D_STAR` and `K_STAR` are `None` until step 10 sets them; the matcher refuses to label without
+> them.** `simulation/matcher_cases.py` (new package) builds the five synthetic case types from a seed. Mutation
+> checks: 60 of 63 (3 equivalent), 20 of 20, 4 of 4. **For him, from step 9** (IMPLEMENTATION doc §18 step 9):
+> **(a)** one observable line carries no information but counts as a dimension; **(b)** a run with nothing
+> observable is left out and counted, where a distance of 1 is the alternative, his call; **(d)** a tie can flip
+> "depends on reading" by noise; **(g)** the smoke run suggests opposite cases overlap true matches at the widest
+> spread on S3 and S4. **NEXT: step 10, the simulations (Opus).** No model call, no AWS, nothing under
+> `scratch/runs/` read.
+>
+> **PHASE 3 STEP 8 (THE REPEAT RULE) DONE 2026-10-08 (Sonnet), for his commit C5; `make check` green, 1059 tests.**
+> `analysis/repeats.py`: shares give the pooled sd with its degrees of freedom, rules (a) and (b), the clamp to
+> [6, 20] and the half-width when the cap binds; choice rates give 20 and the half-width at 50% and 5%. The output
+> carries no mean, difference or objective label, and a test pins the field names and shows it does not move when an
+> objective is shifted or relabelled. `planning/07` §8's worked example holds with the frozen Z (2.9552): **no
+> rounding changed.** Mutation check: 62 of 66 caught, 4 equivalent. **Findings for step 12 (none changes a rule),
+> in the IMPLEMENTATION doc §18 step 8:** **(a)** §8's choice-rate precision (±27 at 50%, ±12 at 5%) is the Wald
+> figure; Newcombe, the method §6.3 chose, gives **±25.2 and ±15.9**, and the code reports those; **(b)** rule (a)
+> never sets the count (rule (b) is always about twice as large); **(c)** `0.84` is a rounded 0.8416, kept as
+> written; **(d)** the rule divides by three wordings though the pilot runs two. **NEXT: step 9, the matcher
+> (Opus).** No model call, no AWS, nothing under `scratch/runs/` read.
+>
 > **PHASE 3 STEP 7 (DESCRIPTIVE ANALYSES AND THE RESULTS OBJECT) DONE 2026-10-08 (Sonnet), COMPLETING C4 (steps
 > 5-7: `phase 3: failure, robustness, descriptive`); `make check` green, 1011 tests.** First, Opus's step 6 review:
 > the sealed wording's `agrees_with_pooled` is now a **relation** (`same_verdict` / `same_direction_less_certain` /

@@ -56,3 +56,26 @@ smallest step an outcome can take (1/125).
 **The known weak spot, made visible.** If every run under both objectives gives the identical share, the resampling
 interval has no width and the rule says "no split" with a certainty the data cannot support. The engine flags this
 case on every comparison; decision 10 decides what to do about it.
+
+## The matcher (step 9, 2026-10-08)
+
+**What it asks.** For a real case, which objective's runs came closest to what the company actually did. It is a
+reading, not a test: no verdict, and its intervals are 95%.
+
+**Only what was disclosed.** A filing shows some of what a company did and not the rest. The matcher compares runs
+and the company on the disclosed lines only, rescaled so each side's disclosed money adds to 1, and on the choice if
+the choice is known. Two runs that spent the same proportions on those lines are at distance 0, whatever they did
+elsewhere.
+
+**Distance per run, then averaged.** Each run is compared with the company on its own (half the sum of the
+differences in proportions, 0 to 1; plus 0 or 1 for the choice; the two averaged when both exist). An objective's
+distance is the average over its runs. Averaging the runs first would invent a decision: half the runs all-in on one
+thing and half all-in on another average to a split that no run made.
+
+**Four answers, never forced.** *Not enough disclosed* when too few dimensions are known to tell objectives apart.
+*No good match* when even the nearest objective is far. *Tie* when the gap between the two nearest could be zero
+once the runs are resampled. Otherwise *match*. The two cut-offs (how far is "far", how few is "too few") are set
+from synthetic cases with a known answer before any real case is run, so neither is chosen after seeing a result.
+
+**A known limit, for step 12.** One disclosed line on its own carries no information: rescaled to add to 1, every
+run that put anything there looks identical to the company.

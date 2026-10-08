@@ -135,6 +135,27 @@ def _resampled_values(
     return resampled
 
 
+def stratified_bootstrap_value(
+    cells: Cells, *, seed: int, alpha: float, resamples: int = RESAMPLES
+) -> Interval:
+    """The percentile interval for one side's value (the mean of its per-wording means), resampling within
+    each wording: the spread the matcher shows beside each objective's distance (section 13.1)."""
+    if resamples < 1:
+        raise ValueError("resamples must be at least 1")
+    arrays = _arrays(cells, "cells")
+    rng = np.random.Generator(np.random.PCG64(seed))
+    low, high = np.quantile(_resampled_values(arrays, rng, resamples), [alpha / 2, 1 - alpha / 2])
+    return Interval(
+        estimate=mean_of_wording_means(cells),
+        low=float(low),
+        high=float(high),
+        method="stratified_bootstrap",
+        alpha=alpha,
+        resamples=resamples,
+        seed=seed,
+    )
+
+
 def stratified_bootstrap_difference(
     first: Cells,
     second: Cells,
