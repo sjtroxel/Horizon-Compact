@@ -774,7 +774,7 @@ with `format()`.
 | 4. Recorded calls: Sonnet 4.6 off, Sonnet 4.6 on, Nova Pro | **PASS** | records 01, 03, 04, 02, 05, 05.2 (§19) |
 | 5. Checks closed or carried; planning patches | **PASS** | the tag half closed by item 1; `planning/04` §3.3 and `planning/02` §2.12 patched |
 | 6. Development model named; Nova Pro's default temperature recorded | **PASS** | his decision 2026-10-04 (since amended by Phase 2.5's decision 9 for dev runs); 0.7 |
-| 7. `make check` and CI green; no account ID or email tracked; guard on every commit | **PASS** | CI on the close-out commit; the architecture test; the hooks |
+| 7. `make check` and CI green; no account ID or email tracked; guard on every commit | **PASS** | close-out commit `9937eb1`: CI `37794849404` and Deploy `37794849258` green; the architecture test; the hooks |
 | 8. Spend measured from the bill, under $1 | **PASS** | item 3: $0.02 for the whole account |
 | 9. Nothing always-on; nothing of Musical Mycelium's changed | **PASS** | budgets bill nothing (notification-only); the plans |
 

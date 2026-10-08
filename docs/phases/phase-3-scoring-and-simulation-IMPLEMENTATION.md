@@ -574,14 +574,46 @@ Each step ends green under `make check`. Model choice in brackets (`CLAUDE.md`: 
 for routine code; he switches with `/model`).
 
 0. **C1** (him): this doc and the housekeeping in §15, after approval.
-1. **[Sonnet] The analysis group and the run reader.** `pyproject.toml` group and `default-groups`; the Dockerfile
+1. **[done 2026-10-08, Sonnet] The analysis group and the run reader.** `pyproject.toml` group and `default-groups`; the Dockerfile
    change and a local image check; the mypy override; `records.py` with `RunRow` (run id, scenario, objective,
    wording, repeat, final status, first-attempt status, the amounts used, the choice, `menu_order`, `option_order`,
    the first attempt's amounts and choice); decision 8's refusal; tests on records **written by test code in the
    runner's exact format** (built by calling the runner's own record functions on fake providers where possible, so
    the format cannot drift).
-2. **[Sonnet] The outcomes** (§6), every key read from the scenario files; tests on hand-built runs for each
-   scenario, including S1's undefined secondary and S4's mixed-sign vector.
+   *As built.* Versions re-read on PyPI the same day: numpy 2.5.3, scipy 1.18.1, statsmodels 0.15.0, pandas 3.0.6,
+   patsy 1.0.3, all at least two weeks old. **One transitive pin:** `formulaic` (statsmodels) pulled `wrapt` 2.5.0,
+   released 2026-09-27 (11 days), so `uv.lock` holds `wrapt` 2.4.1 (2026-09-10); a bare `uv lock --upgrade` will move
+   it, so re-check the age of anything new in the lock then. `[tool.uv] default-groups = ["dev", "analysis"]`; both
+   Dockerfile `uv sync` lines say `--no-default-groups`. **Image checked locally** (built, then removed): `import
+   numpy`, `scipy` and `statsmodels` each fail inside it with `ModuleNotFoundError`, `pydantic` and `boto3` import.
+   mypy override for `statsmodels.*` only. `records.py` reads from anything with `get` and `list_keys` (its own small
+   protocol, since `sweep/store.py` imports botocore and the analysis may not), refuses by key, **on every key a
+   listing returns** and not only on the prefix asked for, so a wide prefix (`""`, `development/`) that reaches
+   `development/company/` is refused; the message says why. Integrity refusals beyond the brief: a `final.json` that
+   disagrees with its last model attempt, a run not in the manifest, no manifest. Unfinished runs (a manifest entry
+   with no `final.json`) are listed in `RunSet.unfinished`, not analysed. `repeat` comes from `manifest.json`, since
+   the attempt records do not carry it. The status sets are copied into `records.py` (it may not import
+   `sweep.classify`) and a test compares them with the runner's. Tests: `tests/test_analysis_records.py` (13), the
+   records built by `run_session` on a scripted provider, and `tests/analysis_helpers.py`, which runs the real
+   company scenario files through the runner and copies the objects to a `pilot-test/` prefix the reader accepts.
+2. **[done 2026-10-08, Sonnet] The outcomes** (§6), every key read from the scenario files; tests on hand-built runs for each
+   scenario, including S1's undefined secondary and S4's vector of uses and sources together.
+   *As built.* `analysis/outcomes.py`: `outcomes_for(scenario)` returns kind, threshold (0.10 / 0.20), line keys and
+   `score_amounts` / `score` / `score_first_attempt` (the same computation on the counted decision or the first
+   attempt's) / `summarize_secondary` (mean over runs where defined, with `n_defined` beside `n_runs`). Totals, caps,
+   lines and the offered set come from the loaded scenario; lines are found by lever code (L1 for the eliminated
+   people in S1 and S3, L1 and L4 for S2's workforce). **Three names a lever cannot give are in one table
+   (`_ROLES`) and checked against the file on construction:** S1's `move_keep_pay` and `move_plant_pay`, S3's `close`,
+   S4's `fund`. A rename fails loudly, and a test proves it. Secondaries per run: S1 `keep_pay_share_of_moved` (None when
+   no one moved), S3 `retained_share`, S4 `any_cuts`; S2 has none. S4's vector is all fifteen offered lines over
+   their sum, and is None (not a division by zero) if every line is zero. The descriptive roll-ups of §11 stay step 7.
+   Tests: `tests/test_analysis_outcomes.py` (21), hand-built runs for each scenario plus the same shapes written by the
+   runner and read back through the reader.
+   *Architecture tests added* (`tests/test_architecture.py`): `analysis` never imports `simulation`; `analysis` imports
+   only itself, `horizon_compact.experiment`, the standard library and numpy, scipy, statsmodels; nothing outside
+   `analysis` and `simulation` imports those three (the image has none of them); `default-groups` and both Dockerfile
+   lines are as above. *Opus review, same day:* the import reader skipped relative imports, so `from ..simulation
+   import x` would have passed; it now resolves them against the file's package, with a test that proves it.
 3. **[Opus] The intervals.** First, read Newcombe (1998) Table II, or a published reproduction of it, from a live
    copy, and write `worked-examples.md` with the source; then `intervals.py` and its tests (§7); the bootstrap's
    cross-check against scipy.

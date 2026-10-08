@@ -4,10 +4,10 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
-RUN uv sync --locked --no-dev --no-install-project
+RUN uv sync --locked --no-default-groups --no-install-project
 COPY src ./src
 COPY experiment ./experiment
-RUN uv sync --locked --no-dev
+RUN uv sync --locked --no-default-groups
 ARG GIT_SHA
 ENV PATH="/app/.venv/bin:$PATH" HC_EXPERIMENT_DIR=/app/experiment HC_GIT_SHA=$GIT_SHA
 RUN useradd --uid 10001 --no-create-home hc

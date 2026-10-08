@@ -15,6 +15,7 @@ authors = [{ name = "sjtroxel" }]
 
 # Each runtime dependency arrives with its subject: boto3 with the provider interface (Phase 0.5), pydantic with the
 # decision schema (Phase 1). The name guard (horizon_compact.privacy) stays standard-library only, on purpose.
+# The analysis group (numpy, scipy, statsmodels) arrives with Phase 3 and stays out of the container image.
 dependencies = [
     "boto3>=1.43.108",
     "pydantic>=2.13.5",
@@ -23,7 +24,17 @@ dependencies = [
 [project.scripts]
 hc = "horizon_compact.cli:main"
 
+[tool.uv]
+# `dev` and `analysis` install by default (make install, make check, CI). The container image installs neither:
+# its `uv sync` lines say --no-default-groups, because the image runs sweeps and never analysis.
+default-groups = ["dev", "analysis"]
+
 [dependency-groups]
+analysis = [
+    "numpy>=2.5.3",
+    "scipy>=1.18.1",
+    "statsmodels>=0.15.0",
+]
 dev = [
   "boto3-stubs[bedrock,bedrock-runtime,ec2,ecs,s3,sts]>=1.43.108",
   "mypy>=2.4",
@@ -68,6 +79,11 @@ max-doc-length = 110
 python_version = "3.13"
 files = ["src", "tests"]
 strict = true
+
+# statsmodels ships no type information; this is the only third-party package whose imports are left untyped.
+[[tool.mypy.overrides]]
+module = ["statsmodels.*"]
+ignore_missing_imports = true
 
 # --- tests -------------------------------------------------------------------
 

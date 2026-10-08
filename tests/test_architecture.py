@@ -467,3 +467,104 @@ def test_workflows_hold_no_account_id() -> None:
     account_id = re.compile(r"(?<![\w-])\d{12}(?![\w-])")
     offenders = [p.name for p in WORKFLOWS.glob("*.yml") if account_id.search(p.read_text())]
     assert not offenders, offenders
+
+
+# --- the analysis package (Phase 3 IMPLEMENTATION doc sections 4, 5 and 16) --------------------------------
+
+SRC = ROOT / "src" / "horizon_compact"
+ANALYSIS = SRC / "analysis"
+ANALYSIS_GROUP_LIBRARIES = {"numpy", "scipy", "statsmodels"}
+# Phase 3.5 hashes analysis/ alone, so nothing it needs may live outside it except the scenario loader.
+ANALYSIS_MAY_IMPORT_FROM_THE_PACKAGE = {"horizon_compact.experiment"}
+
+
+def _imports(path: Path, root: Path = SRC.parent) -> list[tuple[int, str]]:
+    """Every module a file imports, absolute. A relative import is resolved against the file's package, so
+    ``from ..simulation import x`` cannot slip past a rule written for ``horizon_compact.simulation``."""
+    package = list(path.relative_to(root).with_suffix("").parts)[:-1]
+    found: list[tuple[int, str]] = []
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+        if isinstance(node, ast.Import):
+            found.extend((node.lineno, alias.name) for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level == 0:
+                module = node.module or ""
+            else:
+                base = package[: len(package) - (node.level - 1)]
+                module = ".".join(base + ([node.module] if node.module else []))
+            if module:
+                found.append((node.lineno, module))
+            # `from horizon_compact import simulation` names the module in the alias, not in `module`.
+            found.extend((node.lineno, f"{module}.{alias.name}") for alias in node.names)
+    return found
+
+
+def test_relative_imports_are_resolved_by_the_import_reader(tmp_path: Path) -> None:
+    probe = tmp_path / "horizon_compact" / "analysis" / "probe.py"
+    probe.parent.mkdir(parents=True)
+    probe.write_text("from ..simulation import x\nfrom . import records\n", encoding="utf-8")
+    names = {name for _line, name in _imports(probe, root=tmp_path)}
+    assert "horizon_compact.simulation" in names
+    assert "horizon_compact.simulation.x" in names
+    assert "horizon_compact.analysis.records" in names
+
+
+def test_analysis_never_imports_simulation() -> None:
+    offenders = [
+        f"{path.name}:{line} {name}"
+        for path in sorted(ANALYSIS.rglob("*.py"))
+        for line, name in _imports(path)
+        if name == "horizon_compact.simulation" or name.startswith("horizon_compact.simulation.")
+    ]
+    assert not offenders, f"analysis imports simulation: {offenders}"
+
+
+def test_analysis_imports_only_itself_the_experiment_loader_and_the_allowed_libraries() -> None:
+    allowed_top = set(sys.stdlib_module_names) | {"__future__"} | ANALYSIS_GROUP_LIBRARIES
+    offenders: list[str] = []
+    for path in sorted(ANALYSIS.rglob("*.py")):
+        for line, name in _imports(path):
+            top = name.split(".")[0]
+            if top == "horizon_compact":
+                inside = name == "horizon_compact" or name.startswith("horizon_compact.analysis")
+                loader = any(
+                    name == ok or name.startswith(ok + ".")
+                    for ok in ANALYSIS_MAY_IMPORT_FROM_THE_PACKAGE
+                )
+                if not (inside or loader):
+                    offenders.append(f"{path.name}:{line} {name}")
+            elif top not in allowed_top:
+                offenders.append(f"{path.name}:{line} {name}")
+    assert not offenders, f"analysis imports outside its allowance: {offenders}"
+
+
+def test_nothing_outside_analysis_and_simulation_imports_the_analysis_libraries() -> None:
+    """The container image leaves the analysis group out, so a sweep module that imported numpy would crash
+    there. Only analysis/ and the simulation package may import them."""
+    homes = {SRC / "analysis", SRC / "simulation"}
+    offenders = [
+        f"{path.relative_to(SRC)}:{line} {name}"
+        for path in sorted(SRC.rglob("*.py"))
+        if not any(home in path.parents for home in homes)
+        for line, name in _imports(path)
+        if name.split(".")[0] in ANALYSIS_GROUP_LIBRARIES
+    ]
+    assert not offenders, f"analysis-group libraries imported outside their home: {offenders}"
+
+
+def test_the_image_leaves_the_analysis_group_out() -> None:
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    assert set(pyproject["tool"]["uv"]["default-groups"]) == {"dev", "analysis"}
+    assert {re.split(r"[<>=]", d)[0] for d in pyproject["dependency-groups"]["analysis"]} == (
+        ANALYSIS_GROUP_LIBRARIES
+    )
+    syncs = [
+        line
+        for line in (ROOT / "infra" / "docker" / "Dockerfile")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if "uv sync" in line
+    ]
+    assert len(syncs) == 2
+    for line in syncs:
+        assert "--no-default-groups" in line and "--no-dev" not in line, line

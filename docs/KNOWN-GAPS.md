@@ -7,7 +7,16 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-07, evening
+> ## START HERE — where things stand, 2026-10-08, late morning
+>
+> **PHASE 3 BUILD, STEPS 1-2 DONE 2026-10-08 (Sonnet), for his commit C2 `phase 3: analysis group, run reader,
+> outcomes`; `make check` green, 762 tests.** The `analysis` dependency group (numpy 2.5.3, scipy 1.18.1, statsmodels
+> 0.15.0; `wrapt` pinned to 2.4.1 in `uv.lock` for the two-week rule) is a default group and is **not in the container
+> image** (built locally and checked: numpy, scipy and statsmodels do not import there). `src/horizon_compact/analysis/`
+> has `records.py` (the run reader, and decision 8's refusal of `development/` records on real content, checked on
+> every key listed) and `outcomes.py` (§6). **NEXT: step 3, the intervals (Opus), which starts by reading Newcombe's
+> Table II from a live copy;** the as-built notes are in the Phase 3 IMPLEMENTATION doc §18. No model call, no AWS, no
+> record from `scratch/runs/` was read. The Phase 0.5 §21 CI-id line rides in C2.
 >
 > **PHASE 2.5 IS CLOSED** (DoD audit, honor statements and deviations: IMPLEMENTATION doc §22). The sealed template
 > is **`w2`** (`docs/phases/evidence/phase-2.5/sealed-draw.md`). It closed on the development model
@@ -213,6 +222,30 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN — for Phase 3.5: Claude Haiku 5.5 as a model-set candidate, 2026-10-08
+
+Claude Haiku 5.5 launched on 2026-10-07 (Anthropic models overview and pricing pages, AWS Bedrock model card, read
+2026-10-08). **$0.10 / $0.50 per million tokens** for prompts up to 100,000 tokens, against Sonnet 4.6's $3 / $15:
+about a thirtieth. Bedrock: no in-region endpoint in us-east-1, US geo profile `us.anthropic.claude-haiku-5-5`; tool use
+yes, structured outputs no (unused here); June 2026 cutoff, which fits the real-case window already set to the
+strictest cutoff (`planning/01` §3). Bedrock's own price was not read (about $0.11 / $0.55 if the usual 10% geo
+premium applies; an inference).
+
+**His hypothesis:** it may be more capable than Sonnet 4.6 outright, as well as cheaper. Secondary sources only: one
+aggregator (BenchLM) scores Haiku 5.5 at 66.3 and Sonnet 4.6 at 55.2; Artificial Analysis puts Haiku 5.5 at 43 on its
+index, against 56 for Sonnet 5.5, with no Sonnet 4.6 figure. No head-to-head from Anthropic was found. Plausible, not
+established.
+
+**What Phase 3.5's model-set decision should weigh** (the set is fixed there, before real cases; `planning/05` §3.1):
+Haiku 5.5 as the main model, or as a cheap third official model beside Sonnet 4.6 (a size and generation comparison
+within one provider). Lower cost could also buy more repeats, which would narrow the choice-rate intervals. Reopening
+"Sonnet 4.6 is the main model, fixed" (2026-10-05) is his call. **Blocker:** this account's Bedrock restriction. AWS
+said new Claude models need several billing cycles of spend (Sonnet 5.5 was refused for that), and all models are
+throttled while case 179121856900232 is open. One call when quotas return will tell. Official runs are container
+runs, so OpenRouter is not an official route without a design change.
 
 ---
 
