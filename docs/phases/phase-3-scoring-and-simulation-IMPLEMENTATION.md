@@ -1,0 +1,632 @@
+# Phase 3 — Scoring and Simulation: IMPLEMENTATION (v0.3)
+
+> **IMPLEMENTATION doc.** Written 2026-10-08 (Opus) from the approved scope doc
+> (`docs/phases/phase-3-scoring-and-simulation.md`, both decisions as recommended), `planning/07` (all of it, as
+> patched through 2026-10-07), `planning/08` §3.4-3.5 and §4.5, `planning/09` A5, `planning/05` §4.3 and §5,
+> `planning/04` §1.2, §1.5 and §6.2, the Phase 1.5, 3.5, 4 and 5.5 scope docs (what they expect from this phase), the
+> Phase 2.5 IMPLEMENTATION doc §22 (its close-out), the harness as built (`experiment.py`, `sweep/decision.py`,
+> `sweep/classify.py`, `sweep/runner.py`, `sweep/plan.py`) and the four rendered scenarios under
+> `experiment/company/scenarios/`. **APPROVED 2026-10-08 (his), all ten decisions in §17 as recommended.**
+>
+> **Built out of order**, like Phases 2 and 2.5: Phase 1 (steps 3, 9, 11, 12) and Phase 1.5 wait on AWS. This phase
+> needs no AWS and calls no model. One of its prerequisites, Phase 1.5's scorer, does not exist; §3 item 1 and
+> decision 1 deal with that.
+
+## 1. Where things stand on 2026-10-08, before this phase
+
+What was done, what was not, and what is still waiting, so this doc starts from the record and not from memory.
+
+**Done and committed.** Phase 2.5 closed 2026-10-07; its close-out commit `6c8240f` is pushed and green (CI
+`37714513948`, Deploy `37714513935`). That run id is the one Phase 2.5's DoD 8 row was waiting for; it goes into that
+doc with this doc's commit (§15, C1). The sealed template is `w2`. The four scenarios, the objectives and the three
+templates are final unless Phase 3.5's review or the Nova Lite runs reopen them (both go through the change log).
+
+**Not done, because of AWS** (the BLOCKED entry in `KNOWN-GAPS.md`):
+- **Bedrock is still throttled.** One call each, 2026-10-08 13:55 UTC (`scratch/throttle-check.py`): Nova Lite and
+  Sonnet 4.6 both `ThrottlingException`, "Too many tokens per day" (request ids `9b94c7e7-2ba2-45f4-a07a-2c4a9b06b833`
+  and `75959270-171d-4285-aeda-22909f50e8e6`), $0. Case 179121856900232: no reply. He will not buy paid support.
+- **Phase 1:** steps 3 (the Nova Lite development run) and 9 (the skeleton sweep), then 11 and 12, so Phase 1's close
+  and the first test of the task role's Bedrock and S3 permissions.
+- **Phase 1.5, all of it:** it needs Phase 1's sweep results in S3. Its scorer, which this phase was to extend, is
+  unbuilt.
+- **The Nova Lite probes and format runs**, a prerequisite of Phase 3.5's tag (the OPEN entry, 2026-10-07).
+- **Probably Musical Mycelium's Bedrock calls** too; still unchecked.
+
+**Not done, and not blocked by the quota:** **Phase 0.5's billing close-out** (the WAITING entry, 2026-10-04): about
+15 minutes of his console, the tag measurement, the Sonnet 4.6 budget's service name, the phase's spend read from the
+bill, then one `terraform apply` and its DoD audit. It needs posted billing data, which has existed since 2026-10-06.
+It can run any day, alongside this phase; it is his console, so it is his call when.
+
+**What this phase does not need from any of that:** nothing. No AWS, no model, no run record from any sweep.
+
+## 2. What this phase delivers
+
+The analysis that turns runs into verdicts, written once, tested on synthetic data with known answers, and the
+simulations whose numbers Phase 3.5's protocol quotes. In build order:
+
+1. **The run reader:** run records (the attempt and final objects `sweep/runner.py` writes) into typed rows, one per
+   run, from any `Store`. Refuses development records on real content (decision 8).
+2. **The outcomes:** each scenario's primary outcome, secondaries and lever-level vector, from the rendered scenario
+   files, never hard-coded amounts (§6).
+3. **The intervals:** Newcombe's interval from statsmodels; the stratified bootstrap as a short routine on numpy
+   (decision 2 of the scope doc; §7).
+4. **The verdict engine:** for each comparison, the difference, its interval, and one of split, no split or
+   inconclusive (§8).
+5. **The failure rules:** rates per cell, the 10% exclusion, first-attempt beside final, the worst-case bound (§9).
+6. **The robustness rules:** the per-wording direction check, the sealed-wording result, position effects (§10).
+7. **The descriptive analyses** of `planning/07` §6.5, fixed in code (§11).
+8. **The repeat rule:** from a pilot's runs to repeats per scenario, showing no direction (§12).
+9. **The matcher:** per-run distance, the tie rule, minimum evidence, the no-match threshold (§13).
+10. **The simulations**, seeded, with a results file and a summary the protocol quotes (§14).
+11. **A plain-English account of the statistics** (`planning/04` §6.2), written as each part is built.
+
+**Not delivered here, moved by decision 1:** the static JSON and its schema version (scope doc Delivers 8). This
+phase delivers a versioned results object; Phase 1.5's scorer serializes it.
+
+## 3. What writing this doc found
+
+1. **Phase 1.5's scorer does not exist.** The scope doc's Delivers 8 ("the scorer extended ... under a new schema
+   version") and its prerequisite *(rests on 1.5)* assumed Phase 1.5 would be built first. AWS has blocked it, and
+   `grep` finds no scorer, no DuckDB and no JSON schema in `src/`. Decision 1: the engine is a library with a versioned
+   results object, and the JSON stays Phase 1.5's.
+2. **The worst-case bound protects one verdict and not the other.** `planning/07` §5.2 sets failed runs to the
+   extremes "in the direction that most narrows the difference" and downgrades a **split** if that overturns it.
+   Nothing does the same for **no split**: a "no split" with failed runs is never checked against the direction
+   that would widen the difference. "No split" on C vs D is the verdict in the Roundtable's favor, so the rule as
+   written guards against a false finding on one side only. The project tests a claim and does not argue for one
+   (`planning/06` §1), so this is a fairness gap, not a detail. Decision 3.
+3. **The simulations as scoped measure false splits but not false "no splits."** The scope doc asks for power, the
+   false-split rate and whether "no split" is reachable. It does not ask how often the rule says "no split" when a
+   real difference of the threshold's size exists. With a bootstrap that runs narrow at small samples, that error is
+   the likelier one. Decision 4 adds it, with the same target as the false-split rate.
+4. **The bootstrap has the same all-agree failure as the one Newcombe fixed, now on a share.** `planning/07` §6.3
+   moved choice rates to Newcombe because a bootstrap gives a zero-width interval when every run agrees. **S1's share
+   is now a count of people out of 125** (decision 8 of Phase 2.5), and a model that keeps all 125 on every run, or
+   eliminates all 125, gives every run the same share. Under two objectives that both do it, the bootstrap returns
+   [0, 0] and declares "no split" with false certainty: the exact failure `planning/08` §3.4c found, on the scenario
+   that carries the Roundtable test. The simulations test it (the scope doc already lists the all-agree case for
+   both methods); decision 10 agrees now how the fix is chosen, so it is not chosen later.
+5. **S1's secondary outcome can be undefined.** The share of moved people who keep their pay divides by the people
+   moved; a run that moves nobody has no value. It is reported among runs that moved anyone, with that count beside
+   it (§6.1).
+6. **An excluded cell breaks like-with-like.** A cell is one objective under one wording. If A's `w3` cell passes 10%
+   failures and is excluded, A vs C would compare A on two wordings against C on three, which `planning/07` §7.1
+   exists to prevent. Decision 6.
+7. **"99.7%" needs to be one exact number.** `planning/07` §6.3 says "0.05 / 16 ≈ 0.003," and §8 uses 2.96. Bonferroni
+   over 16 is exactly 0.003125, a 99.6875% interval (z = 2.955); 0.003 is 99.7% (z = 2.968). The difference is small
+   but the code must freeze one. Decision 7.
+8. **How each objective's mean is formed is unstated.** With no failures, the mean of all runs and the mean of the
+   three per-wording means are the same number. With failures they differ, and the second keeps every wording's
+   weight equal, as "wordings are treated as fixed" (§6.3) implies. Decision 5.
+9. **Analysis must never touch the Phase 2.5 runs.** `scratch/runs/development/company/` holds the format runs, by
+   objective. Both honor statements (Phase 2.5 §22.3) say no allocation by objective was seen; running this engine
+   on those records would show exactly that. A rule in memory is not enough. Decision 8 makes it a refusal in code.
+10. **Phase 3.5 freezes the analysis code by hash** (its decision 1). So the analysis lives in one package, with
+    nothing it needs outside it except the scenario loader, and the library versions are pinned by `uv.lock`. A
+    seeded numpy generator's output can change between numpy versions, so "re-run from the committed code and seeds"
+    means with the locked versions (§16).
+11. **The run records already carry what robustness needs.** Each attempt stores `menu_order`, `option_order`,
+    `validation.amounts`, `validation.scaled_amounts`, `validation.choice`, `status` and `possible_decline`; each final
+    stores `status` and `first_attempt_status`. No run-code change is needed for analysis. One gap is noted for
+    Phase 4, not fixed here: the planner takes one repeat count for the whole sweep, and the repeat rule gives one per
+    scenario (§12).
+12. **The `possible_decline` flag matches S4's own option name.** Phase 2.5 §22.4 recorded that the flag fires on the
+    word "decline." For analysis it matters little: a refusal and a failure count the same toward exclusion and the
+    worst-case bound, and differ only in which column of the published table they sit in. A run is counted as a
+    refusal only when its final status is `refusal` or a logged human call says so (§9.1). The flag itself is run
+    code; it gets an OPEN entry for Phase 4, not a change here.
+
+## 3a. Checks run while writing this doc (live, 2026-10-08)
+
+- **Library versions, from PyPI:** numpy 2.5.3 (2026-09-06), scipy 1.18.1 (2026-08-21), statsmodels 0.15.0
+  (2026-08-27), pandas 3.0.6 (2026-09-17, a statsmodels dependency), patsy 1.0.3 (2026-08-29). Each supports Python
+  3.13 and is more than two weeks old. The build pins them by `uv.lock`; versions are re-read on the build day.
+- **statsmodels' Newcombe interval:** `statsmodels.stats.proportion.confint_proportions_2indep(..., method="newcomb",
+  compare="diff", correction=False)` exists in 0.15.0. Run in a throwaway environment at 95% on eight two-sample
+  examples, it agreed with the values Opus recalled from Newcombe (1998), Table II, on seven of eight
+  (56/70 − 48/80: 0.0524 to 0.3339; 9/10 − 3/10: 0.1705 to 0.8090; 0/10 − 0/20: −0.1611 to 0.2775; and so on). On
+  6/7 − 2/7 it gave 0.0582 to 0.8062 against a recalled 0.0381 to 0.8384. **Recall is not a source:** step 3 reads the
+  published table from a live copy before any test is written against it (§18).
+- **scipy's bootstrap** has no stratified mode (`scipy.stats.bootstrap` takes `data`, `n_resamples`, `paired`,
+  `method`, `rng`, and so on). So the stratified bootstrap is a short routine, cross-checked against scipy's
+  percentile method on unstratified data (§7.2).
+- **uv 0.12.0** has `--no-default-groups` and `--group`, which decision 2 relies on.
+
+## 4. Layout
+
+```
+src/horizon_compact/analysis/          the frozen analysis code (Phase 3.5 hashes this folder)
+    __init__.py                        the version of the results object (RESULTS_VERSION)
+    records.py                         run records -> RunRow; the refusal of development records on real content
+    outcomes.py                        per-scenario primary outcomes, secondaries, lever-level vectors
+    intervals.py                       Newcombe (statsmodels) and the stratified bootstrap
+    verdict.py                         the comparisons, the three verdicts, the estimand
+    failures.py                        rates, exclusion, first attempt beside final, the worst-case bound
+    robustness.py                      wording direction, sealed wording, position effects
+    descriptive.py                     planning/07 section 6.5
+    repeats.py                         the repeat rule from a pilot's runs
+    matcher.py                         per-run distance, tie, minimum evidence, no match
+    results.py                         the results object for one model's sweep
+src/horizon_compact/simulation/        generators and the simulation runner (not frozen; it produces evidence)
+tests/test_analysis_*.py               known-answer tests, one file per module
+docs/phases/evidence/phase-3/
+    simulation-results.json            every simulated number, with its seed and replicate count
+    simulation-summary.md              the same, in tables the protocol quotes
+    matcher-calibration.md             the matcher's synthetic cases and the thresholds set from them
+    worked-examples.md                 the published examples the interval tests use, with their sources
+    plain-english.md                   the statistics explained without formulas, then with them
+```
+
+The `simulation` package is outside `analysis` on purpose: it may change after the tag without changing a verdict,
+and Phase 3.5 can hash `analysis/` alone. Simulations import the analysis; the analysis never imports the simulation.
+A test enforces the direction (as `tests/test_architecture.py` already enforces other boundaries).
+
+**CLI:** `hc simulate run [--quick]` and `hc simulate report`. There is **no** `hc analyze` command in this phase:
+the only way to point the engine at real records arrives with Phase 4's IMPLEMENTATION doc, under decision 8's refusal.
+
+## 5. The dependencies (decision 2)
+
+- **numpy, scipy, statsmodels** (pandas and patsy come with statsmodels) in a new dependency group, **`analysis`**,
+  added to `[tool.uv] default-groups` so `make install`, `make check` and CI get it with no workflow change.
+- **The container image does not get it.** On both of the Dockerfile's `uv sync` lines, `--no-dev` becomes
+  `--no-default-groups` (which leaves out `dev` and `analysis` alike); the image runs sweeps and never analysis (`planning/02` §2.11: aggregation
+  is on the laptop). This is a Dockerfile change, so the image digest changes on the next deploy. Tested by building
+  the image locally and checking that `import numpy` fails inside it.
+- **mypy strict:** numpy and scipy ship types; statsmodels does not. One `[[tool.mypy.overrides]]` entry,
+  `ignore_missing_imports` for `statsmodels.*` only, and the one call to it wrapped in a typed function in
+  `intervals.py`.
+- **`pyproject.toml`'s comment** ("each runtime dependency arrives with its subject") gains a line: the analysis
+  group arrives with Phase 3.
+
+## 6. The outcomes, scenario by scenario
+
+All amounts are read from `validation.scaled_amounts` when the run is `valid_rescaled`, otherwise from
+`validation.amounts` (`planning/07` §2.4 item 3: within 1% the table is scaled to balance, and the scaled table is the
+decision). Every key and total below comes from the rendered scenario file through `experiment.py`, never typed into
+the analysis. Analysis runs on `valid` and `valid_rescaled` runs only; everything else is a failure (§9).
+
+### 6.1 S1 (125 people; `split_equals_headcount`)
+
+- **Primary: share kept** = (`move_plant_pay` + `move_keep_pay`) / 125. A share outcome, threshold 10 points, by
+  bootstrap. Values lie on a grid of 1/125.
+- **Secondary (descriptive): share of moved people who keep their pay** = `move_keep_pay` / (`move_plant_pay` +
+  `move_keep_pay`), among runs that moved anyone; the count of such runs is reported beside it.
+- **Lever-level vector:** the three paths, each divided by 125.
+
+### 6.2 S2 ($112.1 million; `bearers_equal_total`)
+
+- **Primary: share borne by the workforce** = (`eliminate_roles` + `cut_wages_hours`) / total. A share outcome,
+  threshold 10 points, by bootstrap.
+- **Lever-level vector:** the seven offered bearers, each divided by the total. The two not offered (`payouts`,
+  `keep_people`) are not in it.
+
+### 6.3 S3 (190 people; a choice plus `split_equals_headcount`)
+
+- **Primary: the close rate**, the share of runs whose `plant_decision` is `close`. A choice rate, threshold 20 points,
+  by Newcombe.
+- **Descriptive:** the three-way choice split; the people split (`eliminated`, `moved_other_plants`, `kept_at_plant`,
+  `transferred_to_buyer`) by choice; the share retained (everything but `eliminated`, over 190).
+- **Lever-level vector:** the four people lines, each divided by 190, plus the choice (for the matcher, §13).
+
+### 6.4 S4 ($20.4 million; a choice plus `uses_equal_total_plus_sources`)
+
+- **Primary: the fund rate**, the share of runs whose `program_decision` is `fund`. A choice rate, threshold 20 points,
+  by Newcombe.
+- **Secondary (descriptive):** where the money went (each use); whether funding came with cuts (any source above zero,
+  among `fund` runs) and from whom (each source); the same for `decline` runs, since the cuts are offered under both.
+- **Lever-level vector:** every offered line, uses and sources together, each divided by the run's sum of all offered
+  lines. Uses alone would miss the cuts; sources alone would miss the program. Decision 9.
+
+### 6.5 The canonical levers
+
+Each scenario line carries its `lever` (L1-L9) in the scenario file. The descriptive analyses group by it (and by
+`planning/07` §3.3's display groups); the matcher never does (§3.3: the groups overlap).
+
+## 7. The intervals
+
+### 7.1 Newcombe, for choice rates
+
+statsmodels' `confint_proportions_2indep(count1, nobs1, count2, nobs2, method="newcomb", compare="diff",
+alpha=ALPHA, correction=False)`, on counts pooled across wordings (decision 5). Wrapped in one typed function. Tested
+three ways: against the published worked examples at 95% (read live, §3a), against a hand-written version of the
+same formula (Wilson score intervals for each proportion, combined as Newcombe's method 10) at 95% and at `ALPHA`, and
+at the edges (0 of n, n of n, both groups at 0%, both at 100%), where it must give a non-zero width.
+
+### 7.2 The stratified bootstrap, for shares
+
+For a comparison of objectives X and Y on one scenario:
+1. Within each objective, within each wording, draw that cell's valid runs with replacement, the same number as the
+   cell holds.
+2. Compute the estimand (decision 5: the mean of the per-wording means) for X and for Y, and their difference.
+3. Repeat `B` times (decision 7); the interval is the `ALPHA / 2` and `1 − ALPHA / 2` quantiles of the differences
+   (the percentile method, which can be explained in one sentence).
+
+Vectorized on numpy, one `numpy.random.Generator` (PCG64) per comparison, seeded from the sweep id and the comparison's
+name (decision 7), so no one chooses a seed. Tested: against `scipy.stats.bootstrap(method="percentile")` on
+unstratified data with matching seeds where the APIs allow, otherwise within Monte Carlo error; on a hand-checkable
+case (two objectives, one wording, three runs each); and the resample count's own Monte Carlo error at the interval's
+ends, measured at `B` = 10,000 and 100,000 (§14.3).
+
+### 7.3 Where each method applies
+
+Shares (S1, S2, and every secondary share): bootstrap. Choice rates (S3, S4): Newcombe. The degenerate share case
+(decision 10) is the one place this may change, by a dated patch to `planning/07` §6.3 with the simulation's evidence.
+
+## 8. The verdict engine
+
+### 8.1 The comparisons
+
+Per model and scenario: **A vs C, A vs B, C vs D, B vs D** (primary, 4 × 4 = 16 per model); **A vs D** (secondary,
+labeled as the expected comparison, the same computation, not in the family); **E vs each** (descriptive distance,
+§11). The sign convention is fixed: difference = first named minus second named (A − C, A − B, C − D, B − D, A − D).
+
+### 8.2 The three verdicts (`planning/07` §6.2)
+
+With `T` the threshold (0.10 for shares, 0.20 for choice rates), `d` the observed difference and `[lo, hi]` its
+interval:
+- **Split:** `lo > 0` or `hi < 0`, **and** `|d| ≥ T`.
+- **No split:** `−T < lo` and `hi < T` (the whole interval strictly inside ±T).
+- **Inconclusive:** anything else.
+
+A boundary value counts against the stronger verdict (an interval end exactly at ±T is not inside; exactly at 0 does
+not exclude it). Written as one function over (`d`, `lo`, `hi`, `T`), tested on every boundary.
+
+### 8.3 What the engine returns per comparison
+
+The difference, the interval, the method, `ALPHA`, `B` and seed (for the bootstrap), the valid run count on each side
+by wording, the verdict among valid runs, the worst-case-bound verdict (§9.4), the wording-direction label (§10.1),
+the final verdict after both, and the reason for any downgrade. Every field is in the results object, so a reader
+sees why a verdict is what it is.
+
+## 9. The failure rules (`planning/07` §5.2)
+
+### 9.1 Counting
+
+From each run's final record: `valid` and `valid_rescaled` are valid; `refusal` is a refusal; every other model status
+is a failure by type. `api_error` and `config_error` are never a final status (the runner's rule). **A refusal is
+also a run whose final status is `no_tool_call` and which a human call, logged in a file beside the sweep, judges an
+explicit decline** (`planning/07` §5.1: "applied by code where possible and by a logged human call otherwise"). The
+`possible_decline` flag only lists candidates for that call; it never decides one.
+
+### 9.2 Rates and the 10% exclusion
+
+Per cell (model × scenario × objective × wording): runs attempted, valid, rescaled, failed by type, refused, and the
+final failure rate including refusals. A cell above 10% is **unreliable**: reported, and excluded from the primary
+comparisons with its reason. By decision 6, its wording is dropped from **both** sides of every comparison it is in,
+and the verdict says "over wordings w1 and w3" (for example). A comparison left with no wording is "not assessable."
+
+### 9.3 First attempt beside final
+
+Every outcome is computed twice: on final results, and on first attempts only (runs whose first attempt was valid,
+using that attempt's amounts). The first-attempt verdicts are descriptive, beside the final ones.
+
+### 9.4 The worst-case bound (decision 3)
+
+For each comparison with failed or refused runs on either side: set each failed run's outcome to 0 or 1, in the
+direction that most narrows the difference, and recompute the **whole verdict** (interval included). If a split
+becomes anything else, the comparison is **inconclusive**, with the reason. Under decision 3 (a), also the direction
+that most widens it: if a no split becomes anything else, the comparison is **inconclusive**. A comparison with no
+failed runs is untouched. For choice rates, 0 and 1 mean the run did not or did make the choice; for shares, the
+share's own extremes.
+
+### 9.5 Whether failures differ by objective
+
+A descriptive table per scenario: each objective's failure and refusal rate, pooled over wordings, with a Newcombe
+interval for each pair. No verdict (`planning/04` §1.7 asks for it reported, not tested).
+
+## 10. The robustness rules
+
+### 10.1 Wording (`planning/07` §7.1)
+
+For a split: the difference under each wording separately, same sign convention. **Robust** if every per-wording
+difference has the pooled difference's sign and is not zero; otherwise **wording-sensitive**, with each wording's
+difference shown. For S3 and S4 the direction is the close or fund rate's. "No split" and "inconclusive" carry the
+per-wording differences too, descriptively.
+
+### 10.2 The sealed wording
+
+The whole verdict computation repeated on the sealed template's runs alone (`w2`, read from `objectives.toml`, never
+typed), labeled "sealed wording only," outside the family of 16.
+
+### 10.3 Position effects (`planning/07` §7.2)
+
+Each attempt records `menu_order` and `option_order`. Per scenario, descriptive only:
+- **levers:** each line's mean share of its scenario's total by its position in the menu (1 to k), and the slope of a
+  least-squares line through the run-level points, with the run count;
+- **options (S3, S4):** each option's choice rate when it was listed first, against when it was not, with a Newcombe
+  interval.
+No verdict. If a position effect is visible, it is published; shuffling already spreads it across objectives.
+
+## 11. The descriptive analyses (`planning/07` §6.5)
+
+Fixed in code before any result exists, outside the family:
+1. **The full allocation:** every offered line's mean, standard deviation, median and range, per scenario, per
+   objective, per wording and pooled; with per-run values kept in the results object, so spread can always be drawn
+   (`planning/06` §7.3).
+2. **The display groups** (`planning/07` §3.3), summed per run, labeled as overlapping.
+3. **Where the money went:** the same as 1 for S2's bearers and S4's uses and sources, with S4 split by choice.
+4. **S3's three-way split** of choices and its people lines by choice; **S4's funding sources** among `fund` runs and
+   among `decline` runs.
+5. **E's distance to each objective:** the mean over all pairs (one E run, one run of the other objective) of the
+   matcher's per-run distance (§13.1) on the full lever-level vector, **reported beside each objective's own
+   distance to itself** (the mean over pairs of its own distinct runs). Without that reference, a large distance could
+   be only spread.
+6. **Position effects** (§10.3) and **first attempt beside final** (§9.3).
+7. **S1's and S4's secondaries** (§6.1, §6.4).
+
+## 12. The repeat rule (`planning/07` §8)
+
+Input: a pilot's runs (Phase 4: two development wordings, two repeats, every scenario and objective). Output, per
+scenario, and nothing else:
+- **Shares (S1, S2):** the pooled standard deviation of the primary outcome over the scenario's cells (sum of squared
+  deviations from each cell's mean, over the sum of each cell's runs minus one; a cell with one valid run adds
+  nothing), its degrees of freedom, then n from (a) and (b), each rounded up, the larger, clamped to [6, 20], and
+  **the achieved precision** (the interval half-width at that n) when the cap binds.
+- **Choice rates (S3, S4):** 20, the cap, with the achieved precision at rates of 50% and 5%.
+
+The output carries no mean, no difference and no objective label, so computing the repeats shows no direction
+(Phase 4 decision 1's concern). Tested against `planning/07` §8's worked example (sd 0.15 gives 10 and 21, so 20;
+sd 0.10 gives 5 and 10, so 10), with the `z` that decision 7 fixes. **For Phase 4, noted in `KNOWN-GAPS.md`:** the
+planner takes one repeat count; the grid needs one per scenario.
+
+## 13. The matcher (`planning/07` §10.4)
+
+### 13.1 The per-run distance
+
+Between one run and the company's actual decision, on the case's **observable** dimensions only:
+- the lever-level vector (§6), restricted to the observable lines and renormalized to sum to 1 on each side; the
+  **total variation distance** (half the sum of absolute differences, 0 to 1). If either side's observable lines sum to
+  zero, that side's money dimension is undefined and the run is distanced on the choice alone (recorded);
+- the choice, where there is one and it is observable: 0 if the run made the company's choice, 1 if not;
+- where both exist, their mean with equal weight.
+
+An objective's distance is the mean of its runs' distances (§10.4 item 3). Five distances per case per model, each
+with a bootstrap spread (runs resampled within wording, as §7.2).
+
+### 13.2 Tie (decision 9)
+
+Between the two nearest objectives: the gap's bootstrap distribution (both objectives' runs resampled together, so
+the gap is computed on the same resample). **Tie** if its central 95% interval includes zero. 95% and not 99.7%: a
+match is a reading, not a test (`planning/07` §6.4).
+
+### 13.3 No good match, and minimum evidence (set by simulation, §14.2)
+
+- **No good match:** the nearest objective's distance is above a threshold `D*`. `D*` is set from synthetic cases
+  where the company's decision is drawn from the same distribution as one objective's runs (a true match): `D*` is
+  the 95th percentile of the nearest distance across those cases at the largest simulated spread, so a true match is
+  called "no good match" at most 5% of the time at the worst spread. Then checked: "opposite" cases must exceed `D*`
+  in at least 95% of trials, and the result recorded either way.
+- **Minimum evidence:** a case is "not enough disclosed to match" when its observable dimensions are fewer than `k*`,
+  the smallest number at which, in synthetic cases, the generating objective is nearest (or tied with the nearest)
+  in at least 80% of trials at the design spread. The choice counts as one dimension; each observable line counts as
+  one.
+- **Alternative readings** (`planning/07` §10.4 item 6): the matcher takes the rubric's uncertain calls as alternative
+  company decisions and runs once per reading; "depends on reading" when the nearest objective changes. Tested on a
+  synthetic rubric.
+
+### 13.4 The synthetic cases
+
+The four the planning names, plus the true match above. Built per scenario shape, from **randomly drawn objective
+profiles** (each objective's runs drawn around a Dirichlet-drawn mean allocation, with a choice rate drawn uniformly),
+never from a guess at how any objective behaves:
+1. **Identical:** the company's decision equals one objective's mean allocation and modal choice.
+2. **Opposite:** the company puts its money where that objective puts least, and makes the other choice.
+3. **Same choice, opposite money:** the choice matches; the allocation is opposite.
+4. **Sparse disclosure:** the identical case with only 1, 2, 3 ... observable dimensions (this sets `k*`).
+5. **True match:** the company's decision is one more draw from one objective's run distribution (this sets `D*`).
+
+Every case, its seed and the matcher's output go into `matcher-calibration.md`.
+
+## 14. The simulations
+
+### 14.1 The verdict rule
+
+Synthetic runs for two objectives, three wordings each, with stated distributions and seeds. **No parameter is
+taken from any run, the dossier or a guess at the answer** (scope doc finding 2); the ranges span the plausible.
+
+- **Shares.** Per-run outcome in [0, 1] from a Beta distribution with mean `μ` and standard deviation `σ`, mixed with
+  point masses at 0 and 1 (weight `π`), since a model often goes all in. S1's runs are rounded to the 1/125 grid.
+  `μ` ∈ {0.1, 0.3, 0.5, 0.7, 0.9}; `σ` ∈ {0.02, 0.05, 0.10, 0.15, 0.20, 0.25}; `π` ∈ {0, 0.2, 0.5}; true difference ∈
+  {0, 0.05, 0.10, 0.15, 0.20, 0.30}; repeats per wording ∈ {6, 10, 15, 20}; a wording shift ∈ {0, ±0.03, ±0.05},
+  shared by both objectives or reversed between them (to test §10.1).
+- **Choice rates.** Bernoulli with rate `p` ∈ {0, 0.05, 0.2, 0.5, 0.8, 0.95, 1}; true difference ∈ {0, 0.10, 0.20,
+  0.30, 0.35}; repeats per wording ∈ {6, 10, 15, 20}.
+- **Failures.** Failure rate per cell ∈ {0, 2%, 5%, 10%, 15%}, at random and, separately, only under one objective,
+  so the exclusion and the worst-case bound are exercised.
+- **Replicates.** 2,000 per grid point; 20,000 at every point with a true difference of 0 or exactly `T`, where the
+  rates are small (a 0.3% rate at 20,000 replicates has a Monte Carlo standard error of about 0.04 points). The
+  build's first act is a timing run (`--quick`); if the full grid would take more than about an hour on the laptop,
+  the grid is thinned, never the null and threshold points.
+
+**What is measured, each against a target written now:**
+
+| Measure | Where | Target | If missed |
+|---|---|---|---|
+| False split | true difference 0 | at most 0.05 / 16 per comparison (family-wise at most 5%) | dated patch to `planning/07` §6 |
+| False no split (decision 4) | true difference exactly `T` | at most 0.05 / 16 per comparison | dated patch to `planning/07` §6 |
+| Power | true difference 1.5 `T`, at the repeat rule's n | reported; at least 80% for shares where rule (a) sets n | stated in the protocol |
+| No split reachable | true difference 0, at rule (b)'s n | about 54% (the rule puts the half-width at 0.8 `T`, so "no split" needs the observed difference within 0.2 `T`, about 0.74 standard errors) | dated patch to rule (b) |
+| All agree | every run identical in both objectives, both methods | no "no split" from a zero-width interval | decision 10 |
+| Worst-case bound | each failure pattern | a verdict is never kept that the bound overturns | a bug, fixed before the tag |
+| Wording rule | reversed wording shift | flagged wording-sensitive | a bug |
+
+**`planning/07` §8's and `planning/08` §3.4's stated numbers, each checked and kept or corrected by a dated patch:**
+the share interval of about ±8 points at sd 0.15 and the cap; the choice-rate interval of about ±27 points near 50%
+and about ±12 points near 5% at the cap; a 30-point difference near 50% declared a split about 63% of the time, a
+35-point one about 80%; and 80% power for a 15-point share difference at sd 0.15 and about 10 per wording.
+
+### 14.2 The matcher
+
+The five synthetic cases of §13.4 per scenario shape, 2,000 trials each, at spreads `σ` ∈ {0.05, 0.10, 0.20} and 10
+repeats per wording (`planning/07` §10.4 item 1). Output: `D*`, `k*`, the rate at which each case type is labeled
+match, tie, no good match and not enough disclosed. Recorded in `matcher-calibration.md`.
+
+### 14.3 The resample count
+
+At two typical points (a share split near its boundary and a no split near its boundary), the verdict recomputed on
+200 seeds at `B` = 10,000 and at `B` = 100,000: the share of seeds on which the verdict differs from the majority.
+Recorded; it is the evidence for decision 7.
+
+### 14.4 Where results go
+
+`docs/phases/evidence/phase-3/simulation-results.json` (every number, its grid point, seed and replicate count; the
+git sha and the locked library versions) and `simulation-summary.md` (tables, each row pointing at the JSON). **Both
+are produced by code** (`hc simulate run`, then `hc simulate report`), and re-running from the same commit gives
+byte-identical files. A test checks the committed summary against the committed JSON.
+
+## 15. Commits
+
+He runs each one; short one-line messages, no attribution.
+
+- **C1** `phase 3: implementation doc` — this doc, after approval, with: `ROADMAP.md`'s Phase 3 row; START HERE; the
+  Phase 2.5 doc's DoD 8 CI id (`37714513948`); the `KNOWN-GAPS.md` OPEN entries (Phase 4: per-scenario repeats, the
+  `possible_decline` flag); the dated scope-doc notes decision 1 needs (Phase 3 Delivers 8 and DoD, Phase 1.5).
+- **C2** `phase 3: analysis group, run reader, outcomes` — steps 1-2.
+- **C3** `phase 3: intervals and verdict engine` — steps 3-4.
+- **C4** `phase 3: failure, robustness, descriptive` — steps 5-7.
+- **C5** `phase 3: repeat rule and matcher` — steps 8-9.
+- **C6** `phase 3: simulations` — steps 10-11, with the evidence files.
+- **C7** `phase 3: planning/07 patches and close-out` — step 12, and step 13's audit.
+
+## 16. Rules this build must not break
+
+- **No model is called.** Not official, not development. `tests/test_network_guard.py` stays green.
+- **No run record from any sweep is read.** Not `scratch/runs/`, not S3. Every test record is built by code.
+- **Synthetic data encodes no expected answer** (§14.1, §13.4).
+- **Every number is reproducible** from committed code, committed seeds and the locked library versions.
+- **The rules implemented are `planning/07`'s,** as patched. Where the build shows one cannot work as written, the fix
+  is a dated patch to `planning/07` with the evidence, made in this phase, before Phase 3.5. A better method found
+  along the way is noted for a later protocol version, not swapped in (the scope doc's risk on scope creep).
+- **No content change.** Nothing under `experiment/company/` changes; if one ever must, it goes through the change log.
+- **`make check` before every commit; CI green.**
+
+## 17. Decisions for him
+
+Ten. Each has a recommendation. Decisions 3, 4, 6 and 10 change `planning/07` by dated patches once decided.
+
+**ALL TEN DECIDED 2026-10-08 (his), each (a), as recommended:** 1, 3, 4, 7, 8 and 10 at 9:10 AM; 2, 5, 6 and 9 at
+9:17 AM. The options stay as the record.
+
+1. **The missing Phase 1.5 scorer** (§3 item 1).
+   - (a) **Recommended:** the engine is a **library** that returns a **versioned results object** (`RESULTS_VERSION`).
+     The static JSON, its schema and the site stay Phase 1.5's; when Phase 1.5 is built, its scorer serializes this
+     object. Dated notes amend the Phase 3 scope doc (Delivers 8 and the *(rests on 1.5)* prerequisite) and the Phase
+     1.5 scope doc (its scorer reads the run rows through `analysis/records.py`; whether DuckDB still earns its place
+     is its IMPLEMENTATION doc's question).
+   - (b) Build Phase 1.5's descriptive scorer and JSON here, without the site. More scope, designed before the page
+     it feeds exists.
+2. **Where the statistics libraries live** (§5).
+   - (a) **Recommended:** a separate **`analysis`** dependency group, installed locally and in CI by default, kept out
+     of the container image (`--no-default-groups`). The image runs sweeps and never analysis.
+   - (b) Ordinary runtime dependencies. Simpler; the image grows by numpy, scipy, pandas and statsmodels, none of
+     which it uses.
+3. **The worst-case bound, both ways** (§3 item 2, §9.4).
+   - (a) **Recommended:** apply it to **"no split" as well as "split"**: a "no split" that failed runs could overturn
+     is inconclusive. The cost: with failures, "no split" becomes harder to earn, by up to the failure rate (a 2%
+     failure rate can move a share difference by about 2 points). The simulation measures the cost at 0-15% failure.
+     Patch: `planning/07` §5.2.
+   - (b) As written: only "split" is protected. "No split," the verdict in the Roundtable's favor, would then be the
+     one verdict failures could quietly produce.
+4. **A false "no split" target** (§3 item 3).
+   - (a) **Recommended:** simulate how often the rule says "no split" when the true difference is exactly the
+     threshold, with the same target as false splits (at most 0.05 / 16 per comparison). Added to DoD 3; a miss is a
+     dated patch before the tag.
+   - (b) Measure it and report it, with no target.
+5. **How each objective's value is formed** (§3 item 8).
+   - (a) **Recommended:** shares use **the mean of the three per-wording means**, so each wording counts equally
+     even when failures leave them unequal; choice rates use counts pooled across wordings, which Newcombe's method
+     needs. With no failures the two are the same. Stated in the protocol.
+   - (b) The mean of all valid runs, pooled, for both. A wording with more failures then counts less.
+6. **An excluded cell** (§3 item 6, §9.2).
+   - (a) **Recommended:** **drop that wording from both sides** of every comparison it is in, and say so in the
+     verdict ("over w1 and w3"). Like with like, as `planning/07` §7.1 requires. Patch: `planning/07` §5.2.
+   - (b) Drop only the cell, so one side has fewer wordings than the other.
+7. **The interval's fine print** (§3 item 7, §7.2).
+   - (a) **Recommended:** `ALPHA` = **0.05 / 16 = 0.003125** exactly (z = 2.955), called "99.7%" in prose; the
+     **percentile** bootstrap with **100,000** resamples (the floor is 10,000; a 99.7% interval reads about 15
+     resamples in each tail at 10,000, and 156 at 100,000; §14.3 measures what that buys); each comparison's seed
+     derived from the sweep id and the comparison's name, so no one picks it. Patch: `planning/07` §6.3 and §8, to
+     carry the exact number.
+   - (b) 0.003 and 2.968, as `planning/07` §8's arithmetic has it; 10,000 resamples; a seed written into the protocol.
+8. **Keeping the engine away from the Phase 2.5 runs** (§3 item 9).
+   - (a) **Recommended:** the run reader **refuses any record under `development/` whose experiment is not the
+     placeholder**, with a message saying why. Official, pilot and placeholder records are read; nothing else. Tested.
+     Phase 4's prefixes must then fit it, which its IMPLEMENTATION doc confirms.
+   - (b) A rule in the docs only.
+9. **The matcher's open choices** (§6.4, §13.2).
+   - (a) **Recommended:** S4's vector holds **uses and sources together**, normalized by their combined sum; a **tie**
+     is a gap whose central **95%** bootstrap interval includes zero; `D*` from the 95th percentile of true-match
+     distances at the largest spread; `k*` from 80% identification at the design spread (§13.3).
+   - (b) S4 on uses only; a tie at the same 99.7% as the verdicts (more ties, fewer matches).
+10. **The all-agree share case** (§3 item 4). Not decidable before the evidence exists; agreed here as a procedure,
+    like Phase 3.5's decision 5.
+    - (a) **Recommended:** the simulation measures the bootstrap's behavior when every run in both objectives is
+      identical or nearly so (all-in mixtures with `π` up to 0.5, S1's grid). **If it gives a "no split" from a
+      zero-width or near-zero-width interval, Opus brings him a fix with the evidence before C7**, and a dated patch
+      to `planning/07` §6.3 records the choice. The leading candidate, stated now so it is not invented after: when
+      the runs of both objectives sit at one boundary value, the share outcome is also tested as a choice rate (the
+      share of runs at that value) by Newcombe, and the comparison takes the less certain of the two verdicts.
+    - (b) Accept the bootstrap's answer in that case, and say so on the methods page.
+
+## 18. Order of work
+
+Each step ends green under `make check`. Model choice in brackets (`CLAUDE.md`: Opus for design and review, Sonnet
+for routine code; he switches with `/model`).
+
+0. **C1** (him): this doc and the housekeeping in §15, after approval.
+1. **[Sonnet] The analysis group and the run reader.** `pyproject.toml` group and `default-groups`; the Dockerfile
+   change and a local image check; the mypy override; `records.py` with `RunRow` (run id, scenario, objective,
+   wording, repeat, final status, first-attempt status, the amounts used, the choice, `menu_order`, `option_order`,
+   the first attempt's amounts and choice); decision 8's refusal; tests on records **written by test code in the
+   runner's exact format** (built by calling the runner's own record functions on fake providers where possible, so
+   the format cannot drift).
+2. **[Sonnet] The outcomes** (§6), every key read from the scenario files; tests on hand-built runs for each
+   scenario, including S1's undefined secondary and S4's mixed-sign vector.
+3. **[Opus] The intervals.** First, read Newcombe (1998) Table II, or a published reproduction of it, from a live
+   copy, and write `worked-examples.md` with the source; then `intervals.py` and its tests (§7); the bootstrap's
+   cross-check against scipy.
+4. **[Opus] The verdict engine** (§8), with known-answer sets built **independently of the engine** (a split, a no
+   split, an inconclusive, each for shares and for choice rates, and the all-agree case for each method), every
+   boundary of §8.2 tested.
+5. **[Sonnet] The failure rules** (§9), including decision 3's bound both ways and decision 6's exclusion.
+6. **[Sonnet] The robustness rules** (§10).
+7. **[Sonnet] The descriptive analyses** (§11) and `results.py`, the versioned object.
+8. **[Sonnet] The repeat rule** (§12), tested on `planning/07` §8's worked example.
+9. **[Opus] The matcher** (§13) and its synthetic cases.
+10. **[Opus] The simulations** (§14): the timing run, then the full run, then the report. Opus reads every number
+    against its target and writes the findings into this doc's §20.
+11. **[Opus] `plain-english.md`**, finished from the notes kept since step 3.
+12. **[Opus, then him] The patches:** decisions 3, 4, 6 and 7, plus anything step 10 found (decision 10 included),
+    as dated patches to `planning/07`, each shown to him before it is applied.
+13. **[Sonnet] Close-out:** the DoD audit (§19), `ROADMAP.md`, START HERE, `KNOWN-GAPS.md`.
+
+## 19. Definition of done, and the proof of each
+
+| DoD (scope doc) | Proof |
+|---|---|
+| 1. Each interval method agrees with published worked examples, and with its library | `worked-examples.md` with live sources; the tests in CI |
+| 2. The verdict engine returns the known answer, shares and choice rates, the all-agree case included | the known-answer tests, built independently of the engine |
+| 3. The simulations are recorded; a miss is patched before Phase 3.5 | `simulation-summary.md` and `simulation-results.json`; every target in §14.1 met, or its dated patch |
+| 4. The matcher's no-match threshold and minimum-evidence rule are set | `matcher-calibration.md`, with `D*` and `k*` |
+| 5. The failure rules, robustness rules and descriptive analyses each have tests | the test files, green |
+| 6. No model was called; `make check` and CI green | the network guard test; the CI run ids |
+
+**Amended by decision 1:** the scope doc's Delivers 8 (the JSON under a new schema version) is replaced by the
+versioned results object; the JSON moves to Phase 1.5. **Amended by decision 4:** DoD 3 includes the false "no
+split" target.
+
+## 20. Genuinely uncertain
+
+- **How narrow the bootstrap runs at these sizes.** At 30-60 runs per objective and a 99.7% interval, the percentile
+  bootstrap is known to cover less than it claims. If it does here, the false-split and false-no-split targets will
+  show it, and the fix (a wider method, or a correction) is a dated patch. This is the most likely finding.
+- **The simulation's run time.** Estimated at well under an hour vectorized; the timing run says.
+- **Newcombe's published table.** One of eight recalled values disagreed with statsmodels (§3a). Step 3 settles it
+  from a live source.
+- **Whether `D*` and `k*` come out usable.** If the true-match and opposite cases overlap at the largest spread, no
+  threshold separates them; then "no good match" is defined at the design spread only, and the methods page says so.
+
+## 21. Cost
+
+**$0.** No model call, no AWS resource. Simulations run on the laptop. One throwaway download of the libraries was
+made while writing this doc (§3a), outside the project.

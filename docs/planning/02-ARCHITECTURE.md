@@ -3,6 +3,8 @@
 - **Status:** PROPOSED 2026-10-02. Facts marked *verified* were checked live that day. Costs are estimated in `03`.
   **Amended by `08` (2026-10-03):** §2.1 retries and a running spend cap, §2.8 per-run storage, §2.12 the Budgets
   filter's status (patches P18, P19, P20, P33 in `09` §3).
+  **Patched 2026-10-08 (his):** §2.12, the Budgets filter measured to work, and the tag budget added (Phase 0.5's
+  close-out, decision 3 (c)).
   **Patched 2026-10-04 (his):** §2.10, the budgets move from `main` to `bootstrap`, so they exist before the first
   model call and survive `main`'s teardown (`docs/phases/phase-0.5-aws-foundation.md`, decision 2).
   **Patched 2026-10-04 (his):** §1, §2.8 and §2.10, from Phase 1's decisions 4 and 5
@@ -264,6 +266,9 @@ Writing these by hand, one action and one resource at a time, is the "IAM depth"
   can target those lines** (*unverified*, checked in the Terraform step, `04` §3.3). Musical Mycelium's
   account-wide budgets stay as they are, as the net over the shared credit pot. Set before the first full sweep
   (`00` §8). The per-sweep cost record, not Budgets, is the authoritative per-project number.
+  *Patched 2026-10-08 (his):* the filter works, measured (`04` §3.3): a budget on Sonnet 4.6's line and one on the
+  `Project` tag, which official calls carry through the tagged application inference profiles (Phase 0.5 decision
+  3, (c)). Both end 2027-10-01 and are extended before then (`KNOWN-GAPS.md`).
 - **Cost dashboards filter by the Marketplace provider line** (§2.5).
 
 ---

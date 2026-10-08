@@ -5,6 +5,8 @@
 - **Read after:** `03-COST-MODEL`. **Read before:** `05-EVOLUTION-PLAN`.
 - **Amended by `08` (2026-10-03):** §1.1 objective wording, §1.2 and §7 the pre-registration's relation to `07`,
   §2.2 measurement, §2.6 and §7 the name check, §6.1 the wording cut (patches P23, P25, P28, P29 in `09` §3).
+- **Patched 2026-10-08 (his):** §3.3, both Budgets questions answered by measurement at Phase 0.5's close-out
+  (decision 3 (c), the tag budget).
 - **Patched 2026-10-05 (his):** §1.9 and §3.2, Sonnet 4.6 is the v1 main model, fixed; Sonnet 5.5 is no
   longer awaited (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry).
 - **Patched 2026-10-04 (his):** §3.4, the re-plan check also made on a projection before the official grid
@@ -362,6 +364,13 @@ ignore it, which is how the one real alarm gets missed.
   authoritative per-project number. Whether Bedrock application inference profiles with cost-allocation tags could
   split spend more finely is *unverified*; not needed if the per-model filter works.
 - **Whether additional budgets cost money is unverified**; checked before adding them.
+
+*Patched 2026-10-08 (his), from Phase 0.5's close-out (`docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md`
+§21):* **both questions above are answered by measurement.** A Budgets `Service` filter targets the Marketplace line
+(`Claude Sonnet 4.6 ( Bedrock Edition)`), and the `Project` tag on the application inference profiles lands on both
+Sonnet 4.6's Marketplace charges and Nova Pro's. Two budgets exist: one on Sonnet's line, one on the tag (Phase 0.5
+decision 3, (c)), which counts this project alone, Nova Pro included, without Musical Mycelium's judge calls. Both
+run 2026-10-01 to 2027-10-01: a longer custom period needs account-wide multi-year data. Added budgets cost nothing.
 
 **Owner:** Terraform step (`05`), `03` (patch).
 

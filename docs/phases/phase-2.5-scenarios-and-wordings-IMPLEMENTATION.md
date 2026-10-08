@@ -1188,7 +1188,7 @@ sjtroxel." *(One typo, "runes", corrected to "runs" with his permission.)*
 | 5. Checklist complete, blind reader done, both committed | **Met** | `neutrality-checklist.md`, `reader-brief.md`, `reader-raw.md` (commit `67cfac6`) |
 | 6. Change log complete, honor statement made | **Met** (14 entries and the draw, checked; both statements made) | `CHANGELOG.toml`; §22.3 |
 | 7. The harness refuses the sealed template | **Met** | `test_after_the_draw_real_content_runs_on_the_development_templates_only`; the refusal seen live in step 15's planning |
-| 8. No official model called; `make check` and CI green; spend measured | **Met** *(CI id of the close-out commit pending)* | no Bedrock call in this phase; §22.5 |
+| 8. No official model called; `make check` and CI green; spend measured | **Met** (close-out commit `6c8240f`, CI `37714513948` green) | no Bedrock call in this phase; §22.5 |
 
 **Deviations, stated:** the development model is `gpt-oss-openrouter`, not Ollama or Nova Lite (decisions 7 and 9);
 the format grid on the final text is one repeat per cell (`format2`, 40 runs), with `format1` (68 of 120 runs, three

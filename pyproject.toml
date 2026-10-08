@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "horizon-compact"
 # Tracks the ROADMAP version spine: Phase 0 is v0.0. The package version and the git tag are the only two
 # version numbers; a test keeps this file and src/horizon_compact/__init__.py in agreement.
-version = "0.0.0"
+version = "0.0.5"
 description = "An experiment: the same model, given five different corporate objectives, deciding the same capital allocation."
 # Upper bound is deliberate (Musical Mycelium's lesson): without it uv resolves to the newest interpreter on
 # the machine, which then disagrees with CI and with the container image.

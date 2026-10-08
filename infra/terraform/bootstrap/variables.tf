@@ -67,9 +67,13 @@ variable "budget_start" {
 }
 
 variable "budget_end" {
-  description = "End of the budget period. Within three years of the start; past the credits' expiry (2027-07-30)."
+  # Was 2029-09-30. AWS refused it on 2026-10-08: a period longer than the 14 months of cost history kept by
+  # default needs multi-year data turned on, which is account-wide (shared with Musical Mycelium) and lapses
+  # after three months unread. Twelve months stays inside the default. Custom budgets do not renew: extend this
+  # before it ends (KNOWN-GAPS.md, the hosting REMINDER entry).
+  description = "End of the budget period: 12 months, inside the 14-month default history; past the credits' expiry (2027-07-30)."
   type        = string
-  default     = "2029-09-30_00:00"
+  default     = "2027-10-01_00:00"
 }
 
 variable "budget_limit_usd" {

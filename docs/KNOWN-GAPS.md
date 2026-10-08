@@ -13,7 +13,14 @@ case by its type and a neutral label. The names live only in the private longlis
 > is **`w2`** (`docs/phases/evidence/phase-2.5/sealed-draw.md`). It closed on the development model
 > `gpt-oss-openrouter`, not Ollama: decision 7 applied, and **the Nova Lite probes and format runs are a prerequisite
 > of Phase 3.5's tag** (OPEN entry below). Bedrock is still blocked (BLOCKED entry).
-> **NEXT SESSION, first move: write the Phase 3 `scoring-and-simulation` IMPLEMENTATION doc (Opus)** from its scope
+> **2026-10-08 morning: the Phase 3 IMPLEMENTATION doc is WRITTEN (Opus) and APPROVED 9:17 AM (his, all ten as recommended):**
+> `docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md`, ten decisions in its §17. Its §1 lists what is
+> done, what AWS still blocks, and what is not blocked (Phase 0.5's billing close-out). Bedrock still throttled at
+> 13:55 UTC (`scratch/throttle-check.py`, one call each, $0); no reply on case 179121856900232.
+> **PHASE 0.5 CLOSED 2026-10-08, 9:32 AM** (his console and apply; IMPLEMENTATION doc §21): decision 3 is (c); two
+> budgets live to 2027-10-01; $0.02 spent in all. **NEXT: his commit of the doc work and close-out (one commit), then
+> Phase 3's build from its §18 step 1 (Sonnet).**
+> *(Was:)* **NEXT SESSION, first move: write the Phase 3 `scoring-and-simulation` IMPLEMENTATION doc (Opus)** from its scope
 > doc (`docs/phases/phase-3-scoring-and-simulation.md`), shown to him before any build. Phase 3 needs no AWS and calls no model.
 > *Everything below is the day's record, oldest first within the day; where it says otherwise, this block governs.*
 >
@@ -209,6 +216,26 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
+## OPEN — for Phase 3.5: Nova Pro must use its tagged profile, 2026-10-08
+
+Phase 0.5 decision 3 is (c) (his, 2026-10-08): the tag budget counts only calls made through the tagged application
+inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-sonnet-4-6` already; **Nova Pro is not in
+`models.toml` yet.** When Phase 3.5 fixes the model set, its entry takes `route = "application_profile"` with
+`inference_profile = "horizon-compact-nova-pro"`, or its spend misses the tag budget. A test should hold it.
+
+---
+
+## OPEN — for Phase 4, from the Phase 3 IMPLEMENTATION doc, 2026-10-08
+
+- **Repeats per scenario.** The repeat rule gives one count per scenario (shares by the pilot's spread, choice rates
+  at the cap of 20); `sweep/plan.py` takes one `repeats` for the whole sweep. Phase 4's IMPLEMENTATION doc adds
+  per-scenario repeats before the grid (Phase 3 IMPLEMENTATION doc §12).
+- **The `possible_decline` flag matches S4's option name** ("decline"; Phase 2.5 IMPLEMENTATION doc §22.4). It is
+  only a candidate list for the logged human call (Phase 3 doc §9.1), so it decides nothing, but it will list every
+  S4 text answer that names the option. Narrow the pattern in run code before the grid, with a test.
+
+---
+
 ## OPEN — prerequisite of Phase 3.5's tag: the Nova Lite probes and format runs, 2026-10-07
 
 **Phase 2.5 closed on the development model** (`gpt-oss-openrouter`) by its decision 7 (a), because Bedrock is
@@ -362,7 +389,14 @@ credits, if they cover the models (unverified). Each is his decision.
 
 ---
 
-## WAITING — Phase 0.5 close-out, on billing data, 2026-10-04
+## CLOSED 2026-10-08 — Phase 0.5 close-out, on billing data (was WAITING, 2026-10-04)
+
+**Closed by his console reads and one apply, 2026-10-08** (Phase 0.5 IMPLEMENTATION doc §21): the tag lands on both
+billing lines, so **decision 3 is (c)** (his); the Service string is `Claude Sonnet 4.6 ( Bedrock Edition)`; the
+whole account spent **$0.02** from 2026-10-04 to 2026-10-08, credits excluded; two budgets applied
+(`horizon-compact-sonnet-line`, `horizon-compact-project-tag`), **2026-10-01 to 2027-10-01**, since a longer custom
+period was refused without account-wide multi-year data; a second plan clean. The entry as it stood:
+
 
 The smoke calls ran 17:54-18:01 CDT on 2026-10-04; `Project` was activated as a cost allocation tag at 17:19 CDT.
 Cost Explorer and Budgets post usage up to about a day late, so these wait until **the evening of 2026-10-05 at the
@@ -414,6 +448,11 @@ measured. By 2027-06-30, either the static site moves to a free static host and 
 public repo, with AWS hosting torn down and the raw results archived where they cost nothing; or he decides, before
 the date, to keep AWS hosting on a stated cash budget. Free hosts and their terms are checked live at the time.
 Musical Mycelium shares the same credits and the same date. **Owner:** Phase 7 records the plan; he decides.
+
+**Added 2026-10-08: the budgets end 2027-10-01.** Both `horizon-compact-` budgets are one custom period, 2026-10-01
+to 2027-10-01 (12 months; longer needs account-wide multi-year data, Phase 0.5 IMPLEMENTATION doc §6). Custom
+budgets do not renew. **At the 2027-06-30 decision, also extend `budget_end`** (a new period, or multi-year data,
+his call then), or the alarms stop on 2027-10-01.
 
 ---
 
@@ -498,7 +537,7 @@ Each is Claude's, using live sources only. None blocks Phase 0.
 | Check | Source |
 |---|---|
 | ~~Ollama's install location and whether WSL can reach it (7 GB RAM visible in WSL)~~ **CLOSED 2026-10-04**, below | `planning/00` §9.7, `planning/04` §6.3 |
-| Whether AWS Budgets can filter on this project's per-model billing lines; whether added budgets cost money; whether application inference profiles could tag spend **PARTLY CLOSED 2026-10-04**, below; the tag half waits for a measurement. *Update 2026-10-04 evening:* the tagged profiles exist, `Project` is active (17:19 CDT), and calls 1, 2 and 4 went through them; the reading waits for billing data (WAITING entry above). Found: the Budgets Service list offers only services already billed | `planning/04` §3.3 |
+| ~~Whether AWS Budgets can filter on this project's per-model billing lines; whether added budgets cost money; whether application inference profiles could tag spend~~ **CLOSED 2026-10-08** by measurement (the CLOSED close-out entry above); was **PARTLY CLOSED 2026-10-04**, below; the tag half waits for a measurement. *Update 2026-10-04 evening:* the tagged profiles exist, `Project` is active (17:19 CDT), and calls 1, 2 and 4 went through them; the reading waits for billing data (WAITING entry above). Found: the Budgets Service list offers only services already billed | `planning/04` §3.3 |
 | ~~Converse: one tool with `auto` choice on Sonnet 4.6; how thinking settings are passed and recorded~~ **CLOSED 2026-10-04** by smoke calls 1, 3 and 4 (IMPLEMENTATION doc §19; `planning/07` §14.1 and §7.3 patched) | `planning/07` §14.1 |
 | ~~Nova Pro: default temperature, availability, knowledge cutoff~~ **CLOSED 2026-10-04**: the documented values below, and availability by smoke calls 2 and 5.2 (one `ModelErrorException` in three calls, recorded) | `planning/07` §14.2, `planning/01` §7.5 |
 | ~~Claude's default temperature value, for the methods page~~ **CLOSED 2026-10-04**, below | `planning/07` §14.3 |

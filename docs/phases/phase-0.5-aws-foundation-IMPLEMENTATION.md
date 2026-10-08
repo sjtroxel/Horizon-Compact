@@ -184,6 +184,14 @@ read from the Budgets console's own filter list in step 2, because the Cost Expl
 (`KNOWN-GAPS.md`, Musical Mycelium billing check). **Added budgets cost nothing** (closed 2026-10-04: notification-only
 budgets are free).
 
+*Amended 2026-10-08 (his, at close-out):* **the period ends `2027-10-01_00:00`, not `2029-09-30_00:00`.** The apply
+refused both budgets: "Historical data older than 14 months is required. Enable multi-year historical data tracking
+and resubmit." A custom period longer than Cost Explorer's default 14 months of history needs multi-year data turned
+on, an account-wide setting shared with Musical Mycelium that AWS turns off after three months unread. Twelve months
+covers v1 and the credits' expiry; custom budgets do not renew, so the end date is extended before it passes
+(`KNOWN-GAPS.md`, the hosting REMINDER entry). The ANNUALLY fallback was not taken: it resets, and the ceiling is
+cumulative.
+
 ## 7. The application inference profiles and the tag test
 
 Two `aws_bedrock_inference_profile` resources, free (Bedrock documentation: the price is the model's price), in
@@ -702,7 +710,7 @@ item 1 closed; `planning/03` §3.1 (tool-use input overhead) and §4 (developmen
 §3.3 and `planning/02` §2.12 patches it settles; the Sonnet-line budget; the phase's spend; then version 0.0.5 and
 the key deletion.
 
-**DoD audit, provisional (final at close-out):**
+**DoD audit, provisional (final at close-out; superseded by §21, 2026-10-08):**
 
 | Scope DoD | Verdict now | Evidence |
 |---|---|---|
@@ -715,3 +723,59 @@ the key deletion.
 | 7. `make check` and CI green with Terraform; no account ID or email tracked; guard on every commit | **PASS so far** | CI runs `37240755349`, `37241581113`, `37242580418`; the architecture test; re-checked at close-out |
 | 8. Spend measured from the bill, under $1 | **OPEN** | estimates $0.019; the bill is read at close-out |
 | 9. Nothing always-on; nothing of Musical Mycelium's changed | **PASS** | the plan (a bucket, a role, two profiles; none bills by the hour); the before-and-after reads; the dev policy's denies |
+
+## 21. Close-out (2026-10-08, his console and apply; Opus)
+
+All reads in the console (free), credits excluded. **Phase 0.5 is CLOSED.**
+
+**1. The tag measurement (decision 3).** Cost Explorer, 2026-10-04, daily, tag `Project` = `horizon-compact`. By
+service: `Claude Sonnet 4.6 ( Bedrock Edition)` $0.01, `Bedrock` $0.00, S3 $0.00. By usage type:
+`USE1-MP:USE1_InputTokenCount-Units` and `USE1-MP:USE1_OutputTokenCount-Units` (Sonnet 4.6, Marketplace-billed),
+`USE1-NovaPro-input-tokens` and `USE1-NovaPro-output-tokens`, and S3's request and transfer rows. **The tag lands on
+both billing lines, the Marketplace one included**: the question no source answered (§7) is answered by measurement.
+All three conditions of the agreed procedure hold. **DECIDED 2026-10-08 (his): (c).** `models.toml` already routes
+Sonnet 4.6 through `horizon-compact-sonnet-4-6` (`application_profile`), so nothing changes on the request path; the
+geo route stays in code as the other branch, unused. **Nova Pro is not yet in `models.toml`**; when it is added
+(Phase 3.5's model set), it must go through `horizon-compact-nova-pro`, or its spend misses the tag budget
+(`KNOWN-GAPS.md`).
+
+**2. The Service string.** The Budgets filter list: `Claude Sonnet 4.6 ( Bedrock Edition)` (a space after the
+opening parenthesis, none before the closing one), set as `sonnet_service_name` in the untracked
+`terraform.tfvars`.
+
+**3. The phase's spend (DoD 8).** Cost Explorer, 2026-10-04 to 2026-10-08, **the whole account**, by usage type:
+**$0.02 in all**: Sonnet 4.6 input and output about $0.01 each, Nova Pro, Nova Lite, gpt-oss and every S3 line under a
+cent each; nothing after 2026-10-04 but storage and requests, at $0.00. The project's spend is at most the account's,
+so **under $1, met.** No Haiku line in the window: Musical Mycelium made no Bedrock calls. **Whether the errored Nova
+Pro call (record 05) was charged is not separable** at the console's cent resolution; charged or not, under a cent.
+
+**4. The budgets.** Plan read by Claude before the apply: 2 to add, 0 to change, 0 to destroy; both names
+`horizon-compact-`; filters `Service` = the string above and `TagKeyValue` = `user:Project$horizon-compact`;
+`include_credit = false`; notifications hidden as sensitive (they carry the email), `ACTUAL` by the code and by
+`test_no_forecasted_budget_notification`. **First apply refused both** ("Historical data older than 14 months is
+required. Enable multi-year historical data tracking and resubmit."): the 2029 end date needed account-wide
+multi-year data. **His decision: a 12-month period, 2026-10-01 to 2027-10-01** (§6, amended). Second plan the same
+but for the date; **applied: 2 added** (`horizon-compact-project-tag`, `horizon-compact-sonnet-line`). Found while
+writing the tag budget: in HCL, `"$${"` is the escape for a literal `"${"`, so the first draft's filter value would have
+read `user:Project${var.project}` and matched nothing; caught with `terraform console` before any plan, rewritten
+with `format()`.
+
+**5. Planning patches decision 3 settles:** `planning/04` §3.3 and `planning/02` §2.12, dated 2026-10-08.
+
+**6. Version 0.0.5** in `pyproject.toml` and `__init__.py`, as §14's C4 planned.
+
+**DoD audit, final:**
+
+| Scope DoD | Verdict | Evidence |
+|---|---|---|
+| 1. Bootstrap applied, nothing shared created, second plan clean, provider unchanged | **PASS** | §15 steps 3-4; the close-out applies added only the two budgets |
+| 2. Deploy role trusts `main` only, no permission policy | **PASS** | run `37241137274`; the architecture test |
+| 3. Budgets on actual spend, credits excluded, filtered, no forecast; Musical Mycelium's unchanged | **PASS** | the two budgets above; the architecture tests; Musical Mycelium's budgets untouched (the dev policy denies any change to them; neither plan touched them) |
+| 4. Recorded calls: Sonnet 4.6 off, Sonnet 4.6 on, Nova Pro | **PASS** | records 01, 03, 04, 02, 05, 05.2 (§19) |
+| 5. Checks closed or carried; planning patches | **PASS** | the tag half closed by item 1; `planning/04` §3.3 and `planning/02` §2.12 patched |
+| 6. Development model named; Nova Pro's default temperature recorded | **PASS** | his decision 2026-10-04 (since amended by Phase 2.5's decision 9 for dev runs); 0.7 |
+| 7. `make check` and CI green; no account ID or email tracked; guard on every commit | **PASS** | CI on the close-out commit; the architecture test; the hooks |
+| 8. Spend measured from the bill, under $1 | **PASS** | item 3: $0.02 for the whole account |
+| 9. Nothing always-on; nothing of Musical Mycelium's changed | **PASS** | budgets bill nothing (notification-only); the plans |
+
+**Not done here, on purpose:** the `horizon-compact-dev` access key stays until Phase 1 closes (decision A, amended).
