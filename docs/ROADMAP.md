@@ -76,7 +76,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | **APPROVED 2026-10-04**, its four decisions as recommended; not yet built |
 | 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1 | not written; immediately before its build |
 | 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | **APPROVED 2026-10-06**, its five decisions as recommended; **built and closed 2026-10-06**, DoD audit in §14 |
-| 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | not written; immediately before its build |
+| 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | not written; immediately before its build |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | not written; immediately before its build |
 | 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split | not written; immediately before its build |
@@ -95,7 +95,20 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-06, evening
+### Where the build actually is — 2026-10-07, evening
+
+**Measured 2026-10-07, evening:** `make check` green, **723 tests passed**, root 13 of 16.
+
+- **Phase 2.5 `scenarios-and-wordings` is built and closed** (out of order, as Phase 2 was): four scenarios as data,
+  three wording templates, **`w2` sealed** by a draw from the review commit; a neutrality checklist and a blind
+  reader (`google/gemini-3.1-pro-preview`), 14 logged changes to the text; probes and format runs pass on the
+  development model `gpt-oss-openrouter`. DoD audit in its IMPLEMENTATION doc §22. About $0.59 of his OpenRouter
+  balance, no AWS spend, no official model.
+- **Next: Phase 3 `scoring-and-simulation`**, its IMPLEMENTATION doc first (Opus). It needs no AWS and no model.
+- **Before Phase 3.5's tag:** the Nova Lite probes and format runs (`KNOWN-GAPS.md`, OPEN). Phase 1 steps 3, 9, 11,
+  12, Phase 1.5 and Phase 0.5's close-out still wait on AWS.
+
+### Where the build actually was — 2026-10-06, evening *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-06, evening:** `make check` green, **442 tests passed**, root 13 of 16. `origin/main` at `6262c82`;
 the Phase 2 close-out (steps 8 and 9) is one commit he runs.
@@ -235,6 +248,16 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
+
+- **2026-10-07 — Phase 2.5 `scenarios-and-wordings` built and closed** (his; out of order, AWS still blocked). The
+  IMPLEMENTATION doc's seven decisions approved as recommended; decision 8 (S1 as three priced paths) and decision 9
+  (`gpt-oss-openrouter` as the development model, amended to cover every Phase 2.5 run) added in the build. A
+  ten-item neutrality checklist (Opus) and a blind reader (`google/gemini-3.1-pro-preview`, $0.28), whose point R5
+  found that S4's cuts spared payouts, prices and the environment, which the checklist had missed; all of both
+  accepted by him. Fourteen logged changes to the text, one of them (S2's wage limit) from the format runs. **The
+  sealed template is `w2`,** drawn once from the review commit `67cfac6`. Phase 2.5 closed on the development model
+  by decision 7; the Nova Lite runs are a prerequisite of Phase 3.5's tag. `planning/07` §3.2 patched (S4's cuts).
+  **Cost: about $0.59 of his OpenRouter balance; no AWS spend and no official model call.**
 
 - **2026-10-06 — Phase 2 `company-dossier` built and closed, started out of order** (his; Phases 1, 1.5 and every
   Bedrock run were waiting on AWS, and Phase 2 needs neither AWS nor a model). The IMPLEMENTATION doc and its five

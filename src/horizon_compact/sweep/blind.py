@@ -8,6 +8,10 @@ validator's problems, **with every digit replaced by `#` and every option's key 
 shape of any text the model wrote outside the tool call: its length in words, whether it reads as a decline,
 and whether it names the tool.
 
+*Also stricter (Opus, 2026-10-07, found reading format1's view):* the view names a run by scenario and
+template only, never by objective or run id (the plan maps a run id to its objective), since a problem such as
+"the wage cut is above its limit after eliminate_roles" says which lines a run used.
+
 *Stricter than section 11.3 (Opus, 2026-10-07, found by this module's test):* the section allowed the text
 itself. A model that fails by not calling the tool usually writes its decision as prose, and masking digits
 and option keys does not hide "closing the plant", so the text is never printed.
@@ -161,7 +165,7 @@ def failures_view(store: Store, experiment: Experiment, plan: SweepPlan) -> str:
             problems.append(str(attempt["detail"]))
         written = " ".join(str(t) for t in attempt.get("text_blocks") or [] if str(t).strip())
         lines += [
-            f"## {spec.scenario_id} {spec.wording_id} objective {spec.objective_id}, `{spec.run_id}`",
+            f"## {spec.scenario_id} {spec.wording_id}",
             "",
             f"- status: `{final['status']}` (first attempt `{final['first_attempt_status']}`, "
             f"{final['model_attempts']} model attempts)",
@@ -198,7 +202,7 @@ def failures_view(store: Store, experiment: Experiment, plan: SweepPlan) -> str:
             problems = [str(p) for p in validation.get("problems") or []]
             written = " ".join(str(t) for t in attempt.get("text_blocks") or [] if str(t).strip())
             lines.append(
-                f"- {spec.scenario_id} {spec.wording_id} objective {spec.objective_id}, attempt {n}: "
+                f"- {spec.scenario_id} {spec.wording_id}, attempt {n}: "
                 f"`{attempt.get('status')}`; problems: "
                 + ("; ".join(mask(p, keys) for p in problems) if problems else "none recorded")
                 + f"; text outside the tool call: {_text_shape(written, attempt)}"

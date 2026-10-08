@@ -5,6 +5,7 @@ here is a canary; no model is called."""
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -190,3 +191,14 @@ def test_the_view_also_counts_failed_attempts_that_a_retry_hid(tmp_path: Path) -
     assert "amounts.cut_wages_hours is #######, above its limit" in view
     assert "**1 failed attempts in runs that ended valid.**" in view
     assert str(CANARY_AMOUNT) not in view and "CANARYMEMO" not in view
+
+
+def test_the_failures_view_names_no_objective_and_no_run_id(
+    planted: tuple[LocalStore, SweepPlan],
+) -> None:
+    """A problem says which lines a run used, so the view must not say whose objective it ran under."""
+    store, plan = planted
+    view = failures_view(store, load_experiment("company"), plan)
+    assert "## s3 w" in view
+    assert re.search(r"objective [A-E]\b", view) is None
+    assert re.search(r"r-[0-9a-f]{12}", view) is None

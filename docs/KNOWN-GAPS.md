@@ -7,13 +7,23 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-07, morning
+> ## START HERE — where things stand, 2026-10-07, evening
+>
+> **PHASE 2.5 IS CLOSED** (DoD audit, honor statements and deviations: IMPLEMENTATION doc §22). The sealed template
+> is **`w2`** (`docs/phases/evidence/phase-2.5/sealed-draw.md`). It closed on the development model
+> `gpt-oss-openrouter`, not Ollama: decision 7 applied, and **the Nova Lite probes and format runs are a prerequisite
+> of Phase 3.5's tag** (OPEN entry below). Bedrock is still blocked (BLOCKED entry).
+> **NEXT SESSION, first move: write the Phase 3 `scoring-and-simulation` IMPLEMENTATION doc (Opus)** from its scope
+> doc (`docs/phases/phase-3-scoring-and-simulation.md`), shown to him before any build. Phase 3 needs no AWS and calls no model.
+> *Everything below is the day's record, oldest first within the day; where it says otherwise, this block governs.*
+>
+> ### The day's record, from the morning
 >
 > **PHASE 2.5 `scenarios-and-wordings`: IMPLEMENTATION doc WRITTEN (Opus) and APPROVED 2026-10-07 (his, all seven
 > §19 decisions as recommended)**: `docs/phases/phase-2.5-scenarios-and-wordings-IMPLEMENTATION.md`. Planning
 > patches applied the same day: `planning/00` §5.1 ("over the next twenty years"), `planning/07` §3.2 (employment
 > cost for L1 and L2; S4's cuts under both choices). The OPEN entry on S3's community consequence is CLOSED by
-> decision 5 (below). **Decision 7:** if Bedrock is still blocked at its step 16, Phase 2.5 closes on Ollama alone,
+> decision 5 (below). **Decision 7** *(applied 2026-10-07 evening, on `gpt-oss-openrouter`, not Ollama; see above)*: if Bedrock is still blocked at its step 16, Phase 2.5 closes on Ollama alone,
 > and **the Nova Lite probes and format runs become a prerequisite of Phase 3.5's tag** (they add to the Ollama
 > runs; nothing is re-run).
 > **BUILD, §17 STEPS 1-3 DONE 2026-10-07 (Sonnet) AND COMMITTED: `3039526`, pushed, CI run `37640121903` green.**
@@ -85,8 +95,11 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Review commit `67cfac6`, CI `37701059850` green. STEP 14 DONE (Opus): THE SEALED TEMPLATE IS `w2`**
 > (`sealed-draw.md`; draw record in the change log, checked by `hc scenarios check`), uncommitted for his commit C8.
 > Committed `fb2a92c`. **The blind format report and failures view are BUILT (Opus), uncommitted: `hc sweep report`;
-> stricter than §11.3 (the model's text is never printed, only its shape).** **NEXT: his commit, then step 15: `hc
-> sweep run` on `gpt-oss-openrouter`, `w1` and `w3`, 120 runs, worst case $0.27; then `hc sweep report`.**
+> stricter than §11.3 (the model's text is never printed, only its shape).** **STEP 15 DONE: format1 (68 runs) found one failure
+> type, S2's wage limit, fixed by entry 14; format2 (40 runs, the final text) 40 of 40 cells valid; probes re-run on
+> S2 and S4, 4 traced misses, no text change. PHASE 2.5 CLOSED 2026-10-07 on the development model (decision 7; the
+> Nova Lite runs are a prerequisite of Phase 3.5's tag, OPEN entry below), IMPLEMENTATION doc §22.** **NEXT SESSION:
+> Phase 3 `scoring-and-simulation`, its IMPLEMENTATION doc first (Opus); no AWS and no model needed.**
 > *(Was: his marks on R2-R5.)* *(Was:)* **the blind reader** (a vendor that makes none of the tested models, chosen live
 > and shown to him before sending, cap $3; it reads the current text, before any change); **then step 13 (Opus)**,
 > the accepted changes F1-F8 and F10, each text change logged. *(The spend warning spec as written:)* Before the
@@ -193,6 +206,16 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN — prerequisite of Phase 3.5's tag: the Nova Lite probes and format runs, 2026-10-07
+
+**Phase 2.5 closed on the development model** (`gpt-oss-openrouter`) by its decision 7 (a), because Bedrock is
+blocked (BLOCKED entry below). Before Phase 3.5 tags `prereg-v1`: the comprehension probes (40 questions, 5 repeats)
+and the format runs (4 scenarios x 5 objectives x `w1`, `w3`) on **Nova Lite**, through the same blind reports
+(`hc probes report`, `hc sweep report`). A failure type found there is fixed by a logged change, as in step 15.
+Estimated under $0.15 of AWS credit. Phase 2.5 IMPLEMENTATION doc §22.1.
 
 ---
 

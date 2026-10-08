@@ -991,7 +991,7 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
     (date, commit, template, hashes, `after_entry`), chained after entry 13; `hc scenarios check` recomputes the
     template from the commit and fails if the record, `objectives.toml` and the computation disagree, or if a
     template is set with no record (five canary tests). The development templates are now `w1` and `w3`.
-15. **Format runs** on `qwen-local`, 120; the blind report; failures read through the view; fixes logged; re-run the
+15. **[done 2026-10-07; detail in §22.4]** **Format runs** on `qwen-local`, 120; the blind report; failures read through the view; fixes logged; re-run the
     affected cells.
     *Amended 2026-10-07 (Opus, recording decision 9 as amended by him at 4:45 PM):* **on `gpt-oss-openrouter`, not
     `qwen-local`**, templates `w1` and `w3` (`w2` is sealed). Planned offline: 120 runs, worst case $0.27, sweep id
@@ -999,8 +999,8 @@ Model notes: Sonnet for code (steps 1-4, 8), Opus for drafting and review (steps
     the failures view (§11.3) were specified but not built. BUILT 2026-10-07 (Opus), §11.3's amendment:** `hc sweep
     report`. His run: `hc sweep run` with the plan above (`--max-minutes 60`), then `hc sweep report` with the same
     plan arguments; Opus reads only those two files.
-16. **Nova Lite**, if Bedrock answers: probes and format runs. If not, per decision 7.
-17. **Close-out:** the manual rule-zero read, the honor statement (both), the DoD audit, `ROADMAP.md`,
+16. **[deferred by decision 7, §22.1]** **Nova Lite**, if Bedrock answers: probes and format runs. If not, per decision 7.
+17. **[done 2026-10-07, Opus and him; §22]** **Close-out:** the manual rule-zero read, the honor statement (both), the DoD audit, `ROADMAP.md`,
     `KNOWN-GAPS.md` START HERE, the spend.
 
 ## 18. Definition of done, and the proof of each
@@ -1131,3 +1131,75 @@ The options stay as the record.
 **About $1-3, none of it on AWS unless Bedrock returns.** Ollama runs are free. The blind reader is one OpenRouter
 call, capped at $3 (Phase 2's cost $0.50). Nova Lite, if it runs: about 300 calls at roughly 4,500 tokens in and
 600 out, under $0.15.
+
+## 22. Close-out (step 17, 2026-10-07, Opus and him)
+
+### 22.1 Step 16, Nova Lite: decision 7 applies
+
+Bedrock is still blocked (every Bedrock rate quota at 0 applied; case 179121856900232 open). **By decision 7 (a),
+approved by him 2026-10-07, Phase 2.5 closes on the development model**, which is `gpt-oss-openrouter` by decision 9
+as amended, not Ollama: decision 7 was written when Ollama was the development route, and its reasoning holds for
+any development model (the content can be reviewed and frozen without Nova Lite; a weaker model finds more format
+problems, never fewer). **The Nova Lite probes and format runs are a prerequisite of Phase 3.5's tag**, recorded in
+`KNOWN-GAPS.md`.
+
+### 22.2 The manual rule-zero read (Opus)
+
+Every file Phase 2.5 added or changed under `docs/` and `experiment/` (a diff from `4250ea3`, Phase 2's close, plus
+the untracked files) was scanned for capitalized words mid-sentence and all-caps tokens: 675 distinct, each read.
+The proper names are authors of cited sources (the AI-exposure study behind S1's share, the R&D studies, Newcombe's
+interval), history (the Mayflower Compact), the placeholder's fictional garden, AI models and their makers, and his
+own projects. **No real company, brand, ticker or plant location.** The Company is fictional and built from
+industry aggregates; no Phase 2.5 figure comes from one firm. What the guard and this read cannot catch is unchanged
+(CLAUDE.md, rule zero): text typed into GitHub is his to check.
+
+### 22.3 The honor statements (DoD 6)
+
+**Claude (Opus), 2026-10-07.** I did not open any record of a run on the company's content. I read the probe
+reports (probe answers carry no objective), the blind reader's reply, the format reports and the failures views,
+and nothing else from those runs, with one exception and one disclosure:
+
+- **The exception:** the first format1 attempt was refused by OpenRouter (HTTP 401, a key that was not recognized)
+  before any model answered. I printed only that attempt's `status`, `error` and `detail` fields, with a check that
+  it held no parsed decision and no tool call; it held neither.
+- **The disclosure:** format1's first failures view named each failed attempt's objective. From it I learned that
+  in S2, ten failed attempts under objectives A, C, D and E had put money on both cutting wages or hours and
+  eliminating roles, beyond the wage cut's limit. No amount, choice or memo, and nothing about S1, S3 or S4 by
+  objective. The view was changed the same evening to name no objective and no run id (§11.3's amendment), and the
+  one change made from it (change log entry 14) rests on the failure type, which concerns format, not direction.
+
+Otherwise I saw no allocation, choice or memo, by objective or in total. Every change to what a model reads after
+the baseline is in `CHANGELOG.toml` with its evidence and reason. **This is an honor statement:** nothing in the
+harness can prove it; the blind reports are what make it credible.
+
+**Him (sjtroxel), 2026-10-07, in his words:** "I did not open any file under scratch/runs nor did I look at any of
+the run outputs. I did not seek out nor examine any of the results of the reports or the content within the report
+files. I saw no allocation, choice, or memo from any run on the company's content. This is the honor statement of
+sjtroxel." *(One typo, "runes", corrected to "runs" with his permission.)*
+
+### 22.4 Definition of done (§18)
+
+| DoD | Status | Proof |
+|---|---|---|
+| 1. Four scenarios as data, every number traced | **Met** | `hc scenarios check` in `make check`; `scenarios-cited.md` |
+| 2. Three templates, no added adjective, differ only in the sentence, sealed one drawn | **Met** | the template text check and the F10 test in CI; checklist §6; `sealed-draw.md`: **`w2`**, from `67cfac6` |
+| 3. Probes pass at 4 of 5, or traced | **Met:** all 40 on `e7bd77d7` (`probes2`); on the final text `a31d1f11`, S2 and S4 re-probed (`probes3-gpt-oss-openrouter-6f72067c`): 16 of 20 pass, **4 traced** | the probe reports. Traced, from the records (probe answers carry no objective, §10): S2 q3, S2 q7 and S4 q4 miss only where a repeat gave the list as one string, every value right (the answer's format, like probes1's millions); S2 q2 ("borne by the workforce") misses twice where the answer adds the R&D cut, which R2 relabeled "borne by ... its engineering staff": a correct reading of the changed text, so the question is now stricter than the text, and the text stays. No change, no log entry |
+| 4. Format runs parse under all five objectives, both development templates | **Met** | `format2-gpt-oss-openrouter-bfc44abd`: 40 of 40 cells valid on the final text (`a31d1f11`), 38 on the first attempt; `format1-...-29603836`: 67 of 68 finished runs valid on the text before entry 14, whose one failure type (S2's wage limit, ten attempts) entry 14 fixed: S2's first-attempt failures went from 8 of 22 to 1 of 10 |
+| 5. Checklist complete, blind reader done, both committed | **Met** | `neutrality-checklist.md`, `reader-brief.md`, `reader-raw.md` (commit `67cfac6`) |
+| 6. Change log complete, honor statement made | **Met** (14 entries and the draw, checked; both statements made) | `CHANGELOG.toml`; §22.3 |
+| 7. The harness refuses the sealed template | **Met** | `test_after_the_draw_real_content_runs_on_the_development_templates_only`; the refusal seen live in step 15's planning |
+| 8. No official model called; `make check` and CI green; spend measured | **Met** *(CI id of the close-out commit pending)* | no Bedrock call in this phase; §22.5 |
+
+**Deviations, stated:** the development model is `gpt-oss-openrouter`, not Ollama or Nova Lite (decisions 7 and 9);
+the format grid on the final text is one repeat per cell (`format2`, 40 runs), with `format1` (68 of 120 runs, three
+repeats, on the text before entry 14) as the failure-rate evidence; the failures view is stricter than §11.3.
+**A known weakness, for later:** the classifier's "reads as a decline" flag matches the word "decline", which is
+S4's own option name; format2's one S4 no-tool-call attempt was flagged so, and its retry was valid.
+format2 ran while the failures view's objective change was uncommitted, so its records say `git_dirty: true`;
+the uncommitted code was the report, not the run path, and every record's content hash pins the text it read.
+
+### 22.5 Spend
+
+All from his OpenRouter balance; none on AWS. Step 6a diagnostics about $0.24; the garden run $0.0017; probes1
+$0.0062; the blind reader $0.2831; probes2 $0.0063; format1 $0.0325; format2 $0.0176; probes3 $0.0034. **About $0.59,**
+against §21's estimate of $1-3.
