@@ -478,3 +478,9 @@ label = "Severance as a share of a year's pay, salaried staff"
 unit = "pct"
 formula = "shared_tenure * s1_severance_weeks / 52"
 note = "Checklist F4: S1's formula."
+
+[figures.wage_cap_drop]
+label = "How much the wage and hours cut's maximum falls per dollar of roles eliminated"
+unit = "pct"
+formula = "max_wage_cut / s2_cost_per_payroll_dollar"
+note = "Format run format1 (step 15): ten failed attempts put the wage cut at its full maximum while also eliminating roles. Eliminating a dollar of roles, at employment cost, removes 1 / 1.268 of a dollar of payroll, and the cut is at most 10% of the payroll left."

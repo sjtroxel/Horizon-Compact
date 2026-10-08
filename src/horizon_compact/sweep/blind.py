@@ -171,4 +171,37 @@ def failures_view(store: Store, experiment: Experiment, plan: SweepPlan) -> str:
             "- text outside the tool call: " + _text_shape(written, attempt),
             "",
         ]
+    lines += [
+        "## Failed attempts in runs that ended valid",
+        "",
+        "The same fields for every model attempt that was not valid in a run that a later attempt made valid, so "
+        "a failure that a retry hides is still counted by its cause.",
+        "",
+    ]
+    hidden = 0
+    for spec in plan.runs:
+        ended = finals.get(spec.run_id)
+        if ended is None or ended["status"] not in VALID:
+            continue
+        keys = _option_keys(experiment, spec.scenario_id)
+        for n in range(1, int(ended["final_attempt"])):
+            text = store.get(f"{prefix}runs/{spec.run_id}/attempt-{n}.json")
+            attempt = json.loads(text) if text is not None else {}
+            if attempt.get("status") in VALID or attempt.get("status") in (
+                "api_error",
+                "config_error",
+                None,
+            ):
+                continue
+            hidden += 1
+            validation = attempt.get("validation") or {}
+            problems = [str(p) for p in validation.get("problems") or []]
+            written = " ".join(str(t) for t in attempt.get("text_blocks") or [] if str(t).strip())
+            lines.append(
+                f"- {spec.scenario_id} {spec.wording_id} objective {spec.objective_id}, attempt {n}: "
+                f"`{attempt.get('status')}`; problems: "
+                + ("; ".join(mask(p, keys) for p in problems) if problems else "none recorded")
+                + f"; text outside the tool call: {_text_shape(written, attempt)}"
+            )
+    lines += ["", f"**{hidden} failed attempts in runs that ended valid.**", ""]
     return "\n".join(lines)

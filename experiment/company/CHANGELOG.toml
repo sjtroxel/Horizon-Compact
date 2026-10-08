@@ -132,3 +132,11 @@ template = "w2"
 hash_before = "e7bd77d74cb96e17e0320fe51f447c66b31795980cc652a8a978f6780c4f25cc"
 hash_after = "5bd849beef0d74e9c1df7d24126d4319382da527520ad4d6969127da794192a5"
 after_entry = 13
+
+[[entries]]
+date = 2026-10-07
+files = ["scenarios/s2.toml", "scenarios/s4.toml"]
+hash_before = "5bd849beef0d74e9c1df7d24126d4319382da527520ad4d6969127da794192a5"
+hash_after = "a31d1f1184a502ce7e9cede35755cbb2c5083b658aed0c7f27e75c12d84df3c3"
+evidence = '''format run format1-gpt-oss-openrouter-29603836 (step 15), read through the failures view: ten of thirteen failed attempts, all in S2, put the wage and hours cut above its limit after eliminating roles; the shrinking limit is now stated as a number. S4 has the same rule since R5 and gets the same sentence'''
+reason = "clarity"

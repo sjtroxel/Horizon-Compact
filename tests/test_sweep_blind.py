@@ -18,6 +18,7 @@ from horizon_compact.sweep.runner import sweep_prefix
 from horizon_compact.sweep.store import LocalStore
 
 CANARY_AMOUNT = 7654321
+CANARY_WORDS = 9876543  # seven digits: unlike 212, too long to turn up by chance in a hex run id
 CANARY_MEMO = "CANARYMEMO the memo must never be printed"
 PLAN_ARGS = [
     "--experiment", "company",
@@ -59,7 +60,7 @@ def plant(store: LocalStore, plan: SweepPlan, run: RunSpec, status: str, **attem
             "amounts": {"anything": CANARY_AMOUNT},
             "scaled_amounts": None,
             "choice": "retool",
-            "memo_words": 212,
+            "memo_words": CANARY_WORDS,
         },
         "text_blocks": attempt.get("text_blocks", []),
         "detail": None,
@@ -117,7 +118,7 @@ def test_neither_output_holds_an_amount_a_choice_or_a_memo(
         assert f"{CANARY_AMOUNT:,}" not in text
         assert "CANARYMEMO" not in text and "the memo must never be printed" not in text
         assert "retool" not in text
-        assert "212" not in text  # the memo's word count
+        assert str(CANARY_WORDS) not in text  # the memo's word count
         assert "anything" not in text  # a key that exists only inside the planted amounts
 
 
@@ -163,3 +164,29 @@ def test_hc_sweep_report_writes_both_files(
     assert (folder / f"{plan.sweep_id}.md").is_file()
     assert (folder / f"{plan.sweep_id}-failures.md").is_file()
     assert "**Runs finished: 1 of 40.**" in (folder / f"{plan.sweep_id}.md").read_text()
+
+
+def test_the_view_also_counts_failed_attempts_that_a_retry_hid(tmp_path: Path) -> None:
+    plan = company_plan()
+    store = LocalStore(tmp_path)
+    run = next(r for r in plan.runs if r.scenario_id == "s2")
+    plant(store, plan, run, "valid")
+    prefix = sweep_prefix(plan.experiment, plan.sweep_id)
+    hidden = {
+        "status": "schema_invalid",
+        "validation": {
+            "problems": [f"amounts.cut_wages_hours is {CANARY_AMOUNT}, above its limit"]
+        },
+        "parsed_decision": {"memo": CANARY_MEMO},
+        "text_blocks": [],
+    }
+    (tmp_path / f"{prefix}runs/{run.run_id}/attempt-1.json").write_text(json.dumps(hidden))
+    store.put_new(f"{prefix}runs/{run.run_id}/attempt-2.json", json.dumps({"status": "valid"}))
+    final = json.loads(store.get(f"{prefix}runs/{run.run_id}/final.json") or "{}")
+    (tmp_path / f"{prefix}runs/{run.run_id}/final.json").write_text(
+        json.dumps({**final, "final_attempt": 2, "model_attempts": 2})
+    )
+    view = failures_view(store, load_experiment("company"), plan)
+    assert "amounts.cut_wages_hours is #######, above its limit" in view
+    assert "**1 failed attempts in runs that ended valid.**" in view
+    assert str(CANARY_AMOUNT) not in view and "CANARYMEMO" not in view
