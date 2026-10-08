@@ -614,12 +614,59 @@ for routine code; he switches with `/model`).
    `analysis` and `simulation` imports those three (the image has none of them); `default-groups` and both Dockerfile
    lines are as above. *Opus review, same day:* the import reader skipped relative imports, so `from ..simulation
    import x` would have passed; it now resolves them against the file's package, with a test that proves it.
-3. **[Opus] The intervals.** First, read Newcombe (1998) Table II, or a published reproduction of it, from a live
+3. **[done 2026-10-08, Opus] The intervals.** First, read Newcombe (1998) Table II, or a published reproduction of it, from a live
    copy, and write `worked-examples.md` with the source; then `intervals.py` and its tests (§7); the bootstrap's
    cross-check against scipy.
-4. **[Opus] The verdict engine** (§8), with known-answer sets built **independently of the engine** (a split, a no
+   *As built.* **Newcombe's Table II was not readable in full** (publisher paywall; ResearchGate 403). Read instead:
+   three of its columns, (a), (b) and (h), as reproduced with a page-877 citation in the `pairwiseCI` R documentation,
+   and Fagerland, Lydersen and Laake (2011), whose equation 7 gives the formula and whose Table 3 gives a worked
+   example. statsmodels matches all four published values, and matches a hand-written equation 7 to 1e-15 on all
+   eight Table II columns at 95% and at `ALPHA`. **§3a's disagreement was my recall, not statsmodels:** the recalled
+   0.0381 is column (d)'s lower bound. Sources, both tables and what is and is not a published check:
+   `evidence/phase-3/worked-examples.md`. `analysis/intervals.py`: `ALPHA` = 0.05 / 16 exactly, `Z` = 2.9552 (computed,
+   not typed), `RESAMPLES` = 100,000; `newcombe_difference` (the one statsmodels call, typed); `mean_of_wording_means`
+   (decision 5); `comparison_seed(sweep_id, name)` (sha256, first 128 bits, into PCG64; decision 7);
+   `stratified_bootstrap_difference`, which refuses two sides with different wordings (like with like; the caller drops
+   an excluded wording from both, decision 6), empty cells and non-finite values. Quantiles use numpy's default
+   (linear), the same as scipy's percentile method. Tests: `tests/test_analysis_intervals.py` (48): published values,
+   the formula, the edges (never zero width), an exact enumeration of a three-run bootstrap, scipy within Monte Carlo
+   error, stratification, seeds, refusals, and **the all-agree [0, 0] kept as a visible test for decision 10.**
+   **§5 was wrong about scipy:** it ships no types. `scipy-stubs` 1.18.1.1 (2026-09-20) joins the `dev` group, so mypy
+   stays strict with no new override; its dependency `optype` is held at 0.18.0 (2026-06-07) in `uv.lock`, because
+   0.19.0 was 6 days old. The plain-English notes began: `evidence/phase-3/plain-english.md`.
+
+4. **[done 2026-10-08, Opus] The verdict engine** (§8), with known-answer sets built **independently of the engine** (a split, a no
    split, an inconclusive, each for shares and for choice rates, and the all-agree case for each method), every
    boundary of §8.2 tested.
+   *As built.* `analysis/verdict.py`: `decide(d, lo, hi, T)` returns the verdict and a sentence saying why;
+   `compare(outcomes, rows, first, second)` gives one `Comparison` (scenario, pair, role and label, outcome, kind,
+   threshold, the wordings it is "over", valid runs per wording per side, the `Interval`, the decision, and a
+   `degenerate_interval` flag); `compare_scenario` gives A-C, A-B, C-D, B-D, then A-D as "secondary: the expected
+   comparison". Only valid runs are read; runs from two sweeps or two models are refused; **a wording with no valid
+   run on one side is refused, never dropped quietly** (dropping is decision 6, the failure rules' call, made by
+   passing `wordings`). The bootstrap's seed name is `<scenario>:<first>-<second>`; the sealed-wording rerun (step 6)
+   passes its own name, e.g. `s1:A-C:sealed`. Tests: `tests/test_analysis_verdict.py` (54). **Known answers built
+   without the engine:** share cases whose interval is bounded by the data's range alone (every resampled mean lies
+   between a cell's smallest and largest value), and choice-rate cases checked against the test's own Newcombe.
+   **Mutation check:** twelve deliberate bugs planted in the boundary logic, one at a time; eleven failed the tests,
+   and the twelfth (dropping the same-side condition) is logically equivalent to the code, as noted below.
+   **Four findings, for step 12's `planning/07` patch list (his review), none changing a rule's intent:**
+   (a) **floating point at the threshold:** 57/60 − 45/60 is 0.19999999999999996, and its interval excludes zero, so
+   a plain `>=` would call an exact 20-point difference inconclusive. Every boundary is compared with a tolerance of
+   1e-9 (the finest outcome grid is 1/125 = 0.008); a value within it counts as on the boundary, which then goes
+   against the stronger verdict, except that "at least T" includes T, as `planning/07` §6.2 says.
+   (b) **a guard the planning does not state:** the difference must lie inside its own interval, or the verdict is
+   inconclusive. A percentile interval can, rarely, exclude its own estimate, and without the guard an interval
+   could satisfy split and no split at once. It can only weaken a verdict, and it makes §8.2's "|d| ≥ T" directional
+   (a split's difference is on the side of zero its interval is on).
+   (c) **decision 10 is already triggered, without waiting for the simulations:** when every run under both
+   objectives gives the same share, the bootstrap returns [0, 0] and the rule as written says **no split**. That
+   follows from arithmetic, and a test now holds it. The engine flags it (`degenerate_interval`) and does not hide
+   it. What the simulations still have to show is how often *nearly* identical runs give a near-zero width; the fix
+   (the leading candidate is in decision 10) comes to him before C7, as agreed.
+   (d) §8.3's remaining fields (the worst-case verdict, the wording label, the final verdict and the downgrade
+   reason) belong to steps 5 and 6, which extend `Comparison`; this step returns the verdict among valid runs only.
+
 5. **[Sonnet] The failure rules** (§9), including decision 3's bound both ways and decision 6's exclusion.
 6. **[Sonnet] The robustness rules** (§10).
 7. **[Sonnet] The descriptive analyses** (§11) and `results.py`, the versioned object.

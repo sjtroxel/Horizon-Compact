@@ -7,7 +7,16 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-08, late morning
+> ## START HERE — where things stand, 2026-10-08, midday
+>
+> **PHASE 3 STEPS 3-4 (INTERVALS, VERDICT ENGINE) DONE 2026-10-08 (Opus), for his commit C3** `phase 3: intervals
+> and verdict engine`; `make check` green, 864 tests. C2 is committed (`8e391c7`). `analysis/intervals.py` (Newcombe,
+> checked against Newcombe's Table II via a reproduction and Fagerland 2011; the stratified bootstrap, checked by exact
+> enumeration and against scipy) and `analysis/verdict.py` (the three verdicts, every boundary tested, known answers
+> built without the engine, a mutation check). **For him, from step 4:** decision 10 is already triggered by
+> arithmetic (all-identical shares give a [0, 0] interval and a "no split"); the engine flags it, and the fix comes to
+> him before C7. Four findings for step 12's patch list are in the IMPLEMENTATION doc §18 step 4. **NEXT: step 5,
+> the failure rules (Sonnet).**
 >
 > **PHASE 3 BUILD, STEPS 1-2 DONE 2026-10-08 (Sonnet), for his commit C2 `phase 3: analysis group, run reader,
 > outcomes`; `make check` green, 762 tests.** The `analysis` dependency group (numpy 2.5.3, scipy 1.18.1, statsmodels
