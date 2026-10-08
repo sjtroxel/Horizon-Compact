@@ -33,7 +33,7 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 | **1** `walking-skeleton` | v0.1 | The run path on **placeholder content, off the subject** (scenario, objectives, menu): Fargate, rate limiter, spend cap, official gate (closed), Bedrock, per-run write-once S3 | Container-run results in S3, each traceable to its image digest and input hashes; resume and cap shown | about $1 with 1.5 | **building since 2026-10-05**; steps 3, 9, 11, 12 wait on Bedrock quotas (`KNOWN-GAPS.md`) |
 | **1.5** `publish-path` | v0.1.5 | Scorer, committed static JSON, one page live at `horizon-compact.vercel.app` through CloudFront and Vercel | The placeholder sweep on the public URL, traceable; destroy and re-apply of `main` tested, raw results intact | cents | not started |
 | **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | **2 `company-dossier`: BUILT AND CLOSED 2026-10-06, out of order** (steps 1-9; `pyproject.toml` stays at Phase 1's version until Phases 1 and 1.5 close, Phase 2 decision 4); 2.5 not started |
-| **3** `preregistration-and-scoring` (split 2026-10-04: **3** `scoring-and-simulation`, **3.5** `preregistration`) | v0.3, v0.3.5 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | not started |
+| **3** `preregistration-and-scoring` (split 2026-10-04: **3** `scoring-and-simulation`, **3.5** `preregistration`) | v0.3, v0.3.5 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | **3: building since 2026-10-08**, steps 1-11 done, step 12 decided and not built, step 13 left; 3.5 not started |
 | **4** `official-grid` | v0.4 | Pilot (excluded), then the full grid on Sonnet 4.6, then Nova Pro; robustness checks; first measured cost | Full grid run under the protocol on at least Sonnet 4.6; the $60 re-plan point checked | about $20-30 | not started |
 | **5** `real-cases` (split 2026-10-04: **5** `case-building`, **5.5** `case-runs`) | v0.5, v0.5.5 | Cases by the pre-registered selection rule, dossiers, foreshadowing check, recognition probe, a rubric committed before each case runs | At least three cases run and matched, including an invest or retool case; selection log complete | about $20-25 | not started |
 | **6** `explorer-and-methods` (split 2026-10-04: **6** `explorer`, **6.5** `methods-and-release`) | v0.6, v0.6.5 | The full site and the methods page | A hostile reader could re-run the experiment from the published inputs; every real-case memo passed the name scan | under $2 | not started |
@@ -77,7 +77,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1 | not written; immediately before its build |
 | 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | **APPROVED 2026-10-06**, its five decisions as recommended; **built and closed 2026-10-06**, DoD audit in §14 |
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
-| 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; not yet built |
+| 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built 2026-10-08 through step 11** (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, plus his end-of-day commit); step 12 decided (its §20b), not built |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | not written; immediately before its build |
 | 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split | not written; immediately before its build |
 | 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5 | not written; immediately before its build |
@@ -95,7 +95,24 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-07, evening
+### Where the build actually is — 2026-10-08, evening
+
+**Measured 2026-10-08, 6:40 PM CDT:** `make check` green, **1176 tests passed**, root 13 of 16. Pushed through
+`0e8ec0b` (step 10); steps 11 and 12's decision go in his end-of-day commit.
+
+- **Phase 0.5 `aws-foundation` closed** in the morning ($0.02 spent in all; two budgets live).
+- **Phase 3 `scoring-and-simulation` built through step 11** (out of order: no AWS, no model): the run reader, the
+  outcomes, Newcombe and the bootstrap, the verdict engine, the failure, robustness and descriptive rules, the
+  versioned results object, the repeat rule, the matcher, and the simulations.
+- **The simulations found the share rule's false-split rate over its target** (worst 2.2% against 0.3125%) and
+  decision 10's all-agree case real. **Step 12 is decided, not built:** shares move to a stratified Welch
+  t-interval with two all-agree rules, which hold both targets on the same grid
+  (`docs/phases/evidence/phase-3/interval-screening.md`; IMPLEMENTATION doc §20b).
+- **Next: Phase 3 step 12's build (Opus), then step 13's close-out (Sonnet), then Phase 3.5.** Bedrock still has not
+  answered (case 179121856900232, opened 2026-10-05); the fallbacks researched today are in `KNOWN-GAPS.md`'s BLOCKED
+  entry, his to decide.
+
+### Where the build actually was — 2026-10-07, evening *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-07, evening:** `make check` green, **723 tests passed**, root 13 of 16.
 

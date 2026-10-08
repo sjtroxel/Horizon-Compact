@@ -79,8 +79,21 @@ def _side_transform(shifted: np.ndarray, length: int) -> np.ndarray:
 def exact_intervals(
     first: np.ndarray, second: np.ndarray, *, grid: int, alpha: float, chunk: int = 4
 ) -> ExactIntervals:
-    """The exact stratified percentile bootstrap for each replicate. ``first`` and ``second`` are integer
-    arrays of shape (replicates, wordings, runs per cell) on ``0..grid``.
+    """The exact stratified percentile bootstrap for each replicate at one ``alpha``."""
+    return exact_intervals_at(first, second, grid=grid, alphas=(alpha,), chunk=chunk)[alpha]
+
+
+def exact_intervals_at(
+    first: np.ndarray,
+    second: np.ndarray,
+    *,
+    grid: int,
+    alphas: tuple[float, ...],
+    chunk: int = 4,
+) -> dict[float, ExactIntervals]:
+    """The exact stratified percentile bootstrap for each replicate, at each of ``alphas`` from one
+    computation of the distribution. ``first`` and ``second`` are integer arrays of shape (replicates,
+    wordings, runs per cell) on ``0..grid``.
 
     Each cell is shifted to start at 0, so a side's resampled total spans only ``n`` times the sum of its
     cells' ranges, and the transform is sized to that rather than to the whole lattice; replicates are
@@ -102,8 +115,7 @@ def exact_intervals(
     span_second = n * (second.max(axis=2) - low_second).sum(axis=1)
     offset = n * (low_first.sum(axis=1) - low_second.sum(axis=1))
     need = span_first + span_second + 1
-    low = np.empty(reps)
-    high = np.empty(reps)
+    ends = {a: (np.empty(reps), np.empty(reps)) for a in alphas}
     order = np.argsort(need, kind="stable")
     for start in range(0, reps, chunk):
         rows = order[start : start + chunk]
@@ -118,11 +130,12 @@ def exact_intervals(
         index = (np.arange(length)[None, :] - s2[:, None]) % length
         cdf = np.cumsum(np.take_along_axis(pmf, index, axis=1), axis=1)
         total = cdf[:, -1:]
-        j_low = np.argmax(cdf >= (alpha / 2 - _TOLERANCE) * total, axis=1)
-        j_high = np.argmax(cdf >= (1 - alpha / 2 - _TOLERANCE) * total, axis=1)
-        low[rows] = (j_low - s2 + offset[rows]) / scale
-        high[rows] = (j_high - s2 + offset[rows]) / scale
-    return ExactIntervals(estimate, low, high)
+        for alpha, (low, high) in ends.items():
+            j_low = np.argmax(cdf >= (alpha / 2 - _TOLERANCE) * total, axis=1)
+            j_high = np.argmax(cdf >= (1 - alpha / 2 - _TOLERANCE) * total, axis=1)
+            low[rows] = (j_low - s2 + offset[rows]) / scale
+            high[rows] = (j_high - s2 + offset[rows]) / scale
+    return {alpha: ExactIntervals(estimate, low, high) for alpha, (low, high) in ends.items()}
 
 
 # --- the share distributions --------------------------------------------------------------------------------

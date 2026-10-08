@@ -54,6 +54,9 @@ In build order.
    (Bonferroni over 16 per model, §6.3), and exactly one of split, no split or inconclusive (§6.2). Shares use a
    stratified bootstrap by wording with at least 10,000 resamples; choice rates use Newcombe's score interval
    (decision 2).
+   *Amended 2026-10-08 (his authorization; IMPLEMENTATION doc §20a-§20b):* the simulations found the bootstrap's
+   false-split rate over its target, so **shares move to a stratified Welch t-interval** with two rules for runs that
+   all agree; choice rates keep Newcombe. Being built in step 12; the `planning/07` §6.3 patch follows.
 2. **The failure rules as code** (`planning/07` §5.2): per-cell failure and refusal rates; the 10% exclusion of
    unreliable cells; first-attempt beside final results; the worst-case bound that turns a split inconclusive when
    failed runs could overturn it; "among valid runs" labeling.

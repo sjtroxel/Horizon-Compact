@@ -234,6 +234,10 @@ at the edges (0 of n, n of n, both groups at 0%, both at 100%), where it must gi
 
 ### 7.2 The stratified bootstrap, for shares
 
+> *Superseded for the verdict 2026-10-08 (step 12, §20b; his authorization):* step 10 found this interval too narrow
+> (false splits up to 2.2% against 0.3125%), and shares move to a stratified Welch t-interval with two all-agree
+> rules. The bootstrap stays in the code for the matcher (95%, outside the family). Kept below as built.
+
 For a comparison of objectives X and Y on one scenario:
 1. Within each objective, within each wording, draw that cell's valid runs with replacement, the same number as the
    cell holds.
@@ -488,6 +492,11 @@ He runs each one; short one-line messages, no attribution.
 - **C6** `phase 3: simulations` — steps 10-11, with the evidence files.
 - **C7** `phase 3: planning/07 patches and close-out` — step 12, and step 13's audit.
 
+*As committed, annotated 2026-10-08 evening:* C6 landed as `0e8ec0b` with **step 10 alone** (his choice: the evidence
+file needed its large-file exception first). **Step 11 and step 12's decision** (the screening module and its
+evidence, §20b) go in **his end-of-day commit of 2026-10-08**. Step 12's build and patches, then step 13, follow;
+whether they are one commit or two is his call when they land.
+
 ## 16. Rules this build must not break
 
 - **No model is called.** Not official, not development. `tests/test_network_guard.py` stays green.
@@ -541,7 +550,8 @@ Ten. Each has a recommendation. Decisions 3, 4, 6 and 10 change `planning/07` by
    - (a) **Recommended:** **drop that wording from both sides** of every comparison it is in, and say so in the
      verdict ("over w1 and w3"). Like with like, as `planning/07` §7.1 requires. Patch: `planning/07` §5.2.
    - (b) Drop only the cell, so one side has fewer wordings than the other.
-7. **The interval's fine print** (§3 item 7, §7.2).
+7. **The interval's fine print** (§3 item 7, §7.2). *Annotated 2026-10-08 (step 12, §20b): `ALPHA` holds; the
+   resample count and seed rule now serve only the matcher, since shares move to a Welch interval.*
    - (a) **Recommended:** `ALPHA` = **0.05 / 16 = 0.003125** exactly (z = 2.955), called "99.7%" in prose; the
      **percentile** bootstrap with **100,000** resamples (the floor is 10,000; a 99.7% interval reads about 15
      resamples in each tail at 10,000, and 156 at 100,000; §14.3 measures what that buys); each comparison's seed
@@ -558,7 +568,8 @@ Ten. Each has a recommendation. Decisions 3, 4, 6 and 10 change `planning/07` by
      is a gap whose central **95%** bootstrap interval includes zero; `D*` from the 95th percentile of true-match
      distances at the largest spread; `k*` from 80% identification at the design spread (§13.3).
    - (b) S4 on uses only; a tie at the same 99.7% as the verdicts (more ties, fewer matches).
-10. **The all-agree share case** (§3 item 4). Not decidable before the evidence exists; agreed here as a procedure,
+10. **The all-agree share case** (§3 item 4). *Annotated 2026-10-08: triggered and settled by step 12 (§20b): the
+    candidate below was not enough; two rules replace it.* Not decidable before the evidence exists; agreed here as a procedure,
     like Phase 3.5's decision 5.
     - (a) **Recommended:** the simulation measures the bootstrap's behavior when every run in both objectives is
       identical or nearly so (all-in mixtures with `π` up to 0.5, S1's grid). **If it gives a "no split" from a
@@ -1003,9 +1014,18 @@ for routine code; he switches with `/model`).
     `test_simulation_report.py`; 1176 in all.
     **Step 9's flags, resolved:** `run_distance` stays in `descriptive.py`; `D*`/`k*` are set; the matcher's refusal of
     an objective with nothing to distance (finding (b)) occurs in 90 of 270,000 synthetic trials.
-11. **[Opus] `plain-english.md`**, finished from the notes kept since step 3.
-12. **[Opus, then him] The patches:** decisions 3, 4, 6 and 7, plus anything step 10 found (decision 10 included),
+11. **[done 2026-10-08, Opus] `plain-english.md`**, finished from the notes kept since step 3.
+    *As built.* Restructured into ten sections in the build's order (what is compared, intervals, verdicts, failures,
+    wordings and menu order, descriptive analyses, repeats, matcher, simulations), then **likely interview questions
+    with short answers** (`planning/04` §6.2's reason for the document) and the formulas last. Steps 5-8 had no notes
+    and were written from their as-built entries. The share interval's paragraphs are marked *under revision*: step 12
+    rewrites them.
+12. **[decided 2026-10-08, not built; Opus, under his authorization] The patches:** decisions 3, 4, 6 and 7, plus anything step 10 found (decision 10 included),
     as dated patches to `planning/07`, each shown to him before it is applied.
+    *Annotated 2026-10-08 evening:* **he authorized Opus's recommendations for step 12** ("you're authorized to proceed
+    accordingly"), so patches that follow a recommendation are applied and shown to him in the diff before his commit;
+    the three items he did not decide are listed at the end of §20b. **The share interval is decided (§20b), nothing
+    of step 12 is built yet, and the build order and file-level list are in §20b.**
 13. **[Sonnet] Close-out:** the DoD audit (§19), `ROADMAP.md`, START HERE, `KNOWN-GAPS.md`.
 
 ## 19. Definition of done, and the proof of each
@@ -1122,6 +1142,107 @@ the target. Each finding names what step 12 should decide; none is decided here.
    verdicts; all six disagreements sit at a boundary within the engine's Monte Carlo error.
 10. **For the methods page:** the share rule as pre-registered would have had a false-split rate above its stated
     level; the simulation found it before any real result existed, which is what the simulation is for.
+
+### 20b. Step 12's decision on findings 1-3 (2026-10-08 evening, Opus, under his authorization)
+
+He authorized Opus's recommendations for step 12 ("I normally do adopt your reasonable recommendations, so you're
+authorized to proceed"). The evidence: `evidence/phase-3/interval-screening.md` (generated, with its JSON), nine
+candidates judged on identical draws at every null, threshold and power point of §14.1's share grid and on the
+near-all-agree family.
+
+| Candidate | False split at 0: over (clearly) | False no split at T: over (clearly) | Near-all-agree, worst false no split |
+|---|---|---|---|
+| percentile (as written) | 268 (215), worst 2.12% | 55 (25), worst 1.25% | 14.57% |
+| expanded percentile | 182 (63), worst 0.97% | 10 (6), worst 0.97% | 14.57% |
+| **Welch t + floor + constant check** | **48 (1), worst 0.53%** | **1 (0), worst 0.38%** | **0.22%** |
+
+About 9 of 360 points would read "clearly" over by chance at the target, so Welch's 1 and 0 are what a rule that
+holds its level looks like. **Decided:**
+1. **Shares use a stratified Welch t-interval** at `ALPHA`: the difference of the mean of wording means, plus or
+   minus `t(1 - ALPHA / 2, df) * SE`, `SE^2` the sum over both objectives' cells of `s^2 / (W^2 n)` (sample
+   variances, `W` kept wordings), `df` by Welch-Satterthwaite. It replaces the percentile bootstrap for the verdict;
+   the matcher keeps its bootstrap (a 95% reading, outside the family). Choice rates keep Newcombe.
+2. **Decision 10, two rules,** for shares: (a) an interval narrower than 1/125 (one person in S1) is never a "no
+   split"; (b) when every valid run of either objective (over the kept wordings) has the same value, the share of
+   runs at that value is also compared by Newcombe at the share threshold, and the comparison takes the less certain
+   of the two verdicts (the same verdict when they agree, inconclusive when they do not). The candidate as written in
+   decision 10 is (b) narrowed to boundary values and to both objectives; the evidence shows that narrowing leaves
+   false "no splits" (3.98% with the floor alone; 2.15% for Welch with the floor alone).
+3. **The cost, stated:** power at 1.5 T falls where cells are small (median 12% at 6 per wording against the
+   percentile's 30%) and barely at the cap (62% against 66%); part of the percentile's apparent power was the same
+   narrowness that broke its error rate.
+
+**To build (next session, Opus), in this order. Written 2026-10-08 evening as the handoff; each item names its files.**
+
+1. **`intervals.welch_difference(first, second, *, alpha=ALPHA) -> Interval`.** Difference of the mean of wording means;
+   `SE^2` = sum over every cell of both sides of `s^2 / (W^2 n_cell)`, `s^2` the cell's sample variance (`ddof=1`),
+   `W` the number of wordings; `df` by Welch-Satterthwaite over those cell terms (`SE^4 / sum(term^2 / (n_cell - 1))`);
+   ends `d -+ t(1 - alpha / 2, df) * SE`. `Interval` gains `df: float | None`; `Method` gains `"welch"`. **Every cell
+   variance zero:** the interval is `[d, d]`, `df` None (rules (a) and (b) below handle it). **A cell with fewer than
+   two valid runs:** refuse with a `ValueError` naming it; unreachable in practice (at 6-9 repeats one failure already
+   drops the wording, at 10 or more a cell keeps at least 9), and a refusal is better than a silent variance of 0.
+   **Tests:** one wording against `scipy.stats.ttest_ind(..., equal_var=False).confidence_interval(1 - alpha)` (sign:
+   first minus second); a stratified case worked by hand in the test's comment; the zero-variance case; refusals;
+   alpha passed through.
+2. **`verdict.compare_cells`:** shares use `welch_difference`. Then rule (a), `SHARE_FLOOR = 1 / 125`: a share interval
+   narrower than it is never "no split" (it becomes inconclusive, with the reason). Then rule (b): over the kept
+   wordings' valid runs, if every run of either objective has one value `v` (the first objective's, if both), count
+   each side's runs equal to `v`, take `newcombe_difference` at `alpha` and `decide` at the share threshold, and keep
+   the less certain verdict (same if they agree, otherwise inconclusive). `Comparison` gains `floor_applied: bool`,
+   `constant_value: float | None`, `constant_check: Decision | None`; `decision` is the final one; keep
+   `degenerate_interval`. Choice rates unchanged. The failure rules' bound recomputes go through `compare_cells`, so
+   the rules apply there too, as they should.
+3. **Remove the seed and resample plumbing from the verdict path** (dead once shares are not resampled):
+   `compare_cells`, `compare`, `compare_scenario`, `failures.assess_comparison`, `assess_scenario`,
+   `robustness.sealed_result`, `robustness_scenario`, `results.build_results`; `ModelResults.resamples` and the
+   comparison's `seed`/`resamples` fields go. **`RESULTS_VERSION` becomes 2** (the interval's meaning and fields
+   change); the pinned-field test follows. The matcher keeps `RESAMPLES`, `comparison_seed` and its bootstrap.
+4. **Re-derive the affected tests, never edit them until they pass:** `test_analysis_verdict.py` (the share
+   known-answer sets were bounded by bootstrap properties; rebuild them from the test's own Welch arithmetic; the
+   all-agree `[0, 0]` test now expects inconclusive, by rules (a) and (b)), `test_analysis_failures.py`,
+   `test_analysis_robustness.py` (the sealed seed-name tests go), `test_analysis_results.py`. Then a **mutation check**
+   on `welch_difference` and the two rules, and on whatever else changed. The step 8-10 mutation scripts lived in the
+   session scratchpad and are gone; write new ones.
+5. **`repeats.py` on the t quantile:** rule (b) is the smallest n with `t(1 - ALPHA / 2, 6 (n - 1)) * sd * sqrt(2 / (3n))
+   <= 0.8 T`; rule (a) likewise with `t + 0.84`; `share_half_width` uses `t` at the n given. **Checked 2026-10-08:**
+   §8's worked example is unchanged (sd 0.10 gives 10, t = 3.094; sd 0.15 the cap). The by-hand numbers in
+   `test_analysis_repeats.py` that used `Z` are recomputed with `t`.
+6. **Matcher items decided by recommendation (step 9 findings), built before the re-run because they move `k*`:**
+   (a) a lone observable line carries no information, so the money dimension counts **lines - 1** (zero for one
+   line); `CompanyDecision.dimensions` and `matcher_sim`'s identification by k change with it, and `k*` is re-set from
+   the re-run; (d) "depends on reading" compares **matched sets** (the nearest, or the tied pair) and is set only when
+   the readings share no objective; (b) undistanced runs stay left out and counted (90 of 270,000 synthetic trials);
+   (c) the mean of wording means stays.
+7. **The simulations on the new engine:** move `screen.welch_intervals` into the share family's engine
+   (`verdicts.share_point`), and **validate it per replicate against `welch_difference` and the two rules** (the
+   validation family; agreement must be exact, not within Monte Carlo error). `report.py`: section 1's method text,
+   the all-agree table (rule as adopted beside step 10's), drop the section 14.3 resample family (it served decision 7
+   for the bootstrap verdict; its step 10 numbers stay in §20a finding 9 as the record). `exact.py` and `screen.py`
+   stay as the record of the screening. Then `PYTHONUNBUFFERED=1 uv run hc simulate run --workers 10` (10 workers is
+   the laptop's throughput peak; expected well under step 10's 68 minutes, since the share grid needs no FFT),
+   `uv run hc simulate report`, and **regenerate `analysis/matcher_thresholds.toml`** with
+   `report.thresholds_toml` (its header carries the results' code hash; a test compares the text). **Do not edit any
+   hashed file while the run is going.** Read every target again; update §20/§20a/§20b with the new numbers.
+8. **The dated `planning/07` patches**, each in place and listed in its status line as "Patched 2026-10-0X (his
+   authorization of 2026-10-08, on Opus's recommendation), from Phase 3 step 12": **§5.2** decision 3's bound both
+   ways (both widening signs for a no split), decision 6 (a wording dropped from both sides; "not assessable"), the
+   measured cost of failures; **§6.2** edges at a 1e-9 tolerance and the estimate-inside-its-interval guard (step 4
+   (a), (b)); **§6.3** Welch for shares, exact alpha 0.05 / 16 = 0.003125 (decision 7), decision 10's two rules,
+   Newcombe unchanged, descriptive intervals at 95% (step 5 (e)), the matcher's bootstrap at 95% with seeds by rule;
+   **§8** the t quantile, the choice precision +-25 / +-16 (step 8 (a)), rule (a) never setting n (8 (b)), 0.84 as
+   written (8 (c)), three wordings against a two-wording pilot (8 (d)), the "about 54%" qualified; **§10.4** `D*`
+   and `k*` per shape, distance as the mean of wording means, the matched-set reading rule, lines - 1, undistanced
+   runs; **decision 4**'s false-no-split target stated with the other simulation targets. Then §18 step 12 `[done]`,
+   START HERE, and step 13 (Sonnet).
+
+**His, not decided by the authorization (open, each with its cost; Opus's recommendation in brackets):**
+- **The worst-case bound's cost** (finding 4): keep it as built [recommended: the planning's intent, that failures
+  never manufacture a verdict, is the safer direction], or soften it (for example, apply it only above a stated
+  failure rate). Cost of keeping: a model that fails more than about 2% of the time supports few firm verdicts.
+- **The matcher's opposite check** (finding 6): judge it against the generating objective's own distance [recommended:
+  that is what the check was meant to show, and it passes at 99.8-100%], or keep the planning's wording and report it
+  missed. Either way "no good match" will be rare; the methods page must say so.
+- **The AWS fallback** (the BLOCKED entry in `KNOWN-GAPS.md`): suggested decision point mid-week of 2026-10-12.
 
 ## 21. Cost
 
