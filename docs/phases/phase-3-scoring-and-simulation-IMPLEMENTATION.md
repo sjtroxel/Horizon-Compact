@@ -1042,7 +1042,10 @@ for routine code; he switches with `/model`).
     variance), never edited to pass. **Mutation check: 39 of 39 caught** (a new scratchpad script; three needed new
     tests first: the floor's verdict condition, the rebuild's constant check, the identification grouping). The
     re-run and what it found are in §20c.
-13. **[Sonnet] Close-out:** the DoD audit (§19), `ROADMAP.md`, START HERE, `KNOWN-GAPS.md`.
+13. **[done 2026-10-09, Sonnet] Close-out:** the DoD audit (§19), `ROADMAP.md`, START HERE, `KNOWN-GAPS.md`.
+    *As built:* the audit is §19a; his decision on finding A is recorded in §20c; `ROADMAP.md`, START HERE and the
+    phase's status updated; one correction to the step 12 text (the "about 54%" wording, here and in `planning/07`
+    §8). `make check` green. **Phase 3 is closed.**
 
 ## 19. Definition of done, and the proof of each
 
@@ -1058,6 +1061,22 @@ for routine code; he switches with `/model`).
 **Amended by decision 1:** the scope doc's Delivers 8 (the JSON under a new schema version) is replaced by the
 versioned results object; the JSON moves to Phase 1.5. **Amended by decision 4:** DoD 3 includes the false "no
 split" target.
+
+### 19a. The audit, at close (2026-10-09, Sonnet; every proof opened in the repo that day)
+
+Measured: `make check` green, **1204 tests**; CI green on `84d82d7` (run 37941551854). One row per scope-doc DoD item.
+
+| DoD | Proof, as found | Met? |
+|---|---|---|
+| 1. Each interval method agrees with published worked examples, and with its library | **Newcombe:** `tests/test_analysis_intervals.py` holds Table II (three columns, via the `pairwiseCI` documentation, not Newcombe's paper itself, which was paywalled), Fagerland et al. 2011 Table 3 and equation 7, against statsmodels, with the worked-examples record in `evidence/phase-3/worked-examples.md`. Columns (c) to (g) of Table II come from statsmodels, not a published copy, and are marked so there. **Welch (step 12):** no published worked example was used. It is checked against `scipy.stats.ttest_ind(equal_var=False)` on one wording, a stratified case worked by hand in the test's comment, and the tests' own arithmetic (`hand_welch`). | **Partly.** Newcombe: yes, to the precision the sources give, with the limits above. Welch: against its library and by hand, not a published example. |
+| 2. The verdict engine returns the known answer, shares and choice rates, the all-agree case included | `tests/test_analysis_verdict.py`: splits, no splits and inconclusives for shares (Welch, by `hand_welch`) and choice rates (by `hand_newcombe`); the all-agree case under both of decision 10's rules, the floor alone, the constant check alone, an interior value, and the choice-rate all-agree. | **Met** |
+| 3. The simulations are recorded; a miss is patched before Phase 3.5 | `evidence/phase-3/simulation-results.json`, `simulation-summary.md` (§2 targets), the code hash equal to the code as committed. Recorded: power at 1.5 T, false split, false no split, reachability, across the grid. **Misses and what was done:** the bootstrap's false split (worst 2.22%) was patched out (Welch, `planning/07` §6.3), leaving **0.43% worst, 5 of 360 points clearly over 0.3125%**, which he accepted on 2026-10-09 (§20c finding A: state it, no recalibration). **Reachability** of no split: **49.7% at worst** against about 54% stated where the cap does not bind, patched into `planning/07` §8 as holding roughly (corrected this day). Near-all-agree worst false no split 0.33%, over the target but not clearly. | **Met with two stated residuals**, neither a surprise: the share false-split rate is held approximately, and reachability's worst point is four points under its stated figure. Both are written into `planning/07`. |
+| 4. The matcher's no-match threshold and minimum-evidence rule are set | `analysis/matcher_thresholds.toml` (`D*` and `k*` per shape, equal to the results by `test_the_thresholds_file_is_what_the_report_writes_from_the_results`); `evidence/phase-3/matcher-calibration.md`. The opposite check, judged on the generating objective (his decision 2), is met on every shape; "no good match" is rare by construction and the methods page must say so. | **Met** |
+| 5. The failure rules, the robustness rules and the descriptive analyses each have tests | `tests/test_analysis_failures.py` (43 test functions), `test_analysis_robustness.py` (31), `test_analysis_descriptive.py` (19); the bound and the wording rule are also rebuilt independently in the simulations (0 mismatches over 162 and 36 settings). | **Met** |
+| 6. No model was called; `make check` and CI are green | No provider, HTTP or AWS import anywhere under `analysis/` or `simulation/` (grepped; a grep miss is only a check, but `tests/test_network_guard.py` refuses any non-loopback connection in every test, and `test_architecture.py` holds the import rules). No run record under `scratch/runs/` was opened in this phase (the audit listed that folder's file names once, to check; contents unread). `make check` green, CI green on `84d82d7`. | **Met** |
+
+**Not in the DoD, and still open:** the methods page (his), Phase 1.5's scorer (waits on AWS), the AWS quota case, the
+model-set decision (Phase 3.5, `KNOWN-GAPS.md`'s Haiku 5.5 entry).
 
 ## 20. Genuinely uncertain
 
@@ -1291,11 +1310,14 @@ hashed file changed during the run (checked by sha256 before and after). `simula
   (recommended: the methods page gives the measured worst case beside the nominal level; of the nine candidates
   screened at step 12 none held it better), or calibrate a stricter alpha for shares on this grid (fits the
   correction to the grid; its power cost is not measured, and power is already thin where cells are small).
+  **Decided 2026-10-09 (his, on Opus's recommendation): state it.** The methods page gives the share rule's measured
+  worst case (0.43% per comparison against the nominal 0.3125%) beside the nominal level; no alpha recalibration.
+  The methods page is his to write (`CLAUDE.md`, public prose).
 - **B. Power fell where cells are small, as §20b expected.** At the repeat rule's n, power at 1.5 T is 96.8% or more
   where the cap does not bind, a median of 57.2% (worst 19.3%) where it binds. `08` §3.4's "80% power for 15 points
   at sd 0.15 and about 10 repeats" measures 76.5% at exactly 10 (84.4% under the percentile rule; rule (a) asks for
-  11 there). "No split reachable" where the cap does not bind: 49.7% at worst (the stated "about 54%" is near the
-  floor), median 97.7%; where it binds, median 0.2%. Patched into `planning/07` §8.
+  11 there). "No split reachable" where the cap does not bind: 49.7% at worst (four points under the stated "about
+  54%", so that figure holds roughly, not at its worst point), median 97.7%; where it binds, median 0.2%. Patched into `planning/07` §8.
 - **C. Failures, measured again** (§5.2 patch): at 20 per wording and sd 0.2, a true 15-point difference is a split
   84% of the time with no failures, 53% at 2%, 24% at 5%, 4% at 10% (300 replicates each). The first-order input to
   Phase 3.5's model choice stands; his decision 1 keeps the bound as built, revisited before the tag on a measured

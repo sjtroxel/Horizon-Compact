@@ -552,8 +552,10 @@ test (`04` §1.6). Reported as context, never used to filter runs.
   spread pooled over the pilot's two.
 - **Precision at the cap, corrected:** shares, sd 0.15, about **±8.3 points** (t on 114 degrees of freedom, 3.0195);
   choice rates, Newcombe at 60 runs a side, **±25 points near 50%** and **±16 near 5%** (the "±27" and "±12" below
-  were normal-approximation figures). **"No split reachable about 54%"** is a floor where the cap does not bind (49.7%
-  at worst, median 97.7%, in the simulations); **where the cap binds it falls to a median of 0.2%**, so on a wide or
+  were normal-approximation figures). **"No split reachable about 54%"** holds only roughly where the cap does not bind:
+  the worst point is **49.7%**, four points under the stated figure, and the median is 97.7%, in the simulations
+  (*corrected 2026-10-09, from Phase 3 step 13: this patch first called 49.7% a floor, which it is not*);
+  **where the cap binds it falls to a median of 0.2%**, so on a wide or
   all-in spread "no split" is effectively unreachable at 20 repeats. **Power at 1.5 times the threshold** is 96.8%
   or more where the cap does not bind and a median of 57% where it does. **The "80% power for a 15-point difference
   at sd 0.15 and about 10 repeats"** of `08` §3.4 measures 76.5% at exactly 10 (rule (a) asks for 11 there).

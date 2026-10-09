@@ -7,7 +7,51 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-09, morning
+> ## START HERE — where things stand, 2026-10-09, late morning
+>
+> **THE PHASE 3.5 IMPLEMENTATION DOC IS WRITTEN (Opus), AWAITING HIS APPROVAL:**
+> `docs/phases/phase-3.5-preregistration-IMPLEMENTATION.md`. **Ten decisions in its §15**, each with a recommendation
+> and its cost; the biggest: **(1)** the tag freezes the *instrument* code (prompt, validation, classification) as well
+> as the analysis; **(2)** the model set, which reopens "Sonnet 4.6 fixed" (recommended: Sonnet 4.6 main, Haiku 5.5 as a
+> third official model if Bedrock serves it, Nova Pro second family); **(3)** a garden-shape proxy to measure failure
+> rates before the tag, since no official model may see the company's content first; **(4)** the Nova Lite
+> prerequisite waits for Bedrock; **(5)** the tag waits for one working call per official model. **Amended before
+> approval (his): no cash by default.** Every model call in the phase runs on Bedrock under the credits once quotas
+> return (about $2-3.50 of credits, $0 of his money); OpenRouter routes are priced options only, and buy no time while
+> the tag waits on AWS. The reviewer defaults to `gpt-oss-120b` on Bedrock; `gpt-6-astra` ($1-2 cash) is his option. **Done for the doc looks like:** his decisions recorded in §15, then C1 (this doc, with Phase 3's step
+> 13 close-out files, his choice). **Then the build, §16 step 1 (Sonnet).** Steps 1-8 and 10-11 need no AWS; step 9 and
+> tag day do. Seventeen findings in its §3, live checks in §3a (GitHub: no ruleset, tag or release yet; Software
+> Heritage: the repo is not archived yet, and its save API accepts GitHub without an account).
+>
+> *Superseded 2026-10-09, late morning, by the block above (the doc is written):*
+>
+> **PHASE 3 IS CLOSED.** Steps 1-13 done; DoD audit in the IMPLEMENTATION doc §19a (four rows met, one met with two
+> stated residuals, one only partly: Welch has no published worked example, only scipy and a hand-worked case).
+> **NEXT MOVE (Opus): Phase 3.5 `preregistration`**, its IMPLEMENTATION doc written and approved first (scope doc:
+> `docs/phases/phase-3.5-preregistration.md`; nothing official runs before the tag). **Done for the doc looks like:**
+> approved, with its decisions listed with costs. **Carry into it:**
+> - **The model set is fixed there, before real cases** (`planning/05` §3.1). The **Haiku 5.5 entry below** (OPEN, 2026-10-08)
+>   is its main input: Haiku 5.5 as the main model or a cheap third official model, which reopens "Sonnet 4.6 is the
+>   main model, fixed" (his call). **A model's failure rate is a first-order input** (IMPLEMENTATION doc §20c, finding
+>   C): at 20 per wording and sd 0.2, a real 15-point difference is found 24% of the time at 5% failures (84% with none).
+> - **The worst-case bound is kept as built** (his decision, 2026-10-09), **to be revisited before the tag** on a failure
+>   rate measured on the chosen model, not before.
+> - **Nova Lite's probes and format runs** are a prerequisite of the tag (OPEN entry, 2026-10-07, below); Nova Pro's
+>   tagged profile (OPEN, 2026-10-08).
+> - **Phase 3.5 hashes `analysis/`**, which now holds Welch, the two all-agree rules, `RESULTS_VERSION` 2 and
+>   `matcher_thresholds.toml` (`D*` and `k*` per shape).
+> - **For his methods page** (his to write): the share rule's measured worst case, 0.43% against the nominal 0.3125%
+>   (his decision, 2026-10-09); that "no good match" will be rare, since with five random objectives one usually sits
+>   near any decision; and the cost of failures.
+>
+> **AWS is still the blocker for everything that calls a model** (the pilot, Phase 4). Case 179121856900232 (opened
+> 2026-10-05, "Unassigned" on 2026-10-09; filed correctly, checked from his screenshots) is left as it is on purpose, so
+> it keeps its place in the queue; a nudge, or the fallbacks in the BLOCKED entry below, is his call if a few more days
+> pass. Phase 3.5's IMPLEMENTATION doc needs no AWS; its tag needs the Nova Lite format runs.
+>
+> **Measured 2026-10-09:** `make check` green, 1204 tests, root 13 of 16; CI green on `84d82d7`.
+>
+> *Superseded 2026-10-09, mid-morning, by the block above (step 13 done):*
 >
 > **NEXT MOVE (Sonnet): Phase 3 step 13, the close-out** (IMPLEMENTATION doc §18 step 13): the DoD audit against §19,
 > `ROADMAP.md`, this block, and the phase's close. **Done looks like:** each DoD row with its proof, the ROADMAP row
@@ -26,7 +70,7 @@ case by its type and a neutral label. The names live only in the private longlis
 > of 2026-10-09:** (1) the worst-case bound kept as built, revisited before the tag once a failure rate is measured;
 > (2) the opposite check judged on the generating objective (met on every shape).
 >
-> **His open items:** **(A)** finding A of §20c: state the share rule's measured worst case on the methods page
+> **His open items:** **(A)** *(decided 2026-10-09, as recommended: state it, no recalibration)* finding A of §20c: state the share rule's measured worst case on the methods page
 > (recommended) or calibrate a stricter share alpha on this grid; **(3)** the AWS fallback. He is leaving case
 > 179121856900232 as it is for a few more days rather than risk its place in the queue (it is "Unassigned", filed
 > correctly, checked from his screenshots 2026-10-09); the BLOCKED entry below has the fallbacks.
