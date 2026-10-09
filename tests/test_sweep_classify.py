@@ -68,6 +68,23 @@ def test_no_tool_call_is_retried_and_a_decline_is_flagged_for_a_human() -> None:
     )
 
 
+def test_an_option_named_decline_alone_is_not_a_decline_but_a_real_refusal_is() -> None:
+    for text in (
+        "I would choose the decline option.",
+        "decline",
+        "My pick is to decline the offer and keep the plant open.",
+    ):
+        assert outcome(ok(calls=[], stop="end_turn", text=[text])).possible_decline is False
+    for text in (
+        "I will not make this decision.",
+        "I decline to make this decision.",
+        "I must respectfully refuse to choose.",
+        "I refuse.",
+        "I'm going to have to decline to make this call.",
+    ):
+        assert outcome(ok(calls=[], stop="end_turn", text=[text])).possible_decline is True
+
+
 def test_text_beside_one_call_is_not_no_tool_call() -> None:
     result = outcome(ok(text=["Some words beside the call."]))
     assert result.status == "valid"

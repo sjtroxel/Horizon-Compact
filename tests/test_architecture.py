@@ -590,3 +590,26 @@ def test_the_command_line_imports_the_simulations_only_inside_their_command() ->
         )
     ]
     assert not offenders, offenders
+
+
+def test_analysis_imports_nothing_from_model_config() -> None:
+    """The frozen analysis set must not depend on run code (Phase 3.5 IMPLEMENTATION doc section 5.1).
+
+    ``model_config.py`` is a run file that may change after the tag; ``analysis/`` reads scenarios
+    through ``experiment.py`` only.
+    """
+    offenders: list[str] = []
+    for path in sorted((ROOT / "src" / "horizon_compact" / "analysis").rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                base = "." * node.level + (node.module or "")
+                names = [base] + [f"{base}.{alias.name}" for alias in node.names]
+            else:
+                continue
+            offenders.extend(
+                f"{path.name}:{node.lineno} {name}" for name in names if "model_config" in name
+            )
+    assert not offenders, f"analysis/ imports model_config: {offenders}"

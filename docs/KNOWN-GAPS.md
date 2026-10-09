@@ -9,7 +9,15 @@ case by its type and a neutral label. The names live only in the private longlis
 
 > ## START HERE — where things stand, 2026-10-09, late morning
 >
-> **THE PHASE 3.5 IMPLEMENTATION DOC IS WRITTEN (Opus), AWAITING HIS APPROVAL:**
+> **PHASE 3.5 IMPLEMENTATION DOC APPROVED 2026-10-09 (his): all ten decisions as recommended, on two conditions:
+> OpenRouter capped at $5 in aggregate for every remaining use, and no indefinite AWS wait.** The second became a
+> **deadline: if Bedrock is not answering by Friday 2026-10-16 (tentative), the fallback set** (Haiku 5.5 main, `gpt-oss-120b`
+> second, through OpenRouter from the container, about $3-4 for all of v1) replaces decision 2's and the tag proceeds
+> (doc §15, decision 5). **Steps 1 and 2 DONE 2026-10-09 (Sonnet), uncommitted with the approval edits. NEXT: §16 step 3,
+> `protocol/sets.py` (Opus), then 4 (Sonnet), 5 and 6 (Opus), $0, no AWS.**
+> The doc was committed in `c00b8cf` before approval; the approval rides in the next commit.
+>
+> *Superseded 2026-10-09, late morning, by the block above (approved). The doc as written:*
 > `docs/phases/phase-3.5-preregistration-IMPLEMENTATION.md`. **Ten decisions in its §15**, each with a recommendation
 > and its cost; the biggest: **(1)** the tag freezes the *instrument* code (prompt, validation, classification) as well
 > as the analysis; **(2)** the model set, which reopens "Sonnet 4.6 fixed" (recommended: Sonnet 4.6 main, Haiku 5.5 as a
@@ -419,6 +427,10 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ## OPEN — for Phase 3.5: Claude Haiku 5.5 as a model-set candidate, 2026-10-08
 
+**Decided as a procedure 2026-10-09 (his, Phase 3.5 IMPLEMENTATION doc decisions 2 and 5):** Haiku 5.5 joins as a third
+official model if Bedrock serves it at build step 9; if Bedrock is not answering by 2026-10-16 (tentative), it becomes the main
+model of the fallback set (with `gpt-oss-120b`, through OpenRouter, inside his $5 cap). Closes at step 9 or on that date.
+
 Claude Haiku 5.5 launched on 2026-10-07 (Anthropic models overview and pricing pages, AWS Bedrock model card, read
 2026-10-08). **$0.10 / $0.50 per million tokens** for prompts up to 100,000 tokens, against Sonnet 4.6's $3 / $15:
 about a thirtieth. Bedrock: no in-region endpoint in us-east-1, US geo profile `us.anthropic.claude-haiku-5-5`; tool use
@@ -458,6 +470,8 @@ inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-son
 - **The `possible_decline` flag matches S4's option name** ("decline"; Phase 2.5 IMPLEMENTATION doc §22.4). It is
   only a candidate list for the logged human call (Phase 3 doc §9.1), so it decides nothing, but it will list every
   S4 text answer that names the option. Narrow the pattern in run code before the grid, with a test.
+  **Closed 2026-10-09** (Phase 3.5 step 2): "decline" now flags only as "decline to" in a clause starting with "I"; the bare
+  word no longer flags; "refuse" stays broad. `classify.py` is an instrument file, frozen at the tag.
 - **Refusal calls are made blind, once** *(added 2026-10-08, from Opus's review of Phase 3 step 5)*. The human call
   that turns a `no_tool_call` into a refusal (`refusal-calls.json` beside the sweep; Phase 3 doc §9.1) is made with
   the run's objective hidden, and the file is written once, before any official analysis. A call cannot change a
@@ -474,6 +488,10 @@ inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-son
 ---
 
 ## OPEN — prerequisite of Phase 3.5's tag: the Nova Lite probes and format runs, 2026-10-07
+
+**2026-10-09 (his, Phase 3.5 IMPLEMENTATION doc decisions 4 and 5):** run on Bedrock under the credits when quotas
+return; if Bedrock is not answering by 2026-10-16 (tentative), through OpenRouter (`amazon/nova-lite-v1`, under $0.25, inside his
+$5 cap).
 
 **Phase 2.5 closed on the development model** (`gpt-oss-openrouter`) by its decision 7 (a), because Bedrock is
 blocked (BLOCKED entry below). Before Phase 3.5 tags `prereg-v1`: the comprehension probes (40 questions, 5 repeats)
@@ -619,6 +637,10 @@ only if it needs a new call (it does not: it reads the 2026-10-04 bill). **What 
 **If AWS says no** (discussed 2026-10-05, nothing decided): ask again or escalate; another region; a free local open
 model (Ollama `qwen3.5:4b`) as the subject, a smaller but real version of the experiment; another cloud's new-account
 credits, if they cover the models (unverified). Each is his decision.
+
+**2026-10-09: the fallback has a date (his, Phase 3.5 IMPLEMENTATION doc decision 5).** If Bedrock is not answering by
+**Friday 2026-10-16 (tentative)**, official runs go to Haiku 5.5 and `gpt-oss-120b` through OpenRouter, called from the Fargate
+container, with **all remaining OpenRouter spend capped at $5** (his). Details in that doc's §15, decision 5.
 
 **2026-10-08 evening (his report): still no reply on the case.** He plans a nudge on the case on 2026-10-09 in his own
 words (AWS's own list says Sonnet 4.6 and Nova Lite should not be restricted). **Fallbacks researched live that

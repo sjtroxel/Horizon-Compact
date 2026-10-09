@@ -20,7 +20,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from horizon_compact.experiment import Experiment, ModelConfig, Objective
+from horizon_compact.experiment import Experiment, Objective
+from horizon_compact.model_config import ModelConfig
 from horizon_compact.providers.base import DecisionRequest, ModelRoute, Provider, RawDecision
 from horizon_compact.smoke.record import serialize_safely
 from horizon_compact.sweep.classify import (

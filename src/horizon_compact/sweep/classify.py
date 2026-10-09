@@ -74,7 +74,13 @@ _NETWORK_ERRORS = frozenset(
 )
 # Carried from Phase 0.5: Bedrock reports a malformed tool call as ModelErrorException.
 _MALFORMED_CODES = frozenset({"ModelErrorException"})
-_DECLINE = re.compile(r"won't|will not|cannot|can't|decline|refuse|unable to", re.IGNORECASE)
+# S4's option is named "decline", so the bare word is not a refusal: it counts only as "decline to" or
+# "declining to" in a clause that starts with "I" ("I'm going to have to decline to"). "refuse" names no
+# option and stays broad (Phase 3.5 IMPLEMENTATION doc section 16 step 2).
+_DECLINE = re.compile(
+    r"won't|will not|cannot|can't|unable to|refus|\bI\b[^.!?\n]{0,30}?\bdeclin(?:e|ing)\s+to\b",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)

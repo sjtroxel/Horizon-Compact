@@ -7,7 +7,7 @@ from itertools import pairwise
 
 import pytest
 
-from horizon_compact.experiment import Prices
+from horizon_compact.model_config import Prices
 from horizon_compact.providers.base import ToolSpec, Usage
 from horizon_compact.sweep.pacing import (
     Pacer,

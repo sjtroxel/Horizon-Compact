@@ -7,6 +7,8 @@
   Phase 0; the AWS half (Terraform bootstrap, budgets, smoke calls, Ollama, the development model, the `09` §5
   checks) becomes Phase 0.5 `aws-foundation`. Reason and record: `docs/phases/phase-0-scaffold-and-guardrails.md`,
   decision 6. The table below is unchanged as the record of the plan.
+  **Patched 2026-10-09 (his):** §3.1, the tag also freezes the instrument code (Phase 3.5 IMPLEMENTATION doc,
+  decision 1).
   **Patched 2026-10-05 (his):** §5.2 and §6, Sonnet 4.6 is the v1 main model, fixed; Sonnet 5.5 is no longer
   awaited (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry). §8 items 4 and 5 stay as the record.
   **Patched 2026-10-04 (his), from `docs/phases/phase-1-walking-skeleton.md`:** §5's Phase 1 is split into Phase 1
@@ -89,7 +91,7 @@ result. Everything else in this plan is a two-way door; this is the one that onl
 
 | Decision | Why it locks | What "right" means from the start |
 |---|---|---|
-| **Pre-registration before any official run** (§2) | A result seen before the protocol is fixed cannot be unseen | The protocol commit is a phase gate (Phase 3); the harness refuses to run an official sweep unless the protocol hash in its config matches a committed protocol. *Patched 2026-10-04 (his):* the tag freezes the content, the protocol **and the analysis code** (verdicts, intervals, matching); a change to any of them after the tag is a new protocol version. Run code may be fixed, each fix logged with its effect (Phase 3.5 decision 1) |
+| **Pre-registration before any official run** (§2) | A result seen before the protocol is fixed cannot be unseen | The protocol commit is a phase gate (Phase 3); the harness refuses to run an official sweep unless the protocol hash in its config matches a committed protocol. *Patched 2026-10-04 (his):* the tag freezes the content, the protocol **and the analysis code** (verdicts, intervals, matching); a change to any of them after the tag is a new protocol version. Run code may be fixed, each fix logged with its effect (Phase 3.5 decision 1). *Patched 2026-10-09 (his, Phase 3.5 IMPLEMENTATION doc decision 1):* the frozen code also includes the **instrument** (the prompt frame, validation and failure classification: `sweep/prompt.py`, `decision.py`, `classify.py`) and the loader the analysis reads scenarios through (`experiment.py`); the official analysis runs from a checkout of the tag |
 | **Provenance on every model call** (`02` §2.2) | A result without its model, prompt hash and seed cannot be defended or re-run; retrofitting means re-running everything | Recorded from the first skeleton call, including the placeholder runs |
 | **Raw responses kept, write-once** (`02` §2.8) | If only parsed numbers are kept, a scoring bug found later means paying for every run again | The raw response is stored next to the parsed decision; results are never overwritten |
 | **Official and development results kept apart** (`02` §2.2) | A laptop or local-model run mixed into the official set is Musical Mycelium's false-finding lesson | Official = container run, identified by image digest, under a committed protocol. Everything else is labeled development and stored under a different prefix |

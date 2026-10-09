@@ -236,6 +236,14 @@ phase from the evidence. Each keeps its original framing under *Was:* as the rec
 
 ## Left for the IMPLEMENTATION doc
 
+*Note 2026-10-09 (his approval of the IMPLEMENTATION doc, all ten decisions as recommended):* decision 1's freeze
+extends to the instrument code (prompt, validation, classification) and `experiment.py`; the protocol also freezes the
+real-case search queries (decision 6), the scaling factor's range and the coarsening rule (decision 7, §9.3); the
+model set is decided by a procedure at build step 9 (decision 2: Sonnet 4.6 main, Haiku 5.5 a third official model if
+Bedrock serves it, Nova Pro second family), **with a fallback set if Bedrock is not answering by 2026-10-16 (tentative)** (Haiku
+5.5 and `gpt-oss-120b` through OpenRouter from the container, inside his $5 cap; decision 5 as decided). That reopens
+"The main model" above under its stated conditions. Cost: $0 cash on the Bedrock path.
+
 The protocol's outline and its machine-readable format. Which files count as analysis code. The gate's checks, one by
 one. The archive and the GitHub protection settings, checked live. The reviewer's model and brief. The release's
 wording (a title, his). The real-case build rules' exact text (Delivers 2) and the case mode's checks. The order of the commits and of the steps on tag day.

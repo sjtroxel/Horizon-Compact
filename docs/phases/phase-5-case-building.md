@@ -277,6 +277,11 @@ All six taken 2026-10-04 (his), as recommended. Each keeps its original framing 
 
 ## Left for the IMPLEMENTATION doc
 
+*Note 2026-10-09 (Phase 3.5 IMPLEMENTATION doc §3 items 10-11, decisions 6 and 7, his):* **the search queries per
+channel, the template per case type section by section, and the scaling factor's range are frozen in the protocol**,
+not written here; the Phase 3.5 scope doc's amendment (from this doc's own decision 2) governs. This doc's
+IMPLEMENTATION doc runs them as written and reports any deviation.
+
 The search queries per channel, exactly. The template per case type, section by section. The extraction model and its
 prompt. The scaling factor's range. The independent reader's model and brief. The SEC User-Agent and
 rate handling, checked live. Where the private appendix's cache lives and how it is backed up. The neutral labeling

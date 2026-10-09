@@ -7,7 +7,7 @@ attempt with a cache hit (section 19); a test is added the day it is seen.
 
 from __future__ import annotations
 
-from horizon_compact.experiment import Prices
+from horizon_compact.model_config import Prices
 from horizon_compact.providers.base import ToolSpec, Usage
 
 # Phase 0.5 measured 716 tokens of tool overhead for a short prompt.

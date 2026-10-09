@@ -7,8 +7,10 @@
 > §5, the Phase 4, 5 and 5.5 scope docs (what they expect the protocol to hold), the Phase 2.5 IMPLEMENTATION doc §22
 > (its close-out and honor statements), the Phase 3 IMPLEMENTATION doc §15-§20c, and the harness as built
 > (`experiment.py`, `sweep/runner.py`, `sweep/plan.py`, `sweep/prompt.py`, `sweep/decision.py`, `sweep/classify.py`,
-> `analysis/`, `simulation/runner.py`, `infra/docker/Dockerfile`, `privacy/guard.py`). **Awaiting his approval.** Ten
-> decisions in §15, each with a recommendation and its cost.
+> `analysis/`, `simulation/runner.py`, `infra/docker/Dockerfile`, `privacy/guard.py`). **APPROVED 2026-10-09 (his), all ten
+> decisions in §15 as recommended, on two conditions of his:** no more than **$5 of OpenRouter, in aggregate, for
+> every use from here on**, and **no indefinite wait on AWS**. The second sets a deadline on decision 5 (§15, decision 5
+> as decided).
 >
 > **The doc is written so that the code and the protocol's text can be built without AWS; every model call waits
 > for it.** *Amended 2026-10-09 (his, before approval): **no cash by default.*** OpenRouter spends his own money;
@@ -519,7 +521,12 @@ He runs each one; short one-line messages, no attribution.
 
 ## 15. Decisions for him
 
-Ten. Each has a recommendation and its cost. None is taken until he says so.
+Ten. Each has a recommendation and its cost.
+
+**ALL TEN DECIDED 2026-10-09 (his), each as recommended**, on his two conditions: **(i)** OpenRouter spend capped at
+**$5 in aggregate** for every remaining use in the project (reviews, development runs and, under the fallback below,
+official runs); **(ii)** **no indefinite wait on AWS**, which decision 5 as decided turns into a dated fallback.
+Decision 7 takes (i), `gpt-oss-120b` on Bedrock. The options stay as the record.
 
 1. **What the tag freezes in code** (§3 items 1-3, §5).
    - (a) **Recommended:** three kinds of code: the **instrument** (`prompt.py`, `decision.py`, `classify.py`) and the
@@ -570,6 +577,28 @@ Ten. Each has a recommendation and its cost. None is taken until he says so.
      or on his fallback decision if Bedrock never returns.
    - (b) Tag as soon as the protocol is approved, and treat any later route change as `prereg-v2` before any official
      run. Faster; spends the clean v1 on a possible route change.
+
+   **DECIDED 2026-10-09 (his): (a), with a deadline.** *The date is a tentative, very general timetable (his, 2026-10-09), Claude's proposal confirmed by him as the best
+   balance of wait against decision time; **adjustable at his will as needed**, and moving it needs no protocol change.* **If Bedrock
+   is not answering by Friday 2026-10-16 (tentative)** (one call each on Nova Lite and Sonnet 4.6, `scratch/throttle-check.py`,
+   credits only), **the fallback set replaces decision 2's** and the tag proceeds without Bedrock:
+   - **Haiku 5.5 the main model, `gpt-oss-120b` the second family**, both through OpenRouter, called **from the
+     container** (Fargate tasks already get a public IP, `sweep/launch.py`), so official stays "a container run by
+     image digest". The key lives in SSM Parameter Store (standard tier, free) and is read by the task role. A third
+     OpenRouter path in the provider seam, with provider pinning (no silent fallback between backends) and the serving
+     provider recorded per call. A design change, made and logged before the tag.
+   - **Its money, estimated:** all of v1 on both models about **$3-4** (`gpt-oss-120b` about $0.0004 a decision,
+     measured in Phase 2.5; Haiku 5.5 about $0.001, from list price), inside the $5 cap with about $1-2 of margin. To
+     protect it: the thinking sub-study and Nova Pro are cut; the review uses `gpt-oss-120b`; decision 3's proxy runs
+     on the two fallback models only (cents); decision 4's Nova Lite runs move to OpenRouter (under $0.25). **The
+     harness's per-sweep caps are set so the project's OpenRouter total cannot pass $5**, and the cash ledger is
+     read before every run.
+   - **First, a few cents:** Haiku 5.5 on the garden shapes, to measure its failure rate before anything is fixed
+     around it. If it fails often, he decides with the numbers in hand.
+   - **What it gives up, stated in the protocol:** Sonnet 4.6 (the headline becomes a small current model and an
+     open-weights model), Nova Pro, the thinking sub-study, and most of the budget's margin.
+   - **If Bedrock returns after the fallback is taken but before the tag,** he chooses which set the protocol names;
+     after the tag, a Bedrock set would be its own protocol version.
 6. **The real-case search queries** (§3 item 10).
    - (a) **Recommended:** **frozen in the protocol**, query by query, with the shape rule and the coarsening rule of
      §9.3. Phase 5 runs them as written; a channel that has changed by then is reported, and its replacement query
@@ -611,11 +640,17 @@ routine code; he switches with `/model`). **The code and text steps (1-6, the sh
 AWS. Every step that calls a model (the runs in 7 and 8, then 9 and 11) waits for Bedrock, so nothing costs his money.**
 
 0. **C1** (him): this doc and the housekeeping in §13, after approval.
-1. **[Sonnet] The model-config split** (decision 1): `ModelConfig`, `ModelsFile`, `Prices` to `model_config.py`;
+1. **[Sonnet] The model-config split** (decision 1) `[done]` 2026-10-09: `ModelConfig`, `ModelsFile`, `Prices` to `model_config.py`;
    imports updated; no behavior change; the placeholder golden test untouched; a test that `analysis/` imports
-   nothing from `model_config.py`.
-2. **[Sonnet] The decline pattern** (OPEN, Phase 4): narrowed so S4's option name alone does not flag, with tests both
-   ways. C2.
+   nothing from `model_config.py`. *As built:* `model_config.py` carries its own small `_Strict` base (importing
+   `experiment._Strict` would be circular); `experiment.py` imports the two classes it loads; `spend.py`, `runner.py`
+   and one test import `Prices`/`ModelConfig` from the new module. Test: `test_analysis_imports_nothing_from_model_config`
+   in `test_architecture.py`. 1206 tests with step 2.
+2. **[Sonnet] The decline pattern** (OPEN, Phase 4) `[done]` 2026-10-09: narrowed so S4's option name alone does not flag, with tests both
+   ways. C2. *As built:* `_DECLINE` in `sweep/classify.py` keeps `won't`, `will not`, `cannot`, `can't` and `unable to`,
+   keeps a bare `refus` (no option is named that), and replaces the bare `decline` with "decline to" or "declining to"
+   within 30 characters of an "I" in the same clause (Opus review: the first build had narrowed `refuse` too). Test:
+   `test_an_option_named_decline_alone_is_not_a_decline_but_a_real_refusal_is`. `classify.py` is now final as an instrument file.
 3. **[Opus] `protocol/sets.py`:** the three sets by pattern, the hash function, tests that each file is in exactly one
    set and that `__pycache__` and untracked files are not.
 4. **[Sonnet] `protocol/lock.py` and `hc protocol lock --write` / `hc protocol check`;** `make check` runs the check;
