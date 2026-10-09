@@ -13,9 +13,12 @@ case by its type and a neutral label. The names live only in the private longlis
 > OpenRouter capped at $5 in aggregate for every remaining use, and no indefinite AWS wait.** The second became a
 > **deadline: if Bedrock is not answering by Friday 2026-10-16 (tentative), the fallback set** (Haiku 5.5 main, `gpt-oss-120b`
 > second, through OpenRouter from the container, about $3-4 for all of v1) replaces decision 2's and the tag proceeds
-> (doc §15, decision 5). **Steps 1 and 2 DONE 2026-10-09 (Sonnet), uncommitted with the approval edits. NEXT: §16 step 3,
-> `protocol/sets.py` (Opus), then 4 (Sonnet), 5 and 6 (Opus), $0, no AWS.**
-> The doc was committed in `c00b8cf` before approval; the approval rides in the next commit.
+> (doc §15, decision 5). **Steps 1 and 2 DONE and committed (`dd3a28a`, with the approval). Step 3 (`protocol/sets.py`,
+> Opus) DONE 2026-10-09, uncommitted (rides with step 4's commit, his choice); `providers/base.py` stays run code (his,
+> as recommended). Step 4 (`protocol/lock.py`, `hc protocol lock` / `check`, Sonnet) DONE 2026-10-09, uncommitted, with
+> a list of the choices it made in its §16 note; reviewed by Opus the same day (one fix, `tree_sha256` now skips
+> untracked files). Steps 3 and 4 commit together. **NEXT: §16 step 5, `protocol/gate.py` (Opus), then 6 (Opus), $0,
+> no AWS.**
 >
 > *Superseded 2026-10-09, late morning, by the block above (approved). The doc as written:*
 > `docs/phases/phase-3.5-preregistration-IMPLEMENTATION.md`. **Ten decisions in its §15**, each with a recommendation

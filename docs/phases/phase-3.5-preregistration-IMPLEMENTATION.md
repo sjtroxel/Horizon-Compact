@@ -651,10 +651,61 @@ AWS. Every step that calls a model (the runs in 7 and 8, then 9 and 11) waits fo
    keeps a bare `refus` (no option is named that), and replaces the bare `decline` with "decline to" or "declining to"
    within 30 characters of an "I" in the same clause (Opus review: the first build had narrowed `refuse` too). Test:
    `test_an_option_named_decline_alone_is_not_a_decline_but_a_real_refusal_is`. `classify.py` is now final as an instrument file.
-3. **[Opus] `protocol/sets.py`:** the three sets by pattern, the hash function, tests that each file is in exactly one
-   set and that `__pycache__` and untracked files are not.
-4. **[Sonnet] `protocol/lock.py` and `hc protocol lock --write` / `hc protocol check`;** `make check` runs the check;
+3. **[Opus] `protocol/sets.py`** `[done]` 2026-10-09: the three sets by pattern, the hash function, tests that each file is in exactly one
+   set and that `__pycache__` and untracked files are not. *As built:* the universe is the package
+   (`src/horizon_compact/`); instrument = the three exact paths, analysis = `analysis/**` and `experiment.py`, run =
+   the rest; a file takes the first set it matches. Listing walks the disk and, where `.git` exists, keeps only what
+   `git ls-files` lists (a git that cannot answer is an error, never "no filter"; `GIT_DIR` and its kin are ignored so
+   a hook's environment cannot point it at another repository); without `.git` (the container) the pattern alone.
+   A tracked file missing on disk drops out, and `unmatched_patterns` names a frozen pattern that matches nothing, for
+   step 4's lock writer. A frozen set that lists empty is an error (wrong root). The hash is `code_hash`'s scheme,
+   sorted by path string; `code_hash` itself is untouched, since the simulation results record its value.
+   `protocol/` is run code: a change to its patterns changes a set's hash, which the gate then refuses.
+   `tests/test_protocol_sets.py`, 20 tests: the real sets pinned file by file (instrument 3, analysis 13 today), the
+   partition, the synthetic checkout and container trees, the hash both ways; five mutations of `sets.py` each
+   caught. Checked live: the laptop tree and a `git archive` copy give the same two hashes.
+   **Two findings.** (a) **Frozen code imports two run files**: `prompt.py` and `classify.py` import
+   `providers/base.py` (the seam's types; `RawDecision.tool_call_count` and `tool_input` are logic `classify.py`
+   reads), and `experiment.py` imports `model_config.py` (by design, §5.1). A run fix to `base.py` after the tag could
+   change classification without touching a frozen hash. Built as decided (run code), with a test that allows exactly
+   these two and fails on any new one. **Decided 2026-10-09 (his): `base.py` stays run code** (as recommended:
+   `Provenance` lives there and Phase 4 may add fields to it, and every raw response is kept, so a classification can
+   be recomputed from the record). A post-tag fix to `RawDecision`'s properties is logged with its effect on runs. (b) **No `.gitattributes`:** every package file is LF today (`git ls-files --eol`),
+   and the image is built from CI's Linux checkout; a checkout with `core.autocrlf=true` would hash differently from
+   the container and fail the gate closed. No change made; noted for step 4's message on a mismatch.
+4. **[Sonnet] `protocol/lock.py` and `hc protocol lock --write` / `hc protocol check`** `[done]` 2026-10-09; `make check` runs the check;
    tests on a synthetic tree (absent lock passes; stale lock fails naming the file; errata file ignored).
+   *As built:* `protocol/lock.py` builds the §6 lock from `sets.py` and the loaded experiment, writes it as TOML
+   with a small sorted-key writer (no library), reads it back through a strict pydantic model, and checks a tree
+   against it, reporting every difference. `hc protocol lock --model KEY ... [--write]` and `hc protocol check`
+   are in `cli.py`; the Makefile's `protocol-check` is part of `check`, so CI runs it. `runner.py`'s
+   `check_official` and `_lock_matches` are untouched (step 5 replaces them; the old reader refuses a §6 lock,
+   the safe direction). `tests/test_protocol_lock.py`, 55 tests as built; ten mutations of `lock.py` each caught.
+   Checked live in a scratch copy of the tree with a stand-in document: the writer's lock reads back and checks
+   clean, and its analysis and instrument hashes equal step 3's.
+   **Choices the doc did not spell out:** (1) `[content.files]`, `[instrument.files]` and `[analysis.files]` are
+   sub-tables, one file per line, not the inline tables §6 sketches (same data; diffs show one file each); keys are
+   sorted, so `lock_version` is not first. (2) `files` under `[content]` are `Experiment.file_hashes` without
+   `models.toml`, whose hash the content hash does not cover either. (3) A set or content mismatch reports the
+   per-file lines; the aggregate hash line appears only when no file line explains it. (4) Added and missing
+   files are `... differs from prereg-v1: PATH (added)` or `(missing)`; a changed file has no suffix. (5) The
+   writer needs at least one `--model` and refuses a duplicate silently by recording it once. (6) It also
+   refuses a missing `uv.lock` or simulation-results file, since a lock without its record-only sources is
+   incomplete. (7) `lock` without `--write` prints the lock and writes nothing, with every refusal applied. (8) The file is
+   created exclusively, so a lock can never be replaced even by a race. (9) `sealed_template` is left out of
+   `[content]` when the experiment has none (the placeholder), and the check compares absent with absent. (10)
+   Region is recorded for the three Bedrock routes only, from `providers/bedrock.py`'s `REGION`. (11) `thinking`
+   and `sampling` are written as `"not set"` for every model and **not compared by the check** (`models.toml` has
+   no field to compare them with). **Step 9 must not leave this as is for Haiku 5.5**, whose request needs
+   `thinking: {"type": "disabled"}` (§3 item 4): the lock would record the wrong request. (12) A hash mismatch adds
+   a note that the lock hashes LF bytes (step 3's finding (b)). (13) The lock's `document` path is checked to be
+   relative and free of `..` before it is read. (14) A content file that no longer loads is one failure line
+   (`content: experiment ... does not load`), not a per-file list.
+   **Opus review, 2026-10-09:** the code matches the brief and the choices stand. One fix: `tree_sha256` had hashed
+   every file on disk under `experiment/company/`, untracked ones included, so a scratch file there on tag day would
+   record a value no clean clone of the tag reproduces. It now goes through `git ls-files` like the code sets
+   (`sets.tracked_files` takes the folder as a parameter, default unchanged), with a test that fails without it.
+   56 tests in the file, 1282 in all.
 5. **[Opus] `protocol/gate.py`:** §7.1's checks, `check_official` calling them, `--dry-run`, every refusal both ways
    as tests; `required_repeats` with synthetic pilot records (§7.4).
 6. **[Opus] `protocol/cases.py`:** §8, with fake GitHub and store objects, both ways. C3.

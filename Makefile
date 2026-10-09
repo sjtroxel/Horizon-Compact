@@ -2,7 +2,7 @@
 # `make help` lists targets. `make check` is what CI runs, except the one check CI skips by name.
 
 .DEFAULT_GOAL := help
-.PHONY: help setup install fmt lint typecheck test root-check paths-check dossier-check scenarios-check doctor \
+.PHONY: help setup install fmt lint typecheck test root-check paths-check dossier-check scenarios-check protocol-check doctor \
         check guard-history fingerprint tf-fmt tf-check
 
 GUARD := uv run --no-sync python -m horizon_compact.privacy.guard
@@ -81,12 +81,17 @@ dossier-check: ## Check the company dossier's figures, template and rendered fil
 scenarios-check: ## Check the scenario sources, rendered files, templates and change log
 	uv run --no-sync hc scenarios check
 
+# Offline, no model: the frozen files, the protocol document and the content match experiment/protocol/prereg.lock.
+# Passes, and says so, before the lock exists (Phase 3.5 IMPLEMENTATION doc section 6).
+protocol-check: ## Check the tree against the pre-registration lock
+	uv run --no-sync hc protocol check
+
 doctor: ## Check the hooks are installed and the private term file loads
 	@$(GUARD) doctor
 
 # CI never has the hooks or the private term file, so `doctor` is skipped there BY NAME, and says so.
 # Everything else is identical, so a green local `make check` predicts a green check on GitHub.
-check: lint typecheck test root-check paths-check dossier-check scenarios-check tf-check ## Everything CI runs, plus doctor when not in CI
+check: lint typecheck test root-check paths-check dossier-check scenarios-check protocol-check tf-check ## Everything CI runs, plus doctor when not in CI
 ifdef CI
 	@echo "SKIPPED in CI: doctor (no hooks or private term file on a CI runner, by design)"
 else

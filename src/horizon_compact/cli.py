@@ -40,6 +40,16 @@ from horizon_compact.probes.run import (
     probe_run_id,
     run_probes,
 )
+from horizon_compact.protocol.lock import (
+    EXPERIMENT as LOCK_EXPERIMENT,
+)
+from horizon_compact.protocol.lock import (
+    LOCK_RELATIVE,
+    LockError,
+    check_lock,
+    render_lock,
+    write_lock,
+)
 from horizon_compact.providers.base import ModelRoute, Provider
 from horizon_compact.providers.bedrock import REGION, BedrockConverseProvider, make_runtime_client
 from horizon_compact.providers.ollama import DEFAULT_URL, OllamaProvider
@@ -539,6 +549,41 @@ def cmd_dossier(args: argparse.Namespace) -> int:
     return cmd_dossier_check(root) if args.action == "check" else cmd_dossier_render(root)
 
 
+# --- protocol (Phase 3.5 step 4) -------------------------------------------------------------------------
+
+
+def cmd_protocol_check(root: Path) -> int:
+    report = check_lock(root)
+    for failure in report.failures:
+        print(f"FAIL: {failure}", file=sys.stderr)
+    for note in report.notes:
+        print(f"note: {note}", file=sys.stderr if report.failures else sys.stdout)
+    if report.ok:
+        print("protocol check: ok")
+    return CLEAN_EXIT if report.ok else CHECK_FAILED_EXIT
+
+
+def cmd_protocol_lock(root: Path, models: list[str], experiment: str, write: bool) -> int:
+    try:
+        if write:
+            write_lock(root, models, experiment=experiment)
+            print(f"wrote {LOCK_RELATIVE}")
+        else:
+            print(render_lock(root, models, experiment=experiment), end="")
+    except LockError as exc:
+        for reason in exc.reasons:
+            print(f"refused: {reason}", file=sys.stderr)
+        return REFUSED_EXIT
+    return CLEAN_EXIT
+
+
+def cmd_protocol(args: argparse.Namespace) -> int:
+    root: Path = args.root or default_repo_root()
+    if args.action == "check":
+        return cmd_protocol_check(root)
+    return cmd_protocol_lock(root, args.models, args.experiment, args.write)
+
+
 # --- probes ----------------------------------------------------------------------------------------------
 
 PROBE_REPORT_DIR = "docs/phases/evidence/phase-2.5/probes"
@@ -808,6 +853,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="Check the sources, that every rendered file is fresh, the templates and the log",
     )
 
+    protocol = groups.add_parser(
+        "protocol", help="Phase 3.5 pre-registration lock. Offline; calls no model and no AWS."
+    )
+    protocol.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
+    protocol_actions = protocol.add_subparsers(dest="action", required=True)
+    protocol_actions.add_parser(
+        "check", help="Check the tree against the lock; passes when there is no lock yet"
+    )
+    lock_parser = protocol_actions.add_parser(
+        "lock", help="Build the lock; with --write, create it (never over an existing one)"
+    )
+    lock_parser.add_argument("--write", action="store_true", help="write the file; else print it")
+    lock_parser.add_argument(
+        "--model",
+        dest="models",
+        action="append",
+        default=[],
+        metavar="KEY",
+        help="an official model's key in models.toml; repeat for each, never inferred",
+    )
+    lock_parser.add_argument("--experiment", default=LOCK_EXPERIMENT, help=argparse.SUPPRESS)
+
     simulate = groups.add_parser(
         "simulate", help="Phase 3 simulations. Offline; calls no model and no AWS."
     )
@@ -845,6 +912,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return cmd_dossier(args)
     if args.group == "scenarios":
         return cmd_scenarios(args)
+    if args.group == "protocol":
+        return cmd_protocol(args)
     if args.group == "simulate":
         if args.action == "run" and args.workers is None:
             args.workers = max(1, min(12, (os.cpu_count() or 2) - 2))
