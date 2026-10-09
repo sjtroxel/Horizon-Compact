@@ -17,8 +17,10 @@ case by its type and a neutral label. The names live only in the private longlis
 > Opus) DONE 2026-10-09, uncommitted (rides with step 4's commit, his choice); `providers/base.py` stays run code (his,
 > as recommended). Step 4 (`protocol/lock.py`, `hc protocol lock` / `check`, Sonnet) DONE 2026-10-09, uncommitted, with
 > a list of the choices it made in its §16 note; reviewed by Opus the same day (one fix, `tree_sha256` now skips
-> untracked files). Steps 3 and 4 commit together. **NEXT: §16 step 5, `protocol/gate.py` (Opus), then 6 (Opus), $0,
-> no AWS.**
+> untracked files). Steps 3 and 4 committed (`9eccb4a`). **Step 5 (`protocol/gate.py`, Opus) DONE 2026-10-09,
+> uncommitted**: the eight checks, the dry run, the launch preflight, `required_repeats`; one finding (the pilot vs
+> check 4) built as a `pilot` mode, Phase 4 wires it (OPEN, for Phase 4). **NEXT: §16 step 6, `protocol/cases.py`
+> (Opus), $0, no AWS.**
 >
 > *Superseded 2026-10-09, late morning, by the block above (approved). The doc as written:*
 > `docs/phases/phase-3.5-preregistration-IMPLEMENTATION.md`. **Ten decisions in its §15**, each with a recommendation
@@ -487,6 +489,13 @@ inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-son
   now refuses a `RunSet` whose `unfinished` is non-empty** (Phase 3 step 7, tested). What stays for Phase 4: the
   command that points the engine at real records must pass the `RunSet` itself, never just its `rows`, or the
   guard is bypassed.
+- **The pilot mode and the repeat record** *(added 2026-10-09, Phase 3.5 step 5)*. `protocol/gate.py` checks a pilot
+  (`run_gate(..., pilot=True)`: labeled `pilot`, never the sealed template) and computes the repeat count
+  (`required_repeats`, with `RepeatDecision.as_record()` as the body of `repeats.json`). Not built, for Phase 4: a
+  `--pilot` flag through `hc sweep run` and `launch`; the pilot prefix (`runner.sweep_prefix` writes only under
+  `development/` today, which the reader refuses for real content); `hc protocol repeats --pilot <sweep_id>`, which
+  writes `repeats.json` once under the pilot's prefix; and the launch's refusal unless the plan's repeats equal that
+  file's (it needs the per-scenario repeats above).
 
 ---
 
@@ -512,6 +521,10 @@ a development session. Before Phase 2.5 that only mislabeled the run; since step
 refused (the sealed template, and Sonnet 4.6 on real content). Harmless until Phase 4, since nothing official runs
 before `prereg-v1`. **For Phase 4's IMPLEMENTATION doc:** forward `--official` in the launch command, with a test
 that the command carries it, before the first official launch.
+
+**2026-10-09 (Phase 3.5 step 5):** `hc sweep launch --official` now runs the gate's checks 1-7 on the laptop and
+then refuses outright ("an official launch is not wired yet"), so it can no longer start a mislabeled task. Phase 4
+replaces that refusal with the forwarding and its test.
 
 ---
 

@@ -45,7 +45,6 @@ from horizon_compact.sweep.store import Store
 
 RECORD_VERSION = 1
 SONNET_ROUTE_ENV = "HC_SONNET_ROUTE"
-PROTOCOL_LOCK = ("protocol", "prereg.lock")
 
 
 def sweep_prefix(experiment_name: str, sweep_id: str) -> str:
@@ -104,30 +103,6 @@ def check_route(experiment: Experiment, model_key: str, env: Mapping[str, str]) 
             f"{SONNET_ROUTE_ENV} is {configured!r} but models.toml says route {config.route!r} for "
             f"{model_key}; they must agree"
         )
-
-
-def check_official(experiment: Experiment, identity: RunnerIdentity) -> None:
-    """``--official`` needs (a) a committed protocol whose recorded content hash equals the current one and
-    (b) a container with an image digest. Phase 3.5 owns the lock file's format; until then (a) never
-    holds."""
-    lock = experiment.root.joinpath(*PROTOCOL_LOCK)
-    if not lock.is_file() or not _lock_matches(lock.read_text(encoding="utf-8"), experiment):
-        raise SweepRefusal(
-            "official sweeps are refused: no committed protocol (prereg-v1 does not exist)"
-        )
-    if not identity.in_container:
-        raise SweepRefusal(
-            "official sweeps are refused: they run only in the container, never on a laptop"
-        )
-
-
-def _lock_matches(text: str, experiment: Experiment) -> bool:
-    import tomllib
-
-    try:
-        return tomllib.loads(text).get("content_hash") == experiment.content_hash
-    except tomllib.TOMLDecodeError:
-        return False
 
 
 def _now_utc() -> datetime:

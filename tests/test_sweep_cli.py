@@ -79,7 +79,7 @@ def test_plan_names_the_known_models_when_given_an_unknown_one(
 def test_an_official_run_is_refused_with_the_reason(capsys: pytest.CaptureFixture[str]) -> None:
     assert cli.main(["sweep", "run", *PLAN_ARGS, "--profile", "p", "--official"]) == 2
     assert (
-        "official sweeps are refused: no committed protocol (prereg-v1 does not exist)"
+        "official sweep refused: no committed protocol: experiment/protocol/prereg.lock does not exist"
         in capsys.readouterr().err
     )
 

@@ -40,6 +40,7 @@ from horizon_compact.probes.run import (
     probe_run_id,
     run_probes,
 )
+from horizon_compact.protocol.gate import check_official, refusal_message, run_gate
 from horizon_compact.protocol.lock import (
     EXPERIMENT as LOCK_EXPERIMENT,
 )
@@ -85,7 +86,7 @@ from horizon_compact.sweep.plan import (
     worst_case_per_attempt_usd,
 )
 from horizon_compact.sweep.prompt import render_prompt
-from horizon_compact.sweep.runner import check_official, check_route, run_session
+from horizon_compact.sweep.runner import check_route, run_session
 from horizon_compact.sweep.spend import DEVELOPMENT_CAP_USD
 from horizon_compact.sweep.store import LocalStore, S3Store, Store
 from horizon_compact.sweep.warning import SpendEstimate, format_warning, sweep_estimate
@@ -358,12 +359,30 @@ def cmd_sweep_plan(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_sweep_dry_run(args: argparse.Namespace) -> int:
+    """Every gate check, the plan, and nothing else: no write, no provider, no AWS (section 7.2)."""
+    if not args.official:
+        raise SweepRefusal("--dry-run checks an official sweep against the lock: add --official")
+    experiment, plan_ = _load(args)
+    result = run_gate(experiment, plan_, identify(os.environ, _laptop_git), require_container=False)
+    print(f"sweep:   {plan_.sweep_id} ({len(plan_.runs)} runs, model {plan_.model_key})")
+    for note in result.notes:
+        print(f"note: {note}")
+    if not result.ok:
+        print(refusal_message(result), file=sys.stderr)
+        return REFUSED_EXIT
+    print("official sweep: every check passes (dry run; nothing written, nothing called)")
+    return CLEAN_EXIT
+
+
 def cmd_sweep_run(args: argparse.Namespace) -> int:
+    if args.dry_run:
+        return cmd_sweep_dry_run(args)
     experiment, plan_ = _load(args)
     cap = _check_cap(args)
     identity = identify(os.environ, _laptop_git)
     if args.official:
-        check_official(experiment, identity)
+        check_official(experiment, plan_, identity)
     check_route(experiment, plan_.model_key, os.environ)
     check_preflight(experiment, plan_, cap)
     provider, route, store, account_id = _connect(
@@ -425,7 +444,16 @@ def cmd_sweep_launch(args: argparse.Namespace) -> int:
         )
     cap = _check_cap(args)
     if args.official:
-        check_official(experiment, identify({}, _laptop_git))
+        # The laptop checks 1-7 before anything starts; the task checks all eight again in the container.
+        preflight = run_gate(
+            experiment, plan_, identify({}, _laptop_git), require_container=False, why="launch"
+        )
+        if not preflight.ok:
+            raise SweepRefusal(refusal_message(preflight))
+        raise SweepRefusal(
+            "an official launch is not wired yet: forwarding --official to the task is Phase 4's run-code "
+            "item (KNOWN-GAPS). Gate checks 1-7 pass on this laptop."
+        )
     check_preflight(experiment, plan_, cap)
     session = _session(args, identify({}, _laptop_git))
     command = [
@@ -753,7 +781,7 @@ def _add_run_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("--max-minutes", type=float, default=30.0)
     parser.add_argument(
-        "--official", action="store_true", help="refused until a protocol is committed"
+        "--official", action="store_true", help="checked against experiment/protocol/prereg.lock"
     )
 
 
@@ -781,6 +809,11 @@ def build_parser() -> argparse.ArgumentParser:
     _add_plan_arguments(run_parser)
     _add_run_arguments(run_parser)
     run_parser.add_argument("--store", choices=("local", "s3"), default="local")
+    run_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="with --official: run every gate check and plan the sweep; write nothing, call nothing",
+    )
     run_parser.add_argument("--bucket", default=None)
     launch_parser = sweep_actions.add_parser("launch", help="Start the sweep as a Fargate task")
     _add_plan_arguments(launch_parser)

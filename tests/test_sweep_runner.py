@@ -12,7 +12,7 @@ import pytest
 from horizon_compact.experiment import load_experiment
 from horizon_compact.providers.base import DecisionRequest, RawDecision, Usage
 from horizon_compact.sweep.plan import SweepRefusal, build_plan
-from horizon_compact.sweep.runner import check_official, check_route
+from horizon_compact.sweep.runner import check_route
 from horizon_compact.sweep.status import summarize
 from horizon_compact.sweep.store import LocalStore
 from sweep_helpers import (
@@ -366,36 +366,7 @@ def test_status_summarizes_a_sweep(tmp_path: Path) -> None:
     assert summary["sessions"][0]["stopped"] == "complete"
 
 
-# --- the official gate and the route check ---------------------------------------------------------------
-
-
-def test_an_official_sweep_is_refused_because_no_protocol_exists() -> None:
-    with pytest.raises(SweepRefusal, match=r"no committed protocol \(prereg-v1 does not exist\)"):
-        check_official(load_experiment("placeholder"), FARGATE)
-
-
-def test_an_official_sweep_is_refused_on_a_laptop_even_if_a_protocol_existed(
-    tmp_path: Path,
-) -> None:
-    from sweep_helpers import copy_experiment
-
-    root = copy_experiment(tmp_path)
-    exp = load_experiment("placeholder", root)
-    (root / "protocol").mkdir()
-    (root / "protocol" / "prereg.lock").write_text(f'content_hash = "{exp.content_hash}"\n')
-    check_official(exp, FARGATE)  # a matching lock and a container: allowed
-    with pytest.raises(SweepRefusal, match="only in the container"):
-        check_official(exp, LAPTOP)
-
-
-def test_a_stale_protocol_lock_does_not_open_the_gate(tmp_path: Path) -> None:
-    from sweep_helpers import copy_experiment
-
-    root = copy_experiment(tmp_path)
-    (root / "protocol").mkdir()
-    (root / "protocol" / "prereg.lock").write_text('content_hash = "stale"\n')
-    with pytest.raises(SweepRefusal, match="no committed protocol"):
-        check_official(load_experiment("placeholder", root), FARGATE)
+# --- the route check (the official gate moved to protocol/gate.py; tests/test_protocol_gate.py) --------
 
 
 def test_a_route_mismatch_is_refused_naming_both() -> None:

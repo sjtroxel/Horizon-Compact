@@ -706,8 +706,33 @@ AWS. Every step that calls a model (the runs in 7 and 8, then 9 and 11) waits fo
    record a value no clean clone of the tag reproduces. It now goes through `git ls-files` like the code sets
    (`sets.tracked_files` takes the folder as a parameter, default unchanged), with a test that fails without it.
    56 tests in the file, 1282 in all.
-5. **[Opus] `protocol/gate.py`:** §7.1's checks, `check_official` calling them, `--dry-run`, every refusal both ways
-   as tests; `required_repeats` with synthetic pilot records (§7.4).
+5. **[Opus] `protocol/gate.py`** `[done]` 2026-10-09: §7.1's checks, `check_official` calling them, `--dry-run`, every refusal both ways
+   as tests; `required_repeats` with synthetic pilot records (§7.4). *As built:* one function per check, `run_gate`
+   runs all of them and reports every failure in check order, `check_official` raises them as one
+   `official sweep refused: ...` line each. `runner.check_official` and its old one-field lock reader are gone
+   (`cli.py` imports the gate); the checks reuse `lock.py`'s comparisons, made public for it. **Three things the
+   section did not say:** (i) **what is hashed is what runs:** the root comes from the running package
+   (`horizon_compact.__file__`, editable in the image too, pinned by a test on the Dockerfile), and an experiment
+   loaded from any other folder is refused; check 3 compares the experiment in hand, not a fresh read of the disk.
+   (ii) **The pilot vs check 4.** Phase 4's pilot runs the tagged content on Sonnet 4.6 with the two development
+   wordings only, so "the plan uses the sealed template" would refuse it. Built as `pilot=True`: labeled `pilot`, the
+   sealed template never included; a grid labeled `pilot` is refused. The command line does not offer it yet (Phase
+   4, OPEN entry). (iii) **`required_repeats` takes the records, not a `RunSet`:** `(source, prefix, experiment,
+   lock)`, since the label, content hash, model and templates it must check are in the manifest, which a `RunSet`
+   does not carry. It refuses a label other than `pilot`, content or a model not the lock's, the sealed template, an
+   unfinished run, and (through the reader) a pilot left under `development/`. It imports `analysis/repeats.py`
+   (scipy) inside the function: a test runs `import horizon_compact.cli` with numpy, scipy and statsmodels blocked,
+   as in the image. `RepeatDecision.as_record()` is `repeats.json`'s body (no mean, difference or objective; tested);
+   the command that writes it and the launch's comparison with it are Phase 4's. **The launch:** `--official` runs
+   checks 1-7 on the laptop, then refuses ("not wired yet"), so a mislabeled task can no longer start (OPEN entry of
+   2026-10-07 updated). **The dry run** (`hc sweep run --official --dry-run`) needs `--official`, prints the plan and
+   the notes, writes nothing and makes no AWS session (tested by snapshotting the tree). `tests/test_protocol_gate.py`,
+   48 tests on a synthetic tagged tree (the company experiment, a lock for Sonnet 4.6): passes as tagged, the grid,
+   price and run-code changes pass; refused on one byte in a scenario, `decision.py`, `verdict.py` and the document,
+   on a model's profile, id or route, on a model outside the lock, on another experiment or experiment folder, on
+   each sealed-template rule both ways, on a laptop; the pilot records written by the runner itself. Nineteen
+   mutations of `gate.py`, each caught. The real-repository dry run is his to run (`.claude/settings.json` denies
+   Claude `hc sweep run`); it refuses there today, since no lock exists. 1327 tests in all.
 6. **[Opus] `protocol/cases.py`:** §8, with fake GitHub and store objects, both ways. C3.
 7. **[Opus drafts, he reviews] `experiment/shapes/`** (decision 3): four garden scenarios with S1-S4's structural
    rules and the placeholder's objectives; `hc scenarios check` passes on them. **[his runs, needs AWS]** the proxy

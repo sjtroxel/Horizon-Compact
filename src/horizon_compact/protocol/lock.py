@@ -354,7 +354,7 @@ class CheckReport:
         return not self.failures
 
 
-def _differences(
+def differences(
     kind: str, protocol: str, locked: Mapping[str, str], current: Mapping[str, str]
 ) -> list[str]:
     lines: list[str] = []
@@ -373,7 +373,7 @@ def _unsafe(path: str) -> bool:
     return pure.is_absolute() or ".." in pure.parts or "\\" in path
 
 
-def _check_document(root: Path, lock: Lock) -> list[str]:
+def check_document(root: Path, lock: Lock) -> list[str]:
     if _unsafe(lock.document):
         return [f"the lock names an unsafe document path: {lock.document}"]
     document = root / lock.document
@@ -384,7 +384,7 @@ def _check_document(root: Path, lock: Lock) -> list[str]:
     return []
 
 
-def _check_set(
+def check_set(
     root: Path, lock: Lock, name: sets.SetName, locked_sha: str, locked_files: Mapping[str, str]
 ) -> list[str]:
     try:
@@ -393,7 +393,7 @@ def _check_set(
         current_sha = sets.set_sha256(root, files)
     except (SetError, OSError) as exc:
         return [f"{name}: cannot be listed or read: {exc}"]
-    lines = _differences(name, lock.protocol, locked_files, current)
+    lines = differences(name, lock.protocol, locked_files, current)
     if not lines and current_sha != locked_sha:
         lines.append(f"{name} set hash differs from {lock.protocol}")
     return lines
@@ -406,7 +406,7 @@ def _check_content(root: Path, lock: Lock) -> list[str]:
     except ExperimentError as exc:
         return [f"content: experiment {record.experiment!r} does not load: {exc}"]
     current = {k: v for k, v in loaded.file_hashes.items() if k != MODELS_FILE}
-    lines = _differences("content", lock.protocol, record.files, current)
+    lines = differences("content", lock.protocol, record.files, current)
     if not lines and loaded.content_hash != record.content_hash:
         lines.append(f"content hash differs from {lock.protocol}")
     if loaded.sealed_template != record.sealed_template:
@@ -419,14 +419,24 @@ def _check_content(root: Path, lock: Lock) -> list[str]:
         if config is None:
             lines.append(f"model {key} is in {lock.protocol} but not in {MODELS_FILE}")
             continue
-        now = model_identity(config)
-        for field in ("model_id", "route", "role", "inference_profile", "geo_profile_id", "region"):
-            if getattr(locked, field) != now.get(field):
-                lines.append(
-                    f"model {key} differs from {lock.protocol}: {field} is {now.get(field)!r}, "
-                    f"locked {getattr(locked, field)!r}"
-                )
+        lines.extend(identity_differences(key, locked, config, lock.protocol))
     return lines
+
+
+# The identity fields compared with models.toml (`thinking` and `sampling` have no field there).
+COMPARED_IDENTITY = ("model_id", "route", "role", "inference_profile", "geo_profile_id", "region")
+
+
+def identity_differences(
+    key: str, locked: ModelIdentity, config: ModelConfig, protocol: str
+) -> list[str]:
+    now = model_identity(config)
+    return [
+        f"model {key} differs from {protocol}: {field} is {now.get(field)!r}, "
+        f"locked {getattr(locked, field)!r}"
+        for field in COMPARED_IDENTITY
+        if getattr(locked, field) != now.get(field)
+    ]
 
 
 def check_lock(root: Path) -> CheckReport:
@@ -439,10 +449,10 @@ def check_lock(root: Path) -> CheckReport:
     except LockError as exc:
         return CheckReport(failures=exc.reasons)
     failures = [
-        *_check_document(root, lock),
+        *check_document(root, lock),
         *_check_content(root, lock),
-        *_check_set(root, lock, "instrument", lock.instrument.sha256, lock.instrument.files),
-        *_check_set(root, lock, "analysis", lock.analysis.sha256, lock.analysis.files),
+        *check_set(root, lock, "instrument", lock.instrument.sha256, lock.instrument.files),
+        *check_set(root, lock, "analysis", lock.analysis.sha256, lock.analysis.files),
     ]
     hashed = any(
         line.startswith(("instrument", "analysis", "content", "document")) for line in failures
