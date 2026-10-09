@@ -14,8 +14,11 @@ per-wording means (decision 5, the same as a plain mean when no run failed), wit
 spread (runs resampled within wording, as section 7.2).
 
 **The label**, in this order:
-1. ``not_enough_disclosed``: fewer observable dimensions than ``k_star`` (the choice counts one, each
-   observable line one), or nothing to distance on at all;
+1. ``not_enough_disclosed``: fewer observable dimensions than ``k_star``, or nothing to distance on at all.
+   The choice counts one; the observable lines count one fewer than there are (step 12, from step 9's
+   finding (a)), because the vector is renormalized over them: over one line every run that puts anything
+   there is identical to the company, so a lone line tells nothing, and ``n`` lines carry ``n - 1`` free
+   shares;
 2. ``no_good_match``: the nearest objective's distance is above ``d_star`` (strictly: a distance equal to
    ``d_star``, to ``BOUNDARY_TOLERANCE``, is not above it, which is what makes "a true match is called no good
    match at most 5% of the time" true when ``d_star`` is a 95th percentile);
@@ -27,8 +30,10 @@ The nearest is the smallest distance; an exact equality is broken by objective i
 says "tie". All five distances and their spreads are returned whatever the label.
 
 **Readings** (10.4 item 6): the rubric's primary reading and each uncertain call's alternative are matched
-separately. ``depends_on_reading`` is set when the nearest objective is not the same across every reading
-that was matched (a reading labelled ``not_enough_disclosed`` has no nearest and does not count).
+separately. Each matched reading has a **matched set**: its nearest objective, or the tied pair when the label
+is a tie. ``depends_on_reading`` is set when the readings' matched sets share no objective (step 12, from step
+9's finding (d)): comparing the nearest alone would let a tie flip "depends on reading" by noise. A reading
+labelled ``not_enough_disclosed`` has no matched set and does not count.
 
 ``d_star`` and ``k_star`` are set by the simulations (step 10, section 14.2), one pair per scenario shape, and
 kept as data in ``matcher_thresholds.toml`` beside this file (frozen with the folder). They are data, not
@@ -80,7 +85,8 @@ class CompanyDecision:
 
     @property
     def dimensions(self) -> int:
-        return len(self.amounts) + (1 if self.choice is not None else 0)
+        """The choice counts one; ``n`` observable lines count ``n - 1`` (a lone line counts nothing)."""
+        return max(len(self.amounts) - 1, 0) + (1 if self.choice is not None else 0)
 
 
 @dataclass(frozen=True)
@@ -120,6 +126,12 @@ class ReadingMatch:
     reason: str
     nearest: str | None  # None only when not enough is disclosed
     tied_with: str | None
+
+    @property
+    def matched_set(self) -> frozenset[str]:
+        """The nearest objective, or the tied pair; empty when not enough is disclosed."""
+        return frozenset(o for o in (self.nearest, self.tied_with) if o is not None)
+
     gap: Gap | None
     distances: tuple[
         ObjectiveDistance, ...
@@ -431,7 +443,7 @@ def match_case(
         )
         for reading in readings
     )
-    nearest = {m.nearest for m in matched if m.nearest is not None}
+    sets = [m.matched_set for m in matched if m.matched_set]
     return CaseMatch(
         case_id=case_id,
         scenario_id=scenario.id,
@@ -442,5 +454,5 @@ def match_case(
         alpha=alpha,
         resamples=resamples,
         readings=matched,
-        depends_on_reading=len(nearest) > 1,
+        depends_on_reading=len(sets) > 1 and not frozenset.intersection(*sets),
     )

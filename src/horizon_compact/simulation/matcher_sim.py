@@ -1,7 +1,7 @@
 """The matcher's calibration (Phase 3 IMPLEMENTATION doc sections 13.3 and 14.2).
 
 Each trial builds one synthetic case (``matcher_cases.build_case``) and runs the analysis's own
-``match_case`` on it with no threshold (``d_star`` infinite, ``k_star`` 1), so the record holds what the
+``match_case`` on it with no threshold (``d_star`` infinite, ``k_star`` 0), so the record holds what the
 thresholds are then set from: the nearest objective's distance, whether the generating objective was nearest
 or tied with the nearest, and the label without thresholds (match or tie). The thresholds and the labels
 under them follow from these records alone:
@@ -10,7 +10,9 @@ under them follow from these records alone:
   spread, so a true match is called "no good match" at most 5% of the time there: the smallest observed
   distance with at most 5% of the trials strictly above it;
 - ``k*`` per shape: the smallest number of observable dimensions at which the generating objective is
-  nearest or tied with the nearest in at least 80% of sparse trials at the design spread;
+  nearest or tied with the nearest in at least 80% of sparse trials at the design spread. Dimensions are
+  counted as the matcher counts them (the choice one, ``n`` lines ``n - 1``; step 12), so the sparse trials,
+  which observe ``k`` raw items, are grouped by the dimensions their decision actually has;
 - each case type's label rates at every spread, with ``D*`` and ``k*`` applied.
 
 The gap's interval uses ``MATCH_RESAMPLES`` (10,000) here, not the analysis's 100,000: it is a 95% interval,
@@ -20,6 +22,7 @@ so 10,000 leaves about 250 resamples beyond each end, and the full count would m
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
@@ -31,6 +34,7 @@ from horizon_compact.simulation.matcher_cases import OBJECTIVES, CaseKind, build
 
 MATCH_RESAMPLES = 10_000
 NO_THRESHOLD = 1e9
+NO_MINIMUM = 0  # k_star for calibration: every case is matched, a lone line (0 dimensions) included
 SPREADS = (0.05, 0.10, 0.20)
 DESIGN_SPREAD = 0.10
 REPEATS = 10
@@ -75,7 +79,7 @@ def run_trials(
                 case_id=f"{shape}:{kind}:{t}",
                 objectives=OBJECTIVES,
                 d_star=NO_THRESHOLD,
-                k_star=1,
+                k_star=NO_MINIMUM,
                 resamples=MATCH_RESAMPLES,
             ).readings[0]
         except MatcherError:
@@ -102,6 +106,15 @@ def d_star(nearest: list[float]) -> float:
     a = np.sort(np.asarray(nearest))
     a = a[~np.isnan(a)]
     return float(a[math.ceil(TRUE_MATCH_QUANTILE * a.size) - 1])
+
+
+def identification_by_dimensions(records: Sequence[dict[str, list[Any]]]) -> dict[int, float]:
+    """The identification rate at each dimension count, over every sparse trial given (matched or not)."""
+    hits: dict[int, list[bool]] = {}
+    for record in records:
+        for dims, identified in zip(record["dimensions"], record["identified"], strict=True):
+            hits.setdefault(int(dims), []).append(bool(identified))
+    return {dims: float(np.mean(v)) for dims, v in sorted(hits.items())}
 
 
 def k_star(identification: dict[int, float]) -> int | None:

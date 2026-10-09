@@ -20,6 +20,7 @@ from horizon_compact.analysis.intervals import (
     newcombe_difference,
     stratified_bootstrap_difference,
     stratified_bootstrap_value,
+    welch_difference,
 )
 
 # --- the frozen fine print (decision 7) ------------------------------------------------------------------
@@ -148,6 +149,99 @@ def test_newcombe_refuses_impossible_counts(counts: tuple[int, int, int, int]) -
         newcombe_difference(*counts)
 
 
+# --- Welch, for shares (step 12, section 20b item 1) --------------------------------------------------------
+
+
+@pytest.mark.parametrize("alpha", [ALPHA, 0.05])
+@pytest.mark.parametrize(
+    ("first", "second"),
+    [
+        ([0.1, 0.4, 0.5, 0.9], [0.3, 0.3, 0.6]),
+        ([0.8, 0.84, 0.88, 0.8, 0.96, 1.0], [0.0, 0.2, 0.4, 0.9, 0.12]),
+        ([0.5, 0.5, 0.5, 0.6], [0.1, 0.9]),
+    ],
+)
+def test_one_wording_matches_scipys_welch_test(
+    first: list[float], second: list[float], alpha: float
+) -> None:
+    """With one wording the stratified interval is the ordinary Welch interval; scipy's is first minus
+    second, as here."""
+    got = welch_difference({"w1": first}, {"w1": second}, alpha=alpha)
+    ci = stats.ttest_ind(first, second, equal_var=False).confidence_interval(1 - alpha)
+    assert got.low == pytest.approx(ci.low, abs=1e-12)
+    assert got.high == pytest.approx(ci.high, abs=1e-12)
+    assert got.estimate == pytest.approx(np.mean(first) - np.mean(second))
+    assert (got.method, got.alpha, got.resamples, got.seed) == ("welch", alpha, None, None)
+
+
+def test_the_stratified_interval_worked_by_hand() -> None:
+    """Two wordings, unequal cells. Values in eighths so the arithmetic is exact.
+
+    first:  w1 [2, 4, 6]/8 (mean 4/8, s^2 = 4/64), w2 [0, 8]/8 (mean 4/8, s^2 = 32/64)
+    second: w1 [1, 3]/8 (mean 2/8, s^2 = 2/64), w2 [2, 2, 2, 6]/8 (mean 3/8, s^2 = 4/64)
+    d = 4/8 - (2/8 + 3/8) / 2 = 1.5/8 = 0.1875
+    terms s^2 / (W^2 n), W = 2: (4/64)/12, (32/64)/8, (2/64)/8, (4/64)/16
+      = 1/192, 1/16, 1/256, 1/256; SE^2 = (4 + 48 + 3 + 3) / 768 = 58/768
+    df = SE^4 / (t1^2/2 + t2^2/1 + t3^2/1 + t4^2/3), every term over 768: (4, 48, 3, 3)
+      = 58^2 / (16/2 + 48^2 + 9 + 9/3) = 3364 / 2324
+    """
+    first = {"w1": [2 / 8, 4 / 8, 6 / 8], "w2": [0.0, 1.0]}
+    second = {"w1": [1 / 8, 3 / 8], "w2": [2 / 8, 2 / 8, 2 / 8, 6 / 8]}
+    got = welch_difference(first, second)
+    se = math.sqrt(58 / 768)
+    df = 3364 / 2324
+    half = stats.t.ppf(1 - ALPHA / 2, df) * se
+    assert got.estimate == pytest.approx(0.1875)
+    assert got.df == pytest.approx(df)
+    assert got.low == pytest.approx(0.1875 - half) and got.high == pytest.approx(0.1875 + half)
+
+
+def test_welch_with_no_spread_is_the_difference_alone_with_no_degrees_of_freedom() -> None:
+    """Every cell constant: [d, d], df None; the verdict engine's two all-agree rules decide what it means.
+    Values like 0.1 whose float mean is not exactly 0.1 still count as no spread."""
+    first = {w: [0.1] * 7 for w in ("w1", "w2", "w3")}
+    second = {w: [0.3] * 5 for w in ("w1", "w2", "w3")}
+    got = welch_difference(first, second)
+    assert (got.low, got.high, got.df) == (got.estimate, got.estimate, None)
+    assert got.estimate == pytest.approx(-0.2) and got.width == 0.0
+
+
+def test_a_cell_with_no_spread_adds_nothing_and_the_others_carry_the_interval() -> None:
+    """One side constant: the interval is the other side's alone, and its df that side's n - 1."""
+    first = {"w1": [0.5] * 6}
+    second = {"w1": [0.1, 0.2, 0.3, 0.4]}
+    got = welch_difference(first, second)
+    se = math.sqrt(np.var(second["w1"], ddof=1) / 4)
+    assert got.df == pytest.approx(3)
+    assert got.high - got.estimate == pytest.approx(stats.t.ppf(1 - ALPHA / 2, 3) * se)
+
+
+def test_welch_defaults_to_the_family_alpha_and_a_wider_alpha_narrows_it() -> None:
+    first, second = {"w1": [0.1, 0.4, 0.5, 0.9]}, {"w1": [0.3, 0.3, 0.6]}
+    family = welch_difference(first, second)
+    assert family.alpha == ALPHA
+    assert welch_difference(first, second, alpha=0.05).width < family.width
+
+
+@pytest.mark.parametrize(
+    ("first", "second", "match"),
+    [
+        ({"w1": [0.1, 0.2]}, {"w2": [0.1, 0.2]}, "same wordings"),
+        ({"w1": [0.1, 0.2], "w3": [0.2, 0.3]}, {"w1": [0.1, 0.2]}, "same wordings"),
+        ({"w1": [0.1]}, {"w1": [0.1, 0.2]}, "first: wording w1 has 1 valid run"),
+        ({"w1": [0.1, 0.2]}, {"w1": [0.4]}, "second: wording w1 has 1 valid run"),
+        ({"w1": []}, {"w1": [0.1, 0.2]}, "no valid run"),
+        ({}, {}, "no wording"),
+        ({"w1": [float("nan"), 0.1]}, {"w1": [0.1, 0.2]}, "not finite"),
+    ],
+)
+def test_welch_refuses_unlike_sides_and_cells_too_small_for_a_variance(
+    first: dict[str, list[float]], second: dict[str, list[float]], match: str
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        welch_difference(first, second)
+
+
 # --- the bootstrap: the objective's value (decision 5) -----------------------------------------------------
 
 
@@ -238,8 +332,8 @@ def test_stratification_resamples_within_wording_only() -> None:
 
 
 def test_all_agree_gives_a_zero_width_interval_the_known_failure_for_decision_10() -> None:
-    """Every run on both sides keeps all 125 people: the bootstrap returns [0, 0]. Kept visible on purpose;
-    decision 10 decides from the simulations what the engine does in this case."""
+    """Every run on both sides keeps all 125 people: the bootstrap returns [0, 0]. The verdict no longer uses
+    the bootstrap (step 12); the matcher's 95% reading still does, and this property stays visible."""
     first = {w: [1.0] * 10 for w in ("w1", "w2", "w3")}
     got = stratified_bootstrap_difference(first, dict(first), seed=3, resamples=1_000)
     assert (got.low, got.high, got.width) == (0.0, 0.0, 0.0)

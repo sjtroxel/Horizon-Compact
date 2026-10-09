@@ -30,7 +30,7 @@ from horizon_compact.analysis.failures import (
     PairRates,
     assess_scenario,
 )
-from horizon_compact.analysis.intervals import ALPHA, DESCRIPTIVE_ALPHA, RESAMPLES, Method
+from horizon_compact.analysis.intervals import ALPHA, DESCRIPTIVE_ALPHA, Method
 from horizon_compact.analysis.outcomes import ScenarioOutcomes, outcomes_for
 from horizon_compact.analysis.records import RunSet
 from horizon_compact.analysis.robustness import (
@@ -118,13 +118,17 @@ class ComparisonResult:
     threshold: float
     method: Method | None
     alpha: float
-    resamples: int | None
-    seed: int | None
+    df: float | None  # Welch's degrees of freedom; None for Newcombe or an interval with no spread
     difference: float | None
     low: float | None
     high: float | None
-    verdict_among_valid: Verdict | None
+    verdict_among_valid: Verdict | None  # after decision 10's two rules
     degenerate_interval: bool | None
+    floor_applied: bool | None  # decision 10, rule (a): a no split the floor turned inconclusive
+    constant_value: (
+        float | None
+    )  # decision 10, rule (b): the value every run of one objective holds
+    constant_check: Verdict | None  # rule (b)'s Newcombe verdict on the share of runs at that value
     kept_wordings: tuple[str, ...]
     dropped_wordings: tuple[DroppedResult, ...]
     valid_runs: tuple[tuple[str, int, int], ...]  # (wording, first's runs, second's)
@@ -165,7 +169,6 @@ class ModelResults:
     model_key: str
     alpha: float
     descriptive_alpha: float
-    resamples: int
     sealed_wording: str
     refusal_calls: tuple[tuple[str, str], ...]  # (run id, reason), sorted
     scenarios: tuple[ScenarioResult, ...]
@@ -240,13 +243,15 @@ def comparison_result(
         threshold=outcomes.threshold,
         method=interval.method if interval else None,
         alpha=alpha,
-        resamples=interval.resamples if interval else None,
-        seed=interval.seed if interval else None,
+        df=interval.df if interval else None,
         difference=interval.estimate if interval else None,
         low=interval.low if interval else None,
         high=interval.high if interval else None,
         verdict_among_valid=valid.verdict if valid else None,
         degenerate_interval=valid.degenerate_interval if valid else None,
+        floor_applied=valid.floor_applied if valid else None,
+        constant_value=valid.constant_value if valid else None,
+        constant_check=valid.constant_check.verdict if valid and valid.constant_check else None,
         kept_wordings=assessed.kept_wordings,
         dropped_wordings=tuple(
             DroppedResult(
@@ -299,7 +304,6 @@ def build_results(
     calls: Mapping[str, str] | None = None,
     alpha: float = ALPHA,
     descriptive_alpha: float = DESCRIPTIVE_ALPHA,
-    resamples: int = RESAMPLES,
 ) -> ModelResults:
     """Every analysis for one finished sweep of one model. Refuses unfinished runs, runs from a scenario the
     experiment does not have, and calls that name no run."""
@@ -329,7 +333,6 @@ def build_results(
             calls=calls,
             alpha=alpha,
             descriptive_alpha=descriptive_alpha,
-            resamples=resamples,
         )
         robustness = robustness_scenario(
             outcomes,
@@ -339,7 +342,6 @@ def build_results(
             calls=calls,
             alpha=alpha,
             descriptive_alpha=descriptive_alpha,
-            resamples=resamples,
         )
         scenarios.append(
             ScenarioResult(
@@ -370,7 +372,6 @@ def build_results(
         model_key=model_key,
         alpha=alpha,
         descriptive_alpha=descriptive_alpha,
-        resamples=resamples,
         sealed_wording=sealed_wording,
         refusal_calls=tuple(sorted((calls or {}).items())),
         scenarios=tuple(scenarios),

@@ -8,17 +8,18 @@ are shifted or relabelled.
 **Shares (S1, S2):** the pooled standard deviation of the primary outcome over the scenario's cells (a
 cell is one objective under one wording): the sum of squared deviations from each cell's mean, over the
 sum of each cell's valid runs minus one, so a cell with one valid run adds nothing. Then two repeat
-counts per cell, each rounded up:
+counts per cell, each the smallest ``n`` (at least 2, the fewest runs a cell's variance needs) for which:
 
 - (a) power: 80% power to declare a split at 1.5 times the threshold,
-  ``n = 2 (Z + 0.84)^2 sd^2 / (W (1.5 T)^2)``;
+  ``(t_n + 0.84) sd sqrt(2 / (W n)) <= 1.5 T``;
 - (b) both verdicts reachable: the interval's half-width at most 0.8 times the threshold,
-  ``n = 2 Z^2 sd^2 / (W (0.8 T)^2)``;
+  ``t_n sd sqrt(2 / (W n)) <= 0.8 T``;
 
-with ``W`` wordings (three), ``T`` the scenario's threshold and ``Z`` the frozen one from
-``intervals.py`` (2.9552, never a typed 2.96). The repeats are the larger of the two, clamped to [6, 20].
-When the cap binds, the achieved precision is the interval's half-width at 20 repeats,
-``Z sd sqrt(2 / (W n))``: the same expression rule (b) inverts.
+with ``W`` wordings (three), ``T`` the scenario's threshold and ``t_n`` the ``1 - ALPHA / 2`` quantile of
+t on ``2 W (n - 1)`` degrees of freedom: the Welch interval's quantile when both objectives share one spread
+(step 12, section 20b item 5; the rule was first written with the normal quantile, for the bootstrap). The
+repeats are the larger of the two, clamped to [6, 20]. When the cap binds, the achieved precision is the
+interval's half-width at 20 repeats, ``t_20 sd sqrt(2 / (W n))``: the same expression rule (b) inverts.
 
 **Choice rates (S3, S4):** a pilot cannot measure them, so they go to the cap, 20, with the achieved
 precision at true rates of 50% and 5% (Newcombe's interval on 60 runs a side with equal rates, so the
@@ -30,10 +31,12 @@ half-width is symmetric).
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-from horizon_compact.analysis.intervals import Z, newcombe_difference
+from scipy.stats import t as t_distribution
+
+from horizon_compact.analysis.intervals import ALPHA, newcombe_difference
 from horizon_compact.analysis.outcomes import ScenarioOutcomes
 from horizon_compact.analysis.records import RunRow
 from horizon_compact.analysis.verdict import one_value
@@ -46,7 +49,8 @@ DESIGN_MULTIPLE = 1.5  # rule (a): the true difference the power is stated at, i
 PRECISION_MULTIPLE = 0.8  # rule (b): the largest half-width, in thresholds
 CHOICE_RATES = (0.5, 0.05)  # the rates the achieved precision is stated at (section 8)
 
-_EPSILON = 1e-9  # a count that is a whole number to rounding error is that number, not the next one
+_EPSILON = 1e-9  # a half-width within rounding error of its limit meets it
+_SEARCH_LIMIT = 100_000  # far past any share's need: sd is at most 0.5 and T at least 0.10
 
 
 class RepeatRuleError(Exception):
@@ -77,11 +81,6 @@ class ChoiceRepeats:
     half_width_at_5: float
 
 
-def round_up(x: float) -> int:
-    """The next whole number up, except that a value within rounding error of a whole number stays."""
-    return math.ceil(x - _EPSILON)
-
-
 def pooled_sd(cells: Sequence[Sequence[float]]) -> tuple[float, int]:
     """The pooled standard deviation and its degrees of freedom. A cell of one run adds neither."""
     squares = 0.0
@@ -100,21 +99,43 @@ def pooled_sd(cells: Sequence[Sequence[float]]) -> tuple[float, int]:
     return math.sqrt(squares / df), df
 
 
+def t_quantile(repeats: int, *, wordings: int = WORDINGS) -> float:
+    """The family quantile of t on the degrees of freedom of ``repeats`` runs in each of ``wordings`` cells a
+    side, both sides sharing one spread: ``2 W (n - 1)``."""
+    if repeats < 2:
+        raise ValueError(f"a cell's variance needs two runs; got {repeats}")
+    return float(t_distribution.ppf(1 - ALPHA / 2, 2 * wordings * (repeats - 1)))
+
+
+def _smallest(fits: Callable[[int], bool]) -> int:
+    for n in range(2, _SEARCH_LIMIT):
+        if fits(n):
+            return n
+    raise RepeatRuleError(
+        f"no repeat count up to {_SEARCH_LIMIT:,} meets the rule"
+    )  # pragma: no cover
+
+
 def power_repeats(sd: float, threshold: float, *, wordings: int = WORDINGS) -> int:
-    """Rule (a): 80% power to declare a split at 1.5 times the threshold, rounded up."""
+    """Rule (a): the fewest repeats with 80% power to declare a split at 1.5 times the threshold."""
     design = DESIGN_MULTIPLE * threshold
-    return round_up(2 * (Z + POWER_Z) ** 2 * sd**2 / (wordings * design**2))
+    return _smallest(
+        lambda n: (
+            (t_quantile(n, wordings=wordings) + POWER_Z) * sd * math.sqrt(2 / (wordings * n))
+            <= design + _EPSILON
+        )
+    )
 
 
 def both_verdicts_repeats(sd: float, threshold: float, *, wordings: int = WORDINGS) -> int:
-    """Rule (b): the half-width at most 0.8 times the threshold, rounded up."""
+    """Rule (b): the fewest repeats whose half-width is at most 0.8 times the threshold."""
     reach = PRECISION_MULTIPLE * threshold
-    return round_up(2 * Z**2 * sd**2 / (wordings * reach**2))
+    return _smallest(lambda n: share_half_width(sd, n, wordings=wordings) <= reach + _EPSILON)
 
 
 def share_half_width(sd: float, repeats: int, *, wordings: int = WORDINGS) -> float:
     """The interval's half-width on a difference of two objectives' shares, at ``repeats`` per cell."""
-    return Z * sd * math.sqrt(2 / (wordings * repeats))
+    return t_quantile(repeats, wordings=wordings) * sd * math.sqrt(2 / (wordings * repeats))
 
 
 def share_repeats(

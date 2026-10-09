@@ -13,8 +13,8 @@ The five case types, each built from the generating objective's profile:
 1. ``identical``: the company's decision is the objective's mean allocation and modal choice;
 2. ``opposite``: all the money on the line the objective funds least, and its least likely choice;
 3. ``same_choice_opposite_money``: the modal choice, the opposite allocation;
-4. ``sparse``: the identical case observed on only ``k`` of its dimensions, drawn at random (the choice is
-   one dimension, each line one);
+4. ``sparse``: the identical case observed on only ``k`` of its items, drawn at random (the choice is
+   one item, each line one; the matcher counts ``n`` lines as ``n - 1`` dimensions, step 12);
 5. ``true_match``: one more draw from the objective's own run distribution.
 """
 

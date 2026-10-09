@@ -1,10 +1,10 @@
 """The verdict engine (Phase 3 IMPLEMENTATION doc section 8; step 4).
 
 Two layers. ``decide`` is tested on every boundary of `planning/07` section 6.2 with hand-written numbers.
-The engine is tested on **known-answer sets built independently of it**: share cases whose verdict follows
-from the range of the data alone (every resampled mean lies between a cell's smallest and largest value, so
-the bootstrap's interval can be bounded by hand), and choice-rate cases whose interval comes from the test's
-own Newcombe formula, never from the engine.
+The engine is tested on **known-answer sets built independently of it**: share cases whose interval comes
+from the test's own Welch arithmetic (``hand_welch``, written from the formula with the standard library's
+exact variance), and choice-rate cases whose interval comes from the test's own Newcombe formula, never
+from the engine. Decision 10's two rules (step 12) are tested on cases that isolate each.
 """
 
 from __future__ import annotations
@@ -13,14 +13,17 @@ import math
 
 import pytest
 
-from analysis_helpers import W3, hand_newcombe, run, s1_runs, s3_runs
-from horizon_compact.analysis.intervals import FAMILY_SIZE, comparison_seed
+from analysis_helpers import W3, hand_newcombe, hand_welch, run, s1_runs, s3_runs
+from horizon_compact.analysis import verdict as verdict_module
+from horizon_compact.analysis.intervals import FAMILY_SIZE
 from horizon_compact.analysis.outcomes import outcomes_for
 from horizon_compact.analysis.records import RunRow
 from horizon_compact.analysis.verdict import (
     BOUNDARY_TOLERANCE,
     PRIMARY_PAIRS,
     SECONDARY_PAIRS,
+    SHARE_FLOOR,
+    Comparison,
     compare,
     compare_scenario,
     decide,
@@ -147,50 +150,143 @@ def test_the_family_is_four_pairs_times_four_scenarios() -> None:
     assert {x for pair in PRIMARY_PAIRS + SECONDARY_PAIRS for x in pair} <= named
 
 
-# --- known answers, shares (S1, bootstrap) -----------------------------------------------------------------
+# --- known answers, shares (S1, Welch) ---------------------------------------------------------------------
 
 
-def test_share_split_known_by_the_range_of_the_data() -> None:
-    """Every A run keeps 100-125 people, every C run 0-25: any resampled difference is at least
-    (100 - 25) / 125 = 0.6, so the interval's low end is at least 0.6. Split."""
-    rows = s1_runs("A", {w: range(100, 126, 3) for w in W3}) + s1_runs(
-        "C", {w: range(0, 26, 3) for w in W3}
-    )
-    got = compare(S1, rows, "A", "C", resamples=20_000)
-    assert got.interval.low >= 0.6 and got.verdict == "split"
-    assert got.difference > 0  # the sign convention: first named minus second named
-    assert not got.degenerate_interval
+def shares(kept: dict[str, list[int]]) -> dict[str, list[float]]:
+    return {w: [k / 125 for k in ks] for w, ks in kept.items()}
 
 
-def test_share_no_split_known_by_the_range_of_the_data() -> None:
-    """A keeps 60-64, C 61-65: every resampled difference lies in [(60-65)/125, (64-61)/125] = [-0.04, 0.024],
-    strictly inside plus or minus 0.10. No split."""
-    rows = s1_runs("C", {w: [60, 61, 62, 63, 64] * 2 for w in W3}) + s1_runs(
-        "D", {w: [61, 62, 63, 64, 65] * 2 for w in W3}
-    )
-    got = compare(S1, rows, "C", "D", resamples=20_000)
-    assert got.interval.low >= -0.04 - EPS and got.interval.high <= 0.024 + EPS
-    assert got.verdict == "no_split"
+def check_welch(got: Comparison, first: dict[str, list[int]], second: dict[str, list[int]]) -> None:
+    """The engine's interval against the test's own Welch arithmetic, on the same people counts."""
+    d, lo, hi, df = hand_welch(shares(first), shares(second))
+    assert got.interval.method == "welch"
+    assert got.difference == pytest.approx(d, abs=1e-12)
+    assert got.interval.low == pytest.approx(lo, abs=1e-12)
+    assert got.interval.high == pytest.approx(hi, abs=1e-12)
+    assert got.interval.df == (None if df is None else pytest.approx(df))
+
+
+def test_share_split_known_by_the_tests_own_welch() -> None:
+    """A keeps 100-124 people, C 0-24, nine runs a wording: a difference of 100 / 125 = 0.8 with a standard
+    error near 0.03. Split, with the sign of first named minus second named."""
+    a = {w: list(range(100, 126, 3)) for w in W3}
+    c = {w: list(range(0, 26, 3)) for w in W3}
+    got = compare(S1, s1_runs("A", a) + s1_runs("C", c), "A", "C")
+    check_welch(got, a, c)
+    assert got.difference == pytest.approx(0.8) and got.verdict == "split"
+    assert not got.degenerate_interval and not got.floor_applied and got.constant_value is None
+
+
+def test_share_no_split_known_by_the_tests_own_welch() -> None:
+    """C keeps 60-64, D 61-65, ten runs a wording: a difference of -1 / 125 and an interval about 0.02 either
+    side, strictly inside plus or minus 0.10 and wider than the floor of 1 / 125. No split."""
+    c = {w: [60, 61, 62, 63, 64] * 2 for w in W3}
+    d = {w: [61, 62, 63, 64, 65] * 2 for w in W3}
+    got = compare(S1, s1_runs("C", c) + s1_runs("D", d), "C", "D")
+    check_welch(got, c, d)
+    assert got.interval.width > SHARE_FLOOR
+    assert got.verdict == "no_split" and not got.floor_applied and got.constant_check is None
 
 
 def test_share_inconclusive_when_runs_go_all_in_both_ways() -> None:
     """Each objective keeps everyone on half its runs and no one on the other half: the difference is 0
-    and its standard error is about sqrt(2 x 0.25 / 30) = 0.13, so a 99.7% interval reaches about 0.38
+    and its standard error is about sqrt(2 x 0.25 / 30) = 0.13, so a 99.7% interval reaches about 0.4
     either side, far past 0.10. Inconclusive, and the reason says the interval includes zero."""
-    rows = s1_runs("A", {w: [0, 125] * 5 for w in W3}) + s1_runs("B", {w: [125, 0] * 5 for w in W3})
-    got = compare(S1, rows, "A", "B", resamples=20_000)
+    a = {w: [0, 125] * 5 for w in W3}
+    b = {w: [125, 0] * 5 for w in W3}
+    got = compare(S1, s1_runs("A", a) + s1_runs("B", b), "A", "B")
+    check_welch(got, a, b)
     assert got.difference == pytest.approx(0.0)
     assert got.interval.low < -0.2 and got.interval.high > 0.2
     assert got.verdict == "inconclusive" and "includes zero" in got.decision.reason
 
 
-def test_share_all_agree_gives_a_zero_width_no_split_and_flags_it() -> None:
-    """Every run under both objectives keeps all 125 people. The bootstrap returns [0, 0] and the rule, as
-    written, says no split. This is the case decision 10 exists for: the engine does not hide it."""
-    rows = s1_runs("C", {w: [125] * 10 for w in W3}) + s1_runs("D", {w: [125] * 10 for w in W3})
-    got = compare(S1, rows, "C", "D", resamples=5_000)
-    assert (got.interval.low, got.interval.high) == (0.0, 0.0)
-    assert got.verdict == "no_split" and got.degenerate_interval
+def test_share_with_unequal_cells_weights_wordings_equally() -> None:
+    """Decision 5: each wording's mean counts once, whatever its cell holds, and Welch-Satterthwaite reads
+    each cell's own size."""
+    a = {"w1": [100, 110, 120], "w2": [90, 95, 100, 105, 110, 115], "w3": [80, 100]}
+    c = {"w1": [40, 50], "w2": [30, 60, 45, 35], "w3": [20, 30, 40, 50, 60]}
+    got = compare(S1, s1_runs("A", a) + s1_runs("C", c), "A", "C")
+    check_welch(got, a, c)
+    assert got.valid_runs == (("w1", 3, 2), ("w2", 6, 4), ("w3", 2, 5))
+
+
+# --- decision 10: the two all-agree rules (section 20b) -------------------------------------------------
+
+
+def test_share_all_agree_is_never_a_no_split_by_both_rules() -> None:
+    """Every run under both objectives keeps all 125 people: Welch's [0, 0], which reads as a no split. Rule
+    (a) refuses it, since the interval is narrower than one person; rule (b) compares the share of runs at
+    125, 30 of 30 against 30 of 30, by Newcombe, whose interval reaches past 0.10. Inconclusive both ways,
+    and the zero width is still flagged."""
+    c = d = {w: [125] * 10 for w in W3}
+    got = compare(S1, s1_runs("C", c) + s1_runs("D", d), "C", "D")
+    check_welch(got, c, d)
+    assert (got.interval.low, got.interval.high) == (0.0, 0.0) and got.degenerate_interval
+    assert got.floor_applied and got.constant_value == 1.0
+    lo, hi = hand_newcombe(30, 30, 30, 30)
+    assert lo < -T_SHARE and hi > T_SHARE
+    assert got.constant_check is not None and got.constant_check.verdict == "inconclusive"
+    assert got.verdict == "inconclusive" and "decision 10" in got.decision.reason
+
+
+def test_the_floor_turns_a_narrow_no_split_inconclusive_even_without_a_constant_side() -> None:
+    """C and D each keep 62 or 63 people, alternately: a difference of 0 and a half-width about 0.004, so
+    the interval is narrower than 1 / 125 though neither side is constant. Rule (a) alone."""
+    c = d = {w: [62, 63] * 10 for w in W3}
+    got = compare(S1, s1_runs("C", c) + s1_runs("D", d), "C", "D")
+    check_welch(got, c, d)
+    assert 0 < got.interval.width < SHARE_FLOOR
+    assert got.floor_applied and got.constant_value is None and got.constant_check is None
+    assert got.verdict == "inconclusive" and "rule (a)" in got.decision.reason
+
+
+def test_the_floor_counts_a_width_at_the_floor_as_narrower(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A boundary counts against the stronger verdict (section 6.2): a width equal to the floor, within the
+    tolerance, cannot support a no split; one a hair wider than the tolerance can."""
+    c = {w: [60, 61, 62, 63, 64] * 2 for w in W3}
+    d = {w: [61, 62, 63, 64, 65] * 2 for w in W3}
+    rows = s1_runs("C", c) + s1_runs("D", d)
+    width = compare(S1, rows, "C", "D").interval.width
+    monkeypatch.setattr(verdict_module, "SHARE_FLOOR", width)
+    assert compare(S1, rows, "C", "D").floor_applied
+    monkeypatch.setattr(verdict_module, "SHARE_FLOOR", width - 2 * EPS)
+    assert not compare(S1, rows, "C", "D").floor_applied
+
+
+def test_the_constant_check_keeps_a_split_both_methods_agree_on() -> None:
+    """A keeps everyone, C no one: Welch gives [1, 1] and a split; rule (b) reads A's value, 1, and compares
+    30 of 30 against 0 of 30, also a split. The same verdict, kept."""
+    a = {w: [125] * 10 for w in W3}
+    c = {w: [0] * 10 for w in W3}
+    got = compare(S1, s1_runs("A", a) + s1_runs("C", c), "A", "C")
+    assert got.degenerate_interval and not got.floor_applied
+    assert got.constant_value == 1.0  # the first objective's value, when both are constant
+    assert got.constant_check is not None and got.constant_check.verdict == "split"
+    assert got.verdict == "split"
+
+
+def test_the_constant_check_reads_the_second_side_when_only_it_is_constant() -> None:
+    """D keeps 100 people on every run; C varies around 100 with a third of its runs at exactly 100. Welch
+    calls it a no split (difference 0, interval about 0.02 either side). Rule (b) compares the share of runs
+    at 100: 36 of 36 for D, 12 of 36 for C, a split. The two disagree, so the comparison is inconclusive."""
+    c = {w: [95, 100, 105] * 4 for w in W3}
+    d = {w: [100] * 12 for w in W3}
+    got = compare(S1, s1_runs("C", c) + s1_runs("D", d), "C", "D")
+    check_welch(got, c, d)
+    assert not got.floor_applied and got.constant_value == pytest.approx(0.8)
+    assert got.constant_check is not None and got.constant_check.verdict == "split"
+    lo, _ = hand_newcombe(12, 36, 36, 36)
+    assert lo < 0  # the test's own Newcombe: C's 12 of 36 against D's 36 of 36, well apart
+    assert got.verdict == "inconclusive" and "disagree" in got.decision.reason
+
+
+def test_the_constant_check_reads_an_interior_value_not_only_a_boundary() -> None:
+    """Every run of both objectives keeps exactly 100 people (0.8): rule (b) applies away from 0 and 1."""
+    c = d = {w: [100] * 10 for w in W3}
+    got = compare(S1, s1_runs("C", c) + s1_runs("D", d), "C", "D")
+    assert got.constant_value == pytest.approx(0.8) and got.verdict == "inconclusive"
 
 
 # --- known answers, choice rates (S3, Newcombe) -------------------------------------------------------------
@@ -225,6 +321,8 @@ def test_choice_rate_all_agree_has_real_width() -> None:
     got = compare(S3, s3_runs("C", 0, 60) + s3_runs("D", 0, 60), "C", "D")
     assert got.interval.width > 0.25
     assert got.verdict == "no_split"
+    # Decision 10's rules are for shares; Newcombe needs neither.
+    assert not got.floor_applied and got.constant_value is None and got.constant_check is None
 
 
 def test_choice_rates_pool_counts_across_wordings() -> None:
@@ -282,19 +380,15 @@ def test_a_comparison_needs_two_objectives_and_some_runs() -> None:
         compare(S3, s3_runs("A", 3, 9), "B", "D")
 
 
-# --- seeds, the sealed wording, and the whole scenario ------------------------------------------------------
+# --- determinism, the sealed wording, and the whole scenario ------------------------------------------------
 
 
-def test_the_bootstrap_seed_comes_from_the_sweep_and_the_comparison() -> None:
+def test_a_comparison_is_fixed_by_its_data_and_can_be_narrowed_to_named_wordings() -> None:
     rows = s1_runs("A", {w: [10, 50, 90] for w in W3}) + s1_runs(
         "C", {w: [20, 60, 100] for w in W3}
     )
-    one = compare(S1, rows, "A", "C", resamples=5_000)
-    again = compare(S1, rows, "A", "C", resamples=5_000)
-    assert one == again
-    assert one.interval.seed == comparison_seed("pilot-test-sweep", "s1:A-C")
-    sealed = compare(S1, rows, "A", "C", wordings=["w2"], name="s1:A-C:sealed", resamples=5_000)
-    assert sealed.interval.seed == comparison_seed("pilot-test-sweep", "s1:A-C:sealed")
+    assert compare(S1, rows, "A", "C") == compare(S1, rows, "A", "C")
+    sealed = compare(S1, rows, "A", "C", wordings=["w2"])
     assert sealed.wordings == ("w2",) and sealed.valid_runs == (("w2", 3, 3),)
 
 

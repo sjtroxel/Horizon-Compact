@@ -6,4 +6,6 @@ the analysis, never the other way (``tests/test_architecture.py`` holds both rul
 """
 
 # The version of the results object (doc section 4). It changes when the object's fields or meaning do.
-RESULTS_VERSION = 1
+# 2 (step 12): shares' intervals are Welch t-intervals, not bootstrap; the seed and resample fields went, and
+# the degrees of freedom and decision 10's two rules came in.
+RESULTS_VERSION = 2

@@ -1,4 +1,6 @@
-"""The repeat rule (Phase 3 doc 12, step 8) on hand-built runs, answers worked out by hand."""
+"""The repeat rule (Phase 3 doc 12, step 8; on the t quantile since step 12, section 20b item 5) on hand-built
+runs, answers worked out by hand: each count is the smallest n meeting the rule, checked here with scipy's t
+quantile directly and pinned as a number."""
 
 from __future__ import annotations
 
@@ -6,9 +8,10 @@ import dataclasses
 import math
 
 import pytest
+from scipy import stats
 
 from analysis_helpers import failed, hand_newcombe, run, s1_runs
-from horizon_compact.analysis.intervals import Z
+from horizon_compact.analysis.intervals import ALPHA, Z
 from horizon_compact.analysis.outcomes import (
     LEVERS_WORKFORCE_BEARS,
     ScenarioOutcomes,
@@ -27,9 +30,9 @@ from horizon_compact.analysis.repeats import (
     power_repeats,
     repeats_for_pilot,
     repeats_for_scenario,
-    round_up,
     share_half_width,
     share_repeats,
+    t_quantile,
 )
 from horizon_compact.experiment import load_experiment
 
@@ -41,79 +44,90 @@ S4 = outcomes_for(EXP.get_scenario("s4"))
 T = 0.10
 
 
-def sd_giving_b(n: float) -> float:
-    """The sd at which rule (b) asks for exactly ``n`` repeats (the rule's own algebra, inverted)."""
-    return math.sqrt(n * 3 * (0.8 * T) ** 2 / (2 * Z**2))
+def t_n(n: int, wordings: int = 3) -> float:
+    """The test's own quantile: t at the family level on 2 W (n - 1) degrees of freedom."""
+    return float(stats.t.ppf(1 - ALPHA / 2, 2 * wordings * (n - 1)))
+
+
+def half_width(sd: float, n: int, wordings: int = 3) -> float:
+    return t_n(n, wordings) * sd * math.sqrt(2 / (wordings * n))
+
+
+def sd_giving_b(n: int) -> float:
+    """The sd at which rule (b) is met exactly at ``n`` repeats (its inequality, as an equality)."""
+    return 0.8 * T / (t_n(n) * math.sqrt(2 / (3 * n)))
+
+
+def sd_giving_a(n: int) -> float:
+    """The sd at which rule (a) is met exactly at ``n`` repeats."""
+    return 1.5 * T / ((t_n(n) + 0.84) * math.sqrt(2 / (3 * n)))
+
+
+def is_smallest_b(sd: float, n: int, threshold: float = T, wordings: int = 3) -> bool:
+    fits = half_width(sd, n, wordings) <= 0.8 * threshold
+    return fits and (n == 2 or half_width(sd, n - 1, wordings) > 0.8 * threshold)
+
+
+def is_smallest_a(sd: float, n: int, threshold: float = T, wordings: int = 3) -> bool:
+    def power(m: int) -> float:
+        return (t_n(m, wordings) + 0.84) * sd * math.sqrt(2 / (wordings * m))
+
+    return power(n) <= 1.5 * threshold and (n == 2 or power(n - 1) > 1.5 * threshold)
 
 
 # --- the worked example in planning/07 section 8 -----------------------------------------------------------
 
 
-def test_worked_example_sd_015_gives_10_and_21_so_the_cap() -> None:
+def test_worked_example_sd_015_gives_11_and_22_so_the_cap() -> None:
+    # With the normal quantile it was 10 and 21 (step 8); t's heavier tail asks for one more each.
     got = share_repeats("s1", 0.15, 10, T)
-    assert (got.n_power, got.n_both_reachable, got.repeats) == (10, 21, 20)
+    assert (got.n_power, got.n_both_reachable, got.repeats) == (11, 22, 20)
+    assert is_smallest_a(0.15, 11) and is_smallest_b(0.15, 22)
     assert got.cap_binds
 
 
-def test_worked_example_sd_010_gives_5_and_10_so_10() -> None:
+def test_worked_example_sd_010_gives_6_and_10_so_10() -> None:
+    # Rule (b) unchanged at 10: t on 54 degrees of freedom is 3.094, and 3.094 x 0.10 x sqrt(2 / 30) = 0.0799,
+    # just inside 0.08; at 9 repeats, t on 48 is 3.111 and the half-width 0.0846.
     got = share_repeats("s1", 0.10, 10, T)
-    assert (got.n_power, got.n_both_reachable, got.repeats) == (5, 10, 10)
+    assert (got.n_power, got.n_both_reachable, got.repeats) == (6, 10, 10)
+    assert t_quantile(10) == pytest.approx(3.0940, abs=5e-5)
+    assert half_width(0.10, 10) == pytest.approx(0.0799, abs=5e-5) and half_width(0.10, 9) > 0.08
     assert not got.cap_binds and got.achieved_half_width is None
 
 
-def test_the_frozen_z_is_used_and_does_not_move_the_worked_example() -> None:
-    # planning/07 section 8 computed with 2.96; the code freezes 2.9552. Unrounded, at sd 0.15 and 0.10:
-    # (a) 9.60 and 4.27, (b) 20.47 and 9.10 with Z; with 2.96, 9.62/4.28 and 20.52/9.12. Same ceilings.
-    assert round(Z, 4) == 2.9552
-    for sd, a, b in ((0.15, 10, 21), (0.10, 5, 10)):
-        assert (power_repeats(sd, T), both_verdicts_repeats(sd, T)) == (a, b)
-        for z in (2.96, Z):
-            assert math.ceil(2 * (z + 0.84) ** 2 * sd**2 / (3 * (1.5 * T) ** 2)) == a
-            assert math.ceil(2 * z**2 * sd**2 / (3 * (0.8 * T) ** 2)) == b
+def test_the_quantile_is_t_on_the_cells_degrees_of_freedom_not_the_normal() -> None:
+    assert round(Z, 4) == 2.9552  # the normal quantile, still frozen for the record
+    assert t_quantile(10) == pytest.approx(t_n(10)) and t_quantile(10) > Z
+    assert t_quantile(20) == pytest.approx(3.0195, abs=5e-5)
+    assert t_quantile(10, wordings=2) == pytest.approx(t_n(10, 2))
+    with pytest.raises(ValueError, match="two runs"):
+        t_quantile(1)
 
 
 def test_the_formulas_by_hand() -> None:
-    # sd 0.2, T 0.1: (a) 2 * (2.9552 + 0.84)^2 * 0.04 / (3 * 0.0225) = 17.07, so 18
-    #                (b) 2 * 2.9552^2 * 0.04 / (3 * 0.0064) = 36.39, so 37
-    assert power_repeats(0.2, T) == 18
-    assert both_verdicts_repeats(0.2, T) == 37
+    # sd 0.2, T 0.1: (a) the smallest n with (t_n + 0.84) 0.2 sqrt(2 / 3n) <= 0.15 is 18;
+    #                (b) the smallest n with t_n 0.2 sqrt(2 / 3n) <= 0.08 is 38 (37 with the normal).
+    assert power_repeats(0.2, T) == 18 and is_smallest_a(0.2, 18)
+    assert both_verdicts_repeats(0.2, T) == 38 and is_smallest_b(0.2, 38)
 
 
-def sd_giving_a(n: float) -> float:
-    """The sd at which rule (a) asks for exactly ``n`` repeats (the rule's own algebra, inverted)."""
-    return math.sqrt(n * 3 * (1.5 * T) ** 2 / (2 * (Z + 0.84) ** 2))
-
-
-def test_rule_a_sits_on_its_own_edge_so_a_different_z_or_power_value_would_move_it() -> None:
-    # At exactly 10, a typed 2.96 gives 10.026 and 0.8416 for the power term gives 10.008: both would say 11.
+def test_rule_a_sits_on_its_own_edge_so_a_different_quantile_or_power_value_would_move_it() -> None:
     assert power_repeats(sd_giving_a(10), T) == 10
     assert power_repeats(sd_giving_a(10) * (1 + 1e-6), T) == 11
 
 
 def test_rule_a_never_asks_for_more_than_rule_b() -> None:
-    # (a)/(b) = (Z + 0.84)^2 / Z^2 / (1.5 / 0.8)^2 = 0.47 whatever the spread, so rule (b) always sets the
-    # count and rule (a) is kept for the record. A finding for step 12, not a bug.
+    # Rule (b) sets the count everywhere on this range, and rule (a) is kept for the record: (t + 0.84) / 1.5
+    # is below t / 0.8 for any t over 0.97. A finding for step 12, not a bug.
     for sd in (0.0, 0.01, 0.05, 0.1, 0.15, 0.3, 0.6):
         assert power_repeats(sd, T) <= both_verdicts_repeats(sd, T)
 
 
 def test_the_threshold_and_the_wording_count_are_inputs_not_constants() -> None:
-    # a threshold of 0.2 quarters n; two wordings instead of three multiplies it by 3/2
-    assert both_verdicts_repeats(0.15, 0.2) == 6  # 20.47 / 4 = 5.12
-    assert both_verdicts_repeats(0.15, T, wordings=2) == 31  # 20.47 * 1.5 = 30.7
-    assert power_repeats(0.15, T, wordings=2) == 15  # 9.60 * 1.5 = 14.4
-
-
-# --- rounding up -------------------------------------------------------------------------------------------
-
-
-def test_round_up_is_a_ceiling_with_a_guard_for_rounding_error() -> None:
-    assert round_up(4.0001) == 5
-    assert round_up(4.5) == 5
-    assert round_up(5.0) == 5
-    assert round_up(5.0 + 1e-12) == 5  # float residue of a whole number
-    assert round_up(5.0 + 1e-6) == 6  # a real fraction
-    assert round_up(0.0) == 0
+    assert both_verdicts_repeats(0.15, 0.2) == 7 and is_smallest_b(0.15, 7, threshold=0.2)
+    assert both_verdicts_repeats(0.15, T, wordings=2) == 32 and is_smallest_b(0.15, 32, wordings=2)
+    assert power_repeats(0.15, T, wordings=2) == 16 and is_smallest_a(0.15, 16, wordings=2)
 
 
 # --- the clamp, every boundary -----------------------------------------------------------------------------
@@ -121,7 +135,7 @@ def test_round_up_is_a_ceiling_with_a_guard_for_rounding_error() -> None:
 
 @pytest.mark.parametrize(
     ("wanted", "expected"),
-    [(0, 6), (5, 6), (6, 6), (7, 7), (19, 19), (20, 20)],
+    [(2, 6), (5, 6), (6, 6), (7, 7), (19, 19), (20, 20)],
 )
 def test_the_floor_and_the_range_between(wanted: int, expected: int) -> None:
     got = share_repeats("s1", sd_giving_b(wanted), 4, T)
@@ -144,9 +158,9 @@ def test_a_far_larger_spread_stays_at_the_cap() -> None:
     assert got.repeats == CAP and got.cap_binds
 
 
-def test_sd_zero_gives_zero_and_zero_so_the_floor() -> None:
+def test_sd_zero_gives_the_fewest_runs_a_variance_needs_so_the_floor() -> None:
     got = share_repeats("s1", 0.0, 4, T)
-    assert (got.n_power, got.n_both_reachable, got.repeats) == (0, 0, FLOOR)
+    assert (got.n_power, got.n_both_reachable, got.repeats) == (2, 2, FLOOR)
     assert not got.cap_binds
 
 
@@ -159,16 +173,16 @@ def test_the_floor_and_cap_are_the_planning_s() -> None:
 
 def test_achieved_precision_at_the_cap_is_the_half_width_at_20() -> None:
     # planning/07 section 8: "with a within-cell spread of 0.15 at the cap, the interval is about +-8 points".
-    # 2.9552 * 0.15 * sqrt(2 / 60) = 0.4433 * 0.18257 = 0.0809
+    # t on 114 degrees of freedom is 3.0195: 3.0195 * 0.15 * sqrt(2 / 60) = 0.0827 (0.0809 with the normal).
     got = share_repeats("s1", 0.15, 10, T)
-    assert got.achieved_half_width == pytest.approx(0.0809, abs=5e-5)
+    assert got.achieved_half_width == pytest.approx(0.0827, abs=5e-5)
     assert got.achieved_half_width == pytest.approx(share_half_width(0.15, CAP))
 
 
 def test_achieved_precision_is_the_half_width_at_20_not_at_the_unclamped_n() -> None:
     wide = share_repeats("s1", 0.3, 10, T)  # needs far more than 20
     assert wide.achieved_half_width == pytest.approx(share_half_width(0.3, 20))
-    assert wide.achieved_half_width == pytest.approx(2 * 0.0809, abs=1e-4)  # linear in sd
+    assert wide.achieved_half_width == pytest.approx(2 * 0.0827, abs=1e-4)  # linear in sd
 
 
 def test_rule_b_is_the_inverse_of_the_half_width() -> None:
@@ -228,7 +242,7 @@ def _pilot_pair(objective: str, wordings: tuple[str, ...], kept: tuple[int, int]
 def test_from_runs_every_cell_is_one_objective_under_one_wording() -> None:
     # Ten cells (five objectives x two wordings), each two runs keeping 50 and 75 of 125: shares 0.4 and 0.6.
     # Each cell: mean 0.5, squares 0.01 + 0.01 = 0.02, df 1. Pooled: sqrt(0.2 / 10) = 0.14142, df 10.
-    # (a) 2 * 3.7952^2 * 0.02 / 0.0675 = 8.53, so 9;  (b) 2 * 2.9552^2 * 0.02 / 0.0192 = 18.19, so 19.
+    # The smallest n: (a) 10, (b) 20 (9 and 19 with the normal quantile).
     rows = []
     for objective in "ABCDE":
         rows += _pilot_pair(objective, ("w1", "w2"), (50, 75))
@@ -237,8 +251,9 @@ def test_from_runs_every_cell_is_one_objective_under_one_wording() -> None:
     assert got.scenario_id == "s1"
     assert got.pooled_sd == pytest.approx(math.sqrt(0.02), abs=1e-9)
     assert got.degrees_of_freedom == 10
-    assert (got.n_power, got.n_both_reachable, got.repeats) == (9, 19, 19)
-    assert not got.cap_binds
+    assert (got.n_power, got.n_both_reachable, got.repeats) == (10, 20, 20)
+    assert is_smallest_a(math.sqrt(0.02), 10) and is_smallest_b(math.sqrt(0.02), 20)
+    assert not got.cap_binds  # exactly 20 is the cap, not past it
 
 
 def test_objectives_in_one_wording_are_separate_cells() -> None:
@@ -310,10 +325,8 @@ def test_the_threshold_comes_from_the_scenario() -> None:
     base = repeats_for_scenario(S1, rows)
     wide = repeats_for_scenario(dataclasses.replace(S1, threshold=0.2), rows)
     assert isinstance(base, ShareRepeats) and isinstance(wide, ShareRepeats)
-    assert (base.n_both_reachable, wide.n_both_reachable) == (
-        19,
-        5,
-    )  # 18.19 -> 19; 18.19 / 4 = 4.55 -> 5
+    assert (base.n_both_reachable, wide.n_both_reachable) == (20, 6)
+    assert is_smallest_b(math.sqrt(0.02), 6, threshold=0.2)
     assert wide.repeats == FLOOR
 
 
@@ -375,11 +388,12 @@ def test_choice_precision_does_not_depend_on_the_pilot() -> None:
 
 
 def test_the_wording_count_reaches_the_rule_from_runs_and_from_the_pilot() -> None:
-    rows = s1_runs("A", {"w1": (50, 75), "w2": (50, 75)})  # sd 0.14142: (b) 18.19 at three wordings
+    rows = s1_runs("A", {"w1": (50, 75), "w2": (50, 75)})  # sd 0.14142: (b) 20 at three wordings
     three = repeats_for_scenario(S1, rows)
     two = repeats_for_scenario(S1, rows, wordings=2)
     assert isinstance(three, ShareRepeats) and isinstance(two, ShareRepeats)
-    assert (three.n_both_reachable, two.n_both_reachable) == (19, 28)  # 18.19 * 1.5 = 27.3
+    assert (three.n_both_reachable, two.n_both_reachable) == (20, 29)
+    assert is_smallest_b(math.sqrt(0.02), 29, wordings=2)
     assert two.cap_binds and two.achieved_half_width == pytest.approx(
         share_half_width(0.14142, 20, wordings=2), abs=1e-4
     )

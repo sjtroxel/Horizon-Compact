@@ -16,6 +16,7 @@ from analysis_helpers import (
     W3,
     failed,
     hand_newcombe,
+    hand_welch,
     run,
     s1_runs,
     s3_cell,
@@ -50,7 +51,6 @@ from horizon_compact.experiment import load_experiment
 EXP = load_experiment("company")
 S1 = outcomes_for(EXP.get_scenario("s1"))
 S3 = outcomes_for(EXP.get_scenario("s3"))
-N = 3_000  # bootstrap resamples: enough for the share tests, whose answers are fixed by the data
 
 
 # --- 9.1 counting ---------------------------------------------------------------------------------
@@ -482,18 +482,31 @@ def test_failed_runs_in_a_dropped_wording_do_not_enter_the_bound() -> None:
     assert only_dropped.final_verdict == "split"
 
 
-def test_the_bound_seeds_are_named_apart_from_the_verdict_and_from_each_other() -> None:
-    s1_rows = s1_runs("C", {w: [125] * 18 for w in W3}) + s1_runs("D", {w: [125] * 18 for w in W3})
-    s1_rows += [r for w in W3 for r in failed("s1", "C", w, 2)] + [
-        r for w in W3 for r in failed("s1", "D", w, 2)
-    ]
-    got = assess_comparison(S1, s1_rows, "C", "D", resamples=500)
-    assert got.among_valid is not None
-    seeds = {got.among_valid.interval.seed} | {c.comparison.interval.seed for c in got.bound}
-    assert len(seeds) == 3 and None not in seeds
+def test_the_bound_recomputes_through_decision_10s_rules() -> None:
+    """C keeps all 125 on its 60 valid runs a wording; D keeps 125 on 59 and 100 on one. Among valid runs: a
+    no split by Welch (difference 1 / 300, interval about 0.006 either side, wider than the floor), and by
+    rule (b), since C is constant at 1: 180 of 180 against 177 of 180. Two failures a cell (3.2%, kept). The
+    raising bound sets C's to 1, so C stays constant and rule (b) applies inside the bound: 186 of 186
+    against 177 of 186, whose Newcombe interval includes zero and reaches past 0.10. The bound's verdict is
+    inconclusive, which overturns the no split."""
+    rows = share_cells("C", 60, 2, 125)
+    rows += s1_runs("D", {w: [125] * 59 + [100] for w in W3})
+    rows += [r for w in W3 for r in failed("s1", "D", w, 2)]
+    got = assess_comparison(S1, rows, "C", "D")
+    assert got.among_valid is not None and got.among_valid.verdict == "no_split"
+    assert got.among_valid.constant_value == 1.0 and not got.among_valid.floor_applied
+    raised, lowered = got.bound
+    lo, hi = hand_newcombe(186, 186, 177, 186)
+    assert lo < 0 < 0.10 < hi
+    assert raised.comparison.constant_value == 1.0
+    assert raised.comparison.constant_check is not None
+    assert raised.comparison.constant_check.verdict == "inconclusive"
+    assert raised.comparison.verdict == "inconclusive" and raised.overturned
+    assert lowered.comparison.constant_value is None  # C's failures at 0: no side is constant
+    assert got.final_verdict == "inconclusive"
 
 
-# --- the bound on shares (S1, bootstrap) ----------------------------------------------------------
+# --- the bound on shares (S1, Welch) ----------------------------------------------------------
 
 
 def share_cells(objective: str, kept_valid: int, kept_failed: int, people: int) -> list[RunRow]:
@@ -506,7 +519,7 @@ def test_a_share_split_that_the_bound_pulls_below_the_threshold_is_overturned() 
     in each cell of 20, the bound sets A's to 0 (wording mean 0.9) and C's to 1 (0.8 x 0.9 + 0.1 = 0.82):
     0.08, under the 0.10 threshold, so it cannot be a split."""
     rows = share_cells("A", 18, 2, 125) + share_cells("C", 18, 2, 100)
-    got = assess_comparison(S1, rows, "A", "C", resamples=N)
+    got = assess_comparison(S1, rows, "A", "C")
     assert got.among_valid is not None
     assert got.among_valid.difference == pytest.approx(0.2) and got.among_valid.degenerate_interval
     assert got.among_valid.verdict == "split"
@@ -517,37 +530,44 @@ def test_a_share_split_that_the_bound_pulls_below_the_threshold_is_overturned() 
 
 def test_a_share_split_far_above_the_threshold_survives_the_bound() -> None:
     rows = share_cells("A", 18, 2, 125) + share_cells("C", 18, 2, 0)
-    got = assess_comparison(S1, rows, "A", "C", resamples=N)
+    got = assess_comparison(S1, rows, "A", "C")
     (check,) = got.bound
     assert check.comparison.difference == pytest.approx(0.9 - 0.1)  # A's failures to 0; C's to 1
     assert got.final_verdict == "split" and got.worst_case_verdict == "split"
 
 
-def test_the_all_agree_no_split_with_failures_is_downgraded_by_the_widening() -> None:
-    """Every valid run of C and D keeps all 125: the bootstrap's [0, 0] and a no split (decision 10's case).
-    With failures present the raising bound puts C at 1.0 and D at 0.9: a difference of 0.10, which no
-    interval around it can call a no split."""
+def test_an_all_agree_share_is_inconclusive_among_valid_runs_so_the_bound_is_not_run() -> None:
+    """Every valid run of C and D keeps all 125: Welch's [0, 0], which decision 10's rules make inconclusive
+    (rule (a): narrower than the floor; rule (b): 54 of 54 against 54 of 54, an interval past 0.10). An
+    inconclusive verdict has nothing for the bound to overturn."""
     rows = share_cells("C", 18, 2, 125) + share_cells("D", 18, 2, 125)
-    got = assess_comparison(S1, rows, "C", "D", resamples=N)
-    assert got.among_valid is not None
-    assert got.among_valid.degenerate_interval and got.among_valid.verdict == "no_split"
-    raised, lowered = got.bound
-    assert raised.comparison.difference == pytest.approx(0.1)
-    # C's failures to 0 (wording mean 0.9), D's to 1 (wording mean 1.0)
-    assert lowered.comparison.difference == pytest.approx(0.9 - 1.0)
-    assert raised.overturned and lowered.overturned
-    assert got.final_verdict == "inconclusive"
+    got = assess_comparison(S1, rows, "C", "D")
+    assert got.among_valid is not None and got.among_valid.degenerate_interval
+    assert got.among_valid.floor_applied and got.among_valid.constant_value == 1.0
+    assert got.among_valid.verdict == "inconclusive"
+    assert got.bound == () and got.final_verdict == "inconclusive"
+    assert (got.failed_first, got.failed_second) == (6, 6)
 
 
 def test_a_no_split_the_bound_turns_into_a_split_is_still_downgraded() -> None:
-    """C keeps all 125 on every valid run, D keeps 119: a 0.048 difference, no split. The raising bound sets
-    D's failures to 0 (wording mean 0.9 x 0.952), a difference of 0.143 with an interval above 0.048: a split.
-    Anything but the verdict that was claimed overturns it, and the final verdict is inconclusive."""
-    rows = share_cells("C", 18, 2, 125) + share_cells("D", 18, 2, 119)
-    got = assess_comparison(S1, rows, "C", "D", resamples=N)
+    """C keeps 125 or 115 people, alternately, on 18 valid runs a wording; D keeps 120 or 110: a difference of
+    0.04 and a Welch interval about 0.024 either side, a no split. Two failures a cell. The raising bound sets
+    C's to 1 (wording mean (9 + 9 x 0.92 + 2) / 20 = 0.964) and D's to 0 ((9 x 0.96 + 9 x 0.88) / 20 =
+    0.828): a difference of 0.136, whose interval excludes zero: a split. Anything but the verdict that was
+    claimed overturns it, and the final verdict is inconclusive."""
+    c = {w: [125, 115] * 9 for w in W3}
+    d = {w: [120, 110] * 9 for w in W3}
+    rows = s1_runs("C", c) + s1_runs("D", d)
+    rows += [r for w in W3 for o in ("C", "D") for r in failed("s1", o, w, 2)]
+    got = assess_comparison(S1, rows, "C", "D")
     assert got.among_valid is not None and got.among_valid.verdict == "no_split"
     raised, _ = got.bound
-    assert raised.comparison.difference == pytest.approx(1.0 - 0.9 * 119 / 125)
+    raised_c = {w: [k / 125 for k in c[w]] + [1.0, 1.0] for w in W3}
+    raised_d = {w: [k / 125 for k in d[w]] + [0.0, 0.0] for w in W3}
+    diff, lo, hi, _df = hand_welch(raised_c, raised_d)
+    assert diff == pytest.approx(0.964 - 0.828) and lo > 0
+    assert raised.comparison.interval.low == pytest.approx(lo)
+    assert raised.comparison.interval.high == pytest.approx(hi)
     assert raised.comparison.verdict == "split" and raised.overturned
     assert got.worst_case_verdict == "split" and got.final_verdict == "inconclusive"
     assert got.downgrade_reason is not None and "the verdict becomes split" in got.downgrade_reason
@@ -634,7 +654,7 @@ def assess_scenario_for(rows: list[RunRow]) -> ScenarioAssessment:
     extra: list[RunRow] = []
     for objective in sorted(needed):  # pad the missing objectives so all five pairs exist
         extra += s3_design(objective, [5, 5, 5], [20, 20, 20])
-    return assess_scenario(S3, rows + extra, resamples=500)
+    return assess_scenario(S3, rows + extra)
 
 
 def test_a_human_call_is_not_applied_to_the_first_attempt_view() -> None:

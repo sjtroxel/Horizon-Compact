@@ -16,12 +16,29 @@ A boundary value counts against the stronger verdict: an interval end exactly at
 and an end exactly at plus or minus ``T`` is not inside. "At least ``T``" includes ``T``. Every comparison is
 made with a tolerance of ``BOUNDARY_TOLERANCE``, because floating point puts exact boundaries a hair off:
 57/60 - 45/60 is 0.19999999999999996, not 0.2. One further guard, which can only weaken a verdict: the
-difference must sit inside its own interval (a percentile interval can, rarely, exclude its own estimate).
+difference must sit inside its own interval (a percentile interval can, rarely, exclude its own estimate;
+Welch's cannot, but the guard costs nothing and stays).
 It also keeps a split's difference on the side of zero its interval is on, and keeps split and no split
 from ever both holding.
 
+**Shares: two all-agree rules** (decision 10, as decided at step 12 from the simulations; section 20b),
+applied after the interval's verdict, each of which can only weaken it:
+
+- **(a) the floor:** a share interval narrower than ``SHARE_FLOOR`` (1/125, one person of S1's 125) is never a
+  "no split"; it becomes inconclusive. A width at the floor, within the tolerance, counts as narrower: a
+  boundary counts against the stronger verdict. Runs that nearly all agree give an interval too narrow to
+  mean anything, which without this rule reads as a confident "no split" (step 10: up to 15% false "no
+  split" where the true difference was the threshold).
+- **(b) the constant check:** when every valid run of either objective, over the wordings compared, holds one
+  value ``v`` (the first objective's, if both do), the share of each side's runs at ``v`` is also compared, by
+  Newcombe at ``alpha`` and the share threshold, and the comparison takes the less certain of the two
+  verdicts: the same verdict when they agree, inconclusive when they do not.
+
+Choice rates use Newcombe, which never has zero width, and neither rule applies to them.
+
 This step returns the verdict **among valid runs**. The worst-case bound (section 9.4) and the wording
-direction (section 10.1) are later steps that may downgrade it; nothing here reads a failed run.
+direction (section 10.1) are later steps that may downgrade it; nothing here reads a failed run. The bound's
+recomputations go through ``compare_cells`` too, so both rules apply there as well.
 """
 
 from __future__ import annotations
@@ -34,11 +51,9 @@ from typing import Literal
 
 from horizon_compact.analysis.intervals import (
     ALPHA,
-    RESAMPLES,
     Interval,
-    comparison_seed,
     newcombe_difference,
-    stratified_bootstrap_difference,
+    welch_difference,
 )
 from horizon_compact.analysis.outcomes import ScenarioOutcomes
 from horizon_compact.analysis.records import RunRow
@@ -48,6 +63,10 @@ SECONDARY_PAIRS: tuple[tuple[str, str], ...] = (("A", "D"),)
 # Far below anything a difference of rates or shares can mean (the finest grid is 1/125 = 0.008), far above
 # floating-point noise on numbers between -1 and 1 (about 1e-16).
 BOUNDARY_TOLERANCE = 1e-9
+# Decision 10, rule (a): one step of S1's lattice (125 people). A share interval narrower than this is never a
+# "no split". Used for every share, S2's continuous one included: the simulations set it on S1's lattice and
+# checked it on a 1/1000 one (section 20b).
+SHARE_FLOOR = 1 / 125
 
 Verdict = Literal["split", "no_split", "inconclusive"]
 Role = Literal["primary", "secondary"]
@@ -102,6 +121,18 @@ def decide(d: float, lo: float, hi: float, threshold: float) -> Decision:
     )
 
 
+def less_certain(first: Decision, second: Decision) -> Decision:
+    """Two verdicts on one comparison: the same verdict when they agree (the first's reason kept), otherwise
+    inconclusive, naming both."""
+    if first.verdict == second.verdict:
+        return first
+    return Decision(
+        "inconclusive",
+        f"two verdicts disagree, so the less certain is kept: {first.verdict} ({first.reason}); "
+        f"{second.verdict} ({second.reason})",
+    )
+
+
 @dataclass(frozen=True)
 class Comparison:
     """One comparison of two objectives on one scenario's primary outcome, among valid runs."""
@@ -117,9 +148,13 @@ class Comparison:
     wordings: tuple[str, ...]  # the verdict is "over these wordings"
     valid_runs: tuple[tuple[str, int, int], ...]  # (wording, first's valid runs, second's)
     interval: Interval
-    decision: Decision
+    decision: Decision  # the final verdict among valid runs, after the two all-agree rules
     # True when the interval has (almost) no width: the case decision 10 settles. Never silent.
     degenerate_interval: bool
+    # Decision 10 (shares only): rule (a) turned a no split into inconclusive; rule (b)'s value and verdict.
+    floor_applied: bool = False
+    constant_value: float | None = None
+    constant_check: Decision | None = None
 
     @property
     def verdict(self) -> Verdict:
@@ -195,24 +230,60 @@ def gather_cells(
     return CellSet(scenario_id, sweep_id, first, second, chosen, cells)
 
 
+def _constant_value(cells: Mapping[str, Sequence[float]]) -> float | None:
+    """The one value every run of one side holds (within the tolerance), or None."""
+    values = [v for runs in cells.values() for v in runs]
+    first = values[0]
+    return first if all(abs(v - first) <= BOUNDARY_TOLERANCE for v in values) else None
+
+
+def _count_at(cells: Mapping[str, Sequence[float]], value: float) -> tuple[int, int]:
+    values = [v for runs in cells.values() for v in runs]
+    return sum(1 for v in values if abs(v - value) <= BOUNDARY_TOLERANCE), len(values)
+
+
 def compare_cells(
     outcomes: ScenarioOutcomes,
     cellset: CellSet,
     *,
     role: Role = "primary",
     alpha: float = ALPHA,
-    resamples: int = RESAMPLES,
-    name: str | None = None,
 ) -> Comparison:
-    """The interval and the verdict from a set of cells. The bootstrap's seed comes from the sweep id and
-    ``name`` (default ``"<scenario>:<first>-<second>"``)."""
+    """The interval and the verdict from a set of cells: Welch and decision 10's two rules for a share,
+    Newcombe for a choice rate."""
     scenario_id, first, second = cellset.scenario_id, cellset.first, cellset.second
     chosen, cells = cellset.wordings, cellset.cells
+    threshold = outcomes.threshold
+    floor_applied = False
+    constant_value: float | None = None
+    constant_check: Decision | None = None
     if outcomes.kind == "share":
-        seed = comparison_seed(cellset.sweep_id, name or f"{scenario_id}:{first}-{second}")
-        interval = stratified_bootstrap_difference(
-            cells[first], cells[second], seed=seed, alpha=alpha, resamples=resamples
-        )
+        interval = welch_difference(cells[first], cells[second], alpha=alpha)
+        decision = decide(interval.estimate, interval.low, interval.high, threshold)
+        if decision.verdict == "no_split" and interval.width < SHARE_FLOOR + BOUNDARY_TOLERANCE:
+            floor_applied = True
+            decision = Decision(
+                "inconclusive",
+                f"the interval is narrower than {SHARE_FLOOR:g} (decision 10, rule (a)), so it cannot "
+                f"support a no split ({decision.reason})",
+            )
+        for side in (first, second):
+            constant_value = _constant_value(cells[side])
+            if constant_value is not None:
+                break
+        if constant_value is not None:
+            counted = newcombe_difference(
+                *_count_at(cells[first], constant_value),
+                *_count_at(cells[second], constant_value),
+                alpha=alpha,
+            )
+            check = decide(counted.estimate, counted.low, counted.high, threshold)
+            constant_check = Decision(
+                check.verdict,
+                f"every run of one objective holds {constant_value:g}; the share of runs at it, by "
+                f"Newcombe (decision 10, rule (b)): {check.reason}",
+            )
+            decision = less_certain(decision, constant_check)
     else:
         counts = {
             side: (
@@ -222,6 +293,7 @@ def compare_cells(
             for side in (first, second)
         }
         interval = newcombe_difference(*counts[first], *counts[second], alpha=alpha)
+        decision = decide(interval.estimate, interval.low, interval.high, threshold)
 
     sizes = {side: Counter({w: len(cells[side][w]) for w in chosen}) for side in (first, second)}
     return Comparison(
@@ -232,12 +304,15 @@ def compare_cells(
         label=label_for(role),
         outcome=outcomes.primary_name,
         kind=outcomes.kind,
-        threshold=outcomes.threshold,
+        threshold=threshold,
         wordings=chosen,
         valid_runs=tuple((w, sizes[first][w], sizes[second][w]) for w in chosen),
         interval=interval,
-        decision=decide(interval.estimate, interval.low, interval.high, outcomes.threshold),
+        decision=decision,
         degenerate_interval=interval.width <= BOUNDARY_TOLERANCE,
+        floor_applied=floor_applied,
+        constant_value=constant_value,
+        constant_check=constant_check,
     )
 
 
@@ -250,13 +325,11 @@ def compare(
     role: Role = "primary",
     wordings: Sequence[str] | None = None,
     alpha: float = ALPHA,
-    resamples: int = RESAMPLES,
-    name: str | None = None,
 ) -> Comparison:
     """``first`` minus ``second`` on the scenario's primary outcome, among valid runs, over ``wordings``
     (default: every wording either side has a valid run in): ``gather_cells`` then ``compare_cells``."""
     cellset = gather_cells(outcomes, rows, first, second, wordings=wordings)
-    return compare_cells(outcomes, cellset, role=role, alpha=alpha, resamples=resamples, name=name)
+    return compare_cells(outcomes, cellset, role=role, alpha=alpha)
 
 
 def compare_scenario(
@@ -265,22 +338,12 @@ def compare_scenario(
     *,
     wordings: Sequence[str] | None = None,
     alpha: float = ALPHA,
-    resamples: int = RESAMPLES,
 ) -> tuple[Comparison, ...]:
     """The four primary comparisons, then the secondary one, on one scenario, in `planning/07` section 6.1's
     order."""
     pairs: list[tuple[tuple[str, str], Role]] = [(p, "primary") for p in PRIMARY_PAIRS]
     pairs += [(p, "secondary") for p in SECONDARY_PAIRS]
     return tuple(
-        compare(
-            outcomes,
-            rows,
-            first,
-            second,
-            role=role,
-            wordings=wordings,
-            alpha=alpha,
-            resamples=resamples,
-        )
+        compare(outcomes, rows, first, second, role=role, wordings=wordings, alpha=alpha)
         for (first, second), role in pairs
     )

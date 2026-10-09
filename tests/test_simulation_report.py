@@ -52,7 +52,9 @@ def test_the_matchers_thresholds_are_the_ones_the_results_set() -> None:
         if (
             expected_k is None
         ):  # no k reached 80%: one more than the dimensions, so nothing is matched
-            dims = max(int(k) for k in matcher[shape]["identification_by_k_at_design_spread"])
+            dims = max(
+                int(k) for k in matcher[shape]["identification_by_dimensions_at_design_spread"]
+            )
             assert t.k_star == dims + 1, shape
         else:
             assert t.k_star == expected_k, shape

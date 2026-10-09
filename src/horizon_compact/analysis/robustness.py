@@ -12,12 +12,11 @@ the published claim says which kind (``headline``). Making it inconclusive would
 planning does not have. A split over one kept wording is labeled robust trivially; its ``scope`` already
 says it is over that wording alone.
 
-**The sealed wording** (10.2). The whole assessment, bound included, repeated on the sealed
-template's runs alone, under its own seed name (``<scenario>:<first>-<second>:sealed``), labeled
-"sealed wording only", outside the family of 16. Which template is sealed is read from
-``objectives.toml`` through the loaded experiment, never typed here. Its verdict is reported beside
-the pooled one with a **relation**, because the sealed rerun is the same test on about a third of
-the data at the same 99.7% level, so a real result can come back less certain without any wording
+**The sealed wording** (10.2). The whole assessment, bound included, repeated on the sealed template's
+runs alone, labeled "sealed wording only", outside the family of 16. Which template is sealed is read
+from ``objectives.toml`` through the loaded experiment, never typed here. Its verdict is reported beside
+the pooled one with a **relation**, because the sealed rerun is the same test on about a third of the
+data at the same 99.7% level, so a real result can come back less certain without any wording
 disagreeing. With ``P`` the pooled final verdict, ``S`` the sealed one, ``d_P`` and ``d_S`` their
 observed differences, ``T`` the threshold and ``eps`` the verdict engine's boundary tolerance:
 
@@ -57,7 +56,6 @@ from horizon_compact.analysis.failures import (
 from horizon_compact.analysis.intervals import (
     ALPHA,
     DESCRIPTIVE_ALPHA,
-    RESAMPLES,
     Interval,
     newcombe_difference,
 )
@@ -244,9 +242,8 @@ def sealed_result(
     *,
     calls: Mapping[str, str] | None = None,
     alpha: float = ALPHA,
-    resamples: int = RESAMPLES,
 ) -> SealedResult:
-    """One comparison repeated on the sealed wording's runs alone, under its own seed name."""
+    """One comparison repeated on the sealed wording's runs alone."""
     check_refusal_calls(rows, calls or {})  # against every run, before the rows are narrowed
     sealed_rows = [r for r in rows if r.wording_id == sealed_wording]
     if not any(r.scenario_id == outcomes.scenario.id for r in sealed_rows):
@@ -263,8 +260,6 @@ def sealed_result(
         role=pooled.role,
         calls={k: v for k, v in (calls or {}).items() if k in kept},
         alpha=alpha,
-        resamples=resamples,
-        name=f"{pooled.scenario_id}:{pooled.first}-{pooled.second}:sealed",
     )
     relation, reason = relate(
         pooled.final_verdict,
@@ -409,10 +404,9 @@ def robustness_scenario(
     calls: Mapping[str, str] | None = None,
     alpha: float = ALPHA,
     descriptive_alpha: float = DESCRIPTIVE_ALPHA,
-    resamples: int = RESAMPLES,
 ) -> ScenarioRobustness:
-    """Wording direction, the sealed wording and position effects for one scenario's assessment. ``alpha`` and
-    ``resamples`` should be the ones the assessment was made with."""
+    """Wording direction, the sealed wording and position effects for one scenario's assessment. ``alpha``
+    should be the one the assessment was made with."""
     return ScenarioRobustness(
         scenario_id=assessment.scenario_id,
         comparisons=tuple(
@@ -420,9 +414,7 @@ def robustness_scenario(
             for a in assessment.comparisons
         ),
         sealed=tuple(
-            sealed_result(
-                outcomes, rows, a, sealed_wording, calls=calls, alpha=alpha, resamples=resamples
-            )
+            sealed_result(outcomes, rows, a, sealed_wording, calls=calls, alpha=alpha)
             for a in assessment.comparisons
         ),
         position=position_effects(outcomes, rows, alpha=descriptive_alpha),

@@ -237,6 +237,7 @@ at the edges (0 of n, n of n, both groups at 0%, both at 100%), where it must gi
 > *Superseded for the verdict 2026-10-08 (step 12, §20b; his authorization):* step 10 found this interval too narrow
 > (false splits up to 2.2% against 0.3125%), and shares move to a stratified Welch t-interval with two all-agree
 > rules. The bootstrap stays in the code for the matcher (95%, outside the family). Kept below as built.
+> *Built 2026-10-09 (step 12):* `intervals.welch_difference` and decision 10's two rules in `verdict.compare_cells`.
 
 For a comparison of objectives X and Y on one scenario:
 1. Within each objective, within each wording, draw that cell's valid runs with replacement, the same number as the
@@ -255,6 +256,8 @@ ends, measured at `B` = 10,000 and 100,000 (§14.3).
 
 Shares (S1, S2, and every secondary share): bootstrap. Choice rates (S3, S4): Newcombe. The degenerate share case
 (decision 10) is the one place this may change, by a dated patch to `planning/07` §6.3 with the simulation's evidence.
+*Annotated 2026-10-09 (step 12, §20b):* shares are Welch, with decision 10's two rules; the matcher alone keeps the
+bootstrap.
 
 ## 8. The verdict engine
 
@@ -1020,12 +1023,25 @@ for routine code; he switches with `/model`).
     with short answers** (`planning/04` §6.2's reason for the document) and the formulas last. Steps 5-8 had no notes
     and were written from their as-built entries. The share interval's paragraphs are marked *under revision*: step 12
     rewrites them.
-12. **[decided 2026-10-08, not built; Opus, under his authorization] The patches:** decisions 3, 4, 6 and 7, plus anything step 10 found (decision 10 included),
+12. **[done 2026-10-09, Opus, under his authorization] The patches:** decisions 3, 4, 6 and 7, plus anything step 10 found (decision 10 included),
     as dated patches to `planning/07`, each shown to him before it is applied.
     *Annotated 2026-10-08 evening:* **he authorized Opus's recommendations for step 12** ("you're authorized to proceed
     accordingly"), so patches that follow a recommendation are applied and shown to him in the diff before his commit;
     the three items he did not decide are listed at the end of §20b. **The share interval is decided (§20b), nothing
     of step 12 is built yet, and the build order and file-level list are in §20b.**
+    *As built 2026-10-09 (Opus), §20b items 1-8 in order; `make check` green, 1204 tests.* `intervals.welch_difference`
+    (checked against scipy's Welch test and a hand-worked stratified case); decision 10's two rules in
+    `verdict.compare_cells`, with `Comparison.floor_applied`, `constant_value` and `constant_check`; the seed and
+    resample plumbing gone from the verdict path; `RESULTS_VERSION` 2 (`df`, the rules' fields; no `seed` or
+    `resamples`); `repeats.py` on the t quantile (§8's worked example holds: 10 at sd 0.10; sd 0.15 the cap); the
+    matcher's lines - 1 and matched-set reading rules; the simulations on the new engine (Welch vectorized, the rules
+    written again apart from the analysis, validated replicate by replicate against `verdict.compare`); the dated
+    `planning/07` patches (§5.2, §6.2, §6.3, §8, §10.4, §14 item 5, the status line). His decisions 1 and 2 of
+    2026-10-09 (the bound kept as built; the opposite check judged on the generating objective) are applied. Tests
+    re-derived from the tests' own arithmetic (`hand_welch` in `analysis_helpers.py`, the standard library's exact
+    variance), never edited to pass. **Mutation check: 39 of 39 caught** (a new scratchpad script; three needed new
+    tests first: the floor's verdict condition, the rebuild's constant check, the identification grouping). The
+    re-run and what it found are in §20c.
 13. **[Sonnet] Close-out:** the DoD audit (§19), `ROADMAP.md`, START HERE, `KNOWN-GAPS.md`.
 
 ## 19. Definition of done, and the proof of each
@@ -1235,6 +1251,10 @@ holds its level looks like. **Decided:**
    runs; **decision 4**'s false-no-split target stated with the other simulation targets. Then §18 step 12 `[done]`,
    START HERE, and step 13 (Sonnet).
 
+*Annotated 2026-10-09: decisions 1 and 2 below were taken by him as recommended (bound kept as built; opposite check
+judged on the generating objective); decision 3 is his AWS call, waiting on the case. A new open item, finding A,
+is in §20c.*
+
 **His, not decided by the authorization (open, each with its cost; Opus's recommendation in brackets):**
 - **The worst-case bound's cost** (finding 4): keep it as built [recommended: the planning's intent, that failures
   never manufacture a verdict, is the safer direction], or soften it (for example, apply it only above a stated
@@ -1243,6 +1263,53 @@ holds its level looks like. **Decided:**
   that is what the check was meant to show, and it passes at 99.8-100%], or keep the planning's wording and report it
   missed. Either way "no good match" will be rare; the methods page must say so.
 - **The AWS fallback** (the BLOCKED entry in `KNOWN-GAPS.md`): suggested decision point mid-week of 2026-10-12.
+
+### 20c. Step 12 as built: the re-run on the adopted rule (2026-10-09, Opus)
+
+`PYTHONUNBUFFERED=1 uv run hc simulate run --workers 10`: 11,644 tasks in **709 s** (12 minutes; step 10's took 68),
+the matcher 6,600 of the 7,069 CPU seconds. The results' code hash (`705078047b9ec370`) equals the code as left; no
+hashed file changed during the run (checked by sha256 before and after). `simulation-summary.md`,
+`matcher-calibration.md` and `analysis/matcher_thresholds.toml` regenerated from it. **Every target, read again:**
+
+| Target (§14.1) | Step 10 (percentile) | Step 12 (Welch + two rules) | Verdict |
+|---|---|---|---|
+| False split, shares, 0.3125% | worst 2.22%; 267 of 360 clearly over | **worst 0.43%, median 0.12%; 52 over, 5 clearly** | **clearly missed at 5 points, by up to 1.4 times** (finding A) |
+| False no split, shares (decision 4) | worst 1.29%; 34 clearly over | **worst 0.27%; 0 over** | met |
+| Near-all-agree, false no split at T | 15.5% (rule as written) | **worst 0.33%** (`mixture a=0.95 vs 0.75`, n 20) | over, not clearly (Wilson lower end below target) |
+| Choice rates (Newcombe, unchanged) | false split 0.417% at 2 points | the same | finding 7 stands: met at the cap |
+| Worst-case bound | 0 kept; 0 rebuild mismatches | **0 kept; 0 mismatches** (rebuild now Welch + rules, written apart) | met |
+| Wording rule | 0 mismatches | **0 mismatches** | met |
+| Engine against the analysis | 954 of 960 (Monte Carlo) | **21,200 of 21,200, exact**; ends within 5.6e-16 | met |
+
+**Findings, for him and for Phase 3.5:**
+- **A. The share rule holds its level approximately, not exactly.** The five clearly-over null points are all at the
+  most scattered settings: sd 0.25, or half the runs all in near a mean of 0.5 (worst
+  `mu=0.5|sigma=0.15|pi=0.5|n=10`, 0.43%, Wilson [0.35%, 0.53%]). With every point at the target about 9 would read
+  clearly over by chance, but most sit far below (median 0.12%), so these are probably real and small: Welch's t is
+  slightly liberal on skewed, lumpy data at these sizes. The family-wise bound, if every share comparison sat at its
+  worst point at once (it cannot), is about 8 × 0.43% + 8 × 0.42% ≈ 6.8% against 5%. **His call (open):** state it
+  (recommended: the methods page gives the measured worst case beside the nominal level; of the nine candidates
+  screened at step 12 none held it better), or calibrate a stricter alpha for shares on this grid (fits the
+  correction to the grid; its power cost is not measured, and power is already thin where cells are small).
+- **B. Power fell where cells are small, as §20b expected.** At the repeat rule's n, power at 1.5 T is 96.8% or more
+  where the cap does not bind, a median of 57.2% (worst 19.3%) where it binds. `08` §3.4's "80% power for 15 points
+  at sd 0.15 and about 10 repeats" measures 76.5% at exactly 10 (84.4% under the percentile rule; rule (a) asks for
+  11 there). "No split reachable" where the cap does not bind: 49.7% at worst (the stated "about 54%" is near the
+  floor), median 97.7%; where it binds, median 0.2%. Patched into `planning/07` §8.
+- **C. Failures, measured again** (§5.2 patch): at 20 per wording and sd 0.2, a true 15-point difference is a split
+  84% of the time with no failures, 53% at 2%, 24% at 5%, 4% at 10% (300 replicates each). The first-order input to
+  Phase 3.5's model choice stands; his decision 1 keeps the bound as built, revisited before the tag on a measured
+  failure rate.
+- **D. Decision 10's rules cost almost nothing on the main grid:** of 17.28 million replicates they turned 404 no
+  splits and 0 splits inconclusive (the floor fired 44 times, the constant check 6,873). Their cost is in the
+  near-all-agree family, where a split on runs that mostly go all in is rarer (e.g. `bernoulli a=1 vs 0.9`, n 20:
+  13.8% under Welch alone, 7.0% under the rules), the price of not trusting agreement.
+- **E. The matcher, recalibrated in the new dimension count:** `D*` S1 0.348, S2 0.679, S3 0.546, S4 0.656
+  (unchanged: the true-match cases do not depend on the count); **`k*` S1 1, S2 2, S3 1, S4 2** (one lower in the new
+  units: the same evidence, counted without the free line). Lone-line cases (0 dimensions) identify the generating
+  objective 38.6-40.8% of the time, chance among five with ties, which confirms finding (a) of step 9 from the data.
+  The opposite check, judged on the generating objective (his decision 2): **met on every shape** (99.8-100%);
+  the nearest objective is beyond `D*` in only 15-66% of opposite cases, so "no good match" stays rare.
 
 ## 21. Cost
 

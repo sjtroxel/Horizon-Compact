@@ -2,8 +2,9 @@
 
 **Finished at step 11 (2026-10-08) from notes kept since step 3** (IMPLEMENTATION doc §18; `planning/04` §6.2: the
 statistics must be explainable, not only computed). Plain words first, formulas last. This is the record the
-methods page draws on; the methods page itself is his to write. **Step 12 changes the share interval** (finding 1 of
-§20a); the paragraphs marked *under revision* are rewritten when it does.
+methods page draws on; the methods page itself is his to write. **Updated at step 12 (2026-10-09):** the share
+interval, the all-agree rules, the repeat rule's quantile, the matcher's dimension count and reading rule, and the
+simulations re-run on the rule as adopted (IMPLEMENTATION doc §20b).
 
 ## 1. What is being compared
 
@@ -32,16 +33,18 @@ interval leaves out 0.05 / 16 = 0.3125%, so it covers 99.6875%: "99.7%" in prose
 property: even when every run in both groups made the same choice, it still says "not certain," rather than claiming
 a difference of exactly zero with no doubt.
 
-**Shares** *(under revision, step 12)*. These are amounts, not yes or no, so the interval comes from resampling:
-treat the runs we have as the whole world, draw new samples from them 100,000 times, and see how much the difference
-moves. Draws are made within each wording, so a wording that ran high cannot leak into another. Each objective's
-value is the average of its three wordings' averages, so every wording counts the same even if one lost runs to
-failures. The simulations showed this interval is too narrow at these sample sizes (section 9), and step 12 replaces
-or corrects it.
+**Shares** (changed at step 12). These are amounts, not yes or no. Each objective's value is the average of its three
+wordings' averages, so every wording counts the same even if one lost runs to failures. The interval is the
+difference plus or minus a margin built from how much the runs vary inside each wording (Welch's t-interval): the
+more the runs within a wording disagree, and the fewer there are, the wider the margin. Variation between wordings
+does not count as noise, since the wordings are fixed, not a sample.
 
-**The seed.** Resampling is random, so each comparison's random sequence is fixed by a rule (from the sweep's id and
-the comparison's name) and nobody picks it. 100,000 draws keep the randomness small: the simulations found that at
-most a few percent of verdicts sit close enough to a boundary for the draws to matter.
+**Why it changed.** The plan was to resample the runs: treat them as the whole world, draw new samples 100,000 times,
+and see how much the difference moves. The simulations (section 9) showed that interval is too narrow at these sample
+sizes, so it would call a split by mistake up to seven times as often as the stated level. Welch's interval held the
+stated level on the same made-up data, and it needs no random draws, so there is no seed and no draw-to-draw wobble.
+The resampling interval stays for the matcher, which is a 95% reading, not a verdict; its random sequence is fixed by
+a rule (from the sweep's id and the reading's name), so nobody picks it.
 
 ## 3. The verdicts (step 4)
 
@@ -56,6 +59,14 @@ most a few percent of verdicts sit close enough to a boundary for the draws to m
 **A real but small difference is a no split.** An interval of 1 to 5 points means the difference is probably real
 and too small to matter by the rule fixed in advance. "No split" means no difference of a size that counts, not
 "identical decisions."
+
+**When the runs agree (two extra rules for shares).** If nearly every run lands on the same number, the margin above
+shrinks toward nothing and the interval can claim "no split" with confidence it has not earned. Two rules stop that.
+**(a)** An interval narrower than one person out of 125 can never support "no split." **(b)** When every run under
+one objective gave the same answer, the comparison is also made the way a yes-or-no rate is (how many runs landed on
+that answer under each objective, by Newcombe), and if the two ways disagree the result is inconclusive. Both rules
+can only make a verdict less certain, never more. In the simulations they took the worst false "no split" on runs
+that nearly all agree from about 15 in 100 down to about 3 in 1,000.
 
 **Edges go to the weaker answer.** An interval that ends exactly at zero does not exclude zero; one that ends
 exactly at the threshold is not inside it. A difference of exactly the threshold does reach it ("at least").
@@ -104,9 +115,11 @@ Every run's values are kept, so the spread can always be drawn.
 
 A small pilot (two repeats, the two development wordings) measures how much runs vary within a cell. From that
 spread, the number of repeats per cell is chosen so the interval is narrow enough for "no split" to be reachable
-(its half-width at most 0.8 of the threshold), between 6 and 20. Choice rates always get 20, the cap. **The repeat
-count carries no direction:** it is computed from spread alone, so setting it reveals nothing about which way any
-comparison leans. At the cap, the choice-rate interval is about plus or minus 25 points near 50% and 16 near 5%.
+(its half-width at most 0.8 of the threshold), between 6 and 20. The margin uses the same t value as the share
+interval, so the rule and the verdict agree on what "narrow enough" means. Choice rates always get 20, the cap. **The
+repeat count carries no direction:** it is computed from spread alone, so setting it reveals nothing about which way
+any comparison leans. At the cap, the share interval is about plus or minus 8 points at a spread of 0.15, and the
+choice-rate interval about plus or minus 25 points near 50% and 16 near 5%.
 
 ## 8. The matcher (step 9)
 
@@ -122,12 +135,18 @@ the average over its runs. Averaging the runs first would invent a decision: hal
 half on another average to a split no run made.
 
 **Four answers, never forced.** *Not enough disclosed* when too few things are known to tell objectives apart.
+Counting what is known: the choice counts one; disclosed money lines count one fewer than there are, because once
+each side is rescaled to add to 1, the last line is fixed by the others (a single line alone tells nothing).
 *No good match* when even the nearest objective is far. *Tie* when the gap between the two nearest could be zero.
 Otherwise *match*. The cut-offs are set from synthetic cases with known answers before any real case runs.
 
-**Known limits.** One disclosed line on its own carries no information (rescaled to 1, every run that put anything
-there looks identical to the company). And with five objectives, one usually lands near any decision, so "no good
-match" will be rare (section 9).
+**More than one reading.** Where the rubric is unsure what the company did, each reading is matched. The case
+"depends on reading" only when the readings point to different objectives with nothing in common: a tie between B
+and D under one reading and B alone under another is the same answer, not a change.
+
+**Known limits.** With five objectives, one usually lands near any decision, so "no good match" will be rare (section
+9). The matcher does tell an objective from its opposite: in the simulations, the objective that generated a case
+almost always sits far from that case's opposite.
 
 ## 9. The simulations (step 10)
 
@@ -135,28 +154,37 @@ match" will be rare (section 9).
 answer is known: objectives that truly do not differ, that differ by exactly the threshold, or by more. Counting how
 often the rules get those wrong shows what the rules can and cannot claim.
 
-**Exact, not approximate.** The resampling interval re-draws the runs 100,000 times. Doing that for millions of
-made-up comparisons would take about ten days of computing. But when every share is a whole number of people out of
-125, every possible re-draw can be counted at once, exactly (the fast Fourier transform). That is the answer the
-re-drawing approaches as the number of draws grows without limit, so the simulation measures the rule itself. A
-check ran the real 100,000-draw version on 960 comparisons: the same verdict on 954, and the other six sat exactly on
-a boundary. Choice rates needed no simulation: their verdict depends only on two counts, so every pair of counts was
-weighed by its exact probability.
+**How they were run.** Millions of made-up comparisons, each judged by the same rules the real data will be.
+At step 10 the share interval was the resampling one, and since re-drawing 100,000 times for each of millions of
+comparisons would take about ten days of computing, every possible re-draw was counted at once, exactly (the fast
+Fourier transform). At step 12 the share interval became Welch's, which needs no re-drawing, so the whole set ran in
+about twelve minutes. To be sure the simulation's fast version of the rules is the rule itself, 21,200 made-up
+comparisons were also run through the real analysis code: the same answer every time. Choice rates needed no
+simulation: their verdict depends only on two counts, so every pair of counts was weighed by its exact probability.
 
 **What they found.**
-- When two objectives truly do not differ, the share rule was meant to say "split" by mistake at most about 3 times
-  in 1,000. It did so up to about 22 times in 1,000 when models go all in on one answer, which they often do. This is
-  the known weakness of the resampling interval at small samples, and it is fixed before anything is pre-registered.
-- When nearly every run agrees, the rule can call two objectives the same with a confidence it has not earned. The
-  fix proposed in advance covers only exact agreement; the evidence says it must cover near agreement too.
+- When two objectives truly do not differ, the share rule should say "split" by mistake at most about 3 times in
+  1,000. The resampling interval did so up to about 22 times in 1,000 when models go all in on one answer, which
+  they often do. That was fixed before anything was pre-registered: with Welch's interval and the two rules for
+  runs that agree, the worst rate is about 4 in 1,000 and the typical one about 1 in 1,000. A handful of the most
+  scattered settings still sit a little above 3 in 1,000, so the methods page states the level as held
+  approximately, with the measured worst case.
+- When nearly every run agrees, the first rule could call two objectives the same with a confidence it had not
+  earned: up to 15 in 100 times where the true difference was the threshold. The two rules bring that to about 3 in
+  1,000.
+- The fix costs some power where runs are few: a real difference of 15 points is found less often at 6 repeats than
+  it was, though much of the old interval's apparent power was the same narrowness that broke its error rate.
 - Failed runs cost more than expected (section 4).
-- The matcher tells an objective from its opposite, but "no good match" will be rare.
-- The numbers the plan stated in advance mostly held: the choice-rate power figures (63% and 80% stated; 62.9% and
-  81.9% measured), the share interval at the cap (about 8 points stated; 7.9 measured).
+- The matcher tells an objective from its opposite (the generating objective sat beyond the no-match line in 99.8%
+  to 100% of opposite cases), but "no good match" will be rare. A single disclosed line identified the right
+  objective about 40% of the time, which is chance among five with ties, confirming it tells nothing.
+- The numbers the plan stated in advance: the choice-rate power figures held (63% and 80% stated; 62.9% and 81.9%
+  measured); the share interval at the cap is about 8 points as stated (8.3 measured); 80% power for a 15-point share
+  difference at about 10 repeats is 76.5% at exactly 10 (the rule asks for 11 there).
 
-**Why this matters for the claim.** Had the rule gone into the pre-registration unchanged, a "split" on a share would
-have been less certain than the published level said. Finding that before any real result exists is the point of
-simulating first.
+**Why this matters for the claim.** Had the first rule gone into the pre-registration unchanged, a "split" on a share
+would have been less certain than the published level said. Finding that before any real result exists is the point
+of simulating first.
 
 ## 10. Questions an interviewer is likely to ask, with short answers
 
@@ -165,14 +193,17 @@ simulating first.
   split" is the claim the Roundtable statement implies.
 - **"Why divide by 16?"** Sixteen comparisons per model; at 95% each, one false split across the set would be likely.
   Bonferroni is blunt but simple, and conservative is the right direction for this claim.
-- **"Why a bootstrap for shares and Newcombe for choices?"** Shares are amounts with odd shapes (often all in at 0 or
-  1), so a method that makes no shape assumption fits; choices are yes or no, where Newcombe is the standard and does
-  not collapse when every run agrees. The simulations then tested both and found where the bootstrap falls short.
+- **"Why Welch for shares and Newcombe for choices?"** Choices are yes or no, where Newcombe is the standard and does
+  not collapse when every run agrees. For shares the plan was a bootstrap, since shares have odd shapes (often all in
+  at 0 or 1). The simulations showed it too narrow at these sample sizes; nine candidates were then tested on the same
+  made-up data, and Welch's t-interval, with two rules for runs that agree, held the stated error rate. The choice
+  was made on that evidence, before any real result existed.
 - **"How do you know your code is right?"** Known answers built without the engine; published worked examples for
-  Newcombe; exact enumeration for the bootstrap; independent rebuilds of the failure and wording checks; and mutation
-  checks: bugs planted on purpose, one at a time, to confirm the tests catch them.
-- **"What did the simulations change?"** The share interval (too narrow), the all-agree rule (too narrow a fix), and
-  the cost of failures, all before pre-registration.
+  Newcombe; scipy's own Welch test and a hand-worked example for the share interval; independent rebuilds of the
+  failure and wording checks and of the share rule itself, checked against the analysis replicate by replicate; and
+  mutation checks: bugs planted on purpose, one at a time, to confirm the tests catch them.
+- **"What did the simulations change?"** The share interval (bootstrap to Welch), the all-agree rule (widened to near
+  agreement and to any value), and the known cost of failures, all before pre-registration.
 
 ## Formulas
 
@@ -180,10 +211,16 @@ simulating first.
   z / (1 + z²/n) · √(p(1 − p)/n + z²/4n²); giving (l, u).
 - **Newcombe**, d = p1 − p2: from d − √((p1 − l1)² + (u2 − p2)²) to d + √((p2 − l2)² + (u1 − p1)²) (Fagerland,
   Lydersen and Laake 2011, equation 7). z = 2.9552 at the family level (alpha = 0.05 / 16).
-- **Stratified percentile bootstrap** *(under revision, step 12)*: per wording, resample the cell's runs with
-  replacement, as many as it holds; average; average the wordings; difference the two objectives; the interval is the
-  0.15625% and 99.84375% points of 100,000 such differences.
-- **Repeats**: n = 2 z² sd² / (3 (0.8 T)²), rounded up, between 6 and 20; the interval's half-width at n is
-  z · sd · √(2 / (3n)).
+- **Stratified Welch t-interval** (shares): d = the difference of the two objectives' means of wording means;
+  SE² = Σ over every cell of both objectives of s² / (W² n), with s² the cell's sample variance, n its runs and W the
+  wordings; df = SE⁴ / Σ (term² / (n − 1)); the interval is d ± t(1 − 0.003125 / 2, df) · SE. With no spread in any
+  cell it is [d, d], which rules (a) and (b) then decide.
+- **Rule (a)**: a share interval narrower than 1/125 is never a no split. **Rule (b)**: when every run of either
+  objective holds one value v, Newcombe on (runs at v) / (runs) for each objective, at the share threshold; the less
+  certain of the two verdicts is kept.
+- **Repeats**: the smallest n with t · sd · √(2 / (3n)) ≤ 0.8 T, t taken on 6 (n − 1) degrees of freedom, between 6
+  and 20; the interval's half-width at n is t · sd · √(2 / (3n)).
+- **Stratified percentile bootstrap** (the matcher only, 95%): per wording, resample the cell's runs with replacement,
+  as many as it holds; average; average the wordings; the interval is the 2.5% and 97.5% points of 100,000 draws.
 - **Matcher distance**: ½ Σ |a_i − b_i| over the disclosed lines, each side rescaled to sum to 1; plus 1 if the
   choices differ; averaged when both exist.

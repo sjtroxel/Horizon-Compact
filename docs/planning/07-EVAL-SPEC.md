@@ -37,6 +37,13 @@
   **Patched 2026-10-04 (his), from Phase 0.5's smoke calls (`docs/phases/phase-0.5-aws-foundation-IMPLEMENTATION.md` §19):** §5.1 a model error that Bedrock delivers as
   an API error is a model outcome (`malformed_tool_use`), and text beside one tool call is not `no_tool_call`; §7.3
   thinking tokens are not reported separately by Converse; §14 item 1 closed.
+  **Patched 2026-10-09 (his authorization of 2026-10-08, on Opus's recommendation), from Phase 3 step 12
+  (`docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md` §20b):** §5.2 the worst-case bound both ways (kept
+  as built, his decision 1 of 2026-10-09), a wording dropped from both sides, and the measured cost of failures; §6.2 edges and the estimate-inside guard; §6.3
+  Welch for shares, alpha exactly 0.003125, decision 10's two rules, 95% for descriptive intervals and the matcher;
+  §8 the t quantile, the corrected precision at the cap, rule (a) never setting n, 0.84 as written, the pilot's two
+  wordings; §10.4 dimensions, distance, the matched-set reading rule, `D*` and `k*` per shape, the opposite check
+  (his decision 2, 2026-10-09); §14 item 5 the false-no-split target (decision 4).
 - **Read after:** `06-NARRATIVE-AND-VOCABULARY`. **Read before:** `08-REVIEW`.
 - **What this doc is:** the measurement design. **What it is not:** the pre-registration itself. In Phase 3 (`05`
   §5) this design is filled in with the final wordings, dossier and numbers, committed and tagged `prereg-v1`, and from
@@ -317,6 +324,24 @@ otherwise.
   setting the cell's failed runs to the outcome's extremes (0 and 1) in the direction that most narrows the
   difference. If that bound would overturn a split, the comparison is reported as inconclusive.
 
+*Patched 2026-10-09 (his authorization of 2026-10-08, on Opus's recommendation; the bound kept as built, his
+decision 1 of 2026-10-09), from Phase 3 decisions 3 and 6 and the step 10 and 12 simulations:*
+- **The bound works both ways.** A split is checked against the setting that most narrows the difference. **A no
+  split is checked against the settings that most widen it, in both signs** (raising the difference and lowering
+  it), since a no split's difference can sit near zero. Any verdict the bound changes, a no split it turns into a
+  split included, becomes inconclusive, with the reason. The whole verdict is recomputed, interval and the
+  all-agree rules of §6.3 included. Failed runs in a dropped wording do not enter.
+- **An unreliable cell drops its wording from both sides** of every comparison the cell is in, so two objectives
+  are always compared over the same wordings, and the verdict says which. A comparison left with no wording is
+  **"not assessable"**, a fourth label beside the three verdicts, never counted as any of them.
+- **What failures cost, measured:** the bound widens the interval as well as moving the difference, so it costs
+  more than the failure rate. At 20 repeats a wording and a within-cell spread of 0.2, a true 15-point share
+  difference is a split about 84% of the time with no failures, 53% at 2% random failures, 24% at 5% and 4% at
+  10% (300 replicates each, so about ±5 points). At 6 repeats a wording one failure drops its wording, and at 10%
+  failures about a third of comparisons are not assessable. **A model's failure rate is a first-order input to
+  which model can support conclusions** (Phase 3.5's model choice); a softer bound (applied only above a stated
+  failure rate) is possible before the tag, decided on a measured failure rate, not now.
+
 ---
 
 ## 6. What is compared, and what counts as a difference
@@ -353,6 +378,13 @@ Every primary comparison ends in exactly one of:
   support the Roundtable's claim on C vs D, and it has to be shown, not assumed from the absence of a split.
 - **Inconclusive:** anything else. Published as inconclusive.
 
+*Patched 2026-10-09 (his authorization of 2026-10-08, on Opus's recommendation), from Phase 3 step 4 (a) and (b):*
+**edges go to the weaker verdict.** An interval end exactly at zero does not exclude it; an end exactly at plus or
+minus the threshold is not inside; a difference of exactly the threshold reaches it ("at least"). Every comparison
+allows a tolerance of 1e-9, far below the smallest step an outcome takes (1/125) and far above floating-point noise
+(57/60 - 45/60 is 0.19999999999999996). **The difference must sit inside its own interval,** or the comparison is
+inconclusive: a guard that can only weaken a verdict, and keeps split and no split from both holding.
+
 **Practical thresholds (proposed; his decision, §15):** **10 percentage points** for share outcomes (S1, S2, and the
 secondary shares); **20 percentage points** for choice rates (S3 close rate, S4 fund rate), which are noisier per run.
 **What they mean** (added 2026-10-03, `08` §3.4f): 10 points of S1's illustrative $40M is $4M a year kept with people
@@ -371,6 +403,30 @@ extreme tails). **Choice rates: Newcombe's score interval** for a difference of 
 the same choice, which would declare "no split" with false certainty; the score interval stays honest at 0% and
 100%. Wordings are treated as fixed, not random: three wordings are too few to
 estimate a wording-level variance honestly, so the robustness rule in §7.1 handles wording instead.
+
+*Patched 2026-10-09 (his authorization of 2026-10-08, on Opus's recommendation), from Phase 3 step 12
+(`docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md` §20b); replaces the bootstrap for shares above:*
+- **Alpha is exactly 0.05 / 16 = 0.003125** (decision 7), a 99.6875% interval, "99.7%" in prose.
+- **Shares use a stratified Welch t-interval,** not a bootstrap. Each objective's value is the mean of its
+  per-wording means; the difference's squared standard error is the sum over every cell of both objectives of
+  s² / (W² n) (s² the cell's sample variance, n its valid runs, W the wordings compared); degrees of freedom by
+  Welch-Satterthwaite over the same terms; the interval is the difference plus or minus t(1 − 0.003125 / 2, df)
+  standard errors. **Why it changed:** the Phase 3 simulations found the percentile bootstrap too narrow at these
+  sample sizes: false splits up to 2.2% per comparison against a 0.3125% target, worst when runs go all in. Welch
+  held both targets on the same draws (`docs/phases/evidence/phase-3/interval-screening.md`). **Measured on the
+  full grid with the rules below** (`simulation-summary.md`, 20,000 replicates a point): false split at most
+  **0.43%** per comparison (median 0.12%), with 5 of 360 null points clearly above 0.3125%, all at the widest
+  spreads or the heaviest all-in runs, so the level is held approximately, not exactly; false no split at most
+  0.27%, every point within target.
+- **When runs agree (decision 10), two rules for shares,** each of which can only weaken a verdict: **(a)** an
+  interval narrower than 1/125 (one person of S1's 125) is never a "no split"; **(b)** when every valid run of either
+  objective holds one value, the share of runs at that value is also compared by Newcombe at the share threshold, and
+  the comparison takes the less certain of the two verdicts (the same when they agree, inconclusive when not). Without
+  them, runs that nearly all agree read as a confident "no split" (up to 15.5% false "no split" in the simulations).
+- **Choice rates keep Newcombe,** unchanged.
+- **Descriptive intervals** (failure rates by objective, position effects; no verdict) are at 95% (Phase 3 step 5
+  (e)). **The matcher's** spreads and tie rule are a 95% stratified bootstrap with 100,000 resamples, each seed
+  derived by rule from the sweep and the reading, never chosen (§10.4).
 
 **Why Bonferroni and not something more powerful:** it is the method that can be explained in one sentence in an
 interview, and the study's power is set by the repeat rule (§8), not by squeezing the correction. Recorded as a
@@ -481,6 +537,26 @@ test (`04` §1.6). Reported as context, never used to filter runs.
   detect) rather than spending past the budget.
 - **Worked example, shares, threshold 0.10:** sd = 0.15 → (a) 10, (b) 21 → **20** (cap). sd = 0.10 → (a) 5, (b) 10 →
   **10**. The cost cases in §13 (cap, and 10 repeats) are unchanged.
+
+*Patched 2026-10-09 (his authorization of 2026-10-08, on Opus's recommendation), from Phase 3 steps 8 and 12:*
+- **The rule uses the t quantile,** to match the Welch interval (§6.3): each count is the smallest n meeting its
+  condition, with t at 1 − 0.003125 / 2 on 6 (n − 1) degrees of freedom (three wordings, both objectives) in place of
+  2.96. (a): (t + 0.84) × sd × √(2 / 3n) ≤ 1.5 × threshold; (b): t × sd × √(2 / 3n) ≤ 0.8 × threshold. **The worked
+  example becomes** sd = 0.15 → (a) 11, (b) 22 → **20** (cap); sd = 0.10 → (a) 6, (b) 10 → **10** (t = 3.094).
+  The repeats in both cases, and so the cost cases in §13, are unchanged.
+- **Rule (a) never sets n:** (t + 0.84) / 1.5 is below t / 0.8 for any t over about 1, so (b) is always the larger.
+  (a) is kept and reported for the record.
+- **0.84 is used as written** (the 80th percentile of the normal is 0.8416; the difference moves no count in the
+  worked example).
+- **The pilot runs two wordings, the study three:** the rule is computed with W = 3, the study's wordings, from a
+  spread pooled over the pilot's two.
+- **Precision at the cap, corrected:** shares, sd 0.15, about **±8.3 points** (t on 114 degrees of freedom, 3.0195);
+  choice rates, Newcombe at 60 runs a side, **±25 points near 50%** and **±16 near 5%** (the "±27" and "±12" below
+  were normal-approximation figures). **"No split reachable about 54%"** is a floor where the cap does not bind (49.7%
+  at worst, median 97.7%, in the simulations); **where the cap binds it falls to a median of 0.2%**, so on a wide or
+  all-in spread "no split" is effectively unreachable at 20 repeats. **Power at 1.5 times the threshold** is 96.8%
+  or more where the cap does not bind and a median of 57% where it does. **The "80% power for a 15-point difference
+  at sd 0.15 and about 10 repeats"** of `08` §3.4 measures 76.5% at exactly 10 (rule (a) asks for 11 there).
 
 **What the cap means, stated now so it is not discovered later** (arithmetic rechecked 2026-10-03, `08` §3.4):
 - **Choice rates:** at 20 repeats and three wordings (60 runs per objective), the 99.7% interval on a difference is
@@ -610,6 +686,24 @@ For each case and model:
    its alternative reading.** If the nearest objective changes, the case is reported as "depends on reading," with
    both matches shown.
 
+*Patched 2026-10-09 (his authorization of 2026-10-08, on Opus's recommendation; item (e) his decision 2 of the
+same day), from Phase 3 steps 9, 10 and 12:*
+- **(a) Dimensions:** the choice counts one; **n observable lines count n − 1**, since the vector is renormalized over
+  them: one line alone carries no information (every run that puts anything there is identical to the company).
+- **(b) Distance** is each objective's mean of its per-wording mean run distances (the same as item 3's average unless
+  runs failed). A run with nothing on the observable lines and no observable choice has no distance: it is left out
+  and counted, never given a made-up value.
+- **(c) "Depends on reading"** (item 6) compares **matched sets**: each reading's nearest objective, or the tied pair
+  when it is a tie. It is set when the readings' matched sets share no objective, so a tie whose nearest flips by
+  noise does not count as a change.
+- **(d) The thresholds, per scenario shape,** from the synthetic cases (Phase 3 §14.2): `D*`, the 95th percentile of
+  true-match cases' nearest distance at the widest spread; `k*`, the fewest dimensions at which the generating
+  objective is nearest or tied in at least 80% of sparse cases at the design spread. The values are in
+  `src/horizon_compact/analysis/matcher_thresholds.toml`, frozen with the analysis at the tag, and in the protocol.
+- **(e) The opposite check** (an opposite case must not read as a match) is judged on the generating objective's own
+  distance, which is what it is for. With five random profiles another objective usually sits near any decision,
+  so "no good match" is rare; the methods page says so.
+
 Wording on every surface: "most closely matched," ties and no-match shown as such (`00` §5.4, `06` §4).
 
 ---
@@ -683,7 +777,11 @@ repeats, about $57).
    *Closed 2026-10-04, as documented, not observed:* `content_filtered`, provisionally (§5.1).
 5. **Bootstrap, Newcombe intervals and the repeat rule** implemented and tested on synthetic data with a known answer:
    the power and false-split rates of the §6.2 rule simulated, including the case where every run agrees (Phase 3,
-   `05` §5; `09` A5).
+   `05` §5; `09` A5). *Patched 2026-10-09 (his authorization of 2026-10-08, on Opus's recommendation), from Phase 3
+   decision 4:* the simulation's targets, per comparison: **false split at a true difference of 0, and false no
+   split at a true difference of exactly the threshold, each at most 0.05 / 16**; power at 1.5 times the threshold
+   and "no split reachable" reported; when every run agrees, no "no split" from a zero-width interval. Shares are
+   now Welch (§6.3); the results are in `docs/phases/evidence/phase-3/`.
 6. **The matcher calibrated on synthetic cases** and its no-match threshold and minimum-evidence rule set (§10.4),
    before any real case runs (Phase 3; `09` A5).
 

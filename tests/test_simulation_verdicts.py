@@ -1,5 +1,5 @@
-"""The verdict-rule simulations: choice rates exact, decision 10's candidates, the engine families and the
-runner's grid (Phase 3 doc 14, step 10)."""
+"""The verdict-rule simulations: choice rates exact, the share engine under the rule adopted at step 12 (Welch
+and decision 10's two rules), the engine families and the runner's grid (Phase 3 doc 14, steps 10 and 12)."""
 
 from __future__ import annotations
 
@@ -10,12 +10,17 @@ import numpy as np
 import pytest
 from scipy import stats
 
-from analysis_helpers import hand_newcombe
+from analysis_helpers import hand_newcombe, hand_welch
 from horizon_compact.analysis.intervals import comparison_seed
-from horizon_compact.analysis.verdict import decide
+from horizon_compact.analysis.verdict import compare, decide
 from horizon_compact.simulation import real
 from horizon_compact.simulation.exact import S1_GRID, share_pmf
-from horizon_compact.simulation.matcher_sim import d_star, k_star, labels
+from horizon_compact.simulation.matcher_sim import (
+    d_star,
+    identification_by_dimensions,
+    k_star,
+    labels,
+)
 from horizon_compact.simulation.runner import (
     AGREE_CONFIGS,
     FULL,
@@ -29,11 +34,12 @@ from horizon_compact.simulation.runner import (
 )
 from horizon_compact.simulation.verdicts import (
     VERDICTS,
-    candidate_verdicts,
     choice_point,
     less_certain,
     newcombe_verdict,
     share_point,
+    share_verdicts,
+    welch_arrays,
 )
 
 
@@ -74,7 +80,7 @@ def test_the_stated_choice_powers() -> None:
     )
 
 
-# --- decision 10's candidates -------------------------------------------------------------------------------
+# --- the share engine: Welch and decision 10's two rules (step 12) ----------------------------------------
 
 
 def test_less_certain() -> None:
@@ -84,43 +90,62 @@ def test_less_certain() -> None:
     assert less_certain("no_split", "inconclusive") == "inconclusive"
 
 
-def test_every_run_at_one_boundary_value_on_both_sides() -> None:
-    # The rule says no split from [0, 0]; both candidates fire on every replicate and test 18 of 18 against
-    # 18 of 18 by Newcombe at the share threshold, whose interval is far wider than 0.1: inconclusive.
+def test_the_vectorized_welch_matches_the_tests_own_on_every_replicate() -> None:
+    rng = np.random.Generator(np.random.PCG64(11))
+    first = rng.integers(0, S1_GRID + 1, size=(40, 3, 5))
+    second = rng.integers(0, S1_GRID + 1, size=(40, 3, 5))
+    first[0] = 100  # one replicate with no spread on the first side
+    d, lo, hi = welch_arrays(first, second, S1_GRID)
+    for r in range(40):
+        one, two = (
+            {w: list(x[r, i] / S1_GRID) for i, w in enumerate("abc")} for x in (first, second)
+        )
+        hd, hlo, hhi, _ = hand_welch(one, two)
+        assert (d[r], lo[r], hi[r]) == pytest.approx((hd, hlo, hhi), abs=1e-12)
+
+
+def test_every_run_at_one_boundary_value_on_both_sides_is_inconclusive_by_both_rules() -> None:
+    # Welch alone says no split from [0, 0]. The floor makes it inconclusive, and the constant check tests
+    # 18 of 18 against 18 of 18 by Newcombe at the share threshold, far wider than 0.1: inconclusive too.
     one = point_mass(S1_GRID)
     got = share_point([one] * 3, [one] * 3, n=6, reps=50, seed=1, grid=S1_GRID)
-    assert got["verdicts"] == {"split": 0, "no_split": 50, "inconclusive": 0}
-    assert got["no_split_degenerate"] == 50
+    assert got["interval_alone"] == {"split": 0, "no_split": 50, "inconclusive": 0}
+    assert got["interval_alone_no_split_degenerate"] == 50
+    assert got["verdicts"] == {"split": 0, "no_split": 0, "inconclusive": 50}
+    assert got["floor_fired"] == got["constant_fired"] == 50
+    assert got["constant_changed"] == 0  # the floor had already made it inconclusive
     assert newcombe_verdict(18, 18, 18, 18, 0.1) == "inconclusive"
-    for name in ("c1", "c2"):
-        assert got[f"{name}_rule"]["no_split"] == 50
-        assert candidate_verdicts(got, name) == {"split": 0, "no_split": 0, "inconclusive": 50}
 
 
-def test_an_interior_all_agree_fires_neither_candidate() -> None:
-    # Every run keeps 100 of 125: still [0, 0] and no split, but no run is at a boundary value.
+def test_an_interior_all_agree_is_caught_too() -> None:
+    # Every run keeps 100 of 125: away from 0 and 1, which decision 10's first candidate missed.
     eighty = point_mass(100)
     got = share_point([eighty] * 3, [eighty] * 3, n=6, reps=20, seed=2, grid=S1_GRID)
-    assert got["verdicts"]["no_split"] == 20 and got["no_split_degenerate"] == 20
-    assert sum(got["c1_rule"].values()) == sum(got["c2_rule"].values()) == 0
-    assert candidate_verdicts(got, "c1") == got["verdicts"]
+    assert got["interval_alone"]["no_split"] == 20
+    assert got["verdicts"]["no_split"] == 0 and got["constant_fired"] == 20
 
 
-def test_one_side_at_a_boundary_fires_only_the_wider_candidate() -> None:
+def test_one_constant_side_fires_the_constant_check_on_every_replicate() -> None:
     one, zero = point_mass(S1_GRID), point_mass(0)
     mixed = 0.5 * one + 0.5 * zero
     got = share_point([one] * 3, [mixed] * 3, n=6, reps=40, seed=3, grid=S1_GRID)
-    assert sum(got["c1_rule"].values()) == 0
-    assert sum(got["c2_rule"].values()) == 40
+    assert got["constant_fired"] == 40
 
 
-def test_candidate_verdicts_replace_only_the_triggered_replicates() -> None:
-    point = {
-        "verdicts": {"split": 10, "no_split": 5, "inconclusive": 85},
-        "c1_rule": {"split": 0, "no_split": 4, "inconclusive": 0},
-        "c1_combined": {"split": 0, "no_split": 0, "inconclusive": 4},
-    }
-    assert candidate_verdicts(point, "c1") == {"split": 10, "no_split": 1, "inconclusive": 89}
+def test_the_floor_alone_fires_on_a_narrow_interval_with_no_constant_side() -> None:
+    narrow = 0.5 * point_mass(62) + 0.5 * point_mass(63)
+    got = share_point([narrow] * 3, [narrow] * 3, n=20, reps=30, seed=9, grid=S1_GRID)
+    assert got["constant_fired"] == 0
+    assert got["floor_fired"] == got["interval_alone"]["no_split"] > 0
+    assert got["verdicts"]["no_split"] == 0
+
+
+def test_the_engine_reads_the_first_sides_value_when_both_are_constant() -> None:
+    first, second = np.full((1, 3, 6), 125), np.full((1, 3, 6), 0)
+    got = share_verdicts(first, second, grid=S1_GRID)
+    assert got.constant == [125] and got.final == ["split"]
+    got = share_verdicts(second, first, grid=S1_GRID)
+    assert got.constant == [0] and got.final == ["split"]  # a split the other way
 
 
 def test_a_share_point_is_fixed_by_its_seed_and_counts_every_replicate() -> None:
@@ -232,6 +257,16 @@ def test_d_star_is_an_observed_95th_percentile_ignoring_unmatchable_trials() -> 
     assert d_star([0.3] * 20) == 0.3  # ties: none above
 
 
+def test_identification_is_grouped_by_the_dimensions_each_case_has() -> None:
+    # Two sparse cells: trials are pooled by their own dimension count, not by the cell they came from.
+    one: dict[str, list[Any]] = {
+        "dimensions": [0, 1, 1, 2],
+        "identified": [False, True, False, True],
+    }
+    two: dict[str, list[Any]] = {"dimensions": [1, 2, 2], "identified": [True, True, False]}
+    assert identification_by_dimensions([one, two]) == {0: 0.0, 1: 2 / 3, 2: 2 / 3}
+
+
 def test_k_star_is_the_smallest_k_reaching_80_percent() -> None:
     assert k_star({1: 0.5, 2: 0.79, 3: 0.8, 4: 0.95}) == 3
     assert k_star({1: 0.5, 2: 0.7}) is None
@@ -257,22 +292,27 @@ def test_labels_in_the_matchers_order() -> None:
 # --- cases built so the outcome is forced (gaps the mutation check showed) ----------------------------------
 
 
-def test_the_candidates_test_at_the_share_threshold_not_the_choice_threshold() -> None:
-    # 60 of 60 against 60 of 60: Newcombe's half-width is about 0.127, inside 0.2 but not inside 0.1. At the
-    # share threshold the candidate must make it inconclusive; at 0.2 it would stay a no split.
+def test_the_constant_check_tests_at_the_share_threshold_not_the_choice_threshold() -> None:
+    # 60 of 60 against 60 of 60: Newcombe's half-width is about 0.127, inside 0.2 but not inside 0.1. A
+    # constant check at the choice threshold would let a no split through where the floor did not fire.
     assert newcombe_verdict(60, 60, 60, 60, 0.1) == "inconclusive"
     assert newcombe_verdict(60, 60, 60, 60, 0.2) == "no_split"
-    one = point_mass(S1_GRID)
-    got = share_point([one] * 3, [one] * 3, n=20, reps=5, seed=1, grid=S1_GRID)
-    assert candidate_verdicts(got, "c1") == {"split": 0, "no_split": 0, "inconclusive": 5}
+    first = np.full((1, 3, 20), 125)
+    second = np.full((1, 3, 20), 125)
+    second[0, :2, 0] = 100  # one run at 0.8 in two wordings: real width, and 58 of 60 still at 125
+    assert newcombe_verdict(60, 60, 58, 60, 0.1) == "inconclusive"
+    assert newcombe_verdict(60, 60, 58, 60, 0.2) == "no_split"
+    got = share_verdicts(first, second, grid=S1_GRID)
+    assert got.interval_verdict == ["no_split"] and got.floor_fired == [False]
+    assert got.constant == [125] and got.final == ["inconclusive"]
 
 
-def test_a_no_split_with_width_is_not_counted_degenerate() -> None:
+def test_a_no_split_with_width_is_not_counted_degenerate_and_stands() -> None:
     p = share_pmf(0.5, 0.05, 0.0, S1_GRID)
     assert p is not None
     got = share_point([p] * 3, [p] * 3, n=20, reps=200, seed=2, grid=S1_GRID)
     assert got["verdicts"]["no_split"] > 150
-    assert got["no_split_degenerate"] == 0
+    assert got["interval_alone_no_split_degenerate"] == 0 and got["floor_fired"] == 0
 
 
 def test_a_choice_split_in_the_wrong_direction_is_counted() -> None:
@@ -316,14 +356,50 @@ def test_the_bound_rebuild_agrees_when_the_bound_must_overturn_a_split() -> None
 
 
 def test_the_bound_rebuild_agrees_when_the_bound_must_overturn_a_no_split() -> None:
-    # Every valid run of both keeps 62 of 125: a no split from [0, 0]. Widening sets A's failures to 1 and B's
-    # to 0 (and the reverse); with both sides' failures counted the difference reaches about 0.1 and
-    # overturns it, which a rebuild that dropped B's failures would miss.
-    got = real.failure_point(
-        point_mass(62), point_mass(62), n=20, rate=0.1, pattern="random", reps=12, seed=5, key="n"
-    )
+    # Both objectives near 0.5 with a spread of 0.05: a no split with real width. Widening sets A's failures
+    # to 1 and B's to 0 (and the reverse); with both sides' failures counted the difference reaches about
+    # 0.1 and overturns it, which a rebuild that dropped B's failures would miss.
+    p = share_pmf(0.5, 0.05, 0.0, S1_GRID)
+    assert p is not None
+    got = real.failure_point(p, p, n=20, rate=0.1, pattern="random", reps=12, seed=5, key="n")
     assert got["bound_applied"] > 0 and got["downgraded_by_bound"] > 0
     assert got["independent_rebuild_mismatches"] == 0
+
+
+def test_the_rebuild_is_the_adopted_rule_on_unequal_cells() -> None:
+    # Against the analysis's own compare on the same cells, with a cell short of runs and a constant side.
+    cases = [
+        ({"w1": [0.8, 0.6, 0.72], "w2": [0.4, 0.96]}, {"w1": [0.2, 0.16], "w2": [0.0, 0.08, 0.4]}),
+        ({"w1": [1.0] * 4, "w2": [1.0] * 3}, {"w1": [1.0, 0.92, 1.0], "w2": [1.0] * 5}),
+        (
+            {"w1": [0.496, 0.504] * 5, "w2": [0.504] * 6},
+            {"w1": [0.496] * 6, "w2": [0.504, 0.496] * 4},
+        ),
+        # Welch says no split; the constant check (42 of 42 against 40 of 42) makes it inconclusive.
+        (
+            {"w1": [1.0] * 20, "w2": [1.0] * 22},
+            {"w1": [1.0] * 19 + [0.8], "w2": [1.0] * 21 + [0.8]},
+        ),
+    ]
+    outcomes = real.s1_outcomes()
+    for first, second in cases:
+        rows = []
+        for objective, cells in ((real.FIRST, first), (real.SECOND, second)):
+            for w, values in cells.items():
+                for i, v in enumerate(values):
+                    rows.append(real._row("rebuild", objective, w, i, round(v * S1_GRID)))
+        got = compare(outcomes, rows, real.FIRST, real.SECOND)
+        assert real.rebuild_verdict(first, second) == got.verdict
+    assert got.interval.width > 0.008 and got.constant_check is not None
+    assert decide(got.difference, got.interval.low, got.interval.high, 0.1).verdict == "no_split"
+    assert got.verdict == "inconclusive"  # the last case is decided by the constant check
+
+
+def test_the_validation_family_agrees_with_the_analysis_where_the_rules_fire() -> None:
+    a, b = agree_pmf("mixture", 1.0), agree_pmf("mixture", 0.8)
+    got = real.validation_point(a, b, n=6, reps=40, seed=2, key="t")
+    assert got["verdicts_agree"] == 40 and got["disagreements"] == []
+    assert got["constant_fired"] > 0 and got["max_abs_endpoint_difference"] < 1e-12
 
 
 def test_a_wording_with_no_difference_breaks_a_negative_split() -> None:

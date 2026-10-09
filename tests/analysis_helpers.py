@@ -8,6 +8,7 @@ sweep's objects to a prefix the reader accepts, so a test can score a run as it 
 from __future__ import annotations
 
 import math
+import statistics
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -101,7 +102,7 @@ def run(
     return RunRow(**base)
 
 
-def s1_runs(objective: str, kept_per_wording: dict[str, Iterable[int]]) -> list[RunRow]:
+def s1_runs(objective: str, kept_per_wording: Mapping[str, Iterable[int]]) -> list[RunRow]:
     """S1 runs keeping the given number of the 125 people (moved at the plant role's pay), the rest
     eliminated."""
     return [
@@ -159,6 +160,31 @@ def hand_newcombe(c1: int, n1: int, c2: int, n2: int, alpha: float = ALPHA) -> t
     return d - math.sqrt((p1 - l1) ** 2 + (u2 - p2) ** 2), d + math.sqrt(
         (p2 - l2) ** 2 + (u1 - p1) ** 2
     )
+
+
+def hand_welch(
+    first: Mapping[str, Sequence[float]],
+    second: Mapping[str, Sequence[float]],
+    alpha: float = ALPHA,
+) -> tuple[float, float, float, float | None]:
+    """The test's own stratified Welch interval (Phase 3 IMPLEMENTATION doc section 20b, item 1), written from
+    the formula with the standard library's exact ``statistics`` and scipy's t quantile: independent of the
+    engine. Returns (difference, low, high, df); df is None when no cell has any spread."""
+    wordings = len(first)
+    d = statistics.fmean(statistics.fmean(v) for v in first.values()) - statistics.fmean(
+        statistics.fmean(v) for v in second.values()
+    )
+    terms = [
+        (statistics.variance(v) / (wordings * wordings * len(v)), len(v))
+        for side in (first, second)
+        for v in side.values()
+    ]
+    se2 = sum(term for term, _ in terms)
+    if se2 == 0:
+        return d, d, d, None
+    df = se2 * se2 / sum(term * term / (n - 1) for term, n in terms)
+    half = float(stats.t.ppf(1 - alpha / 2, df)) * math.sqrt(se2)
+    return d, d - half, d + half, df
 
 
 W3 = ("w1", "w2", "w3")

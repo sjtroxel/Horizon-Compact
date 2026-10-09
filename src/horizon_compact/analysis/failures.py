@@ -45,7 +45,6 @@ from typing import Literal
 from horizon_compact.analysis.intervals import (
     ALPHA,
     DESCRIPTIVE_ALPHA,
-    RESAMPLES,
     Interval,
     newcombe_difference,
 )
@@ -309,8 +308,6 @@ def assess_comparison(
     role: Role = "primary",
     calls: Mapping[str, str] | None = None,
     alpha: float = ALPHA,
-    resamples: int = RESAMPLES,
-    name: str | None = None,
 ) -> AssessedComparison:
     """One comparison with the failure rules applied: unreliable wordings dropped from both sides, the verdict
     among valid runs, then the worst-case bound, then the final verdict and, if it was downgraded, why."""
@@ -361,11 +358,8 @@ def assess_comparison(
     if not kept:
         return proto
 
-    seed_name = name or f"{scenario_id}:{first}-{second}"
     cellset = gather_cells(outcomes, scoped, first, second, wordings=kept)
-    valid = compare_cells(
-        outcomes, cellset, role=role, alpha=alpha, resamples=resamples, name=seed_name
-    )
+    valid = compare_cells(outcomes, cellset, role=role, alpha=alpha)
     failed = {(side, w): rates[(side, w)].unsuccessful for side in (first, second) for w in kept}
     n_first = sum(n for (side, _w), n in failed.items() if side == first)
     n_second = sum(n for (side, _w), n in failed.items() if side == second)
@@ -395,8 +389,6 @@ def assess_comparison(
             _set_failed(cellset, failed, first_v, second_v),
             role=role,
             alpha=alpha,
-            resamples=resamples,
-            name=f"{seed_name}:bound:{label}",
         )
         checks.append(
             BoundCheck(
@@ -539,7 +531,6 @@ def assess_scenario(
     calls: Mapping[str, str] | None = None,
     alpha: float = ALPHA,
     descriptive_alpha: float = DESCRIPTIVE_ALPHA,
-    resamples: int = RESAMPLES,
 ) -> ScenarioAssessment:
     """Every failure-rule output for one scenario of one sweep of one model."""
     scenario_id = outcomes.scenario.id
@@ -555,19 +546,11 @@ def assess_scenario(
     firsts = first_attempt_rows(scoped)
 
     def run_all(
-        view: Sequence[RunRow], suffix: str, use_calls: Mapping[str, str]
+        view: Sequence[RunRow], use_calls: Mapping[str, str]
     ) -> tuple[AssessedComparison, ...]:
         return tuple(
             assess_comparison(
-                outcomes,
-                view,
-                first,
-                second,
-                role=role,
-                calls=use_calls,
-                alpha=alpha,
-                resamples=resamples,
-                name=f"{scenario_id}:{first}-{second}{suffix}",
+                outcomes, view, first, second, role=role, calls=use_calls, alpha=alpha
             )
             for (first, second), role in pairs
         )
@@ -576,8 +559,8 @@ def assess_scenario(
     return ScenarioAssessment(
         scenario_id=scenario_id,
         cells=cell_rates(scoped, mine),
-        comparisons=run_all(scoped, "", mine),
-        first_attempt=run_all(firsts, ":first-attempt", {}),
+        comparisons=run_all(scoped, mine),
+        first_attempt=run_all(firsts, {}),
         objective_rates=rates,
         pair_rates=pair_rates(rates, alpha=descriptive_alpha),
     )

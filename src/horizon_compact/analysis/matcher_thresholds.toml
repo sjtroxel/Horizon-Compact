@@ -2,20 +2,20 @@
 # Written from docs/phases/evidence/phase-3/simulation-results.json by
 # horizon_compact.simulation.report.thresholds_toml; a test holds the two equal. Data, not code, so
 # that writing it leaves the hash the results record unchanged. Frozen with analysis/ at the tag.
-# Results code hash: 7d1a8f029b758c56139015a3533d53b458b1156532f2f350d746b311b89d192d
+# Results code hash: 705078047b9ec370e75d1e56e03ec9ade8dc6d5b7a28a48cc77636046b59192c
 
 [shapes.s1]
 d_star = 0.34845088127426144
-k_star = 2
+k_star = 1
 
 [shapes.s2]
 d_star = 0.6794453761344973
-k_star = 3
+k_star = 2
 
 [shapes.s3]
 d_star = 0.5456778377115402
-k_star = 2
+k_star = 1
 
 [shapes.s4]
 d_star = 0.6555312294739376
-k_star = 3
+k_star = 2

@@ -1,4 +1,4 @@
-"""``hc simulate run``: every simulation of Phase 3 step 10, seeded, in parallel, into one results file.
+"""``hc simulate run``: every simulation of Phase 3 (steps 10 and 12), seeded, in parallel, into one file.
 
 Each task is fixed by its family, its grid point and its chunk, and its seed is derived from those names
 (``comparison_seed``), so no one picks a seed and the results do not depend on how many workers run them or
@@ -31,21 +31,20 @@ from typing import Any
 import numpy as np
 
 from horizon_compact.analysis import RESULTS_VERSION
-from horizon_compact.analysis.intervals import ALPHA, RESAMPLES, Z, comparison_seed
+from horizon_compact.analysis.intervals import ALPHA, comparison_seed
 from horizon_compact.analysis.outcomes import CHOICE_THRESHOLD, SHARE_THRESHOLD
 from horizon_compact.analysis.repeats import share_repeats
-from horizon_compact.analysis.verdict import decide
+from horizon_compact.analysis.verdict import SHARE_FLOOR
 from horizon_compact.simulation import matcher_sim, real, verdicts
 from horizon_compact.simulation.exact import (
     FINE_GRID,
     S1_GRID,
-    draw,
-    exact_intervals,
     pmf_mean_sd,
     share_pmf,
 )
 
-SIMULATION_VERSION = 1
+# 2 (step 12): shares judged by the Welch interval and decision 10's two rules; the resample family went.
+SIMULATION_VERSION = 2
 SEED_ROOT = "phase-3-simulation"
 T = SHARE_THRESHOLD
 
@@ -79,7 +78,6 @@ class Plan:
     wording_reps: int
     validation_every: int
     validation_reps: int
-    resample_seeds: int
     matcher_trials: int
     matcher_spreads: tuple[float, ...]
     matcher_chunk: int
@@ -108,9 +106,8 @@ FULL = Plan(
     failure_reps=300,
     wording_repeats=(10, 20),
     wording_reps=400,
-    validation_every=3,
-    validation_reps=40,
-    resample_seeds=200,
+    validation_every=1,
+    validation_reps=200,
     matcher_trials=2_000,
     matcher_spreads=matcher_sim.SPREADS,
     matcher_chunk=250,
@@ -141,7 +138,6 @@ QUICK = Plan(
     wording_reps=10,
     validation_every=24,
     validation_reps=5,
-    resample_seeds=5,
     matcher_trials=20,
     matcher_spreads=(0.10, 0.20),
     matcher_chunk=10,
@@ -390,7 +386,7 @@ def build_tasks(plan: Plan) -> list[Task]:
                 key = f"d={d:g}|{mode} s={s:g}|n={n}"
                 for i, size in enumerate(_chunks(plan.wording_reps, 100)):
                     tasks.append(_task("wording", key, i, d=d, mode=mode, s=s, n=n, reps=size))
-    # 10. the exact bootstrap against the engine
+    # 10. the share family's engine against the analysis, replicate by replicate
     points = [
         (mu, sigma, pi, d, n)
         for mu in (0.1, 0.5, 0.9)
@@ -412,10 +408,20 @@ def build_tasks(plan: Plan) -> list[Task]:
                 reps=plan.validation_reps,
             )
         )
-    # 11. the resample count (section 14.3)
-    for which in ("split near its boundary", "no split near its boundary"):
-        tasks.append(_task("resamples", which, which=which, seeds=plan.resample_seeds))
-    # 12. the matcher
+    for name, kind, a1, a2 in configs:  # where decision 10's rules fire
+        for n in (6, 20) if plan.mode == "full" else (6,):
+            tasks.append(
+                _task(
+                    "validation",
+                    f"{name}|n={n}",
+                    kind=kind,
+                    a1=a1,
+                    a2=a2,
+                    n=n,
+                    reps=plan.validation_reps,
+                )
+            )
+    # 11. the matcher
     tasks += matcher_tasks(plan)
     return tasks
 
@@ -466,43 +472,6 @@ def _required(p: np.ndarray | None) -> np.ndarray:
     if p is None:
         raise ValueError("no distribution for this point")
     return p
-
-
-def _resample_dataset(
-    which: str,
-) -> tuple[dict[str, list[float]], dict[str, list[float]], dict[str, Any]]:
-    """The fixed data set for section 14.3: from 2,000 replicates at a typical point, the one at the 5th
-    percentile of its verdict's margin (close to the boundary, not the closest)."""
-    sigma, n = 0.15, 10
-    high, low = (0.55, 0.45) if which.startswith("split") else (0.5, 0.5)
-    rng = np.random.Generator(
-        np.random.PCG64(comparison_seed(SEED_ROOT, f"resamples|{which}|data"))
-    )
-    first = draw(_required(pmf(high, sigma, 0.0)), (2000, 3, n), rng)
-    second = draw(_required(pmf(low, sigma, 0.0)), (2000, 3, n), rng)
-    ex = exact_intervals(first, second, grid=S1_GRID, alpha=ALPHA)
-    margins = []
-    for r in range(2000):
-        verdict = decide(float(ex.estimate[r]), float(ex.low[r]), float(ex.high[r]), T).verdict
-        if which.startswith("split") and verdict == "split" and ex.estimate[r] > 0:
-            margins.append((float(ex.low[r]), r))
-        if which.startswith("no split") and verdict == "no_split":
-            margins.append((min(T - float(ex.high[r]), float(ex.low[r]) + T), r))
-    margins.sort()
-    margin, r = margins[max(0, math.ceil(0.05 * len(margins)) - 1)]
-    cells_first = {w: [float(v) / S1_GRID for v in first[r, i]] for i, w in enumerate(real.W3)}
-    cells_second = {w: [float(v) / S1_GRID for v in second[r, i]] for i, w in enumerate(real.W3)}
-    meta = {
-        "point": f"{high:g} vs {low:g}|sigma={sigma:g}|pi=0|n={n}",
-        "replicate": r,
-        "candidates": len(margins),
-        "exact_margin": margin,
-        "exact_interval": [float(ex.low[r]), float(ex.high[r])],
-        "estimate": float(ex.estimate[r]),
-        "values_first": {w: [int(v) for v in first[r, i]] for i, w in enumerate(real.W3)},
-        "values_second": {w: [int(v) for v in second[r, i]] for i, w in enumerate(real.W3)},
-    }
-    return cells_first, cells_second, meta
 
 
 def run_task(task: Task) -> tuple[str, str, int, dict[str, Any]]:
@@ -594,34 +563,24 @@ def run_task(task: Task) -> tuple[str, str, int, dict[str, Any]]:
             round(a - b, 10) for a, b in zip(means[0], means[1], strict=True)
         ]
     elif family == "validation":
-        sides = pair(g("mu"), g("d"), g("sigma"), g("pi"))
-        if sides is None:
-            return (
-                family,
-                task.key,
-                task.chunk,
-                {"skipped": "no distribution has these means and spread"},
+        if "kind" in dict(task.params):
+            sides_pmf = (agree_pmf(g("kind"), g("a1")), agree_pmf(g("kind"), g("a2")))
+        else:
+            sides = pair(g("mu"), g("d"), g("sigma"), g("pi"))
+            if sides is None:
+                return (
+                    family,
+                    task.key,
+                    task.chunk,
+                    {"skipped": "no distribution has these means and spread"},
+                )
+            sides_pmf = (
+                _required(pmf(sides[0], g("sigma"), g("pi"))),
+                _required(pmf(sides[1], g("sigma"), g("pi"))),
             )
         result = real.validation_point(
-            _required(pmf(sides[0], g("sigma"), g("pi"))),
-            _required(pmf(sides[1], g("sigma"), g("pi"))),
-            n=g("n"),
-            reps=g("reps"),
-            seed=task.seed,
-            key=task.key,
+            *sides_pmf, n=g("n"), reps=g("reps"), seed=task.seed, key=task.key
         )
-    elif family == "resamples":
-        cells_first, cells_second, meta = _resample_dataset(g("which"))
-        result = {
-            **meta,
-            "by_resamples": real.resample_point(
-                cells_first,
-                cells_second,
-                seeds=g("seeds"),
-                resamples=(10_000, RESAMPLES),
-                key=task.key,
-            ),
-        }
     elif family == "matcher":
         result = matcher_sim.run_trials(
             g("shape"), g("kind"), g("sigma"), g("k"), range(g("start"), g("stop"))
@@ -673,14 +632,18 @@ def _merge_share(parts: list[dict[str, Any]]) -> dict[str, Any]:
     out = {k: v for k, v in parts[0].items() if k not in ("seed",)}
     out["seeds"] = [p["seed"] for p in parts]
     out["reps"] = sum(p["reps"] for p in parts)
-    for name in ("verdicts", "c1_rule", "c1_combined", "c2_rule", "c2_combined"):
+    for name in ("verdicts", "interval_alone"):
         out[name] = {v: sum(p[name][v] for p in parts) for v in verdicts.VERDICTS}
-    for name in ("split_wrong_sign", "no_split_degenerate", "no_split_narrow"):
+    for name in (
+        "split_wrong_sign",
+        "interval_alone_no_split_degenerate",
+        "no_split_narrow",
+        "floor_fired",
+        "constant_fired",
+        "constant_changed",
+    ):
         out[name] = sum(p[name] for p in parts)
     out["mean_half_width"] = sum(p["mean_half_width"] * p["reps"] for p in parts) / out["reps"]
-    out["end_near_a_boundary"] = {
-        k: sum(p["end_near_a_boundary"][k] for p in parts) for k in parts[0]["end_near_a_boundary"]
-    }
     return out
 
 
@@ -717,11 +680,13 @@ def _matcher_summary(records: dict[str, dict[str, list[Any]]], plan: Plan) -> di
         )
         true_widest = mine[f"{shape}|true_match|sigma={widest:g}|k=None"]["nearest"]
         d = matcher_sim.d_star(true_widest)
-        identification = {
-            int(key.split("|k=")[1]): float(np.mean(v["identified"]))
-            for key, v in mine.items()
-            if "|sparse|" in key and f"sigma={design:g}|" in key
-        }
+        identification = matcher_sim.identification_by_dimensions(
+            [
+                v
+                for key, v in sorted(mine.items())
+                if "|sparse|" in key and f"sigma={design:g}|" in key
+            ]
+        )
         k = matcher_sim.k_star(identification)
         k_applied = k if k is not None else max(identification) + 1
         cells = {}
@@ -745,7 +710,7 @@ def _matcher_summary(records: dict[str, dict[str, list[Any]]], plan: Plan) -> di
             "d_star": d,
             "d_star_from": f"{shape}|true_match|sigma={widest:g}|k=None",
             "k_star": k,
-            "identification_by_k_at_design_spread": {
+            "identification_by_dimensions_at_design_spread": {
                 str(kk): identification[kk] for kk in sorted(identification)
             },
             "design_spread": design,
@@ -838,8 +803,8 @@ def run(
         },
         "constants": {
             "alpha": ALPHA,
-            "z": Z,
-            "resamples": RESAMPLES,
+            "share_interval": "stratified Welch t",
+            "share_floor": SHARE_FLOOR,
             "share_threshold": SHARE_THRESHOLD,
             "choice_threshold": CHOICE_THRESHOLD,
             "match_resamples": matcher_sim.MATCH_RESAMPLES,
@@ -857,7 +822,6 @@ def run(
             "failures": merged("failures", _merge_counts),
             "wording": merged("wording", _merge_counts),
             "validation": single("validation"),
-            "resamples": single("resamples"),
         },
         "matcher": _matcher_summary(matcher_records, plan),
     }

@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import math
 from typing import Any
 
 import pytest
+from scipy import stats
 
 from analysis_helpers import (
     W3,
@@ -36,7 +38,6 @@ from horizon_compact.analysis.results import (
 from horizon_compact.experiment import PLACEHOLDER_EXPERIMENT, load_experiment
 
 EXP = load_experiment("company")
-R = 400  # bootstrap resamples: the tests that use shares are decided by the data, not by the draws
 
 
 def s3_four(
@@ -69,7 +70,7 @@ def with_orders(rows: list[RunRow]) -> list[RunRow]:
 
 
 def results_of(rows: list[RunRow], **kw: Any) -> ModelResults:
-    return build_results(EXP, RunSet(tuple(with_orders(rows)), ()), resamples=R, **kw)
+    return build_results(EXP, RunSet(tuple(with_orders(rows)), ()), **kw)
 
 
 def comparison(res: ModelResults, scenario: str, first: str, second: str) -> ComparisonResult:
@@ -92,7 +93,7 @@ def names(cls: type) -> list[str]:
 
 def test_the_shape_of_the_object_is_pinned_so_a_change_has_to_bump_the_version() -> None:
     """If this fails, a field was added, removed or renamed: bump RESULTS_VERSION and update the pins."""
-    assert RESULTS_VERSION == 1
+    assert RESULTS_VERSION == 2
     assert names(ModelResults) == [
         "results_version",
         "experiment",
@@ -100,7 +101,6 @@ def test_the_shape_of_the_object_is_pinned_so_a_change_has_to_bump_the_version()
         "model_key",
         "alpha",
         "descriptive_alpha",
-        "resamples",
         "sealed_wording",
         "refusal_calls",
         "scenarios",
@@ -129,13 +129,15 @@ def test_the_shape_of_the_object_is_pinned_so_a_change_has_to_bump_the_version()
         "threshold",
         "method",
         "alpha",
-        "resamples",
-        "seed",
+        "df",
         "difference",
         "low",
         "high",
         "verdict_among_valid",
         "degenerate_interval",
+        "floor_applied",
+        "constant_value",
+        "constant_check",
         "kept_wordings",
         "dropped_wordings",
         "valid_runs",
@@ -201,7 +203,7 @@ def test_the_object_is_plain_data_that_a_serializer_can_walk() -> None:
 
 def test_a_clean_robust_split_has_every_field_filled_from_the_pieces() -> None:
     res = results_of(s3_four(([9, 9, 9], [10, 10, 10]), ([1, 1, 1], [10, 10, 10])))
-    assert (res.results_version, res.experiment, res.model_key) == (1, "company", "sonnet-4-6")
+    assert (res.results_version, res.experiment, res.model_key) == (2, "company", "sonnet-4-6")
     assert res.sealed_wording == EXP.sealed_template and res.refusal_calls == ()
     assert res.scenarios_without_runs == ("s1", "s2", "s4")
     got = comparison(res, "s3", "A", "C")
@@ -214,7 +216,8 @@ def test_a_clean_robust_split_has_every_field_filled_from_the_pieces() -> None:
     )
     assert got.difference == pytest.approx(0.8)
     assert got.low == pytest.approx(lo) and got.high == pytest.approx(hi)
-    assert got.alpha == pytest.approx(0.05 / 16) and got.seed is None and got.resamples is None
+    assert got.alpha == pytest.approx(0.05 / 16) and got.df is None
+    assert (got.floor_applied, got.constant_value, got.constant_check) == (False, None, None)
     assert (got.role, got.label) == ("primary", "primary")
     assert got.verdict_among_valid == "split" and got.degenerate_interval is False
     assert got.kept_wordings == W3 and got.dropped_wordings == ()
@@ -286,14 +289,20 @@ def test_a_dropped_wording_is_named_with_the_cells_that_dropped_it() -> None:
     assert comparison(results_of(rows), "s3", "A", "D").role == "secondary"
 
 
-def test_a_share_scenario_carries_the_bootstraps_seed_and_resamples() -> None:
+def test_a_share_scenario_carries_the_welch_interval_and_its_degrees_of_freedom() -> None:
     rows: list[RunRow] = []
     for objective, kept in (("A", 100), ("B", 100), ("C", 20), ("D", 20)):
         rows += s1_runs(objective, {w: [kept, kept + 5] for w in W3})
     got = comparison(results_of(rows), "s1", "A", "C")
-    assert (got.method, got.kind, got.resamples) == ("stratified_bootstrap", "share", R)
-    assert isinstance(got.seed, int) and got.threshold == 0.10
+    assert (got.method, got.kind, got.threshold) == ("welch", "share", 0.10)
+    # By hand: six cells of two runs 5/125 apart, each s^2 = (5/125)^2 / 2 and term s^2 / (3^2 * 2); six
+    # equal terms with one degree of freedom each give df = (6 term)^2 / (6 term^2) = 6.
+    term = (5 / 125) ** 2 / 2 / (9 * 2)
+    half = stats.t.ppf(1 - 0.05 / 32, 6) * math.sqrt(6 * term)
+    assert got.df == pytest.approx(6)
     assert got.difference == pytest.approx(80 / 125) and got.final_verdict == "split"
+    assert got.low == pytest.approx(80 / 125 - half) and got.high == pytest.approx(80 / 125 + half)
+    assert (got.floor_applied, got.constant_value, got.constant_check) == (False, None, None)
     assert got.sealed.sealed_wording == EXP.sealed_template
 
 
@@ -343,15 +352,15 @@ def test_refusal_calls_are_recorded_and_sorted_with_their_reasons() -> None:
 def test_an_unfinished_sweep_is_refused() -> None:
     rows = s3_four(([9, 9, 9], [10, 10, 10]), ([1, 1, 1], [10, 10, 10]))
     with pytest.raises(ValueError, match=r"1 run.*unfinished.*r-0123456789ab"):
-        build_results(EXP, RunSet(tuple(with_orders(rows)), ("r-0123456789ab",)), resamples=R)
+        build_results(EXP, RunSet(tuple(with_orders(rows)), ("r-0123456789ab",)))
 
 
 def test_nothing_to_analyse_other_scenarios_and_mixed_sweeps_are_refused() -> None:
     with pytest.raises(ValueError, match="no runs to analyse"):
-        build_results(EXP, RunSet((), ()), resamples=R)
+        build_results(EXP, RunSet((), ()))
     rows = [run("s9", "A", "w1", {"x": 1})]
     with pytest.raises(ValueError, match="does not have"):
-        build_results(EXP, RunSet(tuple(rows), ()), resamples=R)
+        build_results(EXP, RunSet(tuple(rows), ()))
     mixed = s3_four(([9, 9, 9], [10, 10, 10]), ([1, 1, 1], [10, 10, 10]))
     mixed.append(run("s3", "A", "w1", mixed[0].amounts, choice="close", model_key="other"))
     with pytest.raises(ValueError, match="model_keys"):
@@ -360,14 +369,13 @@ def test_nothing_to_analyse_other_scenarios_and_mixed_sweeps_are_refused() -> No
         build_results(
             load_experiment(PLACEHOLDER_EXPERIMENT),
             RunSet(tuple(s3_four(([9, 9, 9], [10, 10, 10]))), ()),
-            resamples=R,
         )
 
 
 def test_the_sealed_wording_follows_the_experiment_whatever_it_is() -> None:
     other = dataclasses.replace(EXP, sealed_template="w3")
     rows = with_orders(s3_four(([9, 9, 9], [10, 10, 10]), ([1, 1, 1], [10, 10, 10])))
-    res = build_results(other, RunSet(tuple(rows), ()), resamples=R)
+    res = build_results(other, RunSet(tuple(rows), ()))
     assert res.sealed_wording == "w3"
     assert all(c.sealed.sealed_wording == "w3" for c in res.family)
     assert all(c.sealed.sealed_wording == "w2" for c in results_of(rows).family)
@@ -438,16 +446,15 @@ def test_the_bound_records_how_many_runs_of_each_side_it_set() -> None:
     assert bound.low == pytest.approx(lo) and bound.high == pytest.approx(hi)
 
 
-def test_the_alphas_and_resamples_used_are_recorded_and_reach_every_interval() -> None:
+def test_the_alphas_used_are_recorded_and_reach_every_interval() -> None:
     rows = s3_four(([9, 9, 9], [10, 10, 10]), ([1, 1, 1], [10, 10, 10]))
     res = build_results(
         EXP,
         RunSet(tuple(with_orders(rows)), ()),
         alpha=0.01,
         descriptive_alpha=0.1,
-        resamples=250,
     )
-    assert (res.alpha, res.descriptive_alpha, res.resamples) == (0.01, 0.1, 250)
+    assert (res.alpha, res.descriptive_alpha) == (0.01, 0.1)
     got = comparison(res, "s3", "A", "C")
     assert got.alpha == 0.01
     lo, hi = hand_newcombe(27, 30, 3, 30, alpha=0.01)

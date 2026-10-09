@@ -8,11 +8,13 @@ dropped, a split the bound already overturned, and a sealed wording that disagre
 
 from __future__ import annotations
 
+import math
 import tomllib
 from dataclasses import replace
 from typing import Any
 
 import pytest
+from scipy import stats
 
 from analysis_helpers import (
     W3,
@@ -31,7 +33,7 @@ from horizon_compact.analysis.failures import (
     assess_comparison,
     assess_scenario,
 )
-from horizon_compact.analysis.intervals import ALPHA, DESCRIPTIVE_ALPHA, comparison_seed
+from horizon_compact.analysis.intervals import ALPHA, DESCRIPTIVE_ALPHA
 from horizon_compact.analysis.outcomes import outcomes_for
 from horizon_compact.analysis.records import RunRow
 from horizon_compact.analysis.robustness import (
@@ -50,11 +52,10 @@ from horizon_compact.experiment import PLACEHOLDER_EXPERIMENT, load_experiment
 EXP = load_experiment("company")
 S1 = outcomes_for(EXP.get_scenario("s1"))
 S3 = outcomes_for(EXP.get_scenario("s3"))
-N = 3_000
 
 
 def robust(rows: list[RunRow], first: str, second: str, outcomes: Any = S3) -> RobustComparison:
-    assessed = assess_comparison(outcomes, rows, first, second, resamples=N)
+    assessed = assess_comparison(outcomes, rows, first, second)
     return RobustComparison(assessed, wording_direction(outcomes, rows, assessed))
 
 
@@ -200,13 +201,13 @@ def test_the_sealed_wording_is_read_from_the_experiment_not_typed() -> None:
 
 
 def pooled_for(rows: list[RunRow], first: str = "A", second: str = "C", outcomes: Any = S3) -> Any:
-    return assess_comparison(outcomes, rows, first, second, resamples=N)
+    return assess_comparison(outcomes, rows, first, second)
 
 
 def test_the_sealed_result_uses_only_the_sealed_wordings_runs_and_agrees_when_it_holds() -> None:
     sealed = sealed_wording_of(EXP)
     rows = s3_design("A", [9, 9, 9], [10, 10, 10]) + s3_design("C", [1, 1, 1], [10, 10, 10])
-    got = sealed_result(S3, rows, pooled_for(rows), sealed, resamples=N)
+    got = sealed_result(S3, rows, pooled_for(rows), sealed)
     assert got.label == SEALED_LABEL and "outside the family" in got.label
     assert got.sealed_wording == sealed
     assert got.assessed.among_valid is not None
@@ -222,9 +223,9 @@ def test_the_sealed_result_uses_only_the_sealed_wordings_runs_and_agrees_when_it
 def test_the_wording_is_whatever_is_passed_and_the_pairs_role_carries_into_the_rerun() -> None:
     """Nothing in the rerun may assume which template is sealed: the id is an argument."""
     rows = s3_design("A", [9, 9, 9], [10, 10, 10]) + s3_design("D", [1, 1, 1], [10, 10, 10])
-    pooled = assess_comparison(S3, rows, "A", "D", role="secondary", resamples=N)
+    pooled = assess_comparison(S3, rows, "A", "D", role="secondary")
     for wording in W3:
-        got = sealed_result(S3, rows, pooled, wording, resamples=N)
+        got = sealed_result(S3, rows, pooled, wording)
         assert got.sealed_wording == wording and got.assessed.kept_wordings == (wording,)
     assert (
         got.assessed.role == "secondary"
@@ -237,24 +238,30 @@ def test_a_sealed_wording_that_does_not_hold_is_reported_beside_the_pooled_split
     closes_a = [9 if w != sealed else 5 for w in W3]
     closes_c = [1 if w != sealed else 5 for w in W3]
     rows = s3_design("A", closes_a, [10, 10, 10]) + s3_design("C", closes_c, [10, 10, 10])
-    got = sealed_result(S3, rows, pooled_for(rows), sealed, resamples=N)
+    got = sealed_result(S3, rows, pooled_for(rows), sealed)
     assert got.pooled_verdict == "split" and got.assessed.final_verdict == "inconclusive"
     assert got.relation == "different" and "zero" in got.relation_reason
     assert got.assessed.among_valid is not None and got.assessed.among_valid.difference == 0.0
 
 
-def test_the_sealed_rerun_has_its_own_seed_name() -> None:
+def test_the_sealed_rerun_of_a_share_is_welch_over_the_sealed_wording_alone() -> None:
     sealed = sealed_wording_of(EXP)
     rows = s1_runs("A", {w: [10, 50, 90] for w in W3}) + s1_runs(
         "C", {w: [20, 60, 100] for w in W3}
     )
-    got = sealed_result(S1, rows, pooled_for(rows, outcomes=S1), sealed, resamples=500)
-    assert got.assessed.among_valid is not None
-    assert got.assessed.among_valid.interval.seed == comparison_seed(
-        "pilot-test-sweep", "s1:A-C:sealed"
-    )
+    got = sealed_result(S1, rows, pooled_for(rows, outcomes=S1), sealed)
+    valid = got.assessed.among_valid
+    assert valid is not None and valid.wordings == (sealed,)
+    # By hand, one wording: each side's three runs are 40/125 apart, s^2 = (40/125)^2; SE^2 = 2 s^2 / 3;
+    # two equal terms with two degrees of freedom each give df = (2 term)^2 / (2 term^2 / 2) = 4.
+    se = math.sqrt(2 * (40 / 125) ** 2 / 3)
+    half = stats.t.ppf(1 - ALPHA / 2, 4) * se
+    assert valid.interval.method == "welch" and valid.interval.df == pytest.approx(4)
+    assert valid.difference == pytest.approx(-10 / 125)
+    assert valid.interval.low == pytest.approx(-10 / 125 - half)
+    assert valid.interval.high == pytest.approx(-10 / 125 + half)
     pooled = pooled_for(rows, outcomes=S1)
-    assert pooled.among_valid.interval.seed == comparison_seed("pilot-test-sweep", "s1:A-C")
+    assert pooled.among_valid is not None and pooled.among_valid.wordings == W3
 
 
 def test_the_sealed_rerun_applies_the_failure_rules_to_its_own_wording_only() -> None:
@@ -262,7 +269,7 @@ def test_the_sealed_rerun_applies_the_failure_rules_to_its_own_wording_only() ->
     others = [w for w in W3 if w != sealed]
     a = s3_design("A", [18, 18, 18], [18, 18, 18], [2, 2, 2])  # every cell has 2 failed
     c = s3_design("C", [0, 0, 0], [20, 20, 20])
-    got = sealed_result(S3, a + c, pooled_for(a + c), sealed, resamples=N)
+    got = sealed_result(S3, a + c, pooled_for(a + c), sealed)
     assert got.assessed.failed_first == 2  # the sealed cell's two, not the six across wordings
     (check,) = got.assessed.bound
     assert (check.set_first, check.set_second) == (2, 0)
@@ -277,7 +284,7 @@ def test_a_sealed_cell_over_the_failure_limit_is_not_assessable_even_if_the_pool
     rows = s3_design("A", [9, 9, 9], [10, 10, 10], fail) + s3_design("C", [1, 1, 1], [10, 10, 10])
     pooled = pooled_for(rows)
     assert pooled.final_verdict == "split" and [d.wording_id for d in pooled.dropped] == [sealed]
-    got = sealed_result(S3, rows, pooled, sealed, resamples=N)
+    got = sealed_result(S3, rows, pooled, sealed)
     assert got.assessed.final_verdict == "not_assessable" and got.relation == "not_comparable"
 
 
@@ -286,10 +293,10 @@ def test_the_sealed_rerun_needs_runs_under_the_sealed_wording_on_both_sides() ->
     others = [w for w in W3 if w != sealed]
     rows = s3_cell("A", others[0], 9, 10) + s3_cell("C", others[0], 1, 10)
     with pytest.raises(ValueError, match="no run under the sealed wording"):
-        sealed_result(S3, rows, pooled_for(rows), sealed, resamples=N)
+        sealed_result(S3, rows, pooled_for(rows), sealed)
     rows += s3_cell("A", sealed, 9, 10)  # only A has the sealed wording
     with pytest.raises(ValueError, match=f"C has no run at all under {sealed}"):
-        sealed_result(S3, rows, pooled_for(rows), sealed, resamples=N)
+        sealed_result(S3, rows, pooled_for(rows), sealed)
 
 
 def test_a_logged_call_on_another_wording_is_fine_and_an_unknown_one_is_not() -> None:
@@ -299,12 +306,10 @@ def test_a_logged_call_on_another_wording_is_fine_and_an_unknown_one_is_not() ->
     extra = failed("s3", "A", others[0], 1, status=CALLABLE_STATUS)
     rows += extra
     calls = {extra[0].run_id: "declined in words"}
-    got = sealed_result(S3, rows, pooled_for(rows, "A", "C"), sealed, calls=calls, resamples=N)
+    got = sealed_result(S3, rows, pooled_for(rows, "A", "C"), sealed, calls=calls)
     assert got.assessed.failed_first == 0  # that run is under another wording
     with pytest.raises(RefusalCallError, match="not among the runs"):
-        sealed_result(
-            S3, rows, pooled_for(rows), sealed, calls={"r-ffffffffffff": "typo"}, resamples=N
-        )
+        sealed_result(S3, rows, pooled_for(rows), sealed, calls={"r-ffffffffffff": "typo"})
 
 
 # --- 10.3 position effects -----------------------------------------------------------------------------
@@ -445,8 +450,8 @@ def test_robustness_scenario_covers_every_comparison_and_the_sealed_wording() ->
     menu = ("eliminated", "moved_other_plants", "kept_at_plant", "transferred_to_buyer")
     options = ("close", "retool", "sell")
     rows = [replace(r, menu_order=menu, option_order=options) for r in rows]
-    assessment = assess_scenario(S3, rows, resamples=500)
-    got = robustness_scenario(S3, rows, assessment, sealed_wording_of(EXP), resamples=500)
+    assessment = assess_scenario(S3, rows)
+    got = robustness_scenario(S3, rows, assessment, sealed_wording_of(EXP))
     assert got.scenario_id == "s3"
     pairs = [(c.assessed.first, c.assessed.second) for c in got.comparisons]
     assert pairs == [("A", "C"), ("A", "B"), ("C", "D"), ("B", "D"), ("A", "D")]
@@ -533,7 +538,7 @@ def test_a_sealed_result_inconclusive_but_in_the_pooled_direction_is_less_certai
     closes_c = [1 if w != sealed else 3 for w in W3]
     rows = s3_design("A", closes_a, [10, 10, 10]) + s3_design("C", closes_c, [10, 10, 10])
     pooled = pooled_for(rows)
-    got = sealed_result(S3, rows, pooled, sealed, resamples=N)
+    got = sealed_result(S3, rows, pooled, sealed)
     assert pooled.final_verdict == "split" and got.assessed.final_verdict == "inconclusive"
     assert (
         got.assessed.among_valid is not None
@@ -551,7 +556,7 @@ def test_a_sealed_result_pointing_the_other_way_is_different_even_when_it_is_onl
     closes_c = [1 if w != sealed else 6 for w in W3]
     rows = s3_design("A", closes_a, [10, 10, 10]) + s3_design("C", closes_c, [10, 10, 10])
     pooled = pooled_for(rows)
-    got = sealed_result(S3, rows, pooled, sealed, resamples=N)
+    got = sealed_result(S3, rows, pooled, sealed)
     assert pooled.final_verdict == "split" and got.assessed.final_verdict == "inconclusive"
     assert (
         got.assessed.among_valid is not None
@@ -570,6 +575,6 @@ def test_a_pooled_no_split_beside_a_sealed_point_estimate_at_the_threshold_is_di
     closes_d = [3 if w == sealed else 20 for w in W3]
     rows = s3_design("C", closes_c, sizes) + s3_design("D", closes_d, sizes)
     pooled = pooled_for(rows, "C", "D")
-    got = sealed_result(S3, rows, pooled, sealed, resamples=N)
+    got = sealed_result(S3, rows, pooled, sealed)
     assert pooled.final_verdict == "no_split" and got.assessed.final_verdict == "inconclusive"
     assert got.relation == "different" and "threshold" in got.relation_reason

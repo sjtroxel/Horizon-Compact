@@ -142,7 +142,7 @@ def test_the_distances_by_hand_and_a_clear_match() -> None:
         "E",
     ]  # objective order, not ranked
     assert (m.label, m.nearest, m.tied_with) == ("match", "A", None)
-    assert m.company_basis == "both" and m.dimensions == 3
+    assert m.company_basis == "both" and m.dimensions == 2  # two lines count one, the choice one
     assert m.observable_lines == ("eliminated", "kept_at_plant")  # file order
     # gap E - A: A's resampled values lie in [0, 0.25], E's in [0.25, 0.75] (each cell's mean of two runs),
     # so the gap's interval sits in [0, 0.75]; the estimate is 0.5 - 0.125 = 0.375
@@ -213,17 +213,24 @@ def test_no_good_match_comes_before_tie() -> None:
 
 
 def test_not_enough_disclosed_below_k_star_and_matched_at_it() -> None:
-    below = match(case_rows(), k_star=4).readings[0]  # three dimensions: two lines and the choice
+    below = match(case_rows(), k_star=3).readings[
+        0
+    ]  # two dimensions: two lines (one) and the choice
     assert below.label == "not_enough_disclosed"
     assert (below.nearest, below.gap, below.distances) == (None, None, ())
-    assert "3 observable dimension(s), fewer than the 4" in below.reason
-    assert match(case_rows(), k_star=3).readings[0].label == "match"
+    assert "2 observable dimension(s), fewer than the 3" in below.reason
+    assert match(case_rows(), k_star=2).readings[0].label == "match"
 
 
-def test_the_choice_counts_as_one_dimension_and_each_line_as_one() -> None:
-    assert COMPANY.dimensions == 3
-    assert CompanyDecision("r", {"eliminated": 1}, None).dimensions == 1
+def test_the_choice_counts_one_dimension_and_n_lines_count_n_minus_one() -> None:
+    # Step 12, from step 9's finding (a): the vector is renormalized over the observable lines, so n lines
+    # carry n - 1 free shares and a lone line none.
+    assert COMPANY.dimensions == 2
+    assert CompanyDecision("r", {"eliminated": 1}, None).dimensions == 0
+    assert CompanyDecision("r", {"eliminated": 1}, "close").dimensions == 1
     assert CompanyDecision("r", {}, "close").dimensions == 1
+    assert CompanyDecision("r", {"a": 1, "b": 2, "c": 3}, None).dimensions == 2
+    assert CompanyDecision("r", {}, None).dimensions == 0
 
 
 def test_a_company_with_nothing_to_distance_on_is_not_enough_disclosed() -> None:
@@ -276,13 +283,17 @@ def test_a_run_with_no_observable_choice_and_nothing_on_the_lines_is_left_out_an
     assert m.nearest == "B"
 
 
-def test_one_observable_line_and_no_choice_puts_every_run_at_zero() -> None:
-    # A finding for step 12, held here: renormalized over a single line, every run that puts anything
-    # there is identical to the company, so a lone line carries no information.
+def test_one_observable_line_and_no_choice_is_zero_dimensions_and_puts_every_run_at_zero() -> None:
+    # Step 9's finding (a), held here: renormalized over a single line, every run that puts anything there is
+    # identical to the company, so a lone line carries no information. It counts zero dimensions, so any
+    # k_star of 1 or more calls it not enough disclosed; with no minimum, every run is at zero.
     company = CompanyDecision("primary", {"cut_rnd": 10}, None)
     rows = [s2("A", "w1", cut_rnd=1, raise_prices=99), s2("B", "w1", cut_rnd=50)]
     rows += [s2("A", "w2", cut_rnd=7), s2("B", "w2", cut_rnd=1e6)]
-    m = match(rows, company, objectives="AB", scenario=S2).readings[0]
+    assert match(rows, company, objectives="AB", scenario=S2).readings[0].label == (
+        "not_enough_disclosed"
+    )
+    m = match(rows, company, objectives="AB", scenario=S2, k_star=0).readings[0]
     assert [d.distance for d in m.distances] == [0.0, 0.0]
     assert m.label == "tie"
 
@@ -305,6 +316,25 @@ def test_an_alternative_reading_that_moves_the_nearest_objective_depends_on_read
     assert m.readings[0].nearest == "A"
     assert m.readings[1].nearest == "B" and m.readings[1].label == "tie"  # B and D identical
     assert m.depends_on_reading
+
+
+def test_a_tie_whose_nearest_flips_between_readings_does_not_depend_on_reading() -> None:
+    """Step 12, from step 9's finding (d): readings are compared by their matched sets. B always keeps all 190
+    and retools; D does that once a wording and keeps 185 once. Read as "kept all", B is nearest and D tied;
+    read as "eliminated 5, kept 185", D is nearest and B tied. The nearest flips, the matched set {B, D}
+    does not: no dependence on the reading."""
+    rows: list[RunRow] = []
+    for w in ("w1", "w2"):
+        rows += a_like("A", w) + b_like("B", w)
+        rows += [s3("D", w, 0, 190, 0, "retool"), s3("D", w, 5, 185, 0, "retool")]
+    kept_all = CompanyDecision("kept-all", {"eliminated": 0, "kept_at_plant": 190}, "retool")
+    kept_most = CompanyDecision("kept-most", {"eliminated": 5, "kept_at_plant": 185}, "retool")
+    m = match(rows, kept_all, kept_most, objectives="ABD")
+    first, second = m.readings
+    assert (first.nearest, first.tied_with, first.label) == ("B", "D", "tie")
+    assert (second.nearest, second.tied_with, second.label) == ("D", "B", "tie")
+    assert first.matched_set == second.matched_set == frozenset("BD")
+    assert not m.depends_on_reading
 
 
 def test_an_alternative_reading_with_the_same_nearest_does_not() -> None:

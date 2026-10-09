@@ -108,11 +108,17 @@ def test_same_choice_opposite_money() -> None:
     assert same.generating == identical.generating == opposite.generating  # same seed, same draws
 
 
-def test_sparse_keeps_k_dimensions_of_the_identical_case() -> None:
+def test_sparse_keeps_k_items_of_the_identical_case() -> None:
+    """``k`` raw items (each line one, the choice one) are observed; the matcher counts them as dimensions
+    with the lines one fewer (step 12), so the calibration groups trials by ``dimensions``, not by ``k``."""
     identical = build_case(S3, "identical", seed=4, sigma=0.1, repeats=2)
     for k in range(1, 6):
         case = build_case(S3, "sparse", seed=4, sigma=0.1, repeats=2, k=k)
-        assert case.decision.dimensions == k
+        items = len(case.decision.amounts) + (case.decision.choice is not None)
+        assert items == k
+        assert case.decision.dimensions == max(len(case.decision.amounts) - 1, 0) + (
+            case.decision.choice is not None
+        )
         for key, value in case.decision.amounts.items():
             assert value == identical.decision.amounts[key]
         if case.decision.choice is not None:

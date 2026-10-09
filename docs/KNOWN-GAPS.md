@@ -7,7 +7,31 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-08, evening
+> ## START HERE — where things stand, 2026-10-09, morning
+>
+> **NEXT MOVE (Sonnet): Phase 3 step 13, the close-out** (IMPLEMENTATION doc §18 step 13): the DoD audit against §19,
+> `ROADMAP.md`, this block, and the phase's close. **Done looks like:** each DoD row with its proof, the ROADMAP row
+> saying built and closed, `make check` green. One input from him first, finding A below (it does not block the
+> audit; the audit records whichever way he decides).
+>
+> **Where things stand, 2026-10-09, 9:15 AM CDT (measured: `make check` green, 1204 tests; root 13 of 16).** **Phase 3
+> step 12 is built** (uncommitted, his commit C7), §20b items 1-8 in order: shares use the stratified Welch
+> t-interval with decision 10's two rules; `RESULTS_VERSION` 2; the repeat rule on the t quantile; the matcher's
+> lines - 1 and matched-set rules; the simulations re-run on the new engine (12 minutes); the dated `planning/07`
+> patches (§5.2, §6.2, §6.3, §8, §10.4, §14 item 5). Mutation check 39 of 39. **The re-run's targets (IMPLEMENTATION
+> doc §20c):** false no split met everywhere (worst 0.27%); the engine agrees with the analysis on 21,200 of 21,200
+> replicates; the bound and wording checks clean; near-all-agree worst false no split 0.33% (from 15.5%; over, not
+> clearly). **False split on shares is held approximately, not exactly:** worst 0.43% against 0.3125%, 5 of 360 points
+> clearly over, all at the most scattered settings (from 2.22% and 267 points under the bootstrap). **His decisions
+> of 2026-10-09:** (1) the worst-case bound kept as built, revisited before the tag once a failure rate is measured;
+> (2) the opposite check judged on the generating objective (met on every shape).
+>
+> **His open items:** **(A)** finding A of §20c: state the share rule's measured worst case on the methods page
+> (recommended) or calibrate a stricter share alpha on this grid; **(3)** the AWS fallback. He is leaving case
+> 179121856900232 as it is for a few more days rather than risk its place in the queue (it is "Unassigned", filed
+> correctly, checked from his screenshots 2026-10-09); the BLOCKED entry below has the fallbacks.
+>
+> *Superseded 2026-10-09 by the block above (step 12 built):*
 >
 > **TOMORROW'S FIRST MOVE (Opus): build Phase 3 step 12 from the IMPLEMENTATION doc §20b, "To build", items 1-8 in
 > order** (the Welch interval and the two all-agree rules in `analysis/`, the tests re-derived, `RESULTS_VERSION` 2,
@@ -26,7 +50,7 @@ case by its type and a neutral label. The names live only in the private longlis
 > less certain verdict kept): near-all-agree worst false "no split" 0.22%, from 14.57%. Cost: less power at 6 per
 > wording (median 12% against 30% at 1.5 T), little at 20 (62% against 66%).
 >
-> **Until the patches land, these docs describe the old rule:** `planning/07` §6.3 (bootstrap for shares), §8 (z, not
+> *(Annotated 2026-10-09: the patches landed; the next paragraph no longer holds.)* **Until the patches land, these docs describe the old rule:** `planning/07` §6.3 (bootstrap for shares), §8 (z, not
 > t) and §10.4; the IMPLEMENTATION doc §7.2 (annotated) and the scope doc's Delivers 1 (amended). **§20b governs.** The
 > step 10 results file (`simulation-results.json`) records C6's code hash; `exact.py` and `screen.py` changed since,
 > so it no longer matches HEAD until step 12's re-run regenerates it. Expected, not a fault.

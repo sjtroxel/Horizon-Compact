@@ -56,7 +56,7 @@ In build order.
    (decision 2).
    *Amended 2026-10-08 (his authorization; IMPLEMENTATION doc §20a-§20b):* the simulations found the bootstrap's
    false-split rate over its target, so **shares move to a stratified Welch t-interval** with two rules for runs that
-   all agree; choice rates keep Newcombe. Being built in step 12; the `planning/07` §6.3 patch follows.
+   all agree; choice rates keep Newcombe. *Built 2026-10-09 (step 12), and `planning/07` §6.3 patched the same day.*
 2. **The failure rules as code** (`planning/07` §5.2): per-cell failure and refusal rates; the 10% exclusion of
    unreliable cells; first-attempt beside final results; the worst-case bound that turns a split inconclusive when
    failed runs could overturn it; "among valid runs" labeling.

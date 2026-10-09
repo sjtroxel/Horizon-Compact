@@ -1,11 +1,13 @@
-"""The simulations that run the analysis engine itself, end to end, at its frozen settings (100,000
-resamples, ``ALPHA``): failures and the worst-case bound, the wording rule, the resample count (section 14.3)
-and the exact bootstrap's validation. Each replicate is a set of S1 runs built as ``RunRow`` objects, read
-by the same functions a real sweep's runs are.
+"""The simulations that run the analysis engine itself, end to end, at its frozen settings (``ALPHA``):
+failures and the worst-case bound, the wording rule, and the validation of the share family's vectorized
+engine against the analysis. Each replicate is a set of S1 runs built as ``RunRow`` objects, read by the same
+functions a real sweep's runs are.
 
 Every check here recomputes what it checks *independently* where it can: the bound's settings and verdicts
-are rebuilt from the replicate's own values, and the wording label from the per-wording means, so a passing
-check is not the code agreeing with itself.
+are rebuilt from the replicate's own values with this module's own Welch interval and decision 10's rules,
+the wording label from the per-wording means, and the share engine's verdicts from ``verdicts.py``, so a
+passing check is not the code agreeing with itself. (Step 10's resample-count family served the bootstrap
+verdict; it went at step 12, and its numbers stay in the IMPLEMENTATION doc, section 20a, finding 9.)
 """
 
 from __future__ import annotations
@@ -16,20 +18,17 @@ from functools import cache
 from typing import Any
 
 import numpy as np
+from scipy import stats
 
 from horizon_compact.analysis.failures import assess_comparison
-from horizon_compact.analysis.intervals import (
-    ALPHA,
-    RESAMPLES,
-    comparison_seed,
-    stratified_bootstrap_difference,
-)
+from horizon_compact.analysis.intervals import ALPHA
 from horizon_compact.analysis.outcomes import SHARE_THRESHOLD, ScenarioOutcomes, outcomes_for
 from horizon_compact.analysis.records import RunRow
 from horizon_compact.analysis.robustness import wording_direction
-from horizon_compact.analysis.verdict import BOUNDARY_TOLERANCE, decide
+from horizon_compact.analysis.verdict import BOUNDARY_TOLERANCE, SHARE_FLOOR, compare, decide
 from horizon_compact.experiment import load_experiment
-from horizon_compact.simulation.exact import S1_GRID, draw, exact_intervals
+from horizon_compact.simulation.exact import S1_GRID, draw
+from horizon_compact.simulation.verdicts import less_certain, newcombe_verdict, share_verdicts
 
 W3 = ("w1", "w2", "w3")
 FIRST, SECOND = "A", "B"
@@ -99,6 +98,49 @@ def _cells(
     }
 
 
+def rebuild_verdict(
+    cells_first: dict[str, list[float]],
+    cells_second: dict[str, list[float]],
+    threshold: float = SHARE_THRESHOLD,
+) -> str:
+    """The adopted share rule, written again for the bound's independent rebuild: Welch over unequal cells,
+    then the floor and the constant check. Values are S1 shares, so on the lattice in 125ths."""
+    wordings = len(cells_first)
+    sides = [
+        [np.rint(np.asarray(cells[w]) * S1_GRID).astype(np.int64) for w in sorted(cells)]
+        for cells in (cells_first, cells_second)
+    ]
+    means = [np.mean([cell.mean() for cell in side]) / S1_GRID for side in sides]
+    d = float(means[0] - means[1])
+    terms, sizes = [], []
+    for side in sides:
+        for cell in side:
+            n = cell.size
+            numerator = n * int((cell * cell).sum()) - int(cell.sum()) ** 2  # exact
+            terms.append(numerator / (n * (n - 1) * S1_GRID**2) / (wordings**2 * n))
+            sizes.append(n)
+    se2 = sum(terms)
+    if se2 > 0:
+        df = se2**2 / sum(t * t / (n - 1) for t, n in zip(terms, sizes, strict=True))
+        half = float(stats.t.ppf(1 - ALPHA / 2, df)) * se2**0.5
+    else:
+        half = 0.0
+    verdict: str = decide(d, d - half, d + half, threshold).verdict
+    if verdict == "no_split" and 2 * half < SHARE_FLOOR + BOUNDARY_TOLERANCE:
+        verdict = "inconclusive"
+    for side in sides:
+        values = np.concatenate(side)
+        if np.all(values == values[0]):
+            value = int(values[0])
+            counts = [int((np.concatenate(x) == value).sum()) for x in sides]
+            totals = [sum(c.size for c in x) for x in sides]
+            verdict = less_certain(
+                verdict, newcombe_verdict(counts[0], totals[0], counts[1], totals[1], threshold)
+            )
+            break
+    return verdict
+
+
 def _bound_settings(verdict: str, difference: float) -> list[tuple[str, float, float]]:
     if verdict == "split":
         return [("narrowing", 0.0, 1.0)] if difference > 0 else [("narrowing", 1.0, 0.0)]
@@ -160,21 +202,14 @@ def failure_point(
                 _cells(first, fail_first, kept),
                 _cells(second, fail_second, kept),
             )
-            for label, v_first, v_second in _bound_settings(valid.verdict, valid.difference):
+            for _label, v_first, v_second in _bound_settings(valid.verdict, valid.difference):
                 cells_first = {
                     w: base_first[w] + [v_first] * int(fail_first[index[w]].sum()) for w in kept
                 }
                 cells_second = {
                     w: base_second[w] + [v_second] * int(fail_second[index[w]].sum()) for w in kept
                 }
-                iv = stratified_bootstrap_difference(
-                    cells_first,
-                    cells_second,
-                    seed=comparison_seed(sweep, f"s1:{FIRST}-{SECOND}:bound:{label}"),
-                    alpha=ALPHA,
-                    resamples=RESAMPLES,
-                )
-                if decide(iv.estimate, iv.low, iv.high, SHARE_THRESHOLD).verdict != valid.verdict:
+                if rebuild_verdict(cells_first, cells_second) != valid.verdict:
                     expected = "inconclusive"
         if expected != assessed.final_verdict:
             mismatches += 1
@@ -242,76 +277,44 @@ def wording_point(
 def validation_point(
     pmf_first: np.ndarray, pmf_second: np.ndarray, *, n: int, reps: int, seed: int, key: str
 ) -> dict[str, Any]:
-    """The exact bootstrap against the engine's own (100,000 resamples) on the same replicates."""
+    """The share family's engine (``verdicts.share_verdicts``) against the analysis's own ``compare`` on the
+    same replicates, built as run rows. The verdicts must agree exactly, and so must the rules that fired;
+    the interval ends agree to floating-point error."""
     rng = np.random.Generator(np.random.PCG64(seed))
     first, second = draw(pmf_first, (reps, 3, n), rng), draw(pmf_second, (reps, 3, n), rng)
-    exact = exact_intervals(first, second, grid=S1_GRID, alpha=ALPHA)
+    engine = share_verdicts(first, second, grid=S1_GRID)
+    none = np.zeros((3, n), dtype=bool)
+    outcomes = s1_outcomes()
     agree = 0
-    low_diffs, high_diffs = [], []
+    diffs: list[float] = []
     disagreements = []
     for r in range(reps):
-        cells_first = {w: list(first[r, i] / S1_GRID) for i, w in enumerate(W3)}
-        cells_second = {w: list(second[r, i] / S1_GRID) for i, w in enumerate(W3)}
-        iv = stratified_bootstrap_difference(
-            cells_first, cells_second, seed=comparison_seed(f"validate:{key}", str(r))
+        rows = build_rows(f"validate:{key}:{r}", first[r], second[r], none, none)
+        got = compare(outcomes, rows, FIRST, SECOND)
+        same = (
+            got.verdict == engine.final[r]
+            and got.floor_applied == engine.floor_fired[r]
+            and (got.constant_value is not None) == (engine.constant[r] >= 0)
         )
-        engine = decide(iv.estimate, iv.low, iv.high, SHARE_THRESHOLD).verdict
-        mine = decide(
-            float(exact.estimate[r]), float(exact.low[r]), float(exact.high[r]), SHARE_THRESHOLD
-        ).verdict
-        agree += engine == mine
-        low_diffs.append(iv.low - float(exact.low[r]))
-        high_diffs.append(iv.high - float(exact.high[r]))
-        if engine != mine:
+        agree += same
+        diffs += [abs(got.interval.low - engine.low[r]), abs(got.interval.high - engine.high[r])]
+        if not same:
             disagreements.append(
                 {
                     "replicate": r,
-                    "engine": engine,
-                    "exact": mine,
-                    "estimate": float(exact.estimate[r]),
-                    "engine_interval": [iv.low, iv.high],
-                    "exact_interval": [float(exact.low[r]), float(exact.high[r])],
+                    "analysis": got.verdict,
+                    "engine": engine.final[r],
+                    "estimate": float(engine.estimate[r]),
+                    "analysis_interval": [got.interval.low, got.interval.high],
+                    "engine_interval": [float(engine.low[r]), float(engine.high[r])],
                 }
             )
-    diffs = np.abs(np.concatenate([low_diffs, high_diffs]))
     return {
         "reps": reps,
         "seed": str(seed),
         "verdicts_agree": agree,
-        "mean_abs_endpoint_difference": float(diffs.mean()),
-        "max_abs_endpoint_difference": float(diffs.max()),
+        "constant_fired": int(sum(v >= 0 for v in engine.constant)),
+        "floor_fired": int(sum(engine.floor_fired)),
+        "max_abs_endpoint_difference": float(max(diffs)),
         "disagreements": disagreements,
     }
-
-
-def resample_point(
-    cells_first: dict[str, list[float]],
-    cells_second: dict[str, list[float]],
-    *,
-    seeds: int,
-    resamples: Sequence[int],
-    key: str,
-) -> dict[str, Any]:
-    """One fixed data set's verdict recomputed on ``seeds`` seeds at each resample count (section 14.3)."""
-    out: dict[str, Any] = {}
-    for b in resamples:
-        verdicts: Counter[str] = Counter()
-        lows, highs = [], []
-        for s in range(seeds):
-            iv = stratified_bootstrap_difference(
-                cells_first,
-                cells_second,
-                seed=comparison_seed(f"resample:{key}", f"{b}:{s}"),
-                resamples=b,
-            )
-            verdicts[decide(iv.estimate, iv.low, iv.high, SHARE_THRESHOLD).verdict] += 1
-            lows.append(iv.low)
-            highs.append(iv.high)
-        majority = max(verdicts.values())
-        out[str(b)] = {
-            "verdicts": dict(sorted(verdicts.items())),
-            "differ_from_majority": seeds - majority,
-            "low_sd": float(np.std(lows, ddof=1)),
-            "high_sd": float(np.std(highs, ddof=1)),
-        }
-    return out
