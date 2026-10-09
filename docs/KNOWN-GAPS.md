@@ -7,6 +7,41 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-09, 3 PM (handoff)
+>
+> **Measured at handoff:** `make check` green, **1391 tests**, root 13 of 16; last commit `a40d38b` (steps 6-7),
+> pushed. **Uncommitted, on purpose (his, held for a later commit):** step 10's work, `experiment/protocol/protocol-v1.md`,
+> `docs/phases/evidence/phase-3.5/calls-inventory.md` and `review-brief.md`, with this file's and the IMPLEMENTATION
+> doc's notes. Commit message when he lands it: `phase 3.5: step 10, protocol draft, inventory, review brief`.
+>
+> **EVERY NO-AWS STEP OF PHASE 3.5 IS DONE** (§16 steps 1-7's drafting and 10). What is left needs Bedrock: step 7's
+> garden runs, 8 (Nova Lite), 9 (model set), 11 (the review, brief ready), then tag day. Tentative fallback date
+> 2026-10-16, his to move. **One no-AWS item is his: reading protocol §2-15** and deciding the six drafting choices
+> (IMPLEMENTATION doc §16 step 10 note; two are marked "for his decision" in the protocol text).
+>
+> **THE NO-AWS QUEUE for 10/10-10/12, in the recommended order.** Each item's IMPLEMENTATION doc is written (Opus) and
+> approved before its build, as always; **which item comes first is his decision** (below).
+> 1. **His review of protocol §2-15** (about an hour of reading; no code). Any change Opus makes from it.
+> 2. **Phase 4's offline run code** (scope doc `phase-4-official-grid.md`; every Delivers item calls a model, but the
+>    harness work they need does not): per-scenario repeats in `plan.py` (OPEN entry), forwarding `--official` in
+>    `launch.py`, the thinking request fields (protocol §9.5), the awareness-probe sweep (§9.6, its text frozen there),
+>    the pilot path wired to `run_gate(pilot=True)` and `repeats.json`, the blind refusal-call workflow (OPEN entry: who
+>    writes `refusal-calls.json`, objective hidden), and the analysis command that takes a whole `RunSet` (OPEN entry).
+>    All run code, so it may be built before or after the tag; all testable on fakes. About a day with tests.
+> 3. **Phase 5's dossier builder, the code only** (scope doc decision 3: fetch by date with the cut-off enforced in
+>    code, sections by the template's fixed list, the scaling draw of protocol §12.6), tested on **synthetic** filings
+>    only. Built before any grid result exists, which is the point. The search itself still runs only on its rule date.
+>    **Rule zero:** no real filing in a test or fixture.
+> 4. **Phase 1.5 `publish-path`'s IMPLEMENTATION doc** and whatever of it runs on local placeholder records; its real
+>    test needs Phase 1's sweep in S3 (AWS).
+>
+> **His decisions for the weekend:** (a) **order** (recommended: 1, 2, 3, then 4); (b) **whether Phases 4 and 5 are
+> split**, as 3 and 3.5 were, so their offline code gets an IMPLEMENTATION doc now and the model-calling half gets its
+> own later (recommended: yes for both; costs one more doc each and keeps "IMPLEMENTATION doc immediately before the
+> build" true); (c) the 10/16 fallback date, unchanged unless he moves it.
+>
+> *Superseded 2026-10-09, 3 PM, by the block above. The late-morning block as written:*
+>
 > ## START HERE — where things stand, 2026-10-09, late morning
 >
 > **PHASE 3.5 IMPLEMENTATION DOC APPROVED 2026-10-09 (his): all ten decisions as recommended, on two conditions:
@@ -25,8 +60,11 @@ case by its type and a neutral label. The names live only in the private longlis
 > with step 6 in one commit (his choice), awaiting his review:** `hc scenarios check` now holds each shape to its
 > scenario's form; the harness let official models run only on `placeholder`, so `OFF_SUBJECT_EXPERIMENTS` adds
 > `shapes` (his decision, as recommended); the proxy is refused as one $11.35-worst-case command, so run day is one
-> command per scenario (§16 note). 1391 tests. **NEXT: his review of the four shapes; then step 10, the protocol
-> draft (no AWS). Step 7's runs, and steps 8, 9 and 11, wait for Bedrock (tentative fallback date 2026-10-16).**
+> command per scenario (§16 note). 1391 tests. Steps 6-7 committed (`a40d38b`). **Step 10's protocol draft DONE
+> 2026-10-09 (Opus), every section, uncommitted:** `experiment/protocol/protocol-v1.md`, §1 accepted (his), §2-15
+> awaiting his review, six drafting choices marked for him in the text (§16 note); the calls inventory and the review
+> brief also done. **Every no-AWS step of Phase 3.5 is done. NEXT: his review of §2-15. Step 7's runs, and steps 8, 9 and 11, wait for Bedrock
+> (tentative fallback date 2026-10-16).**
 >
 > *Superseded 2026-10-09, late morning, by the block above (approved). The doc as written:*
 > `docs/phases/phase-3.5-preregistration-IMPLEMENTATION.md`. **Ten decisions in its §15**, each with a recommendation

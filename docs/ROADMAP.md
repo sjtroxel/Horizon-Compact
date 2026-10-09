@@ -78,7 +78,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | **APPROVED 2026-10-06**, its five decisions as recommended; **built and closed 2026-10-06**, DoD audit in §14 |
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built and closed 2026-10-09**, DoD audit in §19a (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, `4febc15`, `84d82d7`, plus step 13's commit) |
-| 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); not yet built |
+| 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); **no-AWS steps built 2026-10-09** (1-7's drafting and 10; `dd3a28a`, `9eccb4a`, `15f66a2`, `a40d38b`, step 10 uncommitted); steps 7's runs, 8, 9, 11 and the tag wait on Bedrock |
 | 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split | not written; immediately before its build |
 | 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5 | not written; immediately before its build |
 | 5.5 `case-runs` | **APPROVED 2026-10-04**, with Phase 5 | not written; immediately before its build |
@@ -95,7 +95,18 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-09, morning
+### Where the build actually is — 2026-10-09, 3 PM
+
+**Measured 2026-10-09, 3 PM:** `make check` green, **1391 tests passed**, root 13 of 16; last commit `a40d38b`, pushed.
+
+- **Phase 3.5 `preregistration`: every step that needs no AWS is done.** Steps 1-7 committed (`dd3a28a`, `9eccb4a`,
+  `15f66a2`, `a40d38b`; step 7's garden shapes drafted, their runs wait); step 10 (the protocol draft, all fifteen
+  sections, the calls inventory and the review brief) done and uncommitted on purpose (his). Steps 7's runs, 8, 9,
+  11 and tag day wait on Bedrock; tentative fallback date 2026-10-16 (his). Protocol §2-15 await his review.
+- **Next:** the no-AWS queue in `KNOWN-GAPS.md`'s START HERE (Phase 4's offline run code, Phase 5's dossier builder,
+  Phase 1.5's doc), order and phase splits his to decide.
+
+### Where the build was — 2026-10-09, morning *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-09, morning:** `make check` green, **1204 tests passed**, root 13 of 16; CI green on `84d82d7`.
 

@@ -790,6 +790,27 @@ AWS. Every step that calls a model (the runs in 7 and 8, then 9 and 11) waits fo
    **his decision on the bound** if decision 3's threshold was crossed. C5.
 10. **[Opus] The protocol draft** (§9), section by section for his review; the review brief; the calls inventory
     (DoD 5's second half). C6.
+    **Draft `[done]` 2026-10-09 (Opus), every section:** `experiment/protocol/protocol-v1.md`, §1 reviewed and accepted
+    (his), §2-15 awaiting his review. AWS-dependent values are bracketed holes (the calls inventory's counts, step 7's
+    and 8's runs, step 9's model set, tag day). **Choices made in drafting, marked for him in the text:** (i) the window
+    opens 2026-08-01 and July 2026 disclosures are excluded (`planning/01` §3.2 allowed them after a check); (ii) WARN
+    notices and trade press are not a discovery channel in v1, because neither can be queried by a fixed rule; (iii)
+    the search queries per channel (§12.3), drafted after a live check that EDGAR full-text search takes phrases and
+    `OR` but returned nothing for a grouped `AND (... OR ...)`, so each query is a plain phrase list, run separately and
+    unioned, filtered on the hits' structured `items` and `sics`; (iv) the awareness probe on S1, every objective and
+    template, the decision prompt with no tool and the instruction replaced by a stated question (§9.6); (v) the
+    template's sections per scenario shape (§12.6); (vi) a window rule if a later-cutoff model joins. **Two facts
+    corrected against the record while drafting:** the dossier's numbers are sourced, assumed or derived, not all
+    cited; and his reviews of the dossier and scenarios were acceptances of Claude's recommendations, which §3 says
+    plainly. **The calls inventory `[done]` 2026-10-09** (`docs/phases/evidence/phase-3.5/calls-inventory.md`), from
+    manifests, session records' status counts and the blind reports only: on the company's content, 50 probe calls and
+    122 decision calls, all `gpt-oss-120b`, development templates only; official models only on the neutral smoke
+    prompt (6 answered) and garden shapes (Sonnet 4.6, 10, through OpenRouter); the format sweeps' attempts counted
+    from session records, not attempt objects; Phase 0.5's local Ollama smoke runs were not recorded, stated. Its
+    counts filled §2. **The review brief `[done]`** (`review-brief.md`), for step 11. **Claude's own review pass of
+    §2-15 the same day** fixed: §2.2 (the walking skeleton never ran; Sonnet 4.6's garden calls were through
+    OpenRouter); §6.5 (the 15.5% is the interval alone, Welch included, not only the old bootstrap); §11.1 (the
+    family-wide rate is a Bonferroni ceiling, not an estimate). **Step 10 is complete except his review of §2-15.**
 11. **[Opus, needs AWS under 7 (i)] The review** (§11): his call to send; the raw reply kept; each point marked; his decisions; changes made.
     C7.
 12. **[him, with Claude reading back] Tag day, steps 1-5** (§12). `P`.
