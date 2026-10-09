@@ -250,6 +250,86 @@ def test_stakeholder_alone_is_allowed() -> None:
     assert not any("stakeholder" in f for f in run_checks(ROOT).failures)
 
 
+# --- Phase 3.5 step 7: the garden shapes (decision 3) ---------------------------------------------------
+
+SHAPES = "experiment/shapes/scenarios"
+
+
+def shape_failures_of(root: Path) -> list[str]:
+    return [f for f in failures(root) if f.startswith("shapes:")]
+
+
+def test_each_company_scenario_has_a_garden_shape_with_its_form() -> None:
+    company = load_experiment("company")
+    shapes = load_experiment("shapes")
+    assert sorted(shapes.scenarios) == sorted(f"garden_{s}" for s in company.scenarios)
+    assert not shape_failures_of(ROOT)
+
+
+@pytest.mark.parametrize(
+    ("shape", "old", "new"),
+    [
+        ("garden_s1", "cap = 125\ndetail", "cap = 124\ndetail"),  # a cap's ratio to the total
+        ("garden_s2", "cap = 77\n", "cap = 78\n"),
+        ("garden_s2", "base = 2443.0", "base = 2500.0"),  # the joint cap
+        ("garden_s3", 'options = ["hand_over"]', 'options = ["hand_over", "close"]'),
+        ("garden_s4", 'keys = ["cut_hedge", "hedge"]\n', 'keys = ["cut_hedge", "cut_trials"]\n'),
+        ("garden_s4", "amount = 204.0", "amount = 200.0"),  # the line the choice fixes
+        ("garden_s4", "tolerance_fraction = 0.01", "tolerance_fraction = 0.02"),
+        ("garden_s1", "max_tokens = 3072", "max_tokens = 2048"),
+    ],
+)
+def test_a_shape_that_drifts_from_its_scenarios_form_fails(
+    repo: Path, shape: str, old: str, new: str
+) -> None:
+    edit(repo, f"{SHAPES}/{shape}.toml", old, new)
+    found = shape_failures_of(repo)
+    assert found, f"{shape}: the edit {old!r} -> {new!r} was not caught"
+
+
+def test_a_dropped_not_both_rule_fails(repo: Path) -> None:
+    edit(
+        repo,
+        f"{SHAPES}/garden_s4.toml",
+        '[[rules]]\nkind = "not_both"\nkeys = ["cut_hedge", "hedge"]\n',
+        "",
+    )
+    assert any("does not have s4's form" in f for f in shape_failures_of(repo))
+
+
+def test_a_missing_or_extra_shape_fails(repo: Path) -> None:
+    (repo / SHAPES / "garden_s3.toml").rename(repo / SHAPES / "garden_s9.toml")
+    edit(repo, f"{SHAPES}/garden_s9.toml", 'id = "garden_s3"', 'id = "garden_s9"')
+    found = shape_failures_of(repo)
+    assert any("no garden shape garden_s3" in f for f in found)
+    assert any("garden_s9 has no company scenario s9" in f for f in found)
+
+
+def test_amounts_may_scale_as_long_as_the_ratios_hold(repo: Path) -> None:
+    path = repo / SHAPES / "garden_s2.toml"
+    text = path.read_text(encoding="utf-8")
+    for old, new in [
+        ("total = 1121", "total = 11210"),
+        ("cap = 3098", "cap = 30980"),
+        ("cap = 244\n", "cap = 2440\n"),
+        ("cap = 300", "cap = 3000"),
+        ("cap = 45\n", "cap = 450\n"),
+        ("cap = 446", "cap = 4460"),
+        ("cap = 77\n", "cap = 770\n"),
+        ("cap = 1121", "cap = 11210"),
+        ("base = 2443.0", "base = 24430.0"),
+    ]:
+        assert old in text, old
+        text = text.replace(old, new, 1)
+    path.write_text(text, encoding="utf-8")
+    assert not shape_failures_of(repo)
+
+
+def test_a_never_use_term_in_a_shape_fails(repo: Path) -> None:
+    edit(repo, f"{SHAPES}/garden_s2.toml", "Leaving beds unplanted this season", "A ruthless cut")
+    assert any("ruthless" in f.lower() and "never used" in f for f in shape_failures_of(repo))
+
+
 def test_a_baseline_sentence_that_is_not_in_the_prompt_once_fails(repo: Path) -> None:
     # Two copies of the sentence in one prompt would be two places the objective sits.
     edit(

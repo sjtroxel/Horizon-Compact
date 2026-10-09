@@ -1,0 +1,89 @@
+# THE PLACEHOLDER RULE (Phase 1 decision 2, his, 2026-10-04). This content is off the experiment's subject entirely:
+# no company, no workers, no shareholders or owners, no contrast of who counts, no contrast of time horizon. It has
+# the experiment's SHAPE (a balanced allocation with caps, one discrete choice, a memo) and none of its content, so
+# nothing produced from it shows which way the real objectives push, and nothing on a public page can be quoted as a
+# finding. A test fails if any word from the subject's vocabulary appears in any file in this folder.
+#
+# The dossier is the cached prefix. It must stay above 1,024 tokens, Sonnet 4.6's minimum cacheable prefix
+# (planning/07 section 4), so the cache-write and cache-read fields carry real numbers.
+
+title = "Hollin Street Community Garden: the club's notes for the coming season"
+
+text = """
+HOLLIN STREET COMMUNITY GARDEN
+Notes prepared for the club treasurer, ahead of the coming season
+
+The garden
+
+The Hollin Street Community Garden sits on a level corner plot of about 900 square meters, fenced on three sides
+with a hedge of hawthorn and field maple on the fourth. A gravel path runs from the gate to a small paved area with
+two benches and a water tap. The club looks after the whole plot. Everything planted, watered and mulched is paid
+for from the club's own money, which this year comes from three sources described at the end of these notes.
+
+Beds and light
+
+There are fourteen raised beds, each 1.2 meters wide and 4 meters long, built from untreated larch planks that were
+replaced two seasons ago and are in good condition. Beds 1 to 6 run along the south side and get full sun from
+mid-morning until evening. Beds 7 to 10 are in the middle of the plot and get sun for about six hours a day. Beds 11
+to 14 are along the north hedge and are shaded for most of the afternoon from late spring onward. Along the gravel
+path there is also a border strip about 30 meters long and half a meter wide, in full sun, which has been left as
+rough grass for the last two seasons.
+
+Soil
+
+The soil is a loam over clay. A soil test taken last autumn showed a pH of 6.8, adequate phosphorus and potassium,
+and low organic matter in beds 11 to 14, where the clay is closest to the surface. Those four beds drain slowly after
+heavy rain and stay wet into late spring. The south beds drain well and dry out quickly in summer. Two cubic meters
+of compost were spread across beds 1 to 10 last spring; beds 11 to 14 received none.
+
+Water
+
+All water comes from the single tap by the benches, which is metered. Last season the club used about 61 cubic
+meters of water between April and September, most of it in July and August, when the south beds needed watering
+almost every evening. Watering is done by hand with cans and one hose. The meter charge last season was 2.10 per
+cubic meter. A drip line along the south beds and the border strip would put water at the roots and cut the amount
+lost to evaporation; the parts needed are listed below. Rainfall in the area averages about 640 millimeters a year,
+falling most heavily in October and November and least in July.
+
+What grew last season
+
+Beds 1 to 4 held tulips and alliums in spring, followed by cosmos and zinnias in summer. The tulips flowered well in
+late April; the alliums flowered through May and drew a steady stream of bees. Beds 5 and 6 held lavender, which
+established well and flowered from late June into August. Beds 7 to 10 held a mix of herbs: thyme, oregano, sage,
+chives, mint in sunken pots, and a row of fennel. The thyme and oregano flowered heavily in July. Beds 11 to 14 held
+ferns and hostas, which did well in the shade but were badly eaten by slugs in May. The border strip was not planted.
+Butterflies were counted on six fine afternoons in July and August, with an average of nine on the lavender and the
+oregano at any one time, and almost none in the shaded beds.
+
+Prices for the coming season
+
+These are the prices the club paid last season, which the club expects to hold this season.
+- Spring bulbs (tulips, alliums, crocus, daffodils): about 0.45 each; 100 bulbs fill one raised bed.
+- Summer annual seed (cosmos, zinnias, sunflowers): about 3.50 a packet; four packets fill one bed.
+- Herb seedlings (thyme, oregano, marjoram, sage, rosemary, lavender): about 3.20 each in 9 centimeter pots; 30
+  plants fill one bed.
+- Drip irrigation: a 50 meter drip line with fittings and a timer costs about 260; a second 50 meter line about 150.
+- Mulch and compost: bark mulch about 45 a cubic meter delivered; garden compost about 55 a cubic meter delivered.
+  About half a cubic meter covers one bed to a useful depth.
+- A tool shed: the committee looked at a timber shed for about 950 last season and has decided not to buy one this
+  year. It is not on offer.
+
+The open day
+
+The club holds one open day each year, when the gate is left open from ten until four and visitors walk the paths.
+The committee has asked the treasurer to choose the season for this year's open day: spring or autumn. In spring,
+bulbs are in flower in late April and May, the herbs are small, and the summer annuals have not yet been sown. In
+autumn, the herbs and lavender are at full size, the summer annuals are finishing, asters and sedums can be in
+flower if planted, and the bulbs are below ground. The open day costs nothing to hold and does not change the
+amounts below.
+
+The club's money this season
+
+The club has three sources of money for this season's spending, each with a maximum.
+- The yearly fund: up to 1,000, the amount set aside each year for the garden.
+- Spring plant-sale proceeds: up to 400, from seedlings the club raises and sells at the gate.
+- Summer raffle proceeds: up to 300, from the raffle held at the street's summer fair.
+Whatever is not drawn from a source stays in the club's account. The four uses this season are spring
+bulbs, herb seedlings, drip irrigation parts, and mulch and compost, each with a maximum set by how much of it the
+beds and border can use. The tool shed is not on offer.
+"""

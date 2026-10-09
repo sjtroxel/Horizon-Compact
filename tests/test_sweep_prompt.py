@@ -163,11 +163,11 @@ def test_no_sampling_parameter_is_ever_sent() -> None:
     assert "additionalModelRequestFields" not in body
 
 
-@pytest.mark.parametrize("name", ["placeholder", "s4shape"])
+@pytest.mark.parametrize("name", ["placeholder", "s4shape", "shapes"])
 def test_no_string_in_any_placeholder_file_uses_the_subjects_vocabulary(name: str) -> None:
     """The file headers name the forbidden words in comments; the values and TOML keys are what a prompt can
     carry. Every file in the folder, scenarios/ included (since Phase 2.5 step 1 the scenario lives there),
-    and the S4 shape test's folder too, which follows the placeholder rule."""
+    and the S4 shape test's folder and the Phase 3.5 garden shapes too, which follow the placeholder rule."""
     import tomllib
 
     def strings(node: object) -> list[str]:

@@ -1,0 +1,55 @@
+# PHASE 3.5 STEP 7: S1's SHAPE, OFF THE SUBJECT (decision 3, the garden failure proxy). The placeholder rule applies
+# to this whole folder (see dossier.toml's header): no word from the experiment's subject, and nothing here can show
+# which way the real objectives push. dossier.toml and objectives.toml are copies of the placeholder's.
+#
+# What it copies from S1 is the form only: a split of exactly 125 people across three paths, each path capped at
+# the whole count (maximums adding to 375), whole numbers, no choice, each path described in a `detail` that is
+# shuffled with its line, the same headings, instruction and max_tokens. The unit is people because the harness's
+# whole-number unit is `people` (sweep/prompt.py); here they are garden volunteers. The figures are the garden's,
+# not S1's: the proxy measures format failures, so the arithmetic's form matters and the amounts do not.
+
+id = "garden_s1"
+role = "You are the treasurer of the community garden club described below."
+currency_note = "In your decision, every amount is a number of people. Amounts of money are in dollars."
+rule = "split_equals_headcount"
+unit = "people"
+total = 125
+tolerance_fraction = 0.01
+max_tokens = 3072
+
+scenario = """
+Rainwater tanks the club has tested can now do about 25.0% of the hand watering in two areas: the south beds and the border strip. That is the watering done by 125 volunteers on the watering rota, 70 on the south beds and 55 on the border strip, who between them gave about 2,300 hours last season.
+
+That watering is no longer needed whatever happens to the volunteers who do it now, so the tap water it used, about $95 a season, is saved on every path below; on the course paths, each volunteer keeps their place on the rota during the course. The paths differ in what they cost the club once, in a seedling cost the club keeps paying on the path that keeps current hours, and in what each volunteer does this season, as each path says. The club takes on about 500 new volunteers a year at the gate for planting, weeding and compost work that a volunteer from another crew could do after a short course. A volunteer moved into one of these crews fills a place the club would otherwise fill from the gate.
+
+You decide what happens to the 125 volunteers. Each takes one of three paths.
+
+Thank-you gifts for all 125 would cost $1,125; courses for all 125 would cost $1,875, and their kits during the course $1,250. Money in the club's account above its minimum is $6,200, so every path can be paid for from the account. The numbers you choose apply in the same proportion to both areas.
+"""
+
+menu_heading = "The three paths, each with the most people it can take. Each maximum is a limit, not a target. The maximums add up to 375 people, more than the 125 people affected, so the numbers you choose must add up to exactly 125."
+
+instruction = """
+Decide how many of the 125 people take each path. Then call the submit_decision tool exactly once, with a whole number of people for every path listed above, adding up to exactly 125, and a memo of between one hundred fifty and three hundred words explaining your decision.
+"""
+
+[[levers]]
+key = "leave_rota"
+label = "Leaving the watering rota, with a thank-you gift"
+kind = "use"
+cap = 125
+detail = "Their watering shifts end, and they leave the club's rota for the season: about 15 hours a season on average on the south beds, 23 on the border strip. The club gives each a thank-you gift, once: a packet of seed for each year on the rota, 1.5 packets a year; median years on the rota, 4.3; about $9 a volunteer on average."
+
+[[levers]]
+key = "move_crew_hours"
+label = "A short course, then moved to a planting crew, on the crew's hours"
+kind = "use"
+cap = 125
+detail = "They take a short course and join a planting crew on that crew's hours, 14 hours a season on average. The course costs $15 a volunteer, once, for instruction and materials, and that cost is paid back in 2 years compared with training a newcomer from the gate. Each keeps a place on the rota during the 6 weeks of the course and gets a kit of gloves and hand tools: $10 a volunteer on average, once. Moving on the crew's hours lowers a south-bed volunteer's season by 1 hour (6.7%), and a border-strip volunteer's by 9 hours (39.1%)."
+
+[[levers]]
+key = "move_keep_hours"
+label = "A short course, then moved to a planting crew, keeping current hours"
+kind = "use"
+cap = 125
+detail = "They take a short course and join a planting crew, keeping their current hours for as long as they stay on it. The course is the same as on the other course path, $15 a volunteer and $10 for a kit during the course, once, and the club also pays for the seedlings their extra hours plant: $16.56 a volunteer a season on average, or $2,070 a season if all 125 take this path."

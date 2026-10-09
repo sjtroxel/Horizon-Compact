@@ -311,6 +311,10 @@ def test_an_official_model_is_never_asked_about_real_content(company: Experiment
     check_probe_model(company, "gpt-oss-openrouter")
 
 
+def test_an_official_model_may_be_asked_about_the_garden_shapes() -> None:
+    check_probe_model(load_experiment("shapes"), "sonnet-4-6")
+
+
 def test_the_cli_refuses_an_official_model_before_it_reads_anything_else(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

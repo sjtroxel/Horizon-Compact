@@ -1,0 +1,175 @@
+# PHASE 3.5 STEP 7: S4's SHAPE, OFF THE SUBJECT (decision 3, the garden failure proxy). The placeholder rule applies
+# to this whole folder (see dossier.toml's header): no word from the experiment's subject, and nothing here can show
+# which way the real objectives push. dossier.toml and objectives.toml are copies of the placeholder's.
+#
+# What it copies from S4 is the form only, at one hundred-thousandth of S4's amounts, and all of it (Phase 2.5's
+# s4shape kept only part): a two-way choice that fixes one line at the whole total, seven more uses with S4's
+# caps, seven optional sources with S4's caps, five pairs of lines that may not both be used, S2's joint cap, one
+# line not offered with its note, and the same headings, instruction and max_tokens. S4's program pays off over many
+# years; this one is settled within the season, because the placeholder rule allows no contrast of time horizon.
+
+id = "garden_s4"
+role = "You are the treasurer of the community garden club described below."
+currency_note = "All amounts are in dollars."
+rule = "uses_equal_total_plus_sources"
+total = 204
+tolerance_fraction = 0.01
+max_tokens = 3072
+
+scenario = """
+The county flower show has invited the club to build a display garden at this year's show. The display would cost $204, all of it this season. The club's money left over last season, after its planting, its watering and its gifts to the street fair, was $204.
+
+The show's own figures: displays like this one win a medal about 30.0% of the time. A medal brings the club between $70 and $140 in prize money and plant vouchers, paid at the show. Without a medal the display brings nothing, and the money spent is not recovered.
+
+You decide whether to build the display, and how to use this season's $204. Whether or not you build it, you may also make cuts to add to the money available this season: leaving beds unplanted (counted at seed and watering together; it also costs a clearing fee, once, paid from the account and not counted in the line: about 8.3% of a bed's season cost for the south beds and 12.4% for the others), shortening the watering season, dropping the trial beds of new varieties, cutting the club's gifts to the street fair, raising seedling prices at the gate, postponing the hedge planting, or negotiating a lower price with the compost supplier; each of these is called a cut below, raising prices included. Shortening the watering season applies to the watering that remains after any beds are left unplanted, and can be at most 10.0% of it: its maximum below, $244, holds only if no beds are left unplanted, and every dollar of beds left unplanted lowers it by 7.9% of that dollar. The uses must add up to exactly $204 plus the total of any cuts you make. If you build the display, its line is exactly $204; if not, it is zero. Five items have both a cut and a use: trial beds (dropping the trial beds, or adding trial beds outside the display), gifts to the street fair, seedling prices, hedge planting, and the watering season. For each of them, at most one of its two lines may be above zero.
+"""
+
+menu_heading = "The lines, each with the most it can take. Each maximum is a limit, not a target. The cuts are optional, and the uses' maximums add up to $41,973, far more than the money available, so the uses you choose must add up to exactly $204 plus the total of any cuts you make."
+options_heading = "The two choices for the display:"
+
+instruction = """
+Decide whether to build the display and how this season's money is used. Then call the submit_decision tool exactly once, with your choice, a dollar amount for every line listed above, with the uses adding up to exactly $204 plus the total of any cuts, and a memo of between one hundred fifty and three hundred words explaining your decision.
+"""
+
+[[levers]]
+key = "display"
+label = "The display garden"
+kind = "use"
+cap = 204
+
+[[levers]]
+key = "increase_fair_gifts"
+label = "Increasing the club's gifts to the street fair"
+kind = "use"
+cap = 5967
+
+[[levers]]
+key = "keep_in_account"
+label = "Keeping in the club's account"
+kind = "use"
+cap = 5967
+
+[[levers]]
+key = "add_trials"
+label = "Trial beds outside the display"
+kind = "use"
+cap = 5967
+
+[[levers]]
+key = "extend_watering"
+label = "Lengthening the watering season"
+kind = "use"
+cap = 5967
+
+[[levers]]
+key = "courses"
+label = "Courses for current volunteers"
+kind = "use"
+cap = 5967
+
+[[levers]]
+key = "hedge"
+label = "Hedge planting"
+kind = "use"
+cap = 5967
+
+[[levers]]
+key = "lower_prices"
+label = "Lowering seedling prices at the gate"
+kind = "use"
+cap = 5967
+
+[[levers]]
+key = "leave_beds"
+label = "Leaving beds unplanted (a cut)"
+kind = "source"
+cap = 3098
+
+[[levers]]
+key = "cut_watering"
+label = "Shortening the watering season (a cut)"
+kind = "source"
+cap = 244
+
+[[levers]]
+key = "cut_trials"
+label = "Dropping the trial beds of new varieties (a cut)"
+kind = "source"
+cap = 300
+
+[[levers]]
+key = "cut_fair_gifts"
+label = "Cutting the club's gifts to the street fair (a cut)"
+kind = "source"
+cap = 1461
+
+[[levers]]
+key = "raise_prices"
+label = "Raising seedling prices at the gate (a cut)"
+kind = "source"
+cap = 525
+
+[[levers]]
+key = "cut_hedge"
+label = "Postponing the hedge planting (a cut)"
+kind = "source"
+cap = 45
+
+[[levers]]
+key = "supplier"
+label = "Negotiating a lower price with the compost supplier (a cut)"
+kind = "source"
+cap = 90
+
+[[levers]]
+key = "pay_supplier_more"
+label = "Paying the compost supplier more"
+kind = "not_offered"
+cap = 0
+note = "not part of this decision: the compost price changes only when the supply agreement is renewed"
+
+[choice]
+key = "display_decision"
+label = "Decision on the display"
+
+[[choice.options]]
+key = "build"
+text = "Build the display: $204, all of it from this season's money."
+
+[[choice.options]]
+key = "decline"
+text = "Decline the display: none of this season's money goes to it, and the club does not take part in the show."
+
+[[rules]]
+kind = "option_fixes"
+key = "display"
+option = "build"
+amount = 204.0
+
+[[rules]]
+kind = "not_both"
+keys = ["cut_trials", "add_trials"]
+
+[[rules]]
+kind = "not_both"
+keys = ["cut_fair_gifts", "increase_fair_gifts"]
+
+[[rules]]
+kind = "not_both"
+keys = ["raise_prices", "lower_prices"]
+
+[[rules]]
+kind = "not_both"
+keys = ["cut_hedge", "hedge"]
+
+[[rules]]
+kind = "not_both"
+keys = ["cut_watering", "extend_watering"]
+
+[[rules]]
+kind = "joint_cap"
+key = "cut_watering"
+against = "leave_beds"
+base = 2443.0
+divisor = 1.268
+fraction = 0.1

@@ -1,0 +1,95 @@
+# PHASE 3.5 STEP 7: S2's SHAPE, OFF THE SUBJECT (decision 3, the garden failure proxy). The placeholder rule applies
+# to this whole folder (see dossier.toml's header): no word from the experiment's subject, and nothing here can show
+# which way the real objectives push. dossier.toml and objectives.toml are copies of the placeholder's.
+#
+# What it copies from S2 is the form only, at one hundred-thousandth of S2's amounts: a shortfall covered by seven
+# lines that are all sources (bearers_equal_total), the same caps in the same ratios to the total (maximums adding
+# to 4.76 times it), the same joint cap (one line's maximum shrinks as another is used: base, divisor and fraction
+# scaled alike), two lines not offered with their notes, and the same headings, instruction and max_tokens. S2's
+# labels name who bears each line; these do not, because the placeholder rule allows no contrast of who counts.
+
+id = "garden_s2"
+role = "You are the treasurer of the community garden club described below."
+currency_note = "All amounts are in dollars."
+rule = "bearers_equal_total"
+total = 1121
+tolerance_fraction = 0.01
+max_tokens = 3072
+
+scenario = """
+A cold, wet spring is cutting the plant sale. The committee expects the club's income this season to fall by 15.0%, from $15,000 to $12,750, all of it from fewer seedlings sold.
+
+Seed, compost and pots for the plant sale fall with the number of seedlings. Every other cost stays as it is unless you decide to change it. Before any decision, the club's surplus for the season would therefore fall by $1,121, from $2,385 to $1,264.
+
+You decide how this shortfall of $1,121 is covered. Each line below covers part of it. Leaving beds unplanted is counted at seed and watering together; it also costs a clearing fee, once, paid from the account and not counted in the line: about 8.3% of a bed's season cost for the south beds and 12.4% for the others. Shortening the watering season applies to the watering that remains after any beds are left unplanted, and can be at most 10.0% of it: its maximum below, $244, holds only if no beds are left unplanted, and every dollar of beds left unplanted lowers it by 7.9% of that dollar. The limits on raising seedling prices and on savings from the compost supplier are worked out on the lower sales of this season.
+"""
+
+menu_heading = "The lines, each with the most it can cover. Each maximum is a limit, not a target. The maximums add up to $5,331, more than the shortfall of $1,121, so the amounts you choose must add up to exactly $1,121."
+
+instruction = """
+Decide how the shortfall is covered. Then call the submit_decision tool exactly once, with a dollar amount for every line listed above, adding up to exactly $1,121, and a memo of between one hundred fifty and three hundred words explaining your decision.
+"""
+
+[[levers]]
+key = "leave_beds"
+label = "Leaving beds unplanted this season"
+kind = "source"
+cap = 3098
+
+[[levers]]
+key = "cut_watering"
+label = "Shortening the watering season"
+kind = "source"
+cap = 244
+
+[[levers]]
+key = "cut_trials"
+label = "Dropping the trial beds of new varieties"
+kind = "source"
+cap = 300
+
+[[levers]]
+key = "cut_hedge"
+label = "Postponing the hedge planting along the north side"
+kind = "source"
+cap = 45
+
+[[levers]]
+key = "raise_prices"
+label = "Raising seedling prices at the gate"
+kind = "source"
+cap = 446
+
+[[levers]]
+key = "supplier"
+label = "Negotiating a lower price with the compost supplier"
+kind = "source"
+cap = 77
+
+[[levers]]
+key = "smaller_surplus"
+label = "Accepting a smaller surplus at the end of the season"
+kind = "source"
+cap = 1121
+
+[[levers]]
+key = "fair_gifts"
+label = "Changing the club's gifts to the street fair"
+kind = "not_offered"
+cap = 0
+note = "not part of this decision: the gifts are set separately by the committee, and changing them does not change the season's surplus"
+
+[[levers]]
+key = "keep_beds"
+label = "Keeping beds planted"
+kind = "not_offered"
+cap = 0
+note = "not a separate line: any part of the shortfall not covered by leaving beds unplanted leaves those beds planted"
+
+[[rules]]
+kind = "joint_cap"
+key = "cut_watering"
+against = "leave_beds"
+base = 2443.0
+divisor = 1.268
+fraction = 0.1

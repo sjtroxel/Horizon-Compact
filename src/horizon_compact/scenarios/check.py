@@ -13,6 +13,9 @@ Failures make the check fail; notes never do. Nothing here calls a model or read
 4. The comprehension probes (section 10): one file per scenario, every key resolvable.
 5. The change log (section 14), once ``CHANGELOG.toml`` exists: the current content hash is the latest entry's
    "after" hash, and the entries chain.
+6. The garden shapes (Phase 3.5 IMPLEMENTATION doc decision 3, step 7): ``experiment/shapes/`` loads, holds
+   one ``garden_sN`` for each company ``sN`` and nothing else, each with its scenario's form (``_form``), no
+   never-use term, and prompts that differ only in the objective sentence.
 """
 
 from __future__ import annotations
@@ -34,6 +37,11 @@ from horizon_compact.experiment import (
     TEMPLATE_IDS,
     Experiment,
     ExperimentError,
+    JointCap,
+    NotBoth,
+    OptionFixes,
+    OptionRequires,
+    Scenario,
     load_experiment,
 )
 from horizon_compact.probes.questions import ProbeError
@@ -50,6 +58,8 @@ from horizon_compact.sweep.plan import SweepRefusal
 from horizon_compact.sweep.prompt import render_prompt
 
 COMPANY_EXPERIMENT = "company"
+SHAPES_EXPERIMENT = "shapes"
+SHAPE_PREFIX = "garden_"
 CHANGELOG_PATH = f"{COMPANY_DIR}/CHANGELOG.toml"
 # planning/06 section 3.1, "Never in public": words the instrument's own text must not use. "Stakeholder"
 # alone is allowed (the Roundtable's word, in objectives B and D); only "stakeholder capitalism" is not.
@@ -234,6 +244,81 @@ def template_failures(exp: Experiment) -> list[str]:
     return failures
 
 
+def _form(scenario: Scenario) -> tuple[object, ...]:
+    """What a garden shape copies from its company scenario: everything that can make a reply fail the format,
+    none of the content. Caps and rule amounts are kept as ratios to the total, so a shape may scale the
+    amounts; the order of the lines is not kept, since every run shuffles it."""
+
+    def ratio(amount: float) -> float:
+        return round(amount / scenario.total, 3)
+
+    caps = {
+        kind: sorted(ratio(lever.cap) for lever in scenario.offered(kind))
+        for kind in ("source", "use")
+    }
+    levers = {lever.key: lever for lever in scenario.levers}
+
+    def line(key: str) -> tuple[str, float]:
+        return (levers[key].kind, ratio(levers[key].cap))
+
+    extra = sorted(
+        (
+            rule.kind,
+            tuple(sorted(line(key) for key in rule.keys))
+            if isinstance(rule, NotBoth)
+            else (line(rule.key), line(rule.against))
+            if isinstance(rule, JointCap)
+            else (line(rule.key),),
+            (ratio(rule.base), rule.divisor, rule.fraction) if isinstance(rule, JointCap) else (),
+            ratio(rule.amount) if isinstance(rule, OptionFixes) else None,
+            len(rule.options) if isinstance(rule, OptionRequires) else None,
+        )
+        for rule in scenario.rules
+    )
+    return (
+        scenario.rule,
+        scenario.unit,
+        scenario.tolerance_fraction,
+        scenario.max_tokens,
+        caps["source"],
+        caps["use"],
+        sum(lever.kind == "not_offered" for lever in scenario.levers),
+        all(lever.detail for lever in scenario.offered()),
+        len(scenario.choice.options) if scenario.choice else 0,
+        extra,
+    )
+
+
+def shape_failures(company: Experiment, root: Path) -> list[str]:
+    """The garden shapes (decision 3): one per company scenario, each with its form, off the never-use list,
+    and prompts that differ only in the objective sentence. The placeholder rule's subject-vocabulary test is
+    in tests/test_sweep_prompt.py, as it is for the placeholder."""
+    try:
+        shapes = load_experiment(SHAPES_EXPERIMENT, root / "experiment")
+    except ExperimentError as exc:
+        return [f"{SHAPES_EXPERIMENT}: {exc}"]
+    expected = {SHAPE_PREFIX + scenario_id for scenario_id in company.scenarios}
+    failures = [
+        f"{SHAPES_EXPERIMENT}: {shape_id} has no company scenario {shape_id.removeprefix(SHAPE_PREFIX)}"
+        for shape_id in sorted(set(shapes.scenarios) - expected)
+    ] + [
+        f"{SHAPES_EXPERIMENT}: no garden shape {shape_id} for company scenario "
+        f"{shape_id.removeprefix(SHAPE_PREFIX)}"
+        for shape_id in sorted(expected - set(shapes.scenarios))
+    ]
+    for scenario_id, scenario in company.scenarios.items():
+        shape = shapes.scenarios.get(SHAPE_PREFIX + scenario_id)
+        if shape is not None and _form(shape) != _form(scenario):
+            failures.append(
+                f"{SHAPES_EXPERIMENT}: {shape.id} does not have {scenario_id}'s form "
+                f"(rule, unit, caps as ratios to the total, extra rules, choice); "
+                f"{_form(shape)} against {_form(scenario)}"
+            )
+    failures.extend(f"{SHAPES_EXPERIMENT}: {f}" for f in _vocabulary_failures(shapes))
+    failures.extend(f"{SHAPES_EXPERIMENT}: {f}" for f in _prompt_difference_failures(shapes))
+    return failures
+
+
 def _prompt_difference_failures(exp: Experiment) -> list[str]:
     """For each scenario, every objective under every template renders the same prompt once the objective
     sentence is taken out, and the sentence is in the prompt once: the prompts differ only in that sentence,
@@ -319,6 +404,7 @@ def run_checks(root: Path) -> Report:
         report.failures.append(str(exc))
         return report
     report.failures.extend(template_failures(exp))
+    report.failures.extend(shape_failures(exp, root))
     report.failures.extend(_probe_failures(root, exp))
     failures, notes = check_change_log(root, exp.content_hash, exp.sealed_template)
     report.failures.extend(failures)

@@ -25,7 +25,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from horizon_compact.dossier.figures import FigureSet
-from horizon_compact.experiment import PLACEHOLDER_EXPERIMENT, Experiment
+from horizon_compact.experiment import OFF_SUBJECT_EXPERIMENTS, Experiment
 from horizon_compact.probes.questions import (
     TOOL_NAME,
     Key,
@@ -60,7 +60,7 @@ CLEAN_STOPS = frozenset({"complete", "cap_reached", "max_minutes", "stop_request
 def check_probe_model(experiment: Experiment, model_key: str) -> None:
     """No official model sees real content, as a decision or as a probe (section 9)."""
     config = experiment.model(model_key)
-    if experiment.name != PLACEHOLDER_EXPERIMENT and config.role != "development":
+    if experiment.name not in OFF_SUBJECT_EXPERIMENTS and config.role != "development":
         raise SweepRefusal(
             f"{model_key} is not the development model (role {config.role!r}); only a development model "
             f"may be asked about {experiment.name}'s content"

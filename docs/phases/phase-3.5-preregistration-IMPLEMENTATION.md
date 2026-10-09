@@ -733,10 +733,55 @@ AWS. Every step that calls a model (the runs in 7 and 8, then 9 and 11) waits fo
    each sealed-template rule both ways, on a laptop; the pilot records written by the runner itself. Nineteen
    mutations of `gate.py`, each caught. The real-repository dry run is his to run (`.claude/settings.json` denies
    Claude `hc sweep run`); it refuses there today, since no lock exists. 1327 tests in all.
-6. **[Opus] `protocol/cases.py`:** §8, with fake GitHub and store objects, both ways. C3.
+6. **[Opus] `protocol/cases.py`** `[done]` 2026-10-09: §8, with fake GitHub and store objects, both ways. C3. *As built:*
+   the case record (`experiment/cases/<label>/case.lock`, TOML, `case_version = 1`: `label`, `probe_set`, and the
+   sha256 of the dossier, the scenario text and the rubric; the label must be the folder's, so a record cannot vouch
+   for another case; Phase 5 writes it). Check 1 hashes the content supplied at run time against it. Check 2 reads
+   two interfaces, `CiRun` (a GitHub Actions run's `created_at` and the record as it stood at its head commit) and
+   `ProbeRecord` (a probe call's model, set, pass and S3 `LastModified`); the earliest run holding each hash counts,
+   strictly before the probe, and a commit's own date is never read. Its `OrderFinding.as_record()` is what goes
+   into the manifest; the container's `run_case_gate` refuses a finding that is missing, for another case, or not
+   admitted. Check 3: every official model, three calls, all passed, in the last probe set, which must be the
+   record's. Check 4: the grid's checks 2, 5, 6 and 7, **plus 8** (the container: §8 did not list it, but official
+   means a container run); not the content hash and not the sealed template. **What §8 did not say, decided here:**
+   (i) **the order is checked twice for a coarsened case:** the rubric before the case's first probe of any set (no
+   model sees a case before its rubric), and the content that counts before the first probe of its own set (the
+   coarsened dossier did not exist before set 1, so one comparison against set 1 would refuse every coarsened case);
+   (ii) **a re-probe needs a changed dossier** (the probe reads only the dossier, so a second set on the same dossier
+   is probing until it passes), shown from the CI history; a second set only after the first failed; no third set;
+   (iii) times without a zone are refused, never assumed UTC. `tests/test_protocol_cases.py`, 48 tests: §8's cases
+   both ways (admitted with an earlier run and a passed probe; refused with a run after the first probe, at the same
+   instant, with no run, with a failed probe, with content that does not hash) and the coarsened history both ways;
+   twenty-two mutations of `cases.py`, all caught but one, which is equivalent under the coarsening rule (matching a
+   record's content without its probe set). The real GitHub and S3 readers, the record writer and the launch wiring
+   are Phase 5's (OPEN entry). 1375 tests in all.
 7. **[Opus drafts, he reviews] `experiment/shapes/`** (decision 3): four garden scenarios with S1-S4's structural
    rules and the placeholder's objectives; `hc scenarios check` passes on them. **[his runs, needs AWS]** the proxy
    runs on Bedrock, one command per model; Claude reports counts and types from the blind reports only (`failure-proxy.md`).
+   **Drafting `[done]` 2026-10-09 (Opus), awaiting his review; the runs wait for Bedrock.** *As built:*
+   `experiment/shapes/`, its dossier and objectives byte copies of the placeholder's (one template, `w1`), and
+   `garden_s1` to `garden_s4`, each holding its scenario's **form** and none of its content: the same balance rule
+   and unit, the caps as the same ratios to the total, the same extra rules over lines of the same kind and cap, the
+   same choice size, the lines not offered, `detail` where S1 has it, tolerance and `max_tokens`, and headings and
+   instructions in the same words. Amounts are the garden's: S2 and S4 at one hundred-thousandth of theirs, S1 and S3
+   with garden figures. `garden_s4` copies all of S4 (Phase 2.5's `s4shape` kept part). `hc scenarios check` now
+   checks the shapes (`shape_failures`): one `garden_sN` per company `sN` and no other, each with its scenario's
+   `_form`, the never-use list, and prompts that differ only in the objective sentence; the shapes folder joins the
+   placeholder rule's subject-vocabulary test. **What step 7 did not say, decided here:** (i) **S1 and S3 count
+   people**, because the harness's whole-number unit is `people` (`sweep/prompt.py`); the shapes' people are garden
+   volunteers, with no contrast of who counts; (ii) **S2's labels name who bears each line, the shape's do not**, and
+   **S4's program pays off over years, the shape's display within the season**: both because the placeholder rule
+   allows no contrast of who counts or of time horizon; (iii) **the harness refused every official model on any
+   experiment but `placeholder`** (`sweep/plan.py`, `probes/run.py`), which this doc missed: **decided 2026-10-09
+   (his, as recommended):** `OFF_SUBJECT_EXPERIMENTS = ("placeholder", "shapes")` in `experiment.py`; `s4shape` and
+   the company stay on the development model, and `analysis/records.py` still reads only the placeholder's
+   development records (the proxy reads the blind reports, which never refuse). These files are frozen at the tag,
+   so this lands before it. (iv) **For the run day:** `hc sweep plan --experiment shapes --model sonnet-4-6
+   --repeats 3` is 60 runs with a **worst case of $11.35, above the $5 development cap**, so the harness refuses it
+   as one command. **Recommended:** one command per scenario (`--scenario garden_sN`, 15 runs, worst case about
+   $2.84 each), four per model, no override; `--allow-over-cap` stays his to type. Tests: the form check caught
+   eight kinds of drift and a dropped rule, allows a uniform rescaling, and refuses a missing or extra shape. 1391
+   tests in all. Committed with step 6 (his choice); the runs' evidence comes in a later commit.
 8. **[his runs, needs AWS] Nova Lite on Bedrock** (decision 4): probes and format runs on the existing `nova-lite` entry;
    **[Opus]** any failure type fixed through the change log, probes re-run if text changed. C4. This closes the OPEN
    entry of 2026-10-07.

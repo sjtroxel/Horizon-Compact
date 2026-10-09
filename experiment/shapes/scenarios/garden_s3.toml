@@ -1,0 +1,83 @@
+# PHASE 3.5 STEP 7: S3's SHAPE, OFF THE SUBJECT (decision 3, the garden failure proxy). The placeholder rule applies
+# to this whole folder (see dossier.toml's header): no word from the experiment's subject, and nothing here can show
+# which way the real objectives push. dossier.toml and objectives.toml are copies of the placeholder's.
+#
+# What it copies from S3 is the form only: one of three options, and a split of exactly 190 people across four lines
+# with S3's caps (190, 29, 162, 171; maximums adding to 552), two of them open under one option only
+# (option_requires), whole numbers, the options' text at about S3's length, and the same headings, instruction and
+# max_tokens. The unit is people because the harness's whole-number unit is `people` (sweep/prompt.py); here they
+# are garden volunteers. The amounts are the garden's, kept consistent with each other.
+
+id = "garden_s3"
+role = "You are the treasurer of the community garden club described below."
+currency_note = "In your decision, every amount is a number of people. Amounts of money are in dollars."
+rule = "split_equals_headcount"
+unit = "people"
+total = 190
+tolerance_fraction = 0.01
+max_tokens = 3072
+
+scenario = """
+The Mill Lane plot, the club's second site, has 190 volunteers on its rota, who give about 10,500 hours a season. Its result for the season just ended was -$90, after its share of the club's shared costs. Shared costs are divided among the sites in proportion to seedlings sold. Mill Lane's share was $324, so before shared costs the plot earned $234. Its costs are $329 a season above what the club's average would imply, because its water and rent are spread over the fewest beds.
+
+You must choose one of the three options below for the Mill Lane plot, and decide what happens to its 190 volunteers. The figures for every option are the committee's estimates. Every option can be paid for from the club's account of $4,449.
+
+Under every option, volunteers can be offered places on the rota at Hollin Street, across town; the club takes on about 500 new volunteers a year at the gate. The committee expects about 15.0% of those offered to accept, at most 29 people, with a bus pass of $20 a person, once. A volunteer who leaves the club's rota receives a thank-you gift, once: about $5 a person on average.
+"""
+
+menu_heading = "Where the plot's volunteers go, each line with the most people it can take. Each maximum is a limit, not a target. The maximums add up to 552 people, more than the plot's 190 volunteers, so the numbers you choose must add up to exactly 190. Two lines are open under one option only, as each says."
+options_heading = "The three options for the plot:"
+
+instruction = """
+Choose one option for the Mill Lane plot and decide how many of its 190 volunteers take each line. Then call the submit_decision tool exactly once, with your choice of option, a whole number of people for every line listed above, adding up to exactly 190, and a memo of between one hundred fifty and three hundred words explaining your decision.
+"""
+
+[[levers]]
+key = "left_rota"
+label = "Leaving the club's rota, with a thank-you gift"
+kind = "use"
+cap = 190
+
+[[levers]]
+key = "moved_hollin"
+label = "Moved to the rota at Hollin Street"
+kind = "use"
+cap = 29
+
+[[levers]]
+key = "kept_mill_lane"
+label = "Kept at Mill Lane (rebuild only)"
+kind = "use"
+cap = 162
+
+[[levers]]
+key = "joined_school"
+label = "Joined the school garden's rota (hand over only)"
+kind = "use"
+cap = 171
+
+[choice]
+key = "plot_decision"
+label = "Decision for the plot"
+
+[[choice.options]]
+key = "close"
+text = "Close the plot and move its seedling beds to Hollin Street. Hollin Street has room for about $3,610 of added plant sales, so the club keeps the plot's sales. Raising the seedlings at Hollin Street removes about 50.0% of Mill Lane's cost above the club's average, and the club's surplus rises by $165 a season. The shared costs assigned to the plot stay with the club. Clearing the plot and moving its cold frames costs $100, once. Hollin Street needs 190 places on its rota to raise the moved seedlings; places not taken by Mill Lane volunteers are filled from the gate. The plot's volunteer hours after closing: none."
+
+[[choice.options]]
+key = "rebuild"
+text = "Rebuild the plot with raised beds and drip lines, as at Hollin Street, at a cost of $300, once. The plot's result rises by $75 a season, to -$15 after shared costs, and the club's surplus rises by the same $75 a season. The rebuilt plot needs 162 of its 190 places on the rota. The plot's volunteer hours after rebuilding: 8,900 a season."
+
+[[choice.options]]
+key = "hand_over"
+text = "Hand the plot, with its seedling beds, to the school garden next door, which will keep running it, for a payment of $375, once. The plot's loss leaves the club, but $243 a season of the shared costs assigned to it stays with the club, so the club's surplus falls by $153 a season. The school garden will keep 171 of the plot's 190 places on its rota for at least 2 years. The plot's volunteer hours after the hand-over: 9,400 a season."
+
+[[rules]]
+kind = "option_requires"
+key = "kept_mill_lane"
+options = ["rebuild"]
+
+[[rules]]
+kind = "option_requires"
+key = "joined_school"
+options = ["hand_over"]

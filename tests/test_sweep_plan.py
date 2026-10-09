@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from horizon_compact.experiment import OFF_SUBJECT_EXPERIMENTS, load_experiment
 from horizon_compact.sweep.plan import (
     SweepRefusal,
     build_plan,
@@ -176,6 +177,17 @@ def test_real_content_runs_only_on_the_development_model(tmp_path: Path) -> None
     ).runs
     with pytest.raises(SweepRefusal, match="sonnet-4-6 is not the development model"):
         build_plan(exp, model_key="sonnet-4-6", label="t", repeats=1, seed=1, templates=["w1"])
+
+
+def test_the_off_subject_experiments_are_the_placeholder_and_the_garden_shapes_only() -> None:
+    """Phase 3.5 decision 3: the garden shapes run on the official candidates before the tag. Any other
+    experiment, the Phase 2.5 S4 shape test included, stays on the development model."""
+    assert OFF_SUBJECT_EXPERIMENTS == ("placeholder", "shapes")
+    shapes = load_experiment("shapes")
+    plan = build_plan(shapes, model_key="sonnet-4-6", label="proxy", repeats=3, seed=1)
+    assert len(plan.runs) == 4 * 5 * 3
+    with pytest.raises(SweepRefusal, match="s4shape is not off the subject"):
+        build_plan(load_experiment("s4shape"), model_key="sonnet-4-6", label="t", repeats=1, seed=1)
 
 
 def test_the_placeholder_may_run_on_any_model() -> None:

@@ -20,7 +20,7 @@ from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from typing import Any
 
-from horizon_compact.experiment import PLACEHOLDER_EXPERIMENT, Experiment
+from horizon_compact.experiment import OFF_SUBJECT_EXPERIMENTS, Experiment
 from horizon_compact.sweep.classify import MAX_MODEL_ATTEMPTS
 from horizon_compact.sweep.prompt import build_tool, menu_order_seed, render_prompt
 from horizon_compact.sweep.spend import estimate_input_tokens, worst_case_attempt_usd
@@ -143,12 +143,12 @@ def check_not_official_rules(
             "the sealed one, so no decision run is allowed"
         )
     if (
-        experiment.name != PLACEHOLDER_EXPERIMENT
+        experiment.name not in OFF_SUBJECT_EXPERIMENTS
         and experiment.model(model_key).role != DEVELOPMENT_ROLE
     ):
         raise SweepRefusal(
             f"{model_key} is not the development model: real content runs only on the development "
-            f"model until the official sweep ({experiment.name} is not the placeholder)"
+            f"model until the official sweep ({experiment.name} is not off the subject)"
         )
 
 

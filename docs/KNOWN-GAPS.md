@@ -17,10 +17,16 @@ case by its type and a neutral label. The names live only in the private longlis
 > Opus) DONE 2026-10-09, uncommitted (rides with step 4's commit, his choice); `providers/base.py` stays run code (his,
 > as recommended). Step 4 (`protocol/lock.py`, `hc protocol lock` / `check`, Sonnet) DONE 2026-10-09, uncommitted, with
 > a list of the choices it made in its §16 note; reviewed by Opus the same day (one fix, `tree_sha256` now skips
-> untracked files). Steps 3 and 4 committed (`9eccb4a`). **Step 5 (`protocol/gate.py`, Opus) DONE 2026-10-09,
-> uncommitted**: the eight checks, the dry run, the launch preflight, `required_repeats`; one finding (the pilot vs
-> check 4) built as a `pilot` mode, Phase 4 wires it (OPEN, for Phase 4). **NEXT: §16 step 6, `protocol/cases.py`
-> (Opus), $0, no AWS.**
+> untracked files). Steps 3 and 4 committed (`9eccb4a`), step 5 (`protocol/gate.py`) committed (`15f66a2`; the pilot
+> vs check 4 built as a `pilot` mode, Phase 4 wires it). **Step 6 (`protocol/cases.py`, Opus) DONE 2026-10-09,
+> uncommitted, to ride in step 7's commit (his choice):** the case mode both ways on fakes; the order checked twice for a coarsened case, and a re-probe needs
+> a changed dossier (§16 note); the real readers are Phase 5's (OPEN, for Phase 5). **Steps 1-6 are done: every
+> no-AWS code step. Step 7's drafting (the garden shapes, `experiment/shapes/`, Opus) DONE 2026-10-09, uncommitted,
+> with step 6 in one commit (his choice), awaiting his review:** `hc scenarios check` now holds each shape to its
+> scenario's form; the harness let official models run only on `placeholder`, so `OFF_SUBJECT_EXPERIMENTS` adds
+> `shapes` (his decision, as recommended); the proxy is refused as one $11.35-worst-case command, so run day is one
+> command per scenario (§16 note). 1391 tests. **NEXT: his review of the four shapes; then step 10, the protocol
+> draft (no AWS). Step 7's runs, and steps 8, 9 and 11, wait for Bedrock (tentative fallback date 2026-10-16).**
 >
 > *Superseded 2026-10-09, late morning, by the block above (approved). The doc as written:*
 > `docs/phases/phase-3.5-preregistration-IMPLEMENTATION.md`. **Ten decisions in its §15**, each with a recommendation
@@ -464,6 +470,18 @@ Phase 0.5 decision 3 is (c) (his, 2026-10-08): the tag budget counts only calls 
 inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-sonnet-4-6` already; **Nova Pro is not in
 `models.toml` yet.** When Phase 3.5 fixes the model set, its entry takes `route = "application_profile"` with
 `inference_profile = "horizon-compact-nova-pro"`, or its spend misses the tag budget. A test should hold it.
+
+---
+
+## OPEN — for Phase 5: the case mode's readers and wiring, 2026-10-09
+
+Phase 3.5 step 6 built the case mode's checks (`protocol/cases.py`) on interfaces, tested with fakes. Phase 5 builds:
+**the record writer** (`experiment/cases/<label>/case.lock`, the format in the Phase 3.5 IMPLEMENTATION doc §16 step 6);
+**the GitHub reader** (each Actions run's `created_at`, from the API, and the record at its head commit, from
+`git show <sha>:<path>`; check before relying on it whether a deleted or expired run disappears from the listing,
+which would fail closed); **the S3 probe reader** (each probe object's `LastModified` and its pass); **the launch's
+order check** writing `OrderFinding.as_record()` into the case sweep's manifest; and **the container session** that
+supplies the case content from private storage and calls `check_case_official`. Phase 5.5 runs it.
 
 ---
 

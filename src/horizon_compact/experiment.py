@@ -30,8 +30,13 @@ SCENARIOS_DIR = "scenarios"
 # A scenario as written (text with {row} placeholders); `hc scenarios render` turns it into the file the
 # harness reads. The loader never reads it (Phase 2.5 IMPLEMENTATION doc section 4).
 SOURCE_SUFFIX = ".source.toml"
-# The one experiment that may run on any model, official ones included: it has none of the real content.
+# The placeholder: the walking skeleton's experiment, and the only one whose development records the analysis
+# engine reads (analysis/records.py).
 PLACEHOLDER_EXPERIMENT = "placeholder"
+# The experiments that may run on any model, official ones included: they have none of the real content, and
+# the placeholder rule's subject-vocabulary test covers every file in them (tests/test_sweep_prompt.py). The
+# garden shapes measure each official candidate's format failures before the tag (Phase 3.5 decision 3).
+OFF_SUBJECT_EXPERIMENTS = (PLACEHOLDER_EXPERIMENT, "shapes")
 TEMPLATE_IDS = ("w1", "w2", "w3")
 WORDING_FIELDS = ("who", "when", "wording")
 
