@@ -7,14 +7,17 @@ import re
 from collections import Counter
 from typing import Any
 
+from horizon_compact.sweep.runner import Role, sweep_prefix
 from horizon_compact.sweep.store import Store
 
 _ATTEMPT = re.compile(r"runs/r-[0-9a-f]{12}/attempt-\d+\.json$")
 _FINAL = re.compile(r"runs/r-[0-9a-f]{12}/final\.json$")
 
 
-def summarize(store: Store, experiment_name: str, sweep_id: str) -> dict[str, Any] | None:
-    prefix = f"development/{experiment_name}/{sweep_id}/"
+def summarize(
+    store: Store, experiment_name: str, sweep_id: str, role: Role = "development"
+) -> dict[str, Any] | None:
+    prefix = sweep_prefix(experiment_name, sweep_id, role)
     manifest_text = store.get(f"{prefix}manifest.json")
     if manifest_text is None:
         return None

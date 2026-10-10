@@ -358,6 +358,38 @@ def test_task_and_execution_roles_fit_inside_the_boundary() -> None:
         assert set(_allowed_actions(name)) <= boundary, name
 
 
+def _results_prefixes(name: str) -> tuple[list[str], list[str]]:
+    """The key prefixes a policy's results-object statement names, and its list statement's ``s3:prefix``."""
+    bucket = f"arn:aws:s3:::{_FAKE_VARS['results_bucket']}/"
+    objects: list[str] = []
+    listed: list[str] = []
+    for s in _statements(name):
+        if s["Sid"] == "ResultsObjects":
+            objects = [r.removeprefix(bucket) for r in _as_list(s["Resource"])]
+        if s["Sid"] == "ResultsList":
+            condition = s["Condition"]
+            assert isinstance(condition, dict)
+            listed = _as_list(condition["StringLike"]["s3:prefix"])
+    return objects, listed
+
+
+def test_task_role_and_boundary_grant_exactly_the_three_results_prefixes() -> None:
+    """Phase 4 code half section 4.2: development, pilot and official, and nothing else in the bucket (the
+    pilot is its own top-level prefix so it can never sit beside the grid)."""
+    wanted = ["development/*", "pilot/*", "official/*"]
+    for name in ("task.json", "boundary.json"):
+        objects, listed = _results_prefixes(name)
+        assert sorted(objects) == sorted(wanted), name
+        assert sorted(listed) == sorted(wanted), name
+
+
+def test_the_task_role_never_holds_a_results_prefix_the_boundary_lacks() -> None:
+    task_objects, task_listed = _results_prefixes("task.json")
+    boundary_objects, boundary_listed = _results_prefixes("boundary.json")
+    assert set(task_objects) <= set(boundary_objects)
+    assert set(task_listed) <= set(boundary_listed)
+
+
 def test_task_role_cannot_delete_or_touch_iam() -> None:
     allowed = _allowed_actions("task.json")
     assert not [a for a in allowed if a.startswith(("iam:", "s3:Delete")) or a.endswith(":*")]

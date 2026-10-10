@@ -2,17 +2,23 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 from pathlib import Path
 
 import pytest
 
-from horizon_compact.experiment import OFF_SUBJECT_EXPERIMENTS, load_experiment
+from horizon_compact.experiment import OFF_SUBJECT_EXPERIMENTS, Experiment, load_experiment
 from horizon_compact.sweep.plan import (
+    MANIFEST_VERSION,
+    SweepPlan,
     SweepRefusal,
     build_plan,
     check_preflight,
+    manifest_repeats,
+    normalize_repeats,
     preflight_bound_usd,
+    repeats_from_json,
     worst_case_per_attempt_usd,
 )
 from sweep_helpers import company_like, experiment, make_plan
@@ -212,3 +218,117 @@ def test_the_local_model_may_run_real_content_because_it_is_the_development_mode
     plan = build_plan(exp, model_key="qwen-local", label="t", repeats=1, seed=1, templates=["w1"])
     assert plan.runs
     assert preflight_bound_usd(exp, plan) == 0.0
+
+
+# --- Phase 4 code half, section 4.1: a count for each scenario -------------------------------------------
+
+
+def _per_scenario(exp: Experiment, repeats: int | dict[str, int]) -> SweepPlan:
+    return build_plan(
+        exp, model_key="nova-lite", label="t", repeats=repeats, seed=1, templates=["w1"]
+    )
+
+
+def test_a_mapping_expands_to_the_right_number_of_runs_per_scenario(tmp_path: Path) -> None:
+    plan = _per_scenario(company_like(tmp_path, sealed="w3"), {"s1": 3, "s2": 1})
+    assert len(plan.runs) == 3 * 3 + 1 * 3  # 3 objectives each
+    by_scenario: dict[str, set[int]] = {}
+    for run in plan.runs:
+        by_scenario.setdefault(run.scenario_id, set()).add(run.repeat)
+    assert by_scenario == {"s1": {0, 1, 2}, "s2": {0}}
+    assert dict(plan.repeats) == {"s1": 3, "s2": 1}
+    assert plan.repeats_text() == "s1=3, s2=1"
+
+
+def test_an_int_and_a_uniform_mapping_are_the_same_plan(tmp_path: Path) -> None:
+    exp = company_like(tmp_path, sealed="w3")
+    as_int = _per_scenario(exp, 2)
+    as_map = _per_scenario(exp, {"s1": 2, "s2": 2})
+    assert as_int == as_map
+    assert as_int.repeats_text() == "2"
+
+
+def test_a_sweep_that_has_one_count_everywhere_keeps_the_id_it_had_before() -> None:
+    """The id's repeats part was ``str(repeats)``; it still is, so a stored development sweep resumes."""
+    exp, plan = make_plan(repeats=3, seed=11)
+    legacy = hashlib.sha256(
+        "|".join(
+            [exp.content_hash, "nova-lite", "t", "3", "11", "garden", ",".join(plan.templates)]
+        ).encode("utf-8")
+    ).hexdigest()
+    assert plan.sweep_id == f"t-nova-lite-{legacy[:8]}"
+
+
+def test_two_plans_that_differ_in_one_scenarios_count_are_two_sweeps(tmp_path: Path) -> None:
+    exp = company_like(tmp_path, sealed="w3")
+    a = _per_scenario(exp, {"s1": 3, "s2": 1})
+    assert a.sweep_id == _per_scenario(exp, {"s1": 3, "s2": 1}).sweep_id
+    assert a.sweep_id != _per_scenario(exp, {"s1": 3, "s2": 2}).sweep_id
+    assert a.sweep_id != _per_scenario(exp, 3).sweep_id
+
+
+def test_the_manifest_holds_the_mapping_at_version_three(tmp_path: Path) -> None:
+    exp = company_like(tmp_path, sealed="w3")
+    manifest = _per_scenario(exp, {"s1": 3, "s2": 1}).manifest()
+    assert MANIFEST_VERSION == 3
+    assert manifest["manifest_version"] == 3
+    assert manifest["repeats"] == {"s1": 3, "s2": 1}
+
+
+def test_a_mapping_that_misses_or_adds_a_scenario_is_refused_naming_it(tmp_path: Path) -> None:
+    exp = company_like(tmp_path, sealed="w3")
+    kw = {"model_key": "nova-lite", "label": "t", "seed": 1, "templates": ["w1"]}
+    with pytest.raises(SweepRefusal, match=r"no count for scenario\(s\) \['s2'\]"):
+        build_plan(exp, repeats={"s1": 3}, **kw)  # type: ignore[arg-type]
+    with pytest.raises(SweepRefusal, match=r"scenario\(s\) \['s9'\]"):
+        build_plan(exp, repeats={"s1": 3, "s2": 1, "s9": 1}, **kw)  # type: ignore[arg-type]
+    with pytest.raises(SweepRefusal, match=r"scenario\(s\) \['s2'\]"):  # a subset needs a subset
+        build_plan(exp, repeats={"s1": 3, "s2": 1}, scenarios=["s1"], **kw)  # type: ignore[arg-type]
+
+
+def test_a_count_below_one_or_not_a_whole_number_is_refused(tmp_path: Path) -> None:
+    exp = company_like(tmp_path, sealed="w3")
+    kw = {"model_key": "nova-lite", "label": "t", "seed": 1, "templates": ["w1"]}
+    bad_counts: list[object] = [0, -1, 2.5, True, "3"]
+    for bad in bad_counts:
+        with pytest.raises(ValueError, match="repeats for s2"):
+            build_plan(exp, repeats={"s1": 3, "s2": bad}, **kw)  # type: ignore[arg-type,dict-item]
+    with pytest.raises(ValueError, match="at least 1"):
+        normalize_repeats(True, ("s1",))
+
+
+def test_a_version_two_manifest_is_read_as_the_same_count_everywhere() -> None:
+    v2 = {"manifest_version": 2, "repeats": 4, "scenarios": ["s1", "s2"], "runs": []}
+    assert manifest_repeats(v2) == {"s1": 4, "s2": 4}
+    v1ish = {"repeats": 2, "runs": [{"scenario_id": "garden"}, {"scenario_id": "garden"}]}
+    assert manifest_repeats(v1ish) == {"garden": 2}
+    assert manifest_repeats({"repeats": {"s1": 3, "s2": 1}, "runs": []}) == {"s1": 3, "s2": 1}
+
+
+def test_a_repeats_file_may_be_a_pilots_record_or_a_plain_mapping() -> None:
+    record = {
+        "protocol": "prereg-v1",
+        "scenarios": [
+            {"kind": "ShareRepeats", "scenario_id": "s1", "repeats": 20},
+            {"kind": "ChoiceRepeats", "scenario_id": "s3", "repeats": 10},
+        ],
+    }
+    assert repeats_from_json(record) == {"s1": 20, "s3": 10}
+    assert repeats_from_json({"s1": 20, "s3": 10}) == {"s1": 20, "s3": 10}
+    refused: list[object] = [
+        [],
+        {},
+        "x",
+        {"s1": "20"},
+        {"s1": 20.7},
+        {"s1": True},
+        {"scenarios": [{"scenario_id": "s1"}]},
+        {"scenarios": [{"scenario_id": "s1", "repeats": 20.7}]},
+        {"scenarios": [{"scenario_id": "s1", "repeats": "20"}]},
+        {"scenarios": [{"scenario_id": "s1", "repeats": True}]},
+        {"scenarios": [{"scenario_id": "s1", "repeats": 2}, {"scenario_id": "s1", "repeats": 3}]},
+        {"scenarios": [{"scenario_id": 1, "repeats": 2}]},
+    ]
+    for bad in refused:
+        with pytest.raises(SweepRefusal):
+            repeats_from_json(bad)

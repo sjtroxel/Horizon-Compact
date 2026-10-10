@@ -79,7 +79,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built and closed 2026-10-09**, DoD audit in §19a (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, `4febc15`, `84d82d7`, plus step 13's commit) |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); **no-AWS steps built 2026-10-09** (1-7's drafting and 10; `dd3a28a`, `9eccb4a`, `15f66a2`, `a40d38b`, step 10 uncommitted); steps 7's runs, 8, 9, 11 and the tag wait on Bedrock |
-| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; build next (Sonnet, Opus reviews). **Runs half:** not written; immediately before the runs |
+| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; **§7 steps 1-4 built 2026-10-10** (`24b40c5`, then steps 2-4 in one commit); steps 5-7 next (Sonnet, Opus reviews). **Runs half:** not written; immediately before the runs |
 | 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5; **split by code and search 2026-10-10 (his)** | **code half** (`phase-5-case-building-code-IMPLEMENTATION.md`, the dossier builder on synthetic filings): not written. **Search half:** not written; immediately before the search |
 | 5.5 `case-runs` | **APPROVED 2026-10-04**, with Phase 5 | not written; immediately before its build |
 | 6 `explorer` | **APPROVED 2026-10-04**, all six decisions as recommended (6 amended by him); split into 6 and 6.5 | not written; immediately before its build |
@@ -95,7 +95,18 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-09, 3 PM
+### Where the build actually is — 2026-10-10, 3 PM
+
+**Measured 2026-10-10, 3:15 PM:** `make check` green, **1457 tests passed**, root 13 of 16; last pushed commit `24b40c5`.
+
+- **Phase 4 code half: §7 steps 1-4 done** (Sonnet built, Opus reviewed). Step 1 (the frozen-file items: the awareness
+  prompt and the results writer) committed and pushed, `24b40c5`. Steps 2-4 (per-scenario repeats, role prefixes,
+  the pilot path, the official launch) land in one commit with this block. IAM boundary applied (his); the task-role
+  half applies on that push.
+- **Next:** §7 steps 5-6, then 7 (`KNOWN-GAPS.md` START HERE). Phase 3.5's tag still waits on Bedrock; tentative
+  fallback date 2026-10-16 (his).
+
+### Where the build was — 2026-10-09, 3 PM *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-09, 3 PM:** `make check` green, **1391 tests passed**, root 13 of 16; last commit `a40d38b`, pushed.
 

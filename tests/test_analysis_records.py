@@ -198,3 +198,17 @@ def test_the_same_records_under_a_pilot_prefix_are_read(tmp_path: Path) -> None:
     found = read_runs(store, relocate(store, plan))
     assert len(found.rows) == 5 and {r.scenario_id for r in found.rows} == {"s1"}
     assert PILOT_PREFIX  # the prefix is only a place; the rule is about development/
+
+
+def test_the_reader_takes_a_version_two_and_a_version_three_manifest_alike(tmp_path: Path) -> None:
+    """The reader never uses the manifest's repeats (each run carries its own repeat), so a sweep stored
+    before counts could differ reads exactly as one stored after."""
+    store, prefix = _placeholder_sweep(tmp_path)
+    key = f"{prefix}manifest.json"
+    manifest = json.loads(store.get(key) or "{}")
+    assert manifest["manifest_version"] == 3 and isinstance(manifest["repeats"], dict)
+    now = read_runs(store, prefix)
+    manifest["manifest_version"] = 2
+    manifest["repeats"] = 1
+    (tmp_path / key).write_text(json.dumps(manifest))
+    assert read_runs(LocalStore(tmp_path), prefix) == now

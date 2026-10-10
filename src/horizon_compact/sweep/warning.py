@@ -14,7 +14,7 @@ from horizon_compact.experiment import Experiment
 from horizon_compact.sweep.classify import MAX_MODEL_ATTEMPTS
 from horizon_compact.sweep.plan import SweepPlan, worst_case_per_attempt_usd
 from horizon_compact.sweep.prompt import build_tool, render_prompt
-from horizon_compact.sweep.runner import finished_run_ids, sweep_prefix
+from horizon_compact.sweep.runner import Role, finished_run_ids, sweep_prefix
 from horizon_compact.sweep.spend import estimate_input_tokens
 from horizon_compact.sweep.store import Store
 
@@ -38,8 +38,10 @@ def likely_call_usd(input_tokens: int, input_price: float, output_price: float) 
     return (input_tokens * input_price + ASSUMED_OUTPUT_TOKENS * output_price) / 1_000_000
 
 
-def sweep_estimate(experiment: Experiment, plan: SweepPlan, store: Store) -> SpendEstimate:
-    prefix = sweep_prefix(plan.experiment, plan.sweep_id)
+def sweep_estimate(
+    experiment: Experiment, plan: SweepPlan, store: Store, role: Role = "development"
+) -> SpendEstimate:
+    prefix = sweep_prefix(plan.experiment, plan.sweep_id, role)
     done = finished_run_ids(store, prefix)
     pending = [run for run in plan.runs if run.run_id not in done]
     prices = experiment.model(plan.model_key).prices

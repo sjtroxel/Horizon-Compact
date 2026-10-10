@@ -22,6 +22,7 @@
       ],
       "Resource": [
         "arn:aws:s3:::${results_bucket}/development/*",
+        "arn:aws:s3:::${results_bucket}/pilot/*",
         "arn:aws:s3:::${results_bucket}/official/*"
       ]
     },
@@ -34,6 +35,7 @@
         "StringLike": {
           "s3:prefix": [
             "development/*",
+            "pilot/*",
             "official/*"
           ]
         }

@@ -7,6 +7,33 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-10, 3 PM (handoff)
+>
+> **Measured at handoff:** `make check` green, **1457 tests**, root 13 of 16. Step 1 committed and pushed (`24b40c5`).
+> **Steps 2-4 built and reviewed, landing in one commit with this handoff** (K3 in the IMPLEMENTATION doc §8); if
+> `git log` shows no `phase 4: steps 2-4` commit, that commit did not happen and the files are still in the tree.
+>
+> **Phase 4 code half (`phase-4-official-grid-code-IMPLEMENTATION.md`): §7 steps 1-4 DONE (Sonnet built, Opus
+> reviewed each).** Per-scenario repeats (manifest v3, `--repeats-file`); `development/`, `pilot/` and `official/`
+> prefixes and record labels; `--pilot` through `run`, `launch` and the dry run; `hc protocol repeats --pilot <id>`
+> writing `repeats.json` once; the official launch wired, with `--pilot-sweep <id>` and the refusal unless the plan's
+> repeats equal the pilot's. As-built notes in the doc's §7.
+>
+> **IAM (step 3): the boundary half is APPLIED** (his, 2026-10-10: bootstrap plan read, 0 add / 1 change / 0 destroy,
+> applied, second plan "No changes"). **The task-role half goes live when he pushes the steps 2-4 commit** (the deploy
+> workflow applies `main`). Check that run's `apply main` job is green; until it is, the task role writes only
+> `development/`. Nothing official can run before the tag anyway.
+>
+> **NEXT: §7 steps 5-6** (the awareness probe's run part and `hc sweep awareness`; the blind refusal-call workflow and
+> `hc analyze`), then step 7 (OpenRouter from the container), each with Opus's review. Done looks like the doc's §9
+> items 3-6 proven by tests, `make check` green, commit K4 (steps 5-6) and K5 (step 7). Run code, so not tag-blocking;
+> only step 1 (done) was.
+>
+> **The two gaps found in review are CLOSED the same afternoon** (his request; entry below, now closed): the gate
+> enforces the pilot's shape (protocol §8.1), and a second pilot on the same model cannot write or be used for repeats.
+>
+> *Superseded 2026-10-10, 3 PM, by the block above. The morning block as written:*
+>
 > ## START HERE — update 2026-10-10, morning
 >
 > **Step 10 is committed (`183421f`), so "uncommitted" in the block below is out of date.** The protocol's six
@@ -486,6 +513,26 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
+## CLOSED 2026-10-10 — the pilot's shape and one pilot per model (was OPEN, same day)
+
+**Closed 2026-10-10, 3:15 PM (his request, Opus built):** `gate.check_pilot_shape` (pilot mode only) refuses a pilot
+missing a scenario or a development wording, or with any count but 2, naming each; `write_repeats` refuses a second
+pilot's `repeats.json` for a model that has one; `check_repeats` refuses an official sweep whose model has more than
+one. Tests in `tests/test_protocol_gate.py`. The entry as first written:
+
+Found in Opus's review of the Phase 4 code half, step 4. Both are run code (fixable after the tag, logged).
+
+- **The pilot's shape is not enforced.** Protocol §8.1 fixes it: all four scenarios, the two development wordings,
+  two repeats a cell. The gate's pilot mode checks only the label (`pilot`) and that the sealed wording is absent, so
+  a pilot on one scenario, one wording or another repeat count would pass. **Recommended:** a gate check that a
+  pilot's plan has exactly that shape, with a test, before the first pilot runs.
+- **Nothing stops a second pilot on the same model.** `--pilot-sweep <id>` names which pilot's `repeats.json` an
+  official sweep must match; the check requires the same model and content, but two pilots could exist and the
+  official sweep could be pointed at either. Protocol §13.2: each study runs once per protocol version.
+  **Recommended:** `hc protocol repeats` refuses when any `repeats.json` already exists under `pilot/` for that model.
+
+---
+
 ## OPEN — for Phase 3.5: Claude Haiku 5.5 as a model-set candidate, 2026-10-08
 
 **Decided as a procedure 2026-10-09 (his, Phase 3.5 IMPLEMENTATION doc decisions 2 and 5):** Haiku 5.5 joins as a third
@@ -540,6 +587,8 @@ supplies the case content from private storage and calls `check_case_official`. 
 - **Repeats per scenario.** The repeat rule gives one count per scenario (shares by the pilot's spread, choice rates
   at the cap of 20); `sweep/plan.py` takes one `repeats` for the whole sweep. Phase 4's IMPLEMENTATION doc adds
   per-scenario repeats before the grid (Phase 3 IMPLEMENTATION doc §12).
+  **Closed 2026-10-10** (Phase 4 code half, step 2): `build_plan` takes a count per scenario; manifest version 3;
+  `--repeats-file`; a version-2 manifest still resumes.
 - **The `possible_decline` flag matches S4's option name** ("decline"; Phase 2.5 IMPLEMENTATION doc §22.4). It is
   only a candidate list for the logged human call (Phase 3 doc §9.1), so it decides nothing, but it will list every
   S4 text answer that names the option. Narrow the pattern in run code before the grid, with a test.
@@ -564,6 +613,11 @@ supplies the case content from private storage and calls `check_case_official`. 
   `development/` today, which the reader refuses for real content); `hc protocol repeats --pilot <sweep_id>`, which
   writes `repeats.json` once under the pilot's prefix; and the launch's refusal unless the plan's repeats equal that
   file's (it needs the per-scenario repeats above).
+  **Closed 2026-10-10** (Phase 4 code half, steps 3-4): all four built as listed, the official run in the container
+  checking the same file; `--pilot-sweep <id>` names the pilot. Two gaps found in review are the 2026-10-10 entry
+  above.
+- *Still open from this entry (2026-10-10):* the blind refusal calls and the analysis command are Phase 4 code-half
+  steps 5-6.
 
 ---
 
@@ -593,6 +647,9 @@ that the command carries it, before the first official launch.
 **2026-10-09 (Phase 3.5 step 5):** `hc sweep launch --official` now runs the gate's checks 1-7 on the laptop and
 then refuses outright ("an official launch is not wired yet"), so it can no longer start a mislabeled task. Phase 4
 replaces that refusal with the forwarding and its test.
+
+**Closed 2026-10-10** (Phase 4 code half, step 4): the launch forwards `--official --pilot-sweep <id>` (or `--pilot`),
+with a test that fails if `--official` is dropped (`tests/test_protocol_gate.py`).
 
 ---
 

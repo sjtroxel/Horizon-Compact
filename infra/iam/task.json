@@ -14,7 +14,11 @@
         "s3:GetObject",
         "s3:PutObject"
       ],
-      "Resource": "arn:aws:s3:::${results_bucket}/development/*"
+      "Resource": [
+        "arn:aws:s3:::${results_bucket}/development/*",
+        "arn:aws:s3:::${results_bucket}/pilot/*",
+        "arn:aws:s3:::${results_bucket}/official/*"
+      ]
     },
     {
       "Sid": "ResultsList",
@@ -23,7 +27,11 @@
       "Resource": "arn:aws:s3:::${results_bucket}",
       "Condition": {
         "StringLike": {
-          "s3:prefix": "development/*"
+          "s3:prefix": [
+            "development/*",
+            "pilot/*",
+            "official/*"
+          ]
         }
       }
     }

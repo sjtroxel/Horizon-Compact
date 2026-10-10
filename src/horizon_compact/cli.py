@@ -6,6 +6,7 @@ calls nothing. Every command that calls a model or authenticates to AWS is typed
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import random
 import signal
@@ -40,14 +41,26 @@ from horizon_compact.probes.run import (
     probe_run_id,
     run_probes,
 )
-from horizon_compact.protocol.gate import check_official, refusal_message, run_gate
+from horizon_compact.protocol.gate import (
+    PilotRefusal,
+    check_official,
+    check_repeats,
+    describe_decision,
+    refusal_message,
+    required_repeats,
+    run_gate,
+    write_repeats,
+)
 from horizon_compact.protocol.lock import (
     EXPERIMENT as LOCK_EXPERIMENT,
 )
 from horizon_compact.protocol.lock import (
+    EXPERIMENT_DIR,
     LOCK_RELATIVE,
     LockError,
     check_lock,
+    lock_path,
+    read_lock,
     render_lock,
     write_lock,
 )
@@ -83,10 +96,11 @@ from horizon_compact.sweep.plan import (
     build_plan,
     check_preflight,
     preflight_bound_usd,
+    repeats_from_json,
     worst_case_per_attempt_usd,
 )
 from horizon_compact.sweep.prompt import render_prompt
-from horizon_compact.sweep.runner import check_route, run_session
+from horizon_compact.sweep.runner import ROLES, Role, check_route, run_session, sweep_prefix
 from horizon_compact.sweep.spend import DEVELOPMENT_CAP_USD
 from horizon_compact.sweep.store import LocalStore, S3Store, Store
 from horizon_compact.sweep.warning import SpendEstimate, format_warning, sweep_estimate
@@ -183,6 +197,46 @@ def _laptop_git() -> tuple[str, bool]:
     return _git("rev-parse", "HEAD"), bool(_git("status", "--porcelain", *_CODE_ONLY))
 
 
+def _repeats_from_args(args: argparse.Namespace) -> int | dict[str, int]:
+    """``--repeats N`` (the same count everywhere), ``--repeats-file`` (a repeats.json, read here) or
+    ``--repeats-json`` (the same mapping as text, which is how a launch hands it to the task, since the task
+    has no copy of the laptop's file). The parser allows exactly one."""
+    if args.repeats is not None:
+        return int(args.repeats)
+    if args.repeats_file is not None:
+        try:
+            data = json.loads(Path(args.repeats_file).read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise SweepRefusal(f"cannot read the repeats file {args.repeats_file}: {exc}") from exc
+        return repeats_from_json(data)
+    try:
+        return repeats_from_json(json.loads(args.repeats_json))
+    except ValueError as exc:
+        raise SweepRefusal(f"--repeats-json is not JSON: {exc}") from exc
+
+
+def _role(args: argparse.Namespace) -> Role:
+    """Where a session writes and what it labels its records: official, pilot or development. The parser
+    allows at most one of ``--official`` and ``--pilot``."""
+    if args.official:
+        return "official"
+    return "pilot" if args.pilot else "development"
+
+
+def _check_pilot_sweep(args: argparse.Namespace, *, needed: bool) -> None:
+    """``--pilot-sweep`` names the pilot whose ``repeats.json`` an official sweep must match: required with
+    ``--official`` where the sweep is launched or run, and meaningless anywhere else."""
+    if args.pilot_sweep and not args.official:
+        raise SweepRefusal(
+            "--pilot-sweep goes with --official: it names the pilot that set the repeats"
+        )
+    if needed and args.official and not args.pilot_sweep:
+        raise SweepRefusal(
+            "an official sweep needs --pilot-sweep <id>: the pilot whose repeats.json it must match "
+            "(protocol 8.3)"
+        )
+
+
 def _load(args: argparse.Namespace) -> tuple[Experiment, SweepPlan]:
     root = Path(args.experiment_dir) if args.experiment_dir else None
     experiment = load_experiment(args.experiment, root)
@@ -190,11 +244,13 @@ def _load(args: argparse.Namespace) -> tuple[Experiment, SweepPlan]:
         experiment,
         model_key=args.model,
         label=args.label,
-        repeats=args.repeats,
+        repeats=_repeats_from_args(args),
         seed=args.seed,
         scenarios=args.scenario or None,
         templates=args.template or None,
-        official=getattr(args, "official", False),
+        # A pilot runs the tagged content on an official model, like the grid: the development-only refusals
+        # in build_plan are for plans that are neither (the gate then checks the pilot's own rules).
+        official=getattr(args, "official", False) or getattr(args, "pilot", False),
     )
     return experiment, plan_
 
@@ -331,7 +387,7 @@ def cmd_sweep_plan(args: argparse.Namespace) -> int:
     print(
         f"runs:            {len(plan_.runs)} ({len(plan_.scenarios)} scenarios x "
         f"{len(experiment.objectives)} objectives x {len(plan_.templates)} templates x "
-        f"{plan_.repeats} repeats)"
+        f"{plan_.repeats_text()} repeats)"
     )
     print(
         f"pacing:          one call start every {60 / (config.requests_per_minute * experiment.models.pace_fraction):.1f}s"
@@ -361,17 +417,29 @@ def cmd_sweep_plan(args: argparse.Namespace) -> int:
 
 def cmd_sweep_dry_run(args: argparse.Namespace) -> int:
     """Every gate check, the plan, and nothing else: no write, no provider, no AWS (section 7.2)."""
-    if not args.official:
-        raise SweepRefusal("--dry-run checks an official sweep against the lock: add --official")
+    if not (args.official or args.pilot):
+        raise SweepRefusal(
+            "--dry-run checks an official sweep against the lock: add --official (or --pilot)"
+        )
+    _check_pilot_sweep(args, needed=False)
     experiment, plan_ = _load(args)
-    result = run_gate(experiment, plan_, identify(os.environ, _laptop_git), require_container=False)
+    result = run_gate(
+        experiment,
+        plan_,
+        identify(os.environ, _laptop_git),
+        require_container=False,
+        pilot=args.pilot,
+    )
     print(f"sweep:   {plan_.sweep_id} ({len(plan_.runs)} runs, model {plan_.model_key})")
     for note in result.notes:
         print(f"note: {note}")
     if not result.ok:
         print(refusal_message(result), file=sys.stderr)
         return REFUSED_EXIT
-    print("official sweep: every check passes (dry run; nothing written, nothing called)")
+    print(
+        f"{'pilot' if args.pilot else 'official sweep'}: every check passes "
+        "(dry run; nothing written, nothing called)"
+    )
     return CLEAN_EXIT
 
 
@@ -380,9 +448,13 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         return cmd_sweep_dry_run(args)
     experiment, plan_ = _load(args)
     cap = _check_cap(args)
+    _check_pilot_sweep(args, needed=False)
     identity = identify(os.environ, _laptop_git)
-    if args.official:
-        check_official(experiment, plan_, identity)
+    if args.official or args.pilot:
+        check_official(experiment, plan_, identity, pilot=args.pilot)
+    _check_pilot_sweep(args, needed=True)  # after the gate, which names everything wrong at once
+    # A session writes under its role's prefix and labels its records with it; nothing else does.
+    role = _role(args)
     check_route(experiment, plan_.model_key, os.environ)
     check_preflight(experiment, plan_, cap)
     provider, route, store, account_id = _connect(
@@ -390,9 +462,13 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         experiment,
         plan_.model_key,
         identity,
-        lambda store: sweep_estimate(experiment, plan_, store),
+        lambda store: sweep_estimate(experiment, plan_, store, role),
         cap,
     )
+    if args.official:
+        # The repeats the pilot set, read from the store the session writes to: a hand-typed command in the
+        # container cannot skip them (protocol 8.3).
+        check_repeats(store, plan_, args.pilot_sweep)
 
     stop_requested = {"flag": False}
 
@@ -413,6 +489,7 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         cap_usd=cap,
         max_minutes=args.max_minutes,
         harness_version=horizon_compact.__version__,
+        role=role,
         rng=random.Random(),
         should_stop=lambda: stop_requested["flag"],
         progress=lambda line: print(line, file=sys.stderr, flush=True),
@@ -443,36 +520,52 @@ def cmd_sweep_launch(args: argparse.Namespace) -> int:
             "here, so use `hc sweep run`"
         )
     cap = _check_cap(args)
-    if args.official:
+    _check_pilot_sweep(args, needed=False)
+    session = None
+    if args.official or args.pilot:
         # The laptop checks 1-7 before anything starts; the task checks all eight again in the container.
         preflight = run_gate(
-            experiment, plan_, identify({}, _laptop_git), require_container=False, why="launch"
+            experiment,
+            plan_,
+            identify({}, _laptop_git),
+            require_container=False,
+            why="launch",
+            pilot=args.pilot,
         )
         if not preflight.ok:
             raise SweepRefusal(refusal_message(preflight))
-        raise SweepRefusal(
-            "an official launch is not wired yet: forwarding --official to the task is Phase 4's run-code "
-            "item (KNOWN-GAPS). Gate checks 1-7 pass on this laptop."
-        )
+    _check_pilot_sweep(args, needed=True)
+    if args.official:
+        # The pilot's repeats.json is read here, from the bucket, so a launch that would be refused in the
+        # container is refused before it starts.
+        session = _session(args, identify({}, _laptop_git))
+        check_repeats(_store(args, session), plan_, args.pilot_sweep)
     check_preflight(experiment, plan_, cap)
-    session = _session(args, identify({}, _laptop_git))
+    session = session or _session(args, identify({}, _laptop_git))
     command = [
         "sweep", "run",
         "--experiment", args.experiment,
         "--model", args.model,
-        "--repeats", str(args.repeats),
         "--seed", str(args.seed),
         "--label", args.label,
         "--store", "s3",
         "--cap-usd", str(cap),
         "--max-minutes", str(args.max_minutes),
     ]  # fmt: skip
+    if args.repeats is not None:
+        command += ["--repeats", str(args.repeats)]
+    else:  # the task has no copy of a laptop file, so the mapping travels in the command
+        command += ["--repeats-json", json.dumps(dict(plan_.repeats))]
     for scenario_id in args.scenario or []:
         command += ["--scenario", scenario_id]
     for template_id in args.template or []:
         command += ["--template", template_id]
     if args.allow_over_cap:
         command.append("--allow-over-cap")
+    if args.official:
+        command += ["--official", "--pilot-sweep", args.pilot_sweep]
+    elif args.pilot:
+        command.append("--pilot")
     arn = sweep_launch.launch_task(
         session.client("ecs"), session.client("ec2"), model_key=args.model, command=command
     )
@@ -489,7 +582,7 @@ def cmd_sweep_status(args: argparse.Namespace) -> int:
     sweep_id = args.sweep_id or _load(args)[1].sweep_id
     identity = identify({}, _laptop_git)
     session = None if args.store == "local" else _session(args, identity)
-    summary = sweep_status.summarize(_store(args, session), args.experiment, sweep_id)
+    summary = sweep_status.summarize(_store(args, session), args.experiment, sweep_id, args.role)
     if summary is None:
         print(f"no manifest for {sweep_id}: nothing has run yet")
         return CLEAN_EXIT
@@ -519,8 +612,8 @@ def cmd_sweep_report(args: argparse.Namespace) -> int:
     folder = top / FORMAT_REPORT_DIR
     folder.mkdir(parents=True, exist_ok=True)
     for name, text in (
-        (f"{plan_.sweep_id}.md", format_report(store, experiment, plan_)),
-        (f"{plan_.sweep_id}-failures.md", failures_view(store, experiment, plan_)),
+        (f"{plan_.sweep_id}.md", format_report(store, experiment, plan_, args.role)),
+        (f"{plan_.sweep_id}-failures.md", failures_view(store, experiment, plan_, args.role)),
     ):
         path = folder / name
         path.write_text(text.rstrip("\n") + "\n", encoding="utf-8", newline="\n")
@@ -605,10 +698,37 @@ def cmd_protocol_lock(root: Path, models: list[str], experiment: str, write: boo
     return CLEAN_EXIT
 
 
+def cmd_protocol_repeats(args: argparse.Namespace, root: Path) -> int:
+    """Set the repeats from a finished pilot and write ``repeats.json`` beside its records, once (Phase 4 code
+    half, section 4.3). Prints what the record holds and nothing that shows a direction."""
+    try:
+        lock = read_lock(lock_path(root))
+    except LockError as exc:
+        for reason in exc.reasons:
+            print(f"refused: {reason}", file=sys.stderr)
+        return REFUSED_EXIT
+    experiment = load_experiment(lock.content.experiment, root / EXPERIMENT_DIR)
+    session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+    store = _store(args, session)
+    prefix = sweep_prefix(experiment.name, args.pilot, "pilot")
+    try:
+        decision = required_repeats(store, prefix, experiment, lock)
+        key = write_repeats(store, prefix, decision)
+    except PilotRefusal as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return REFUSED_EXIT
+    for line in describe_decision(decision):
+        print(line)
+    print(f"written: {key}")
+    return CLEAN_EXIT
+
+
 def cmd_protocol(args: argparse.Namespace) -> int:
     root: Path = args.root or default_repo_root()
     if args.action == "check":
         return cmd_protocol_check(root)
+    if args.action == "repeats":
+        return cmd_protocol_repeats(args, root)
     return cmd_protocol_lock(root, args.models, args.experiment, args.write)
 
 
@@ -753,7 +873,12 @@ def _add_plan_arguments(parser: argparse.ArgumentParser) -> None:
         "--experiment", required=True, help="folder under experiment/, e.g. placeholder"
     )
     parser.add_argument("--model", required=True, help="a key in experiment/models.toml")
-    parser.add_argument("--repeats", type=int, required=True)
+    repeats = parser.add_mutually_exclusive_group(required=True)
+    repeats.add_argument("--repeats", type=int, help="the same count for every scenario")
+    repeats.add_argument(
+        "--repeats-file", default=None, help="a repeats.json: a count for each scenario"
+    )
+    repeats.add_argument("--repeats-json", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument(
         "--scenario",
@@ -780,8 +905,20 @@ def _add_run_arguments(parser: argparse.ArgumentParser) -> None:
         "--allow-over-cap", action="store_true", help="needed to raise the cap above $5"
     )
     parser.add_argument("--max-minutes", type=float, default=30.0)
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--official", action="store_true", help="checked against experiment/protocol/prereg.lock"
+    )
+    mode.add_argument(
+        "--pilot",
+        action="store_true",
+        help="the pilot (two development wordings, label pilot), checked against the lock; writes under pilot/",
+    )
+    parser.add_argument(
+        "--pilot-sweep",
+        default=None,
+        metavar="ID",
+        help="with --official: the pilot whose repeats.json the plan's repeats must equal",
     )
 
 
@@ -818,12 +955,17 @@ def build_parser() -> argparse.ArgumentParser:
     launch_parser = sweep_actions.add_parser("launch", help="Start the sweep as a Fargate task")
     _add_plan_arguments(launch_parser)
     _add_run_arguments(launch_parser)
+    launch_parser.set_defaults(store="s3")
+    launch_parser.add_argument(
+        "--bucket", default=None, help="the results bucket (to read the pilot's repeats.json)"
+    )
     status_parser = sweep_actions.add_parser("status", help="Summarize a sweep's stored objects")
     _add_plan_arguments(status_parser)
     status_parser.add_argument("--sweep-id", default=None, help="instead of the plan arguments")
     status_parser.add_argument("--store", choices=("local", "s3"), default="s3")
     status_parser.add_argument("--bucket", default=None)
     status_parser.add_argument("--profile", default=None)
+    status_parser.add_argument("--role", choices=ROLES, default="development")
     report_parser = sweep_actions.add_parser(
         "report",
         help="Write the blind format report and the failures view. No amounts, choices or memos.",
@@ -832,6 +974,7 @@ def build_parser() -> argparse.ArgumentParser:
     report_parser.add_argument("--store", choices=("local", "s3"), default="local")
     report_parser.add_argument("--bucket", default=None)
     report_parser.add_argument("--profile", default=None)
+    report_parser.add_argument("--role", choices=ROLES, default="development")
     stop_parser = sweep_actions.add_parser("stop", help="Stop a model's running sweep task")
     stop_parser.add_argument("--model", required=True)
     stop_parser.add_argument("--profile", default=None)
@@ -907,6 +1050,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="an official model's key in models.toml; repeat for each, never inferred",
     )
     lock_parser.add_argument("--experiment", default=LOCK_EXPERIMENT, help=argparse.SUPPRESS)
+    repeats_parser = protocol_actions.add_parser(
+        "repeats",
+        help="Set the repeats from a finished pilot; writes repeats.json beside it, once",
+    )
+    repeats_parser.add_argument(
+        "--pilot", required=True, metavar="SWEEP_ID", help="the pilot sweep's id"
+    )
+    repeats_parser.add_argument("--store", choices=("local", "s3"), default="s3")
+    repeats_parser.add_argument("--bucket", default=None)
+    repeats_parser.add_argument("--profile", default=None)
 
     simulate = groups.add_parser(
         "simulate", help="Phase 3 simulations. Offline; calls no model and no AWS."

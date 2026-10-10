@@ -18,7 +18,7 @@ from collections import Counter
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal
 
 from horizon_compact.experiment import Experiment, Objective
 from horizon_compact.model_config import ModelConfig
@@ -33,7 +33,14 @@ from horizon_compact.sweep.classify import (
 )
 from horizon_compact.sweep.identity import RunnerIdentity
 from horizon_compact.sweep.pacing import Pacer, backoff_seconds
-from horizon_compact.sweep.plan import RunSpec, SweepPlan, SweepRefusal, check_preflight
+from horizon_compact.sweep.plan import (
+    MANIFEST_VERSION,
+    RunSpec,
+    SweepPlan,
+    SweepRefusal,
+    check_preflight,
+    manifest_repeats,
+)
 from horizon_compact.sweep.prompt import RenderedPrompt, build_tool, render_prompt
 from horizon_compact.sweep.spend import (
     SpendCap,
@@ -47,10 +54,17 @@ RECORD_VERSION = 1
 SONNET_ROUTE_ENV = "HC_SONNET_ROUTE"
 
 
-def sweep_prefix(experiment_name: str, sweep_id: str) -> str:
-    """Where a development sweep lives: the experiment's name is in the key, so placeholder and company runs
-    never share a folder (Phase 2.5 IMPLEMENTATION doc section 8.4)."""
-    return f"development/{experiment_name}/{sweep_id}/"
+Role = Literal["development", "pilot", "official"]
+ROLES: tuple[Role, ...] = ("development", "pilot", "official")
+
+
+def sweep_prefix(experiment_name: str, sweep_id: str, role: Role = "development") -> str:
+    """Where a sweep lives: its role, then the experiment's name, so placeholder and company runs never share
+    a folder (Phase 2.5 IMPLEMENTATION doc section 8.4) and a pilot can never sit beside the grid (Phase 4
+    code half, section 4.2). The role is also the ``label`` of every record the sweep writes."""
+    if role not in ROLES:
+        raise ValueError(f"unknown role {role!r}; the roles are {', '.join(ROLES)}")
+    return f"{role}/{experiment_name}/{sweep_id}/"
 
 
 _RUN_KEY = re.compile(
@@ -142,13 +156,21 @@ class _Existing:
         return round(sum(costs), 6)
 
 
+def _as_current(stored: dict[str, Any]) -> dict[str, Any]:
+    """A version-2 manifest (one int for ``repeats``) read as the current version, so a sweep begun before
+    counts could differ resumes under the same id. Anything else is returned as it is."""
+    if stored.get("manifest_version") != 2:
+        return stored
+    return {**stored, "manifest_version": MANIFEST_VERSION, "repeats": manifest_repeats(stored)}
+
+
 def _check_manifest(store: Store, key: str, plan: SweepPlan) -> None:
     wanted = plan.manifest()
     text = json.dumps(wanted, indent=2, sort_keys=True) + "\n"
     if store.put_new(key, text):
         return
     stored = store.get(key)
-    if stored is None or json.loads(stored) != wanted:
+    if stored is None or _as_current(json.loads(stored)) != wanted:
         raise SweepRefusal(
             f"the stored manifest for {plan.sweep_id} differs from the plan recomputed from the "
             "current files, seed and repeats; refusing to resume (a changed experiment is a new sweep)"
@@ -168,12 +190,13 @@ def _attempt_record(
     cost_usd: float,
     identity: RunnerIdentity,
     harness_version: str,
+    role: Role,
 ) -> dict[str, Any]:
     prov = raw.provenance
     tool_input = raw.tool_input
     return {
         "record_version": RECORD_VERSION,
-        "label": "development",
+        "label": role,
         "sweep_id": plan.sweep_id,
         "run_id": spec.run_id,
         "attempt": attempt,
@@ -239,6 +262,7 @@ def run_session(
     cap_usd: float,
     max_minutes: float,
     harness_version: str,
+    role: Role = "development",
     now: Callable[[], datetime] = _now_utc,
     monotonic: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
@@ -249,7 +273,7 @@ def run_session(
 ) -> SessionResult:
     config: ModelConfig = experiment.model(plan.model_key)
     check_preflight(experiment, plan, cap_usd)
-    prefix = sweep_prefix(plan.experiment, plan.sweep_id)
+    prefix = sweep_prefix(plan.experiment, plan.sweep_id, role)
     _check_manifest(store, f"{prefix}manifest.json", plan)
 
     existing = _Existing(store, prefix)
@@ -271,7 +295,7 @@ def run_session(
         last = model_attempts[-1]
         record = {
             "record_version": RECORD_VERSION,
-            "label": "development",
+            "label": role,
             "sweep_id": plan.sweep_id,
             "run_id": spec.run_id,
             "objective_id": spec.objective_id,
@@ -350,6 +374,7 @@ def run_session(
                 cost_usd=cost,
                 identity=identity,
                 harness_version=harness_version,
+                role=role,
             )
             text = serialize_safely(record, account_id)
             if not store.put_new(f"{prefix}runs/{spec.run_id}/attempt-{next_n}.json", text):
@@ -401,7 +426,7 @@ def run_session(
     finally:
         summary = {
             "record_version": RECORD_VERSION,
-            "label": "development",
+            "label": role,
             "sweep_id": plan.sweep_id,
             "runner": identity.runner,
             "image_digest": identity.image_digest,

@@ -15,7 +15,7 @@ from horizon_compact import cli
 from horizon_compact.experiment import load_experiment
 from horizon_compact.sweep.blind import failures_view, format_report, mask
 from horizon_compact.sweep.plan import RunSpec, SweepPlan, build_plan
-from horizon_compact.sweep.runner import sweep_prefix
+from horizon_compact.sweep.runner import Role, sweep_prefix
 from horizon_compact.sweep.store import LocalStore
 
 CANARY_AMOUNT = 7654321
@@ -43,8 +43,15 @@ def company_plan() -> SweepPlan:
     )
 
 
-def plant(store: LocalStore, plan: SweepPlan, run: RunSpec, status: str, **attempt: Any) -> None:
-    prefix = sweep_prefix(plan.experiment, plan.sweep_id)
+def plant(
+    store: LocalStore,
+    plan: SweepPlan,
+    run: RunSpec,
+    status: str,
+    role: Role = "development",
+    **attempt: Any,
+) -> None:
+    prefix = sweep_prefix(plan.experiment, plan.sweep_id, role)
     decision = {
         "amounts": {"anything": CANARY_AMOUNT},
         "memo": CANARY_MEMO,
@@ -165,6 +172,23 @@ def test_hc_sweep_report_writes_both_files(
     assert (folder / f"{plan.sweep_id}.md").is_file()
     assert (folder / f"{plan.sweep_id}-failures.md").is_file()
     assert "**Runs finished: 1 of 40.**" in (folder / f"{plan.sweep_id}.md").read_text()
+
+
+def test_the_report_and_the_failures_view_read_the_role_they_are_asked_for(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plan = company_plan()
+    store = LocalStore(tmp_path / "scratch" / "runs")
+    plant(store, plan, plan.runs[0], "valid", role="pilot")
+    plant(store, plan, plan.runs[1], "sum_mismatch", role="pilot")
+    company = load_experiment("company")
+    assert "**Runs finished: 2 of 40.**" in format_report(store, company, plan, "pilot")
+    assert "**Runs finished: 0 of 40.**" in format_report(store, company, plan)  # development: none
+    assert "**1 of 2 finished runs are not valid.**" in failures_view(store, company, plan, "pilot")
+    monkeypatch.setattr(cli, "_git", lambda *a: str(tmp_path))
+    assert cli.main(["sweep", "report", *PLAN_ARGS, "--role", "pilot"]) == 0
+    written = tmp_path / cli.FORMAT_REPORT_DIR / f"{plan.sweep_id}.md"
+    assert "**Runs finished: 2 of 40.**" in written.read_text()
 
 
 def test_the_view_also_counts_failed_attempts_that_a_retry_hid(tmp_path: Path) -> None:

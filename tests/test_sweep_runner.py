@@ -12,9 +12,10 @@ import pytest
 from horizon_compact.experiment import load_experiment
 from horizon_compact.providers.base import DecisionRequest, RawDecision, Usage
 from horizon_compact.sweep.plan import SweepRefusal, build_plan
-from horizon_compact.sweep.runner import check_route
+from horizon_compact.sweep.runner import ROLES, Role, check_route, sweep_prefix
 from horizon_compact.sweep.status import summarize
 from horizon_compact.sweep.store import LocalStore
+from horizon_compact.sweep.warning import sweep_estimate
 from sweep_helpers import (
     ACCOUNT,
     FARGATE,
@@ -198,6 +199,41 @@ def test_a_changed_manifest_is_refused(tmp_path: Path) -> None:
     manifest = json.loads(path.read_text())
     manifest["content_hash"] = "0" * 64
     path.write_text(json.dumps(manifest))
+    provider = always()
+    with pytest.raises(SweepRefusal, match="differs from the plan"):
+        session(exp, plan, provider, store)
+    assert provider.requests == []
+
+
+def _as_version_two(path: Path, count: int) -> None:
+    """Rewrite a stored manifest the way the harness wrote it before counts could differ."""
+    manifest = json.loads(path.read_text())
+    manifest["manifest_version"] = 2
+    manifest["repeats"] = count
+    path.write_text(json.dumps(manifest))
+
+
+def test_a_sweep_begun_under_a_version_two_manifest_still_resumes(tmp_path: Path) -> None:
+    exp, plan = make_plan(repeats=2)
+    store = LocalStore(tmp_path)
+    session(exp, plan, always(), store)
+    path = tmp_path / f"development/placeholder/{plan.sweep_id}/manifest.json"
+    _as_version_two(path, 2)
+    provider = always()
+    result = session(exp, plan, provider, store)
+    assert provider.requests == []  # every run was already finished
+    assert result.stopped == "complete"
+    assert (
+        json.loads(path.read_text())["manifest_version"] == 2
+    )  # a stored manifest is never rewritten
+
+
+def test_a_version_two_manifest_with_a_different_count_is_refused(tmp_path: Path) -> None:
+    exp, plan = make_plan(repeats=2)
+    store = LocalStore(tmp_path)
+    session(exp, plan, always(), store)
+    path = tmp_path / f"development/placeholder/{plan.sweep_id}/manifest.json"
+    _as_version_two(path, 3)
     provider = always()
     with pytest.raises(SweepRefusal, match="differs from the plan"):
         session(exp, plan, provider, store)
@@ -390,6 +426,66 @@ def test_every_object_a_session_writes_is_labeled_development_and_stored_under_d
     for pattern in ("/attempt-", "final.json", "/sessions/"):
         labels = {o["label"] for o in objects(store, plan.sweep_id, pattern)}
         assert labels == {"development"}, pattern
+
+
+# --- Phase 4 code half, section 4.2: development, pilot and official each have their own prefix and label ---
+
+
+def test_the_prefix_is_the_role_then_the_experiment_then_the_sweep() -> None:
+    assert (
+        sweep_prefix("company", "sw-1") == "development/company/sw-1/"
+    )  # the default is unchanged
+    assert sweep_prefix("company", "sw-1", "pilot") == "pilot/company/sw-1/"
+    assert sweep_prefix("company", "sw-1", "official") == "official/company/sw-1/"
+    assert ROLES == ("development", "pilot", "official")
+    with pytest.raises(ValueError, match="unknown role 'staging'"):
+        sweep_prefix("company", "sw-1", "staging")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("role", ROLES)
+def test_each_role_writes_only_under_its_own_prefix_and_labels_every_object_with_it(
+    tmp_path: Path, role: Role
+) -> None:
+    exp, plan = make_plan()
+    store = LocalStore(tmp_path)
+    session(exp, plan, always(), store, role=role)
+    keys = store.list_keys("")
+    assert keys and all(k.startswith(f"{role}/placeholder/{plan.sweep_id}/") for k in keys)
+    assert len(keys) == 12  # the same objects as a development session writes
+    for pattern in ("/attempt-", "final.json", "/sessions/"):
+        found = [json.loads(store.get(k) or "{}") for k in keys if pattern in k]
+        assert found, pattern
+        assert {o["label"] for o in found} == {role}, pattern
+
+
+def test_a_sweep_resumes_under_its_own_role_and_does_not_see_another_roles_runs(
+    tmp_path: Path,
+) -> None:
+    exp, plan = make_plan()
+    store = LocalStore(tmp_path)
+    session(exp, plan, always(), store, role="pilot")
+    again = always()
+    result = session(exp, plan, again, store, role="pilot")
+    assert (
+        again.requests == [] and result.stopped == "complete"
+    )  # the pilot's runs are all finished
+    other = always()
+    session(exp, plan, other, store, role="official")
+    assert len(other.requests) == 5  # an official session of the same plan starts from nothing
+    assert not store.list_keys(f"development/placeholder/{plan.sweep_id}/")
+
+
+def test_status_and_the_spend_estimate_look_under_the_role_they_are_asked_about(
+    tmp_path: Path,
+) -> None:
+    exp, plan = make_plan()
+    store = LocalStore(tmp_path)
+    session(exp, plan, always(), store, role="pilot")
+    assert summarize(store, "placeholder", plan.sweep_id) is None  # nothing under development/
+    found = summarize(store, "placeholder", plan.sweep_id, "pilot")
+    assert found is not None and found["runs_finished"] == 5
+    assert sweep_estimate(exp, plan, store, "pilot").calls == 0  # every run already finished
+    assert sweep_estimate(exp, plan, store).calls == 5  # a development estimate starts from nothing
 
 
 DAILY = "Too many tokens per day, please wait before trying again."

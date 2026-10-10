@@ -19,12 +19,16 @@ have been loaded from that root's ``experiment/``. A sweep cannot pass the gate 
 
 **The pilot** (Phase 4 Delivers 1) runs the tagged content on an official model with the two development
 wordings only. Check 4 as first written ("the plan uses the sealed template") would refuse it, so a pilot is
-checked the other way: labeled ``pilot`` and never including the sealed template. The command line does not
-offer it yet; Phase 4 wires it with the pilot prefix.
+checked the other way: labeled ``pilot`` and never including the sealed template. ``--pilot`` on ``hc sweep
+run`` and ``launch`` runs it and writes under the ``pilot/`` prefix (Phase 4 code half, section 4.3).
 
 **The repeat count** (section 7.4, decision 9). ``required_repeats`` reads a pilot's records and applies the
 frozen rule in ``analysis/repeats.py``. That module needs scipy, which the container image leaves out, so it
 is imported inside the function, never at module level: the gate itself must load in the container.
+
+**``repeats.json``** (Phase 4 code half, sections 4.3 and 4.4). ``write_repeats`` puts the decision beside the
+pilot's records, once. ``check_repeats`` is what an official launch and an official run both call: the plan's
+counts must equal the file's, scenario by scenario, so a hand-typed command cannot skip the pilot.
 """
 
 from __future__ import annotations
@@ -51,14 +55,18 @@ from horizon_compact.protocol.lock import (
     read_lock,
 )
 from horizon_compact.sweep.identity import RunnerIdentity
-from horizon_compact.sweep.plan import SweepPlan, SweepRefusal
+from horizon_compact.sweep.plan import SweepPlan, SweepRefusal, repeats_from_json
+from horizon_compact.sweep.runner import sweep_prefix
+from horizon_compact.sweep.store import Store
 
 if TYPE_CHECKING:
     from horizon_compact.analysis.records import RecordSource
     from horizon_compact.analysis.repeats import ChoiceRepeats, ShareRepeats
 
 PILOT_LABEL = "pilot"
+PILOT_REPEATS = 2  # protocol 8.1: two repeats a cell
 REFUSED = "official sweep refused"
+REPEATS_FILE = "repeats.json"
 
 
 @dataclass(frozen=True)
@@ -139,6 +147,24 @@ def check_sealed_template(
     return []
 
 
+def check_pilot_shape(experiment: Experiment, plan: SweepPlan, lock: Lock) -> list[str]:
+    """Check 4, pilot mode, continued: the shape protocol 8.1 fixes. Every scenario, every development wording
+    (the sealed one's absence is ``check_sealed_template``'s), two repeats a cell. A pilot in any other shape
+    would set the repeats from a different measurement than the one pre-registered."""
+    lines: list[str] = []
+    missing = [s for s in experiment.scenarios if s not in plan.scenarios]
+    if missing:
+        lines.append(f"a pilot runs every scenario; this one leaves out {missing}")
+    sealed = lock.content.sealed_template
+    wordings = [t for t in experiment.templates if t != sealed and t not in plan.templates]
+    if wordings:
+        lines.append(f"a pilot runs every development wording; this one leaves out {wordings}")
+    off = {sid: n for sid, n in plan.repeats.items() if n != PILOT_REPEATS}
+    if off:
+        lines.append(f"a pilot runs {PILOT_REPEATS} repeats a cell; this one has {off}")
+    return lines
+
+
 def check_instrument(root: Path, lock: Lock) -> list[str]:
     """Check 5."""
     return check_set(root, lock, "instrument", lock.instrument.sha256, lock.instrument.files)
@@ -202,6 +228,8 @@ def run_gate(
         failures += check_document(root, lock)
         failures += check_content(experiment, lock)
         failures += check_sealed_template(experiment, plan, lock, pilot=pilot)
+        if pilot:
+            failures += check_pilot_shape(experiment, plan, lock)
         failures += check_instrument(root, lock)
         failures += check_analysis(root, lock)
         failures += check_model(experiment, plan, lock)
@@ -335,3 +363,148 @@ def required_repeats(
         run_ids=tuple(row.run_id for row in runs.rows),
         scenarios=results,
     )
+
+
+# --- repeats.json: written once beside the pilot, checked at every official launch and run ------------------
+
+
+def repeats_key(pilot_prefix: str) -> str:
+    return (pilot_prefix if pilot_prefix.endswith("/") else pilot_prefix + "/") + REPEATS_FILE
+
+
+def _experiment_pilots(pilot_prefix: str) -> str:
+    """``pilot/<experiment>/`` from ``pilot/<experiment>/<sweep_id>/``."""
+    return pilot_prefix.rstrip("/").rsplit("/", 1)[0] + "/"
+
+
+def repeats_files_for_model(store: Store, pilots_prefix: str, model_key: str) -> list[str]:
+    """Every ``repeats.json`` under ``pilot/<experiment>/`` written for ``model_key``, sorted. Protocol 13.2:
+    a study runs once per protocol version, so there is at most one."""
+    found = []
+    for key in store.list_keys(pilots_prefix):
+        if not key.endswith("/" + REPEATS_FILE):
+            continue
+        text = store.get(key)
+        try:
+            model = json.loads(text).get("model_key") if text else None
+        except ValueError:
+            model = None
+        if model == model_key:
+            found.append(key)
+    return sorted(found)
+
+
+def write_repeats(store: Store, pilot_prefix: str, decision: RepeatDecision) -> str:
+    """Write ``repeats.json`` beside the pilot's records. Once: a second write is refused, never an overwrite.
+    One pilot per model: a ``repeats.json`` from another pilot on the same model is refused too, so an
+    official sweep never has two counts to choose between. Returns the key."""
+    key = repeats_key(pilot_prefix)
+    others = [
+        k
+        for k in repeats_files_for_model(
+            store, _experiment_pilots(pilot_prefix), decision.model_key
+        )
+        if k != key
+    ]
+    if others:
+        raise PilotRefusal(
+            f"{decision.model_key} already has its repeats from another pilot ({others[0]}): one pilot per "
+            "model per protocol version (protocol 13.2)"
+        )
+    text = json.dumps(decision.as_record(), indent=2, sort_keys=True) + "\n"
+    if not store.put_new(key, text):
+        raise PilotRefusal(
+            f"{key} already exists: the repeat count is written once, and an existing one is never replaced"
+        )
+    return key
+
+
+def describe_decision(decision: RepeatDecision) -> list[str]:
+    """What the record holds, for the person who set it off: per scenario the pooled spread, the count and the
+    rule that set it. No mean, no difference, no objective (the record has none to show)."""
+    from horizon_compact.analysis.repeats import CAP, FLOOR, ShareRepeats
+
+    lines = [
+        f"pilot sweep {decision.pilot_sweep_id} ({decision.model_key}), {len(decision.run_ids)} runs, "
+        f"protocol {decision.protocol}"
+    ]
+    for result in decision.scenarios:
+        if isinstance(result, ShareRepeats):
+            if result.cap_binds:
+                rule = f"the cap, {CAP}"
+            elif max(result.n_power, result.n_both_reachable) < FLOOR:
+                rule = f"the floor, {FLOOR}"
+            elif result.n_both_reachable >= result.n_power:
+                rule = "rule (b), both verdicts reachable"
+            else:
+                rule = "rule (a), power"
+            tail = (
+                f"; half-width at the cap {result.achieved_half_width:.4f}"
+                if result.achieved_half_width is not None
+                else ""
+            )
+            lines.append(
+                f"  {result.scenario_id}: pooled spread {result.pooled_sd:.4f} on "
+                f"{result.degrees_of_freedom} degrees of freedom; (a) needs {result.n_power}, "
+                f"(b) needs {result.n_both_reachable}; repeats {result.repeats}, set by {rule}{tail}"
+            )
+        else:
+            lines.append(
+                f"  {result.scenario_id}: repeats {result.repeats}, the cap (a pilot cannot measure a "
+                f"choice rate); half-width at a true rate of 50% {result.half_width_at_50:.4f}, "
+                f"of 5% {result.half_width_at_5:.4f}"
+            )
+    return lines
+
+
+def check_repeats(store: Store, plan: SweepPlan, pilot_sweep_id: str) -> None:
+    """Refuse unless the pilot's ``repeats.json`` exists, is for this model and this content, and holds
+    exactly the plan's count for every scenario (protocol 8.3). Raises ``SweepRefusal`` naming each
+    difference."""
+    pilot_prefix = sweep_prefix(plan.experiment, pilot_sweep_id, "pilot")
+    key = repeats_key(pilot_prefix)
+    text = store.get(key)
+    if text is None:
+        raise SweepRefusal(
+            f"{REFUSED}: no {key}: the pilot sets the repeats (`hc protocol repeats --pilot "
+            f"{pilot_sweep_id}`), and an official sweep needs them"
+        )
+    try:
+        record = json.loads(text)
+        counts = repeats_from_json(record)
+    except (ValueError, SweepRefusal) as exc:
+        raise SweepRefusal(f"{REFUSED}: {key} is not a readable repeats record: {exc}") from exc
+    problems: list[str] = []
+    if record.get("pilot_sweep_id") != pilot_sweep_id:
+        problems.append(
+            f"the record is for pilot {record.get('pilot_sweep_id')!r}, not {pilot_sweep_id!r}"
+        )
+    if record.get("model_key") != plan.model_key:
+        problems.append(
+            f"the pilot ran {record.get('model_key')!r}, and this sweep is {plan.model_key!r}"
+        )
+    if record.get("content_hash") != plan.content_hash:
+        problems.append("the pilot ran different content from this sweep")
+    others = [
+        k
+        for k in repeats_files_for_model(store, _experiment_pilots(pilot_prefix), plan.model_key)
+        if k != key
+    ]
+    if others:
+        problems.append(
+            f"{plan.model_key} has repeats from more than one pilot ({', '.join(others)} as well): one pilot "
+            "per model per protocol version"
+        )
+    for scenario_id in plan.scenarios:
+        want, have = counts.get(scenario_id), plan.repeats[scenario_id]
+        if want != have:
+            problems.append(
+                f"scenario {scenario_id}: the pilot sets {want} repeats, the plan has {have}"
+            )
+    extra = sorted(set(counts) - set(plan.scenarios))
+    if extra:
+        problems.append(
+            f"the pilot sets repeats for scenario(s) {extra} that this plan does not run"
+        )
+    if problems:
+        raise SweepRefusal("\n".join(f"{REFUSED}: {line}" for line in problems))

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +10,7 @@ import boto3
 import pytest
 
 from horizon_compact import cli
+from horizon_compact.sweep import launch as sweep_launch
 from horizon_compact.sweep.plan import SweepRefusal
 from horizon_compact.sweep.runner import run_session
 from sweep_helpers import FARGATE, LAPTOP, FakeClock, ScriptedProvider, company_like
@@ -494,3 +496,160 @@ def test_a_resumed_sweep_counts_only_the_runs_not_yet_finished(
     monkeypatch.setattr("builtins.input", lambda prompt="": "n")
     assert cli.main(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"]) == 2
     assert "calls planned:  0 (runs not yet finished)" in capsys.readouterr().out
+
+
+# --- Phase 4 code half, section 4.1: --repeats-file and the count each scenario gets ------------------------
+
+
+def _company_args_with(tmp_path: Path, *repeats: str) -> list[str]:
+    exp = company_like(tmp_path, sealed="w3")
+    return [
+        "--experiment", "company",
+        "--experiment-dir", str(exp.root),
+        "--model", "nova-lite",
+        *repeats,
+        "--seed", "1",
+        "--label", "t",
+        "--template", "w1",
+    ]  # fmt: skip
+
+
+def test_plan_reads_a_repeats_file_and_shows_each_scenarios_count(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repeats = tmp_path / "repeats.json"
+    repeats.write_text(json.dumps({"s1": 3, "s2": 1}))
+    args = _company_args_with(tmp_path, "--repeats-file", str(repeats))
+    assert cli.main(["sweep", "plan", *args]) == 0
+    out = capsys.readouterr().out
+    assert (
+        "runs:            12 (2 scenarios x 3 objectives x 1 templates x s1=3, s2=1 repeats)" in out
+    )
+    assert out.count("repeat ") == 12
+
+
+def test_plan_reads_the_record_a_pilot_writes(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repeats = tmp_path / "repeats.json"
+    record = {
+        "scenarios": [{"scenario_id": "s1", "repeats": 2}, {"scenario_id": "s2", "repeats": 2}]
+    }
+    repeats.write_text(json.dumps(record))
+    args = _company_args_with(tmp_path, "--repeats-file", str(repeats))
+    assert cli.main(["sweep", "plan", *args]) == 0
+    assert "x 2 repeats)" in capsys.readouterr().out
+
+
+def test_a_repeats_file_that_misses_a_scenario_is_refused_naming_it(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repeats = tmp_path / "repeats.json"
+    repeats.write_text(json.dumps({"s1": 3}))
+    args = _company_args_with(tmp_path, "--repeats-file", str(repeats))
+    assert cli.main(["sweep", "plan", *args]) == 2
+    assert "no count for scenario(s) ['s2']" in capsys.readouterr().err
+
+
+def test_a_missing_or_unreadable_repeats_file_is_refused(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    args = _company_args_with(tmp_path, "--repeats-file", str(tmp_path / "nope.json"))
+    assert cli.main(["sweep", "plan", *args]) == 2
+    assert "cannot read the repeats file" in capsys.readouterr().err
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json")
+    args = _company_args_with(tmp_path / "again", "--repeats-file", str(bad))
+    assert cli.main(["sweep", "plan", *args]) == 2
+    assert "cannot read the repeats file" in capsys.readouterr().err
+
+
+def test_repeats_and_a_repeats_file_together_or_neither_is_an_error(tmp_path: Path) -> None:
+    repeats = tmp_path / "repeats.json"
+    repeats.write_text(json.dumps({"s1": 3, "s2": 1}))
+    both = _company_args_with(tmp_path, "--repeats", "2", "--repeats-file", str(repeats))
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["sweep", "plan", *both])
+    assert exc.value.code == 2
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["sweep", "plan", *_company_args_with(tmp_path / "other")])
+    assert exc.value.code == 2
+
+
+class _Recorder:
+    """Stands in for the AWS session and the one call that starts a task; keeps the command it was given."""
+
+    def __init__(self) -> None:
+        self.command: list[str] = []
+
+    def client(self, name: str) -> object:
+        return object()
+
+    def launch_task(self, ecs: object, ec2: object, *, model_key: str, command: list[str]) -> str:
+        self.command = command
+        return "arn:aws:ecs:us-east-1:000000000000:task/horizon-compact/abc123"
+
+
+def _launch(monkeypatch: pytest.MonkeyPatch, args: list[str]) -> list[str]:
+    recorder = _Recorder()
+    monkeypatch.setattr(cli, "_session", lambda args, identity: recorder)
+    monkeypatch.setattr(sweep_launch, "launch_task", recorder.launch_task)
+    assert cli.main(["sweep", "launch", *args, "--profile", "p"]) == 0
+    return recorder.command
+
+
+def test_a_launch_with_one_count_forwards_it_as_it_always_did(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    command = _launch(monkeypatch, PLAN_ARGS)
+    assert command[command.index("--repeats") + 1] == "3"
+    assert "--repeats-json" not in command
+    assert "--repeats-file" not in command
+
+
+def test_a_launch_with_a_repeats_file_sends_the_mapping_in_the_command(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repeats = tmp_path / "repeats.json"
+    repeats.write_text(json.dumps({"s1": 3, "s2": 1}))
+    command = _launch(monkeypatch, _company_args_with(tmp_path, "--repeats-file", str(repeats)))
+    assert json.loads(command[command.index("--repeats-json") + 1]) == {"s1": 3, "s2": 1}
+    assert "--repeats" not in command  # the task has no copy of the laptop's file
+    assert "--repeats-file" not in command
+
+
+def test_the_container_command_rebuilds_the_same_plan_from_the_forwarded_mapping(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repeats = tmp_path / "repeats.json"
+    repeats.write_text(json.dumps({"s1": 3, "s2": 1}))
+    from_file = _company_args_with(tmp_path, "--repeats-file", str(repeats))
+    cli.main(["sweep", "plan", *from_file])
+    first = capsys.readouterr().out.splitlines()[0]
+    from_json = [
+        "--repeats-json"
+        if a == "--repeats-file"
+        else a
+        if a != str(repeats)
+        else repeats.read_text()
+        for a in from_file
+    ]
+    cli.main(["sweep", "plan", *from_json])
+    assert capsys.readouterr().out.splitlines()[0] == first  # the same sweep id
+
+
+def test_status_reads_the_role_it_is_asked_for(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from horizon_compact.sweep.runner import sweep_prefix
+    from horizon_compact.sweep.store import LocalStore
+
+    monkeypatch.setattr(cli, "_git", lambda *a: str(tmp_path))
+    store = LocalStore(tmp_path / "scratch" / "runs")
+    plan_text = json.dumps({"sweep_id": "sw-1", "runs": [{"run_id": "r-000000000001"}]})
+    store.put_new(sweep_prefix("placeholder", "sw-1", "pilot") + "manifest.json", plan_text)
+    args = ["sweep", "status", *PLAN_ARGS, "--sweep-id", "sw-1", "--store", "local"]
+    assert cli.main(args) == 0
+    assert "no manifest for sw-1" in capsys.readouterr().out  # nothing under development/
+    assert cli.main([*args, "--role", "pilot"]) == 0
+    assert "runs finished:   0 of 1" in capsys.readouterr().out

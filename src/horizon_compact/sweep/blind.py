@@ -30,7 +30,7 @@ from typing import Any
 
 from horizon_compact.experiment import Experiment
 from horizon_compact.sweep.plan import RunSpec, SweepPlan
-from horizon_compact.sweep.runner import sweep_prefix
+from horizon_compact.sweep.runner import Role, sweep_prefix
 from horizon_compact.sweep.store import Store
 
 VALID = frozenset({"valid", "valid_rescaled"})
@@ -39,8 +39,8 @@ _DIGITS = re.compile(r"\d")
 _NAMES_TOOL = re.compile(r"\bsubmit_decision\b|\btool\b", re.IGNORECASE)
 
 
-def _finals(store: Store, plan: SweepPlan) -> dict[str, dict[str, Any]]:
-    prefix = sweep_prefix(plan.experiment, plan.sweep_id)
+def _finals(store: Store, plan: SweepPlan, role: Role) -> dict[str, dict[str, Any]]:
+    prefix = sweep_prefix(plan.experiment, plan.sweep_id, role)
     found: dict[str, dict[str, Any]] = {}
     for run in plan.runs:
         text = store.get(f"{prefix}runs/{run.run_id}/final.json")
@@ -54,14 +54,16 @@ def _counts(statuses: Iterable[str]) -> str:
     return ", ".join(f"{name} {n}" for name, n in sorted(counter.items())) or "none"
 
 
-def format_report(store: Store, experiment: Experiment, plan: SweepPlan) -> str:
-    finals = _finals(store, plan)
+def format_report(
+    store: Store, experiment: Experiment, plan: SweepPlan, role: Role = "development"
+) -> str:
+    finals = _finals(store, plan, role)
     objectives = [o.id for o in experiment.objectives]
     lines = [
         f"# Format report: `{plan.sweep_id}`",
         "",
         f"Experiment `{plan.experiment}`, model `{plan.model_key}`, content hash `{plan.content_hash[:12]}`, "
-        f"templates {', '.join(plan.templates)}, {plan.repeats} repeats. Written by `hc sweep report` from the "
+        f"templates {', '.join(plan.templates)}, {plan.repeats_text()} repeats. Written by `hc sweep report` from the "
         "stored records; do not edit by hand. **Blind:** no amount, choice, memo or line appears here, and per "
         "objective only valid against not valid (IMPLEMENTATION doc section 11.3). A cell passes with at least "
         "one valid run (section 11.2).",
@@ -136,9 +138,11 @@ def _text_shape(written: str, attempt: dict[str, Any]) -> str:
     )
 
 
-def failures_view(store: Store, experiment: Experiment, plan: SweepPlan) -> str:
-    finals = _finals(store, plan)
-    prefix = sweep_prefix(plan.experiment, plan.sweep_id)
+def failures_view(
+    store: Store, experiment: Experiment, plan: SweepPlan, role: Role = "development"
+) -> str:
+    finals = _finals(store, plan, role)
+    prefix = sweep_prefix(plan.experiment, plan.sweep_id, role)
     failed: list[tuple[RunSpec, dict[str, Any]]] = [
         (r, finals[r.run_id])
         for r in plan.runs

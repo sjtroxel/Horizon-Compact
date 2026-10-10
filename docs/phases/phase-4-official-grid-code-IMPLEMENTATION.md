@@ -233,17 +233,38 @@ Each has my recommendation and why. **All five DECIDED 2026-10-10 (his): (a), as
 Items that touch frozen files first, so the tag is never waiting on them. **Sonnet builds; Opus reviews each
 commit's diff before he commits** (the arrangement he called "exactly what we wanted", 2026-10-09).
 
-1. §4.5's instrument part (`render_awareness_prompt`) and §4.7's analysis part (`to_record`, `write_results`): the
-   frozen files, first.
-2. §4.1 per-scenario repeats.
-3. §4.2 prefixes and labels; the IAM JSON change (he applies).
-4. §4.3 the pilot path; §4.4 the official launch.
+1. **[done 2026-10-10, `24b40c5`]** §4.5's instrument part (`render_awareness_prompt`) and §4.7's analysis part
+   (`to_record`, `write_results`): the frozen files, first.
+2. **[done 2026-10-10, K3]** §4.1 per-scenario repeats.
+3. **[done 2026-10-10, K3; boundary applied by him]** §4.2 prefixes and labels; the IAM JSON change (he applies).
+4. **[done 2026-10-10, K3]** §4.3 the pilot path; §4.4 the official launch.
 5. §4.5's run part (the text request, `hc sweep awareness`).
 6. §4.6 the refusal workflow; §4.7's command.
 7. §4.8 the container's OpenRouter route (if decision 4 is (a)); the SSM parameter he creates; then, his choice,
    Phase 1 step 9 on the placeholder.
 
 About a day of build with tests, in line with START HERE's estimate; §4.8 about half a day of it.
+
+**As built, 2026-10-10 (steps 1-4; Sonnet built, Opus reviewed each).** `make check` green at 1457 tests.
+
+- **Step 1.** `AWARENESS_INSTRUCTION` is held equal to protocol §9.6's block quote by a test that reads the protocol
+  file. `write_results` writes with `\n` line endings, refuses NaN, infinity and any type JSON cannot hold, and never
+  overwrites a different result (an identical rewrite is a no-op). The protocol name is an argument: `analysis/` may
+  not import `protocol/`.
+- **Step 2.** One count everywhere hashes into the sweep id exactly as before, so stored development sweeps keep their
+  ids; a version-2 manifest resumes. A repeats file that misses a scenario, names one the plan does not run, or holds
+  a count that is not a plain whole number is refused (Opus's review removed a silent `int()` conversion). Added
+  beyond the doc: `--repeats-json`, how `launch` hands a mapping to the task.
+- **Step 3.** `sweep_prefix(..., role)`; every record's `label` is the role. `hc sweep run --official` now writes under
+  `official/`. `status` and `report` take `--role`. **Moved, by design:** the task role can now write `official/`,
+  so the only guard on an official write is the code gate, no longer IAM.
+- **Step 4.** Added beyond the doc: **`--pilot-sweep <id>`**, required with `--official`, names the pilot whose
+  `repeats.json` must match (the doc did not say how the pilot is found). A pilot builds its plan as official (else
+  `build_plan` refuses the official model on real content); the gate's pilot checks still apply. The check also
+  requires the record's model, content hash and pilot id to match. **Two gaps from the review, closed the same
+  afternoon (Opus, his request):** the gate enforces the pilot's shape (protocol §8.1: every scenario, both
+  development wordings, 2 repeats a cell), and one pilot per model (a second `repeats.json` for a model is refused
+  at write, and an official sweep refuses a model with two). KNOWN-GAPS entry, closed 2026-10-10.
 
 ## 8. Commits
 

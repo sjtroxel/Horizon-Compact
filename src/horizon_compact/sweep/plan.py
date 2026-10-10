@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import random
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -30,7 +30,9 @@ class SweepRefusal(Exception):
     """The sweep or session was refused before any model call. The message says why."""
 
 
-MANIFEST_VERSION = 2
+# 3 (Phase 4 code half, section 4.1): ``repeats`` is a mapping, scenario id to count. A version-2 manifest,
+# whose ``repeats`` is one int for every scenario, is still read (``manifest_repeats``) and still resumed.
+MANIFEST_VERSION = 3
 DEVELOPMENT_ROLE = "development"
 
 
@@ -50,12 +52,16 @@ class SweepPlan:
     label: str
     experiment: str
     model_key: str
-    repeats: int
+    repeats: Mapping[str, int]  # scenario id to its count, in scenario order
     seed: int
     content_hash: str
     runs: tuple[RunSpec, ...]
     scenarios: tuple[str, ...] = ()
     templates: tuple[str, ...] = ()
+
+    def repeats_text(self) -> str:
+        """``3`` when every scenario has the same count, else ``s1=20, s2=10`` (for people reading output)."""
+        return repeats_text(self.repeats)
 
     def manifest(self) -> dict[str, Any]:
         """Deterministic, with no timestamp: a later session recomputes it and refuses unless it matches
@@ -66,7 +72,7 @@ class SweepPlan:
             "label": self.label,
             "experiment": self.experiment,
             "model_key": self.model_key,
-            "repeats": self.repeats,
+            "repeats": dict(self.repeats),
             "seed": self.seed,
             "content_hash": self.content_hash,
             "scenarios": list(self.scenarios),
@@ -79,24 +85,102 @@ def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def repeats_text(repeats: Mapping[str, int]) -> str:
+    counts = set(repeats.values())
+    if len(counts) == 1:
+        return str(next(iter(counts)))
+    return ", ".join(f"{scenario}={count}" for scenario, count in repeats.items())
+
+
+def normalize_repeats(
+    repeats: int | Mapping[str, int], scenario_ids: Sequence[str]
+) -> dict[str, int]:
+    """One count per selected scenario, in scenario order. An int means the same count everywhere. A mapping
+    must name every selected scenario and no other, each at least 1: a missing or extra scenario is refused
+    naming it, never filled in or ignored."""
+    if not isinstance(repeats, Mapping):
+        if isinstance(repeats, bool) or repeats < 1:
+            raise ValueError("repeats must be at least 1")
+        return dict.fromkeys(scenario_ids, repeats)
+    missing = [sid for sid in scenario_ids if sid not in repeats]
+    if missing:
+        raise SweepRefusal(f"the repeats name no count for scenario(s) {missing}")
+    extra = [sid for sid in repeats if sid not in scenario_ids]
+    if extra:
+        raise SweepRefusal(
+            f"the repeats name scenario(s) {extra} that this plan does not run "
+            f"(it runs {list(scenario_ids)})"
+        )
+    for sid in scenario_ids:
+        count = repeats[sid]
+        if isinstance(count, bool) or not isinstance(count, int) or count < 1:
+            raise ValueError(
+                f"repeats for {sid} must be a whole number of at least 1, not {count!r}"
+            )
+    return {sid: repeats[sid] for sid in scenario_ids}
+
+
+def repeats_from_json(data: Any) -> dict[str, int]:
+    """The mapping in a ``repeats.json`` record (a ``scenarios`` list of ``scenario_id`` and ``repeats``) or
+    in a plain ``{"s1": 20, "s2": 10}``. Nothing else is accepted, and nothing is converted: a count of
+    ``20.7``, ``"20"`` or ``true`` is refused, never read as 20 or 1."""
+    if isinstance(data, dict) and isinstance(data.get("scenarios"), list):
+        try:
+            pairs = [(item["scenario_id"], item["repeats"]) for item in data["scenarios"]]
+        except (KeyError, TypeError) as exc:
+            raise SweepRefusal(
+                f"the repeats record is not in the form repeats.json has: {exc!r}"
+            ) from exc
+    elif isinstance(data, dict) and data:
+        pairs = list(data.items())
+    else:
+        raise SweepRefusal(
+            "the repeats must be a repeats.json record or a mapping of scenario id to a count"
+        )
+    counts: dict[str, int] = {}
+    for scenario_id, count in pairs:
+        if not isinstance(scenario_id, str):
+            raise SweepRefusal(f"a scenario id in the repeats is {scenario_id!r}, not a name")
+        if isinstance(count, bool) or not isinstance(count, int):
+            raise SweepRefusal(f"the count for {scenario_id} is {count!r}, not a whole number")
+        if scenario_id in counts:
+            raise SweepRefusal(f"the repeats name {scenario_id} twice")
+        counts[scenario_id] = count
+    return counts
+
+
+def manifest_repeats(manifest: Mapping[str, Any]) -> dict[str, int]:
+    """A manifest's repeats as a mapping, from any version: version 3 stores the mapping; version 2 stored one
+    int for every scenario, which is read as that count everywhere."""
+    stored = manifest["repeats"]
+    if isinstance(stored, Mapping):
+        return {str(k): int(v) for k, v in stored.items()}
+    scenarios = list(manifest.get("scenarios") or [])
+    if not scenarios:  # a manifest from before scenarios were listed
+        scenarios = list(dict.fromkeys(run["scenario_id"] for run in manifest["runs"]))
+    return dict.fromkeys(scenarios, int(stored))
+
+
 def make_sweep_id(
     content_hash: str,
     model_key: str,
     label: str,
-    repeats: int,
+    repeats: int | Mapping[str, int],
     seed: int,
     scenarios: Sequence[str] = (),
     templates: Sequence[str] = (),
 ) -> str:
     """The selection is part of the id, so two plans that differ only in which scenarios or templates they
-    cover are two sweeps, never one sweep refused on resume."""
+    cover are two sweeps, never one sweep refused on resume. So is a plan that differs in one scenario's
+    count. The same count everywhere hashes as that one number, whether it came as an int or as a mapping, so
+    a sweep keeps the id it had before counts could differ."""
     digest = _sha256(
         "|".join(
             [
                 content_hash,
                 model_key,
                 label,
-                str(repeats),
+                str(repeats) if isinstance(repeats, int) else _repeats_for_id(repeats, scenarios),
                 str(seed),
                 ",".join(scenarios),
                 ",".join(templates),
@@ -104,6 +188,13 @@ def make_sweep_id(
         )
     )
     return f"{label}-{model_key}-{digest[:8]}"
+
+
+def _repeats_for_id(counts: Mapping[str, int], scenarios: Sequence[str]) -> str:
+    ordered = [counts[sid] for sid in scenarios] if scenarios else list(counts.values())
+    if len(set(ordered)) == 1:
+        return str(ordered[0])
+    return ",".join(f"{sid}={counts[sid]}" for sid in scenarios)
 
 
 def make_run_id(
@@ -157,27 +248,26 @@ def build_plan(
     *,
     model_key: str,
     label: str,
-    repeats: int,
+    repeats: int | Mapping[str, int],
     seed: int,
     scenarios: Sequence[str] | None = None,
     templates: Sequence[str] | None = None,
     official: bool = False,
 ) -> SweepPlan:
     experiment.model(model_key)  # an unknown model is an error naming the choices
-    if repeats < 1:
-        raise ValueError("repeats must be at least 1")
     scenario_ids = _select(scenarios, list(experiment.scenarios), "scenario")
+    counts = normalize_repeats(repeats, scenario_ids)
     template_ids = _select(templates, list(experiment.templates), "template")
     if not official:
         check_not_official_rules(experiment, model_key, template_ids)
     sweep_id = make_sweep_id(
-        experiment.content_hash, model_key, label, repeats, seed, scenario_ids, template_ids
+        experiment.content_hash, model_key, label, counts, seed, scenario_ids, template_ids
     )
     runs: list[RunSpec] = []
     for scenario_id in scenario_ids:
         for objective in experiment.objectives:
             for template_id in template_ids:
-                for repeat in range(repeats):
+                for repeat in range(counts[scenario_id]):
                     run_id = make_run_id(sweep_id, scenario_id, objective.id, template_id, repeat)
                     runs.append(
                         RunSpec(
@@ -195,7 +285,7 @@ def build_plan(
         label=label,
         experiment=experiment.name,
         model_key=model_key,
-        repeats=repeats,
+        repeats=counts,
         seed=seed,
         content_hash=experiment.content_hash,
         runs=tuple(runs),

@@ -21,7 +21,7 @@ from horizon_compact.providers.bedrock import build_request
 from horizon_compact.sweep.identity import RunnerIdentity
 from horizon_compact.sweep.plan import SweepPlan, build_plan
 from horizon_compact.sweep.prompt import TOOL_NAME
-from horizon_compact.sweep.runner import SessionResult, run_session
+from horizon_compact.sweep.runner import Role, SessionResult, run_session
 from horizon_compact.sweep.store import Store
 
 ACCOUNT = "123456789012"
@@ -174,6 +174,7 @@ def session(
     max_minutes: float = 30.0,
     should_stop: Callable[[], bool] = lambda: False,
     progress: Callable[[str], None] = lambda line: None,
+    role: Role = "development",
 ) -> SessionResult:
     clock = clock or FakeClock()
     return run_session(
@@ -187,6 +188,7 @@ def session(
         cap_usd=cap_usd,
         max_minutes=max_minutes,
         harness_version="0.test",
+        role=role,
         monotonic=clock.monotonic,
         sleep=clock.sleep,
         rng=random.Random(1),
