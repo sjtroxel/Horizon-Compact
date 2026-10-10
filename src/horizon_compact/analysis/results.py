@@ -13,12 +13,21 @@ wording), are written by the site's author when Phase 1.5 is built.
 
 ``build_results`` refuses a ``RunSet`` with unfinished runs: the failure rules count finished runs only, so a
 half-finished sweep would understate every cell's attempts.
+
+``to_record`` and ``write_results`` (Phase 4 code-half IMPLEMENTATION doc section 4.7) turn the object into
+the versioned JSON file Phase 1.5 reads. They live here so the writer is frozen with the analysis.
 """
 
 from __future__ import annotations
 
+import dataclasses
+import json
+import math
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 from horizon_compact.analysis import RESULTS_VERSION
 from horizon_compact.analysis.descriptive import ScenarioDescriptive, describe_scenario
@@ -379,3 +388,66 @@ def build_results(
             s for s in sorted(experiment.scenarios) if s not in {x.scenario_id for x in scenarios}
         ),
     )
+
+
+RESULTS_ROOT = Path("experiment") / "results"
+_SEGMENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+
+
+def _plain(value: Any, path: str) -> Any:
+    """One value as plain JSON data: dataclasses become dicts in field order, tuples become lists. Anything
+    else (a set, a mapping, an enum, a float that is not finite) is refused naming where it sat, so a field
+    added later that a serializer would have to guess at fails here and not in a published file."""
+    if dataclasses.is_dataclass(value) and not isinstance(value, type):
+        return {
+            f.name: _plain(getattr(value, f.name), f"{path}.{f.name}")
+            for f in dataclasses.fields(value)
+        }
+    if isinstance(value, tuple | list):
+        return [_plain(item, f"{path}[{i}]") for i, item in enumerate(value)]
+    if isinstance(value, bool) or value is None or isinstance(value, int | str):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError(f"{path} is {value}, which JSON cannot hold")
+        return value
+    raise TypeError(f"{path} is a {type(value).__name__}, which a results file cannot hold")
+
+
+def to_record(results: ModelResults) -> dict[str, Any]:
+    """The results object as plain data, ready for ``json.dumps``. Key order is the dataclasses' field order,
+    which puts ``results_version`` first; floats are the floats the engine computed; tuples are lists."""
+    record = _plain(results, "results")
+    assert isinstance(record, dict)
+    return record
+
+
+def results_path(root: Path, protocol: str, model_key: str, sweep_id: str) -> Path:
+    """``<root>/experiment/results/<protocol>/<model>/<sweep_id>.json``. Each part must be a plain name, so a
+    sweep id or model key cannot climb out of the folder."""
+    for label, part in (("protocol", protocol), ("model", model_key), ("sweep id", sweep_id)):
+        if not _SEGMENT.fullmatch(part) or ".." in part:
+            raise ValueError(f"{label} {part!r} is not a plain name to use in a path")
+    return root / RESULTS_ROOT / protocol / model_key / f"{sweep_id}.json"
+
+
+def results_json(results: ModelResults) -> str:
+    """The file's exact text: two-space indent, a final newline, non-finite numbers refused."""
+    return json.dumps(to_record(results), indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+
+
+def write_results(results: ModelResults, root: Path, protocol: str) -> Path:
+    """Write one model's results for one sweep, once. The same text again is a no-op; different text for the
+    same sweep is refused, never overwritten (a changed result is a new analysis, which is a new protocol
+    version). Returns the path; committing it is the author's."""
+    path = results_path(root, protocol, results.model_key, results.sweep_id)
+    text = results_json(results)
+    if path.exists():
+        if path.read_text(encoding="utf-8") == text:
+            return path
+        raise FileExistsError(f"{path} already holds different results; it is never overwritten")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(text, encoding="utf-8", newline="\n")  # the same bytes on every platform
+    temporary.replace(path)
+    return path

@@ -9,6 +9,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import math
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -34,6 +35,9 @@ from horizon_compact.analysis.results import (
     ScenarioResult,
     SealedSummary,
     build_results,
+    results_path,
+    to_record,
+    write_results,
 )
 from horizon_compact.experiment import PLACEHOLDER_EXPERIMENT, load_experiment
 
@@ -477,3 +481,90 @@ def test_a_comparison_that_is_not_assessable_still_carries_its_outcome_threshold
     assert got.alpha == pytest.approx(0.05 / 16)
     assert (got.difference, got.low, got.high, got.method, got.verdict_among_valid) == (None,) * 5
     assert got.kept_wordings == () and len(got.dropped_wordings) == 3
+
+
+def _fake_results() -> ModelResults:
+    return results_of(s3_four(([9, 9, 9], [10, 10, 10]), ([1, 1, 1], [10, 10, 10])))
+
+
+def test_the_record_round_trips_through_json_unchanged() -> None:
+    record = to_record(_fake_results())
+    assert json.loads(json.dumps(record, allow_nan=False)) == record
+
+
+def test_a_share_scenario_with_a_welch_interval_round_trips_too() -> None:
+    rows: list[RunRow] = []
+    for objective, kept in (("A", 100), ("B", 100), ("C", 20), ("D", 20)):
+        rows += s1_runs(objective, {w: [kept, kept + 5] for w in W3})
+    record = to_record(results_of(rows))
+    assert json.loads(json.dumps(record, allow_nan=False)) == record
+    (s1,) = record["scenarios"]
+    assert s1["comparisons"][0]["method"] == "welch"
+    assert isinstance(s1["comparisons"][0]["df"], float)
+
+
+def test_the_record_leads_with_the_version_and_holds_lists_not_tuples() -> None:
+    record = to_record(_fake_results())
+    assert next(iter(record)) == "results_version"
+    assert record["results_version"] == RESULTS_VERSION
+    assert isinstance(record["scenarios"], list)
+
+    def no_tuples(node: object) -> None:
+        assert not isinstance(node, tuple)
+        if isinstance(node, dict):
+            for value in node.values():
+                no_tuples(value)
+        elif isinstance(node, list):
+            for value in node:
+                no_tuples(value)
+
+    no_tuples(record)
+
+
+def test_the_record_keeps_every_field_the_object_has() -> None:
+    res = _fake_results()
+    record = to_record(res)
+    assert list(record) == [f.name for f in dataclasses.fields(res)]
+    comparison_record = record["scenarios"][0]["comparisons"][0]
+    assert list(comparison_record) == [f.name for f in dataclasses.fields(ComparisonResult)]
+
+
+def test_the_record_refuses_a_value_json_cannot_hold() -> None:
+    res = _fake_results()
+    with pytest.raises(ValueError, match=r"results\.alpha is nan"):
+        to_record(dataclasses.replace(res, alpha=math.nan))
+    with pytest.raises(TypeError, match=r"results.sealed_wording is a set"):
+        to_record(dataclasses.replace(res, sealed_wording={"w1"}))  # type: ignore[arg-type]
+
+
+def test_the_same_results_write_byte_identical_files(tmp_path: Path) -> None:
+    res = _fake_results()
+    first = write_results(res, tmp_path / "one", "prereg-v1")
+    second = write_results(res, tmp_path / "two", "prereg-v1")
+    assert first.read_bytes() == second.read_bytes()
+    assert first.read_bytes().endswith(b"}\n")
+    assert first == results_path(tmp_path / "one", "prereg-v1", res.model_key, res.sweep_id)
+    assert json.loads(first.read_text(encoding="utf-8")) == to_record(res)
+
+
+def test_a_second_write_of_the_same_results_is_a_no_op_and_a_different_one_is_refused(
+    tmp_path: Path,
+) -> None:
+    res = _fake_results()
+    path = write_results(res, tmp_path, "prereg-v1")
+    before = path.read_bytes()
+    assert write_results(res, tmp_path, "prereg-v1") == path
+    with pytest.raises(FileExistsError, match="never overwritten"):
+        write_results(dataclasses.replace(res, alpha=0.1), tmp_path, "prereg-v1")
+    assert path.read_bytes() == before
+    assert [p.name for p in path.parent.iterdir()] == [path.name]  # no temporary file left behind
+
+
+def test_the_path_is_under_experiment_results_and_refuses_names_that_climb(tmp_path: Path) -> None:
+    got = results_path(tmp_path, "prereg-v1", "sonnet-4-6", "sweep-1")
+    assert got == tmp_path / "experiment" / "results" / "prereg-v1" / "sonnet-4-6" / "sweep-1.json"
+    for bad in ("..", "a/b", "", ".hidden", "a..b", "x y"):
+        with pytest.raises(ValueError, match="plain name"):
+            results_path(tmp_path, "prereg-v1", bad, "sweep-1")
+        with pytest.raises(ValueError, match="plain name"):
+            results_path(tmp_path, "prereg-v1", "sonnet-4-6", bad)

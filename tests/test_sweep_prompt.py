@@ -8,10 +8,16 @@ from pathlib import Path
 
 import pytest
 
-from horizon_compact.experiment import Experiment, Objective
+from horizon_compact.experiment import Experiment, Objective, load_experiment
 from horizon_compact.providers.base import DecisionRequest
 from horizon_compact.providers.bedrock import build_request
-from horizon_compact.sweep.prompt import TOOL_NAME, RenderedPrompt, build_tool
+from horizon_compact.sweep.prompt import (
+    AWARENESS_INSTRUCTION,
+    TOOL_NAME,
+    RenderedPrompt,
+    build_tool,
+    render_awareness_prompt,
+)
 from horizon_compact.sweep.prompt import render_prompt as render_in
 from sweep_helpers import NOVA_ROUTE, company_like, experiment, lever, make_plan, scenario
 
@@ -339,3 +345,49 @@ def test_a_detail_is_rendered_under_its_line_and_shuffled_with_it() -> None:
 def test_a_detail_on_a_lever_not_offered_is_refused() -> None:
     with pytest.raises(ValueError, match="detail"):
         scenario("uses_equal_total", [lever("a", "use"), lever("b", "not_offered", 0, detail="x")])
+
+
+PROTOCOL = Path(__file__).resolve().parents[1] / "experiment" / "protocol" / "protocol-v1.md"
+
+
+def _protocol_awareness_text() -> str:
+    """The block quote under protocol 9.6's "word for word", unwrapped: its lines joined with one space."""
+    lines = PROTOCOL.read_text(encoding="utf-8").splitlines()
+    start = next(i for i, line in enumerate(lines) if line.startswith("### 9.6"))
+    quoted: list[str] = []
+    for line in lines[start + 1 :]:
+        if line.startswith(">"):
+            quoted.append(line[1:].strip())
+        elif quoted:
+            break
+    assert quoted, "protocol 9.6 has no block quote"
+    return " ".join(quoted)
+
+
+def test_the_awareness_question_is_the_protocols_text_word_for_word() -> None:
+    assert _protocol_awareness_text() == AWARENESS_INSTRUCTION
+
+
+def test_the_awareness_prompt_is_the_grid_prompt_with_only_the_instruction_replaced() -> None:
+    exp = load_experiment("company")
+    scenario = exp.get_scenario("s1")
+    for objective in exp.objectives:
+        for template_id in exp.templates:
+            grid = render_in(exp, scenario, objective, template_id, 4242)
+            probe = render_awareness_prompt(exp, scenario, objective, template_id, 4242)
+            assert probe.system == grid.system
+            assert probe.lever_order == grid.lever_order
+            assert probe.option_order == grid.option_order
+            assert probe.template_id == template_id
+            instruction = scenario.instruction.strip()
+            assert grid.user.endswith(instruction)
+            assert probe.user == grid.user[: -len(instruction)] + AWARENESS_INSTRUCTION
+
+
+def test_the_awareness_prompt_carries_the_question_and_not_the_scenarios_instruction() -> None:
+    exp = load_experiment("company")
+    scenario = exp.get_scenario("s1")
+    probe = render_awareness_prompt(exp, scenario, exp.objectives[0], next(iter(exp.templates)), 7)
+    assert probe.user.endswith(AWARENESS_INSTRUCTION)
+    assert scenario.instruction.strip() not in probe.user
+    assert probe.user.count(AWARENESS_INSTRUCTION) == 1
