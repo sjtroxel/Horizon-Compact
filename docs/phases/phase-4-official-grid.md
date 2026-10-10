@@ -7,6 +7,12 @@
 > Written before Phases 0.5 through 3.5 are built. **Lines marked *(rests on N)* depend on what Phase N builds,
 > measures or decides.** Phase 0.5's pre-build checks were run 2026-10-04 (`KNOWN-GAPS.md`); the ones this doc rests
 > on are the quota, the price and the refusal mapping, which the build measures.
+>
+> **Amended 2026-10-10 (his): split by code and runs.** Decision 6 stands for the scope (one phase, one done-when).
+> The run code the runbook needs (per-scenario repeats, the pilot path, the thinking fields, the awareness-probe
+> sweep, the blind refusal-call workflow, whole-run-set analysis) is built first on fakes, from its own
+> IMPLEMENTATION doc (`phase-4-official-grid-code-IMPLEMENTATION.md`), while Bedrock is unavailable. The runbook's
+> IMPLEMENTATION doc is still written immediately before the runs.
 
 ## What this phase is for
 

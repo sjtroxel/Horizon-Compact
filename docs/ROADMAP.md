@@ -79,8 +79,8 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built and closed 2026-10-09**, DoD audit in §19a (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, `4febc15`, `84d82d7`, plus step 13's commit) |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); **no-AWS steps built 2026-10-09** (1-7's drafting and 10; `dd3a28a`, `9eccb4a`, `15f66a2`, `a40d38b`, step 10 uncommitted); steps 7's runs, 8, 9, 11 and the tag wait on Bedrock |
-| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split | not written; immediately before its build |
-| 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5 | not written; immediately before its build |
+| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; build next (Sonnet, Opus reviews). **Runs half:** not written; immediately before the runs |
+| 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5; **split by code and search 2026-10-10 (his)** | **code half** (`phase-5-case-building-code-IMPLEMENTATION.md`, the dossier builder on synthetic filings): not written. **Search half:** not written; immediately before the search |
 | 5.5 `case-runs` | **APPROVED 2026-10-04**, with Phase 5 | not written; immediately before its build |
 | 6 `explorer` | **APPROVED 2026-10-04**, all six decisions as recommended (6 amended by him); split into 6 and 6.5 | not written; immediately before its build |
 | 6.5 `methods-and-release` | **APPROVED 2026-10-04**, with Phase 6 | not written; immediately before its build |
@@ -291,6 +291,13 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
 
+- **2026-10-10 — Phases 4 and 5 split by code and runs** (his, as recommended; AWS still blocked). Each keeps its
+  number and scope doc, and gets two IMPLEMENTATION docs: a **code half**, written, approved and built now on fakes
+  (Phase 4: the run code `KNOWN-GAPS.md`'s queue lists; Phase 5: the dossier builder on synthetic filings), and the
+  **runs half** (Phase 4's runbook; Phase 5's search and case building), written immediately before those run. No
+  renumbering, since other docs cite both phases by number. Reopens Phase 4's decision 6 ("one phase") only in this
+  sense: the scope is unchanged. Same day: **the protocol's six drafting choices decided** (his; Phase 3.5
+  IMPLEMENTATION doc §16 step 10 note): July 2026 a fallback month only, WARN and trade press out of v1.
 - **2026-10-09 — Phase 3 `scoring-and-simulation` built and closed** (his; out of order, AWS still blocked). The
   IMPLEMENTATION doc's ten decisions were approved 2026-10-08 as recommended. The simulations then found the
   percentile bootstrap too narrow, and on 2026-10-08 evening he authorized Opus's recommendations for step 12: shares

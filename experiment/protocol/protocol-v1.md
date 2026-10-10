@@ -701,7 +701,8 @@ named in any public file;** identities, filings, scaling factors and unscaled fi
 **Closure or restructuring, k = 2; an AI-attributed workforce change, k = 1** (it may come from outside
 manufacturing, labeled as a different company type); **invest or retool, k = 2** (a closure with production moved to
 a new facility the company is building counts as retool). At most five cases, at least three, at least one invest or
-retool. **A type that yields fewer than k is a reported shortfall, never filled by judgment.**
+retool. **A type that yields fewer than k, after the fallback month (section 12.2), is a reported shortfall, never
+filled by judgment.**
 
 ### 12.2 The window and the date
 
@@ -709,12 +710,18 @@ retool. **A type that yields fewer than k is a reported shortfall, never filled 
   the date knowing the candidates.
 - **The window:** a decision's **first public disclosure** on or after **2026-08-01**, through the day before the
   search. 2026-08-01 is the buffer past every candidate model's June 2026 training cutoff that the data-sources plan
-  prefers; *[for his decision: whether July 2026 disclosures are admitted after an earlier-signal check, as
-  `planning/01` §3.2 allows, or excluded, as drafted here]*. If the model set adds a model with a later cutoff, the
-  window opens on the first of the second month after the latest cutoff.
+  prefers. If the model set adds a model with a later cutoff, the window opens on the first of the second month after
+  the latest cutoff.
+- **The fallback month (decided 2026-10-10, his):** decisions first disclosed in **July 2026** (in general, the month
+  after the latest cutoff) are admitted **only for a type that yields fewer than k inside the window**, and only after
+  every in-window candidate of that type has been checked. They are taken in the same order and pass the same
+  criteria, the first-disclosure check and the recognition probe (section 12.8) included, and each case taken this way
+  is **labeled a fallback case** wherever it is reported. They never displace an in-window candidate. The search
+  (section 12.3) therefore reads filings from the fallback month's first day, and holds the fallback month's hits
+  apart until a shortfall calls for them.
 - **A decision is dated by its first public disclosure, never its filing date.** Every candidate is searched for
   earlier mentions (an earnings call, a press release, an earlier filing) before any other criterion; one found before
-  the window fails it.
+  the window fails it, and for a fallback candidate, one found before the fallback month does.
 
 ### 12.3 The search, query by query
 
@@ -723,8 +730,8 @@ queries, `OR` between phrases, and the `forms`, `dateRange=custom`, `startdt` an
 `AND (... OR ...)` query returned nothing, so every query below is a plain list of phrases), with a User-Agent naming
 the project and a contact, under the SEC's limit of 10 requests a second, every page of results read. Each hit's
 structured `items`, `sics` and `file_date` fields are what the filters below read. **Queries are run separately and
-their hits unioned; a filing found twice counts once.** Dates are the window's (section 12.2), on the filing date; the
-first-disclosure check then dates each candidate.
+their hits unioned; a filing found twice counts once.** Dates run from the fallback month's first day through the day
+before the search (section 12.2), on the filing date; the first-disclosure check then dates each candidate.
 
 | Channel and type | Forms | Query (each line its own query) | Filter on the hit |
 |---|---|---|---|
@@ -732,10 +739,11 @@ first-disclosure check then dates each candidate.
 | **2. Invest or retool** | 8-K | `"new manufacturing facility"`; `"new production facility"`; `"expand production"`; `"expansion of our manufacturing"`; `"capacity expansion"`; `"retool"` | `items` includes 7.01 or 8.01; `sics` 2000-3999 |
 | **3. AI-attributed workforce change** | 8-K | `"artificial intelligence" "reduction in force"`; `"artificial intelligence" "workforce reduction"`; `"artificial intelligence" "reduce our workforce"`; `"AI" "reduction in force"`; `"automation" "workforce reduction"` | any `items`; any `sics`, labeled by company type |
 
-*[For his decision: WARN notices and trade press (`planning/01` §4.7) cannot be queried by a fixed rule, since every
-state publishes WARN notices differently and trade press has no fixed index. Drafted here as **not a discovery channel
-in v1**, so discovery is mechanical; the alternative is a fixed list of state WARN databases, each with its own
-rule.]*
+**WARN notices and trade press (`planning/01` §4.7) are not discovery channels in v1** (decided 2026-10-10, his).
+Neither can be queried by one fixed rule: every state publishes WARN notices in its own format, and trade press has no
+fixed index. Discovery stays mechanical, and a shortfall is reported rather than filled. A fixed list of state WARN
+databases, each with its own rule, is the candidate for a later version: it would reach closures too small for an
+Item 2.05 filing, for the closure and AI-attributed types only.
 
 **A channel that has changed by the search date** (an endpoint gone, a field renamed) is reported as a deviation; its
 replacement query is written then, read by the independent reader (section 12.9), and logged.
@@ -743,7 +751,7 @@ replacement query is written then, read by the independent reader (section 12.9)
 ### 12.4 Selection
 
 Candidates are taken **in order of first disclosure**, per type, and each is checked against the criteria in order:
-(1) publicly traded and filing with the SEC; (2) first disclosed inside the window; (3) a real decision with real
+(1) publicly traded and filing with the SEC; (2) first disclosed inside the window (or the fallback month, under section 12.2's rule); (3) a real decision with real
 alternatives (not a forced wind-down); (4) maps onto a scenario shape (section 12.5); (5) not instantly recognizable
 after anonymization (the recognition probe, section 12.8); preferred, a manufacturer of comparable size. **The first
 k that pass are the cases.** Every candidate considered is logged with each criterion passed or failed and why; the

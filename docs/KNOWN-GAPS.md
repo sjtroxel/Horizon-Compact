@@ -7,6 +7,18 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — update 2026-10-10, morning
+>
+> **Step 10 is committed (`183421f`), so "uncommitted" in the block below is out of date.** The protocol's six
+> drafting choices were decided 2026-10-10 (his; IMPLEMENTATION doc §16 step 10 note): July 2026 is a fallback month,
+> used only for a type that falls short; WARN and trade press stay out of v1; the other four as drafted. Queue item 1
+> continues as his read of the rest of §2-15. **Decision (b) taken (his): Phases 4 and 5 are split by code and runs,**
+> keeping their numbers (ROADMAP decision history, 2026-10-10). **NEXT: the Phase 4 code-half IMPLEMENTATION doc**
+> (Opus), for his approval before any build. (c), the 10/16 date, stands. **Written and APPROVED 2026-10-10 (his), all
+> five decisions (a):** `docs/phases/phase-4-official-grid-code-IMPLEMENTATION.md`. **NEXT: its build, §7 steps 1-7,
+> Sonnet building, Opus reviewing each commit's diff;** step 1 first (the awareness prompt and the results writer are
+> frozen files, so this half lands before the tag). He planned the build for the afternoon of 2026-10-10.
+>
 > ## START HERE — where things stand, 2026-10-09, 3 PM (handoff)
 >
 > **Measured at handoff:** `make check` green, **1391 tests**, root 13 of 16; last commit `a40d38b` (steps 6-7),

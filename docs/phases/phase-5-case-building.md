@@ -10,6 +10,12 @@
 > `case-runs`** (`docs/phases/phase-5.5-case-runs.md`) runs them, matches them and publishes the results. The six
 > decisions were made on this doc, before the split, and are recorded here; findings 1-7 cover both halves.
 >
+> **Amended 2026-10-10 (his): split by code and search.** The dossier builder (decision 3: fetch by date with the
+> cut-off enforced in code, sections by the template's fixed list, the scaling draw of protocol §12.6) is built
+> first, tested on synthetic filings only, from its own IMPLEMENTATION doc
+> (`phase-5-case-building-code-IMPLEMENTATION.md`). The search and the case building still run only on the rule
+> date, from the IMPLEMENTATION doc written immediately before them.
+>
 > Written before Phases 0.5 through 4 are built. **Lines marked *(rests on N)* depend on what Phase N builds,
 > measures or decides.**
 >

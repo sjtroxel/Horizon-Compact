@@ -589,7 +589,10 @@ Decision 7 takes (i), `gpt-oss-120b` on Bedrock. The options stay as the record.
      provider recorded per call. A design change, made and logged before the tag.
    - **Its money, estimated:** all of v1 on both models about **$3-4** (`gpt-oss-120b` about $0.0004 a decision,
      measured in Phase 2.5; Haiku 5.5 about $0.001, from list price), inside the $5 cap with about $1-2 of margin. To
-     protect it: the thinking sub-study and Nova Pro are cut; the review uses `gpt-oss-120b`; decision 3's proxy runs
+     protect it: *(Re-estimated 2026-10-10 from OpenRouter's live prices, Haiku 5.5 $0.10 / $0.50 and `gpt-oss-120b`
+     $0.037 / $0.17 per million: about **$3 at 10 repeats, about $5.80 at the 20-repeat cap** with real cases, a 20%
+     retry allowance and OpenRouter's 5.5% credit fee. At the cap it passes $5, so the cut or a raise of the cap is
+     decided at Phase 4's projection, before the grid.)* The thinking sub-study and Nova Pro are cut; the review uses `gpt-oss-120b`; decision 3's proxy runs
      on the two fallback models only (cents); decision 4's Nova Lite runs move to OpenRouter (under $0.25). **The
      harness's per-sweep caps are set so the project's OpenRouter total cannot pass $5**, and the cash ledger is
      read before every run.
@@ -811,6 +814,13 @@ AWS. Every step that calls a model (the runs in 7 and 8, then 9 and 11) waits fo
     §2-15 the same day** fixed: §2.2 (the walking skeleton never ran; Sonnet 4.6's garden calls were through
     OpenRouter); §6.5 (the 15.5% is the interval alone, Welch included, not only the old bootstrap); §11.1 (the
     family-wide rate is a Bonferroni ceiling, not an estimate). **Step 10 is complete except his review of §2-15.**
+    **The six drafting choices decided 2026-10-10 (his):** (i) changed: July 2026 is a **fallback month**, admitted
+    only for a type short of k after every in-window candidate, same criteria, labeled as such, never displacing an
+    in-window case (the in-order selection of §12.4 would otherwise have let July cases displace August ones; §12.1,
+    §12.2, §12.3's date range and §12.4's criterion 2 amended); (ii) as drafted, WARN and trade press not channels in
+    v1, a fixed list of state WARN databases named as the candidate for a later version; (iii), (iv) (15 calls per
+    model, about $0.45 of credits on decision 2's set), (v) as drafted; (vi) generalized with (i): the fallback month
+    is the month after the latest cutoff. His read of the rest of §2-15 remains.
 11. **[Opus, needs AWS under 7 (i)] The review** (§11): his call to send; the raw reply kept; each point marked; his decisions; changes made.
     C7.
 12. **[him, with Claude reading back] Tag day, steps 1-5** (§12). `P`.
