@@ -33,6 +33,11 @@ def estimate_input_tokens(system: str, user: str, tool: ToolSpec) -> int:
     return round(chars / CHARS_PER_TOKEN) + TOOL_OVERHEAD_TOKENS
 
 
+def estimate_input_tokens_text(system: str, user: str) -> int:
+    """The same estimate for a call that offers no tool: no schema and no tool overhead."""
+    return round((len(system) + len(user)) / CHARS_PER_TOKEN)
+
+
 def worst_case_attempt_usd(input_tokens: int, max_tokens: int, prices: Prices) -> float:
     """One attempt at full price: the estimated input at no caching, and the whole output allowance."""
     return round((input_tokens * prices.input + max_tokens * prices.output) / 1_000_000, 6)

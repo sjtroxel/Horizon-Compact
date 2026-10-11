@@ -67,16 +67,14 @@ def sweep_prefix(experiment_name: str, sweep_id: str, role: Role = "development"
     return f"{role}/{experiment_name}/{sweep_id}/"
 
 
-_RUN_KEY = re.compile(
-    r"runs/(?P<run>r-[0-9a-f]{12})/(?:attempt-(?P<n>\d+)|(?P<final>final))\.json$"
-)
+RUN_KEY = re.compile(r"runs/(?P<run>r-[0-9a-f]{12})/(?:attempt-(?P<n>\d+)|(?P<final>final))\.json$")
 
 
 def finished_run_ids(store: Store, prefix: str) -> set[str]:
     """The runs of a sweep that already have a ``final.json``: a re-launch skips them."""
     found: set[str] = set()
     for key in store.list_keys(f"{prefix}runs/"):
-        match = _RUN_KEY.search(key)
+        match = RUN_KEY.search(key)
         if match is not None and match.group("final"):
             found.add(match.group("run"))
     return found
@@ -138,7 +136,7 @@ class _Existing:
         self.finals: set[str] = set()
         self.attempts: dict[str, list[dict[str, Any]]] = {}
         for key in store.list_keys(f"{prefix}runs/"):
-            match = _RUN_KEY.search(key)
+            match = RUN_KEY.search(key)
             if match is None:
                 continue
             if match.group("final"):

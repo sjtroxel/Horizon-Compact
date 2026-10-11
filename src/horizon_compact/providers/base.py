@@ -56,6 +56,17 @@ class DecisionRequest:
 
 
 @dataclass(frozen=True)
+class TextRequest:
+    """A call that offers no tool and asks for plain text (the awareness probe, protocol 9.6). Like a
+    ``DecisionRequest`` it has no sampling field: none can be sent."""
+
+    route: ModelRoute
+    system: str
+    user: str
+    max_tokens: int
+
+
+@dataclass(frozen=True)
 class Usage:
     input_tokens: int = 0
     output_tokens: int = 0
@@ -129,6 +140,14 @@ def prompt_sha256(request: DecisionRequest) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def text_prompt_sha256(request: TextRequest) -> str:
+    """Hash of the canonical system and user JSON of a text request, independent of the route."""
+    canonical = json.dumps(
+        {"system": request.system, "user": request.user}, sort_keys=True, separators=(",", ":")
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 class Provider(Protocol):
     name: str
 
@@ -137,3 +156,16 @@ class Provider(Protocol):
         ...
 
     def decide(self, request: DecisionRequest) -> RawDecision: ...
+
+
+class TextProvider(Protocol):
+    """A provider that can also make a call with no tool. Bedrock and OpenRouter do; the local runtime does
+    not, because the awareness probe is official-only."""
+
+    name: str
+
+    def text_request_body(self, request: TextRequest) -> dict[str, Any]:
+        """The request exactly as this provider sends it, for the record."""
+        ...
+
+    def decide_text(self, request: TextRequest) -> RawDecision: ...

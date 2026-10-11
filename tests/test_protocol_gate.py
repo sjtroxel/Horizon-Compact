@@ -33,11 +33,13 @@ from horizon_compact.protocol.gate import (
     describe_decision,
     repeats_key,
     required_repeats,
+    run_analysis_gate,
     run_gate,
     write_repeats,
 )
 from horizon_compact.protocol.lock import LINE_ENDING_NOTE, read_lock, write_lock
 from horizon_compact.sweep import launch as sweep_launch
+from horizon_compact.sweep.awareness import build_awareness_plan
 from horizon_compact.sweep.plan import SweepPlan, SweepRefusal, build_plan
 from horizon_compact.sweep.runner import sweep_prefix
 from horizon_compact.sweep.store import LocalStore
@@ -148,6 +150,36 @@ def test_the_grid_with_every_template_and_scenario_passes(tagged: Path) -> None:
     full = plan(exp, repeats=2)
     assert set(full.templates) == {"w1", "w2", "w3"} and len(full.scenarios) == 4
     assert failures(tagged, exp, the_plan=full) == ()
+
+
+def test_the_awareness_probe_passes_the_gate_as_its_own_official_sweep(tagged: Path) -> None:
+    exp = load(tagged)
+    probe = build_awareness_plan(exp, MODEL, 1)
+    assert len(probe.runs) == 15 and probe.label == "awareness"
+    assert failures(tagged, exp, the_plan=probe) == ()
+    assert "container" in " ".join(failures(tagged, exp, the_plan=probe, identity=LAPTOP))
+
+
+def test_the_analysis_gate_passes_the_tagged_tree_and_ignores_run_code(tagged: Path) -> None:
+    exp = load(tagged)
+    assert run_analysis_gate(exp, package_dir=tagged / PKG).ok
+    append(tagged, f"{PKG}/sweep/runner.py")
+    assert run_analysis_gate(exp, package_dir=tagged / PKG).ok
+
+
+def test_the_analysis_gate_refuses_a_changed_analysis_file(tagged: Path) -> None:
+    append(tagged, VERDICT)
+    result = run_analysis_gate(load(tagged), package_dir=tagged / PKG)
+    assert not result.ok and any("analysis" in line for line in result.failures)
+    assert LINE_ENDING_NOTE in result.notes
+
+
+def test_the_analysis_gate_refuses_changed_content_and_a_missing_lock(tagged: Path) -> None:
+    append(tagged, SCENARIO)
+    assert not run_analysis_gate(load(tagged), package_dir=tagged / PKG).ok
+    (tagged / lock.LOCK_RELATIVE).unlink()
+    result = run_analysis_gate(load(tagged), package_dir=tagged / PKG)
+    assert any("no committed protocol" in line for line in result.failures)
 
 
 def test_prices_quotas_and_pace_may_change(tagged: Path) -> None:

@@ -241,6 +241,24 @@ def run_gate(
     return GateResult(tuple(failures), tuple(notes))
 
 
+def run_analysis_gate(experiment: Experiment, *, package_dir: Path | None = None) -> GateResult:
+    """What ``hc analyze`` checks before it writes an official results file (Phase 4 code half, section 4.7,
+    from Opus's review): the lock (check 1), the content (check 3) and the analysis set (check 6), on the
+    package that is running. The results writer was put in the frozen set so the published numbers come from
+    the frozen code; without this, an edited ``analysis/`` could still write an official file."""
+    root = (package_dir or default_package_dir()).parents[1]
+    failures: list[str] = []
+    notes: list[str] = []
+    lock, problems = check_lock_file(root)
+    failures += problems
+    if lock is not None:
+        failures += check_content(experiment, lock)
+        failures += check_analysis(root, lock)
+    if any(line.startswith(("content differs", "content hash", "analysis")) for line in failures):
+        notes.append(LINE_ENDING_NOTE)
+    return GateResult(tuple(failures), tuple(notes))
+
+
 def refusal_message(result: GateResult) -> str:
     return "\n".join(f"{REFUSED}: {line}" for line in result.failures)
 

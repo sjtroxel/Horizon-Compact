@@ -48,6 +48,7 @@ from horizon_compact.protocol.gate import (
     describe_decision,
     refusal_message,
     required_repeats,
+    run_analysis_gate,
     run_gate,
     write_repeats,
 )
@@ -88,6 +89,13 @@ from horizon_compact.smoke.runner import (
 )
 from horizon_compact.sweep import launch as sweep_launch
 from horizon_compact.sweep import status as sweep_status
+from horizon_compact.sweep.awareness import (
+    awareness_estimate,
+    awareness_report,
+    build_awareness_plan,
+    check_awareness_cap,
+    run_awareness,
+)
 from horizon_compact.sweep.blind import failures_view, format_report
 from horizon_compact.sweep.identity import IdentityError, RunnerIdentity, identify
 from horizon_compact.sweep.plan import (
@@ -100,6 +108,7 @@ from horizon_compact.sweep.plan import (
     worst_case_per_attempt_usd,
 )
 from horizon_compact.sweep.prompt import render_prompt
+from horizon_compact.sweep.refusals import make_calls, require_calls_before_analysis
 from horizon_compact.sweep.runner import ROLES, Role, check_route, run_session, sweep_prefix
 from horizon_compact.sweep.spend import DEVELOPMENT_CAP_USD
 from horizon_compact.sweep.store import LocalStore, S3Store, Store
@@ -599,6 +608,203 @@ def cmd_sweep_status(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_sweep_awareness(args: argparse.Namespace) -> int:
+    """The awareness probe (protocol 9.6): S1, every objective under every template, one call each, no tool.
+    Official only, so the gate applies as for the grid: ``--dry-run`` checks it, ``--launch`` starts the
+    container task, and a plain run is what the task executes. ``--report`` quotes every stored reply."""
+    root = Path(args.experiment_dir) if args.experiment_dir else None
+    experiment = load_experiment(args.experiment, root)
+    plan_ = build_awareness_plan(experiment, args.model, args.seed)
+    if args.report:
+        session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+        print(awareness_report(_store(args, session), experiment, plan_))
+        return CLEAN_EXIT
+    cap = _check_cap(args)
+    route_kind = experiment.model(plan_.model_key).route
+    if route_kind == "local":
+        raise SweepRefusal(
+            f"{plan_.model_key} is a local model: the awareness probe is official only"
+        )
+    if args.dry_run or args.launch:
+        # The laptop checks 1-7 before anything starts; the task checks all eight again in the container.
+        preflight = run_gate(
+            experiment,
+            plan_,
+            identify({} if args.launch else os.environ, _laptop_git),
+            require_container=False,
+            why="launch" if args.launch else "dry run",
+        )
+        for note in preflight.notes:
+            print(f"note: {note}")
+        if not preflight.ok:
+            if args.launch:
+                raise SweepRefusal(refusal_message(preflight))
+            print(refusal_message(preflight), file=sys.stderr)
+            return REFUSED_EXIT
+        check_awareness_cap(experiment, plan_, cap)
+        if args.dry_run:
+            print(f"awareness: {plan_.sweep_id} ({len(plan_.runs)} calls, model {plan_.model_key})")
+            print("every check passes (dry run; nothing written, nothing called)")
+            return CLEAN_EXIT
+        if route_kind == "openrouter":
+            raise SweepRefusal(
+                f"{plan_.model_key} is an OpenRouter model: until the container can reach it, it "
+                "cannot run officially"
+            )
+        session = _session(args, identify({}, _laptop_git))
+        command = [
+            "sweep", "awareness",
+            "--experiment", args.experiment,
+            "--model", args.model,
+            "--seed", str(args.seed),
+            "--store", "s3",
+            "--cap-usd", str(cap),
+            "--max-minutes", str(args.max_minutes),
+        ]  # fmt: skip
+        if args.allow_over_cap:
+            command.append("--allow-over-cap")
+        arn = sweep_launch.launch_task(
+            session.client("ecs"), session.client("ec2"), model_key=args.model, command=command
+        )
+        print(f"launched:        {arn.rsplit('/', 1)[-1]}")
+        print(f"sweep:           {plan_.sweep_id}")
+        print("read it back:    hc sweep awareness --report (same arguments, --store s3)")
+        return CLEAN_EXIT
+    identity = identify(os.environ, _laptop_git)
+    check_official(experiment, plan_, identity)
+    check_route(experiment, plan_.model_key, os.environ)
+    check_awareness_cap(experiment, plan_, cap)
+    provider, route, store, account_id = _connect(
+        args,
+        experiment,
+        plan_.model_key,
+        identity,
+        lambda store: awareness_estimate(experiment, plan_, store),
+        cap,
+    )
+    if not isinstance(provider, BedrockConverseProvider | OpenRouterProvider):
+        raise SweepRefusal(f"{plan_.model_key}'s provider cannot make a call with no tool")
+
+    stop_requested = {"flag": False}
+
+    def request_stop(signum: int, frame: FrameType | None) -> None:
+        stop_requested["flag"] = True
+
+    signal.signal(signal.SIGTERM, request_stop)
+    signal.signal(signal.SIGINT, request_stop)
+
+    result = run_awareness(
+        experiment=experiment,
+        plan=plan_,
+        route=route,
+        provider=provider,
+        store=store,
+        identity=identity,
+        account_id=account_id,
+        cap_usd=cap,
+        max_minutes=args.max_minutes,
+        harness_version=horizon_compact.__version__,
+        rng=random.Random(),
+        should_stop=lambda: stop_requested["flag"],
+        progress=lambda line: print(line, file=sys.stderr, flush=True),
+    )
+    print(f"sweep:           {plan_.sweep_id}")
+    print(f"stopped:         {result.stopped}")
+    print(
+        f"calls recorded:  {result.calls_done_before + result.calls_done_now} of {result.calls_total}"
+    )
+    print(f"this session:    {result.api_calls_now} calls, ${result.cost_usd_now:.4f}")
+    print(f"sweep total:     ${result.cost_usd_total:.4f} (cap ${cap:.2f})")
+    return CLEAN_EXIT if result.clean else NOT_CLEAN_EXIT
+
+
+def cmd_sweep_refusals(args: argparse.Namespace) -> int:
+    """The blind refusal calls (protocol 4.7): every ``no_tool_call`` run of a finished sweep, as a masked,
+    shuffled case with only the reply's text, asked once, written once, before any official analysis."""
+    session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+    store = _store(args, session)
+    prefix = sweep_prefix(args.experiment, args.sweep, args.role)
+
+    def ask(prompt: str) -> str:
+        return input(prompt)
+
+    result = make_calls(
+        store,
+        prefix,
+        args.sweep,
+        made_by=args.made_by,
+        ask=ask,
+        show=print,
+    )
+    if result.calls_key is not None:
+        print(f"wrote {result.calls_key} ({result.refusals} of {result.cases} called refusals)")
+        print(f"wrote {result.meta_key}")
+    return CLEAN_EXIT
+
+
+def cmd_analyze(args: argparse.Namespace) -> int:
+    """One finished sweep to one results file (Phase 4 code half section 4.7). The analysis needs scipy, which
+    the container image leaves out, so it is imported here and never at module level."""
+    from horizon_compact.analysis.failures import RefusalCallError, read_refusal_calls
+    from horizon_compact.analysis.records import RecordRefusal, read_runs
+    from horizon_compact.analysis.results import build_results, write_results
+
+    top = Path(args.root) if args.root else Path(_git("rev-parse", "--show-toplevel"))
+    protocol = args.protocol
+    if protocol is None:
+        try:
+            protocol = read_lock(lock_path(top)).protocol
+        except LockError as exc:
+            raise SweepRefusal(
+                "no --protocol given and no readable lock to take it from: "
+                + "; ".join(exc.reasons)
+            ) from exc
+    experiment = load_experiment(
+        args.experiment, Path(args.experiment_dir) if args.experiment_dir else None
+    )
+    if args.role == "official":
+        frozen = run_analysis_gate(experiment)
+        if not frozen.ok:
+            raise SweepRefusal(
+                "\n".join(
+                    ["official analysis refused: the analysis must be the locked one"]
+                    + [f"  {line}" for line in [*frozen.failures, *frozen.notes]]
+                )
+            )
+    session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+    store = _store(args, session)
+    prefix = sweep_prefix(experiment.name, args.sweep, args.role)
+    try:
+        runset = read_runs(store, prefix)
+    except RecordRefusal as exc:
+        raise SweepRefusal(str(exc)) from exc
+    # The calls come first: a sweep with a no_tool_call run and no calls file is refused here.
+    require_calls_before_analysis(store, prefix, runset.rows)
+    try:
+        calls = read_refusal_calls(store, prefix)
+    except RefusalCallError as exc:
+        raise SweepRefusal(str(exc)) from exc
+    try:
+        # The RunSet itself goes in, so its refusal of unfinished runs cannot be skipped. The analysis
+        # refuses data it cannot assess (unfinished runs, a cell too small for a variance) with ValueError.
+        results = build_results(experiment, runset, calls=calls)
+    except ValueError as exc:
+        raise SweepRefusal(f"the analysis refused this sweep: {exc}") from exc
+    try:
+        path = write_results(results, top, protocol)
+    except (FileExistsError, ValueError) as exc:
+        raise SweepRefusal(str(exc)) from exc
+    print(f"wrote {path.relative_to(top)}")
+    print(
+        f"sweep:           {results.sweep_id} ({results.model_key}, {len(runset.rows)} runs, "
+        f"{len(results.refusal_calls)} refusal calls)"
+    )
+    print(
+        "commit it yourself; it is never overwritten, and a different analysis is a new protocol version"
+    )
+    return CLEAN_EXIT
+
+
 FORMAT_REPORT_DIR = "docs/phases/evidence/phase-2.5/format"
 
 
@@ -975,9 +1181,58 @@ def build_parser() -> argparse.ArgumentParser:
     report_parser.add_argument("--bucket", default=None)
     report_parser.add_argument("--profile", default=None)
     report_parser.add_argument("--role", choices=ROLES, default="development")
+    awareness_parser = sweep_actions.add_parser(
+        "awareness",
+        help="The awareness probe (protocol 9.6): S1, every objective and template, one call each, no tool",
+    )
+    awareness_parser.add_argument("--experiment", required=True)
+    awareness_parser.add_argument("--model", required=True, help="a key in experiment/models.toml")
+    awareness_parser.add_argument("--seed", type=int, required=True)
+    awareness_parser.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
+    awareness_parser.add_argument("--profile", default=None)
+    awareness_parser.add_argument("--cap-usd", type=float, default=DEVELOPMENT_CAP_USD)
+    awareness_parser.add_argument("--allow-over-cap", action="store_true")
+    awareness_parser.add_argument("--max-minutes", type=float, default=30.0)
+    awareness_parser.add_argument("--store", choices=("local", "s3"), default="s3")
+    awareness_parser.add_argument("--bucket", default=None)
+    awareness_mode = awareness_parser.add_mutually_exclusive_group()
+    awareness_mode.add_argument(
+        "--dry-run", action="store_true", help="every gate check; write nothing, call nothing"
+    )
+    awareness_mode.add_argument(
+        "--launch", action="store_true", help="start the probe as a Fargate task"
+    )
+    awareness_mode.add_argument(
+        "--report", action="store_true", help="print every stored reply in full"
+    )
+    refusals_parser = sweep_actions.add_parser(
+        "refusals",
+        help="Make the blind refusal calls for a finished sweep (once, before any analysis)",
+    )
+    refusals_parser.add_argument("--experiment", required=True)
+    refusals_parser.add_argument("--sweep", required=True, help="the sweep id")
+    refusals_parser.add_argument("--made-by", required=True, help="who is making the calls")
+    refusals_parser.add_argument("--role", choices=("official", "development"), default="official")
+    refusals_parser.add_argument("--store", choices=("local", "s3"), default="s3")
+    refusals_parser.add_argument("--bucket", default=None)
+    refusals_parser.add_argument("--profile", default=None)
     stop_parser = sweep_actions.add_parser("stop", help="Stop a model's running sweep task")
     stop_parser.add_argument("--model", required=True)
     stop_parser.add_argument("--profile", default=None)
+
+    analyze = groups.add_parser(
+        "analyze",
+        help="One finished sweep to one results file under experiment/results/. Needs the refusal calls first.",
+    )
+    analyze.add_argument("--experiment", required=True)
+    analyze.add_argument("--sweep", required=True, help="the sweep id")
+    analyze.add_argument("--role", choices=("official", "development"), default="official")
+    analyze.add_argument("--store", choices=("local", "s3"), default="s3")
+    analyze.add_argument("--bucket", default=None)
+    analyze.add_argument("--profile", default=None)
+    analyze.add_argument("--protocol", default=None, help="default: the lock's protocol name")
+    analyze.add_argument("--root", default=None, help=argparse.SUPPRESS)
+    analyze.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
 
     dossier = groups.add_parser("dossier", help="Phase 2 company dossier. Offline; calls no model.")
     dossier.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
@@ -1089,6 +1344,8 @@ SWEEP_COMMANDS = {
     "status": cmd_sweep_status,
     "report": cmd_sweep_report,
     "stop": cmd_sweep_stop,
+    "awareness": cmd_sweep_awareness,
+    "refusals": cmd_sweep_refusals,
 }
 
 
@@ -1108,6 +1365,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         try:
             return PROBE_COMMANDS[args.action](args)
         except (SweepRefusal, ExperimentError, ProbeError, FigureError, ScenarioSourceError) as exc:
+            print(f"refused: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
+        except IdentityError as exc:
+            print(f"cannot tell where this is running: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
+        except (BotoCoreError, ClientError) as exc:
+            print(f"AWS error: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
+    if args.group == "analyze":
+        try:
+            return cmd_analyze(args)
+        except (SweepRefusal, ExperimentError) as exc:
             print(f"refused: {exc}", file=sys.stderr)
             return REFUSED_EXIT
         except IdentityError as exc:

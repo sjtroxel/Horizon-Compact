@@ -39,10 +39,13 @@ from typing import Any
 
 from horizon_compact.providers.base import (
     DecisionRequest,
+    ModelRoute,
     Provenance,
     RawDecision,
+    TextRequest,
     Usage,
     prompt_sha256,
+    text_prompt_sha256,
 )
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -159,8 +162,34 @@ class OpenRouterProvider:
             parsed = json.loads(response.read().decode("utf-8"))
         return parsed if isinstance(parsed, dict) else {"unexpected": parsed}
 
+    def text_request_body(self, request: TextRequest) -> dict[str, Any]:
+        """The same call with no ``tools`` and no ``tool_choice``: the model has nothing to call."""
+        return {
+            "model": request.route.invoke_id,
+            "messages": [
+                {"role": "system", "content": request.system},
+                {"role": "user", "content": request.user},
+            ],
+            "max_tokens": request.max_tokens,
+            "usage": {"include": True},
+        }
+
     def decide(self, request: DecisionRequest) -> RawDecision:
-        body = self.request_body(request)
+        return self._send(
+            self.request_body(request), request.route, request.max_tokens, prompt_sha256(request)
+        )
+
+    def decide_text(self, request: TextRequest) -> RawDecision:
+        return self._send(
+            self.text_request_body(request),
+            request.route,
+            request.max_tokens,
+            text_prompt_sha256(request),
+        )
+
+    def _send(
+        self, body: dict[str, Any], route: ModelRoute, max_tokens: int, sha256: str
+    ) -> RawDecision:
         started = self._now()
         t0 = self._monotonic()
         raw: dict[str, Any] | None = None
@@ -199,16 +228,16 @@ class OpenRouterProvider:
         provenance = Provenance(
             provider=self.name,
             api="openrouter-chat-completions",
-            model_id=request.route.model_id,
-            invoke_id=request.route.invoke_id,
-            route_kind=request.route.route_kind,
+            model_id=route.model_id,
+            invoke_id=route.invoke_id,
+            route_kind=route.route_kind,
             inference_profile=None,
             region=HOSTED_REGION,
             thinking="not set (the model's default)",
             effort="not set",
             temperature="not set; the serving provider's defaults",
-            max_tokens=request.max_tokens,
-            prompt_sha256=prompt_sha256(request),
+            max_tokens=max_tokens,
+            prompt_sha256=sha256,
             started_at=started.isoformat(),
             finished_at=self._now().isoformat(),
             latency_ms=latency_ms,

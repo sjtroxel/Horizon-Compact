@@ -238,8 +238,8 @@ commit's diff before he commits** (the arrangement he called "exactly what we wa
 2. **[done 2026-10-10, K3]** §4.1 per-scenario repeats.
 3. **[done 2026-10-10, K3; boundary applied by him]** §4.2 prefixes and labels; the IAM JSON change (he applies).
 4. **[done 2026-10-10, K3]** §4.3 the pilot path; §4.4 the official launch.
-5. §4.5's run part (the text request, `hc sweep awareness`).
-6. §4.6 the refusal workflow; §4.7's command.
+5. **[done 2026-10-11, K4; Sonnet built, Opus reviewed and fixed]** §4.5's run part (the text request, `hc sweep awareness`).
+6. **[done 2026-10-11, K4; Sonnet built, Opus reviewed and fixed]** §4.6 the refusal workflow; §4.7's command.
 7. §4.8 the container's OpenRouter route (if decision 4 is (a)); the SSM parameter he creates; then, his choice,
    Phase 1 step 9 on the placeholder.
 
@@ -265,6 +265,24 @@ About a day of build with tests, in line with START HERE's estimate; §4.8 about
   afternoon (Opus, his request):** the gate enforces the pilot's shape (protocol §8.1: every scenario, both
   development wordings, 2 repeats a cell), and one pilot per model (a second `repeats.json` for a model is refused
   at write, and an official sweep refuses a model with two). KNOWN-GAPS entry, closed 2026-10-10.
+
+**As built, 2026-10-11 (steps 5-6; Sonnet built, Opus reviewed; fixes applied the same hour).** `make check` green at 1511 tests.
+
+- **Step 5.** `TextRequest` and `decide_text` on both providers; no tool is sent (tests inspect each body). The awareness
+  plan is `build_plan` with the label `awareness`, scenario s1, every template, one repeat, so the gate (check 4 wants
+  the sealed template in the plan) and the manifest rules apply unchanged. Prefix `official/<exp>/awareness/<id>/`.
+  The output allowance is S1's `max_tokens` (the protocol is silent). Added beyond the doc: `--dry-run`, `--launch`,
+  `--report`.
+- **Step 6.** `hc sweep refusals` shows each `no_tool_call` run as `case N of M`, in a shuffled order, with the reply
+  text only (a test checks the screen against every run id, objective phrase, wording id and scenario id). **The header
+  the doc asked for is a sidecar,** `refusal-calls.meta.json`: `analysis/failures.py` reads `refusal-calls.json` as run
+  id to reason only, and a header inside it would change both the analysis set and the protocol's description of the
+  file; the sidecar changes neither. A reason is asked for refusals only. `hc analyze` refuses a sweep with a
+  `no_tool_call` run and no calls file, then passes the `RunSet` to `build_results`.
+- **Opus's review.** Two fixes: the probe keeps every API error under `errors/` (protocol 13.2), and `hc analyze`
+  runs `gate.run_analysis_gate` (the lock, the content, the analysis set) before writing an official results file,
+  added beyond the doc so decision 3's "from the frozen code" is checked, not assumed. Nits: `RUN_KEY` public, a dead
+  variable, narrower error handling. One OPEN entry in KNOWN-GAPS (the run log names the objective).
 
 ## 8. Commits
 

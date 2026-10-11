@@ -7,6 +7,35 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-11, about 4:30 AM (steps 5-6 built by Sonnet, reviewed and fixed by Opus)
+>
+> **Measured:** `make check` green, **1511 tests**, root 13 of 16. **Uncommitted, on purpose (K4, his to run):** steps 5
+> and 6 of the Phase 4 code half with Opus's review fixes, and these notes. If `git log` shows no `phase 4: awareness`
+> commit, the files are still in the tree. **No frozen file changed in K4** (instrument and analysis sets untouched).
+>
+> **Step 5:** `TextRequest` and `decide_text` on Bedrock and OpenRouter (no tool sent; `decide` refactored onto a shared
+> send path); `sweep/awareness.py` (S1, every objective and template, 15 calls, a reply never retried, an API error
+> retried with backoff **and kept under `errors/`**, write-once records under `official/<exp>/awareness/<id>/`, resume,
+> a report quoting every reply); `hc sweep awareness` with `--dry-run`, `--launch` and `--report`.
+>
+> **Step 6:** `hc sweep refusals` (a masked, shuffled screen showing only each reply's text; write-once
+> `refusal-calls.json` plus the sidecar `refusal-calls.meta.json`); `hc analyze` (**for an official sweep, refused unless
+> the lock exists and the content and analysis set are the locked ones**; then refused unless the calls file exists
+> whenever a `no_tool_call` run does; the whole `RunSet` to `build_results`; writes
+> `experiment/results/<protocol>/<model>/<sweep>.json`).
+>
+> **Opus's review (2026-10-11), all applied the same hour at his request:** (1) the probe now keeps every API error as its
+> own record (protocol 13.2: one object per attempt); (2) `hc analyze` runs a new `gate.run_analysis_gate` (checks 1, 3
+> and 6) before an official results file; nits: `RUN_KEY` made public, a dead variable removed, `hc analyze`'s error
+> handling narrowed to each call's own refusals. **Accepted as built:** the sidecar (a header inside the calls file would
+> change both the analysis set and the protocol's description of the file; the sidecar changes neither), a reason asked
+> for refusals only, S1's `max_tokens` for the probe, `--launch` and `--report`. One new OPEN entry below (the progress
+> log).
+>
+> **NEXT:** step 7 (OpenRouter from the container; K5), Sonnet building, Opus reviewing.
+>
+> *Superseded 2026-10-11 by the block above. The 3 PM handoff block as written:*
+>
 > ## START HERE — where things stand, 2026-10-10, 3 PM (handoff)
 >
 > **Measured at handoff:** `make check` green, **1457 tests**, root 13 of 16. Step 1 committed and pushed (`24b40c5`).
@@ -513,6 +542,17 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
+## OPEN 2026-10-11 — the run log shows each run's objective beside its status
+
+Found in Opus's review of the Phase 4 code half, step 6. Not from K4's diff. The runner's progress lines
+(`run 3/30 A attempt 1: no_tool_call`) name the objective and the status, and in the container they go to the task's
+CloudWatch log. A person who reads that log before the blind refusal calls would know which objectives produced
+`no_tool_call`, though not any reply's words. **Recommended:** run code, fixable after the tag: drop the objective id
+from the progress line on an official or pilot session (keep the run's position), with a test; until then, do not read
+an official sweep's log before the calls are made. Stated in no record yet.
+
+---
+
 ## CLOSED 2026-10-10 — the pilot's shape and one pilot per model (was OPEN, same day)
 
 **Closed 2026-10-10, 3:15 PM (his request, Opus built):** `gate.check_pilot_shape` (pilot mode only) refuses a pilot
@@ -594,13 +634,13 @@ supplies the case content from private storage and calls `check_case_official`. 
   S4 text answer that names the option. Narrow the pattern in run code before the grid, with a test.
   **Closed 2026-10-09** (Phase 3.5 step 2): "decline" now flags only as "decline to" in a clause starting with "I"; the bare
   word no longer flags; "refuse" stays broad. `classify.py` is an instrument file, frozen at the tag.
-- **Refusal calls are made blind, once** *(added 2026-10-08, from Opus's review of Phase 3 step 5)*. The human call
+- **Refusal calls are made blind, once** *(added 2026-10-08, from Opus's review of Phase 3 step 5; **built 2026-10-11**, Phase 4 code half step 6, awaiting Opus's review: `hc sweep refusals`, written by him through the masked screen)*. The human call
   that turns a `no_tool_call` into a refusal (`refusal-calls.json` beside the sweep; Phase 3 doc §9.1) is made with
   the run's objective hidden, and the file is written once, before any official analysis. A call cannot change a
   verdict (a refusal and a failure count the same toward exclusion and the worst-case bound), but it moves a run
   between two columns and changes the refusal-rate table (§9.5), so it should not lean by objective. Phase 4's
   IMPLEMENTATION doc says who writes the file, how the objective is hidden from them, and when.
-- **Analysis is refused while any run is unfinished** *(same date and source; the library half is done)*.
+- **Analysis is refused while any run is unfinished** *(same date and source; the library half is done; **the command built 2026-10-11**, step 6: `hc analyze` passes the whole `RunSet`, tested on a half-finished sweep)*.
   `records.RunSet.unfinished` lists manifest runs with no `final.json`; the failure rules count finished runs
   only, so a half-finished sweep would understate every cell's attempts and failures. **`results.build_results`
   now refuses a `RunSet` whose `unfinished` is non-empty** (Phase 3 step 7, tested). What stays for Phase 4: the

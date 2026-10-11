@@ -18,10 +18,13 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 from horizon_compact.providers.base import (
     DecisionRequest,
+    ModelRoute,
     Provenance,
     RawDecision,
+    TextRequest,
     Usage,
     prompt_sha256,
+    text_prompt_sha256,
 )
 
 if TYPE_CHECKING:
@@ -70,6 +73,16 @@ def build_request(request: DecisionRequest) -> dict[str, Any]:
     return body
 
 
+def build_text_request(request: TextRequest) -> dict[str, Any]:
+    """The same call as ``build_request`` with no ``toolConfig`` at all: no tool, so no tool choice."""
+    return {
+        "modelId": request.route.invoke_id,
+        "system": [{"text": request.system}],
+        "messages": [{"role": "user", "content": [{"text": request.user}]}],
+        "inferenceConfig": {"maxTokens": request.max_tokens},
+    }
+
+
 def _thinking_as_sent(request: DecisionRequest) -> str:
     fields = request.additional_fields or {}
     return json.dumps(fields["thinking"], sort_keys=True) if "thinking" in fields else "not set"
@@ -115,8 +128,38 @@ class BedrockConverseProvider:
     def request_body(self, request: DecisionRequest) -> dict[str, Any]:
         return build_request(request)
 
+    def text_request_body(self, request: TextRequest) -> dict[str, Any]:
+        return build_text_request(request)
+
     def decide(self, request: DecisionRequest) -> RawDecision:
-        body = build_request(request)
+        return self._send(
+            build_request(request),
+            request.route,
+            request.max_tokens,
+            _thinking_as_sent(request),
+            _effort_as_sent(request),
+            prompt_sha256(request),
+        )
+
+    def decide_text(self, request: TextRequest) -> RawDecision:
+        return self._send(
+            build_text_request(request),
+            request.route,
+            request.max_tokens,
+            "not set",
+            "not set",
+            text_prompt_sha256(request),
+        )
+
+    def _send(
+        self,
+        body: dict[str, Any],
+        route: ModelRoute,
+        max_tokens: int,
+        thinking: str,
+        effort: str,
+        sha256: str,
+    ) -> RawDecision:
         started = self._now()
         t0 = self._monotonic()
         raw: dict[str, Any] | None = None
@@ -141,16 +184,16 @@ class BedrockConverseProvider:
         provenance = Provenance(
             provider=self.name,
             api="converse",
-            model_id=request.route.model_id,
-            invoke_id=request.route.invoke_id,
-            route_kind=request.route.route_kind,
-            inference_profile=request.route.inference_profile,
+            model_id=route.model_id,
+            invoke_id=route.invoke_id,
+            route_kind=route.route_kind,
+            inference_profile=route.inference_profile,
             region=self._region,
-            thinking=_thinking_as_sent(request),
-            effort=_effort_as_sent(request),
+            thinking=thinking,
+            effort=effort,
             temperature="not set",
-            max_tokens=request.max_tokens,
-            prompt_sha256=prompt_sha256(request),
+            max_tokens=max_tokens,
+            prompt_sha256=sha256,
             started_at=started.isoformat(),
             finished_at=self._now().isoformat(),
             latency_ms=latency_ms,
