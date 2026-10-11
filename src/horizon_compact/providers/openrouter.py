@@ -12,10 +12,20 @@ What is sent: the system and user text, the one tool, ``tool_choice: "auto"``, `
 (planning/07 section 2.3): the provider runs at the defaults it chooses for the model, and the stored
 response says which provider served the call.
 
-**The key** is his and is never written down. It comes from ``OPENROUTER_API_KEY`` if that is set, else from
-a hidden prompt; its shape is checked (``sk-or-``) before any call. It travels in one header, never in a
-body, an argument list, a record or a log: the request the harness stores is the body, which has no key,
-any error message is scrubbed of it, and the record writer refuses a record that still holds a key.
+**The key** is his and is never written down. It comes from ``OPENROUTER_API_KEY`` if that is set, else (in
+the container only) from an SSM SecureString, else from a hidden prompt; its shape is checked (``sk-or-``)
+before any call. It travels in one header, never in a body, an argument list, a record or a log: the request
+the harness stores is the body, which has no key, any error message is scrubbed of it, and the record writer
+refuses a record that still holds a key.
+
+**Provider pinning** (Phase 4 code half section 4.8). A route with a ``pinned_provider`` sends
+``provider: {order: [<it>], allow_fallbacks: false}``, so OpenRouter cannot serve the call from another
+backend, and a reply whose ``provider`` is not that one is a recorded ``api_error`` (code
+``ProviderMismatch``, which the classifier treats as a configuration error that stops the session), never a
+result. The raw reply and its usage stay in the record as evidence; its tool call and text are dropped. The
+comparison is by provider name, ignoring case, punctuation and any ``/variant`` suffix on the pin: the
+request's pin chooses the variant, the reply names the host (``DeepInfra``, as stored replies show). A host
+whose name and slug differ (``Google`` for ``google-vertex``) never matches, so it fails closed.
 
 What comes back is mapped onto the shape the Bedrock provider returns, so the classifier and the runner
 need no change: a reply that ends normally with a tool call has stop reason ``tool_use``, without one
@@ -28,6 +38,7 @@ full price (an overestimate, the safe direction for a cap).
 from __future__ import annotations
 
 import contextlib
+import dataclasses
 import getpass
 import json
 import time
@@ -51,12 +62,15 @@ from horizon_compact.providers.base import (
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 KEY_ENV = "OPENROUTER_API_KEY"
 KEY_PREFIX = "sk-or-"
+SSM_PARAMETER = "/horizon-compact/openrouter-key"  # the container's source; a test holds it equal to the IAM JSON
 MIN_KEY_LENGTH = 20
 HOSTED_REGION = "hosted by OpenRouter"
 # The error names the classifier already knows (sweep/classify.py).
 _CONNECTION_ERROR = "EndpointConnectionError"
 _TIMEOUT_ERROR = "ReadTimeoutError"
 _SERVER_ERROR = "InternalServerException"
+# Not a name the classifier knows, so it is a configuration error that stops the session (the safe direction).
+PROVIDER_MISMATCH = "ProviderMismatch"
 
 
 class OpenRouterKeyError(Exception):
@@ -68,9 +82,15 @@ def read_key(
     ask: Callable[[], str] = lambda: getpass.getpass(
         "OpenRouter key (typing is hidden; press Enter once): "
     ),
+    ssm_fetch: Callable[[], str] | None = None,
 ) -> str:
-    """The key from the environment, else from ``ask`` (a hidden prompt), checked for shape before use."""
-    key = (env.get(KEY_ENV) or "").strip() or ask().strip()
+    """The key from the environment, else from ``ssm_fetch`` (the container's SSM parameter, when given), else
+    from ``ask`` (a hidden prompt), checked for shape before use."""
+    key = (env.get(KEY_ENV) or "").strip()
+    if not key and ssm_fetch is not None:
+        key = ssm_fetch().strip()
+    if not key:
+        key = ask().strip()
     if not key:
         raise OpenRouterKeyError(f"no key: set {KEY_ENV} or type it at the prompt")
     if not key.startswith(KEY_PREFIX) or len(key) < MIN_KEY_LENGTH:
@@ -79,6 +99,32 @@ def read_key(
             f"what was given is {len(key)} characters long); nothing was sent"
         )
     return key
+
+
+def ssm_key_fetcher(client: Any) -> Callable[[], str]:
+    """A function that reads the key from the SSM SecureString, for the container. ``client`` is an ``ssm``
+    client; this module never imports boto3. A failure names the kind of error and the AWS error code, never a
+    value, so nothing about the key can reach a log."""
+
+    def fetch() -> str:
+        try:
+            response = client.get_parameter(Name=SSM_PARAMETER, WithDecryption=True)
+            value = response["Parameter"]["Value"]
+        except Exception as exc:  # a boto error, a missing field: say which kind, show nothing else
+            code = getattr(exc, "response", {}).get("Error", {}).get("Code", "")
+            raise OpenRouterKeyError(
+                f"could not read the key from SSM parameter {SSM_PARAMETER}: "
+                f"{type(exc).__name__}{f' ({code})' if code else ''}"
+            ) from None
+        return str(value)
+
+    return fetch
+
+
+def _provider_key(name: str) -> str:
+    """A provider reduced to what the pin and the reply's name share: lower case, the part before any
+    ``/variant``, letters and digits only (``deepinfra/bf16`` and ``DeepInfra`` are both ``deepinfra``)."""
+    return "".join(ch for ch in name.split("/", 1)[0].lower() if ch.isalnum())
 
 
 def _error_code(status: int) -> str:
@@ -123,7 +169,18 @@ class OpenRouterProvider:
 
     # --- the request ---------------------------------------------------------------------------------------
 
+    @staticmethod
+    def _pin(body: dict[str, Any], route: ModelRoute) -> dict[str, Any]:
+        """Add the provider pin: this provider only, no fallback."""
+        if route.pinned_provider:
+            body["provider"] = {"order": [route.pinned_provider], "allow_fallbacks": False}
+        return body
+
     def request_body(self, request: DecisionRequest) -> dict[str, Any]:
+        return self._pin(self._decision_body(request), request.route)
+
+    @staticmethod
+    def _decision_body(request: DecisionRequest) -> dict[str, Any]:
         return {
             "model": request.route.invoke_id,
             "messages": [
@@ -164,6 +221,10 @@ class OpenRouterProvider:
 
     def text_request_body(self, request: TextRequest) -> dict[str, Any]:
         """The same call with no ``tools`` and no ``tool_choice``: the model has nothing to call."""
+        return self._pin(self._text_body(request), request.route)
+
+    @staticmethod
+    def _text_body(request: TextRequest) -> dict[str, Any]:
         return {
             "model": request.route.invoke_id,
             "messages": [
@@ -249,7 +310,24 @@ class OpenRouterProvider:
         )
         if raw is None:
             return RawDecision(status="api_error", provenance=provenance, error=error)
-        return _decision(raw, provenance)
+        decided = _decision(raw, provenance)
+        pin = route.pinned_provider
+        if pin and _provider_key(str(raw.get("provider", ""))) != _provider_key(pin):
+            # Never a result: the call was served by a backend the pin excludes. The whole reply stays in
+            # ``raw_response`` as evidence and its tokens still count toward the cap, but no tool call or text
+            # is carried, so no record field (``parsed_decision``, ``tool_calls``) ever holds its decision.
+            return dataclasses.replace(
+                decided,
+                status="api_error",
+                tool_calls=[],
+                text_blocks=[],
+                reasoning_block_count=0,
+                error={
+                    "code": PROVIDER_MISMATCH,
+                    "message": f"pinned to {pin!r}, served by {str(raw.get('provider', 'unknown'))!r}",
+                },
+            )
+        return decided
 
 
 def _error_message(exc: urllib.error.HTTPError) -> str:

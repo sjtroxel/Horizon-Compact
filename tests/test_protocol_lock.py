@@ -335,6 +335,21 @@ def test_a_route_without_a_region_or_profile_records_neither(tree: Path) -> None
     assert check_lock(tree).ok
 
 
+def test_a_pinned_openrouter_provider_is_part_of_the_locked_identity(tree: Path) -> None:
+    """The backend that answers is part of which model answers, so the pin is locked and a change to it fails
+    (Phase 4 code half section 4.8). An unpinned model records none."""
+    make_lock(tree, ("gpt-oss-openrouter", "nova-lite"))
+    models = read_lock(lock_path(tree)).models
+    assert models["gpt-oss-openrouter"].openrouter_provider == "deepinfra/bf16"
+    assert models["nova-lite"].openrouter_provider is None
+    assert check_lock(tree).ok
+    edit_models(tree, 'openrouter_provider = "deepinfra/bf16"', 'openrouter_provider = "together"')
+    assert failures(tree) == (
+        "model gpt-oss-openrouter differs from prereg-v1: openrouter_provider is 'together', "
+        "locked 'deepinfra/bf16'",
+    )
+
+
 def test_the_lock_records_the_sets_and_the_record_only_fields(locked: Path) -> None:
     record = read_lock(lock_path(locked))
     assert (record.lock_version, record.protocol, record.document) == (1, "prereg-v1", DOCUMENT)

@@ -393,7 +393,53 @@ def test_the_task_role_never_holds_a_results_prefix_the_boundary_lacks() -> None
 def test_task_role_cannot_delete_or_touch_iam() -> None:
     allowed = _allowed_actions("task.json")
     assert not [a for a in allowed if a.startswith(("iam:", "s3:Delete")) or a.endswith(":*")]
-    assert set(allowed) == {"bedrock:InvokeModel", "s3:GetObject", "s3:PutObject", "s3:ListBucket"}
+    assert set(allowed) == {
+        "bedrock:InvokeModel",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:ListBucket",
+        "ssm:GetParameter",  # the one OpenRouter key parameter, below
+        "kms:Decrypt",  # only for that parameter, via SSM, below
+    }
+
+
+def _statement(name: str, sid: str) -> dict[str, object]:
+    return next(s for s in _statements(name) if s["Sid"] == sid)
+
+
+def test_task_role_and_boundary_read_exactly_one_ssm_parameter_and_decrypt_only_it() -> None:
+    """Phase 4 code half section 4.8: read the OpenRouter key's one parameter, nothing else in SSM, and
+    decrypt only through SSM and only that parameter's value (the encryption context names its ARN)."""
+    from horizon_compact.providers.openrouter import SSM_PARAMETER
+
+    parameter = (
+        f"arn:aws:ssm:{_FAKE_VARS['region']}:{_FAKE_VARS['account_id']}:parameter{SSM_PARAMETER}"
+    )
+    for name in ("task.json", "boundary.json"):
+        read = _statement(name, "ReadOpenRouterKey")
+        assert read["Effect"] == "Allow" and _actions(read) == ["ssm:GetParameter"], name
+        assert _as_list(read["Resource"]) == [parameter], name  # one parameter, no wildcard
+        decrypt = _statement(name, "DecryptOpenRouterKey")
+        assert _actions(decrypt) == ["kms:Decrypt"], name
+        condition = decrypt["Condition"]
+        assert isinstance(condition, dict)
+        assert condition["StringEquals"] == {
+            "kms:ViaService": f"ssm.{_FAKE_VARS['region']}.amazonaws.com",
+            "kms:EncryptionContext:PARAMETER_ARN": parameter,
+        }, name
+    allowed = _allowed_actions("task.json")
+    assert not [a for a in allowed if a.startswith("ssm:") and a != "ssm:GetParameter"]
+    assert not [a for a in allowed if a.startswith("kms:") and a != "kms:Decrypt"]
+
+
+def test_the_key_parameter_is_never_created_by_terraform() -> None:
+    """He creates its value by hand in the console, so the key never passes through a file, a command line or
+    Terraform state (section 4.8)."""
+    assert "aws_ssm_parameter" not in _tf_text_all()
+
+
+def _tf_text_all() -> str:
+    return "\n".join(_strip_comments(text) for text in _tf_text().values())
 
 
 def test_every_role_in_main_carries_the_boundary() -> None:

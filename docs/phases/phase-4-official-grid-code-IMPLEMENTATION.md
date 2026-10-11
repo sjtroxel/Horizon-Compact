@@ -284,6 +284,30 @@ About a day of build with tests, in line with START HERE's estimate; §4.8 about
   added beyond the doc so decision 3's "from the frozen code" is checked, not assumed. Nits: `RUN_KEY` public, a dead
   variable, narrower error handling. One OPEN entry in KNOWN-GAPS (the run log names the objective).
 
+**As built, 2026-10-11 (step 7; Sonnet built, Opus reviewed; fixes applied the same hour).** `make check` green at
+1540 tests.
+
+- **Provider.** `ModelConfig.openrouter_provider` (a slug, `openrouter` routes only) rides on `ModelRoute.pinned_provider`
+  into the body as `provider: {order: [pin], allow_fallbacks: false}`, on both the decision and the text request. A reply
+  whose `provider` names another host is `status = api_error`, code `ProviderMismatch` (not a name the classifier
+  knows, so it stops the session), with the raw reply and its token cost kept and its tool call and text dropped. The
+  pin is in the lock's identity. **The reply names its host by display name: verified from his 225 stored replies of
+  2026-10-07** (Opus's review).
+- **Key.** `read_key(env, ask, ssm_fetch)`: environment, then SSM, then the prompt. `ssm_key_fetcher` reads
+  `/horizon-compact/openrouter-key` with decryption and, on any failure, raises an error naming only the kind and the
+  AWS code (`from None`: no chained message that could hold anything).
+- **Container.** `_connect` on `fargate` reads the key from SSM and uses the results bucket; no spend prompt (the cap is
+  the brake). The laptop path is unchanged. `launch` accepts a pinned OpenRouter model.
+- **IAM.** The task role and the boundary gain `ReadOpenRouterKey` (one parameter) and `DecryptOpenRouterKey`
+  (`kms:ViaService` SSM, encryption context this parameter's ARN). **Checked at build, as the doc asked:** AWS's page
+  says no access control can be set on the default `aws/ssm` key, which suggests no grant is needed, but does not say
+  how a boundary treats it, so the scoped grant stays. Terraform never creates the parameter (a test).
+- **Development model pinned** to `deepinfra/bf16`: the endpoint whose prices `models.toml` records (OpenRouter's endpoint
+  list, 2026-10-11).
+- **Opus's review.** A mismatch result carries no decision (only the raw reply, as evidence); a cosmetic security-group
+  edit reverted so the automatic deploy changes only the task role's policy; one OPEN entry (a host whose name and
+  slug differ never matches; fails closed).
+
 ## 8. Commits
 
 He runs each one; short one-line messages, no attribution.

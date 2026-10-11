@@ -351,18 +351,147 @@ def test_an_openrouter_model_refuses_the_s3_store_before_asking_for_a_key(
     assert "an OpenRouter model's runs stay on this laptop" in capsys.readouterr().err
 
 
-def test_an_openrouter_model_refuses_the_container() -> None:
-    args = cli.build_parser().parse_args(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"])
-    with pytest.raises(SweepRefusal, match="runs on the laptop only"):
-        cli._check_openrouter(args, FARGATE)
-    cli._check_openrouter(args, LAPTOP)
+def _openrouter_config(pinned: bool) -> Any:
+    from horizon_compact.experiment import load_experiment
+
+    config = load_experiment("placeholder").model("gpt-oss-openrouter")
+    return config if pinned else config.model_copy(update={"openrouter_provider": None})
 
 
-def test_an_openrouter_model_cannot_be_launched_as_a_fargate_task(
-    capsys: pytest.CaptureFixture[str],
+def test_an_openrouter_model_runs_in_the_container_only_if_pinned_and_with_the_s3_store() -> None:
+    local = cli.build_parser().parse_args(["sweep", "run", *OPENROUTER_ARGS, "--store", "local"])
+    s3 = cli.build_parser().parse_args(
+        ["sweep", "run", *OPENROUTER_ARGS, "--store", "s3", "--bucket", "b"]
+    )
+    pinned, unpinned = _openrouter_config(True), _openrouter_config(False)
+    cli._check_openrouter(s3, FARGATE, pinned)  # the container: pinned, results bucket
+    with pytest.raises(SweepRefusal, match="no pinned provider"):
+        cli._check_openrouter(s3, FARGATE, unpinned)
+    with pytest.raises(SweepRefusal, match="go to the results bucket"):
+        cli._check_openrouter(local, FARGATE, pinned)
+    cli._check_openrouter(local, LAPTOP, pinned)  # the laptop is as it was, pinned or not
+    cli._check_openrouter(local, LAPTOP, unpinned)
+    with pytest.raises(SweepRefusal, match="stay on this laptop"):
+        cli._check_openrouter(s3, LAPTOP, pinned)
+
+
+class _Aws:
+    """A session whose ``sts``, ``ssm`` and ``s3`` clients are stand-ins; remembers what was asked of ssm."""
+
+    def __init__(self) -> None:
+        self.ssm_calls: list[dict[str, Any]] = []
+
+    def client(self, name: str) -> Any:
+        aws = self
+
+        class Sts:
+            def get_caller_identity(self) -> dict[str, str]:
+                return {"Account": "123456789012"}
+
+        class Ssm:
+            def get_parameter(self, **kwargs: Any) -> dict[str, Any]:
+                aws.ssm_calls.append(kwargs)
+                return {"Parameter": {"Value": MADE_UP_KEY}}
+
+        return {"sts": Sts(), "ssm": Ssm()}.get(name, object())
+
+
+def test_in_the_container_an_openrouter_model_takes_its_key_from_ssm_and_asks_nobody(
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    assert cli.main(["sweep", "launch", *OPENROUTER_ARGS, "--profile", "p"]) == 2
-    assert "is an OpenRouter model" in capsys.readouterr().err
+    from horizon_compact.experiment import load_experiment
+
+    aws = _Aws()
+    built: list[str] = []
+
+    def fake_provider(key: str) -> ScriptedProvider:
+        built.append(key)
+        return ScriptedProvider()
+
+    def nobody(*args: Any, **kwargs: Any) -> str:
+        raise AssertionError("the container asked a person for something")
+
+    monkeypatch.setattr(cli, "_session", lambda args, identity: aws)
+    monkeypatch.setattr(cli, "OpenRouterProvider", fake_provider)
+    monkeypatch.setattr("getpass.getpass", nobody)
+    monkeypatch.setattr("builtins.input", nobody)
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    args = cli.build_parser().parse_args(
+        ["sweep", "run", *OPENROUTER_ARGS, "--store", "s3", "--bucket", "b"]
+    )
+    experiment = load_experiment("placeholder")
+    _provider, route, store, account = cli._connect(
+        args,
+        experiment,
+        "gpt-oss-openrouter",
+        FARGATE,
+        lambda store: pytest.fail("no spend prompt"),
+        5.0,
+    )
+    assert built == [MADE_UP_KEY] and account == "123456789012"
+    assert aws.ssm_calls == [{"Name": "/horizon-compact/openrouter-key", "WithDecryption": True}]
+    assert route.route_kind == "openrouter" and route.pinned_provider == "deepinfra/bf16"
+    assert type(store).__name__ == "S3Store"
+
+
+def test_in_the_container_a_misshapen_ssm_value_is_refused_before_a_provider_exists(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from horizon_compact.experiment import load_experiment
+
+    class BadAws(_Aws):
+        def client(self, name: str) -> Any:
+            class Ssm:
+                def get_parameter(self, **kwargs: Any) -> dict[str, Any]:
+                    return {"Parameter": {"Value": "not-a-key"}}
+
+            return Ssm() if name == "ssm" else super().client(name)
+
+    monkeypatch.setattr(cli, "_session", lambda args, identity: BadAws())
+    monkeypatch.setattr(cli, "OpenRouterProvider", lambda key: pytest.fail("a provider was built"))
+    args = cli.build_parser().parse_args(
+        ["sweep", "run", *OPENROUTER_ARGS, "--store", "s3", "--bucket", "b"]
+    )
+    with pytest.raises(SweepRefusal, match="does not look like an OpenRouter key") as caught:
+        cli._connect(
+            args,
+            load_experiment("placeholder"),
+            "gpt-oss-openrouter",
+            FARGATE,
+            lambda s: pytest.fail("x"),
+            5.0,
+        )
+    assert "not-a-key" not in str(caught.value)
+
+
+def _unpinned_experiment_dir(tmp_path: Path) -> str:
+    from sweep_helpers import copy_experiment
+
+    root = copy_experiment(tmp_path)
+    models = root / "models.toml"
+    models.write_text(
+        models.read_text(encoding="utf-8").replace('openrouter_provider = "deepinfra/bf16"\n', ""),
+        encoding="utf-8",
+    )
+    return str(root)
+
+
+def test_an_unpinned_openrouter_model_cannot_be_launched_as_a_fargate_task(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    directory = _unpinned_experiment_dir(tmp_path)
+    args = ["sweep", "launch", *OPENROUTER_ARGS, "--profile", "p", "--experiment-dir", directory]
+    assert cli.main(args) == 2
+    assert "OpenRouter model with no pinned provider" in capsys.readouterr().err
+
+
+def test_a_pinned_openrouter_model_is_launched_with_the_s3_store_and_no_key_in_the_command(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    command = _launch(monkeypatch, OPENROUTER_ARGS)
+    assert command[command.index("--model") + 1] == "gpt-oss-openrouter"
+    assert command[command.index("--store") + 1] == "s3"
+    assert "sk-or-" not in " ".join(command) and "OPENROUTER" not in " ".join(command)
 
 
 def test_the_plan_for_an_openrouter_model_prints_with_a_small_cost_bound(

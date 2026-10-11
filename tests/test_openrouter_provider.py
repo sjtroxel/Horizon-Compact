@@ -12,11 +12,13 @@ import pytest
 
 from fake_ollama import dead_url
 from fake_openrouter import KEY, MODEL, FakeOpenRouter, completion
-from horizon_compact.providers.base import DecisionRequest, ModelRoute, ToolSpec
+from horizon_compact.providers.base import DecisionRequest, ModelRoute, TextRequest, ToolSpec
 from horizon_compact.providers.openrouter import (
+    SSM_PARAMETER,
     OpenRouterKeyError,
     OpenRouterProvider,
     read_key,
+    ssm_key_fetcher,
 )
 from horizon_compact.smoke.record import RedactionError, serialize_safely
 from horizon_compact.sweep.classify import classify
@@ -24,6 +26,8 @@ from horizon_compact.sweep.store import LocalStore
 from sweep_helpers import experiment, make_plan, session, valid_input
 
 ROUTE = ModelRoute("gpt-oss-openrouter", MODEL, "openrouter", invoke_id=MODEL)
+PIN = "deepinfra/bf16"
+PINNED = ModelRoute("gpt-oss-openrouter", MODEL, "openrouter", invoke_id=MODEL, pinned_provider=PIN)
 TOOL = ToolSpec(
     name="submit_decision",
     description="d",
@@ -362,3 +366,191 @@ def test_the_model_entry_is_the_development_model_with_the_prices_checked_live()
     )
     assert config.num_ctx is None
     assert (config.prices.input, config.prices.output) == (0.037, 0.17)
+
+
+# --- the container's route (Phase 4 code half section 4.8): a pinned provider and the key from SSM ---------
+
+
+def served_by(name: str) -> dict[str, Any]:
+    reply = completion()
+    reply["provider"] = name
+    return reply
+
+
+def test_a_pinned_route_sends_the_provider_with_fallbacks_off_and_an_unpinned_one_sends_nothing() -> (
+    None
+):
+    with FakeOpenRouter(lambda body: (200, served_by("DeepInfra"))) as server:
+        provider = OpenRouterProvider(KEY, server.url)
+        provider.decide(DecisionRequest(PINNED, "s", "u", TOOL, 100))
+        provider.decide(DecisionRequest(ROUTE, "s", "u", TOOL, 100))
+        provider.decide_text(TextRequest(PINNED, "s", "u", 100))
+    pinned, unpinned, text = server.bodies
+    assert pinned["provider"] == {"order": [PIN], "allow_fallbacks": False}
+    assert "provider" not in unpinned
+    assert text["provider"] == {"order": [PIN], "allow_fallbacks": False} and "tools" not in text
+
+
+def test_the_pinned_body_is_the_body_the_provider_describes_and_holds_no_key() -> None:
+    request_ = DecisionRequest(PINNED, "s", "u", TOOL, 100)
+    with FakeOpenRouter(lambda body: (200, served_by("DeepInfra"))) as server:
+        provider = OpenRouterProvider(KEY, server.url)
+        provider.decide(request_)
+        assert provider.request_body(request_) == server.bodies[0]
+    assert KEY not in json.dumps(provider.request_body(request_))
+
+
+@pytest.mark.parametrize("name", ["DeepInfra", "deepinfra", "Deep-Infra", "DeepInfra/turbo"])
+def test_a_reply_from_the_pinned_provider_is_a_result_however_it_is_spelled(name: str) -> None:
+    with FakeOpenRouter(lambda body: (200, served_by(name))) as server:
+        result = OpenRouterProvider(KEY, server.url).decide(
+            DecisionRequest(PINNED, "s", "u", TOOL, 100)
+        )
+    assert result.status == "ok" and result.tool_call_count == 1
+
+
+@pytest.mark.parametrize("name", ["Together", "Test Host", "DeepInfraX", "", "unknown"])
+def test_a_reply_from_any_other_provider_is_a_recorded_api_error_never_a_result(name: str) -> None:
+    with FakeOpenRouter(lambda body: (200, served_by(name))) as server:
+        result = OpenRouterProvider(KEY, server.url).decide(
+            DecisionRequest(PINNED, "s", "u", TOOL, 100)
+        )
+    assert result.status == "api_error"
+    assert result.error is not None and result.error["code"] == "ProviderMismatch"
+    assert PIN in result.error["message"]
+    # the decision is never carried, only the raw reply, as evidence, and its tokens for the cap
+    assert (result.tool_calls, result.text_blocks, result.tool_input) == ([], [], None)
+    assert result.reasoning_block_count == 0
+    assert result.raw_response is not None and result.usage.input_tokens == 2400
+    assert result.raw_response["choices"][0]["message"][
+        "tool_calls"
+    ]  # still there, in the evidence
+
+
+def test_a_host_whose_name_and_slug_differ_fails_closed() -> None:
+    """A known limit: Google's endpoint has the slug ``google-vertex`` and the name ``Google``. The pin and
+    the reply never match, so the call is refused, never counted. Check each host before pinning it."""
+    route = ModelRoute(
+        "m", MODEL, "openrouter", invoke_id=MODEL, pinned_provider="google-vertex/global"
+    )
+    with FakeOpenRouter(lambda body: (200, served_by("Google"))) as server:
+        result = OpenRouterProvider(KEY, server.url).decide(
+            DecisionRequest(route, "s", "u", TOOL, 100)
+        )
+    assert result.status == "api_error" and result.error is not None
+    assert result.error["code"] == "ProviderMismatch"
+
+
+def test_a_missing_provider_in_the_reply_is_a_mismatch_not_a_pass() -> None:
+    reply = completion()
+    del reply["provider"]
+    with FakeOpenRouter(lambda body: (200, reply)) as server:
+        result = OpenRouterProvider(KEY, server.url).decide(
+            DecisionRequest(PINNED, "s", "u", TOOL, 100)
+        )
+    assert result.status == "api_error" and result.error is not None
+    assert result.error["code"] == "ProviderMismatch"
+
+
+def test_a_provider_mismatch_stops_the_session_and_its_cost_still_counts(tmp_path: Path) -> None:
+    exp, plan = make_plan("gpt-oss-openrouter", repeats=1, seed=3)
+    store = LocalStore(tmp_path)
+    with FakeOpenRouter(lambda body: (200, served_by("Together"))) as server:
+        result = session(exp, plan, OpenRouterProvider(KEY, server.url), store, route=PINNED)
+        assert (
+            len(server.bodies) == 1
+        )  # one call, then the session stops: no retry onto the wrong backend
+    assert result.stopped == "config_error" and result.runs_finished_now == 0
+    attempts = [
+        json.loads(store.get(k) or "")
+        for k in store.list_keys(f"development/placeholder/{plan.sweep_id}/")
+        if "/attempt-" in k
+    ]
+    assert len(attempts) == 1
+    assert attempts[0]["status"] == "config_error" and "ProviderMismatch" in attempts[0]["detail"]
+    assert attempts[0]["parsed_decision"] is None and attempts[0]["tool_calls"] == []
+    assert attempts[0]["text_blocks"] == [] and attempts[0]["validation"] is None
+    assert attempts[0]["cost_usd"] > 0 and attempts[0]["raw_response"] is not None
+    assert KEY not in json.dumps(attempts[0])
+
+
+def test_the_pinned_session_runs_end_to_end_and_records_the_pinned_body(tmp_path: Path) -> None:
+    exp, plan = make_plan("gpt-oss-openrouter", repeats=1, seed=3)
+    store = LocalStore(tmp_path)
+    with FakeOpenRouter(lambda body: (200, served_by("DeepInfra"))) as server:
+        result = session(exp, plan, OpenRouterProvider(KEY, server.url), store, route=PINNED)
+    assert result.stopped == "complete" and result.runs_finished_now == 5
+    for stored_key in store.list_keys(f"development/placeholder/{plan.sweep_id}/"):
+        text = store.get(stored_key) or ""
+        assert KEY not in text
+        if "/attempt-" in stored_key:
+            attempt = json.loads(text)
+            assert attempt["request"]["provider"] == {"order": [PIN], "allow_fallbacks": False}
+            assert attempt["provider_details"]["served_by"] == "DeepInfra"
+
+
+class FakeSsm:
+    """An ``ssm`` client that answers ``get_parameter`` with ``value`` or raises ``error``."""
+
+    def __init__(self, value: str = KEY, error: Exception | None = None) -> None:
+        self.value, self.error = value, error
+        self.calls: list[dict[str, Any]] = []
+
+    def get_parameter(self, **kwargs: Any) -> dict[str, Any]:
+        self.calls.append(kwargs)
+        if self.error is not None:
+            raise self.error
+        return {"Parameter": {"Name": kwargs["Name"], "Type": "SecureString", "Value": self.value}}
+
+
+def test_the_ssm_key_is_read_with_decryption_from_the_one_parameter() -> None:
+    ssm = FakeSsm()
+    assert read_key({}, lambda: "", ssm_key_fetcher(ssm)) == KEY
+    assert ssm.calls == [{"Name": SSM_PARAMETER, "WithDecryption": True}]
+    assert SSM_PARAMETER == "/horizon-compact/openrouter-key"
+
+
+def test_the_environment_beats_ssm_and_ssm_beats_the_prompt() -> None:
+    other = "sk-or-v1-fedcba9876543210fedcba9876543210"
+    ssm = FakeSsm(other)
+    assert read_key({"OPENROUTER_API_KEY": KEY}, lambda: "", ssm_key_fetcher(ssm)) == KEY
+    assert ssm.calls == []  # not even asked
+
+    def never() -> str:
+        raise AssertionError("prompted although SSM held the key")
+
+    assert read_key({}, never, ssm_key_fetcher(FakeSsm(other))) == other
+
+
+def test_a_misshapen_or_empty_ssm_value_is_refused_and_never_echoed() -> None:
+    for value in ("", "   ", "sk-ant-api03-this-is-not-an-openrouter-key", "placeholder"):
+        with pytest.raises(OpenRouterKeyError) as caught:
+            read_key({}, lambda: "", ssm_key_fetcher(FakeSsm(value)))
+        if value.strip():
+            assert value.strip() not in str(caught.value)
+
+
+class _AwsError(Exception):
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(message)
+        self.response = {"Error": {"Code": code, "Message": message}}
+
+
+def test_an_ssm_failure_names_its_kind_and_code_and_never_a_value() -> None:
+    fetch = ssm_key_fetcher(FakeSsm(error=_AwsError("AccessDeniedException", f"nope {KEY}")))
+    with pytest.raises(OpenRouterKeyError) as caught:
+        read_key({}, lambda: "", fetch)
+    message = str(caught.value)
+    assert "AccessDeniedException" in message and SSM_PARAMETER in message
+    assert KEY not in message and "nope" not in message  # the AWS message could hold anything
+    assert caught.value.__cause__ is None  # no chained exception that a traceback would print
+
+
+def test_a_malformed_ssm_reply_is_refused_without_a_traceback_holding_the_value() -> None:
+    class Odd:
+        def get_parameter(self, **kwargs: Any) -> dict[str, Any]:
+            return {"unexpected": KEY}
+
+    with pytest.raises(OpenRouterKeyError) as caught:
+        read_key({}, lambda: "", ssm_key_fetcher(Odd()))
+    assert KEY not in str(caught.value) and caught.value.__cause__ is None

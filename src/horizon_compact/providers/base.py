@@ -39,6 +39,8 @@ class ModelRoute:
     route_kind: RouteKind
     invoke_id: str = ""
     inference_profile: str | None = None
+    # OpenRouter only: the provider the request is pinned to (fallbacks off), and the one a reply must name.
+    pinned_provider: str | None = None
 
 
 @dataclass(frozen=True)

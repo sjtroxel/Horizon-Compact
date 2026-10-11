@@ -229,6 +229,33 @@ def test_a_context_window_on_a_route_that_is_not_local_is_refused(tmp_path: Path
         load_experiment("placeholder", root)
 
 
+def test_a_pinned_provider_is_for_an_openrouter_route_only(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    models = root / "models.toml"
+    models.write_text(
+        models.read_text().replace(
+            'route = "in_region"\n', 'route = "in_region"\nopenrouter_provider = "x"\n', 1
+        )
+    )
+    with pytest.raises(ExperimentError, match="openrouter_provider is for an openrouter route"):
+        load_experiment("placeholder", root)
+
+
+def test_a_blank_pinned_provider_is_refused(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    models = root / "models.toml"
+    models.write_text(models.read_text().replace('"deepinfra/bf16"', '"  "', 1))
+    with pytest.raises(ExperimentError, match="must name a provider"):
+        load_experiment("placeholder", root)
+
+
+def test_the_development_openrouter_model_is_pinned_to_the_endpoint_its_prices_belong_to() -> None:
+    config = load_experiment("placeholder").model("gpt-oss-openrouter")
+    assert config.openrouter_provider == "deepinfra/bf16"
+    # OpenRouter's endpoint list, 2026-10-11: deepinfra/bf16 at $0.037 in and $0.17 out per million tokens
+    assert (config.prices.input, config.prices.output) == (0.037, 0.17)
+
+
 def test_the_local_model_is_a_development_model_with_zero_prices() -> None:
     config = load_experiment("placeholder").model("qwen-local")
     assert (config.model_id, config.route, config.role) == ("qwen3.5:4b", "local", "development")

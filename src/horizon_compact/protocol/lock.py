@@ -107,6 +107,7 @@ class ModelIdentity(_Strict):
     inference_profile: str | None = None
     geo_profile_id: str | None = None
     region: str | None = None
+    openrouter_provider: str | None = None
 
 
 class Lock(_Strict):
@@ -202,6 +203,8 @@ def model_identity(config: ModelConfig) -> dict[str, str]:
         record["inference_profile"] = config.inference_profile
     if config.geo_profile_id:
         record["geo_profile_id"] = config.geo_profile_id
+    if config.openrouter_provider:
+        record["openrouter_provider"] = config.openrouter_provider
     if config.route in BEDROCK_ROUTES:
         record["region"] = REGION
     return record
@@ -424,7 +427,15 @@ def _check_content(root: Path, lock: Lock) -> list[str]:
 
 
 # The identity fields compared with models.toml (`thinking` and `sampling` have no field there).
-COMPARED_IDENTITY = ("model_id", "route", "role", "inference_profile", "geo_profile_id", "region")
+COMPARED_IDENTITY = (
+    "model_id",
+    "route",
+    "role",
+    "inference_profile",
+    "geo_profile_id",
+    "region",
+    "openrouter_provider",
+)
 
 
 def identity_differences(

@@ -7,6 +7,58 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-11, about 4:40 AM (step 7 built by Sonnet, reviewed and fixed by Opus)
+>
+> **Measured:** `make check` green, **1540 tests**, root 13 of 16. K4 is committed and pushed (`fc577c5`).
+> **Uncommitted, on purpose (K5, his to run):** step 7, the container's OpenRouter route, with Opus's review fixes and
+> these notes. **No frozen file changed** (instrument and analysis sets untouched; `models.toml` is outside the content
+> hash). **The Phase 4 code half is complete with K5** (§7 steps 1-7).
+>
+> **Built (§4.8):** a pinned provider (`openrouter_provider` in `models.toml`, in the lock's identity; the request sends
+> `provider: {order: [pin], allow_fallbacks: false}`; a reply from any other host is a recorded `ProviderMismatch`
+> error that stops the session, its tokens counted, its decision dropped and only the raw reply kept as evidence); the
+> key read from the SSM SecureString `/horizon-compact/openrouter-key` in the container only (the environment is
+> ignored there); the task role and the boundary gain `ssm:GetParameter` on that one parameter and a `kms:Decrypt`
+> scoped to SSM and that parameter's ARN; `hc sweep launch` and `hc sweep awareness --launch` accept a pinned
+> OpenRouter model; the development model is pinned to `deepinfra/bf16`, the endpoint its recorded prices belong to.
+>
+> **HIS ACTIONS, in this order, before anything can run in the container:**
+> 1. **Apply the boundary** (bootstrap root): the boundary JSON changed. Read the plan first; expect **0 add, 1 change,
+>    0 destroy** (the boundary policy only).
+> 2. **Push K5.** The deploy workflow applies `main`: the task role's policy only. Check that run's `apply main` job is
+>    green.
+> 3. **Create the parameter by hand** in the console (Systems Manager, Parameter Store): name
+>    `/horizon-compact/openrouter-key`, type **SecureString**, tier **Standard**, KMS key **alias/aws/ssm** (the default),
+>    value his OpenRouter key. Terraform never sees the value, and a test refuses a Terraform `aws_ssm_parameter`.
+> 4. **Then, his choice (about a cent of his OpenRouter balance):** Phase 1 step 9, the placeholder as a real Fargate task
+>    on the development model. It proves the container end to end and is the first live test of the KMS grant (below).
+>
+> **What is and is not verified:**
+> - **The reply's `provider` field: verified from his stored replies** (Opus, review). The 10/07 laptop runs hold 225
+>   real OpenRouter replies; every successful one names its host by display name (`DeepInfra`, `DekaLLM`, `AkashML`,
+>   `Amazon Bedrock`...). So the pin `deepinfra/bf16` and a reply naming `DeepInfra` match. The same records show those
+>   unpinned runs were served by at least seven different hosts, mostly DekaLLM (157): the reason the pin exists.
+> - **The KMS grant: not verified live.** AWS's page says no access control can be set on the default `aws/ssm` key,
+>   which suggests no grant is needed, but does not say how a permissions boundary treats the decrypt. A scoped
+>   `kms:Decrypt` (via SSM only, this parameter's encryption context only) is in both policies so it does not matter.
+>   Step 9 is the first real test; a denial would name the missing permission.
+>
+> **Opus's review (2026-10-11), all four points applied at his request:** (1) a `ProviderMismatch` result carries no
+> tool call or text, so no record's `parsed_decision` can hold a wrong host's decision (the raw reply stays as
+> evidence); (2) the security-group description edit was reverted, so the automatic deploy changes only the task
+> role's policy; (3) one OPEN entry below, a host whose name and slug differ never matches; (4) these notes corrected.
+> **Accepted as built:** the pin in the lock's identity; a mismatch stops the session rather than retrying; the scoped
+> `kms:Decrypt`; the container ignoring the environment for the key; no spend prompt in the container (the cap is the
+> brake).
+>
+> **A behaviour change he should know:** laptop development runs on `gpt-oss-openrouter` are now pinned too: DeepInfra
+> only, at the same price, failing rather than falling back if DeepInfra is down. Development only.
+>
+> **NEXT:** his four actions above; then the Phase 4 runs half, whose IMPLEMENTATION doc is written immediately before the
+> runs (it waits on Bedrock or the 2026-10-16 fallback date, his to move).
+>
+> *Superseded 2026-10-11 by the block above (step 7). The 4:30 AM block as written:*
+>
 > ## START HERE — where things stand, 2026-10-11, about 4:30 AM (steps 5-6 built by Sonnet, reviewed and fixed by Opus)
 >
 > **Measured:** `make check` green, **1511 tests**, root 13 of 16. **Uncommitted, on purpose (K4, his to run):** steps 5
@@ -539,6 +591,19 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN 2026-10-11 — a pinned host whose reply name differs from its slug never matches
+
+Found in Opus's review of the Phase 4 code half, step 7. The pin check compares the slug's first part with the host
+name a reply carries, ignoring case and punctuation. That works where the two agree (`deepinfra/bf16` and `DeepInfra`,
+`amazon-bedrock` and `Amazon Bedrock`), and fails for a host whose name and slug differ: OpenRouter's endpoint list has
+`google-vertex/global` named `Google`. Such a pin fails closed (every call is a `ProviderMismatch` and the session
+stops), never a wrong result. **Recommended, when the fallback set's models are pinned:** check each chosen host's
+`provider_name` against its slug in OpenRouter's endpoint list; if they differ, add the expected reply name to
+`models.toml` beside the slug, with a test. A test pins the limit today
+(`test_a_host_whose_name_and_slug_differ_fails_closed`).
 
 ---
 

@@ -31,6 +31,7 @@ from horizon_compact.dossier.render import (
     render_outputs,
 )
 from horizon_compact.experiment import Experiment, ExperimentError, load_experiment
+from horizon_compact.model_config import ModelConfig
 from horizon_compact.probes.questions import ProbeError
 from horizon_compact.probes.run import (
     ProbeSet,
@@ -68,7 +69,12 @@ from horizon_compact.protocol.lock import (
 from horizon_compact.providers.base import ModelRoute, Provider
 from horizon_compact.providers.bedrock import REGION, BedrockConverseProvider, make_runtime_client
 from horizon_compact.providers.ollama import DEFAULT_URL, OllamaProvider
-from horizon_compact.providers.openrouter import OpenRouterKeyError, OpenRouterProvider, read_key
+from horizon_compact.providers.openrouter import (
+    OpenRouterKeyError,
+    OpenRouterProvider,
+    read_key,
+    ssm_key_fetcher,
+)
 from horizon_compact.scenarios.check import run_checks as scenarios_run_checks
 from horizon_compact.scenarios.render import (
     ScenarioSourceError,
@@ -325,10 +331,24 @@ def _check_local(args: argparse.Namespace, identity: RunnerIdentity) -> None:
         raise SweepRefusal("a local model's runs stay on this laptop: use --store local")
 
 
-def _check_openrouter(args: argparse.Namespace, identity: RunnerIdentity) -> None:
-    """An OpenRouter model runs on this laptop, with a key typed here, and keeps its records here."""
-    if identity.runner != "laptop":
-        raise SweepRefusal("an OpenRouter model runs on the laptop only: the container has no key")
+def _check_openrouter(
+    args: argparse.Namespace, identity: RunnerIdentity, config: ModelConfig
+) -> None:
+    """An OpenRouter model runs in one of two places. On the laptop, with a key typed here, keeping its
+    records here. In the container, only if its config names a pinned provider (so a call can never be served
+    by another backend), with the key read from SSM and its records in the results bucket."""
+    if identity.runner == "fargate":
+        if not config.openrouter_provider:
+            raise SweepRefusal(
+                f"{args.model} is an OpenRouter model with no pinned provider: set openrouter_provider in "
+                "models.toml before it runs in the container, so OpenRouter cannot serve it from another "
+                "backend"
+            )
+        if args.store != "s3":
+            raise SweepRefusal(
+                "an OpenRouter model's runs in the container go to the results bucket"
+            )
+        return
     if args.store != "local":
         raise SweepRefusal("an OpenRouter model's runs stay on this laptop: use --store local")
 
@@ -355,15 +375,35 @@ def _connect(
     estimate: Callable[[Store], SpendEstimate],
     cap_usd: float,
 ) -> tuple[Provider, ModelRoute, Store, str]:
-    """The provider, route, store and account id for a run on this machine: a sweep or a probe run. A local or
-    OpenRouter model touches no AWS; a Bedrock model needs a session."""
+    """The provider, route, store and account id for a run on this machine: a sweep or a probe run. A local
+    model touches no AWS, and an OpenRouter model touches none on the laptop (in the container it reads its
+    key from SSM); a Bedrock model needs a session."""
     config = experiment.model(model_key)
     provider: Provider
     if config.route == "openrouter":
-        # No AWS session either. The spend warning comes after every refusal and before the key, and the key
-        # is asked for last, so a refused run never prompts; it lives in the provider and nowhere else.
-        _check_openrouter(args, identity)
-        route = ModelRoute(model_key, config.model_id, "openrouter", invoke_id=config.model_id)
+        _check_openrouter(args, identity, config)
+        route = ModelRoute(
+            model_key,
+            config.model_id,
+            "openrouter",
+            invoke_id=config.model_id,
+            pinned_provider=config.openrouter_provider,
+        )
+        if identity.runner == "fargate":
+            # The container: the task role reads the key from SSM, never a file, a command line or a prompt.
+            session = _session(args, identity)
+            account_id = session.client("sts").get_caller_identity()["Account"]
+            try:
+                key = read_key(
+                    {},
+                    ask=lambda: "",
+                    ssm_fetch=ssm_key_fetcher(session.client("ssm")),
+                )
+            except OpenRouterKeyError as exc:
+                raise SweepRefusal(str(exc)) from exc
+            return OpenRouterProvider(key), route, _store(args, session), account_id
+        # The laptop. No AWS session. The spend warning comes after every refusal and before the key, and the
+        # key is asked for last, so a refused run never prompts; it lives in the provider and nowhere else.
         store = _store(args, None)
         _confirm_spend(estimate, model_key, cap_usd, store)
         try:
@@ -523,10 +563,10 @@ def cmd_sweep_launch(args: argparse.Namespace) -> int:
         raise SweepRefusal(
             f"{plan_.model_key} is a local model: it runs on this laptop, so use `hc sweep run`"
         )
-    if launch_route == "openrouter":
+    if launch_route == "openrouter" and not experiment.model(plan_.model_key).openrouter_provider:
         raise SweepRefusal(
-            f"{plan_.model_key} is an OpenRouter model: it runs on this laptop with a key typed "
-            "here, so use `hc sweep run`"
+            f"{plan_.model_key} is an OpenRouter model with no pinned provider: it runs on this laptop with "
+            "a key typed here (`hc sweep run`), or set openrouter_provider in models.toml to launch it"
         )
     cap = _check_cap(args)
     _check_pilot_sweep(args, needed=False)
@@ -646,10 +686,10 @@ def cmd_sweep_awareness(args: argparse.Namespace) -> int:
             print(f"awareness: {plan_.sweep_id} ({len(plan_.runs)} calls, model {plan_.model_key})")
             print("every check passes (dry run; nothing written, nothing called)")
             return CLEAN_EXIT
-        if route_kind == "openrouter":
+        if route_kind == "openrouter" and not experiment.model(plan_.model_key).openrouter_provider:
             raise SweepRefusal(
-                f"{plan_.model_key} is an OpenRouter model: until the container can reach it, it "
-                "cannot run officially"
+                f"{plan_.model_key} is an OpenRouter model with no pinned provider: set "
+                "openrouter_provider in models.toml before it runs in the container"
             )
         session = _session(args, identify({}, _laptop_git))
         command = [

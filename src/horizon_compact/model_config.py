@@ -35,6 +35,10 @@ class ModelConfig(_Strict):
     geo_profile_id: str | None = None
     # The context window sent to a local runtime, in tokens. Required for a local route, refused for the rest.
     num_ctx: int | None = Field(default=None, gt=0)
+    # An OpenRouter route's pinned provider, a slug from OpenRouter's endpoint list (``deepinfra/bf16``). The
+    # request names it with fallbacks off, so OpenRouter can never serve the call from another backend
+    # (Phase 4 code half section 4.8). Needed to run in the container; optional on the laptop.
+    openrouter_provider: str | None = None
 
     @model_validator(mode="after")
     def _route_has_what_it_needs(self) -> ModelConfig:
@@ -46,6 +50,11 @@ class ModelConfig(_Strict):
             raise ValueError("a local route needs num_ctx")
         if self.route != "local" and self.num_ctx is not None:
             raise ValueError("num_ctx is for a local route")
+        if self.openrouter_provider is not None:
+            if self.route != "openrouter":
+                raise ValueError("openrouter_provider is for an openrouter route")
+            if not self.openrouter_provider.strip():
+                raise ValueError("openrouter_provider must name a provider")
         return self
 
 
