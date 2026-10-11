@@ -385,7 +385,44 @@ in the search half, from what is available on credits that day.
    - **`hc case hashes`** must reuse the function `check_case_content` uses (shared, not copied; a test checks
      they agree), and `hc case foreshadow` takes its terms from the rubric, which the builder never imports (the
      architecture test in `tests/test_architecture.py` enforces it for everything in `casebuild/`).
-7. §4.11 if decision 1 is (a).
+7. **[done 2026-10-11; Sonnet built, Opus reviewed, fixes applied]** §4.11, decision 1 (a): the search runner and
+   the selection log. `casebuild/search.py` (and one host added to `edgar.ALLOWED_HOSTS`); 38 new tests, 1963 collected,
+   `make check` green; one commit (B7). **What it does:** `QUERIES` holds protocol §12.3's twelve queries as data
+   (a test reads the protocol's table and compares the query text, the channels, and the item and SIC filters);
+   `run_search` runs each separately, reads every page (`read_query` raises on a short read, an inexact total or
+   more than 10,000 hits, a deviation to report), applies the form, date, `items` and `sics` filters in code
+   (`filter_reason` names why a hit failed, and the per-query record counts them), unions by accession number
+   within a type (a filing found by two queries is one candidate that lists both), and holds the fallback month
+   (filed 2026-07-01 to 2026-07-31) apart from the window as a separate pool with its own ids (`closure-f01`).
+   Candidates are numbered neutrally per type, in order of filing date then accession number; **that is not
+   first-disclosure order**, which a person finds per candidate as the first check. `candidates.json` is written
+   once (names and accession numbers, private). `SelectionLog` has one row per candidate and six criteria in
+   order (first disclosure, then §12.4's five); `record` enforces the order, a reason on every result and nothing
+   after a failure; `record_read` takes the independent reader's read of a rejection on criterion 3, 4 or 5, with
+   a resolution on a disagreement; `problems()` lists rejections not yet read. `write_log_version` writes a new
+   numbered `selection-log-<n>.json` and `selection-public-<n>.json` each time (the appendix is write-once).
+   **The public view** is by case type and carries no name, accession number, date, SIC or free-text reason: a
+   reason appears only where a person wrote a separate `public_reason` for it. **Choices for review:** (a) a
+   filing that passes two channels' filters is a candidate in each type (§12.3 unions "a filing found twice" within
+   a query set, and the types are selected separately); (b) channel 3 labels the company `manufacturing` (a SIC in
+   2000-3999), `other` or `unknown`; (c) `efts.sec.gov` is now an allowed host for the EDGAR client, nothing
+   else about its checks changed. **Not built, on purpose:** an `hc case search` command. The search runs once, on
+   the rule date, and its command is written with the search half, after the check below. **Not verified:** the
+   reply's shape. §12.3's 2026-10-09 live check covered the query syntax and the parameters, not the reply; this
+   code reads `hits.total.value` and `hits.hits[]._source` (`adsh`, `form`, `file_date`, `items`, `sics`, `ciks`,
+   `display_names`), the page size and whether `from` pages, and raises on anything else. **One read-only request,
+   by script, his User-Agent, a date range of a week, settles all of it before the rule date**, the way step 1 did.
+   **Review fixes (Opus):** the log recorded results but did not apply §12.4's selection rule, so the cases could
+   have been whichever candidates a person checked first. Now (a) a passed first-disclosure check carries the date
+   it found, and no other result carries a date; (b) `selection(type)` returns the first k that passed (`K`,
+   protocol §12.1, tested against its text) in order of that date, the window's before any fallback candidate's,
+   and stays open, naming what it waits on, while any candidate is undated or an unfinished one comes before the
+   k-th case; a candidate that passed but comes after the k-th is logged as passed, not a case; (c) a fallback
+   candidate is refused until every window candidate of its type is finished and fewer than k passed (§12.2), and
+   cases taken from it are listed as fallback cases; (d) `problems()` reports one filing taken as a case in two
+   types; (e) `from_text` rebuilds a saved log through `record` and `record_read`, window rows first, so a
+   hand-edited file cannot skip the order. The public view now shows each type's k, cases, fallback cases,
+   whether the selection is complete and the shortfall; the dates stay private.
 
 About two days of build with tests; the splitter and the date patterns are most of it.
 

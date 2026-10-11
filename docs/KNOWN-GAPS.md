@@ -7,6 +7,31 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-11, about 4:30 PM (Phase 5 code half complete, steps 1-7; step 7 uncommitted)
+>
+> **Measured:** `make check` green, **1963 tests collected**, root 13 of 16. Steps 5 (`92d0346`) and 6 (`9e2d14a`)
+> are committed and pushed. **Step 7 (§4.11, the search runner and selection log) is built and reviewed (Opus's five
+> fixes in: the selection rule, the fallback rule, one filing as two cases, the log's reload), uncommitted**; its
+> commit is B7, `phase 5: search runner and selection log`. With it, **the Phase 5 code half is done.**
+>
+> **Step 6** (§7 step 6): `prepare_case` and `assemble_case`, the reviewed-flags file, `hc case foreshadow`, `hc case
+> hashes`; Opus's four review fixes are in. **Step 7:** `casebuild/search.py`: protocol §12.3's twelve queries as
+> data, every page read, the filters in code, union by accession, the fallback month held apart, and the selection
+> log with its public view. `efts.sec.gov` was added to the EDGAR client's allowed hosts.
+>
+> **NEXT:** he commits step 7. Then the next phase's work, his choice (the search half and the Phase 4 runs half
+> both wait on the `prereg-v1` tag, which waits on Bedrock or the 2026-10-16 fallback). **Not built, by design:** `hc case build` and `hc case
+> search` (they need a model route and the rule date; the search half's). **Carry to the search half's doc:**
+> `prepare_case` takes its seed function as a parameter for tests, and `hc case build` must not expose it.
+>
+> **Open, his:** skim the extraction instructions (`casebuild/extract.py`, `COMMON` and `SECTION_INSTRUCTIONS`)
+> before the first real case; the 2026-10-16 fallback date (tentative). **Cheap checks before the search:** one
+> request to the full-text search endpoint for a week's range, by script and his User-Agent, to confirm the reply's
+> shape (§7 step 7: nothing in `search.py` has seen a real reply), and the `index.json` and older-page check
+> from §7 step 4. Neither is on a company's name: the search is a date range and a phrase.
+>
+> *The 2:30 PM block below is superseded on Phase 5 (it said step 5 was his to commit and step 6 next).*
+>
 > ## START HERE — where things stand, 2026-10-11, about 2:30 PM (Phase 5 code half, steps 3-5 built)
 >
 > **Measured:** `make check` green, **1873 tests**, root 13 of 16. Steps 3 (`4cd6559`) and 4 (`1e71f97`) are

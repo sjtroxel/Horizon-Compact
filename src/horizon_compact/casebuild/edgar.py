@@ -32,7 +32,9 @@ from horizon_compact.casebuild.config import git_config_value, setting
 ENV_VAR = "HC_SEC_USER_AGENT"
 GIT_CONFIG_KEY = "hc.secUserAgent"
 MIN_INTERVAL_SECONDS = 0.25
-ALLOWED_HOSTS = frozenset({"www.sec.gov", "data.sec.gov"})
+ALLOWED_HOSTS = frozenset(
+    {"www.sec.gov", "data.sec.gov", "efts.sec.gov"}
+)  # efts: full-text search (step 7)
 BLOCKED_STATUSES = frozenset({403, 429})
 
 
