@@ -279,7 +279,28 @@ in the search half, from what is available on credits that day.
    follows a redirect (a 3xx is an error), so the SEC-host check cannot be stepped around; the git calls drop every
    inherited `GIT_*` variable and force English messages. **Kept as written (his):** an appendix inside any git
    repository, a private one included, is refused.
-4. §4.4-4.6: the document set and source list, the map and splitter, figures from XBRL.
+4. **[done 2026-10-11; Sonnet built, Opus reviewed, fixes applied]** §4.4-4.6: the document set and source list,
+   the map and splitter, figures from XBRL. `casebuild/{documents,figures,splitter,sections}.py`; 89 new tests,
+   1696 in all, `make check` green; one commit (B4). **Choices, reviewed and kept:** (a) only plain `10-K` and
+   `10-Q` are picked as the periodic reports, an amendment never is, and an 8-K/A counts as an 8-K; (b) "after
+   the annual report" compares filing dates strictly, so an 8-K filed the same day as the 10-K is out; (c) older
+   submissions pages are followed only until both an admitted 10-K and 10-Q are in hand; (d) a figure line uses
+   the first listed tag that has an admitted value for the latest fiscal year, and years that tag lacks are
+   listed, never filled from another tag; (e) an annual period is 355 to 375 days and fiscal years chain 350 to
+   380 days apart; (f) two same-day filings that disagree leave the year out, listed; (g) section 5 also carries
+   the annual report's Item 7 for acquisitions. **Review fixes:** only rows of the four forms used (10-K, 10-Q,
+   8-K, 8-K/A) are parsed, so a malformed row of another form cannot stop a build, while a malformed row of one
+   of the four still refuses the table; the segment note needs a heading shaped like one, so a table row such as
+   "Total segment revenue" is no longer taken for it (it was, tested); `build_section_inputs` takes the case's
+   scenario shape and builds and requires only that shape's sections (protocol §12.6), so an S4 case is never
+   refused over Item 2 or the workforce part; Item 1's human-capital part can be cut by hand alone
+   (`HUMAN_CAPITAL` in the hand boundaries) while the items still split automatically; a hand boundary key must
+   be an item; exhibits sort by number (`ex99-2` before `ex99-10`). **Not verified on any real filing:** the
+   splitter and the human-capital and segment-note finders (§10); the shape of an older submissions page
+   (`filings.files[].name`, the table at the page's top level) and of a filing's `index.json`
+   (`directory.item[].name`), which step 1 did not fetch, and the exhibit-name pattern built on it; every figure
+   tag not listed in §11. The first real case is the check; the cheap one to run sooner is one `index.json` and
+   one older page for a filer, by script, his User-Agent.
 5. §4.7-4.9: the extraction request on a fake provider, anonymize and scale, options.
 6. §4.10: assemble, `hc case foreshadow`, `hc case hashes`.
 7. §4.11 if decision 1 is (a).
