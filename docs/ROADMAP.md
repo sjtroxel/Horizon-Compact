@@ -73,14 +73,14 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 |---|---|---|
 | 0 | **APPROVED 2026-10-03** | **APPROVED 2026-10-03; built; DoD audit §11a** |
 | 0.5 `aws-foundation` | **APPROVED 2026-10-04**, all eight decisions as recommended | **APPROVED 2026-10-04**, its four decisions (A-D) as recommended; **built 2026-10-04** (`b9c9aaf`, `52aa3fd`, `ac2fbe0`); **closed 2026-10-08**, DoD audit §21 |
-| 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | **APPROVED 2026-10-04**, its four decisions as recommended; not yet built |
+| 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | **APPROVED 2026-10-04**, its four decisions as recommended; **built 2026-10-05** (steps 0-2, 4-8 and 10; step 3 blocked on Bedrock); **step 9 run and step 11 read 2026-10-11 on the development model**; DoD 1 open until the main model runs; DoD 7 and C6 not done |
 | 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1 | not written; immediately before its build |
 | 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | **APPROVED 2026-10-06**, its five decisions as recommended; **built and closed 2026-10-06**, DoD audit in §14 |
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built and closed 2026-10-09**, DoD audit in §19a (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, `4febc15`, `84d82d7`, plus step 13's commit) |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); **no-AWS steps built 2026-10-09** (1-7's drafting and 10; `dd3a28a`, `9eccb4a`, `15f66a2`, `a40d38b`, step 10 uncommitted); steps 7's runs, 8, 9, 11 and the tag wait on Bedrock |
 | 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; **§7 steps 1-4 built 2026-10-10** (`24b40c5`, then steps 2-4 in one commit); steps 5-6 built and reviewed 2026-10-11 (K4, `fc577c5`), step 7 built and reviewed 2026-10-11 (K5): **the code half is complete**; the runs half next, its doc immediately before the runs (Sonnet, Opus reviews). **Runs half:** not written; immediately before the runs |
-| 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5; **split by code and search 2026-10-10 (his)** | **code half** (`phase-5-case-building-code-IMPLEMENTATION.md`, the dossier builder on synthetic filings): not written. **Search half:** not written; immediately before the search |
+| 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5; **split by code and search 2026-10-10 (his)** | **code half** (`phase-5-case-building-code-IMPLEMENTATION.md`, the dossier builder on synthetic filings, and the search runner, his 2026-10-11): **APPROVED 2026-10-11 (his)**, its four decisions as recommended; not yet built. **Search half:** not written; immediately before the search |
 | 5.5 `case-runs` | **APPROVED 2026-10-04**, with Phase 5 | not written; immediately before its build |
 | 6 `explorer` | **APPROVED 2026-10-04**, all six decisions as recommended (6 amended by him); split into 6 and 6.5 | not written; immediately before its build |
 | 6.5 `methods-and-release` | **APPROVED 2026-10-04**, with Phase 6 | not written; immediately before its build |
@@ -95,7 +95,22 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-10, 3 PM
+### Where the build actually is — 2026-10-11, 4:50 AM
+
+**Measured 2026-10-11, 4:50 AM:** `make check` green, **1540 tests passed**, root 13 of 16; last pushed commit `5ac21cd`.
+
+- **Phase 4 code half: complete** (§7 steps 1-7; Sonnet built, Opus reviewed each). K4 `fc577c5` (the awareness sweep,
+  the blind refusal calls, `hc analyze`) and K5 `5ac21cd` (OpenRouter from the container) pushed; Deploy green. His
+  actions for step 7 done: the boundary applied, the SSM parameter created.
+- **Next:** Phase 1 step 9 on the development model (his decision; `KNOWN-GAPS.md` START HERE), then the Phase 4 runs
+  half. Phase 3.5's tag still waits on Bedrock; tentative fallback date 2026-10-16 (his).
+- **Update, 2026-10-11 about 10 AM:** Phase 1 steps 9 and 11 **done on the development model** (`gpt-oss-openrouter`, a
+  real Fargate task; stop and resume clean; $0.0033 of his OpenRouter cash). **Phase 1 DoD 1 stays open** until the main
+  model runs. **The Phase 5 code half IMPLEMENTATION doc was written and approved the same morning** (his, all four
+  decisions (a)); **next: its build** (Sonnet, Opus reviews), not the Phase 4 runs half, whose doc waits for the runs
+  (`KNOWN-GAPS.md` START HERE).
+
+### Where the build was — 2026-10-10, 3 PM *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-10, 3:15 PM:** `make check` green, **1457 tests passed**, root 13 of 16; last pushed commit `24b40c5`.
 

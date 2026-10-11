@@ -16,6 +16,9 @@
 > (`phase-5-case-building-code-IMPLEMENTATION.md`). The search and the case building still run only on the rule
 > date, from the IMPLEMENTATION doc written immediately before them.
 >
+> **Widened 2026-10-11 (his, code-half decision 1 (a)):** the code half also builds the search runner and the selection
+> log's format, on fake responses only. The search itself still runs only on the rule date.
+>
 > Written before Phases 0.5 through 4 are built. **Lines marked *(rests on N)* depend on what Phase N builds,
 > measures or decides.**
 >

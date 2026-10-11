@@ -7,6 +7,68 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-11, about 10 AM (handoff; Phase 1 step 9 run, Phase 5 code-half doc approved)
+>
+> **Measured at handoff:** `make check` green, **1540 tests**, root 13 of 16. Last pushed commit `5ac21cd`. Today's
+> docs go in one commit he runs before closing (if `git log` lacks `phase 1: step 9`, it did not happen).
+>
+> **Phase 1 steps 9 and 11 done on the development model** `gpt-oss-openrouter`, as a real Fargate task: 15 of 15 runs
+> `valid`, stopped after 5 and resumed (no run re-run; 33 keys, one version each, no delete markers), one image digest,
+> equal to ECR's for the `5ac21cd` tag; provider pin held (every reply from DeepInfra); key read from SSM; no key-shaped string
+> in any stored object or the CloudWatch log. **$0.003349** of his OpenRouter cash. Notes at the end of §21 of the
+> Phase 1 doc; the CARRIED list for Phase 1.5 is below.
+>
+> **Phase 1 DoD 1 stays OPEN** (his, as recommended): it says "on the main model", and this was not. It closes when the
+> same sweep runs on the main model once Bedrock answers. DoD 3 (resume) is met. DoD 7 (spend from the bill) is owed,
+> from 2026-10-12. **Not tested:** whether the scoped `kms:Decrypt` is needed at all.
+>
+> **Phase 5 code half IMPLEMENTATION doc APPROVED 2026-10-11 (his), all four decisions (a)**
+> (`docs/phases/phase-5-case-building-code-IMPLEMENTATION.md`): builder plus search runner, on fakes; 8-Ks since the
+> last annual report; strictly before the cut-off; pay per head within 3%, groups under 100 as a range. **Not built.**
+>
+> **NEXT: build it, on Sonnet, Opus reviewing each commit** (doc §7). Step 1 is his: one read-only SEC request (a
+> `scratch/` script, his User-Agent, a filer not on the longlist) to confirm field names. Step 2 is the protocol edits
+> for decisions 2 and 4, which **must land before the `prereg-v1` tag**. **Not the Phase 4 runs half yet:** its doc is
+> written immediately before the runs, which wait on the tag, which waits on Bedrock or the 2026-10-16 fallback.
+>
+> **Open decisions that are his:** the 2026-10-16 fallback date (tentative); his SEC User-Agent name and address
+> (needed by step 1).
+>
+> *Supersedes a 9:40 AM block written by Sonnet the same morning, which called steps 9 and 11 simply "done" and named
+> the Phase 4 runs half as next.*
+>
+> *The 4:50 AM block below is superseded: its NEXT (step 9) is done. Its account of the Phase 4 code half still holds.*
+>
+> ## START HERE — where things stand, 2026-10-11, 4:50 AM (handoff)
+>
+> **Measured at handoff:** `make check` green, **1540 tests**, root 13 of 16. Tree clean, nothing unpushed. Last
+> commits `fc577c5` (K4: awareness sweep, refusal calls, analyze) and `5ac21cd` (K5: OpenRouter from the container),
+> both pushed; CI and Deploy green on `5ac21cd`, including the `apply main` job (Claude watched the runs finish).
+>
+> **THE PHASE 4 CODE HALF IS COMPLETE** (§7 steps 1-7; Sonnet built each, Opus reviewed each, every review fix applied).
+>
+> **His step-7 actions are ALL DONE (2026-10-11, early morning):** the bootstrap boundary applied (plan 0 add, 1 change,
+> 0 destroy; re-plan "No changes"); K5 pushed and deployed; the SSM parameter `/horizon-compact/openrouter-key` created
+> by hand (Standard, SecureString, us-east-1), its key confirmed as `alias/aws/ssm` with `aws ssm describe-parameters`
+> (the value was never shown).
+>
+> **NEXT, recommended (his decision): Phase 1 step 9 on the development model**, a real Fargate task on the placeholder,
+> after a night's sleep and with a clear head. Phase 1 IMPLEMENTATION doc §16 step 9 is the procedure (launch, stop
+> after about six runs, launch again to resume, `hc sweep status` between), **with `--model gpt-oss-openrouter` in place
+> of `sonnet-4-6`**, since Bedrock is still blocked; then step 11's read of every object. It is the first live test of
+> the container end to end: the image digest, write-once records, resume, the key from SSM, the scoped `kms:Decrypt`
+> (not yet verified live) and the provider pin. **Cost:** about a cent of his OpenRouter balance (his cash) and a few
+> cents of Fargate (credits). If it is skipped, nothing breaks, but the first container run becomes the pilot.
+> Claude gives the commands one at a time in that session.
+>
+> **Then:** the Phase 4 runs half, whose IMPLEMENTATION doc is written immediately before the runs. Phase 3.5's tag
+> still waits on Bedrock; the fallback date 2026-10-16 is tentative and his to move.
+>
+> **Open decisions that are his:** whether and when to run step 9 (above); the 10/16 fallback date.
+>
+> *Superseded 2026-10-11, 4:50 AM, by the block above. Its "uncommitted" line and his action list were made true by
+> the morning's commits and his actions. The 4:40 AM block as written:*
+>
 > ## START HERE — where things stand, 2026-10-11, about 4:40 AM (step 7 built by Sonnet, reviewed and fixed by Opus)
 >
 > **Measured:** `make check` green, **1540 tests**, root 13 of 16. K4 is committed and pushed (`fc577c5`).
@@ -594,6 +656,22 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
+## CARRIED — from Phase 1 to Phase 1.5, 2026-10-11
+
+Found by Phase 1's build and its step 9 run (`docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md` §21); each lands
+in Phase 1.5's IMPLEMENTATION doc.
+- **The only Fargate sweep so far is on the development model** (`skeleton-gpt-oss-openrouter-78a37f95`). Phase 1.5's
+  scope says the page shows "whatever Phase 1's sweep ran on: Sonnet 4.6". If Bedrock is still dark when Phase 1.5 is
+  built, the page shows this sweep, labeled as a development model's test run, the model's name from provenance.
+- **Read sweeps from `<role>/<experiment>/<sweep_id>/`**, not the layout in Phase 1 doc §7 (dated note there).
+- **Each attempt carries `provider_details.served_by`** on the OpenRouter route (OpenRouter is the router, not the
+  host); whether the page shows the host is for that doc to decide.
+- **Laptop reads need the bucket name** (`--bucket` or `HC_RESULTS_BUCKET`); the dev user cannot list buckets.
+- **Calls take about 30 s on this route** (28-63 s), so a stop lands about one call late; the pacing interval is a
+  floor, not the speed.
+
+---
+
 ## OPEN 2026-10-11 — a pinned host whose reply name differs from its slug never matches
 
 Found in Opus's review of the Phase 4 code half, step 7. The pin check compares the slug's first part with the host
@@ -699,7 +777,7 @@ supplies the case content from private storage and calls `check_case_official`. 
   S4 text answer that names the option. Narrow the pattern in run code before the grid, with a test.
   **Closed 2026-10-09** (Phase 3.5 step 2): "decline" now flags only as "decline to" in a clause starting with "I"; the bare
   word no longer flags; "refuse" stays broad. `classify.py` is an instrument file, frozen at the tag.
-- **Refusal calls are made blind, once** *(added 2026-10-08, from Opus's review of Phase 3 step 5; **built 2026-10-11**, Phase 4 code half step 6, awaiting Opus's review: `hc sweep refusals`, written by him through the masked screen)*. The human call
+- **Refusal calls are made blind, once** *(added 2026-10-08, from Opus's review of Phase 3 step 5; **built and reviewed 2026-10-11**, Phase 4 code half step 6, `fc577c5`: `hc sweep refusals`, written by him through the masked screen)*. The human call
   that turns a `no_tool_call` into a refusal (`refusal-calls.json` beside the sweep; Phase 3 doc §9.1) is made with
   the run's objective hidden, and the file is written once, before any official analysis. A call cannot change a
   verdict (a refusal and a failure count the same toward exclusion and the worst-case bound), but it moves a run

@@ -274,6 +274,11 @@ raw_response, tool_calls, text_blocks, reasoning_block_count, parsed_decision, v
 
 **Bucket:** `horizon-compact-results-<account-id>`, in `bootstrap` (Phase 1 decision 4).
 
+> **Stale layout, noted 2026-10-11:** the keys below omit two levels added later. As built, a sweep lives at
+> `<role>/<experiment>/<sweep_id>/` (`sweep_prefix` in `sweep/runner.py`; the experiment level from Phase 2.5, the role
+> from the Phase 4 code half §4.2), for example `development/placeholder/<sweep_id>/manifest.json`. The rest is as
+> written.
+
 ```
 development/<sweep_id>/manifest.json                      written once, by the first session
 development/<sweep_id>/runs/<run_id>/attempt-<n>.json     one per attempt, n from 1
@@ -544,12 +549,12 @@ All offline (the Phase 0.5 conftest makes the network unreachable). Expected new
 7. **[done 2026-10-05; `ab76636`; deploy green on the first run, no follow-ups]** **Claude writes C4** (`main`, the two workflows). **He commits and pushes C4**; the deploy workflow runs. **Claude
    reads its logs**; each missing permission is fixed by name (C4 follow-ups) until the deploy is green.
 8. **[done 2026-10-05; run `37353579140`, passed]** **He dispatches the permission check** (DoD 5). Claude reads its log.
-9. **[BLOCKED with step 3]** **Phase 0.5 must be closed by here** (§1). **He launches the skeleton sweep:**
+9. **[done 2026-10-11 on the development model `gpt-oss-openrouter`, not the main model, so DoD 1 stays open; notes at the end of §21]** **Phase 0.5 must be closed by here** (§1). **He launches the skeleton sweep:**
    `hc sweep launch --experiment placeholder --model sonnet-4-6 --repeats 3 --seed 20261005 --label skeleton --profile horizon-compact`
    (given as a script in `scratch/`, since it is long). After about six runs, **`hc sweep stop`**; then the same launch
    again, which must resume. `hc sweep status` between and after.
 10. **[done 2026-10-05; refused, §21]** **He tries one official launch** (`--official`) and pastes the refusal (DoD 4).
-11. **Claude reads every object** of the sweep: digest present and matching ECR's; hashes; resume behavior (no run
+11. **[done 2026-10-11, same notes]** **Claude reads every object** of the sweep: digest present and matching ECR's; hashes; resume behavior (no run
     re-run, no object overwritten, attempt numbers continuing); cache fields; costs; then writes the as-built notes
     and the CARRIED list for Phase 1.5. **He commits C5.**
 12. **A day later: the phase's spend from the bill** (DoD 7), then the close-out (C6).
@@ -752,3 +757,40 @@ and its tests.
 `refused: official sweeps are refused: no committed protocol (prereg-v1 does not exist)`. The gate runs before any AWS session
 is created (`cmd_sweep_launch`), so it needed no Bedrock and made no AWS call; no task was launched. The exit code was not
 captured. This is DoD 4's pasted refusal, beside the gate tests.
+
+**Steps 9 and 11, the placeholder sweep as a real Fargate task (2026-10-11): passed, on the development model
+`gpt-oss-openrouter` in place of `sonnet-4-6`** (Bedrock still blocked; Phase 4 code half section 4.8). Everything else
+as written: `--experiment placeholder --repeats 3 --seed 20261005 --label skeleton`, sweep
+`skeleton-gpt-oss-openrouter-78a37f95`, image built from `5ac21cd`.
+
+- **Run.** First task `087f125a...`, stopped with `hc sweep stop` after 5 runs (not "about six": a call takes 28-63 s,
+  so the pacing of 3.8 s is not the limit); the same launch again started task `032a577b...`, which finished the other 10.
+  Sessions: `stopped: stop_requested` (5 attempts), then `stopped: complete` (10).
+- **Resume (DoD 3).** 15 runs, 15 attempts, every one `attempt-1`: no run re-run. The bucket holds 33 keys, **each with
+  exactly one version and no delete markers**: no object overwritten.
+- **Provenance (DoD 1).** All 15 records carry the same image digest `sha256:422c1737...4191b83`, which is the digest ECR
+  holds under the tag `5ac21cdb...-38128857529`; the same `git_sha` (`git_dirty` false); the same content, dossier and
+  file hashes, the content hash equal to the manifest's.
+- **Logs.** The task's CloudWatch log (27 lines over both tasks: one per run, then each session's summary) holds no
+  key-shaped string, no `Bearer` and no account ID. Cosmetic: the per-run line's "so far" is the session's cost, so it
+  restarts at the resume ($0.0002 at run 6); the session summary's sweep total is right. The objective beside each
+  status is the OPEN item of 2026-10-11 in `KNOWN-GAPS.md`.
+- **Live for the first time:** the key read from SSM (no key-shaped string and no account ID in any stored object), the
+  OpenRouter provider pin (request carries `allow_fallbacks: false, order: [deepinfra/bf16]`; every reply `served_by:
+  DeepInfra`, no `ProviderMismatch`), write-once S3 records from the task role. The scoped `kms:Decrypt` works with the
+  grant in place; whether the grant is needed at all (AWS says no control can be set on `aws/ssm`) is NOT tested.
+- **Results.** 15 of 15 `valid`, amounts sum to 3000 in each, `stop_reason` `tool_use`. No cache tokens reported, read
+  or write, on any attempt; whether DeepInfra caches this prefix at all is not known. 27,864 input and 13,625 output tokens; **$0.003349** in all, attempts and finals agree
+  with the session totals. His OpenRouter cash, not credits; Fargate time is on credits and not measured here.
+- **Findings to carry.** (1) **This doc's section 7 layout is stale:** keys are `<role>/<experiment>/<sweep_id>/...`
+  (`sweep_prefix`, `runner.py`), here `development/placeholder/...`. (2) `hc sweep status` from a laptop needs
+  `--bucket` (or `HC_RESULTS_BUCKET`); the dev user cannot list buckets (`s3:ListAllMyBuckets`), so the name comes from
+  `terraform output` or the account id. (3) A stop request lands between attempts, so it needs time; with about 30 s per
+  call, a stop "after about six" is best requested at 3 or 4.
+- **DoD 1 stays OPEN** (his, 2026-10-11, as Opus recommended). DoD 1 says "on the main model"; this sweep ran on the
+  development model. It proves the container, the store and resume; it does not prove the main model's route from the
+  task role (Bedrock, the application profile, the geo-profile ARN of C4 note 1). DoD 1 closes when the same sweep runs
+  on the main model, once Bedrock answers, or by a dated patch here if he decides otherwise; it is not lowered after the
+  fact. DoD 3 is met by this run.
+- **Not done by this step.** DoD 7 (spend from the bill) waits a day; Phase 3.5's tag still waits on Bedrock. The CARRIED
+  list for Phase 1.5 is in `KNOWN-GAPS.md` (CARRIED, from Phase 1 to Phase 1.5).

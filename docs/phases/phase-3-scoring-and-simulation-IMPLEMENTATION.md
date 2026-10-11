@@ -726,10 +726,12 @@ for routine code; he switches with `/model`).
    should measure how often it bites at the repeat counts the rule produces.
    (d) **`planning/07` §5.1 names a "logged human call" and no format.** The format is now `refusal-calls.json`,
    beside the sweep; Phase 4's IMPLEMENTATION doc must say who writes it and when (before any official analysis).
+   *(Done 2026-10-11: he writes it, through the blind screen of `hc sweep refusals`; Phase 4 code half §4.6, `fc577c5`.)*
    (e) **9.5's interval level is not stated in the planning.** Built first at the family `ALPHA`; **changed after
    Opus's review (his, 2026-10-08) to `DESCRIPTIVE_ALPHA` = 0.05**, see below.
    (f) **Unfinished runs are invisible to the rates:** `RunSet.unfinished` is not in the rows, so a cell's
    "attempted" counts finished runs only. Phase 4 should refuse analysis while anything is unfinished.
+   *(Done 2026-10-11: `hc analyze` passes the whole `RunSet`, refused while any run is unfinished; `fc577c5`.)*
    (g) **The first-attempt view ignores human calls** (they are about a final status); a first-attempt
    `no_tool_call` stays a failure by type, which counts the same toward every rule.
    *Opus review, same day (his decisions):* (a) kept: "worst case" is the worse of the two settings, and near zero the
