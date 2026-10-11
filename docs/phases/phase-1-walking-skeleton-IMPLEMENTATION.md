@@ -792,5 +792,11 @@ as written: `--experiment placeholder --repeats 3 --seed 20261005 --label skelet
   task role (Bedrock, the application profile, the geo-profile ARN of C4 note 1). DoD 1 closes when the same sweep runs
   on the main model, once Bedrock answers, or by a dated patch here if he decides otherwise; it is not lowered after the
   fact. DoD 3 is met by this run.
+- *Dated note, 2026-10-11 (his, Phase 3.5 §23, decided the same evening):* the fallback set is taken on 2026-10-12, so
+  **the main model is Haiku 5.5, reached through Anthropic's API** (Phase 4 code half §4.9, K6), and
+  DoD 1 closes when this same sweep runs on it as a Fargate task: same placeholder, same 15 runs, same checks
+  (provenance, one image digest, stop and resume), with the route proven being Anthropic's API from the task role
+  (the key read from SSM) instead of Bedrock's. That is the bar as written ("on the main model"), applied to the model
+  the protocol will name; it is not lowered.
 - **Not done by this step.** DoD 7 (spend from the bill) waits a day; Phase 3.5's tag still waits on Bedrock. The CARRIED
   list for Phase 1.5 is in `KNOWN-GAPS.md` (CARRIED, from Phase 1 to Phase 1.5).

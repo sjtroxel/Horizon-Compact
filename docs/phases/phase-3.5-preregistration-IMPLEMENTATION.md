@@ -1,5 +1,9 @@
 # Phase 3.5 — Pre-registration: IMPLEMENTATION (v0.3.5)
 
+> **2026-10-11, DECIDED (his, all eight of §23.5's decisions as recommended):** §23, the fallback set taken on
+> 2026-10-12 with Haiku 5.5 reached through Anthropic's API on his prepaid credit. It moves decision 5's date and
+> Haiku's route; the design is otherwise unchanged.
+
 > **IMPLEMENTATION doc.** Written 2026-10-09 (Opus) from the approved scope doc
 > (`docs/phases/phase-3.5-preregistration.md`, its six decisions as recorded there), `KNOWN-GAPS.md` read in full
 > (START HERE and every OPEN, BLOCKED and RECORDED entry), `planning/07` (all of it, as patched through 2026-10-09),
@@ -602,6 +606,10 @@ Decision 7 takes (i), `gpt-oss-120b` on Bedrock. The options stay as the record.
      open-weights model), Nova Pro, the thinking sub-study, and most of the budget's margin.
    - **If Bedrock returns after the fallback is taken but before the tag,** he chooses which set the protocol names;
      after the tag, a Bedrock set would be its own protocol version.
+
+   *Amended 2026-10-11 (his, §23): the fallback set is taken on **2026-10-12**, and Haiku 5.5 is reached through
+   **Anthropic's API** on his prepaid Console credit, not OpenRouter; `gpt-oss-120b` stays on OpenRouter; the thinking
+   sub-study is restored on Haiku 5.5. §23 has the facts, the cost and the eight decisions.*
 6. **The real-case search queries** (§3 item 10).
    - (a) **Recommended:** **frozen in the protocol**, query by query, with the shape rule and the coarsening rule of
      §9.3. Phase 5 runs them as written; a channel that has changed by then is reported, and its replacement query
@@ -882,3 +890,192 @@ left out, a per-employee or per-hour dollar figure not scaled (it is a ratio), a
 rounding (3% as first written; corrected the same day on Opus's review, since the two roundings reach 3.08%). Each
 closes a place where a person who knows the grid's results could have bent a case. §12.6 is among the sections still
 awaiting his review of the draft (the protocol's status line); these edits are for that review to confirm.
+
+## 23. The fallback set taken early, with Haiku 5.5 through Anthropic's API (DECIDED 2026-10-11, his)
+
+> **Status: DECIDED 2026-10-11 (his): all eight decisions in §23.5 (A-H) as recommended.** Written the same day by
+> Opus at his request ("start tomorrow as if AWS is never going to respond"), approved by him that evening. **What it changes is
+> small:** the fallback set of decision 5 is already decided (Haiku 5.5 main, `gpt-oss-120b` second family). This
+> section moves its date and changes the route Haiku 5.5 is reached by. It does not change the protocol's design, the
+> analysis, the thresholds or the order of operations.
+
+### 23.1 What he proposed, and what is already decided
+
+- **His proposal:** stop waiting for Bedrock, and run the experiment from where it stands with **Haiku 5.5 as the main
+  model**, reached **directly through Anthropic's API** and paid from **$18.19 of prepaid credit** already on his
+  Anthropic Console account, unused for about two months, under a new API key made for this project.
+- **Already decided (decision 5, 2026-10-09):** if Bedrock is not answering by 2026-10-16 (tentative, **his to move,
+  and moving it needs no protocol change**), the fallback set replaces decision 2's: Haiku 5.5 main, `gpt-oss-120b`
+  second family, the thinking sub-study and Nova Pro cut, the review on `gpt-oss-120b`, a few cents of garden-shape
+  runs first. Its route was OpenRouter, built and deployed as Phase 4's K5.
+- **So two things are new:** (1) the date moves from 2026-10-16 to 2026-10-12; (2) Haiku 5.5's route moves from
+  OpenRouter to Anthropic's own API, a design change of the same kind as decision 5's own (a provider in the
+  container), made and logged before the tag. `gpt-oss-120b` stays on OpenRouter: Anthropic does not serve it.
+
+### 23.2 Facts checked live on 2026-10-11
+
+From Anthropic's documentation pages, read the same day (models overview, the Haiku 5.5 model page, pricing, rate
+limits), and Anthropic's support article on credits.
+
+| Fact | Value | Bears on |
+|---|---|---|
+| Model ID | `claude-haiku-5-5` (a pinned snapshot; no date suffix) | `models.toml` |
+| Released | **2026-10-07** (four days before this was written) | how little is known of it; see §23.6 |
+| Retirement | not sooner than **2027-10-07** | later than Sonnet 4.6's (not before 2027-02-17); real cases run well inside it |
+| Knowledge cutoff | June 2026 (reliable and training) | the real-case window (from 2026-08-01) already allows for it |
+| Price, prompts up to 100,000 tokens | **$0.10 input, $0.50 output** per million; cache read $0.01; 5-minute cache write $0.125 | §23.4 |
+| Price, prompts over 100,000 tokens | **5x**: $0.50 input, $2.50 output | the grid's prompts are about 8,000 tokens; matters only for long dossier extraction (search half) |
+| Batch API | 50% off | not used (§23.5, decision E) |
+| Thinking | adaptive, **on by default**; effort default `medium` | protocol §5 already requires "the explicit field that turns it off" on such a model |
+| Sampling | `temperature`, `top_p`, `top_k` must be omitted (non-default values return 400) | matches the design: sampling is never set |
+| Tool use | supported; `tool_choice: auto` is the design's one way | unchanged |
+| Tokenizer | the newer one; about 30% more tokens than Haiku 4.5 for the same text | §23.4 uses it |
+| Minimum cacheable prompt | 512 tokens | caching is off anyway (decision F) |
+| Rate limits, Start tier | 1,000 requests, 2,000,000 input tokens, 400,000 output tokens a minute; a new or little-used organization may start lower (an "Evaluation" tier) | read his actual limits on the Console's Rate limits page; the harness's pacing is far below either |
+| A spend limit he sets | reached, requests return **HTTP 400 `invalid_request_error`**, "You have reached your specified ... usage limits" | the provider must treat it as stop-the-session, never as a model failure (§23.7) |
+| Workspaces | a workspace can carry its own monthly spend limit and rate limits, never above the organization's; the Default workspace cannot | the guard in §23.5, decision G |
+| Prepaid credits | **expire one year after purchase**, cannot be extended, are non-refundable | **check the purchase date first** (§23.8 step 1) |
+
+**Not verified, and how each is settled:** whether `thinking: {type: "disabled"}` is accepted at the default effort
+(Anthropic's API reference says it is, at effort `high` or below; the first neutral call shows it); his organization's
+tier and limits (the Console); the credit's purchase and expiry dates (the Console's invoice history); **how well Haiku
+5.5 does this task** (§23.6).
+
+### 23.3 What changes and what does not
+
+**Changes:** the main model (Sonnet 4.6 to Haiku 5.5, as decision 5 already says); Haiku's route (OpenRouter to
+Anthropic's API); a fourth provider in the seam (`providers/anthropic.py`, Phase 4 code-half doc §4.9, step K6); one
+SSM parameter and its IAM grant; `models.toml` gains `haiku-5-5`; the protocol's §5 and §9.5 are filled at build step
+9 with this set; the cost estimate (§23.4).
+
+**Does not change:** the instrument (`prompt.py`, `decision.py`, `classify.py`), the analysis, the thresholds, the
+simulations, the repeat rule, the gate and the lock's design, the one-tool `auto` capture, write-once raw responses,
+official = a container run by image digest, the order of operations (nobody sees an official decision on a
+pre-registered scenario before `prereg-v1`), the real-case rules, Phase 5's code. **AWS stays in use** for Fargate,
+S3, ECR and SSM, under the credits; only Bedrock is dropped.
+
+### 23.4 Cost
+
+**Per decision on Haiku 5.5, estimated:** about 8,000 input tokens (the company dossier was about 4,700 tokens on
+`qwen`'s tokenizer; the newer Claude tokenizer counts more, plus the scenario, the objective, the frame and the tool)
+and 800-1,500 output tokens with thinking off. **About $0.0012 typical, $0.0016 conservative.** Measured on the first
+calls, and the plan re-priced from the measurement before the pilot.
+
+| Line (Haiku 5.5) | Calls | At $0.0016 |
+|---|---|---|
+| Neutral calls, model facts, smoke | ~10 | $0.02 |
+| Phase 1 step 9, the skeleton sweep (placeholder, short prompts) | 15 | under $0.01 |
+| Decision 3's proxy: garden shapes, 3 repeats a cell | ~60 | ~$0.05 (short prompts) |
+| Pilot (excluded) | 80 | $0.13 |
+| Fictional grid at the 20-repeat cap (10 repeats: half) | 1,200 | $1.92 |
+| Thinking sub-study, if restored (decision D; thinking adds output) | 100 | ~$0.30 |
+| Real cases, 5 x 5 x 3 x 10 | 750 | $1.20 |
+| Awareness and recognition probes, refusal calls | ~100 | $0.16 |
+| **Subtotal** | **~2,300** | **~$3.80** |
+| Plus 20% for retries | | **~$4.50** |
+
+**At 10 repeats:** about $3.40 with retries. **Worst case, on these assumptions: about $4.50 of the $18.19 credit**,
+leaving about $13. If the extraction model for real dossiers (the search half's choice) is also Haiku 5.5, add
+roughly $0.50 (a few dozen long calls, each kept under 100,000 tokens so the 5x price never applies). **Not affordable
+on this credit:** a Sonnet-class main model (Sonnet 5.5's grid alone at the cap is about $28 at its list price).
+
+**`gpt-oss-120b` (second family, OpenRouter, his cash):** about the same number of calls at about $0.0004 (measured in
+Phase 2.5), about **$1 with retries and OpenRouter's 5.5% fee**, inside his $5 OpenRouter cap; what is already spent
+of that cap is read from the cash ledger before the first run.
+
+**AWS:** unchanged, under the credits (Fargate minutes, S3, SSM standard tier free). **Total new cash: $0 beyond the
+prepaid Anthropic credit and about $1 of OpenRouter.**
+
+### 23.5 Decisions for him
+
+Each has my recommendation and the reason. **All eight DECIDED 2026-10-11 (his), each as recommended.**
+
+- **A. Take the fallback now (2026-10-12) rather than on 2026-10-16.** **Recommended: yes.** My earlier advice (keep
+  10/16, so as not to spend his cash four days early) assumed OpenRouter cash. The Anthropic credit is already paid
+  for and expires a year from purchase, so waiting saves nothing and only costs days. **What it gives up:** the chance
+  that Bedrock answers this week and the set stays Sonnet 4.6 and Nova Pro under the credits. Decision 5's rule still
+  holds: if Bedrock returns before the tag, he chooses which set the protocol names; after the tag, a Bedrock set is
+  its own protocol version.
+- **B. Haiku 5.5's route: Anthropic's API, not OpenRouter.** **Recommended: Anthropic's API.** It is the model's own
+  vendor (no intermediary choosing a backend, so no provider pin to enforce), no 5.5% fee, and it spends money already
+  paid. **Cost:** about half a day of build (K6) and review; one more dependency in the image (Anthropic's Python SDK,
+  pinned). The OpenRouter route stays for `gpt-oss-120b`.
+- **C. Thinking off by `thinking: {type: "disabled"}`, effort not sent** (its default, `medium`, recorded). **Recommended.**
+  Protocol §5 already says a model whose thinking is on by default gets "the explicit field that turns it off". Not
+  sending effort keeps to "each model at its own defaults, recorded". *Alternative:* send `effort: "medium"`
+  explicitly, which pins the value if the default ever changed; the model ID is a pinned snapshot, so I do not think
+  it needs to be.
+- **D. Restore the thinking sub-study (§9.5) on Haiku 5.5.** **Recommended: yes**, about $0.30. It was cut to protect
+  OpenRouter cash, which no longer applies. Haiku 5.5 runs with thinking on by default, so the sub-study is the
+  check that turning it off for the grid does not change what an objective does. *Alternative:* keep it cut, as
+  decision 5 says.
+- **E. No Batch API.** **Recommended.** It would halve about $4 to about $2, but the harness is built on one paced
+  call at a time with write-once records and resume; batching is a redesign of the run path for about $2.
+- **F. No prompt caching on official runs.** **Recommended.** `DecisionRequest.cache_system` exists and stays off:
+  caching changes no decision but adds a variable to every call's record, and the saving is about $1.50 at the cap.
+- **G. The guard on the credit: a Console workspace `horizon-compact` with a monthly spend limit of $10, the key made
+  inside it.** **Recommended.** Three walls then stand in front of the $18.19: the workspace limit, the harness's
+  per-sweep caps ($5 development, $25 official, `planning/09` §6.2) and the cost check before each sweep. The key in
+  that workspace can spend nothing outside it. *Alternative:* the Default workspace, which cannot carry a limit.
+- **H. The second family stays `gpt-oss-120b` on OpenRouter.** **Recommended**, about $1 of his cash inside the $5
+  cap. *Alternative:* no second family. Cheaper by $1, but protocol §9.4 then has nothing, and every result rests on
+  one model.
+
+### 23.6 An honest note on Haiku 5.5 for this study
+
+- **His reading that Haiku 5.5 is comparable to the generation before Sonnet 5.5 cannot be checked here.** The model
+  is four days old; I found no independent measurement on a task like this one, and benchmark scores would not
+  settle it anyway. **The protocol's own measurement settles what matters:** decision 3's garden-shape proxy gives
+  Haiku 5.5's format failure rate for a few cents, before anything is fixed around it, and decision 5 already puts it
+  first. A model's failure rate sharply limits what the study can conclude (Phase 3 §20c finding C); if Haiku fails
+  often, he decides with the numbers in hand, before the tag.
+- **The study does not need a frontier model to be valid.** It asks whether stated objectives change one model's
+  decisions, and whether the long-horizon versions converge. On Haiku 5.5 that question is answered for a small,
+  current, widely deployed model. **What it gives up is reach:** the result says less about the larger models that
+  companies would actually put in front of a capital decision. The methods page states that plainly, as decision 5
+  already requires ("the headline becomes a small current model and an open-weights model").
+- **The score he consulted** (Artificial Analysis, read 2026-10-11): Haiku 5.5 scores 43 on its Intelligence Index,
+  ranked 2nd of 180 in the comparison shown. **That score is for Haiku 5.5 at `max` effort, thinking on**; the grid
+  runs it with thinking off (decision C), which is not the configuration scored. So the score supports the choice of
+  model and says little about this configuration on this task; the garden-shape proxy and the restored thinking
+  sub-study are what measure that.
+- **Gained, not only lost:** a later end of life than Sonnet 4.6, a June 2026 cutoff inside the window's allowance,
+  and enough money left that the thinking sub-study comes back.
+
+### 23.7 What the build must get right (for K6's doc, Phase 4 code half §4.9)
+
+1. **The SDK's own retries off** (`max_retries=0`): the harness counts attempts; a library retrying underneath would
+   hide them from the failure accounting.
+2. **A spend-limit or exhausted-credit reply stops the session** (HTTP 400 with "usage limits", or HTTP 402
+   `billing_error`), recorded as a configuration error, never as a model's failure or a retry.
+3. **`stop_reason: "refusal"`** (with `stop_details`) maps to the refusal the classifier already reads, so the frozen
+   classifier does not change.
+4. **The raw response is kept**, byte for byte, as every provider's is.
+5. **The key** never appears in a body, a record, a log or an error; from `ANTHROPIC_API_KEY` or a hidden prompt on
+   the laptop, from SSM `/horizon-compact/anthropic-key` in the container, as K5 did for OpenRouter.
+
+### 23.8 Order of work, from 2026-10-12
+
+1. **[done 2026-10-11]** **He approves §23.5**: all eight as recommended. Recorded here, in decision 5's text, the
+   ROADMAP decision history and `KNOWN-GAPS.md`.
+2. **Console, with Claude leading, about 20 minutes, no spend:** the credit's purchase and expiry dates (Billing,
+   invoice history) **[done 2026-10-11, his reading: the latest grant, $15.00, bought 2026-07-07, expires 2027-07-08;
+   the rest of the $18.19 balance is from a $20.00 grant of 2026-06-26, expiring 2027-06-27, so the whole balance holds
+   until at least 2027-06-27, about $13.70 of margin over the ~$4.50 estimate, and every v1 run finishes long before]**; his organization's tier and limits (Rate limits page); the workspace and its $10 limit; the key,
+   made in that workspace and shown once; the SSM SecureString `/horizon-compact/anthropic-key`, typed into the AWS
+   console by him as he did for OpenRouter's.
+3. **[done 2026-10-11]** **K6's spec approved** with §23.5 decision B (Phase 4 code half §4.9).
+4. **[Sonnet] K6 built** on a fake transport; **[Opus] reviewed**; `make check` green; he commits and pushes; the
+   boundary change is his to apply, as with K5.
+5. **One neutral call on the laptop** (Phase 0.5's smoke prompt, no scenario): about $0.001. It shows that thinking can
+   be turned off, the price, and the record's shape. Recorded in `model-facts.md` (build step 9).
+6. **Phase 1 step 9 on Haiku 5.5 as a Fargate task:** the skeleton sweep, on the placeholder, under $0.01. **This
+   closes Phase 1's DoD 1** ("on the main model").
+7. **Decision 3's proxy on Haiku 5.5 and `gpt-oss-120b`** (garden shapes): failure counts and types only. If either
+   model fails often, he decides the bound before the tag.
+8. **The rest of Phase 3.5 as written:** step 8's prerequisite, step 9's model facts, the protocol's §5 and §9.5
+   filled, his review of §2-15, step 11's independent review on `gpt-oss-120b`, then **the tag**. Then Phase 4's runs
+   half.
+
+**About the calendar:** steps 1-4 fit in one day; 5-7 the next; step 8 depends on his review of the protocol, which is
+the longest item and his own.

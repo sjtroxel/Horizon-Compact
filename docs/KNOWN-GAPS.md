@@ -7,6 +7,26 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-11, evening (Phase 5 code half done; Haiku 5.5 via Anthropic's API DECIDED, starts 2026-10-12)
+>
+> **Phase 5 code half complete and committed** (`8271785`, step 7). `make check` green, 1963 tests collected.
+>
+> **DECIDED 2026-10-11 (his, all eight of A-H as recommended): the fallback set is taken on 2026-10-12, with Haiku
+> 5.5 reached through Anthropic's API**
+> on his prepaid Console credit ($18.19), instead of waiting for Bedrock until 2026-10-16. The plan, the facts checked
+> live 2026-10-11, the cost and eight decisions (A-H, all as recommended) are in
+> **`docs/phases/phase-3.5-preregistration-IMPLEMENTATION.md` §23**. The build spec is the Phase 4 code-half doc §4.9
+> (K6, the Anthropic provider); Phase 1's DoD 1 has a matching dated note. **Estimated: about $3.40-4.50 of the
+> credit for all of v1 on Haiku 5.5, plus about $1 of OpenRouter for `gpt-oss-120b`.**
+>
+> **NEXT, 2026-10-12:** (1) the Console, Claude leading, no spend: the credit's
+> purchase date (**done 2026-10-11**: $15.00 bought 2026-07-07, expires 2027-07-08), his tier and limits, a `horizon-compact`
+> workspace with a $10 monthly limit, the key made in it, the SSM parameter; (2) K6 built (Sonnet) and reviewed (Opus);
+> (3) one neutral call, then Phase 1 step 9 on Haiku 5.5 in Fargate (closes DoD 1); (4) the garden-shape proxy
+> measures Haiku's failure rate before anything is fixed around it.
+>
+> *The 4:30 PM block below is superseded on what is next; its account of Phase 5 holds.*
+>
 > ## START HERE — where things stand, 2026-10-11, about 4:30 PM (Phase 5 code half complete, steps 1-7; step 7 uncommitted)
 >
 > **Measured:** `make check` green, **1963 tests collected**, root 13 of 16. Steps 5 (`92d0346`) and 6 (`9e2d14a`)

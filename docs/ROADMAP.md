@@ -317,6 +317,11 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
 
+- **2026-10-11 — The fallback set taken now, Haiku 5.5 through Anthropic's API** (his idea; Opus scoped it the same
+  evening; **DECIDED by him that evening, all eight decisions A-H as recommended**). Decision 5's fallback set is unchanged in content
+  (Haiku 5.5 main, `gpt-oss-120b` second family); its date moves from 2026-10-16 to 2026-10-12 and Haiku's route from
+  OpenRouter to Anthropic's API, paid from his prepaid Console credit. Reasoning, live facts, cost and decisions A-H:
+  Phase 3.5 IMPLEMENTATION doc §23. The thinking sub-study is restored; Bedrock, Sonnet 4.6 and Nova Pro leave v1.
 - **2026-10-10 — Phases 4 and 5 split by code and runs** (his, as recommended; AWS still blocked). Each keeps its
   number and scope doc, and gets two IMPLEMENTATION docs: a **code half**, written, approved and built now on fakes
   (Phase 4: the run code `KNOWN-GAPS.md`'s queue lists; Phase 5: the dossier builder on synthetic filings), and the

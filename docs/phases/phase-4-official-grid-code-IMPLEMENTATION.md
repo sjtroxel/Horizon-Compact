@@ -186,6 +186,42 @@ Phase 3.5 decision 5's design change, built now.
 - **Then, his choice, about a cent of his OpenRouter balance:** Phase 1 step 9 on the placeholder as a real Fargate
   task with the development model, which proves the container end to end (finding 6).
 
+### 4.9 Anthropic's API from the laptop and the container (K6) — APPROVED 2026-10-11 (his)
+
+*Written 2026-10-11 (Opus) for Phase 3.5 §23 (the fallback set taken early, Haiku 5.5 on Anthropic's API); approved
+with §23's decision B the same evening. Same shape as §4.8, which it copies wherever it can.*
+
+- **The provider:** `providers/anthropic.py`, through **Anthropic's official Python SDK** (`anthropic`, version pinned
+  in `pyproject.toml` and the lock file, checked live on the day; the SDK's 1.x line). Route kind `"anthropic"` added
+  to `RouteKind`. What is sent: `model`, `system`, one user message, the one tool, `tool_choice: {"type": "auto"}`,
+  `max_tokens`, and `thinking: {"type": "disabled"}` when the model's config says thinking is off (decision C). **Never
+  sent:** `temperature`, `top_p`, `top_k` (the model rejects them, and the design never sets sampling), `effort`
+  (decision C), a cache breakpoint (decision F), `inference_geo`, any beta header, any fallback model.
+- **Retries:** the client is built with `max_retries=0`. Every attempt is the harness's, counted and recorded.
+- **The raw response:** read through the SDK's raw-response accessor and stored byte for byte, with the `request-id`
+  header in provenance. The parsed message is mapped onto the shape the Bedrock provider returns, as OpenRouter's is:
+  `tool_use` and `end_turn` pass through, `max_tokens` is `max_tokens`, **`refusal` becomes the refusal the classifier
+  already reads** (with `stop_details` kept in the stored response), so no frozen file changes.
+- **Errors are records, never exceptions,** on the names the classifier knows: 429 and 529 (overloaded) and 5xx are
+  retryable throttles or service errors; **a spend limit reached (HTTP 400 whose message names usage limits) and HTTP
+  402 `billing_error` stop the session** as configuration errors, never retried and never counted as a model's
+  failure; 401 and 403 stop it too.
+- **The key:** `ANTHROPIC_API_KEY` on the laptop, else a hidden prompt; in the container only, the SSM SecureString
+  `/horizon-compact/anthropic-key` (standard tier, the AWS-managed key), its value typed in by him. Shape checked
+  (`sk-ant-`) before any call; it travels only in the SDK's header; scrubbed from every error; the record writer
+  refuses a record holding one. `infra/iam/task.json` and `boundary.json` each gain read on exactly that parameter and
+  the matching scoped `kms:Decrypt`, held equal to the provider's constant by a test, as for OpenRouter.
+- **`models.toml`:** `[models.haiku-5-5]`, `model_id = "claude-haiku-5-5"`, `route = "anthropic"`, `thinking = "off"`,
+  `requests_per_minute` well under his organization's limit (read on the Console), `role = "main"` once the protocol
+  names it; prices $0.10 input, $0.50 output, $0.01 cache read, $0.125 cache write, with the date read. Cost is
+  counted from tokens and these prices, as for every model.
+- **Tests, all on a fake transport (no network):** the body has exactly the fields above and none of the never-sent
+  ones; `max_retries` is 0; each stop reason maps as stated; each error class becomes the record stated (spend limit
+  and 402 stop the session); the key never appears in a stored body, an error or a log; IAM grants read on exactly
+  one parameter; the provider is chosen by route kind.
+- **Then:** one neutral call on the laptop (about $0.001), and Phase 1 step 9 on Haiku 5.5 as a Fargate task (under
+  $0.01), which closes Phase 1's DoD 1.
+
 ## 5. Rules this half must not break
 
 - **No model call and no AWS call in any test.** Every provider, store and AWS client is a fake.
@@ -242,6 +278,9 @@ commit's diff before he commits** (the arrangement he called "exactly what we wa
 6. **[done 2026-10-11, K4; Sonnet built, Opus reviewed and fixed]** §4.6 the refusal workflow; §4.7's command.
 7. §4.8 the container's OpenRouter route (if decision 4 is (a)); the SSM parameter he creates; then, his choice,
    Phase 1 step 9 on the placeholder.
+8. **[APPROVED 2026-10-11 (his, Phase 3.5 §23 decision B); next to build]** §4.9 Anthropic's API route (K6): the
+   provider, the SSM parameter he creates, the IAM change he applies to the boundary; then one neutral call and Phase
+   1 step 9 on Haiku 5.5. About half a day of build with tests (Sonnet), then Opus's review.
 
 About a day of build with tests, in line with START HERE's estimate; §4.8 about half a day of it.
 
@@ -317,6 +356,7 @@ He runs each one; short one-line messages, no attribution.
 - **K3** `phase 4: per-scenario repeats, prefixes, pilot and official launch` — steps 2-4, with the IAM JSON.
 - **K4** `phase 4: awareness sweep, refusal calls, analyze` — steps 5-6.
 - **K5** `phase 4: openrouter from the container` — step 7.
+- **K6** `phase 4: anthropic api route` — step 8 (Phase 3.5 §23).
 
 ## 9. Definition of done, and the proof of each
 
