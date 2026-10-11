@@ -301,8 +301,58 @@ in the search half, from what is available on credits that day.
    (`directory.item[].name`), which step 1 did not fetch, and the exhibit-name pattern built on it; every figure
    tag not listed in §11. The first real case is the check; the cheap one to run sooner is one `index.json` and
    one older page for a filer, by script, his User-Agent.
-5. §4.7-4.9: the extraction request on a fake provider, anonymize and scale, options.
-6. §4.10: assemble, `hc case foreshadow`, `hc case hashes`.
+5. **[done 2026-10-11; Sonnet built, Opus reviewed, fixes applied]** §4.7-4.9: the extraction request on a fake provider, anonymize and
+   scale, options. `casebuild/{extract,terms,dates,scale,transform,anonymize,options}.py` and `figures.render_section`;
+   177 new tests, 1873 in all, `make check` green; one commit (B5). **What it does:** `ExtractionRequest` has three
+   fields (section, instruction, text) and `tests/test_architecture.py` now fails if anything in `casebuild/` imports
+   `analysis`, `protocol.cases`, `simulation` or any module named for a rubric or outcome (the scan is itself tested);
+   names are replaced from a per-case term list with the guard's own matcher (`compile_term`), longest first, then
+   states and provinces become census divisions; one regular expression then decides every date and number once:
+   dates become `fiscal year N-1, third quarter`, dollar figures and headcounts are scaled by the drawn factor
+   (`secrets` seed, log-length-weighted pieces, 3 significant digits, nearest 5, "fewer than 100"), and the
+   pay-per-head check runs on a line holding exactly one pay figure and one headcount. **Choices for review:**
+   (a) **the extraction instructions are new wording** (`extract.COMMON` and `SECTION_INSTRUCTIONS`), written from
+   §12.6's template; their hash goes in `build.json`; they say nothing of an outcome, a case or a reason; (b)
+   **nothing is left silently:** an unclassified number, a per-share figure or share count, a unit volume, a
+   headcount in words, a month and day with no year, a date that is not real, an unlisted state-plus-"City", and a
+   listed term the roles bring back are all **flags**, kept as written, and **step 6's assembly must refuse a
+   dossier while any flag stands**; (c) a bare year or "fiscal 2025" is read as the fiscal year ENDING in that
+   year, and flagged for any year end but 31 December; (d) a dollar figure is left unscaled as a ratio when
+   "per employee", "per hour", "a year on average" follows it or "average pay", "hourly wage" precedes it; any other
+   dollar figure is scaled; (e) states become the nine census divisions ("the East North Central region"), the
+   four census regions (`terms.CENSUS_REGIONS`) wait for the coarsening step; (f) section 7's option labels for S3
+   and S4 are written here ("facility", not "plant"), S1 and S2's are the instrument's own, and every shape's keys
+   are tested against `experiment/company/scenarios/`; (g) an option figure from a filing on or after the cut-off
+   raises, it is not dropped. **Not wired yet (step 6):** the order of the whole pipeline (extract, render figures,
+   options, then `anonymize_and_scale` on each section with one seed and one calendar), the `build.json` write, and
+   the refusal on flags. **Not verified on real text:** the headcount, ratio and date patterns (§10); the
+   fictional dossier's own wording was not used as a test corpus. **Review fixes (Opus, each reproduced before
+   it was fixed, each now a test):** a month name inside a longer word is no longer a month ("the codec 2025
+   release" had become "the cofiscal year N, fourth quarter release", with no flag); postal abbreviations are
+   replaced before the term list, so "Dayton, OH" with Dayton listed no longer leaves "a town, OH"; a ratio named
+   before its figure ("revenue per employee of $410,000") is no longer scaled; "employs approximately 60" now
+   reads "employs fewer than 100". **Left as is:** "we pay suppliers $5.0 million" counts as a pay figure, so a
+   headcount on the same line gets a pay check on the wrong pair; a failure would be reported, never silent.
+   **Checked:** the worst correct build moves pay per head 1.025 x 1.005, about 3.01%, so the 3.5% band holds and
+   a 3% band would not; §12.6's "at most 3.1%" is a safe bound.
+6. §4.10: assemble, `hc case foreshadow`, `hc case hashes`. **Notes for this step, from step 5's review
+   (2026-10-11):**
+   - **Flags need a recorded decision, or no real dossier can ever be assembled.** On real text every "12 plants"
+     and "35 countries" is an "unclassified number" flag, and assembly refuses while any flag stands. Design a
+     reviewed-flags file in the case's appendix directory: one entry per flag (section, kind, line, the flagged
+     text, and its sha256 so an entry cannot outlive a change to the text), each with his decision (keep as
+     written, edit by hand, remove) and a reason. Assembly passes only when every flag has an entry and no entry
+     is stale. Write it so the flags list is what he reads, not the whole dossier.
+   - **The pipeline order:** document set, section inputs for the shape, extraction (fake provider in tests),
+     section 4 and 5 figures by `figures.render_section`, section 7 by `options.build_options_section`, then
+     `anonymize.anonymize_and_scale` on every section with **one** factor (one `scale.new_seed()`, recorded) and
+     **one** `dates.FiscalCalendar` built from `figures.year_ends[0]`. Section 7's figures are scaled like the rest.
+   - **`build.json`** holds the seed, the factor, every section's record (names replaced, counts, flags, pay
+     checks), the section-input record, the figures record, `extract.request_record`, and the options record,
+     written once with `CaseAppendix.write_once`.
+   - **`hc case hashes`** must reuse the function `check_case_content` uses (shared, not copied; a test checks
+     they agree), and `hc case foreshadow` takes its terms from the rubric, which the builder never imports (the
+     architecture test in `tests/test_architecture.py` enforces it for everything in `casebuild/`).
 7. §4.11 if decision 1 is (a).
 
 About two days of build with tests; the splitter and the date patterns are most of it.

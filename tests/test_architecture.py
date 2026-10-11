@@ -691,3 +691,66 @@ def test_analysis_imports_nothing_from_model_config() -> None:
                 f"{path.name}:{node.lineno} {name}" for name in names if "model_config" in name
             )
     assert not offenders, f"analysis/ imports model_config: {offenders}"
+
+
+# --- the case builder never sees the outcome (Phase 5 code-half IMPLEMENTATION doc, finding 7) ---
+
+CASEBUILD = ROOT / "src" / "horizon_compact" / "casebuild"
+# The rubric, the matcher that reads it and the case record that hashes it. If the builder cannot import them,
+# no code path can carry the company's outcome to the extraction model.
+OUTCOME_MODULES = (
+    "horizon_compact.analysis",
+    "horizon_compact.protocol.cases",
+    "horizon_compact.simulation",
+)
+
+
+def _imported_modules(tree: ast.AST) -> list[tuple[int, str]]:
+    found: list[tuple[int, str]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            found.extend((node.lineno, alias.name) for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            base = ("." * node.level) + (node.module or "")
+            found.append((node.lineno, base))
+            found.extend((node.lineno, f"{base}.{alias.name}") for alias in node.names)
+    return found
+
+
+def _outcome_imports(tree: ast.AST) -> list[str]:
+    offenders = []
+    for lineno, module in _imported_modules(tree):
+        relative = module.startswith(".")
+        named = any(word in module.lower() for word in ("rubric", "outcome"))
+        listed = any(module == m or module.startswith(f"{m}.") for m in OUTCOME_MODULES)
+        if relative or named or listed:
+            offenders.append(f"line {lineno}: {module}")
+    return offenders
+
+
+def test_casebuild_cannot_import_the_rubric_or_any_case_outcome_type() -> None:
+    offenders: list[str] = []
+    for path in sorted(CASEBUILD.rglob("*.py")):
+        offenders.extend(
+            f"{path.name} {where}"
+            for where in _outcome_imports(ast.parse(path.read_text(encoding="utf-8")))
+        )
+    assert not offenders, f"casebuild/ imports something that could carry an outcome: {offenders}"
+
+
+def test_the_outcome_import_scan_catches_what_it_is_meant_to() -> None:
+    for source in (
+        "from horizon_compact.analysis import matcher",
+        "import horizon_compact.analysis.outcomes",
+        "from horizon_compact.protocol.cases import CaseRecord",
+        "from horizon_compact import simulation",
+        "from horizon_compact.casebuild.rubric_reader import x",
+        "from . import sibling",
+    ):
+        assert _outcome_imports(ast.parse(source)), source
+    for source in (
+        "from horizon_compact.casebuild.sections import SectionInputs",
+        "from horizon_compact.privacy.names import compile_term",
+        "from horizon_compact.providers.base import TextRequest",
+    ):
+        assert not _outcome_imports(ast.parse(source)), source

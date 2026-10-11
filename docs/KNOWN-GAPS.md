@@ -7,6 +7,31 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-11, about 2:30 PM (Phase 5 code half, steps 3-5 built)
+>
+> **Measured:** `make check` green, **1873 tests**, root 13 of 16. Steps 3 (`4cd6559`) and 4 (`1e71f97`) are
+> committed and pushed. Step 5 is his to commit (`phase 5: extract, anonymize, scale`); if `git log` lacks it, it
+> did not happen. **The name guard blocks that commit on two lines of the census state table in
+> `casebuild/terms.py`** (a state name there is on the private term file). It is a true false positive (the table
+> lists every state and names no company); the fix is his `allow:` lines for those two exact lines, with a reason,
+> never a reworded table and never a bypass.
+>
+> **Phase 5 code half, `docs/phases/phase-5-case-building-code-IMPLEMENTATION.md` §7:** steps 1-5 done (Sonnet
+> built, Opus reviewed each, every review fix applied, each recorded in its step). The package is
+> `src/horizon_compact/casebuild/`; everything runs on fakes; no SEC request beyond step 1's.
+>
+> **NEXT: step 6 (§4.10: assemble, `hc case foreshadow`, `hc case hashes`), Sonnet builds, Opus reviews.** Read
+> §7 step 6's **notes from step 5's review first**: the reviewed-flags file (without it no real dossier can be
+> assembled), the pipeline order with one seed and one calendar, what `build.json` holds, and the shared hash
+> function. Then step 7 (§4.11, the search runner and selection log), then the code half is done.
+>
+> **Open, his:** skim the extraction instructions (`casebuild/extract.py`, `COMMON` and `SECTION_INSTRUCTIONS`)
+> before the first real case; the 2026-10-16 fallback date (tentative). **Cheap check available:** one
+> `index.json` and one older submissions page for a filer, by script, his User-Agent (§7 step 4's unverified
+> shapes).
+>
+> *The 10 AM block below is superseded on Phase 5 (it said "Not built"); its Phase 1 account still holds.*
+>
 > ## START HERE — where things stand, 2026-10-11, about 10 AM (handoff; Phase 1 step 9 run, Phase 5 code-half doc approved)
 >
 > **Measured at handoff:** `make check` green, **1540 tests**, root 13 of 16. Last pushed commit `5ac21cd`. Today's

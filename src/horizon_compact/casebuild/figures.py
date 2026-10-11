@@ -268,3 +268,47 @@ def extract_figures(facts: Mapping[str, Any], cutoff: date) -> FigureTable:
             line.by_year[end] = figure
         table.lines[spec.name] = line
     return table
+
+
+_LABELS = {
+    "revenue": "Revenue",
+    "operating_income": "Operating income",
+    "operating_cash_flow": "Cash from operations",
+    "long_term_debt": "Long-term debt",
+    "cash": "Cash and cash equivalents",
+    "capital_spending": "Capital spending",
+    "research_and_development": "Research and development",
+    "dividends_paid": "Dividends paid",
+    "share_repurchases": "Share repurchases",
+    "acquisitions": "Acquisitions (cash paid, net of cash acquired)",
+}
+
+
+def _dollars(value: float) -> str:
+    sign = "-" if value < 0 else ""
+    amount = abs(value)
+    if amount >= 1_000_000:
+        return f"{sign}${amount / 1_000_000:,.1f} million"
+    return f"{sign}${amount:,.0f}"
+
+
+def render_section(table: FigureTable, section: int) -> str:
+    """Section 4 or 5's figures as text, by code: one line a year, the years named relative to the latest.
+
+    The text still carries the real dollar amounts; ``transform`` scales them with the rest of the dossier.
+    A line left out of the table, or a year it lacks, is simply absent here and listed in the record.
+    """
+    blocks: list[str] = []
+    for spec in LINES:
+        line = table.lines.get(spec.name)
+        if spec.section != section or line is None:
+            continue
+        rows = [_LABELS[spec.name]]
+        for index, end in enumerate(table.year_ends):
+            label = "fiscal year N" if index == 0 else f"fiscal year N-{index}"
+            figure = line.by_year.get(end)
+            rows.append(
+                f"  {label}: {_dollars(figure.value)}" if figure else f"  {label}: not available"
+            )
+        blocks.append("\n".join(rows))
+    return "\n\n".join(blocks)
