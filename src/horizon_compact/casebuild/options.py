@@ -73,6 +73,11 @@ SHAPE_OPTIONS: dict[str, tuple[OptionSpec, ...]] = {
 }
 
 
+# Spelled out: a digit in section 7 would be read by ``transform`` as an unclassified number, and every case
+# would carry a flag for each option's own list number (found in step 6's first pipeline run).
+NUMBER_WORDS = ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+
+
 @dataclass(frozen=True)
 class OptionFigure:
     statement: str  # for example "capital cost of $30.0 million, once"
@@ -105,7 +110,7 @@ def build_options_section(
     stripped = any(not figures.get(spec.key) for spec in specs)
     lines = ["The options plausibly open to the Company:", ""]
     for number, spec in enumerate(specs, start=1):
-        lines.append(f"{number}. {spec.label}")
+        lines.append(f"Option {NUMBER_WORDS[number - 1]}: {spec.label}")
         if not stripped:
             lines.extend(f"   {item.statement}" for item in figures[spec.key])
     text = "\n".join(lines)

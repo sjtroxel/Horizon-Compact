@@ -178,15 +178,34 @@ def _naive(moment: datetime) -> bool:
 # --- check 1: the content hashes to the record --------------------------------------------------------------
 
 
+def content_hashes(content: CaseContent) -> dict[str, str]:
+    """The three hashes a case record holds, keyed by its field names. The one function the gate's check 1
+    and ``hc case hashes`` both use, so what is written into ``case.lock`` is what the gate recomputes."""
+    return {
+        "dossier_sha256": _sha256(content.dossier),
+        "scenario_sha256": _sha256(content.scenario),
+        "rubric_sha256": _sha256(content.rubric),
+    }
+
+
+def case_lock_text(label: str, probe_set: int, hashes: Mapping[str, str]) -> str:
+    """``case.lock``'s text for ``hashes``; ``parse_case`` reads it back."""
+    case_path(label)  # refuses a label that is not one folder name
+    lines = [f"case_version = {CASE_VERSION}", f'label = "{label}"', f"probe_set = {probe_set}"]
+    lines += [f'{key} = "{hashes[key]}"' for key in sorted(hashes)]
+    return "\n".join(lines) + "\n"
+
+
 def check_case_content(record: CaseRecord, content: CaseContent) -> list[str]:
+    actual = content_hashes(content)
     return [
         f"{part} does not hash to {case_path(record.label)}"
-        for part, data, expected in (
-            ("the dossier", content.dossier, record.dossier_sha256),
-            ("the scenario text", content.scenario, record.scenario_sha256),
-            ("the rubric", content.rubric, record.rubric_sha256),
+        for part, key in (
+            ("the dossier", "dossier_sha256"),
+            ("the scenario text", "scenario_sha256"),
+            ("the rubric", "rubric_sha256"),
         )
-        if _sha256(data) != expected
+        if actual[key] != getattr(record, key)
     ]
 
 

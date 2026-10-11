@@ -335,7 +335,39 @@ in the search half, from what is available on credits that day.
    headcount on the same line gets a pay check on the wrong pair; a failure would be reported, never silent.
    **Checked:** the worst correct build moves pay per head 1.025 x 1.005, about 3.01%, so the 3.5% band holds and
    a 3% band would not; §12.6's "at most 3.1%" is a safe bound.
-6. §4.10: assemble, `hc case foreshadow`, `hc case hashes`. **Notes for this step, from step 5's review
+6. **[done 2026-10-11; Sonnet built, Opus reviewed, fixes applied]** §4.10: assemble, `hc case foreshadow`,
+   `hc case hashes`. `casebuild/{review,assemble,foreshadow}.py`, a `case` group in `cli.py`; 52 new tests,
+   `make check` green; one commit (B6). **As built:** (a) two calls, not one, because a person reads the flags
+   between them and a model's reply is not repeatable: `prepare_case` runs the pipeline once (one seed from
+   `scale.new_seed`, one calendar from `figures.year_ends[0]`) and writes `sections.json`,
+   `reviewed-flags.template.json` and, last, `build.json`; `assemble_case` reads them back (the sections are
+   checked against the hash in `build.json`), refuses unless every flag has exactly one current entry in
+   `reviewed-flags.json`, applies the decisions, refuses if a listed term has come back, then writes
+   `dossier.toml` (`title` and `text`) and `assembly.json`. (b) An entry names its flag by section, kind, line,
+   the sha256 of the flagged text and the sha256 of the whole line, so it cannot outlive a change; decisions are
+   `keep`, `edit` (one-line replacement; the flagged text must occur once on its line) and `remove`, each with a
+   reason. A failed pay-per-head check is turned into a flag, so it goes through the same file. (c) **Found by
+   the first pipeline run and fixed in step 5's code:** section 7's own list numbers ("1.", "2.") were flagged
+   as unclassified numbers on every case, so options are now "Option one:" and so on (tested: no shape's section
+   7 holds a digit). (d) `hc case hashes` prints `case.lock` from `protocol.cases.content_hashes`, the function
+   `check_case_content` now calls (shared, tested to agree and to round-trip through `parse_case`); the rubric
+   comes from a file path he gives, so `casebuild/` still imports nothing that could carry an outcome.
+   (e) `hc case foreshadow` takes a plain term file (one per line), searches `dossier.toml` and `scenario.toml`
+   whole-word and case-insensitively, writes the next `foreshadow-<n>.json` (hashes, not the terms) and exits 1
+   on any hit. **Not built, on purpose:** a `hc case build` command (it needs a provider and a model, the search
+   half's choice) and the call to `documents.write_sources`, which whoever builds the document set makes. A
+   prepare that stops part-way leaves its files, which the write-once appendix will not overwrite: clear the case
+   directory by hand. **Review fixes (Opus, each reproduced before it was fixed, each now a test):** the
+   foreshadowing check searched line by line, so a term wrapped across a line break ("the plant" / "closure")
+   passed with no hit; it now searches each text whole and reports the line the match starts on. `build.json`
+   did not record the term list, so assembly could run its last check on a different one; it now holds the
+   list's sha256 (text, case rule and role of each term) and assembly refuses a list that differs. A flag whose
+   text the transform rewrote ("fiscal 2025" to "fiscal year N-1") can only be kept, and edit or remove now says
+   so instead of "occurs 0 times". `foreshadow.py`'s docstring claimed the terms were not in its record; each
+   hit names its term, and the docstring now says that. **For the search half:** `prepare_case` takes the seed
+   function as a parameter for tests; `hc case build` must not expose it, or "never chosen" is a promise rather
+   than code. **Not verified on real text:** how many flags a real case raises. **Original notes for
+   this step, from step 5's review
    (2026-10-11):**
    - **Flags need a recorded decision, or no real dossier can ever be assembled.** On real text every "12 plants"
      and "35 countries" is an "unclassified number" flag, and assembly refuses while any flag stands. Design a

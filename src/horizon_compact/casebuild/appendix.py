@@ -128,6 +128,22 @@ class CaseAppendix:
     def scenario_path(self) -> Path:
         return self.directory / "scenario.toml"
 
+    @property
+    def sections_path(self) -> Path:
+        return self.directory / "sections.json"
+
+    @property
+    def flags_template_path(self) -> Path:
+        return self.directory / "reviewed-flags.template.json"
+
+    @property
+    def reviewed_flags_path(self) -> Path:
+        return self.directory / "reviewed-flags.json"
+
+    @property
+    def assembly_path(self) -> Path:
+        return self.directory / "assembly.json"
+
     def write_once(self, path: Path, data: bytes) -> None:
         """Write ``data`` inside this case's directory; refuse if it exists or git would track it."""
         target = Path(os.path.normpath(path.absolute()))  # collapses any ".."

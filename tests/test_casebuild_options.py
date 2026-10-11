@@ -11,6 +11,7 @@ import pytest
 
 from horizon_compact.casebuild.cutoff import FilingStamp
 from horizon_compact.casebuild.options import (
+    NUMBER_WORDS,
     SHAPE_OPTIONS,
     OptionFigure,
     OptionsError,
@@ -55,14 +56,21 @@ def test_options_are_named_from_the_shape_with_their_admitted_figures() -> None:
     assert section.text.splitlines() == [
         "The options plausibly open to the Company:",
         "",
-        "1. Close the facility and move its product family to the other facilities",
+        "Option one: Close the facility and move its product family to the other facilities",
         "   one-time cost of $20.0 million",
-        "2. Retool the facility",
+        "Option two: Retool the facility",
         "   capital cost of $30.0 million, once",
-        "3. Sell the facility, with its product family, to a buyer that will keep running it",
+        "Option three: Sell the facility, with its product family, to a buyer that will keep running it",
         "   proceeds of $12.0 million",
     ]
     assert section.record["figure_counts"] == {"close": 1, "retool": 1, "sell": 1}
+
+
+def test_no_shape_numbers_its_options_with_a_digit() -> None:
+    """A digit would be an unclassified number to the transform: a flag nobody means (step 6, first run)."""
+    for shape, specs in SHAPE_OPTIONS.items():
+        assert len(specs) <= len(NUMBER_WORDS)
+        assert not any(c.isdigit() for c in build_options_section(shape, {}, CUTOFF).text), shape
 
 
 def test_if_one_option_has_no_admitted_figure_every_option_is_described_without_figures() -> None:

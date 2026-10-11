@@ -21,6 +21,14 @@ import botocore
 from botocore.exceptions import BotoCoreError, ClientError
 
 import horizon_compact
+from horizon_compact.casebuild.appendix import AppendixError, open_case
+from horizon_compact.casebuild.foreshadow import (
+    ForeshadowError,
+    find_hits,
+    format_hits,
+    parse_terms,
+    write_hits,
+)
 from horizon_compact.dossier.check import default_repo_root, run_checks
 from horizon_compact.dossier.figures import FigureError, load_figures
 from horizon_compact.dossier.render import (
@@ -42,6 +50,7 @@ from horizon_compact.probes.run import (
     probe_run_id,
     run_probes,
 )
+from horizon_compact.protocol.cases import CaseContent, CaseError, case_lock_text, content_hashes
 from horizon_compact.protocol.gate import (
     PilotRefusal,
     check_official,
@@ -916,6 +925,57 @@ def cmd_dossier(args: argparse.Namespace) -> int:
     return cmd_dossier_check(root) if args.action == "check" else cmd_dossier_render(root)
 
 
+# --- case (Phase 5 step 6) --------------------------------------------------------------------------------
+
+
+def _case_text(path: Path, what: str) -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise AppendixError(f"cannot read {what}: {exc.strerror or type(exc).__name__}") from exc
+
+
+def cmd_case_foreshadow(args: argparse.Namespace) -> int:
+    case = open_case(args.label)
+    texts = {
+        "dossier": _case_text(case.dossier_path, "the case's dossier.toml"),
+        "scenario": _case_text(case.scenario_path, "the case's scenario.toml"),
+    }
+    terms_text = _case_text(args.terms, "the term file")
+    hits = find_hits(texts, parse_terms(terms_text))
+    name = write_hits(case, hits, terms_text=terms_text, texts=texts)
+    if hits:
+        print(format_hits(hits), file=sys.stderr)
+        print(f"{len(hits)} hit(s), written to {name}: justify each in writing or remove it.")
+        return CHECK_FAILED_EXIT
+    print(f"foreshadow check: no hits ({name})")
+    return CLEAN_EXIT
+
+
+def cmd_case_hashes(args: argparse.Namespace) -> int:
+    case = open_case(args.label)
+    try:
+        content = CaseContent(
+            dossier=case.dossier_path.read_bytes(),
+            scenario=case.scenario_path.read_bytes(),
+            rubric=args.rubric.read_bytes(),
+        )
+    except OSError as exc:
+        raise AppendixError(
+            f"cannot read a case file: {exc.strerror or type(exc).__name__}"
+        ) from exc
+    print(case_lock_text(args.label, args.probe_set, content_hashes(content)), end="")
+    return CLEAN_EXIT
+
+
+def cmd_case(args: argparse.Namespace) -> int:
+    try:
+        return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
+    except (AppendixError, ForeshadowError, CaseError) as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return REFUSED_EXIT
+
+
 # --- protocol (Phase 3.5 step 4) -------------------------------------------------------------------------
 
 
@@ -1285,6 +1345,26 @@ def build_parser() -> argparse.ArgumentParser:
         "check", help="Check the figures, the template and that every rendered file is fresh"
     )
 
+    case = groups.add_parser(
+        "case",
+        help="Phase 5 case files in the private appendix. Offline; reads local files only.",
+    )
+    case_actions = case.add_subparsers(dest="action", required=True)
+    foreshadow = case_actions.add_parser(
+        "foreshadow",
+        help="Search the case's dossier and scenario text for the rubric's key terms (one per line)",
+    )
+    foreshadow.add_argument("label", help="the case's neutral label, such as closure-1")
+    foreshadow.add_argument(
+        "--terms", type=Path, required=True, help="a file of terms, one per line"
+    )
+    hashes = case_actions.add_parser(
+        "hashes", help="Print case.lock for the case's dossier, scenario text and a rubric file"
+    )
+    hashes.add_argument("label", help="the case's neutral label, such as closure-1")
+    hashes.add_argument("--rubric", type=Path, required=True, help="the rubric file")
+    hashes.add_argument("--probe-set", type=int, choices=(1, 2), default=1)
+
     probes = groups.add_parser(
         "probes", help="Phase 2.5 comprehension probes. Development models only; no objective."
     )
@@ -1393,6 +1473,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.group == "dossier":
         return cmd_dossier(args)
+    if args.group == "case":
+        return cmd_case(args)
     if args.group == "scenarios":
         return cmd_scenarios(args)
     if args.group == "protocol":
