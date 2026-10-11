@@ -773,8 +773,20 @@ A document that matches none fails criterion 4, and that rejection is independen
 ### 12.6 The dossier and the scenario text
 
 - **Only documents dated before the cut-off** (the day before first disclosure), enforced in code: the most recent
-  annual and quarterly reports before it and earlier current reports a chief executive would know. **The extraction
-  model sees only those sections and is never told the outcome.**
+  annual and quarterly reports before it and **every current report (8-K, and any 8-K/A amending one), with its
+  press-release exhibits, filed after the most recent annual report and before the cut-off** (rule fixed 2026-10-11,
+  his, replacing "earlier current reports a chief executive would know", a judgment). **"Before the cut-off" is
+  strict:** a document filed on the cut-off day itself is out; the date read is the filing date, never the period a
+  filing covers. **The extraction model sees only those sections and is never told the outcome.**
+- **The section map** (fixed 2026-10-11, his): (1) overview from the annual report's business item; (2) segments and
+  facilities from its properties item and its segment note; (3) workforce from the business item's human-capital
+  part; (4) financial position and (5) capital allocation from the company's tagged financial figures (XBRL), each
+  figure taken by the date of the filing that reported it, a period reported in several filings read from the latest
+  one admitted by the cut-off, acquisitions also from the annual report's discussion of results; (6) the situation at
+  the cut-off from the discussion of results in the latest admitted periodic report (the quarterly report, or the
+  annual report if it is the later of the two) and every admitted current report; (7) from the scenario shape
+  (section 12.5). A filing the builder cannot split into its items is split by hand, with the
+  boundaries recorded.
 - **The template,** the same seven sections for every type, in this order, each sourced only from pre-cut-off
   documents: **(1) overview** (what the company makes and sells, at the level of a product category); **(2) segments
   and facilities** (segments with revenue and income; facilities by region and function, never by town); **(3)
@@ -791,9 +803,16 @@ A document that matches none fails criterion 4, and that rejection is independen
   relative ("fiscal year N, third quarter"); distinctive facts that identify a company on their own (a unique product,
   a named lawsuit) generalized.
 - **Scaling:** every dollar figure and every headcount scaled by one factor per case, **drawn log-uniformly from
-  [0.6, 0.9] ∪ [1.1, 1.6]** from a private recorded seed, never chosen; dollars to three significant digits,
-  headcounts to the nearest 5. The gap around 1 means no case keeps its real figures by chance; pay per head is checked
-  to stay in a realistic band after rounding.
+  [0.6, 0.9] ∪ [1.1, 1.6]** (the two pieces weighted by their log-lengths, ln 1.5 and ln(16/11); fixed 2026-10-11, his)
+  from a private recorded seed, never chosen; dollars to three significant digits, headcounts to the nearest 5, **except
+  that a scaled headcount under 100 is stated as "fewer than 100"** rather than rounded. **A dollar figure stated per
+  employee or per hour (an average wage, revenue per employee) is a ratio of two scaled quantities and is not
+  scaled;** per-share figures and share counts are left out of the dossier. The gap around 1 means no case keeps its
+  real figures by chance. **Pay per head is checked after rounding: wherever a total pay figure and a headcount are
+  both stated, pay per head stays within 3.5% of its unscaled value** (rounding to 5 moves a headcount of 100 or more
+  by at most 2.5%, which moves pay per head by at most 2.6%; three significant digits move a dollar figure by at most
+  0.5%; together at most 3.1%, so a correct build always passes and a failure means an error). A case that fails it
+  is a reported deviation, decided by him with the reason logged; the factor is never redrawn.
 - **Two checks on the dossier and the scenario text:** the **foreshadowing check** (the rubric's outcome terms
   searched for; every hit justified in writing or removed) and the **neutrality checklist** of section 4.2, since the
   options are real.

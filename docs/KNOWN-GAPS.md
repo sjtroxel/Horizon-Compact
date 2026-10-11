@@ -24,7 +24,8 @@ case by its type and a neutral label. The names live only in the private longlis
 >
 > **Phase 5 code half IMPLEMENTATION doc APPROVED 2026-10-11 (his), all four decisions (a)**
 > (`docs/phases/phase-5-case-building-code-IMPLEMENTATION.md`): builder plus search runner, on fakes; 8-Ks since the
-> last annual report; strictly before the cut-off; pay per head within 3%, groups under 100 as a range. **Not built.**
+> last annual report; strictly before the cut-off; pay per head within 3.5% (corrected from 3% the same day), groups
+> under 100 as a range. **Not built.**
 >
 > **NEXT: build it, on Sonnet, Opus reviewing each commit** (doc §7). Step 1 is his: one read-only SEC request (a
 > `scratch/` script, his User-Agent, a filer not on the longlist) to confirm field names. Step 2 is the protocol edits

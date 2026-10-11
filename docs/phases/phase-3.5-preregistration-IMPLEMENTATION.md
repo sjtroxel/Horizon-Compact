@@ -869,3 +869,16 @@ AWS. Every step that calls a model (the runs in 7 and 8, then 9 and 11) waits fo
 through OpenRouter (decision 4 (b)), under $0.25; the proxy through OpenRouter, $2-3. None of them makes the tag
 come sooner while the tag waits on AWS. The credits are shared with Musical Mycelium; these amounts are small against
 the $80 ceiling, and the harness's caps apply.
+
+## 22. Protocol amendment, 2026-10-11 (his), from the Phase 5 code half
+
+`experiment/protocol/protocol-v1.md` **§12.6 changed before the tag**, from Phase 5 code-half IMPLEMENTATION doc §6
+decisions 2, 3 and 4, all taken as recommended: **(i)** the dossier's current reports are now a rule (every 8-K or
+8-K/A and its press-release exhibits filed after the most recent annual report and strictly before the cut-off),
+replacing "earlier current reports a chief executive would know"; **(ii)** "before the cut-off" is strict, read on the
+filing date; **(iii)** a section map from filing items and tagged figures to the seven sections; **(iv)** the scaling
+draw's two pieces weighted by log-length, a scaled headcount under 100 stated as "fewer than 100", per-share figures
+left out, a per-employee or per-hour dollar figure not scaled (it is a ratio), and pay per head within 3.5% after
+rounding (3% as first written; corrected the same day on Opus's review, since the two roundings reach 3.08%). Each
+closes a place where a person who knows the grid's results could have bent a case. §12.6 is among the sections still
+awaiting his review of the draft (the protocol's status line); these edits are for that review to confirm.

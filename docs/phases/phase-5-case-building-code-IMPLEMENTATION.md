@@ -121,16 +121,19 @@ second**, and a declared User-Agent in the form "Sample Company Name AdminContac
 
 One function, `admit(document_or_fact, cutoff)`, used by everything below; nothing reaches extraction or the figures
 without passing it. **The rule is decision 3's.** It reads the filing date, never the period a filing covers, so a
-10-K/A filed after the cut-off is out even though it amends an earlier year. Where EDGAR gives an acceptance time, a
-filing accepted after the cut-off is out even if its filing date is not. Tests put a document on each side of every
+10-K/A filed after the cut-off is out even though it amends an earlier year. The acceptance time is not a second rule (a
+filing accepted after the day's close is dated the next business day, so the filing date already excludes it); the
+filter only checks the two agree (acceptance date, in US Eastern, on or before the filing date) and refuses a filing
+where they do not. *(Amended 2026-10-11, Opus review: the earlier "acceptance after the cut-off is out" clause was
+redundant.)* Tests put a document on each side of every
 boundary.
 
 ### 4.4 The document set
 
-For a filer and a cut-off: **the most recent 10-K and the most recent 10-Q** admitted by §4.3, and **the 8-Ks decision
-2's rule admits**. For each 8-K: the main document and its press-release exhibits (EX-99). The source list records,
-per document: form, accession number, filing date, acceptance time, URL, sha256. This is the "builder's source list"
-of the scope doc's DoD 3.
+For a filer and a cut-off: **the most recent 10-K and the most recent 10-Q** admitted by §4.3, and **the 8-Ks (and
+8-K/As) decision 2's rule admits**. For each 8-K: the main document and its press-release exhibits (EX-99). The source
+list records, per document: form, accession number, filing date, acceptance time, URL, sha256. This is the
+"builder's source list" of the scope doc's DoD 3.
 
 ### 4.5 The section map and the splitter
 
@@ -141,7 +144,7 @@ of the scope doc's DoD 3.
 | (3) workforce | 10-K Item 1, the human capital part |
 | (4) financial position, three years | XBRL (§4.6) |
 | (5) capital allocation history, three years | XBRL (§4.6); acquisitions also from Item 7 |
-| (6) the situation at the cut-off | 10-Q Part I Item 2 (MD&A); every admitted 8-K |
+| (6) the situation at the cut-off | the later of the 10-Q's Part I Item 2 and the 10-K's Item 7 (MD&A); every admitted 8-K |
 | (7) the options plausibly open | §4.9 |
 
 The splitter finds item headings, skips the table of contents (the first run of headings with no body between them),
@@ -174,8 +177,9 @@ In this half it runs only against a fake provider. The model, its route and the 
 - **Scaling,** exactly as protocol §12.6: one factor per case, **drawn log-uniformly from [0.6, 0.9] ∪ [1.1, 1.6], each
   piece weighted by its log-length** (finding 8), from a seed made by `secrets` (never chosen) and recorded in
   `build.json`. Every dollar figure and headcount is scaled; dollars rounded to three significant digits, headcounts to
-  the nearest 5. Percentages and ratios are not scaled. **Per-share figures and share counts are left out** of the
-  dossier: they would need their own rule, they identify a company, and no section needs them.
+  the nearest 5. Percentages and ratios are not scaled, **including a dollar figure stated per employee or per
+  hour**. **Per-share figures and share counts are left out** of the dossier: they would need their own rule, they
+  identify a company, and no section needs them.
 - **The pay-per-head check** is decision 4's rule, run on every line that has both pay and heads.
 
 ### 4.9 Options and the equal-treatment rule
@@ -243,6 +247,8 @@ Each has my recommendation and the reason. **All four DECIDED 2026-10-11 (his): 
      numbers fit together: rounding to 5 moves a headcount of 100 or more by at most 2.5%, and three significant
      digits move a dollar figure by at most 0.5%, so the check fails only on something unexpected. The small-group
      case is generalized the way §12.6 already generalizes distinctive facts.
+     *Corrected 2026-10-11 (his, on Opus's review): 3.5%, not 3%; "fit together" was wrong by 0.08 points. See §7
+     step 2.*
    - (b) A 5% band and rounding kept as written. Simpler, but a small group can still round to 0 and fail.
 
 **Not a decision now:** the extraction model, its route and its cost; the independent reader's model. Both are chosen
@@ -252,11 +258,27 @@ in the search half, from what is available on credits that day.
 
 **Sonnet builds; Opus reviews each commit's diff before he commits.**
 
-1. **He runs one read-only request** (a script in `scratch/`, his User-Agent, a filer not on the longlist, named only in
-   the session) for one submissions file and one company-facts file. Claude reads the field names and records them
-   here; the synthetic fixtures are written to match. No spend.
-2. **The protocol edits** for decisions 2 and 4 (and 3 if (b)), with the Phase 3.5 doc's note; before the tag.
-3. §4.1-4.3: the package, the appendix config and its refusal, the client on a fake transport, the cut-off filter.
+1. **[done 2026-10-11; results in §11]** **He runs one read-only request** (a script in `scratch/`, his User-Agent, a
+   filer not on the longlist, named only in the session) for one submissions file and one company-facts file. Claude
+   reads the field names and records them here; the synthetic fixtures are written to match. No spend.
+2. **[done 2026-10-11]** **The protocol edits** for decisions 2 and 4 (and 3 if (b)), with the Phase 3.5 doc's note;
+   before the tag. Landed in `protocol-v1.md` §12.6 (the 8-K rule, strict cut-off, the section map, the scaling
+   weights, "fewer than 100", the 3% band) and §22 of the Phase 3.5 doc. **Corrected the same day (Opus review,
+   his):** the band is **3.5%, not 3%**: rounding a headcount down 2.5% raises pay per head 2.6%, so the two
+   roundings together reach 3.08%, and a 3% check could fail a correct build. At 3.5% a failure means an error,
+   never a redraw. Also added: a per-employee or per-hour dollar figure is a ratio and is not scaled; 8-K/As count with 8-Ks; section 6
+   reads the later of the quarterly and annual reports; the acceptance-time clause dropped as redundant. §12.6 is
+   still among the sections awaiting his review of the draft.
+3. **[done 2026-10-11; Sonnet built, Opus reviewed, fixes applied]** §4.1-4.3: the package, the appendix config and
+   its refusal, the client on a fake transport, the cut-off filter. `casebuild/{config,appendix,edgar,cutoff}.py`;
+   67 new tests, 1607 in all, `make check` green. As built: the git check runs on every write, not once per case;
+   the cache is a `.body` file plus a `.json` record per URL, the record written second; a 403 or 429 halts every
+   later uncached request; `edgar.UrllibTransport` is tested only against a loopback stand-in; the architecture test
+   that `casebuild/` cannot import the rubric is step 5's, when there is an extraction request to guard. **Review
+   fixes:** a submissions row with no acceptance time is refused, not admitted unchecked; the real transport never
+   follows a redirect (a 3xx is an error), so the SEC-host check cannot be stepped around; the git calls drop every
+   inherited `GIT_*` variable and force English messages. **Kept as written (his):** an appendix inside any git
+   repository, a private one included, is refused.
 4. §4.4-4.6: the document set and source list, the map and splitter, figures from XBRL.
 5. §4.7-4.9: the extraction request on a fake provider, anonymize and scale, options.
 6. §4.10: assemble, `hc case foreshadow`, `hc case hashes`.
@@ -289,4 +311,49 @@ the search half's, estimated there from Phase 4's measured cost per call.
   the search half may add a tag, logged.
 - **Whether name replacement plus human review is enough before the probe.** The recognition probe is the measured
   check; this half only makes the first pass mechanical.
-- **The field names** until step 1.
+- **The field names** until step 1. *(Settled by step 1, §11.)*
+- **Unit volumes** (tons, units shipped) are neither dollars nor heads, so they are not scaled, and a per-unit price
+  beside them would then be inconsistent with scaled revenue. Not decided: the build reports any case where both
+  appear, and the search half decides (generalize the volume, or leave it out).
+
+## 11. As built: step 1, the field names (2026-10-11)
+
+His request, two files for one public filer chosen by him, not on the guard's term file, named nowhere in the repo:
+`submissions` (158 KB) and `companyfacts` (3.8 MB), one second apart, the User-Agent from his environment. Read here
+from the files, not from SEC documentation, which does not list the fields (the API page, checked the same day, names
+none). **The builder's fixtures must match these shapes.**
+
+**Submissions (`data.sec.gov/submissions/CIK##########.json`).** Top level has `name`, `tickers`, `sic`, `formerNames`,
+`fiscalYearEnd` and `filings`. `filings.recent` is a table of parallel lists, one entry per filing, with
+`accessionNumber`, `filingDate`, `reportDate`, `acceptanceDateTime`, `form`, `items`, `primaryDocument`, `size`,
+`isXBRL`. Findings that change the design:
+
+1. **`items` is one comma-separated string** (`"2.02,9.01"`), and empty for forms with none. The channel filters of
+   protocol §12.3 must split it.
+2. **`acceptanceDateTime` is UTC** (`2026-08-20T14:59:01.000Z`); `filingDate` is a plain date. §4.3 compares the date
+   rule on `filingDate` (decision 3) and uses acceptance only as a consistency check against the filing date, converted
+   to US Eastern first, so a late-evening acceptance is not read a day late.
+3. **`recent` is not the whole history.** It held 1,004 rows, filing dates 2023-06-02 to 2026-10-08, and only 3
+   10-Ks; older filings are in the pages listed under `filings.files` (two here, with their date ranges). §4.4 must
+   follow those pages whenever `recent`'s earliest date is later than a lookback needs, and the cache keys them like
+   any other URL.
+
+**Company facts (`data.sec.gov/api/xbrl/companyfacts/CIK##########.json`).** `facts` has the taxonomies `dei`,
+`us-gaap` (478 tags here), `ecd`, `ffd`, `invest`. A tag holds `units`, and under `USD` a list of facts with `start`,
+`end`, `val`, `accn`, `fy`, `fp`, `form`, `filed` and sometimes `frame`; a point-in-time figure (a balance) has no
+`start`. The tags §4.6 tries first were all present (`Revenues`,
+`RevenueFromContractWithCustomerExcludingAssessedTax`, `SalesRevenueNet`, `OperatingIncomeLoss`,
+`NetCashProvidedByUsedInOperatingActivities`, `LongTermDebt`, `PaymentsToAcquirePropertyPlantAndEquipment`). Findings:
+
+4. **Repetition is the norm, so the "latest admitted wins" rule is required, not a nicety:** 99 of 111 periods of one
+   tag appeared in more than one filing (a quarter reported again as a comparative a year later).
+5. **`fy` and `fp` describe the filing, not the figure.** One annual period appears with `fy` 2025 in the filing that
+   reported it and `fy` 2026 in the next year's filing, where it is a comparative. **The builder keys every figure by
+   `start` and `end`, never by `fy`**, and dates a fiscal year by its `end`. (This filer's year also ends in January,
+   so `fy` runs ahead of the calendar.)
+6. **`frame` is a label added after the fact** (the same period had none on the earlier filing and one on the later).
+   The cut-off logic never reads it.
+7. **`form` in the facts is only `10-K`, `10-Q` and `10-Q/A`** here, and a 10-K's annual rows span 364 or 365 days,
+   which is how an annual figure is told from a quarterly one in the same tag.
+
+**Left for the build:** the splitter has still seen no real filing's HTML (§10); this step read structured data only.
