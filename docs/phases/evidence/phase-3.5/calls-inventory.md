@@ -60,6 +60,7 @@ Phase 2.5 honor statements (protocol §2.4).
 |---|---|---|---|---|
 | `openai/gpt-6-astra` | OpenRouter, Phase 2 realism read | the dossier and its assumptions; never a scenario or objective | 1 | `docs/phases/evidence/phase-2/realism-brief.md`, `realism-raw.md` |
 | `google/gemini-3.1-pro-preview` | OpenRouter, Phase 2.5 blind reader | the four scenarios, the objectives and the templates; not told the question | 1 | `docs/phases/evidence/phase-2.5/reader-brief.md`, `reader-raw.md` |
+| `google/gemini-3.1-pro-preview` | OpenRouter, Phase 3.5 step 11, the independent review (effort `high`), 2026-10-12, served by Google | the protocol, the two simulation reports and the printed lock, from commit `b1bc34c`; no run record, no reply on the company's content | 1 ($0.358, his cash) | `review-brief.md`, `review-raw.md`, `review-resolutions.md` |
 | `openai/gpt-6-astra` | OpenRouter, `planning/08` design review | the planning documents, before any instrument text existed | 1 | `docs/planning/08a-REVIEW-BRIEF-gpt-6-astra.md`, `08b-REVIEW-RAW-gpt-6-astra.md` |
 
 ## 4. What this inventory cannot show

@@ -7,6 +7,50 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-12, about 5:00 PM (handoff: tomorrow is TAG DAY)
+>
+> **Measured at handoff:** `make check` green, **2039 tests**, root 13 of 16. Last pushed `46d8c8b` (CI and Deploy
+> green). **Not pushed:** `b1bc34c`. **Not committed:** step 11's review files, the protocol's accepted review changes
+> and these handoff edits, for his one commit (`phase 3.5: independent review and resolutions`). Spent today, by the
+> records' own cost fields: about $0.12 of the Console credit (Haiku), about $0.38 of his OpenRouter cash (proxy $0.0218,
+> reasoning check $0.0012, review $0.358).
+>
+> **Done today, all recorded in the repo:** Phase 1 DoD 1 closed on Haiku 5.5; step 7's proxy (the bound stays);
+> step 9's facts (`model-facts.md`); the roles (Phase 3.5 §24: `main`, `second_family`, `reserve`; the guard on the
+> one-way door re-armed, deployed); `gpt-oss-120b`'s reasoning pinned at `medium` (§25, accepted by DeepInfra on a
+> real call); protocol §5, §9.4, §9.5, §2.2, §2.6, §7.4 drafted and **his approval of §2-15 (4:30 PM)**; step 8 (Nova
+> Lite) **dropped** (his); **step 11's independent review done** (Gemini 3.1 Pro; 10 points, all resolutions accepted by
+> him and applied). The calls inventory is current through the review call.
+>
+> **Phase 3.5's DoD before the tag:** 1 (approved) **except one read he owes:** after his approval, Opus corrected
+> three sentences that stopped being true when `gpt-oss-120b` became the second family, the main one in **§1.1, "The
+> order it protects"** (also §1.6 and §4). He reads §1.1 before `P`. DoD 2 is met when the review files are committed
+> before `P`. DoD 3-6 are tag day itself.
+>
+> **TOMORROW, TAG DAY** (Phase 3.5 IMPLEMENTATION doc §12; every step his, Claude reading back; one command at a
+> time; **nothing calls a model**):
+> 0. His read of §1.1; his commit of today's edits if not done; `git push` (takes `b1bc34c` with it); CI green.
+> 1. **`P`:** first `hc protocol lock --model haiku-5-5 --model gpt-oss-openrouter` *without* `--write`, checked by
+>    Claude; then with `--write` (creates `experiment/protocol/prereg.lock`, which can never be overwritten); `make
+>    check`; his commit and push; **CI green on `P`**, its run id recorded.
+> 2. **The ruleset** (GitHub settings, Rules, New tag ruleset): target `prereg-*`; restrict updates, restrict
+>    deletions, block force pushes; no bypass list. Claude reads it back with `gh api`.
+> 3. **The tag:** `git tag -a prereg-v1 <P> -m "prereg-v1: protocol v1"`, then `git push origin prereg-v1`.
+> 4. **The archive visit:** one `curl` POST to Software Heritage (given on the day); Claude polls until `succeeded`
+>    (a few hours) and checks the snapshot's `refs/tags/prereg-v1` resolves to `P`.
+> 5. **The release:** title and notes **in his words** (public prose is his); he checks them for names.
+> 6. **The gate's dry runs against the tag** (Opus, from a worktree of the tag).
+> 7. **The record commit `R`:** `tag-record.md`, the DoD audit table, ROADMAP, START HERE, version 0.3.5.
+>
+> **His decisions, open, not taken by Claude:** the release's title and notes (his prose); whether steps 6-7 wait for
+> the archive to return or run the same day. **Carried past the tag (not tag-day work):** Phase 4 builds the thinking
+> sub-study option (`max_tokens` 16,000, protocol §9.5) and plans for `gpt-oss-120b`'s slow, throttled host; Phase 5.5's
+> recognition-probe runner must not reuse the development-only rule (§24.2); `s4shape` is refused for the official
+> models (§24.1).
+>
+> *The 12:30 PM block below, and the afternoon lines added under it, are superseded on what is next; they stay as the
+> day's record.*
+
 > ## START HERE — where things stand, 2026-10-12, about 12:30 PM (step 7's proxy done: the bound stays)
 >
 > **Done since 8:45 AM:** Phase 3.5 §23.8 **step 7, the garden-shape proxy**, on Haiku 5.5 (Anthropic's API) and
@@ -68,6 +112,14 @@ case by its type and a neutral label. The names live only in the private longlis
 > reviewer is Gemini 3.1 Pro through OpenRouter** (effort `high`, about $0.36, worst $0.71, his cash), replacing
 > `gpt-oss-120b`; the brief is updated and `scratch/send-review.py` is ready (sends only from a clean commit). NEXT: his
 > commit, then he runs the send; Opus marks each point in `review-resolutions.md`; he decides each. Then tag day (§12).
+> **4:41 PM: the review is IN** (`review-raw.md`, finish `stop`, $0.358 of his cash, from commit `b1bc34c`). **10 points,
+> marked by Opus in `review-resolutions.md`:** 1 confirmed, 7 partly right, 2 rejected; none finds an error in the
+> verdict rules or the quoted numbers. **4:50 PM: ALL TEN ACCEPTED (his) and applied to the protocol** (text only;
+> nothing a model reads), plus three more §1/§4 sentences corrected as §2.7 was (the second family's Phase 2.5
+> decisions). **Step 11 is DONE; DoD 2 is met once this is committed before `P`.**
+>
+> **NEXT: tag day (Phase 3.5 §12, seven steps, all his with Claude reading back).** Before it, he has not yet read the
+> three corrected §1/§4 sentences; that read is his, and quick.
 >
 > **The working tree:** today's doc edits, uncommitted, for one commit he runs: the 8:45 block's four files, plus
 > `model-facts.md`,

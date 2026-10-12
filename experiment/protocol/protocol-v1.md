@@ -26,8 +26,13 @@ computation, no content and no rule (a typo, a broken link, a clearer sentence),
 `errata-v1.md`; or a **new version**, `prereg-v2`, whose results are reported beside version 1's and never merged
 with them.
 
-**The order it protects.** No official model has made a decision on any of the experiment's four scenarios before
-the tag. Section 2 lists every model call made before it, what each saw, and who saw its output.
+**The order it protects.** No official model has made a decision on any of the experiment's four scenarios **as an
+official model** before the tag, and no decision on them by any model has been read by either author. The second
+family made development decisions on them before it was named, none of them read (section 2.4); the main model has
+made none. Section 2 lists every model call made before the tag, what each saw, and who saw its output. *[Corrected
+2026-10-12 (Opus), after his approval of section 1 on 2026-10-09: as first written, "No official model has made a
+decision on any of the experiment's four scenarios before the tag" stopped being true when the fallback set named
+`gpt-oss-120b` (section 2.4).]*
 
 ### 1.2 The question
 
@@ -107,6 +112,10 @@ register for each, because a result in the Roundtable's favor is as publishable 
 A pattern across scenarios is described scenario by scenario; no verdict is pooled across scenarios, and **results
 from different models are compared but never pooled** (section 6).
 
+**The study can find splits more easily than it can show their absence:** where the repeat cap binds on a share, "no
+split" is effectively out of reach, and a result there is inconclusive with its precision stated (section 8.4).
+*[Review point 6, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]*
+
 ### 1.6 What is measured, and what is not
 
 **One decision is one model call**, on one combination of model, scenario, objective, wording, line order (seeded)
@@ -120,10 +129,13 @@ one fictional company and a few anonymized real cases. It does not measure how h
 show that any objective is right, and it predicts nothing about any company. The company is fictional, and every
 number in its dossier is one of three kinds, each marked: cited to a public source, a stated assumption with its
 range and reason, or derived from those by a stated formula (section 4); the real cases are anonymized and run under the
-rules of section 12.
+rules of section 12. **How forcefully an objective is stated** is not varied: each is stated plainly, in three neutral
+templates, with no intensifier; a board that phrases its mandate forcefully is not what is tested. *[Review point 9, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]*
 
 **How it guards against fooling itself.** The design was fixed, and its error rates measured by simulation (section
-11), before any official model saw the scenarios. The verdict thresholds were set before any result. Failures are
+11), before the main model saw the scenarios; the second family had seen them as a development model, before it was
+named (section 2.4). *[Corrected 2026-10-12 (Opus), the same correction as section 2.7's: "before any official model
+saw the scenarios" stopped being true when the fallback set named `gpt-oss-120b`.]* The verdict thresholds were set before any result. Failures are
 counted and published, never quietly dropped (section 7). Every primary comparison is reported, whichever way it
 falls.
 
@@ -313,7 +325,8 @@ S4, whether funding came with cuts. **Extra rules** checked in validation (secti
 be at most 10% of the payroll left after roles are eliminated; S3's two option-only lines; S4's program line and its
 five one-side-only pairs.
 
-**How the text was tested before any official model saw it.** A neutrality checklist of ten items (consequences in
+**How the text was tested before the main model saw it** *(the second family saw it as a development model; section
+2.4)*. A neutrality checklist of ten items (consequences in
 numbers for every group or none; no adjectives about welfare or expectations; options at similar length and
 register; no option labeled responsible or bold; nothing saying what the board, investors or employees want; the
 same facts under every objective; one plain vocabulary; symmetric options; uncertainty treated alike), completed and
@@ -403,7 +416,8 @@ the same prompt, the same order, no message about what failed. Every attempt is 
 
 **Refusals.** A `no_tool_call` becomes a refusal only by a **logged human call**: one file per sweep,
 `refusal-calls.json`, mapping a run id to the reason, naming only runs whose final status is `no_tool_call`. The call
-is made **with the run's objective hidden, once, before any official analysis.** The classifier's flag (a reply
+is made **with the run's objective hidden, once, before any official analysis.** The reply's own text may reveal the
+objective; the call cannot change a verdict, since a refusal and a failure count the same. *[Review point 5, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]* The classifier's flag (a reply
 containing "won't", "will not", "cannot", "can't", "unable to", "refus", or "decline to" in a clause beginning with
 "I") only lists candidates; it decides nothing. A refusal and a failure count the same toward every rule in
 section 7; they differ only in which column of the published table they occupy.
@@ -462,7 +476,9 @@ caching** and **no batch API**. Beyond that:
 - **Thinking is off in the official grid on every model that can turn it off,** by the field each model needs,
   stated per model above and recorded on every call. **`gpt-oss-120b` cannot:** it reasons on every call, so the
   second family's grid is a reasoning model's, and section 9.4 reads its agreement with the main model with that
-  difference named.
+  difference named. **Why off:** it is the cheapest setting, and each decision's memo already gives the reasoning a
+  reader sees. Whether thinking changes what an objective does is tested directly, on S1, by the sub-study of section
+  9.5, and reported as a finding either way. *[Review point 7, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]*
 - **The model set is fixed at the tag,** before any real case is accepted. The roles are part of the lock, so a
   change to either is a new protocol version.
 
@@ -768,8 +784,11 @@ point, which no real set of comparisons would all do at once.
 ### 11.3 The failure rules and the wording rule
 
 The worst-case bound over 162 failure settings kept no verdict the bound overturns, and matched an independent
-rebuild every time. The wording rule over 36 shift settings labeled every reversal wording-sensitive, matching an
-independent recomputation. The share engine used in the simulations gave the analysis's own verdict on 21,200 of
+rebuild every time. The wording rule, over 36 shift settings, matched an independent recomputation; **where one
+wording's true difference had the opposite sign to the others** (four settings), it labeled **87% to 100%** of the
+splits wording-sensitive, the rest robust because that wording's observed difference did not change sign (simulation
+summary section 7). *[Review point 10, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]*
+The share engine used in the simulations gave the analysis's own verdict on 21,200 of
 21,200 replicates.
 
 ### 11.4 The matcher's thresholds
@@ -855,10 +874,12 @@ replacement query is written then, read by the independent reader (section 12.9)
 Candidates are taken **in order of first disclosure**, per type, and each is checked against the criteria in order:
 (1) publicly traded and filing with the SEC; (2) first disclosed inside the window (or the fallback month, under section 12.2's rule); (3) a real decision with real
 alternatives (not a forced wind-down); (4) maps onto a scenario shape (section 12.5); (5) not instantly recognizable
-after anonymization (the recognition probe, section 12.8); preferred, a manufacturer of comparable size. **The first
-k that pass are the cases.** Every candidate considered is logged with each criterion passed or failed and why; the
-log is published by case type, without names. **Every rejection on criterion 3, 4 or 5 is read by the independent
-reader;** a disagreement is resolved by him and logged with the reason.
+after anonymization (the recognition probe, section 12.8). **The first k that pass are the cases.** Each case's size
+beside the fictional company's (revenue and headcount, scaled) is reported, and never used to choose. *[Review point 1, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]* Every
+candidate considered is logged with each criterion passed or failed and why; the log is published by case type,
+without names. **Every rejection on criterion 3, 4 or 5 is read by the independent reader; a rejection the reader
+disputes does not stand:** the candidate goes on to the next criterion, and the disagreement is logged with both
+reasons. *[Review point 2, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]*
 
 ### 12.5 The scenario-shape rule
 
@@ -880,6 +901,11 @@ A document that matches none fails criterion 4, and that rejection is independen
   his, replacing "earlier current reports a chief executive would know", a judgment). **"Before the cut-off" is
   strict:** a document filed on the cut-off day itself is out; the date read is the filing date, never the period a
   filing covers. **The extraction model sees only those sections and is never told the outcome.**
+- **The extraction model, its route, its settings and its prompt are fixed and committed before the first real
+  case's documents are fetched,** and each case record carries that commit and the prompt's hash. It is not one of
+  the official models of section 5 (a model that wrote a case's dossier would then decide on its own summary). A
+  change after the first case is built is a deviation: every case already built is rebuilt with the changed
+  extraction, and both are reported. *[Review point 4, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]*
 - **The section map** (fixed 2026-10-11, his): (1) overview from the annual report's business item; (2) segments and
   facilities from its properties item and its segment note; (3) workforce from the business item's human-capital
   part; (4) financial position and (5) capital allocation from the company's tagged financial figures (XBRL), each
@@ -913,8 +939,11 @@ A document that matches none fails criterion 4, and that rejection is independen
   real figures by chance. **Pay per head is checked after rounding: wherever a total pay figure and a headcount are
   both stated, pay per head stays within 3.5% of its unscaled value** (rounding to 5 moves a headcount of 100 or more
   by at most 2.5%, which moves pay per head by at most 2.6%; three significant digits move a dollar figure by at most
-  0.5%; together at most 3.1%, so a correct build always passes and a failure means an error). A case that fails it
-  is a reported deviation, decided by him with the reason logged; the factor is never redrawn.
+  0.5%; together at most 3.1%, so a correct build always passes and a failure means an error). **A case that fails it
+  has a build error:** the error is found, fixed in the builder (never by editing a figure by hand), and the whole
+  case rebuilt and re-checked with the factor unchanged; **if no error is found, the case is dropped as failing
+  criterion 4** and the next candidate taken. Either way it is a reported deviation; the factor is never redrawn.
+  *[Review point 3, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]*
 - **Two checks on the dossier and the scenario text:** the **foreshadowing check** (the rubric's outcome terms
   searched for; every hit justified in writing or removed) and the **neutrality checklist** of section 4.2, since the
   options are real.
@@ -957,8 +986,9 @@ by case type.
 ### 12.9 The independent reader
 
 Another vendor's model that has not seen the grid's results, given only the criteria or the rubric with its source
-excerpts. It reads every rejection on a judgment criterion and every rubric's mapping. A disagreement is resolved by
-him and logged with the reason.
+excerpts. It reads every rejection on a judgment criterion and every rubric's mapping. A disagreement on a rejection
+is settled as section 12.4 says. **A disagreement on a rubric mapping is logged with both readings, and where they
+give different results the case is reported under both,** his reading labeled as his. *[Review point 2, accepted 2026-10-12 (his); `docs/phases/evidence/phase-3.5/review-resolutions.md`.]*
 
 ### 12.10 The case mode of the gate
 

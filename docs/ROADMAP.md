@@ -95,7 +95,19 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-12, 2:30 AM (handoff)
+### Where the build actually is — 2026-10-12, about 5:00 PM (handoff; tomorrow is tag day)
+
+**Measured 2026-10-12, about 5:00 PM:** `make check` green, **2039 tests passed**, root 13 of 16; last pushed commit
+`46d8c8b`; `b1bc34c` not pushed; step 11's review files and the protocol's accepted review changes uncommitted (his one
+commit, in `KNOWN-GAPS.md` START HERE).
+
+- **Phase 3.5, everything before the tag is done:** model facts, the roles (§24), `gpt-oss-120b`'s reasoning level
+  (§25), protocol §2-15 approved by him, step 8 dropped (his), the independent review done and resolved (Gemini 3.1
+  Pro; all ten resolutions accepted).
+- **Next: tag day** (Phase 3.5 IMPLEMENTATION doc §12), the seven steps in `KNOWN-GAPS.md` START HERE, after his read
+  of the corrected §1.1.
+
+### Where the build was — 2026-10-12, 2:30 AM (handoff) *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-12, 2:30 AM:** `make check` green, **2022 tests passed**, root 13 of 16; last pushed commit
 `0521028`; **K6 and last night's handoff docs uncommitted** (his commit, one command, in `KNOWN-GAPS.md` START HERE).

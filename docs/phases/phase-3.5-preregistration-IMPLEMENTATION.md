@@ -851,7 +851,11 @@ API (his prepaid credit) and `gpt-oss-120b` through OpenRouter (his cash, inside
     v1, a fixed list of state WARN databases named as the candidate for a later version; (iii), (iv) (15 calls per
     model, about $0.45 of credits on decision 2's set), (v) as drafted; (vi) generalized with (i): the fallback month
     is the month after the latest cutoff. His read of the rest of §2-15 remains.
-11. **[Opus, needs AWS under 7 (i)] The review** (§11): his call to send; the raw reply kept; each point marked; his decisions; changes made.
+11. *[done 2026-10-12: reviewer Gemini 3.1 Pro through OpenRouter (his, replacing 7 (i)), $0.358 of his cash, sent
+    from `b1bc34c`; 10 points, all resolutions accepted by him (1 confirmed, 7 partly right, 2 rejected) and applied
+    to the protocol that evening, plus three §1/§4 sentences corrected as §2.7 was.
+    `docs/phases/evidence/phase-3.5/review-raw.md`, `review-resolutions.md`, `review-lock.txt`.]*
+    **[Opus, needs AWS under 7 (i)] The review** (§11): his call to send; the raw reply kept; each point marked; his decisions; changes made.
     C7.
 12. **[him, with Claude reading back] Tag day, steps 1-5** (§12). `P`.
 13. **[Opus] Tag day, steps 6-7:** the dry runs against the tag, the S3 listing that nothing official exists (DoD 5),
