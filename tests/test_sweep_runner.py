@@ -413,7 +413,18 @@ def test_a_route_mismatch_is_refused_naming_both() -> None:
     check_route(exp, "sonnet-4-6", {})  # unset on a laptop: nothing to compare
     check_route(
         exp, "nova-lite", {"HC_SONNET_ROUTE": "geo_profile"}
-    )  # only the main model has the variable
+    )  # only a model on one of the two Sonnet routes has the variable
+
+
+@pytest.mark.parametrize("model", ["haiku-5-5", "gpt-oss-openrouter", "qwen-local"])
+def test_the_route_variable_is_never_compared_with_a_model_that_is_not_on_a_sonnet_route(
+    model: str,
+) -> None:
+    """Phase 3.5 section 24: Haiku 5.5 is the main model on Anthropic's API, and the task always sets
+    HC_SONNET_ROUTE to a Bedrock route; keyed on the role, every Haiku session would have refused."""
+    exp = load_experiment("placeholder")
+    for configured in ("application_profile", "geo_profile"):
+        check_route(exp, model, {"HC_SONNET_ROUTE": configured})
 
 
 def test_every_object_a_session_writes_is_labeled_development_and_stored_under_development(

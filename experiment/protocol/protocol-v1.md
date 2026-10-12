@@ -165,7 +165,8 @@ models 90 times. Those diagnostics showed the shapes are answerable and the smal
 
 ### 2.4 Development runs on the company's content
 
-The instrument's text was tested on development models only, never an official one: comprehension probes (40
+The instrument's text was tested on one model, then a development model and since 2026-10-12 the second family
+(see the end of this section): comprehension probes (40
 questions at five repeats, each asking what a scenario's text says, never what to decide) and format runs (every
 objective on the two development templates, never the sealed one), on `gpt-oss-120b` through OpenRouter:
 50 probe calls and 122 decision calls in all. These runs were read only through **blind reports**: counts of statuses and failure types, with no
@@ -199,6 +200,21 @@ only through the change log (section 4.2), with its evidence and reason.
 **What the disclosure means for this protocol.** It revealed which objectives had a format failure on one line of
 S2 under a development model, not what any objective decided. It changed one rule in the text (S2's wage limit is
 stated with its arithmetic), and no rule in this document was written from it.
+
+**The development model is now the second family.** *[Drafted 2026-10-12 from his decision of that day, for his
+review of this section.]* When Bedrock stayed unavailable, the fallback set (section 5) made `gpt-oss-120b` the
+second family, so the model these runs were made on is an official model. What that does and does not change:
+
+- **The model itself carries nothing from these runs.** `gpt-oss-120b` is a fixed open-weights release; calls do not
+  change it, and every host serves the same published weights.
+- **The text was shaped by it once.** Of the fourteen entries in the change log, one (entry 14, S2's wage limit) came
+  from its format runs; the other thirteen came from the neutrality checklist and the blind reader. Its failure rate on
+  this text may therefore be somewhat lower than an untested model's would be. That concerns format, not direction.
+- **The analyst's knowledge of it is the disclosure above:** which S2 objectives produced one format failure on it,
+  on the development templates. Its S2 results are reported with that disclosure beside them (section 9.4).
+- **It is the less independent check.** Its role is the second family's (section 9.4): a separate analysis whose
+  agreement with the main model is reported. The main model, Haiku 5.5, has not been given the company's content and
+  will not be before the tag.
 
 ### 2.5 The Nova Lite runs
 
@@ -587,6 +603,11 @@ keeps a position effect from favoring any objective; a position effect found is 
 
 *[Waits for build step 9.]* The second family runs the same grid, is analyzed separately, and its agreement or
 disagreement with the main model is reported per comparison.
+
+*[Drafted 2026-10-12 from his decision of that day, for his review of this section.]* The second family,
+`gpt-oss-120b`, is the model the instrument's text was developed on (section 2.4). Every report of its results says
+so, its S2 results carry the 2026-10-07 disclosure beside them, and its agreement with the main model is read as a
+less independent check than an untested model would give.
 
 ### 9.5 Thinking
 

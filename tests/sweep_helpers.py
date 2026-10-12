@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import dataclasses
 import random
 import shutil
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+import pytest
+
+from horizon_compact import cli
 from horizon_compact.experiment import Experiment, Scenario, load_experiment
 from horizon_compact.providers.base import (
     DecisionRequest,
@@ -285,3 +289,19 @@ def scenario(rule: str, levers: list[dict[str, Any]], **extra: Any) -> Scenario:
 
 def lever(key: str, kind: str, cap: int = 1000, **extra: Any) -> dict[str, Any]:
     return {"key": key, "label": key, "kind": kind, "cap": cap, **extra}
+
+
+def as_development_model(monkeypatch: pytest.MonkeyPatch, model_key: str) -> None:
+    """Make the CLI load ``model_key`` with ``role = "development"``, whatever models.toml says.
+
+    For a test of the OpenRouter key flow or the spend warning on company content, which only a development
+    model may run (Phase 3.5 section 24). The role guard has its own tests; this keeps these on the flow."""
+    real = load_experiment
+
+    def load(*args: Any, **kwargs: Any) -> Experiment:
+        exp = real(*args, **kwargs)
+        config = exp.models.models[model_key].model_copy(update={"role": "development"})
+        models = exp.models.model_copy(update={"models": {**exp.models.models, model_key: config}})
+        return dataclasses.replace(exp, models=models)
+
+    monkeypatch.setattr(cli, "load_experiment", load)

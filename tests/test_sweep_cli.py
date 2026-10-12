@@ -506,18 +506,21 @@ def test_the_plan_for_an_openrouter_model_prints_with_a_small_cost_bound(
 def test_after_the_draw_real_content_runs_on_the_development_templates_only(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """The company's sealed template is drawn (w2): the development model may plan on w1 and w3, never on w2,
-    and an official model is refused on real content on its own account."""
+    """The company's sealed template is drawn (w2): a development model may plan on w1 and w3, never on w2,
+    and an official model is refused on real content on its own account, the set's two models included
+    (Phase 3.5 section 24)."""
     args = [*OPENROUTER_ARGS]
     args[args.index("placeholder")] = "company"
+    args[args.index("gpt-oss-openrouter")] = "qwen-local"
     assert cli.main(["sweep", "plan", *args, "--template", "w1", "--template", "w3"]) == 0
     capsys.readouterr()
     assert cli.main(["sweep", "plan", *args, "--template", "w2"]) == 2
     assert "the sealed template (w2) is never part of a decision prompt" in capsys.readouterr().err
-    official = [*args]
-    official[official.index("gpt-oss-openrouter")] = "sonnet-4-6"
-    assert cli.main(["sweep", "plan", *official, "--template", "w1"]) == 2
-    assert "is not the development model" in capsys.readouterr().err
+    for model in ("sonnet-4-6", "haiku-5-5", "gpt-oss-openrouter"):
+        official = [*args]
+        official[official.index("qwen-local")] = model
+        assert cli.main(["sweep", "plan", *official, "--template", "w1"]) == 2
+        assert "is not the development model" in capsys.readouterr().err
 
 
 # --- the spend warning, before the OpenRouter key -----------------------------------------------------------

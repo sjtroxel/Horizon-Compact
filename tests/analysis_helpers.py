@@ -23,7 +23,9 @@ from horizon_compact.sweep.runner import sweep_prefix
 from horizon_compact.sweep.store import LocalStore
 from sweep_helpers import ScriptedProvider, raw_ok, session
 
-DEVELOPMENT_MODEL = "gpt-oss-openrouter"
+# A model whose role is "development" in models.toml: the official models (haiku-5-5, gpt-oss-openrouter) are
+# refused real content before the official sweep (Phase 3.5 section 24), so tests of company runs use this.
+DEVELOPMENT_MODEL = "nova-lite"
 PILOT_PREFIX = "pilot-test/"
 
 

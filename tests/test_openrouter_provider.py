@@ -357,11 +357,11 @@ def test_a_rejected_key_stops_the_session_at_once(tmp_path: Path) -> None:
     assert result.stopped == "config_error"
 
 
-def test_the_model_entry_is_the_development_model_with_the_prices_checked_live() -> None:
+def test_the_model_entry_is_the_second_family_with_the_prices_checked_live() -> None:
     config = experiment().model("gpt-oss-openrouter")
     assert (config.route, config.role, config.model_id) == (
         "openrouter",
-        "development",
+        "second_family",
         "openai/gpt-oss-120b",
     )
     assert config.num_ctx is None

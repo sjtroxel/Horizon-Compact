@@ -316,7 +316,7 @@ def test_the_lock_holds_identity_only_never_prices_quotas_or_pace(locked: Path) 
     assert read_lock(lock_path(locked)).models[MODEL].model_dump(exclude_none=True) == {
         "model_id": "anthropic.claude-sonnet-4-6",
         "route": "application_profile",
-        "role": "main",
+        "role": "reserve",
         "thinking": "not set",
         "sampling": "not set",
         "inference_profile": "horizon-compact-sonnet-4-6",

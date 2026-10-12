@@ -38,7 +38,14 @@ from horizon_compact.scenarios.render import load_scenario_figures
 from horizon_compact.sweep.plan import SweepRefusal
 from horizon_compact.sweep.prompt import render_prompt
 from horizon_compact.sweep.store import LocalStore
-from sweep_helpers import LAPTOP, FakeClock, ScriptedProvider, raw_error, raw_ok
+from sweep_helpers import (
+    LAPTOP,
+    FakeClock,
+    ScriptedProvider,
+    as_development_model,
+    raw_error,
+    raw_ok,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUTE = ModelRoute("qwen-local", "qwen-test:1b", "local", invoke_id="qwen-test:1b")
@@ -308,17 +315,29 @@ def test_an_official_model_is_never_asked_about_real_content(company: Experiment
     with pytest.raises(SweepRefusal, match="not the development model"):
         check_probe_model(company, "sonnet-4-6")
     check_probe_model(company, "qwen-local")
-    check_probe_model(company, "gpt-oss-openrouter")
+    check_probe_model(company, "nova-lite")
+
+
+@pytest.mark.parametrize("model", ["haiku-5-5", "gpt-oss-openrouter"])
+def test_neither_official_model_of_the_fallback_set_is_asked_about_real_content(
+    company: Experiment, model: str
+) -> None:
+    """Phase 3.5 section 24: the set's two models carry a role other than development, so the guard on the
+    one-way door covers them. Measured on 2026-10-12, before the roles changed, it did not."""
+    with pytest.raises(SweepRefusal, match="not the development model"):
+        check_probe_model(company, model)
 
 
 def test_an_official_model_may_be_asked_about_the_garden_shapes() -> None:
-    check_probe_model(load_experiment("shapes"), "sonnet-4-6")
+    for model in ("sonnet-4-6", "haiku-5-5", "gpt-oss-openrouter"):
+        check_probe_model(load_experiment("shapes"), model)
 
 
+@pytest.mark.parametrize("model", ["sonnet-4-6", "haiku-5-5", "gpt-oss-openrouter"])
 def test_the_cli_refuses_an_official_model_before_it_reads_anything_else(
-    capsys: pytest.CaptureFixture[str],
+    capsys: pytest.CaptureFixture[str], model: str
 ) -> None:
-    args = ["probes", "run", "--experiment", "company", "--model", "sonnet-4-6", "--label", "x"]
+    args = ["probes", "run", "--experiment", "company", "--model", model, "--label", "x"]
     assert cli.main(args) == 2
     assert "not the development model" in capsys.readouterr().err
 
@@ -394,9 +413,7 @@ def test_the_cap_stops_a_run_before_a_call_it_cannot_afford(
     tmp_path: Path, company: Experiment, sets: list[ProbeSet]
 ) -> None:
     provider = answering(sets)
-    result = run(
-        company, sets, provider, LocalStore(tmp_path), model="gpt-oss-openrouter", cap_usd=0.0
-    )
+    result = run(company, sets, provider, LocalStore(tmp_path), model="nova-lite", cap_usd=0.0)
     assert result.stopped == "cap_reached"
     assert provider.requests == []
 
@@ -479,6 +496,7 @@ def test_probes_state_the_spend_and_a_refusal_sends_nothing_and_asks_for_no_key(
     def no_prompt(*args: Any, **kwargs: Any) -> str:
         raise AssertionError("a refused run asked for the key")
 
+    as_development_model(monkeypatch, "gpt-oss-openrouter")
     monkeypatch.setattr(cli, "_git", lambda *a: str(tmp_path))
     monkeypatch.setattr("getpass.getpass", no_prompt)
     monkeypatch.setattr(cli, "OpenRouterProvider", lambda key: pytest.fail("a provider was built"))
@@ -502,6 +520,7 @@ def test_probes_go_on_to_the_key_after_a_y(monkeypatch: pytest.MonkeyPatch, tmp_
     def provider(key: str) -> Any:
         raise Reached(key)
 
+    as_development_model(monkeypatch, "gpt-oss-openrouter")
     monkeypatch.setattr(cli, "_git", lambda *a: str(tmp_path))
     monkeypatch.setattr(cli, "OpenRouterProvider", provider)
     monkeypatch.setenv("OPENROUTER_API_KEY", A_KEY)

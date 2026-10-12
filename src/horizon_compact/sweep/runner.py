@@ -52,6 +52,8 @@ from horizon_compact.sweep.store import Store
 
 RECORD_VERSION = 1
 SONNET_ROUTE_ENV = "HC_SONNET_ROUTE"
+# The routes the variable can name: the two Sonnet 4.6 routes `infra/terraform/main/variables.tf` validates.
+SONNET_ROUTES = frozenset({"application_profile", "geo_profile"})
 
 
 Role = Literal["development", "pilot", "official"]
@@ -106,11 +108,13 @@ class SessionResult:
 
 def check_route(experiment: Experiment, model_key: str, env: Mapping[str, str]) -> None:
     """A session refuses when the task's route and ``models.toml``'s differ, so a mismatch can never surface
-    as a run of ``AccessDenied`` errors (section 9.3). Only the main model has a decided route; the variable
-    is optional on the laptop, always set in the task definition."""
+    as a run of ``AccessDenied`` errors (section 9.3). The variable names one of the two Sonnet 4.6 routes,
+    so it is compared only for a model whose route is one of them; the Anthropic, OpenRouter and local routes
+    (and ``in_region``) have no such variable and are never compared (Phase 3.5 section 24). It is optional
+    on the laptop, always set in the task definition."""
     config = experiment.model(model_key)
     configured = env.get(SONNET_ROUTE_ENV)
-    if config.role == "main" and configured and configured != config.route:
+    if config.route in SONNET_ROUTES and configured and configured != config.route:
         raise SweepRefusal(
             f"{SONNET_ROUTE_ENV} is {configured!r} but models.toml says route {config.route!r} for "
             f"{model_key}; they must agree"

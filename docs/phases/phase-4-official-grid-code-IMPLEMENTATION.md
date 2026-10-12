@@ -284,7 +284,9 @@ commit's diff before he commits** (the arrangement he called "exactly what we wa
    compares it; the SDK client is built with every `ANTHROPIC_*` variable set aside (the SDK otherwise lets
    `ANTHROPIC_CUSTOM_HEADERS` add headers); the runner's `cache_system=True` is ignored on this route, as on
    OpenRouter's, so no `cache_control` is ever sent; `models.toml` `haiku-5-5` keeps `role = "development"` until
-   the protocol names it the main model (a `main` role would also need the task definition's route variable);
+   the protocol names it the main model (a `main` role would also need the task definition's route variable;
+   *dated note, 2026-10-12: settled by Phase 3.5 section 24, role `main`, and `check_route` keyed on the route, so
+   the variable needs no change*);
    a reached spend limit is the error code `SpendLimitReached`, which the unchanged classifier treats as a
    configuration error that stops the session; the laptop's spend warning names the prepaid Anthropic credit.
    SDK pinned `anthropic==1.13.0` (latest on 2026-10-12). Boundary change: his to apply, as with K5.]

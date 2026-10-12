@@ -20,21 +20,38 @@ case by its type and a neutral label. The names live only in the private longlis
 > (37 HTTP 429s in 100 attempts, rising through the day); its first session hit the 30-minute default and was resumed.
 > At grid scale that is more than a day of task time.
 >
-> **OPEN, his, before the tag (found by Opus in review, 2026-10-12): the second family is the model the instrument was
+> **DECIDED 1:40 PM (his, as recommended): `gpt-oss-120b` stays the second family**, on three conditions drafted into
+> protocol §2.4 and §9.4 for his review and the calls inventory corrected (Phase 3.5 §23.5, dated note under H). *The
+> finding, as recorded at 12:30 PM:* **the second family is the model the instrument was
 > developed on.** Decision 5 (his, 2026-10-09) made `gpt-oss-120b` the fallback set's second family. In Phase 2.5 it was
 > the development model given the company's content (50 probe calls, 122 decision calls on `w1` and `w3`), and the
 > 2026-10-07 disclosure (protocol §2.4) told Claude which S2 objectives had one format failure on it. Protocol §2.4
 > says the text "was tested on development models only, never an official one", and the calls inventory says "no
 > official model has been given any of the four scenarios": **under the fallback set both are untrue as written.** I
 > found nothing in §23 or decision 5 that addresses it (a grep, not proof). The blind reports mean no decision was seen,
-> so the one-way door's substance may hold; what is open is **whether `gpt-oss-120b` stays the second family, and how
-> the protocol says it.** Opus brings the options and a recommendation before the protocol review; no action today.
+> so the one-way door's substance may hold; what was open was whether `gpt-oss-120b` stays the second family, and
+> how the protocol says it.
+>
+> **About 1:50 PM (Sonnet built, Opus reviewed):** Phase 3.5 build step 9's **facts half is written**:
+> `docs/phases/evidence/phase-3.5/model-facts.md` (live reads of 2026-10-12; no difference from `models.toml`).
+> **OPEN, found in review: the code's one-way-door guard does not cover the fallback set.** `hc sweep plan --experiment
+> company` (local, no call) accepts `haiku-5-5` and `gpt-oss-openrouter` and refuses only `sonnet-4-6`, because both are
+> still `role = "development"`. **Until the roles change, no development or probe run of either on `company`**; only
+> process guards it. The role change re-arms the guard; it also needs `check_route` changed, or every Haiku session in
+> the container refuses. **2:10 PM: scoped by Opus as Phase 3.5 §24 and APPROVED (his, §24.5 A-C as
+> recommended). BUILT by Sonnet, REVIEWED by Opus (2:40 PM, no blocking finding; mutations confirm the new tests bite), `make check`
+> green, 2033 tests:** roles `main`,
+> `second_family`, `reserve`; `check_route` keyed on the route. The local proof shows `company` refused for both
+> official models. **The OPEN above is closed in the repo but not in the container until the new image deploys (his
+> push).** Review notes in §24.6. **NEXT:** his commit and push (the deploy builds the guarded image); then protocol
+> §5's bracket filled from `model-facts.md` (Opus), and his review of protocol §2-15. Protocol §5's bracket and `models.toml` untouched.
 >
 > **The working tree:** today's doc edits, uncommitted, for one commit he runs: the 8:45 block's four files, plus
+> `model-facts.md`,
 > `failure-proxy.md`, the calls inventory and the two blind reports.
 >
 > **NEXT:** (1) his commit; (2) his review of the shapes (`experiment/shapes/`), now that their proxy has run; (3) the
-> second-family question above; (4) the rest of Phase 3.5 as in §23.8 step 8: step 8's prerequisite (Nova Lite), step
+> second family's protocol wording, inside his §2-15 review; (4) the rest of Phase 3.5 as in §23.8 step 8: step 8's prerequisite (Nova Lite), step
 > 9's model facts and `model-facts.md`, the protocol's §5 and §9.5 filled, his review of §2-15, step 11's review, the tag.
 >
 > *The 8:45 AM block below is superseded on what is next.*

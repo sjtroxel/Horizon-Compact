@@ -64,7 +64,7 @@ def build(company: Experiment) -> SweepPlan:
         model_key=DEVELOPMENT_MODEL,
         label="refusals-test",
         repeats=2,
-        seed=35,  # every run's prompt is different under this seed (play() checks)
+        seed=52,  # every run's prompt is different under this seed (play() checks); found for nova-lite
         scenarios=["s1"],
         templates=["w1", "w2", "w3"],
         official=True,

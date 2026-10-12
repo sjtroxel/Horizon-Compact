@@ -23,7 +23,7 @@ CANARY_WORDS = 9876543  # seven digits: unlike 212, too long to turn up by chanc
 CANARY_MEMO = "CANARYMEMO the memo must never be printed"
 PLAN_ARGS = [
     "--experiment", "company",
-    "--model", "gpt-oss-openrouter",
+    "--model", "nova-lite",
     "--repeats", "1",
     "--seed", "5",
     "--label", "blindtest",
@@ -35,7 +35,7 @@ PLAN_ARGS = [
 def company_plan() -> SweepPlan:
     return build_plan(
         load_experiment("company"),
-        model_key="gpt-oss-openrouter",
+        model_key="nova-lite",
         label="blindtest",
         repeats=1,
         seed=5,

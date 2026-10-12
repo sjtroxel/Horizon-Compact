@@ -500,7 +500,7 @@ def test_the_model_entry_is_haiku_5_5_with_thinking_off_and_the_prices_read_on_2
         "claude-haiku-5-5",
         "off",
     )
-    assert config.role == "development"  # until the protocol names it the main model (build step 9)
+    assert config.role == "main"  # section 24: not "development", so real content is refused
     assert config.requests_per_minute <= 600  # far under the 10K requests his Scale tier showed
     assert (config.prices.input, config.prices.output) == (0.10, 0.50)
     assert (config.prices.cache_read, config.prices.cache_write_5m) == (0.01, 0.125)

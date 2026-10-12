@@ -23,7 +23,10 @@ calls (step 9) and the review (step 11) add rows here.
 | Haiku 5.5 | Anthropic's API, Fargate, Phase 1 step 9 (`skeleton-haiku-5-5-f1467906`, `stoptest-haiku-5-5-c61e6830`), 2026-10-12 | the placeholder (garden) | 65, all valid | 0 | Phase 1 IMPLEMENTATION doc §21a |
 | Haiku 5.5 | Anthropic's API, Fargate, the garden-shape proxy (`proxy-haiku-5-5-70ef2152`), 2026-10-12 | garden shapes (off the subject) | 64 (60 valid, 3 `schema_invalid`, 1 `sum_mismatch`) | 0 | `failure-proxy.md`; the blind report |
 
-**No official model has been given any of the four scenarios, on any route.**
+**No official model has been given any of the four scenarios, on any route, as an official model.** *Amended
+2026-10-12:* under the fallback set, `gpt-oss-120b`, the development model of section 2 that was given the company's
+content in Phase 2.5, became the second family (his decision, Phase 3.5 IMPLEMENTATION doc §23.5, dated note under H;
+protocol §2.4). **The main model, Haiku 5.5, has not been given any of the four scenarios.**
 
 ## 2. Development and diagnostic models
 

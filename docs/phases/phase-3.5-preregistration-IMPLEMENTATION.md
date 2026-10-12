@@ -803,6 +803,15 @@ API (his prepaid credit) and `gpt-oss-120b` through OpenRouter (his cash, inside
 9. **[Opus, needs AWS] Model facts and the set** (§10.3, decision 2): live reads, one neutral call per candidate on
    its official route, Nova Pro's tagged entry and its test, the set written into `models.toml` and `model-facts.md`;
    **his decision on the bound** if decision 3's threshold was crossed. C5.
+   *Dated note, 2026-10-12 (Sonnet): the facts half is done under the fallback set.*
+   `docs/phases/evidence/phase-3.5/model-facts.md` is written for `haiku-5-5` and `gpt-oss-openrouter`, live reads
+   with URLs and dates; no difference from `models.toml` found; the Bedrock items are dropped there with their
+   reasons. **Not done, and not mine:** `models.toml`'s roles (the read-only scoping is at the end of
+   `model-facts.md`: `check_route` would refuse every Haiku session in the container if Haiku became `main`, and
+   `HC_SONNET_ROUTE` is always set), protocol §5's bracket, §9.4/§9.5. Opus scopes the role change next.
+   *Opus, reviewing the same day:* the role change is not bookkeeping. While both models of the set are
+   `development`, the harness accepts a non-official run of either on `company` (measured with `hc sweep plan`, no
+   call); the real-content refusal guards only `sonnet-4-6`. No such run until the roles change.
 10. **[Opus] The protocol draft** (§9), section by section for his review; the review brief; the calls inventory
     (DoD 5's second half). C6.
     **Draft `[done]` 2026-10-09 (Opus), every section:** `experiment/protocol/protocol-v1.md`, §1 reviewed and accepted
@@ -1026,6 +1035,14 @@ Each has my recommendation and the reason. **All eight DECIDED 2026-10-11 (his),
 - **H. The second family stays `gpt-oss-120b` on OpenRouter.** **Recommended**, about $1 of his cash inside the $5
   cap. *Alternative:* no second family. Cheaper by $1, but protocol §9.4 then has nothing, and every result rests on
   one model.
+  *Dated note, 2026-10-12 (his, on Opus's recommendation): `gpt-oss-120b` stays the second family although it is
+  the model the instrument was developed on* (Phase 2.5's probes and format runs on the company's content, found in
+  review that day). Reasons: it is a fixed open-weights release, so calls left nothing in it; one of the change log's
+  fourteen entries came from its runs, on format; its role is the separate robustness check. On three conditions,
+  drafted into the protocol for his review: §2.4 says the development model became the second family and what that
+  means; §9.4 says every report of its results names this, with the 2026-10-07 disclosure beside its S2 results; the
+  calls inventory's wording is corrected. *Alternative not taken:* an untested open-weights second family (an
+  unmeasured model, a new pinned host, another proxy run).
 
 ### 23.6 An honest note on Haiku 5.5 for this study
 
@@ -1094,3 +1111,150 @@ Each has my recommendation and the reason. **All eight DECIDED 2026-10-11 (his),
 
 **About the calendar:** steps 1-4 fit in one day; 5-7 the next; step 8 depends on his review of the protocol, which is
 the longest item and his own.
+
+## 24. The model roles for the fallback set (build step 9, second half; written 2026-10-12, Opus)
+
+> **Status: [done] 2026-10-12 (Sonnet built; REVIEWED by Opus about 2:40 PM, no blocking finding; as-built notes and
+> the review in §24.6). APPROVED about 2:10 PM
+> (his, all three of §24.5's decisions as recommended).** Scoped from the read-only findings at the end of
+> `docs/phases/evidence/phase-3.5/model-facts.md`. Build on Sonnet, review on Opus. Cost: $0, no model call.
+
+### 24.1 Why: the guard on the one-way door does not cover the set
+
+Two checks refuse real content to any model whose `models.toml` role is not `development`: `check_not_official_rules`
+(`sweep/plan.py`, every non-official plan) and `check_probe_model` (`probes/run.py`, every probe). They were written
+when the official model was `sonnet-4-6`, role `main`. Under the fallback set the two official models, `haiku-5-5` and
+`gpt-oss-openrouter`, still carry `role = "development"`, so **the harness accepts a non-official run of either on
+`company`**: measured 2026-10-12 with `hc sweep plan --experiment company --template w1 --repeats 1` (local, no call),
+which planned 20 runs for each and refused only `sonnet-4-6`. Nothing has been run that way; only process prevents
+it. **Setting the roles is what puts the code back in front of the door.** The change has one side effect to handle:
+`check_route` (`sweep/runner.py`) compares `HC_SONNET_ROUTE` with the route of any model whose role is `main`, and the
+task definition always sets that variable to a Bedrock route, so Haiku as `main` would refuse in the container.
+
+What does **not** go through those refusals, checked the same day: the official sweep and the pilot (`cli.py` builds
+their plans with `official=True`; the lock's gate checks them instead) and the awareness sweep (`sweep/awareness.py`,
+`official=True`). The gate never reads `role` (`protocol/gate.py`). So the change blocks only what must be blocked,
+with one known side effect: `experiment/s4shape/` (garden text, off the subject, Phase 4's K5 check) is not in
+`OFF_SUBJECT_EXPERIMENTS`, so it becomes refused for the two official models. `shapes` and `placeholder` stay open
+to them, which covers every planned use; adding `s4shape` to that list is not part of this change.
+
+### 24.2 The change
+
+1. **`experiment/models.toml`, roles only** (no price, quota, route or ID changes):
+   - `haiku-5-5`: `role = "main"`.
+   - `gpt-oss-openrouter`: `role = "second_family"`.
+   - `sonnet-4-6`: `role = "reserve"`: out of v1 under the fallback set, kept because decision 5 lets him choose the
+     Bedrock set if Bedrock answers before the tag, and because the smoke plan and about 20 test files name it.
+   - Comments: each entry's comment says its role and why; the stale lines go ("`role` stays development until ...",
+     "The official runs are NOT covered by this entry"). `qwen-local` and `nova-lite` stay `development`.
+2. **`check_route` keyed on the route, not the role.** It compares `HC_SONNET_ROUTE` with a model's route only when
+   that route is one the variable can name (`application_profile` or `geo_profile`, the values `variables.tf`
+   validates). Behavior today is kept for `sonnet-4-6` (still compared) and `nova-lite` (`in_region`, still not);
+   `anthropic`, `openrouter` and `local` routes are never compared. The docstring says why. No other code change.
+3. **Tests.**
+   - New, reading the real `models.toml`: a non-official plan on `company` is refused for `haiku-5-5` and for
+     `gpt-oss-openrouter`, and a probe on `company` is refused for both (the measured gap of §24.1, as a test).
+   - New tripwire: the models with role `development` are exactly `qwen-local` and `nova-lite`; adding a model as
+     development, or demoting an official one, fails until the test is changed on purpose.
+   - `test_sweep_runner.py`'s route test gains: `haiku-5-5` and `gpt-oss-openrouter` pass with
+     `HC_SONNET_ROUTE=application_profile`; the `sonnet-4-6` mismatch is still refused.
+   - Updated expected values: `test_anthropic_provider.py` (role `main`), `test_openrouter_provider.py` (role
+     `second_family`), `test_protocol_lock.py` (the locked `sonnet-4-6` identity's role `reserve`).
+4. **No `infra/` change.** `HC_SONNET_ROUTE` and `HC_SONNET_PROFILE_ARN` stay; nothing in `infra/` reads a role.
+   **The container is fixed only when the new image deploys** (his push; the deploy workflow builds it), because
+   `models.toml` is baked into the image. Until then, no development run of either model on `company`, as now.
+5. **Docs:** a done marker here and in `model-facts.md`'s last section; a dated note under Phase 4 code half §7 step 8
+   (its "keeps `role = development` until ..." is settled); `KNOWN-GAPS.md` closes the OPEN of 2026-10-12 and carries
+   one item to Phase 5.5 (below).
+
+**Carried to Phase 5.5, not built here:** the real cases' recognition probes run on every official model
+(protocol §12.8) and have no runner yet (`protocol/cases.py` only reads their records). That runner must not reuse
+`check_probe_model`'s development-only rule, or it will refuse the very models it is for; its own rule goes in that
+phase's IMPLEMENTATION doc.
+
+### 24.3 What does not change
+
+The lock's design and its identity fields (the role is already in them, so **the roles must be set before
+`prereg-v1`**; a change after the tag is a new protocol version); the gate; the instrument; the prices; protocol §5's
+bracket (filled after this, from `model-facts.md` and these roles); §9.4 and §9.5.
+
+### 24.4 Proof
+
+`make check` green. Then, local and free: `hc sweep plan --experiment company --model haiku-5-5 --repeats 1 --seed 1
+--label x --template w1` is **refused** ("is not the development model"), and the same for `gpt-oss-openrouter`;
+`hc sweep plan --experiment shapes --model haiku-5-5 ...` still plans (off the subject). After his push and the
+deploy, the next Fargate run of Haiku (Phase 4's runs half, or a placeholder run if he wants one, about $0.014) shows
+`check_route` letting it through.
+
+### 24.5 Decisions for him
+
+**All three DECIDED 2026-10-12 (his), each as recommended.**
+
+- **A. The role names `main`, `second_family`, `reserve`.** **Recommended.** Any string other than `development`
+  arms the guard; these say what each model is, and the lock records them.
+- **B. Keep `sonnet-4-6` as `reserve` rather than delete it.** **Recommended.** Deleting it rewrites about 20 test
+  files and the smoke plan for no gain, and decision 5 keeps a Bedrock set possible before the tag.
+  *Alternative:* delete it, as a separate, larger change.
+- **C. One commit.** **Recommended:** this change rides in the same commit as today's held doc edits
+  (`phase 3.5: model facts and roles`), since all of it is build step 9. *Alternative:* commit the docs first, then
+  this.
+
+### 24.6 As built (2026-10-12, Sonnet; for Opus's review)
+
+**Done as §24.2 says:** `models.toml` roles `haiku-5-5` = `main`, `gpt-oss-openrouter` = `second_family`,
+`sonnet-4-6` = `reserve`, with each entry's comment updated and nothing else touched (no price, quota, route or ID);
+`check_route` keyed on the route (`SONNET_ROUTES`, new, in `sweep/runner.py`: `application_profile` and
+`geo_profile`); no `infra/` change; protocol §5's bracket untouched.
+
+**Where it went beyond the list, and why (for review):**
+
+1. **More tests broke than §24.2 named, all one cause:** they used `gpt-oss-openrouter` as "the development model" on
+   company content, which is exactly what the change forbids. Fixed by pointing them at a real development model,
+   not by loosening the guard: `tests/analysis_helpers.DEVELOPMENT_MODEL` is now `nova-lite` (feeds
+   `test_sweep_refusals.py`, `test_analysis_outcomes.py`, `test_analysis_records.py`); `test_sweep_blind.py` uses
+   `nova-lite`; the probe cap test uses `nova-lite`; `test_sweep_cli.py`'s sealed-template test uses `qwen-local` and
+   now loops over the three official models for the refusal. **A seed in `test_sweep_refusals.py` had to move**
+   (35 to 52): the plan's menu-order seeds depend on the model key, and under `nova-lite` seed 35 made two runs
+   share a prompt. Seed 52 is the first that does not (searched 1-199); the comment says so.
+2. **Two probe-CLI tests** (`test_probes_state_the_spend...`, `test_probes_go_on_to_the_key_after_a_y`) test the
+   OpenRouter key flow and spend warning on company content; that flow is now correctly refused for `gpt-oss`.
+   A new helper, `as_development_model` in `tests/sweep_helpers.py`, loads the model with `role = "development"` in
+   those two tests only, so they stay about the flow. The guard has its own tests. **Opus: check you accept this
+   rather than deleting the two tests.**
+3. **`test_probes.py` asserted that `gpt-oss-openrouter` passes `check_probe_model` on company** (line 311): the
+   measured gap, written as a test. It now asserts the opposite for both models (parametrized), and `nova-lite`
+   passes.
+4. **New tests, as 24.2 item 3:** both models refused a non-official plan and a probe (`test_sweep_plan.py`,
+   `test_probes.py`, plus the CLI refusal parametrized over three models), and still allowed on `shapes` and when
+   `official=True`; the tripwire (development models are exactly `nova-lite` and `qwen-local`; the three roles are
+   pinned); the route test for `haiku-5-5`, `gpt-oss-openrouter` and `qwen-local` under both route values.
+   Updated expected values: `test_anthropic_provider.py` (`main`), `test_openrouter_provider.py`
+   (`second_family`, test renamed), `test_protocol_lock.py` (`reserve`).
+
+**Proof.** `make check` green, **2033 tests** (2022 before), root 13 of 16. §24.4's local proof, run after it:
+`hc sweep plan --experiment company` is **refused for `haiku-5-5`, `gpt-oss-openrouter` and `sonnet-4-6`** ("is not
+the development model", exit 2); `--experiment shapes` plans 20 runs for `haiku-5-5` and `gpt-oss-openrouter`
+(exit 0); `hc probes run --experiment company --model haiku-5-5` is refused ("role 'main'", exit 2). No model call,
+cost $0.
+
+**Not done, by design:** the container is guarded only once the new image deploys (his push); the recognition-probe
+runner for Phase 5.5 (carried, §24.2); protocol §5's bracket; the lock (roles are in it, so this must precede
+`prereg-v1`, as it does).
+
+**Review (Opus, 2026-10-12, about 2:40 PM): no blocking finding; nothing changed.** Read the whole diff
+(`models.toml`, `sweep/runner.py`, eleven test files). Checked, not taken from the as-built notes:
+- **The new tests bite.** Two temporary mutations, each restored and confirmed byte-identical with `cmp`: putting
+  `haiku-5-5` back to `development` fails the new refusal tests; keying `check_route` on the role again fails the new
+  route test.
+- **§24.4's proof, re-run:** `company` refused for `haiku-5-5` and `gpt-oss-openrouter`, still planned for
+  `nova-lite`; `shapes` plans 20 runs for both; `check_route` passes `haiku-5-5` with
+  `HC_SONNET_ROUTE=application_profile`.
+- **Item 2 above, accepted:** the two probe-CLI tests stay, with `as_development_model`. They test the spend warning
+  and the OpenRouter key prompt, code that stays live for any future development model on OpenRouter; deleting them
+  would drop that coverage, and the role guard is tested separately. The helper patches only `cli.load_experiment`,
+  only in those two tests.
+- **The re-pointed tests keep their meaning:** each used `gpt-oss-openrouter` only as "some development model";
+  `nova-lite` and `qwen-local` are that. The seed move (35 to 52) changes no assertion, only which seed gives 30
+  distinct prompts, which `play()` checks.
+- Untracked files: only `model-facts.md` (`scratch/` is ignored), so the commit command's `git add -A` takes exactly
+  today's work.

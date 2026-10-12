@@ -19,7 +19,10 @@ route = "application_profile"
 inference_profile = "horizon-compact-sonnet-4-6"
 geo_profile_id = "us.anthropic.claude-sonnet-4-6"
 requests_per_minute = 10
-role = "main"
+# Out of v1 under the fallback set (Phase 3.5 IMPLEMENTATION doc section 23, decision 5): kept so a Bedrock set stays
+# possible before the tag, and because the smoke plan and many tests name it. Any role other than "development" keeps
+# real content away from it before the official sweep (section 24).
+role = "reserve"
 
 [models.sonnet-4-6.prices]
 input = 3.30
@@ -70,14 +73,18 @@ cache_write_5m = 0.0
 # and the cost OpenRouter reports is kept in each stored response. On the laptop its key is typed in; in the
 # container it is read from SSM (Phase 4 code half section 4.8). `openrouter_provider` pins the request to
 # DeepInfra's bf16 endpoint, the one the prices below belong to (checked live 2026-10-11 against OpenRouter's
-# endpoint list), with fallbacks off. The official runs are NOT covered by this entry.
+# endpoint list; re-read 2026-10-12, docs/phases/evidence/phase-3.5/model-facts.md), with fallbacks off.
+#
+# Role, 2026-10-12 (Phase 3.5 IMPLEMENTATION doc section 24, his): "second_family". Under the fallback set this is the
+# official second family, so it is no longer a development model and the real-content refusals apply to it. It is also
+# the model the instrument's text was developed on (protocol section 2.4 and 9.4).
 
 [models.gpt-oss-openrouter]
 model_id = "openai/gpt-oss-120b"
 route = "openrouter"
 openrouter_provider = "deepinfra/bf16"
 requests_per_minute = 20
-role = "development"
+role = "second_family"
 
 [models.gpt-oss-openrouter.prices]
 input = 0.037
@@ -93,15 +100,16 @@ cache_write_5m = 0.037
 # (decision C): the model thinks by default, and the protocol asks for the explicit field that turns it off.
 # Quota: his organization's Scale tier showed 10K requests, 10.0M input and 2.0M output tokens for this model
 # (the Console's Rate limits page, workspace horizon-compact, read 2026-10-12); the pace below is far under it.
-# `role` stays "development" until the protocol names this model its main model (build step 9), so nothing official
-# can run on it before the tag; the container reads the key from SSM (`/horizon-compact/anthropic-key`).
+# Role, 2026-10-12 (Phase 3.5 IMPLEMENTATION doc section 24, his): "main". Any role other than "development" keeps
+# real content away from it before the official sweep. The container reads the key from SSM
+# (`/horizon-compact/anthropic-key`).
 
 [models.haiku-5-5]
 model_id = "claude-haiku-5-5"
 route = "anthropic"
 thinking = "off"
 requests_per_minute = 60
-role = "development"
+role = "main"
 
 [models.haiku-5-5.prices]
 input = 0.10

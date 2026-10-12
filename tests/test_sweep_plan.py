@@ -185,6 +185,33 @@ def test_real_content_runs_only_on_the_development_model(tmp_path: Path) -> None
         build_plan(exp, model_key="sonnet-4-6", label="t", repeats=1, seed=1, templates=["w1"])
 
 
+@pytest.mark.parametrize("model", ["haiku-5-5", "gpt-oss-openrouter", "sonnet-4-6"])
+def test_no_official_model_is_planned_on_real_content_before_the_official_sweep(model: str) -> None:
+    """Phase 3.5 section 24: the set's two models (roles main and second_family) are covered by the guard on
+    the one-way door, as the old main model always was. Measured on 2026-10-12, before the roles changed, a
+    non-official plan on the company was accepted for both."""
+    company = load_experiment("company")
+    with pytest.raises(SweepRefusal, match=f"{model} is not the development model"):
+        build_plan(company, model_key=model, label="t", repeats=1, seed=1, templates=["w1"])
+    assert build_plan(
+        company, model_key=model, label="t", repeats=1, seed=1, templates=["w1"], official=True
+    ).runs
+    shapes = load_experiment("shapes")
+    assert build_plan(shapes, model_key=model, label="t", repeats=1, seed=1).runs
+
+
+def test_the_development_models_are_exactly_the_two_that_never_produce_a_result() -> None:
+    """A tripwire (section 24): demoting an official model, or adding a development one, fails until this test
+    is changed on purpose, with the roles the lock records."""
+    models = load_experiment("placeholder").models.models
+    assert {k for k, m in models.items() if m.role == "development"} == {"nova-lite", "qwen-local"}
+    assert {k: models[k].role for k in ("haiku-5-5", "gpt-oss-openrouter", "sonnet-4-6")} == {
+        "haiku-5-5": "main",
+        "gpt-oss-openrouter": "second_family",
+        "sonnet-4-6": "reserve",
+    }
+
+
 def test_the_off_subject_experiments_are_the_placeholder_and_the_garden_shapes_only() -> None:
     """Phase 3.5 decision 3: the garden shapes run on the official candidates before the tag. Any other
     experiment, the Phase 2.5 S4 shape test included, stays on the development model."""
