@@ -84,3 +84,27 @@ input = 0.037
 output = 0.17
 cache_read = 0.037
 cache_write_5m = 0.037
+
+# Haiku 5.5 through Anthropic's own API: the fallback set's main model, taken on 2026-10-12 (Phase 3.5 IMPLEMENTATION
+# doc section 23, decision B). It is paid from his prepaid Console credit, through a key made inside the
+# `horizon-compact` workspace, which carries a $10 monthly spend limit (decision G). The harness counts cost from
+# tokens and these prices (USD per million tokens, the page for claude-haiku-5-5 read 2026-10-11, for prompts up
+# to 100,000 tokens; the grid's prompts are about 8,000). `thinking = "off"` sends `thinking: {type: disabled}`
+# (decision C): the model thinks by default, and the protocol asks for the explicit field that turns it off.
+# Quota: his organization's Scale tier showed 10K requests, 10.0M input and 2.0M output tokens for this model
+# (the Console's Rate limits page, workspace horizon-compact, read 2026-10-12); the pace below is far under it.
+# `role` stays "development" until the protocol names this model its main model (build step 9), so nothing official
+# can run on it before the tag; the container reads the key from SSM (`/horizon-compact/anthropic-key`).
+
+[models.haiku-5-5]
+model_id = "claude-haiku-5-5"
+route = "anthropic"
+thinking = "off"
+requests_per_minute = 60
+role = "development"
+
+[models.haiku-5-5.prices]
+input = 0.10
+output = 0.50
+cache_read = 0.01
+cache_write_5m = 0.125

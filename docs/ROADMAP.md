@@ -79,7 +79,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built and closed 2026-10-09**, DoD audit in §19a (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, `4febc15`, `84d82d7`, plus step 13's commit) |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); **no-AWS steps built 2026-10-09** (1-7's drafting and 10; `dd3a28a`, `9eccb4a`, `15f66a2`, `a40d38b`, step 10 uncommitted); steps 7's runs, 8, 9, 11 and the tag wait on Bedrock |
-| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; **§7 steps 1-4 built 2026-10-10** (`24b40c5`, then steps 2-4 in one commit); steps 5-6 built and reviewed 2026-10-11 (K4, `fc577c5`), step 7 built and reviewed 2026-10-11 (K5): **the code half is complete**; the runs half next, its doc immediately before the runs (Sonnet, Opus reviews). **Runs half:** not written; immediately before the runs |
+| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; **§7 steps 1-4 built 2026-10-10** (`24b40c5`, then steps 2-4 in one commit); steps 5-6 built and reviewed 2026-10-11 (K4, `fc577c5`), step 7 built and reviewed 2026-10-11 (K5); **step 8 (K6, Anthropic's API route, Phase 3.5 §23) built 2026-10-12 (Sonnet) and reviewed (Opus), uncommitted at the 2:30 AM handoff**; with K6 committed, the code half is complete; the runs half next, its doc immediately before the runs (Sonnet, Opus reviews). **Runs half:** not written; immediately before the runs |
 | 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5; **split by code and search 2026-10-10 (his)** | **code half** (`phase-5-case-building-code-IMPLEMENTATION.md`, the dossier builder on synthetic filings, and the search runner, his 2026-10-11): **APPROVED 2026-10-11 (his)**, its four decisions as recommended; **§7 steps 1-6 done 2026-10-11** (`4cd6559`, `1e71f97`, `92d0346`, `9e2d14a`; Sonnet built, Opus reviewed each, every fix applied); **step 7 (search runner, selection log) built and reviewed, fixes applied**: **the code half is done** once he commits it. **Search half:** not written; immediately before the search |
 | 5.5 `case-runs` | **APPROVED 2026-10-04**, with Phase 5 | not written; immediately before its build |
 | 6 `explorer` | **APPROVED 2026-10-04**, all six decisions as recommended (6 amended by him); split into 6 and 6.5 | not written; immediately before its build |
@@ -95,7 +95,31 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-11, 4:50 AM
+### Where the build actually is — 2026-10-12, 2:30 AM (handoff)
+
+**Measured 2026-10-12, 2:30 AM:** `make check` green, **2022 tests passed**, root 13 of 16; last pushed commit
+`0521028`; **K6 and last night's handoff docs uncommitted** (his commit, one command, in `KNOWN-GAPS.md` START HERE).
+
+- **Console done (his, Claude leading):** workspace `horizon-compact` with a $10 monthly limit, Scale tier, a key made
+  in it and typed straight into SSM `/horizon-compact/anthropic-key`. No laptop copy of the key exists.
+- **K6 built (Sonnet), reviewed (Opus):** Phase 4 code doc §7 step 8.
+- **Next:** commit and push K6, apply the boundary, then Phase 1 step 9 on `haiku-5-5` in Fargate, which stands in for
+  §23.8 step 5's laptop neutral call (`KNOWN-GAPS.md` START HERE).
+
+### Where the build was — 2026-10-11, 4:45 PM (handoff) *(superseded by the block above; kept as the day's record)*
+
+**Measured 2026-10-11, 4:45 PM:** `make check` green, **1963 tests collected**, root 13 of 16; last pushed commit
+`0521028`, tree clean.
+
+- **Phase 5 code half: complete** (§7 steps 1-7, `4cd6559` through `8271785`; Sonnet built, Opus reviewed each, every
+  review fix applied). Everything runs on fakes; no SEC request beyond step 1's.
+- **Decided this evening (his):** the fallback set is taken from 2026-10-12, **Haiku 5.5 through Anthropic's API** on
+  his prepaid Console credit ($18.19, good until at least 2027-06-27), `gpt-oss-120b` through OpenRouter, the
+  thinking sub-study restored. Phase 3.5 IMPLEMENTATION doc §23; decision history below.
+- **Next:** the Console (workspace, $10 limit, key), then K6 (Phase 4 code half §4.9), then one neutral call and
+  Phase 1 step 9 on Haiku 5.5 (closes DoD 1), then the garden-shape proxy (`KNOWN-GAPS.md` START HERE).
+
+### Where the build was — 2026-10-11, 4:50 AM *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-11, 4:50 AM:** `make check` green, **1540 tests passed**, root 13 of 16; last pushed commit `5ac21cd`.
 

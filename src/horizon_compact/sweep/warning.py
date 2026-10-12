@@ -1,9 +1,9 @@
-"""The spend warning shown before an OpenRouter key is asked for (Phase 2.5 IMPLEMENTATION doc section 17
+"""The spend warning shown before a paid route's key is asked for (Phase 2.5 IMPLEMENTATION doc section 17
 step 10, his request of 2026-10-07).
 
-OpenRouter is the one route that spends his own money, so a run on it says what it is expected to cost and
-asks first. Nothing here calls a model or reads a key: it is arithmetic on the plan and on what the store
-already holds, and the text it makes is printed by the command line.
+OpenRouter spends his own cash and Anthropic's API spends his prepaid credit, so a run on either says what it
+is expected to cost and asks first. Nothing here calls a model or reads a key: it is arithmetic on the plan
+and on what the store already holds, and the text it makes is printed by the command line.
 """
 
 from __future__ import annotations
@@ -68,11 +68,16 @@ def sweep_estimate(
     )
 
 
-def format_warning(model_key: str, estimate: SpendEstimate, cap_usd: float) -> str:
+def format_warning(
+    model_key: str,
+    estimate: SpendEstimate,
+    cap_usd: float,
+    spender: str = "your own OpenRouter credit",
+) -> str:
     """The text printed before the key prompt. It states the assumptions, not only the totals."""
     return "\n".join(
         [
-            f"This run spends your own OpenRouter credit ({model_key}).",
+            f"This run spends {spender} ({model_key}).",
             f"  calls planned:  {estimate.calls} ({estimate.what})",
             f"  likely cost:    ${estimate.likely_usd:.4f}  (one call each, the estimated input tokens "
             f"plus {ASSUMED_OUTPUT_TOKENS:,} output tokens)",

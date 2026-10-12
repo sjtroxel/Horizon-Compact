@@ -27,7 +27,9 @@ class Prices(_Strict):
 
 class ModelConfig(_Strict):
     model_id: str
-    route: Literal["in_region", "geo_profile", "application_profile", "local", "openrouter"]
+    route: Literal[
+        "in_region", "geo_profile", "application_profile", "local", "openrouter", "anthropic"
+    ]
     role: str
     requests_per_minute: int = Field(gt=0)
     prices: Prices
@@ -39,6 +41,9 @@ class ModelConfig(_Strict):
     # request names it with fallbacks off, so OpenRouter can never serve the call from another backend
     # (Phase 4 code half section 4.8). Needed to run in the container; optional on the laptop.
     openrouter_provider: str | None = None
+    # An Anthropic route's thinking setting: "off" sends ``thinking: {type: disabled}`` (Phase 3.5 section 23
+    # decision C). Left out, the model runs at its own default. Refused for any other route.
+    thinking: Literal["off"] | None = None
 
     @model_validator(mode="after")
     def _route_has_what_it_needs(self) -> ModelConfig:
@@ -55,6 +60,8 @@ class ModelConfig(_Strict):
                 raise ValueError("openrouter_provider is for an openrouter route")
             if not self.openrouter_provider.strip():
                 raise ValueError("openrouter_provider must name a provider")
+        if self.thinking is not None and self.route != "anthropic":
+            raise ValueError("thinking is for an anthropic route")
         return self
 
 

@@ -649,6 +649,8 @@ Decision 7 takes (i), `gpt-oss-120b` on Bedrock. The options stay as the record.
 Each step ends green under `make check`. Model choice in brackets (`CLAUDE.md`: Opus for design and review, Sonnet for
 routine code; he switches with `/model`). **The code and text steps (1-6, the shapes' drafting in 7, and 10) need no
 AWS. Every step that calls a model (the runs in 7 and 8, then 9 and 11) waits for Bedrock, so nothing costs his money.**
+*Superseded 2026-10-11 (his, §23): those steps no longer wait for Bedrock. They run on Haiku 5.5 through Anthropic's
+API (his prepaid credit) and `gpt-oss-120b` through OpenRouter (his cash, inside the $5 cap), in §23.8's order.*
 
 0. **C1** (him): this doc and the housekeeping in §13, after approval.
 1. **[Sonnet] The model-config split** (decision 1) `[done]` 2026-10-09: `ModelConfig`, `ModelsFile`, `Prices` to `model_config.py`;

@@ -14,7 +14,9 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
-RouteKind = Literal["in_region", "geo_profile", "application_profile", "local", "openrouter"]
+RouteKind = Literal[
+    "in_region", "geo_profile", "application_profile", "local", "openrouter", "anthropic"
+]
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,8 @@ class ModelRoute:
     inference_profile: str | None = None
     # OpenRouter only: the provider the request is pinned to (fallbacks off), and the one a reply must name.
     pinned_provider: str | None = None
+    # Anthropic only: the request carries ``thinking: {type: disabled}`` (the model's config says it is off).
+    thinking_off: bool = False
 
 
 @dataclass(frozen=True)

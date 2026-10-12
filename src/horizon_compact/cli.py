@@ -75,6 +75,12 @@ from horizon_compact.protocol.lock import (
     render_lock,
     write_lock,
 )
+from horizon_compact.providers.anthropic import (
+    AnthropicKeyError,
+    AnthropicProvider,
+)
+from horizon_compact.providers.anthropic import read_key as read_anthropic_key
+from horizon_compact.providers.anthropic import ssm_key_fetcher as anthropic_ssm_key_fetcher
 from horizon_compact.providers.base import ModelRoute, Provider
 from horizon_compact.providers.bedrock import REGION, BedrockConverseProvider, make_runtime_client
 from horizon_compact.providers.ollama import DEFAULT_URL, OllamaProvider
@@ -362,12 +368,30 @@ def _check_openrouter(
         raise SweepRefusal("an OpenRouter model's runs stay on this laptop: use --store local")
 
 
+def _check_anthropic(args: argparse.Namespace, identity: RunnerIdentity) -> None:
+    """An Anthropic model runs in one of two places, like an OpenRouter one: on the laptop, with a key
+    typed here, keeping its records here; in the container, with the key read from SSM and its records in the
+    results bucket (Phase 4 code half section 4.9)."""
+    if identity.runner == "fargate":
+        if args.store != "s3":
+            raise SweepRefusal(
+                "an Anthropic model's runs in the container go to the results bucket"
+            )
+        return
+    if args.store != "local":
+        raise SweepRefusal("an Anthropic model's runs stay on this laptop: use --store local")
+
+
 def _confirm_spend(
-    estimate: Callable[[Store], SpendEstimate], model_key: str, cap_usd: float, store: Store
+    estimate: Callable[[Store], SpendEstimate],
+    model_key: str,
+    cap_usd: float,
+    store: Store,
+    spender: str = "your own OpenRouter credit",
 ) -> None:
     """Print what the run is expected to cost and ask. Anything but ``y`` (or no answer at all) is a refusal,
     so nothing is sent and no key is asked for."""
-    print(format_warning(model_key, estimate(store), cap_usd))
+    print(format_warning(model_key, estimate(store), cap_usd, spender))
     try:
         answer = input("Continue? [y/N] ")
     except EOFError:
@@ -418,6 +442,42 @@ def _connect(
         try:
             provider = OpenRouterProvider(read_key(os.environ))
         except OpenRouterKeyError as exc:
+            raise SweepRefusal(str(exc)) from exc
+        return provider, route, store, LOCAL_ACCOUNT_ID
+    if config.route == "anthropic":
+        _check_anthropic(args, identity)
+        route = ModelRoute(
+            model_key,
+            config.model_id,
+            "anthropic",
+            invoke_id=config.model_id,
+            thinking_off=config.thinking == "off",
+        )
+        if identity.runner == "fargate":
+            # The container: the task role reads the key from SSM, never a file, a command line or a prompt.
+            session = _session(args, identity)
+            account_id = session.client("sts").get_caller_identity()["Account"]
+            try:
+                key = read_anthropic_key(
+                    {},
+                    ask=lambda: "",
+                    ssm_fetch=anthropic_ssm_key_fetcher(session.client("ssm")),
+                )
+            except AnthropicKeyError as exc:
+                raise SweepRefusal(str(exc)) from exc
+            return AnthropicProvider(key), route, _store(args, session), account_id
+        # The laptop: no AWS session; the spend warning, then the key, as for OpenRouter.
+        store = _store(args, None)
+        _confirm_spend(
+            estimate,
+            model_key,
+            cap_usd,
+            store,
+            "your prepaid Anthropic credit (workspace horizon-compact)",
+        )
+        try:
+            provider = AnthropicProvider(read_anthropic_key(os.environ))
+        except AnthropicKeyError as exc:
             raise SweepRefusal(str(exc)) from exc
         return provider, route, store, LOCAL_ACCOUNT_ID
     if config.route == "local":
@@ -731,7 +791,7 @@ def cmd_sweep_awareness(args: argparse.Namespace) -> int:
         lambda store: awareness_estimate(experiment, plan_, store),
         cap,
     )
-    if not isinstance(provider, BedrockConverseProvider | OpenRouterProvider):
+    if not isinstance(provider, BedrockConverseProvider | OpenRouterProvider | AnthropicProvider):
         raise SweepRefusal(f"{plan_.model_key}'s provider cannot make a call with no tool")
 
     stop_requested = {"flag": False}

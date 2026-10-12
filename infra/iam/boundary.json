@@ -32,6 +32,24 @@
       }
     },
     {
+      "Sid": "ReadAnthropicKey",
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:${region}:${account_id}:parameter/horizon-compact/anthropic-key"
+    },
+    {
+      "Sid": "DecryptAnthropicKey",
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "arn:aws:kms:${region}:${account_id}:key/*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "ssm.${region}.amazonaws.com",
+          "kms:EncryptionContext:PARAMETER_ARN": "arn:aws:ssm:${region}:${account_id}:parameter/horizon-compact/anthropic-key"
+        }
+      }
+    },
+    {
       "Sid": "ResultsObjects",
       "Effect": "Allow",
       "Action": [

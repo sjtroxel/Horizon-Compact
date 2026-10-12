@@ -7,9 +7,30 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-12, about 2:30 AM (K6 built and reviewed; Console and SSM done)
+>
+> **Done tonight (his, Claude leading):** Console workspace `horizon-compact` (`$0.00 of $10.00` monthly limit,
+> resets 2026-11-01); his org is on the **Scale tier** (Haiku 5.5: 10K requests, 10.0M input, 2.0M output tokens, read
+> 2026-10-12); a key made inside that workspace and typed straight into the SSM SecureString
+> `/horizon-compact/anthropic-key` (Standard, `alias/aws/ssm`; confirmed by `describe-parameters`). **The key exists
+> nowhere else**, so the laptop has no copy.
+>
+> **K6 built (Sonnet) and reviewed (Opus), `make check` green, 2022 tests**: Phase 4 code doc §7 step 8 lists what was
+> built beyond §4.9. Opus's review: no blocking finding; one stale comment fixed in `protocol/lock.py`.
+>
+> **NEXT (his, in order):** (1) commit K6 with the handoff docs, push, check the deploy run's `apply main` is green;
+> (2) apply the boundary (bootstrap plan first: expect 0 add, 1 change, 0 destroy); (3) **Phase 1 step 9 on
+> `haiku-5-5` as a Fargate task** (placeholder, 15 calls, under $0.01 of the credit). That run **stands in for §23.8
+> step 5's laptop neutral call**: it shows the same things (that `thinking: disabled` is accepted, the real token
+> counts and price, the record's shape) without a copy of the key on the laptop, and it is the first live test of
+> the new KMS grant. Then step 9's model facts and the garden-shape proxy.
+>
+> *The 2026-10-11 evening block below is superseded on what is next.*
+>
 > ## START HERE — where things stand, 2026-10-11, evening (Phase 5 code half done; Haiku 5.5 via Anthropic's API DECIDED, starts 2026-10-12)
 >
-> **Phase 5 code half complete and committed** (`8271785`, step 7). `make check` green, 1963 tests collected.
+> **Measured at handoff, 4:45 PM:** `make check` green, **1963 tests collected**, root 13 of 16; last pushed commit
+> `0521028` (the decision docs), tree clean. **Phase 5 code half complete** (`8271785`, step 7).
 >
 > **DECIDED 2026-10-11 (his, all eight of A-H as recommended): the fallback set is taken on 2026-10-12, with Haiku
 > 5.5 reached through Anthropic's API**
@@ -988,6 +1009,11 @@ doc §2 ran them in the morning; build step 1 re-read the files themselves in th
 ---
 
 ## BLOCKED — every Bedrock call throttled, quotas reset to 0, 2026-10-05
+
+*2026-10-11 (his): **v1 no longer waits on this.** The fallback set is taken from 2026-10-12, Haiku 5.5 through
+Anthropic's API and `gpt-oss-120b` through OpenRouter (Phase 3.5 IMPLEMENTATION doc §23). The entry stays as the
+record; Fargate, S3, ECR and SSM are unaffected and stay in use. If Bedrock answers before the tag, decision 5's rule
+applies (he chooses which set the protocol names).*
 
 **What happened.** On 2026-10-05 every Bedrock call on the account returns `ThrottlingException`, HTTP 429, "Too many
 tokens per day, please wait before trying again": Nova Lite (the step 3 development run, 28 attempts, $0) and Sonnet 4.6

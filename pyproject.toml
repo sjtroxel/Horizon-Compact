@@ -17,6 +17,7 @@ authors = [{ name = "sjtroxel" }]
 # decision schema (Phase 1). The name guard (horizon_compact.privacy) stays standard-library only, on purpose.
 # The analysis group (numpy, scipy, statsmodels) arrives with Phase 3 and stays out of the container image.
 dependencies = [
+    "anthropic==1.13.0",
     "boto3>=1.43.108",
     "pydantic>=2.13.5",
 ]

@@ -278,7 +278,17 @@ commit's diff before he commits** (the arrangement he called "exactly what we wa
 6. **[done 2026-10-11, K4; Sonnet built, Opus reviewed and fixed]** §4.6 the refusal workflow; §4.7's command.
 7. §4.8 the container's OpenRouter route (if decision 4 is (a)); the SSM parameter he creates; then, his choice,
    Phase 1 step 9 on the placeholder.
-8. **[APPROVED 2026-10-11 (his, Phase 3.5 §23 decision B); next to build]** §4.9 Anthropic's API route (K6): the
+8. **[BUILT 2026-10-12 (Sonnet), REVIEWED 2026-10-12 (Opus: no blocking finding; one stale comment in
+   `protocol/lock.py` fixed); `make check` green, 2022 tests, no model call in any test.** As built, beyond §4.9's text: `ModelConfig` gains `thinking = "off"` (anthropic route only) and
+   `ModelRoute` gains `thinking_off`; the lock's identity records it (`off: thinking {type: disabled} sent`) and
+   compares it; the SDK client is built with every `ANTHROPIC_*` variable set aside (the SDK otherwise lets
+   `ANTHROPIC_CUSTOM_HEADERS` add headers); the runner's `cache_system=True` is ignored on this route, as on
+   OpenRouter's, so no `cache_control` is ever sent; `models.toml` `haiku-5-5` keeps `role = "development"` until
+   the protocol names it the main model (a `main` role would also need the task definition's route variable);
+   a reached spend limit is the error code `SpendLimitReached`, which the unchanged classifier treats as a
+   configuration error that stops the session; the laptop's spend warning names the prepaid Anthropic credit.
+   SDK pinned `anthropic==1.13.0` (latest on 2026-10-12). Boundary change: his to apply, as with K5.]
+   Original line: **[APPROVED 2026-10-11 (his, Phase 3.5 §23 decision B)]** §4.9 Anthropic's API route (K6): the
    provider, the SSM parameter he creates, the IAM change he applies to the boundary; then one neutral call and Phase
    1 step 9 on Haiku 5.5. About half a day of build with tests (Sonnet), then Opus's review.
 

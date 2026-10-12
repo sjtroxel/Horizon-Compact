@@ -782,3 +782,167 @@ def test_status_reads_the_role_it_is_asked_for(
     assert "no manifest for sw-1" in capsys.readouterr().out  # nothing under development/
     assert cli.main([*args, "--role", "pilot"]) == 0
     assert "runs finished:   0 of 1" in capsys.readouterr().out
+
+
+# --- Phase 4 code half section 4.9 (K6): an Anthropic model, on the laptop and in the container -------------
+
+ANTHROPIC_ARGS = [
+    "--experiment", "placeholder",
+    "--model", "haiku-5-5",
+    "--repeats", "1",
+    "--seed", "5",
+    "--label", "an",
+]  # fmt: skip
+ANTHROPIC_KEY = "sk-ant-api03-0123456789abcdef0123456789abcdef"
+
+
+def test_an_anthropic_run_warns_about_the_credit_then_builds_its_provider_from_the_environment(
+    laptop_repo: Path,
+    fake_clock: None,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    built: list[str] = []
+
+    def fake_provider(key: str) -> ScriptedProvider:
+        built.append(key)
+        return ScriptedProvider()
+
+    monkeypatch.setattr(cli, "AnthropicProvider", fake_provider)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", ANTHROPIC_KEY)
+    monkeypatch.setattr("builtins.input", lambda prompt="": "y")
+    assert cli.main(["sweep", "run", *ANTHROPIC_ARGS, "--store", "local"]) == 0  # no --profile
+    captured = capsys.readouterr()
+    assert built == [ANTHROPIC_KEY]
+    assert "your prepaid Anthropic credit" in captured.out and "OpenRouter" not in captured.out
+    assert "runs finished:   5 of 5" in captured.out
+    assert ANTHROPIC_KEY not in captured.out + captured.err
+    for path in (laptop_repo / "scratch" / "runs").rglob("*"):
+        if path.is_file():
+            assert ANTHROPIC_KEY not in path.read_text(encoding="utf-8")
+
+
+def test_an_anthropic_run_not_confirmed_never_builds_a_provider_or_asks_for_a_key(
+    laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def no_prompt(*args: Any, **kwargs: Any) -> str:
+        raise AssertionError("a refused run asked for the key")
+
+    monkeypatch.setattr("getpass.getpass", no_prompt)
+    monkeypatch.setattr(cli, "AnthropicProvider", lambda key: pytest.fail("a provider was built"))
+    monkeypatch.setattr("builtins.input", lambda prompt="": "n")
+    assert cli.main(["sweep", "run", *ANTHROPIC_ARGS, "--store", "local"]) == 2
+    assert "not confirmed" in capsys.readouterr().err
+
+
+def test_an_anthropic_misshapen_key_is_refused_before_any_call_and_never_echoed(
+    laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr("builtins.input", lambda prompt="": "y")
+    monkeypatch.setattr(cli, "AnthropicProvider", lambda key: pytest.fail("a provider was built"))
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-or-v1-this-is-not-an-anthropic-key")
+    assert cli.main(["sweep", "run", *ANTHROPIC_ARGS, "--store", "local"]) == 2
+    err = capsys.readouterr().err
+    assert "does not look like an Anthropic key" in err
+    assert "this-is-not" not in err
+
+
+def test_an_anthropic_model_refuses_the_s3_store_on_the_laptop_before_asking_for_a_key(
+    laptop_repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def no_prompt(*args: Any, **kwargs: Any) -> str:
+        raise AssertionError("a refused run asked for the key")
+
+    monkeypatch.setattr("getpass.getpass", no_prompt)
+    assert cli.main(["sweep", "run", *ANTHROPIC_ARGS, "--store", "s3", "--bucket", "b"]) == 2
+    assert "an Anthropic model's runs stay on this laptop" in capsys.readouterr().err
+
+
+def test_an_anthropic_model_in_the_container_needs_the_s3_store() -> None:
+    local = cli.build_parser().parse_args(["sweep", "run", *ANTHROPIC_ARGS, "--store", "local"])
+    s3 = cli.build_parser().parse_args(
+        ["sweep", "run", *ANTHROPIC_ARGS, "--store", "s3", "--bucket", "b"]
+    )
+    cli._check_anthropic(s3, FARGATE)
+    cli._check_anthropic(local, LAPTOP)
+    with pytest.raises(SweepRefusal, match="go to the results bucket"):
+        cli._check_anthropic(local, FARGATE)
+    with pytest.raises(SweepRefusal, match="stay on this laptop"):
+        cli._check_anthropic(s3, LAPTOP)
+
+
+def test_in_the_container_an_anthropic_model_takes_its_key_from_ssm_and_asks_nobody(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from horizon_compact.experiment import load_experiment
+
+    class Aws(_Aws):
+        def client(self, name: str) -> Any:
+            aws = self
+
+            class Ssm:
+                def get_parameter(self, **kwargs: Any) -> dict[str, Any]:
+                    aws.ssm_calls.append(kwargs)
+                    return {"Parameter": {"Value": ANTHROPIC_KEY}}
+
+            return Ssm() if name == "ssm" else super().client(name)
+
+    aws = Aws()
+    built: list[str] = []
+
+    def fake_provider(key: str) -> ScriptedProvider:
+        built.append(key)
+        return ScriptedProvider()
+
+    def nobody(*args: Any, **kwargs: Any) -> str:
+        raise AssertionError("the container asked a person for something")
+
+    monkeypatch.setattr(cli, "_session", lambda args, identity: aws)
+    monkeypatch.setattr(cli, "AnthropicProvider", fake_provider)
+    monkeypatch.setattr("getpass.getpass", nobody)
+    monkeypatch.setattr("builtins.input", nobody)
+    args = cli.build_parser().parse_args(
+        ["sweep", "run", *ANTHROPIC_ARGS, "--store", "s3", "--bucket", "b"]
+    )
+    _provider, route, store, account = cli._connect(
+        args,
+        load_experiment("placeholder"),
+        "haiku-5-5",
+        FARGATE,
+        lambda store: pytest.fail("no spend prompt"),
+        5.0,
+    )
+    assert built == [ANTHROPIC_KEY] and account == "123456789012"
+    assert aws.ssm_calls == [{"Name": "/horizon-compact/anthropic-key", "WithDecryption": True}]
+    assert route.route_kind == "anthropic" and route.thinking_off is True
+    assert type(store).__name__ == "S3Store"
+
+
+def test_in_the_container_a_misshapen_anthropic_ssm_value_is_refused_before_a_provider_exists(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from horizon_compact.experiment import load_experiment
+
+    class BadAws(_Aws):
+        def client(self, name: str) -> Any:
+            class Ssm:
+                def get_parameter(self, **kwargs: Any) -> dict[str, Any]:
+                    return {"Parameter": {"Value": "not-a-key"}}
+
+            return Ssm() if name == "ssm" else super().client(name)
+
+    monkeypatch.setattr(cli, "_session", lambda args, identity: BadAws())
+    monkeypatch.setattr(cli, "AnthropicProvider", lambda key: pytest.fail("a provider was built"))
+    args = cli.build_parser().parse_args(
+        ["sweep", "run", *ANTHROPIC_ARGS, "--store", "s3", "--bucket", "b"]
+    )
+    with pytest.raises(SweepRefusal, match="does not look like an Anthropic key") as caught:
+        cli._connect(
+            args,
+            load_experiment("placeholder"),
+            "haiku-5-5",
+            FARGATE,
+            lambda s: pytest.fail("x"),
+            5.0,
+        )
+    assert "not-a-key" not in str(caught.value)

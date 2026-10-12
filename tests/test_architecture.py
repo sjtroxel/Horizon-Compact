@@ -398,7 +398,7 @@ def test_task_role_cannot_delete_or_touch_iam() -> None:
         "s3:GetObject",
         "s3:PutObject",
         "s3:ListBucket",
-        "ssm:GetParameter",  # the one OpenRouter key parameter, below
+        "ssm:GetParameter",  # the two key parameters (OpenRouter, Anthropic), below
         "kms:Decrypt",  # only for that parameter, via SSM, below
     }
 
@@ -407,26 +407,32 @@ def _statement(name: str, sid: str) -> dict[str, object]:
     return next(s for s in _statements(name) if s["Sid"] == sid)
 
 
-def test_task_role_and_boundary_read_exactly_one_ssm_parameter_and_decrypt_only_it() -> None:
-    """Phase 4 code half section 4.8: read the OpenRouter key's one parameter, nothing else in SSM, and
-    decrypt only through SSM and only that parameter's value (the encryption context names its ARN)."""
-    from horizon_compact.providers.openrouter import SSM_PARAMETER
+def test_task_role_and_boundary_read_exactly_two_ssm_parameters_and_decrypt_only_them() -> None:
+    """Phase 4 code half sections 4.8 and 4.9: read each key's one parameter (OpenRouter's, Anthropic's),
+    nothing else in SSM, and decrypt only through SSM and only that parameter's value (the encryption
+    context names its ARN). One statement pair per key, so a wildcard can never join them."""
+    from horizon_compact.providers import anthropic, openrouter
 
-    parameter = (
-        f"arn:aws:ssm:{_FAKE_VARS['region']}:{_FAKE_VARS['account_id']}:parameter{SSM_PARAMETER}"
-    )
+    for read_sid, decrypt_sid, ssm_parameter in (
+        ("ReadOpenRouterKey", "DecryptOpenRouterKey", openrouter.SSM_PARAMETER),
+        ("ReadAnthropicKey", "DecryptAnthropicKey", anthropic.SSM_PARAMETER),
+    ):
+        parameter = f"arn:aws:ssm:{_FAKE_VARS['region']}:{_FAKE_VARS['account_id']}:parameter{ssm_parameter}"
+        for name in ("task.json", "boundary.json"):
+            read = _statement(name, read_sid)
+            assert read["Effect"] == "Allow" and _actions(read) == ["ssm:GetParameter"], name
+            assert _as_list(read["Resource"]) == [parameter], name  # one parameter, no wildcard
+            decrypt = _statement(name, decrypt_sid)
+            assert _actions(decrypt) == ["kms:Decrypt"], name
+            condition = decrypt["Condition"]
+            assert isinstance(condition, dict)
+            assert condition["StringEquals"] == {
+                "kms:ViaService": f"ssm.{_FAKE_VARS['region']}.amazonaws.com",
+                "kms:EncryptionContext:PARAMETER_ARN": parameter,
+            }, name
     for name in ("task.json", "boundary.json"):
-        read = _statement(name, "ReadOpenRouterKey")
-        assert read["Effect"] == "Allow" and _actions(read) == ["ssm:GetParameter"], name
-        assert _as_list(read["Resource"]) == [parameter], name  # one parameter, no wildcard
-        decrypt = _statement(name, "DecryptOpenRouterKey")
-        assert _actions(decrypt) == ["kms:Decrypt"], name
-        condition = decrypt["Condition"]
-        assert isinstance(condition, dict)
-        assert condition["StringEquals"] == {
-            "kms:ViaService": f"ssm.{_FAKE_VARS['region']}.amazonaws.com",
-            "kms:EncryptionContext:PARAMETER_ARN": parameter,
-        }, name
+        ssm_statements = [s for s in _statements(name) if "ssm:GetParameter" in _actions(s)]
+        assert len(ssm_statements) == 2, name  # exactly the two keys' reads
     allowed = _allowed_actions("task.json")
     assert not [a for a in allowed if a.startswith("ssm:") and a != "ssm:GetParameter"]
     assert not [a for a in allowed if a.startswith("kms:") and a != "kms:Decrypt"]

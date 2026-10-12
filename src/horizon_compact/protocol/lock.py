@@ -46,10 +46,11 @@ UV_LOCK_RELATIVE = "uv.lock"
 SIMULATION_RELATIVE = "docs/phases/evidence/phase-3/simulation-results.json"
 EXPERIMENT_DIR = "experiment"
 
-# What the harness sends when it sets neither (Phase 3.5 IMPLEMENTATION doc section 3, item 4). The sweep has
-# no thinking option yet, so the writer records these for every model; a model that needs another value waits
-# for the option (build step 9).
+# What the harness sends when it sets neither (Phase 3.5 IMPLEMENTATION doc section 3, item 4). Sampling is
+# never set, for any model; thinking is set only where `models.toml` says `thinking = "off"` (K6, below).
 NOT_SET = "not set"
+# An Anthropic route whose config says thinking is off sends ``thinking: {type: disabled}`` (section 23 C).
+THINKING_OFF = "off: thinking {type: disabled} sent"
 BEDROCK_ROUTES = frozenset({"in_region", "geo_profile", "application_profile"})
 
 HEADER = (
@@ -196,7 +197,7 @@ def model_identity(config: ModelConfig) -> dict[str, str]:
         "model_id": config.model_id,
         "route": config.route,
         "role": config.role,
-        "thinking": NOT_SET,
+        "thinking": THINKING_OFF if config.thinking == "off" else NOT_SET,
         "sampling": NOT_SET,
     }
     if config.inference_profile:
@@ -426,7 +427,7 @@ def _check_content(root: Path, lock: Lock) -> list[str]:
     return lines
 
 
-# The identity fields compared with models.toml (`thinking` and `sampling` have no field there).
+# The identity fields compared with models.toml (`sampling` has no field there).
 COMPARED_IDENTITY = (
     "model_id",
     "route",
@@ -435,6 +436,7 @@ COMPARED_IDENTITY = (
     "geo_profile_id",
     "region",
     "openrouter_provider",
+    "thinking",
 )
 
 

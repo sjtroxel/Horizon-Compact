@@ -25,8 +25,9 @@ RECORD_VERSION = 1
 PLACEHOLDER = "<account-id>"
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[A-Za-z]{2,}")
 _ACCOUNT_ID_SHAPE = re.compile(r"(?<![\w-])\d{12}(?![\w-])")
-# An OpenRouter key (sk-or-v1-...). A record that holds one is refused: the key is never stored anywhere.
-_API_KEY = re.compile(r"sk-or-[A-Za-z0-9_-]{8,}")
+# An OpenRouter key (sk-or-v1-...) or an Anthropic key (sk-ant-...). A record that holds one is refused: a key
+# is never stored anywhere.
+_API_KEY = re.compile(r"sk-(?:or|ant)-[A-Za-z0-9_-]{8,}")
 
 
 class RedactionError(Exception):

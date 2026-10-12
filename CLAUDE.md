@@ -12,7 +12,8 @@ quarters or over twenty years, all stakeholders over four quarters or over twent
 stated objective) and asked to make the same capital-allocation decision on a cited fictional company, then on
 anonymized real cases. The question is whether the objectives produce different decisions, and in particular
 whether the long-horizon versions converge, as the Business Roundtable's 2019 statement claims. Python on AWS
-(Bedrock, Fargate, S3), Terraform for everything, a static explorer at `horizon-compact.vercel.app`.
+(Fargate, S3; since 2026-10-11 the models are reached through Anthropic's API and OpenRouter, Bedrock having been
+blocked), Terraform for everything, a static explorer at `horizon-compact.vercel.app`.
 
 **The project tests a claim; it does not argue for one.** A result in the Roundtable's favor is as publishable
 as one against it (`docs/planning/06` §1). Push back when the work starts arguing a conclusion.

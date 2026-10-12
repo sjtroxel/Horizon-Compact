@@ -27,6 +27,10 @@ def _no_network_no_real_aws(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> 
         "AWS_SESSION_TOKEN",
         "AWS_BEARER_TOKEN_BEDROCK",
         "OPENROUTER_API_KEY",  # a real key in the developer's shell must never reach a test
+        "ANTHROPIC_API_KEY",  # likewise
+        "ANTHROPIC_AUTH_TOKEN",
+        "ANTHROPIC_BASE_URL",
+        "ANTHROPIC_CUSTOM_HEADERS",
     ):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "AKIAFAKEFAKEFAKEFAKE")
