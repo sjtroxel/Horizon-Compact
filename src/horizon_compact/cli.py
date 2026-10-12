@@ -421,6 +421,7 @@ def _connect(
             "openrouter",
             invoke_id=config.model_id,
             pinned_provider=config.openrouter_provider,
+            reasoning_effort=config.reasoning_effort,
         )
         if identity.runner == "fargate":
             # The container: the task role reads the key from SSM, never a file, a command line or a prompt.

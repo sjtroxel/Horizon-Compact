@@ -43,8 +43,19 @@ case by its type and a neutral label. The names live only in the private longlis
 > green, 2033 tests:** roles `main`,
 > `second_family`, `reserve`; `check_route` keyed on the route. The local proof shows `company` refused for both
 > official models. **The OPEN above is closed in the repo but not in the container until the new image deploys (his
-> push).** Review notes in §24.6. **NEXT:** his commit and push (the deploy builds the guarded image); then protocol
-> §5's bracket filled from `model-facts.md` (Opus), and his review of protocol §2-15. Protocol §5's bracket and `models.toml` untouched.
+> push).** *Closed in the container too, 2:43 PM: `934a77d` pushed, CI run `38299145104` and Deploy run
+> `38299145057` both green, so the deployed image carries the roles.* Review notes in §24.6. **NEXT:** protocol
+> §5's bracket filled from `model-facts.md` (Opus), and his review of protocol §2-15.
+>
+> **About 3:15 PM (Opus): protocol §5 DRAFTED** (plus §9.4, §9.5, §2.2, §2.6, §7.4, and §2.7 corrected: it still said
+> "no official model has been given any of the four scenarios"), for his review. **Found live: `gpt-oss-120b`'s
+> reasoning is mandatory** (OpenRouter's models API, default effort `medium`), so §5's old line "thinking is off in
+> the official grid" was untrue for the second family; §5.3 and §9.4 now say so. **Two choices for him, marked (i) and
+> (ii) in the protocol text.** Only §2.5 (Nova Lite, step 8) remains bracketed.
+> **3:10 PM: (i) and (ii) DECIDED (his, as recommended):** gpt-oss sends `reasoning: {effort: "medium"}`, recorded in
+> the lock; the thinking sub-study sends `max_tokens` 16,000. (i) is scoped as Phase 3.5 §25, **BUILT by Sonnet 3:30 PM, REVIEWED by
+> Opus 3:55 PM (one wording fix; mutations confirm the tests bite), `make check` green, 2039 tests; the lock proof shows `reasoning {effort: medium} sent`**; (ii) is
+> built with Phase 4's thinking option. **Not proven until a real call: that DeepInfra accepts the field.**
 >
 > **The working tree:** today's doc edits, uncommitted, for one commit he runs: the 8:45 block's four files, plus
 > `model-facts.md`,

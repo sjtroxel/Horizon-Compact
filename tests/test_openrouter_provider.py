@@ -365,6 +365,9 @@ def test_the_model_entry_is_the_second_family_with_the_prices_checked_live() -> 
         "openai/gpt-oss-120b",
     )
     assert config.num_ctx is None
+    assert (
+        config.reasoning_effort == "medium"
+    )  # section 25: its reasoning cannot be turned off, so it is pinned
     assert (config.prices.input, config.prices.output) == (0.037, 0.17)
 
 
@@ -389,6 +392,45 @@ def test_a_pinned_route_sends_the_provider_with_fallbacks_off_and_an_unpinned_on
     assert pinned["provider"] == {"order": [PIN], "allow_fallbacks": False}
     assert "provider" not in unpinned
     assert text["provider"] == {"order": [PIN], "allow_fallbacks": False} and "tools" not in text
+
+
+REASONING = ModelRoute(
+    "gpt-oss-openrouter",
+    MODEL,
+    "openrouter",
+    invoke_id=MODEL,
+    pinned_provider=PIN,
+    reasoning_effort="medium",
+)
+
+
+def test_a_route_with_a_reasoning_level_sends_it_in_both_bodies_and_one_without_sends_nothing() -> (
+    None
+):
+    """Phase 3.5 section 25: the level is sent on the decision body and on the text body (probes)."""
+    with FakeOpenRouter(lambda body: (200, served_by("DeepInfra"))) as server:
+        provider = OpenRouterProvider(KEY, server.url)
+        provider.decide(DecisionRequest(REASONING, "s", "u", TOOL, 100))
+        provider.decide(DecisionRequest(PINNED, "s", "u", TOOL, 100))
+        provider.decide_text(TextRequest(REASONING, "s", "u", 100))
+        provider.decide_text(TextRequest(PINNED, "s", "u", 100))
+    decision, plain_decision, text, plain_text = server.bodies
+    assert decision["reasoning"] == {"effort": "medium"}
+    assert text["reasoning"] == {"effort": "medium"}
+    assert "reasoning" not in plain_decision and "reasoning" not in plain_text
+    # the pin is still sent beside it
+    assert decision["provider"] == {"order": [PIN], "allow_fallbacks": False}
+
+
+def test_the_record_says_the_level_it_sent_and_otherwise_what_it_always_said() -> None:
+    with FakeOpenRouter(lambda body: (200, served_by("DeepInfra"))) as server:
+        provider = OpenRouterProvider(KEY, server.url)
+        sent = provider.decide(DecisionRequest(REASONING, "s", "u", TOOL, 100)).provenance
+        unset = provider.decide(DecisionRequest(PINNED, "s", "u", TOOL, 100)).provenance
+    assert sent.thinking == "reasoning effort medium sent"
+    assert sent.effort == "medium"
+    assert unset.thinking == "not set (the model's default)"
+    assert unset.effort == "not set"
 
 
 def test_the_pinned_body_is_the_body_the_provider_describes_and_holds_no_key() -> None:

@@ -83,6 +83,10 @@ cache_write_5m = 0.0
 model_id = "openai/gpt-oss-120b"
 route = "openrouter"
 openrouter_provider = "deepinfra/bf16"
+# Its reasoning cannot be turned off (OpenRouter's models API, read 2026-10-12: mandatory, efforts low/medium/high,
+# default medium). Sent explicitly so the level is pre-registered and in the lock, not left to OpenRouter's default
+# (Phase 3.5 IMPLEMENTATION doc section 25, his). Equal to the default today, so it changes no measured behavior.
+reasoning_effort = "medium"
 requests_per_minute = 20
 role = "second_family"
 

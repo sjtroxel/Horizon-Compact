@@ -350,6 +350,26 @@ def test_a_pinned_openrouter_provider_is_part_of_the_locked_identity(tree: Path)
     )
 
 
+def test_a_reasoning_level_is_part_of_the_locked_identity(tree: Path) -> None:
+    """A model whose reasoning cannot be turned off has its level pre-registered (Phase 3.5 section 25): the
+    lock records it in `thinking`, an unset model records `not set`, a changed or removed level fails."""
+    make_lock(tree, ("gpt-oss-openrouter", "nova-lite"))
+    models = read_lock(lock_path(tree)).models
+    assert models["gpt-oss-openrouter"].thinking == "reasoning {effort: medium} sent"
+    assert models["nova-lite"].thinking == "not set"
+    assert check_lock(tree).ok
+    edit_models(tree, 'reasoning_effort = "medium"', 'reasoning_effort = "high"')
+    assert failures(tree) == (
+        "model gpt-oss-openrouter differs from prereg-v1: thinking is 'reasoning {effort: high} sent', "
+        "locked 'reasoning {effort: medium} sent'",
+    )
+    edit_models(tree, 'reasoning_effort = "high"\n', "")
+    assert failures(tree) == (
+        "model gpt-oss-openrouter differs from prereg-v1: thinking is 'not set', "
+        "locked 'reasoning {effort: medium} sent'",
+    )
+
+
 def test_the_lock_records_the_sets_and_the_record_only_fields(locked: Path) -> None:
     record = read_lock(lock_path(locked))
     assert (record.lock_version, record.protocol, record.document) == (1, "prereg-v1", DOCUMENT)

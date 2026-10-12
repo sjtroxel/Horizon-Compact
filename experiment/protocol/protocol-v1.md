@@ -155,6 +155,10 @@ experiment's vocabulary appears in it. In Phase 2.5 step 6a, Sonnet 4.6 ran on g
 times, through OpenRouter, all valid; on the same content Nova Lite ran 18 times and `gpt-oss-120b` 24, and two local
 models 90 times. Those diagnostics showed the shapes are answerable and the smaller models' arithmetic is not.
 
+*[Added 2026-10-12 (Opus), for his review.]* On the placeholder itself, as the walking skeleton's runs in the
+container: `gpt-oss-120b` 15 times (2026-10-11) and Haiku 5.5 65 times (2026-10-12), all valid. These proved the
+route, the store and stop-and-resume; they carry nothing about the subject.
+
 ### 2.3 Readers of the text, with no decision asked
 
 - **The realism read** (Phase 2): `openai/gpt-6-astra` read the dossier and its assumptions for realism, once, and
@@ -223,13 +227,29 @@ and any change they caused.]*
 
 ### 2.6 The garden failure-rate runs
 
-*[Waits for build step 7's runs: failure counts and types only, per candidate model, on the garden copies of the
-four scenarios (`experiment/shapes/`), and what was decided from them (section 7.4).]*
+*[Drafted 2026-10-12 (Opus) from `docs/phases/evidence/phase-3.5/failure-proxy.md`, for his review.]* On 2026-10-12
+both official models ran the garden copies of the four scenarios (`experiment/shapes/`): one wording, the
+placeholder's objectives, three repeats a cell, 60 runs each, read **only** as failure counts and types (Claude
+wrote the file from the blind reports; no amount, choice or memo was read).
+
+| | Valid in the end | Valid on the first attempt | Failed model attempts, by type |
+|---|---|---|---|
+| Haiku 5.5 | 60 of 60 | 56 of 60 (about 7% failed) | a line's cap exceeded (2), an amount on a line not offered (1), a total that did not sum (1) |
+| `gpt-oss-120b` | 60 of 60 | 58 of 60 (about 3% failed) | the amounts without the choice or memo (1), a total that did not sum (2: one run's first and second attempts) |
+
+None was a decline. Garden text invites no refusal, so **these understate refusals**, and 60 runs without a final
+failure say the true rate is probably under about 5%, not zero. **Decided from them (decision 3's rule):** both
+final rates are under 2%, so the bound in section 7.4 stays as built. `gpt-oss-120b` was also throttled by its host
+(37 of its 100 attempts were HTTP 429, retried and counted in neither rate).
 
 ### 2.7 What no one has seen
 
-No official model has been given any of the four scenarios. No allocation, choice or memo from any run on the
-company's content has been read by either author. The sealed template (section 4.3) has never been sent to any model
+*[Corrected 2026-10-12 (Opus), for his review: the sentence as first drafted, "No official model has been given any
+of the four scenarios", stopped being true when the fallback set named `gpt-oss-120b` (section 2.4).]* **The main
+model, Haiku 5.5, has not been given any of the four scenarios**, and since 2026-10-12 the harness refuses to give it
+or the second family any of them outside an official sweep. The second family was given them as a development model,
+before it was named (section 2.4). No allocation, choice or memo from any run on the company's content has been read
+by either author. The sealed template (section 4.3) has never been sent to any model
 as part of a decision prompt.
 
 ---
@@ -389,19 +409,59 @@ section 7; they differ only in which column of the published table they occupy.
 
 ## 5. The models
 
-*[Waits for build step 9: the model set as decided on its procedure (decision 2, or the fallback set of decision 5),
-and for each model, as read on the day: its ID, route, inference profile, region, price, quota and end-of-life, one
-neutral call on its official route, and the exact request fields below.]*
+*[Drafted 2026-10-12 (Opus) from build step 9's facts, for his review of this section. Every value below was read
+on 2026-10-12 and is recorded with its source in `docs/phases/evidence/phase-3.5/model-facts.md`. Two choices are
+marked for him, (i) and (ii); both decided 2026-10-12 (his), as recommended.]*
 
-**What is fixed now, whatever the set:**
+### 5.1 The set
+
+**The fallback set of decision 5, taken on 2026-10-12** (Phase 3.5 IMPLEMENTATION doc section 23): the official
+models are **Claude Haiku 5.5** (the main model) and **`gpt-oss-120b`** (the second family, section 9.4). Bedrock
+is not used: neither model is reached through it, and Sonnet 4.6 and Nova Pro, the set of decision 2, are not in v1.
+**Reach, stated plainly:** the headline results are for a small current model and an open-weights model, not for the
+larger models a company would put in front of a capital decision.
+
+| | Haiku 5.5 (main) | `gpt-oss-120b` (second family) |
+|---|---|---|
+| Key in `models.toml`, role | `haiku-5-5`, `main` | `gpt-oss-openrouter`, `second_family` |
+| Model ID | `claude-haiku-5-5` (a pinned snapshot) | `openai/gpt-oss-120b` (open weights, fixed release) |
+| Route | Anthropic's own API, from a key in a workspace with a $10 monthly limit | OpenRouter, pinned to one host: DeepInfra, `bf16`, fallbacks off |
+| Where it runs | Anthropic's default (`inference_geo` "global", recorded on each call) | DeepInfra, through OpenRouter (`served_by` recorded on each call; any other host is an error) |
+| Price per million tokens | $0.10 input, $0.50 output (prompts up to 100,000 tokens; every grid prompt is far under) | $0.037 input, $0.17 output |
+| Quota | Scale tier, 10K requests and 10.0M input tokens (his Console, 2026-10-12); the harness paces far under it | none published; the host throttled (HTTP 429) on 37 of 100 attempts on 2026-10-12, retried |
+| End of life | not sooner than 2027-10-07 | no date; the weights cannot be withdrawn, the host can |
+| Knowledge cutoff | June 2026 | 2024-06-30 (OpenRouter's listing) |
+| Calls before the tag | placeholder and garden shapes only (sections 2.2, 2.6) | the company's content, as a development model (section 2.4), and the garden shapes |
+
+The real-case window (section 12.2) opens after both cutoffs.
+
+### 5.2 What is sent, exactly
+
+Both models get the same system text, user text and one tool, `tool_choice` `auto` (section 4.5), and the
+scenario's `max_tokens` (3,072). No sampling field (`temperature`, `top_p`, `top_k`) is ever sent. **No prompt
+caching** and **no batch API**. Beyond that:
+
+- **Haiku 5.5:** `thinking: {"type": "disabled"}`, and no `effort` field, so it runs at its default, `medium`
+  (recorded). Shown on the official route on 2026-10-12: 65 of 65 placeholder calls accepted it with 0 thinking
+  tokens (the stand-in for the neutral call, Phase 1 IMPLEMENTATION doc section 21a).
+- **`gpt-oss-120b`:** `provider: {order: ["deepinfra/bf16"], allow_fallbacks: false}` and `usage: {include: true}`.
+  **Its reasoning cannot be turned off:** OpenRouter lists it as mandatory, at effort `low`, `medium` or `high`,
+  default `medium`. **The request sends `reasoning: {"effort": "medium"}`** *[choice (i), decided 2026-10-12, his]*,
+  so the level is pre-registered rather than left to OpenRouter's default, which is the same `medium` today and was
+  the level of every call made on it before the tag. Its reasoning text, when returned, is kept in the raw response and
+  never read for a decision.
+
+### 5.3 What is fixed, whatever the set
 
 - **Every model is analyzed separately.** Results are compared across models, never pooled.
 - **Sampling is never set** on any model: each runs at its own default, the default is recorded, and the methods page
   says that the same number would not mean the same thing on two models.
-- **Thinking is off in the official grid,** by the field each model needs (on Sonnet 4.6, no thinking field is sent;
-  on a model whose thinking is on by default, the explicit field that turns it off), stated per model here and
-  recorded on every call.
-- **The model set is fixed at the tag,** before any real case is accepted.
+- **Thinking is off in the official grid on every model that can turn it off,** by the field each model needs,
+  stated per model above and recorded on every call. **`gpt-oss-120b` cannot:** it reasons on every call, so the
+  second family's grid is a reasoning model's, and section 9.4 reads its agreement with the main model with that
+  difference named.
+- **The model set is fixed at the tag,** before any real case is accepted. The roles are part of the lock, so a
+  change to either is a new protocol version.
 
 ---
 
@@ -505,9 +565,9 @@ Failed runs in a dropped wording do not enter. This is a sensitivity bound, not 
 
 ### 7.4 What failures cost, and the bound's form
 
-*[If build step 7's garden runs show every official candidate's final failure rate under 2%, the bound stays as
-above. If not, he decides the bound before the tag, with the measured rates, and this subsection states the result
-and the rates (decision 3).]*
+*[Settled 2026-10-12 (Opus), for his review:]* build step 7's garden runs gave a final failure rate of 0 of 60 for
+both official models (first attempts: about 7% for Haiku 5.5, about 3% for `gpt-oss-120b`; section 2.6). Both are
+under decision 3's 2%, so **the bound stays as built**.
 
 **Measured on synthetic runs** (Phase 3, `docs/phases/evidence/phase-3/simulation-summary.md` section 6; 300
 replicates a point, so about ±5 points): at 20 repeats a wording and a within-cell spread of 0.1, a true 15-point share
@@ -601,8 +661,11 @@ keeps a position effect from favoring any objective; a position effect found is 
 
 ### 9.4 A second model family
 
-*[Waits for build step 9.]* The second family runs the same grid, is analyzed separately, and its agreement or
-disagreement with the main model is reported per comparison.
+The second family runs the same grid, is analyzed separately, and its agreement or disagreement with the main model
+is reported per comparison. *[Drafted 2026-10-12 (Opus), for his review:]* The two differ in more than family:
+`gpt-oss-120b` reasons on every call and Haiku 5.5 runs with thinking off (section 5.3). So an agreement between them
+is agreement across family **and** across thinking, and a disagreement cannot be put down to family alone; reports say
+so.
 
 *[Drafted 2026-10-12 from his decision of that day, for his review of this section.]* The second family,
 `gpt-oss-120b`, is the model the instrument's text was developed on (section 2.4). Every report of its results says
@@ -611,11 +674,26 @@ less independent check than an untested model would give.
 
 ### 9.5 Thinking
 
-*[Waits for build step 9: whether the sub-study runs (it is cut under the fallback set), and its exact request
-fields.]* As designed: scenario S1, the sealed wording, all five objectives, thinking on at effort `high`, the same
-repeats as the main grid, on the main model; per run, whether a thinking block appeared and its text; the cost of
-thinking as the output-token difference against the matched cell of the grid. Reported as a finding: does thinking
-change what an objective does?
+*[Drafted 2026-10-12 (Opus), for his review. The sub-study runs: decision 5 cut it, and section 23's decision D
+(his, 2026-10-11) restored it on Haiku 5.5.]* As designed: scenario S1, the sealed wording, all five objectives,
+thinking on at effort `high`, the same repeats as the main grid, on the main model; per run, whether a thinking block
+appeared and its text; the cost of thinking as the output-token difference against the matched cell of the grid.
+Reported as a finding: does thinking change what an objective does?
+
+**The exact request** (Anthropic's documentation, read 2026-10-12): the grid's request with `thinking: {"type":
+"disabled"}` replaced by `thinking: {"type": "adaptive", "display": "summarized"}`, and `output_config: {"effort":
+"high"}` added. Two consequences, stated now:
+
+- **"Its text" is a summary.** Anthropic returns a summary of the model's reasoning, never the raw reasoning; on
+  Haiku 5.5 the default (`display` "omitted") returns none, so `summarized` is sent. Billing is the same either way.
+  Reports call it the thinking summary.
+- **Thinking counts toward `max_tokens`.** The grid's 3,072 would cut off many thinking runs as `truncated`, so
+  **the sub-study alone sends `max_tokens` 16,000**, recorded on every call; the grid is unchanged *[choice (ii),
+  decided 2026-10-12, his]*. A sub-study run that is still truncated is a failure, counted and reported as in
+  section 7.
+
+The harness cannot send these fields yet (Phase 3.5 IMPLEMENTATION doc section 3, item 9); Phase 4's runs half builds
+the option to send exactly them, and nothing else.
 
 ### 9.6 The awareness probe
 

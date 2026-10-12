@@ -517,5 +517,8 @@ def test_the_lock_names_thinking_for_haiku_and_leaves_every_other_model_as_it_wa
     exp = experiment()
     assert model_identity(exp.model("haiku-5-5"))["thinking"] == THINKING_OFF
     assert model_identity(exp.model("haiku-5-5"))["route"] == "anthropic"
-    for key in ("sonnet-4-6", "nova-lite", "qwen-local", "gpt-oss-openrouter"):
+    for key in ("sonnet-4-6", "nova-lite", "qwen-local"):
         assert model_identity(exp.model(key))["thinking"] == NOT_SET
+    # the second family's reasoning cannot be turned off, so its level is named instead (section 25)
+    second = model_identity(exp.model("gpt-oss-openrouter"))["thinking"]
+    assert second == "reasoning {effort: medium} sent"

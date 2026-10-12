@@ -171,9 +171,12 @@ class OpenRouterProvider:
 
     @staticmethod
     def _pin(body: dict[str, Any], route: ModelRoute) -> dict[str, Any]:
-        """Add the provider pin: this provider only, no fallback."""
+        """Add what the route fixes: the provider pin (this provider only, no fallback) and the reasoning
+        level."""
         if route.pinned_provider:
             body["provider"] = {"order": [route.pinned_provider], "allow_fallbacks": False}
+        if route.reasoning_effort:
+            body["reasoning"] = {"effort": route.reasoning_effort}
         return body
 
     def request_body(self, request: DecisionRequest) -> dict[str, Any]:
@@ -294,8 +297,12 @@ class OpenRouterProvider:
             route_kind=route.route_kind,
             inference_profile=None,
             region=HOSTED_REGION,
-            thinking="not set (the model's default)",
-            effort="not set",
+            thinking=(
+                f"reasoning effort {route.reasoning_effort} sent"
+                if route.reasoning_effort
+                else "not set (the model's default)"
+            ),
+            effort=route.reasoning_effort or "not set",
             temperature="not set; the serving provider's defaults",
             max_tokens=max_tokens,
             prompt_sha256=sha256,

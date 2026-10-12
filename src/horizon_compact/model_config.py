@@ -44,6 +44,11 @@ class ModelConfig(_Strict):
     # An Anthropic route's thinking setting: "off" sends ``thinking: {type: disabled}`` (Phase 3.5 section 23
     # decision C). Left out, the model runs at its own default. Refused for any other route.
     thinking: Literal["off"] | None = None
+    # An OpenRouter route's reasoning level, sent as ``reasoning: {effort: ...}`` on every request. For a
+    # model whose reasoning cannot be turned off (``gpt-oss-120b``), so the level is pre-registered rather
+    # than left to OpenRouter's default (Phase 3.5 section 25). Left out, nothing is sent. Refused for any
+    # other route.
+    reasoning_effort: Literal["low", "medium", "high"] | None = None
 
     @model_validator(mode="after")
     def _route_has_what_it_needs(self) -> ModelConfig:
@@ -62,6 +67,8 @@ class ModelConfig(_Strict):
                 raise ValueError("openrouter_provider must name a provider")
         if self.thinking is not None and self.route != "anthropic":
             raise ValueError("thinking is for an anthropic route")
+        if self.reasoning_effort is not None and self.route != "openrouter":
+            raise ValueError("reasoning_effort is for an openrouter route")
         return self
 
 

@@ -812,6 +812,12 @@ API (his prepaid credit) and `gpt-oss-120b` through OpenRouter (his cash, inside
    *Opus, reviewing the same day:* the role change is not bookkeeping. While both models of the set are
    `development`, the harness accepts a non-official run of either on `company` (measured with `hc sweep plan`, no
    call); the real-content refusal guards only `sonnet-4-6`. No such run until the roles change.
+   *Dated note, 2026-10-12, about 3:15 PM (Opus): the roles were built and deployed (§24, `934a77d`); protocol §5
+   is drafted* (the set, a per-model table, the exact request fields), with §9.4 and §9.5 filled, §2.2, §2.6 and §7.4
+   settled from step 7's runs, and §2.7's untrue sentence corrected, **all for his review**. Two choices are marked
+   in the text for him: (i) whether `gpt-oss-120b`'s request pins `reasoning: {effort: "medium"}` (its reasoning is
+   mandatory, found live that day), (ii) the thinking sub-study's `max_tokens`. Only §2.5 (Nova Lite, step 8) is still
+   bracketed.
 10. **[Opus] The protocol draft** (§9), section by section for his review; the review brief; the calls inventory
     (DoD 5's second half). C6.
     **Draft `[done]` 2026-10-09 (Opus), every section:** `experiment/protocol/protocol-v1.md`, §1 reviewed and accepted
@@ -1258,3 +1264,97 @@ runner for Phase 5.5 (carried, §24.2); protocol §5's bracket; the lock (roles 
   distinct prompts, which `play()` checks.
 - Untracked files: only `model-facts.md` (`scratch/` is ignored), so the commit command's `git add -A` takes exactly
   today's work.
+
+## 25. `gpt-oss-120b`'s reasoning level, pinned (DECIDED 2026-10-12, his; written by Opus)
+
+> **Status: APPROVED 2026-10-12, about 3:10 PM (his): protocol choices (i) and (ii) as recommended.** (i) is
+> **[done] 2026-10-12 (Sonnet built; REVIEWED by Opus about 3:55 PM, one wording fix; §25.4)**; (ii) waits for Phase 4's thinking option.
+> Cost: $0, no model call.
+
+### 25.1 Why
+
+Found live on 2026-10-12 (`model-facts.md`, OpenRouter's models API): `gpt-oss-120b`'s reasoning is **mandatory**,
+at effort `low`, `medium` or `high`, **default `medium`**. The harness sends no reasoning field, so the level used is
+whatever OpenRouter's default is on the day of the call. It is `medium` today and was the level of every call made so
+far, as far as the listing shows; but it is OpenRouter's setting, not the model's, and could change between the tag
+and the grid with nothing in the records showing it. **Decision (i), his:** send `reasoning: {"effort": "medium"}`
+explicitly, and record it in the lock, so the level is part of what is pre-registered. Being equal to today's default,
+it changes no measured behavior.
+
+**Decision (ii), his:** the thinking sub-study (protocol §9.5) sends `max_tokens` 16,000; the grid keeps the
+scenario's 3,072. **Not built here:** the harness has no thinking option yet (§3 item 9); Phase 4's runs half builds
+that option with this value. Recorded in protocol §9.5.
+
+### 25.2 The change (decision (i) only)
+
+1. **`model_config.py`:** `ModelConfig` gains `reasoning_effort: Literal["low", "medium", "high"] | None = None`, with
+   the validator refusing it on any route but `openrouter` (as `thinking` is refused off `anthropic`).
+2. **`experiment/models.toml`:** `gpt-oss-openrouter` gains `reasoning_effort = "medium"`, with a comment citing this
+   section and the live reading. Nothing else changes.
+3. **`providers/base.py`:** `ModelRoute` gains `reasoning_effort: str | None = None`; `cli.py` passes it where it
+   passes `pinned_provider` (the OpenRouter route's construction, near line 423).
+4. **`providers/openrouter.py`:** when the route has it, **both** request bodies (the decision body and the text
+   body, which the probes and the awareness sweep use) carry `"reasoning": {"effort": <it>}`. Provenance records
+   `thinking` as `reasoning effort <it> sent` and `effort` as `<it>`; with no value set,
+   both stay exactly as today (`not set (the model's default)`, `not set`), so old records and the development path
+   are unchanged.
+5. **`protocol/lock.py`:** `model_identity` writes `thinking` as `reasoning {effort: <it>} sent` when
+   `reasoning_effort` is set. `thinking` is already in `COMPARED_IDENTITY`, so a changed or removed level fails the
+   lock; no new lock field, no lock format change. Update the comment above `THINKING_OFF`.
+6. **Tests:** the validator (refused off `openrouter`; an unknown value refused); both bodies carry the field when set
+   and lack it when not; the provenance strings both ways; the lock records it and a changed `reasoning_effort` fails
+   the check; `test_openrouter_provider.py`'s model-entry test asserts `medium`. Every existing test stays green
+   unchanged except where it pins `models.toml`'s entry.
+7. **Docs:** a done marker here; `model-facts.md`'s reasoning row notes the field is now sent; protocol §5.2's choice
+   (i) is already resolved in the text (Opus, same day).
+
+### 25.3 Proof
+
+`make check` green. Then, local and free: `hc protocol lock --model haiku-5-5 --model gpt-oss-openrouter` without
+`--write` prints the lock and writes nothing; its `gpt-oss-openrouter` table shows `thinking = "reasoning {effort:
+medium} sent"` (if it refuses for another reason, such as a missing source, paste the refusal: that is not this
+change's to fix). **Not proven by this step:** that DeepInfra accepts the field on a real call. Its endpoint lists
+`reasoning` and `reasoning_effort` as supported (read 2026-10-12); the first real call shows it, and Phase 4's runs
+half makes that call on the placeholder before any grid (about $0.003 of his cash), or he asks for one sooner.
+
+### 25.4 As built (2026-10-12, Sonnet; for Opus's review)
+
+**Done as §25.2 says:** `ModelConfig.reasoning_effort` (low, medium or high; refused off the `openrouter` route);
+`models.toml` `gpt-oss-openrouter` `reasoning_effort = "medium"` with a comment; `ModelRoute.reasoning_effort`, passed
+by `cli.py` beside the pin; both OpenRouter request bodies carry `reasoning: {effort: ...}` (it went into the existing
+`_pin` helper, which both bodies already go through, so the decision and the text body cannot differ); provenance says
+`reasoning effort medium sent` and effort `medium`, and with nothing set both read exactly as
+before; the lock's `thinking` for that model is `reasoning {effort: medium} sent`, a changed or removed level fails
+the existing `thinking` comparison. No lock format change, no `infra/` change, `protocol-v1.md` not edited.
+
+**Beyond the list, and why:**
+1. **A refusal test for an unknown level and a test that only the second family has one** (`test_experiment.py`),
+   beside the off-route refusal §25.2 asks for.
+2. **`test_anthropic_provider.py`'s lock test pinned `gpt-oss-openrouter`'s `thinking` as `not set`;** that is the
+   value §25 changes on purpose, so it now expects `reasoning {effort: medium} sent` and the other three models still
+   expect `not set`.
+3. **The helper `_pin` now also sets the reasoning level.** Its name says only "pin"; its docstring says both. Left as
+   one function so the two bodies cannot diverge. Opus: rename it if you prefer.
+
+**Proof.** `make check` green, **2039 tests** (2033 before; 6 new). `hc protocol lock --model haiku-5-5 --model
+gpt-oss-openrouter`, without `--write` (nothing written; `experiment/protocol/` still holds only `protocol-v1.md`), prints
+for the second family: `model_id = "openai/gpt-oss-120b"`, `openrouter_provider = "deepinfra/bf16"`, `role =
+"second_family"`, `route = "openrouter"`, `sampling = "not set"`, **`thinking = "reasoning {effort: medium} sent"`**;
+Haiku's table is unchanged (`thinking = "off: thinking {type: disabled} sent"`). The frozen instrument set is
+unchanged (the three files `classify.py`, `decision.py`, `prompt.py`). **Not proven:** that DeepInfra accepts the field
+on a real call (§25.3); no model call was made.
+
+**Review (Opus, 2026-10-12, about 3:55 PM): no blocking finding; one wording fix made.** Read the whole diff
+(`model_config.py`, `models.toml`, `providers/base.py`, `cli.py`, `providers/openrouter.py`, `protocol/lock.py`, four
+test files). Checked, not taken from the notes above:
+- **The new tests bite.** Two temporary mutations, each restored and confirmed byte-identical with `cmp`: dropping the
+  `reasoning` field from the body fails the new body test; making the lock ignore the level fails the new lock test
+  and the updated Haiku lock test.
+- **The provenance strings reach records only.** `thinking` and `effort` are written by the runner, the awareness
+  sweep, the probes and the smoke records, and read by no analysis code (a grep of `src/`, not proof of absence).
+- **The fix:** the record's text said `reasoning effort medium sent (mandatory on this model)`. That is a claim about
+  the model, written by generic provider code, so any later OpenRouter model given a level would carry it whether
+  true or not. Now `reasoning effort medium sent`; the mandatory fact lives in `models.toml`'s comment and
+  `model-facts.md`, where it is sourced. No record held the old string. §25.2 item 4's wording is amended to match.
+- **`_pin` keeps its name** (Sonnet's item 3): its docstring says both jobs, and one function keeps the two bodies
+  identical. Not worth a rename.

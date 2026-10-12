@@ -241,6 +241,35 @@ def test_a_pinned_provider_is_for_an_openrouter_route_only(tmp_path: Path) -> No
         load_experiment("placeholder", root)
 
 
+def test_a_reasoning_effort_is_for_an_openrouter_route_only(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    models = root / "models.toml"
+    models.write_text(
+        models.read_text().replace(
+            'route = "in_region"\n', 'route = "in_region"\nreasoning_effort = "medium"\n', 1
+        )
+    )
+    with pytest.raises(ExperimentError, match="reasoning_effort is for an openrouter route"):
+        load_experiment("placeholder", root)
+
+
+def test_an_unknown_reasoning_effort_is_refused(tmp_path: Path) -> None:
+    root = copy_experiment(tmp_path)
+    models = root / "models.toml"
+    models.write_text(
+        models.read_text().replace('reasoning_effort = "medium"', 'reasoning_effort = "none"', 1)
+    )
+    with pytest.raises(ExperimentError, match="reasoning_effort"):
+        load_experiment("placeholder", root)
+
+
+def test_the_second_family_names_its_reasoning_level() -> None:
+    """Phase 3.5 section 25: its reasoning cannot be turned off, so the level is pinned."""
+    models = load_experiment("placeholder").models.models
+    assert models["gpt-oss-openrouter"].reasoning_effort == "medium"
+    assert {k for k, m in models.items() if m.reasoning_effort} == {"gpt-oss-openrouter"}
+
+
 def test_a_blank_pinned_provider_is_refused(tmp_path: Path) -> None:
     root = copy_experiment(tmp_path)
     models = root / "models.toml"

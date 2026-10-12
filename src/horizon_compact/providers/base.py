@@ -45,6 +45,8 @@ class ModelRoute:
     pinned_provider: str | None = None
     # Anthropic only: the request carries ``thinking: {type: disabled}`` (the model's config says it is off).
     thinking_off: bool = False
+    # OpenRouter only: the request carries ``reasoning: {effort: <this>}`` (the model's config sets it).
+    reasoning_effort: str | None = None
 
 
 @dataclass(frozen=True)

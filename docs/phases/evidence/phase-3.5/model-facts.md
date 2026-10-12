@@ -92,6 +92,17 @@ Read 2026-10-12, about 18:45 UTC, from OpenRouter's public endpoints API, no key
 | Cheaper endpoints exist | Venice, CoreWeave, DekaLLM and AkashML list $0.03 input, with outputs of $0.15 to $0.187. The pin is to the endpoint the instrument was developed and measured on, not the cheapest | n/a |
 | Lifecycle | an open-weights release; no retirement date applies to the weights. **The pinned host's availability is OpenRouter's and DeepInfra's to change**; no end-of-life statement was found, and none is claimed | n/a |
 
+**Added 2026-10-12, about 19:45 UTC (Opus, for protocol section 5), from OpenRouter's models API
+(`https://openrouter.ai/api/v1/models`, the `openai/gpt-oss-120b` entry, no key) and the endpoint entry above:**
+
+| Fact | Value |
+|---|---|
+| Reasoning | `"reasoning": {"mandatory": true, "supported_efforts": ["high", "medium", "low"], "default_effort": "medium"}`: **it cannot be turned off**; OpenRouter's reasoning docs say a model marked mandatory rejects `effort: "none"` (https://openrouter.ai/docs/use-cases/reasoning-tokens, read 2026-10-12). The harness sent no reasoning field until 2026-10-12, so every call before that ran at OpenRouter's default; **since Phase 3.5 section 25 it sends `reasoning: {effort: "medium"}` explicitly, recorded in the lock** |
+| Knowledge cutoff | `"knowledge_cutoff": "2024-06-30"` (OpenRouter's listing) |
+| Expiration | `"expiration_date": null` |
+| Pinned endpoint caching | `"supports_implicit_caching": false` (settles Phase 1 section 21's open question: DeepInfra does not cache this prefix) |
+| Pinned endpoint uptime | 100% over the last 30 and 5 minutes, about 98.7% over the last day, at the time read |
+
 **Differences from `models.toml`: none.** The prices, the model ID and the pin match; `models.toml`'s comment says the
 prices were first read 2026-10-07 and the endpoint checked 2026-10-11, and today's read agrees.
 

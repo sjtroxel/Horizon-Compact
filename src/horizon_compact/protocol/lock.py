@@ -47,10 +47,14 @@ SIMULATION_RELATIVE = "docs/phases/evidence/phase-3/simulation-results.json"
 EXPERIMENT_DIR = "experiment"
 
 # What the harness sends when it sets neither (Phase 3.5 IMPLEMENTATION doc section 3, item 4). Sampling is
-# never set, for any model; thinking is set only where `models.toml` says `thinking = "off"` (K6, below).
+# never set, for any model; thinking is set only where `models.toml` says `thinking = "off"` (K6, below), and
+# a reasoning level only where it says `reasoning_effort` (section 25, below).
 NOT_SET = "not set"
 # An Anthropic route whose config says thinking is off sends ``thinking: {type: disabled}`` (section 23 C).
 THINKING_OFF = "off: thinking {type: disabled} sent"
+# An OpenRouter route whose config names a reasoning level sends ``reasoning: {effort: <it>}``, for a model
+# whose reasoning cannot be turned off (section 25); `{}` is filled with the level.
+REASONING_SENT = "reasoning {{effort: {}}} sent"
 BEDROCK_ROUTES = frozenset({"in_region", "geo_profile", "application_profile"})
 
 HEADER = (
@@ -191,13 +195,21 @@ def dumps(data: Mapping[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _thinking_identity(config: ModelConfig) -> str:
+    if config.thinking == "off":
+        return THINKING_OFF
+    if config.reasoning_effort:
+        return REASONING_SENT.format(config.reasoning_effort)
+    return NOT_SET
+
+
 def model_identity(config: ModelConfig) -> dict[str, str]:
     """The fields that decide which model answers and how it is asked; never a price, quota or pace."""
     record = {
         "model_id": config.model_id,
         "route": config.route,
         "role": config.role,
-        "thinking": THINKING_OFF if config.thinking == "off" else NOT_SET,
+        "thinking": _thinking_identity(config),
         "sampling": NOT_SET,
     }
     if config.inference_profile:
