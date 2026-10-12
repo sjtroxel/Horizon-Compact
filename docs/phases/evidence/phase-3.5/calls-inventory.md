@@ -20,6 +20,8 @@ calls (step 9) and the review (step 11) add rows here.
 | Sonnet 4.6 | OpenRouter, Phase 2.5 step 6a, rounds 5-6 | garden copies of the four shapes (off the subject) | 10, all valid | 0 | Phase 2.5 IMPLEMENTATION doc §17 step 6a |
 | Nova Pro | Bedrock, Phase 0.5 smoke | the neutral prompt | 3 (one malformed tool call, `ModelErrorException`) | 0 | smoke 02, 05, 05.2 |
 | Sonnet 4.6, Nova Lite | Bedrock, `scratch/throttle-check.py` | "Say ok." | 0 | every one, 2026-10-05 to 2026-10-08 (several runs, one call each per model; each refused with `ThrottlingException`, "Too many tokens per day") | `KNOWN-GAPS.md`, BLOCKED entry |
+| Haiku 5.5 | Anthropic's API, Fargate, Phase 1 step 9 (`skeleton-haiku-5-5-f1467906`, `stoptest-haiku-5-5-c61e6830`), 2026-10-12 | the placeholder (garden) | 65, all valid | 0 | Phase 1 IMPLEMENTATION doc §21a |
+| Haiku 5.5 | Anthropic's API, Fargate, the garden-shape proxy (`proxy-haiku-5-5-70ef2152`), 2026-10-12 | garden shapes (off the subject) | 64 (60 valid, 3 `schema_invalid`, 1 `sum_mismatch`) | 0 | `failure-proxy.md`; the blind report |
 
 **No official model has been given any of the four scenarios, on any route.**
 
@@ -36,6 +38,7 @@ calls (step 9) and the review (step 11) add rows here.
 | `gpt-oss-120b` | OpenRouter, comprehension probes `probes1`, `probes2`, `probes3` | **the company's content**: questions on what the text says, no decision asked | 20, 20, 10 (one call per scenario per repeat) | the probe reports in `docs/phases/evidence/phase-2.5/probes/` |
 | `gpt-oss-120b` | OpenRouter, format runs `format1-gpt-oss-openrouter-29603836` | **the company's content**, templates `w1` and `w3` only | 80 (67 valid, 12 `schema_invalid`, 1 `no_tool_call`), plus 1 refused by OpenRouter before any model answered (HTTP 401) | its session records; the blind report |
 | `gpt-oss-120b` | OpenRouter, `format2-gpt-oss-openrouter-bfc44abd` | **the company's content**, `w1` and `w3` only | 42 (40 valid, 1 `schema_invalid`, 1 `no_tool_call`) | its session record; the blind report |
+| `gpt-oss-120b` | OpenRouter, Fargate, the garden-shape proxy (`proxy-gpt-oss-openrouter-5ead7b2e`), 2026-10-12 | garden shapes (off the subject) | 63 (60 valid, 1 `schema_invalid`, 2 `sum_mismatch`), plus 37 `api_error` (throttled, no model answer) | `failure-proxy.md`; the blind report |
 | `qwen3.5:4b` (local, Ollama) | the placeholder, `qwenlocal-qwen-local-8cadb319` | garden | 15 (13 `sum_mismatch`, 1 `schema_invalid`, 1 `truncated`) | its session record |
 | `qwen3.5:4b` (local) | the S4 shape test, `shape-qwen-local-27266cf6` | garden | 15 (10 `sum_mismatch`, 2 `schema_invalid`, 3 `truncated`) | its session record |
 | `qwen3.5:4b`, `qwen3:8b` (local) | Phase 2.5 step 6a rounds 1-4 (`scratch/diagnose-s4shape.py`, `survey-shapes.py`) | garden shapes | 60 (32 in rounds 1-2, 28 in rounds 3-4), by the tables in the record | Phase 2.5 §17 step 6a |

@@ -7,6 +7,69 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-12, about 12:30 PM (step 7's proxy done: the bound stays)
+>
+> **Done since 8:45 AM:** Phase 3.5 §23.8 **step 7, the garden-shape proxy**, on Haiku 5.5 (Anthropic's API) and
+> `gpt-oss-120b` (OpenRouter, pinned), each as a Fargate task: **both 60 of 60 valid, final failure rate 0%, so by
+> decision 3 the bound in protocol §7.4 stays as built.** First attempts failed about 7% (Haiku, 4 of 60) and 3%
+> (`gpt-oss`, 2 of 60). $0.0653 of the credit, $0.0218 of his cash. Run before his review of the shapes (his choice,
+> as recommended). Everything is in `docs/phases/evidence/phase-3.5/failure-proxy.md`; the calls inventory has the
+> rows (Haiku's step 9 calls included).
+>
+> **For Phase 4's runs half:** `gpt-oss-120b` on its pinned host took a median of 74 s a call and was throttled
+> (37 HTTP 429s in 100 attempts, rising through the day); its first session hit the 30-minute default and was resumed.
+> At grid scale that is more than a day of task time.
+>
+> **OPEN, his, before the tag (found by Opus in review, 2026-10-12): the second family is the model the instrument was
+> developed on.** Decision 5 (his, 2026-10-09) made `gpt-oss-120b` the fallback set's second family. In Phase 2.5 it was
+> the development model given the company's content (50 probe calls, 122 decision calls on `w1` and `w3`), and the
+> 2026-10-07 disclosure (protocol §2.4) told Claude which S2 objectives had one format failure on it. Protocol §2.4
+> says the text "was tested on development models only, never an official one", and the calls inventory says "no
+> official model has been given any of the four scenarios": **under the fallback set both are untrue as written.** I
+> found nothing in §23 or decision 5 that addresses it (a grep, not proof). The blind reports mean no decision was seen,
+> so the one-way door's substance may hold; what is open is **whether `gpt-oss-120b` stays the second family, and how
+> the protocol says it.** Opus brings the options and a recommendation before the protocol review; no action today.
+>
+> **The working tree:** today's doc edits, uncommitted, for one commit he runs: the 8:45 block's four files, plus
+> `failure-proxy.md`, the calls inventory and the two blind reports.
+>
+> **NEXT:** (1) his commit; (2) his review of the shapes (`experiment/shapes/`), now that their proxy has run; (3) the
+> second-family question above; (4) the rest of Phase 3.5 as in §23.8 step 8: step 8's prerequisite (Nova Lite), step
+> 9's model facts and `model-facts.md`, the protocol's §5 and §9.5 filled, his review of §2-15, step 11's review, the tag.
+>
+> *The 8:45 AM block below is superseded on what is next.*
+>
+> ## START HERE — where things stand, 2026-10-12, about 8:45 AM (boundary applied; Phase 1 step 9 run on Haiku 5.5; DoD 1 closed)
+>
+> **Measured this morning:** `make check` green, **2022 tests passed** (run before the doc edits below); last pushed
+> commit `8ab367c`, its CI and Deploy green including `apply main`. The working tree now holds **doc edits only**
+> (Phase 1 doc §21a, Phase 3.5 doc §23.8 steps 5 and 6, this block, the ROADMAP row), **uncommitted until he runs the
+> commit**.
+>
+> **Done (his hands, Sonnet leading, 2026-10-12):** the boundary applied (plan 0 add, 1 change, 0 destroy; second plan
+> "No changes"). Phase 1 step 9 on `haiku-5-5` as Fargate tasks: **65 of 65 attempts `valid`**, two sweeps, **$0.0621**
+> of the Console credit. The key was read from SSM by the task role; `thinking: disabled` accepted (0 thinking tokens);
+> one image digest, equal to ECR's for the tag of `8ab367c`; stop and re-launch clean (24 + 26 attempts, no `attempt-2`,
+> **one version per key, no delete markers**). All of it, with numbers, is in **Phase 1 doc §21a**.
+>
+> **Read these two things before trusting "DoD 1 closed":** (1) the stop and re-launch ran on a **separate 50-run
+> sweep**, not the 15-run skeleton, because Haiku finished the 15 in under 2 minutes, before a stop could land; the
+> 2026-10-11 note said "the same 15 runs", so this is a deviation, **accepted by him 2026-10-12 on Opus's recommendation** (same placeholder, image and route; nothing
+> lowered). (2) The task's CloudWatch log was checked in review (83 lines, nothing key-shaped, no account ID); `models.toml` still has Haiku at
+> `role = "development"` until the protocol names it.
+>
+> **Carried, small:** the 15-run sweep cost $0.0140 against an estimate of "under $0.01"; per call it is $0.0008 to
+> $0.0011 at about 3,000 input and 1,000 to 1,650 output tokens on the placeholder. A call takes 5 to 9 s on this
+> route (the 28 to 63 s in the Phase 1.5 CARRIED list is the OpenRouter route's). Haiku's memos run over the requested
+> 300 words in 7 of 15 and 17 of 50 and are still `valid` (the harness never validates or scores memo length).
+>
+> **NEXT:** (1) he commits the doc edits **(held on purpose, his, 9:30 AM: they ride with step 7's commit; not stray)**; (2) **Opus reviews** §21a and
+> the DoD 1 closure; (3) **§23.8 step 7 is Opus's to scope, not Sonnet's:** the garden-shape proxy on Haiku 5.5 and
+> `gpt-oss-120b`, failure counts and types only, with his decision on the failure bound if either fails often;
+> (4) then the rest of Phase 3.5 as in §23.8 step 8.
+>
+> *The 2:30 AM block below is superseded on what is next; its account of K6 and the Console holds.*
+>
 > ## START HERE — where things stand, 2026-10-12, about 2:30 AM (K6 built and reviewed; Console and SSM done)
 >
 > **Done tonight (his, Claude leading):** Console workspace `horizon-compact` (`$0.00 of $10.00` monthly limit,

@@ -771,7 +771,9 @@ API (his prepaid credit) and `gpt-oss-120b` through OpenRouter (his cash, inside
 7. **[Opus drafts, he reviews] `experiment/shapes/`** (decision 3): four garden scenarios with S1-S4's structural
    rules and the placeholder's objectives; `hc scenarios check` passes on them. **[his runs, needs AWS]** the proxy
    runs on Bedrock, one command per model; Claude reports counts and types from the blind reports only (`failure-proxy.md`).
-   **Drafting `[done]` 2026-10-09 (Opus), awaiting his review; the runs wait for Bedrock.** *As built:*
+   **Drafting `[done]` 2026-10-09 (Opus), awaiting his review; the runs wait for Bedrock.** *Dated note, 2026-10-12:
+   the runs were made on the fallback set instead (§23.8 step 7), before his review of the shapes (his choice, on
+   Opus's recommendation: a changed shape is re-run for cents); results in `failure-proxy.md`.* *As built:*
    `experiment/shapes/`, its dossier and objectives byte copies of the placeholder's (one template, `w1`), and
    `garden_s1` to `garden_s4`, each holding its scenario's **form** and none of its content: the same balance rule
    and unit, the caps as the same ratios to the total, the same extra rules over lines of the same kind and cap, the
@@ -941,7 +943,9 @@ limits), and Anthropic's support article on credits.
 **Not verified, and how each is settled:** whether `thinking: {type: "disabled"}` is accepted at the default effort
 (Anthropic's API reference says it is, at effort `high` or below; the first neutral call shows it); his organization's
 tier and limits (the Console); the credit's purchase and expiry dates (the Console's invoice history); **how well Haiku
-5.5 does this task** (§23.6).
+5.5 does this task** (§23.6). *Dated note, 2026-10-12: the first three are settled.* `thinking: disabled` was accepted
+at the default effort (no `effort` sent) on all 65 calls of Phase 1 step 9, with 0 thinking tokens (Phase 1 doc §21a);
+the tier and the dates were read in the Console (§23.8 step 2). The fourth waits on step 7.
 
 ### 23.3 What changes and what does not
 
@@ -1069,12 +1073,21 @@ Each has my recommendation and the reason. **All eight DECIDED 2026-10-11 (his),
 3. **[done 2026-10-11]** **K6's spec approved** with §23.5 decision B (Phase 4 code half §4.9).
 4. **[Sonnet] K6 built** on a fake transport; **[Opus] reviewed**; `make check` green; he commits and pushes; the
    boundary change is his to apply, as with K5.
-5. **One neutral call on the laptop** (Phase 0.5's smoke prompt, no scenario): about $0.001. It shows that thinking can
-   be turned off, the price, and the record's shape. Recorded in `model-facts.md` (build step 9).
-6. **Phase 1 step 9 on Haiku 5.5 as a Fargate task:** the skeleton sweep, on the placeholder, under $0.01. **This
-   closes Phase 1's DoD 1** ("on the main model").
-7. **Decision 3's proxy on Haiku 5.5 and `gpt-oss-120b`** (garden shapes): failure counts and types only. If either
-   model fails often, he decides the bound before the tag.
+5. **[done 2026-10-12, by step 6's run instead]** **One neutral call on the laptop** (Phase 0.5's smoke prompt, no
+   scenario): about $0.001. It shows that thinking can be turned off, the price, and the record's shape. Recorded in
+   `model-facts.md` (build step 9). *Dated note, 2026-10-12:* the key exists only in SSM, so no laptop call was made;
+   the Fargate run of step 6 showed the same three things (thinking `disabled` accepted with 0 thinking tokens, the
+   real price per call, the record's shape). They are written in Phase 1 doc §21a, for `model-facts.md` to take when
+   build step 9 writes it; that file does not exist yet.
+6. **[done 2026-10-12]** **Phase 1 step 9 on Haiku 5.5 as a Fargate task:** the skeleton sweep, on the placeholder,
+   under $0.01. **This closes Phase 1's DoD 1** ("on the main model"). *Dated note, 2026-10-12:* the 15-run sweep cost
+   $0.0140, not under $0.01, and a second 50-run sweep ($0.0481) carried the stop and re-launch because the first was
+   over before a stop could land; **65 of 65 `valid`**. Details, and the deviation from "the same 15 runs", in
+   Phase 1 doc §21a.
+7. **[done 2026-10-12]** **Decision 3's proxy on Haiku 5.5 and `gpt-oss-120b`** (garden shapes): failure counts and
+   types only. If either model fails often, he decides the bound before the tag. *Result: both 60 of 60 valid, final
+   failure rate 0%, so the bound stays as built; first attempts failed about 7% (Haiku) and 3% (`gpt-oss`). About
+   $0.07 of the credit and $0.02 of his cash. `docs/phases/evidence/phase-3.5/failure-proxy.md`.*
 8. **The rest of Phase 3.5 as written:** step 8's prerequisite, step 9's model facts, the protocol's §5 and §9.5
    filled, his review of §2-15, step 11's independent review on `gpt-oss-120b`, then **the tag**. Then Phase 4's runs
    half.

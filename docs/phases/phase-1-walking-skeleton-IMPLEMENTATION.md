@@ -800,3 +800,54 @@ as written: `--experiment placeholder --repeats 3 --seed 20261005 --label skelet
   the protocol will name; it is not lowered.
 - **Not done by this step.** DoD 7 (spend from the bill) waits a day; Phase 3.5's tag still waits on Bedrock. The CARRIED
   list for Phase 1.5 is in `KNOWN-GAPS.md` (CARRIED, from Phase 1 to Phase 1.5).
+
+### 21a. Step 9 on Haiku 5.5 through Anthropic's API (2026-10-12, as built; DoD 1 closed)
+
+Run by him on 2026-10-12 after he applied the boundary (bootstrap plan 0 add, 1 change, 0 destroy; the second plan "No
+changes"). Image built from `8ab367c` (K6); `apply main` green. **Two sweeps, both the placeholder, both
+`development/placeholder/<sweep_id>/`:**
+
+| Sweep | Command (his) | Result |
+|---|---|---|
+| `skeleton-haiku-5-5-f1467906` | `hc sweep launch --experiment placeholder --model haiku-5-5 --repeats 3 --seed 20261012 --label skeleton` | 15 of 15 `valid`, one session (`complete`), $0.0140 |
+| `stoptest-haiku-5-5-c61e6830` | the same with `--repeats 10 --seed 20261013 --label stoptest`, run, stopped, run again | 50 of 50 `valid`, sessions `stop_requested` (24 attempts) then `complete` (26), $0.0481 |
+
+- **Why a second sweep.** The 15-run sweep finished in 1 minute 40 seconds by its session summary (a call takes 5 to 9 s on this route against 28
+  to 63 s on DeepInfra); his first `hc sweep stop` found "no running sweep task". The stop and re-launch were therefore
+  run on a 50-run sweep of the same placeholder. **This is a deviation from §21's "same 15 runs"**: the skeleton sweep
+  carries the provenance and digest checks, the stoptest sweep carries DoD 3, and the two together are what closes
+  DoD 1. **Accepted by him, 2026-10-12, on Opus's recommendation:** "the same 15 runs" was there so the bar could not be
+  lowered, and nothing was: same placeholder, same image, same route, and the 50-run sweep is a superset of the checks.
+- **Resume (DoD 3), measured by Claude from the copied objects.** 50 runs, 50 `attempt-1.json`, no `attempt-2`; the
+  bucket holds 103 keys under the stoptest prefix (50 attempts, 50 finals, 2 session summaries, the manifest) and 32
+  under the skeleton prefix, **every key with exactly one version and no delete markers** (`list-object-versions`).
+- **Provenance (DoD 1).** All 65 records carry `git_sha` `8ab367cf...` (`git_dirty` false), the same content hash
+  (`46cc488a...`) and one image digest, `sha256:ef2582ed...1d16f02`, **which is the digest ECR holds under the tag
+  `8ab367cf...-38218565554`** (read from `describe-images` the same morning).
+- **The new route, live for the first time.** The key was read from SSM by the task role (so the new
+  `ReadAnthropicKey` and `DecryptAnthropicKey` statements work with the grant in place; whether the KMS grant is needed
+  at all stays untested, as in §21). No key-shaped string (`sk-ant`, `Bearer`) and no account ID in any of the 65 stored
+  objects. **The task's CloudWatch log (83 lines, 3 streams, one per task) holds no key-shaped string, no `Bearer` or
+  `x-api-key` and no account ID** (checked by Opus in review, 2026-10-12).
+- **Facts the neutral call was to show (§23.8 step 5), for `model-facts.md` when Phase 3.5 build step 9 writes it:**
+  - `thinking: {type: disabled}` **is accepted**; every request carries it; `usage.output_tokens_details.thinking_tokens`
+    is 0 and `reasoning_block_count` 0 on all 65; `tool_choice` `auto`, `stop_reason` `tool_use` on all 65.
+  - Served model `claude-haiku-5-5` on all 65; a request ID per call, all unique; `inference_geo` "global";
+    `service_tier` "standard"; no cache tokens read or written; temperature not sent ("the API rejects non-default
+    values", the record's own text).
+  - Tokens per call: input 2,998 to 3,013 (the placeholder prompt is about 3,000 tokens, not the 8,000 the real grid is
+    expected to send), output 1,030 to 1,643. **Cost per call $0.0008 to $0.0011, recomputed by hand for one attempt
+    from `models.toml`'s prices and equal to the record's** ($0.000852). Latency 5.3 to 9.0 s, median 6.6 s (skeleton) and 6.9 s (stoptest).
+  - **The estimate was low:** §23.8 step 6 said "under $0.01"; the 15-run sweep cost **$0.0140** and both together
+    **$0.0621** of the Console credit (Fargate time is on AWS credits and was not measured). The per-call figures
+    above, not the estimate, are what Phase 4's runs-half cost should be built from.
+- **Observation for Opus, not a defect.** Haiku's memos exceed the 300 words the prompt asks for in 7 of 15 and 17 of 50
+  attempts (225 to 350 words), and every one is `valid` with no problems: the harness requests the length and never
+  validates it (`sweep/decision.py` checks only that the memo is a non-empty string) and `planning/07`'s memo row says it
+  is never scored in v1. It matters only if a later reading uses memo length.
+- **Results.** 65 of 65 `valid` on the first attempt, on the placeholder. This is **not** the garden-shape proxy of
+  §23.8 step 7, which has not been run, and says nothing about Haiku's failure rate on the real scenarios.
+- **DoD 1: closed, on the reading above** ("on the main model" is Haiku 5.5, per the 2026-10-11 dated note). `models.toml`
+  still carries `role = "development"` for it until the protocol names it (Phase 3.5 build step 9); nothing official
+  can run on it before the tag. DoD 3 is met on this route as well. DoD 7 (spend from the bill) and Phase 1.5 are not
+  done by this step.
