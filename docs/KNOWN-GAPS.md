@@ -55,7 +55,19 @@ case by its type and a neutral label. The names live only in the private longlis
 > **3:10 PM: (i) and (ii) DECIDED (his, as recommended):** gpt-oss sends `reasoning: {effort: "medium"}`, recorded in
 > the lock; the thinking sub-study sends `max_tokens` 16,000. (i) is scoped as Phase 3.5 §25, **BUILT by Sonnet 3:30 PM, REVIEWED by
 > Opus 3:55 PM (one wording fix; mutations confirm the tests bite), `make check` green, 2039 tests; the lock proof shows `reasoning {effort: medium} sent`**; (ii) is
-> built with Phase 4's thinking option. **Not proven until a real call: that DeepInfra accepts the field.**
+> built with Phase 4's thinking option. **4:20 PM: `46d8c8b` pushed, CI and Deploy green; the real call is made: DeepInfra
+> accepts the field (5 of 5 valid, one 429 retried, $0.0012 of his cash; §25.5).**
+>
+> **4:30 PM, DECIDED (his): protocol §2-15 APPROVED** after his read-through, today's drafts included (DoD 1's dated
+> approval; §1 was approved 2026-10-09); **step 8 (Nova Lite) DROPPED** under the fallback set, protocol §2.5 filled to
+> say so. His standing rule for the runs: Haiku 5.5 on his Anthropic key and `gpt-oss-120b` on his OpenRouter, while
+> both stay in the pennies; if Bedrock opens later, it is spent elsewhere.
+>
+> **Before the tag, still open: step 11's independent review** (DoD 2: done and every point resolved before the tag).
+> The reviewer cannot be Claude (the drafter's and main model's vendor; review brief). **4:40 PM, DECIDED (his): the
+> reviewer is Gemini 3.1 Pro through OpenRouter** (effort `high`, about $0.36, worst $0.71, his cash), replacing
+> `gpt-oss-120b`; the brief is updated and `scratch/send-review.py` is ready (sends only from a clean commit). NEXT: his
+> commit, then he runs the send; Opus marks each point in `review-resolutions.md`; he decides each. Then tag day (§12).
 >
 > **The working tree:** today's doc edits, uncommitted, for one commit he runs: the 8:45 block's four files, plus
 > `model-facts.md`,

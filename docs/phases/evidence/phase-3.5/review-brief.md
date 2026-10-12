@@ -3,13 +3,22 @@
 Phase 3.5 build step 11 (scope decision 3; IMPLEMENTATION doc §11 and decision 7). Drafted 2026-10-09 by Claude
 (Opus) in step 10; sent in step 11, once the protocol's bracketed values are filled, by him, as one call.
 
-- **Reviewer:** by decision 7 (i), **`gpt-oss-120b` on Bedrock**, under the credits, $0 cash; another vendor's model
-  on Bedrock if a stronger one is open to the account on the day. Option (ii), `openai/gpt-6-astra` through
-  OpenRouter (about $1-2 of his money, inside the $5 cap), is his call. Not Anthropic (the drafter's and main model's
-  vendor) in either case. The model, its route and the price read that day are recorded here before sending.
+- **Reviewer:** *[Decided 2026-10-12 (his), on Opus's recommendation, replacing decision 7 (i)'s `gpt-oss-120b` on
+  Bedrock:]* **Gemini 3.1 Pro (`google/gemini-3.1-pro-preview`) through OpenRouter, reasoning effort `high`,
+  `max_tokens` 48,000, his OpenRouter cash.** Price read live 2026-10-12 21:30 UTC from OpenRouter's endpoint list:
+  $2 input and $12 output per million tokens on the standard endpoints (a "flex" tier at $1 and $6 is also offered;
+  the host that serves it is recorded). Likely about $0.36, worst case about $0.71 (both with the fee). Why not the others: Bedrock is
+  unavailable; `gpt-oss-120b` became the second family on 2026-10-12, so it would be reviewing a study of itself, and
+  it is the weakest of the candidates; `openai/gpt-6-astra` costs about four times as much. Not Anthropic (the
+  drafter's and main model's vendor). Gemini 3.1 Pro was Phase 2.5's blind reader, so it has read the scenarios'
+  text, never a decision.
 - **Sent with it, as attached files, nothing else:** `experiment/protocol/protocol-v1.md` (as filled for the tag),
   `docs/phases/evidence/phase-3/simulation-summary.md`, `docs/phases/evidence/phase-3/matcher-calibration.md`, and the
-  lock as written by `hc protocol lock --write` on the review's tree.
+  lock **as printed** by `hc protocol lock --model haiku-5-5 --model gpt-oss-openrouter` on the review's commit.
+  *[Amended 2026-10-12 (Opus): not `--write`. A written lock can never be replaced, and the review may change the
+  protocol; the real lock is written on tag day. The printed lock is kept as `review-lock.txt`.]* Sent by
+  `scratch/send-review.py`, which refuses if any sent file is uncommitted and records the commit and each file's
+  sha256 in `review-raw.md`.
 - **Never sent:** any run record, any reply on the company's content, the private case longlist, or anything that
   identifies a real company (rule zero).
 - **Kept:** this brief and the raw reply, verbatim, as `review-raw.md`. Each point is marked confirmed, partly right

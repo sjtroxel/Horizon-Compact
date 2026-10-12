@@ -222,8 +222,11 @@ second family, so the model these runs were made on is an official model. What t
 
 ### 2.5 The Nova Lite runs
 
-*[Waits for build step 8: the probes and format runs on Nova Lite through Bedrock, read through the blind reports,
-and any change they caused.]*
+**Not run.** *[Decided 2026-10-12 (his), on Opus's recommendation.]* Build step 8 planned comprehension probes and
+format runs on Nova Lite through Bedrock, as a second development model. Bedrock stayed unavailable to the account,
+so they were dropped under the fallback set. What they were for is covered otherwise: the text's comprehension was
+probed on `gpt-oss-120b` (section 2.4), and both official models' failure rates were measured directly on the garden
+copies of the four scenarios (section 2.6). No Nova Lite call was made on the company's content.
 
 ### 2.6 The garden failure-rate runs
 

@@ -97,7 +97,7 @@ Read 2026-10-12, about 18:45 UTC, from OpenRouter's public endpoints API, no key
 
 | Fact | Value |
 |---|---|
-| Reasoning | `"reasoning": {"mandatory": true, "supported_efforts": ["high", "medium", "low"], "default_effort": "medium"}`: **it cannot be turned off**; OpenRouter's reasoning docs say a model marked mandatory rejects `effort: "none"` (https://openrouter.ai/docs/use-cases/reasoning-tokens, read 2026-10-12). The harness sent no reasoning field until 2026-10-12, so every call before that ran at OpenRouter's default; **since Phase 3.5 section 25 it sends `reasoning: {effort: "medium"}` explicitly, recorded in the lock** |
+| Reasoning | `"reasoning": {"mandatory": true, "supported_efforts": ["high", "medium", "low"], "default_effort": "medium"}`: **it cannot be turned off**; OpenRouter's reasoning docs say a model marked mandatory rejects `effort: "none"` (https://openrouter.ai/docs/use-cases/reasoning-tokens, read 2026-10-12). The harness sent no reasoning field until 2026-10-12, so every call before that ran at OpenRouter's default; **since Phase 3.5 section 25 it sends `reasoning: {effort: "medium"}` explicitly, recorded in the lock; DeepInfra accepted it on 5 of 5 answered calls on 2026-10-12 (§25.5)** |
 | Knowledge cutoff | `"knowledge_cutoff": "2024-06-30"` (OpenRouter's listing) |
 | Expiration | `"expiration_date": null` |
 | Pinned endpoint caching | `"supports_implicit_caching": false` (settles Phase 1 section 21's open question: DeepInfra does not cache this prefix) |

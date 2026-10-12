@@ -797,7 +797,10 @@ API (his prepaid credit) and `gpt-oss-120b` through OpenRouter (his cash, inside
    $2.84 each), four per model, no override; `--allow-over-cap` stays his to type. Tests: the form check caught
    eight kinds of drift and a dropped rule, allows a uniform rescaling, and refuses a missing or extra shape. 1391
    tests in all. Committed with step 6 (his choice); the runs' evidence comes in a later commit.
-8. **[his runs, needs AWS] Nova Lite on Bedrock** (decision 4): probes and format runs on the existing `nova-lite` entry;
+8. *[DROPPED 2026-10-12 (his, on Opus's recommendation): Bedrock still blocked; Nova Lite was a development model
+   for format and comprehension, both covered by `gpt-oss-120b`'s Phase 2.5 runs and the official models' garden
+   runs (§23.8 step 7). Protocol §2.5 says so. If Bedrock opens later, it is not spent here.]*
+   **[his runs, needs AWS] Nova Lite on Bedrock** (decision 4): probes and format runs on the existing `nova-lite` entry;
    **[Opus]** any failure type fixed through the change log, probes re-run if text changed. C4. This closes the OPEN
    entry of 2026-10-07.
 9. **[Opus, needs AWS] Model facts and the set** (§10.3, decision 2): live reads, one neutral call per candidate on
@@ -1269,7 +1272,7 @@ runner for Phase 5.5 (carried, §24.2); protocol §5's bracket; the lock (roles 
 
 > **Status: APPROVED 2026-10-12, about 3:10 PM (his): protocol choices (i) and (ii) as recommended.** (i) is
 > **[done] 2026-10-12 (Sonnet built; REVIEWED by Opus about 3:55 PM, one wording fix; §25.4)**; (ii) waits for Phase 4's thinking option.
-> Cost: $0, no model call.
+> **The real call is made (§25.5): DeepInfra accepts the field.** Cost of the build: $0; of the check: $0.0012.
 
 ### 25.1 Why
 
@@ -1358,3 +1361,20 @@ test files). Checked, not taken from the notes above:
   `model-facts.md`, where it is sourced. No record held the old string. §25.2 item 4's wording is amended to match.
 - **`_pin` keeps its name** (Sonnet's item 3): its docstring says both jobs, and one function keeps the two bodies
   identical. Not worth a rename.
+
+### 25.5 The real call (2026-10-12, about 4:20 PM; §25.3's open item, now closed)
+
+His command, `scratch/reasoning-launch.sh`: `hc sweep launch --experiment placeholder --model gpt-oss-openrouter
+--repeats 1 --seed 20261012 --label reasoning`, a Fargate task on the image built from `46d8c8b` (Deploy run
+`38307277838`, green). Sweep `reasoning-gpt-oss-openrouter-d1355896`, one session, `complete`, **$0.0012 of his
+OpenRouter cash**. Read by Claude (Opus) from the copied objects (`scratch/reasoning-sync.sh`, 13 objects; placeholder
+content, off the subject; only the fields below were read):
+
+- **DeepInfra accepts the field.** All 6 requests carried `reasoning: {"effort": "medium"}` beside the pin; all 5
+  model answers were `valid`, served by DeepInfra, each with a reasoning block (`reasoning_block_count` 1, which also
+  shows directly that it reasons on every call), 805 to 1,150 output tokens, 30 to 46 s.
+- **The one `api_error`** (run `r-787e93ff8f1f`, attempt 1) was HTTP 429 `ThrottlingException` after 233 ms, "Provider
+  returned error", retried valid on attempt 2: the host's throttling, not a rejection of the field.
+- Records say `thinking` "reasoning effort medium sent" and `effort` "medium"; `git_sha` `46d8c8b`.
+
+Added to `calls-inventory.md`, with the 2026-10-11 placeholder run on the same model, which the inventory had missed.
