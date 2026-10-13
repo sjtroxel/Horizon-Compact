@@ -80,9 +80,11 @@ def test_plan_names_the_known_models_when_given_an_unknown_one(
 
 def test_an_official_run_is_refused_with_the_reason(capsys: pytest.CaptureFixture[str]) -> None:
     assert cli.main(["sweep", "run", *PLAN_ARGS, "--profile", "p", "--official"]) == 2
+    err = capsys.readouterr().err
+    assert "official sweep refused: experiment is 'placeholder'; prereg-v1 locks 'company'" in err
     assert (
-        "official sweep refused: no committed protocol: experiment/protocol/prereg.lock does not exist"
-        in capsys.readouterr().err
+        "official sweep refused: official sweeps run only in the container, never on a laptop"
+        in err
     )
 
 
@@ -90,7 +92,9 @@ def test_an_official_launch_is_refused_before_any_aws_call(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     assert cli.main(["sweep", "launch", *PLAN_ARGS, "--profile", "p", "--official"]) == 2
-    assert "no committed protocol" in capsys.readouterr().err
+    assert "official sweep refused: experiment is 'placeholder'; prereg-v1 locks 'company'" in (
+        capsys.readouterr().err
+    )
 
 
 def test_a_cap_above_five_dollars_needs_allow_over_cap(capsys: pytest.CaptureFixture[str]) -> None:

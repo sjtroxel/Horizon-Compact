@@ -1,0 +1,68 @@
+# The pre-registration lock. Written by `hc protocol lock --write`; never edit it by hand.
+# Phase 3.5 IMPLEMENTATION doc section 6.
+
+document = "experiment/protocol/protocol-v1.md"
+document_sha256 = "6bc5a30c57ae1299f25f24996062d5a3767c5a494e0f6377d14d6a85fa5008c3"
+lock_version = 1
+protocol = "prereg-v1"
+
+[analysis]
+results_version = 2
+sha256 = "0cabbfd96fc42da1ecc1f0e7966e540a3ba9735487046c4e84fe7e45b0f50e0a"
+uv_lock_sha256 = "d9cdf7fc2a169ebcb125bdac0349fa2cbb6ddff876266bbf04b9fe9afe072f81"
+
+[analysis.files]
+"src/horizon_compact/analysis/__init__.py" = "29fe091cff2961f17d13645bb5b952bef3d26daac5ce79bff52282b09e9c3c4b"
+"src/horizon_compact/analysis/descriptive.py" = "d96db6091ca9985c93fba84a7941c8baa14c370e98671807136efbde468dbd70"
+"src/horizon_compact/analysis/failures.py" = "679dce6c002205cc7caa82bd6b34eab1625f638dc075ca76203d221246462962"
+"src/horizon_compact/analysis/intervals.py" = "bfe8b685dbbff460ff773861423972464bdccee8f127c838088fbf36c95a377f"
+"src/horizon_compact/analysis/matcher.py" = "a9bc3b03cd5755c6753c3ec6deae160729fc26aa3037fb9dd8d379a99f7abcd4"
+"src/horizon_compact/analysis/matcher_thresholds.toml" = "97ed98e0bcce97ea8ba6450e876da0e2815110929106132ff42ac9b3a6811954"
+"src/horizon_compact/analysis/outcomes.py" = "1a4e4ef5d04282ce5be9ab419b7e67ca2a5509b5acb4977b61a51621df25ed40"
+"src/horizon_compact/analysis/records.py" = "1d8b2f55b58a92af21d64c74129a371ceaa3d22fd92f6cd3002b6d2ddebc31fa"
+"src/horizon_compact/analysis/repeats.py" = "2955cae4e6be1b6d14e934a05a03093cf2d4d55247e3c95afb5bb692e1954ddb"
+"src/horizon_compact/analysis/results.py" = "0446884fe50850dc7eef73a21ba8101e2fe5bb4f3177ab7bc3d74edb10f548ca"
+"src/horizon_compact/analysis/robustness.py" = "70b6fd5d88504b08c024dc7b7104783987eb27da5d575224bed51169f0ee5f13"
+"src/horizon_compact/analysis/verdict.py" = "f93055690c6fbf5faca50ec79f620c9c9cb7e4c16e3f66d1572674e0ce08a7dc"
+"src/horizon_compact/experiment.py" = "4b061e826a7299029232e83ee23951a4942dd56099e91c30db7829455edacbdf"
+
+[content]
+content_hash = "a31d1f1184a502ce7e9cede35755cbb2c5083b658aed0c7f27e75c12d84df3c3"
+experiment = "company"
+sealed_template = "w2"
+tree_sha256 = "719834d2f10de85f9763610412f6f27210a54173a3a6c78ef0a718fa74e180ef"
+
+[content.files]
+"company/dossier.toml" = "1eb455a06549dca1656695d000514e85b890346cc5850d2918dfa0a90d921e25"
+"company/objectives.toml" = "ea0156f1852562155055fde7ff9d74f1cec34c04e149b3cf0fad124fa0f4563b"
+"company/scenarios/s1.toml" = "9bce9a18894133d3291e15f714f29e70699820d44299ce87525f19f075d919cc"
+"company/scenarios/s2.toml" = "9c0b63cad49d1552b70464a244bec47ff7a4bd071bc534358852fd0bedb2b4b4"
+"company/scenarios/s3.toml" = "810f6ed63ee5098aad8f50b9df51fb2fb09329718308c18fd739ab7f79d30d3d"
+"company/scenarios/s4.toml" = "506f4fde551b7d9d51efe0e37dbf9be8324d7c5781a79c83e1e69dee1d38b766"
+
+[instrument]
+sha256 = "ab19145c204badbbc342e86781211d12388bd0a133020533cebf511594542568"
+
+[instrument.files]
+"src/horizon_compact/sweep/classify.py" = "32d2075d1c042491579210f3e41d97915dd02436903509d01c2d27b00da98625"
+"src/horizon_compact/sweep/decision.py" = "2f6f5f81cee9d25e188621bebebd60afec66e3dd72656ce982d1589b015c92f8"
+"src/horizon_compact/sweep/prompt.py" = "dc8c85dbc341019636058c0bcbb18ad7ee890efa3aaeeab2bb2f30d7136d7928"
+
+[models.gpt-oss-openrouter]
+model_id = "openai/gpt-oss-120b"
+openrouter_provider = "deepinfra/bf16"
+role = "second_family"
+route = "openrouter"
+sampling = "not set"
+thinking = "reasoning {effort: medium} sent"
+
+[models.haiku-5-5]
+model_id = "claude-haiku-5-5"
+role = "main"
+route = "anthropic"
+sampling = "not set"
+thinking = "off: thinking {type: disabled} sent"
+
+[simulation]
+code_sha256 = "705078047b9ec370e75d1e56e03ec9ade8dc6d5b7a28a48cc77636046b59192c"
+results_sha256 = "7f0931fd3fa037f2d7db50f24f1eb9ee57657c27c2f1219e091f282f92b6627f"

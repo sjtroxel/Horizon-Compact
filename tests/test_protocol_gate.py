@@ -438,9 +438,9 @@ def test_check_official_raises_one_line_per_failure_in_the_refusal_form(tagged: 
     ]
 
 
-def test_the_real_repository_has_no_lock_so_every_official_sweep_is_refused() -> None:
+def test_the_real_repository_refuses_an_official_sweep_on_a_model_prereg_v1_does_not_name() -> None:
     exp = load_experiment("company")
-    with pytest.raises(SweepRefusal, match="no committed protocol"):
+    with pytest.raises(SweepRefusal, match="model sonnet-4-6 is not one of prereg-v1's models"):
         check_official(exp, plan(exp), FARGATE)
 
 

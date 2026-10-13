@@ -440,8 +440,8 @@ def test_a_sweep_with_no_no_tool_call_needs_no_file(company: Experiment, tmp_pat
 
 @pytest.fixture
 def local(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> LocalStore:
-    """The command's store, and its analysis gate passed: no lock exists before the tag. The gate itself is
-    tested in test_protocol_gate.py, and its refusal here below."""
+    """The command's store, and its analysis gate passed, so these tests do not depend on the lock. The gate
+    itself is tested in test_protocol_gate.py, and the command's use of it here below."""
     store = LocalStore(tmp_path / "bucket")
     monkeypatch.setattr(cli, "_store", lambda args, session: store)
     monkeypatch.setattr(cli, "run_analysis_gate", lambda experiment: GateResult())
@@ -467,7 +467,7 @@ def test_hc_analyze_refuses_a_sweep_that_has_no_tool_calls_and_no_calls_file(
     assert not (tmp_path / "repo" / "experiment").exists()
 
 
-def test_hc_analyze_refuses_an_official_sweep_unless_the_analysis_is_the_locked_one(
+def test_hc_analyze_refuses_an_official_sweep_when_the_analysis_is_not_the_locked_one(
     company: Experiment,
     local: LocalStore,
     tmp_path: Path,
@@ -476,13 +476,27 @@ def test_hc_analyze_refuses_an_official_sweep_unless_the_analysis_is_the_locked_
 ) -> None:
     plan = build(company)
     play(company, plan, local, {})
-    monkeypatch.undo()  # the real gate, on this repository, which has no lock before the tag
-    monkeypatch.setattr(cli, "_store", lambda args, session: local)
+    changed = GateResult(failures=("analysis differs from prereg-v1: analysis/verdict.py",))
+    monkeypatch.setattr(cli, "run_analysis_gate", lambda experiment: changed)
     assert cli.main(analyze_args(plan, tmp_path)) == 2
     err = capsys.readouterr().err
-    assert "official analysis refused" in err and "no committed protocol" in err
+    assert "official analysis refused" in err and "analysis differs from prereg-v1" in err
     assert not (tmp_path / "repo" / "experiment").exists()
     # a placeholder development sweep is not official, so the gate does not apply to it
+
+
+def test_hc_analyze_accepts_an_official_sweep_under_the_real_gate_with_the_locked_analysis(
+    company: Experiment,
+    local: LocalStore,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    plan = build(company)
+    play(company, plan, local, {})
+    monkeypatch.undo()  # the real gate, on this repository and its committed prereg-v1 lock
+    monkeypatch.setattr(cli, "_store", lambda args, session: local)
+    assert cli.main(analyze_args(plan, tmp_path)) == 0
+    assert (tmp_path / "repo" / "experiment" / "results" / "prereg-test").is_dir()
 
 
 def test_hc_analyze_refuses_a_half_finished_sweep_through_the_runset(
