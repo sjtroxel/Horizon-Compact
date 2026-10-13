@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# horizon-compact name guard: pre-push
+#
+# Installed by `make setup` straight into the hooks directory, NOT through the pre-commit framework: pre-commit
+# 4.6.2 skips every pre-push hook when no pushed ref carries a new commit, so a tag-only push, or a new branch
+# name on a commit the remote already has, was never scanned (found 2026-10-13). Git runs this on every push,
+# passing the remote's name and URL; the guard reads the refs itself.
+#
+# Fails closed: if uv or the guard cannot be run, this exits non-zero and git refuses the push.
+set -euo pipefail
+exec uv run --no-sync python -m horizon_compact.privacy.guard pre-push "$@"

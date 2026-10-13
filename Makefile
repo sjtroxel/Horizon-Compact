@@ -20,7 +20,7 @@ install: ## Create the venv and install all dependencies (uv provisions Python 3
 
 # The term file's path is stored in this clone's own git config (.git/config), which git never tracks,
 # so the path cannot be committed by mistake (Phase 0, decision 2). It is asked for once per clone.
-setup: install ## One-time setup per clone: term-file path, all three hook types, then doctor
+setup: install ## One-time setup per clone: term-file path, the three hooks, then doctor
 	@if [ -z "$$HC_NAME_GUARD_TERMS" ] && [ -z "$$(git config --local --get hc.nameGuardTerms)" ]; then \
 		printf 'Path to the private name-guard term file: '; read -r path; \
 		[ -f "$$path" ] || { echo "No such file. Nothing was stored."; exit 1; }; \
@@ -28,6 +28,9 @@ setup: install ## One-time setup per clone: term-file path, all three hook types
 		echo "Stored in .git/config (never tracked)."; \
 	fi
 	uv run --no-sync pre-commit install
+	@# The push guard bypasses pre-commit (see .pre-commit-config.yaml); this also replaces the pre-push hook
+	@# that pre-commit installed in clones made before 2026-10-13.
+	install -m 755 src/horizon_compact/privacy/hooks/pre-push "$$(git rev-parse --git-path hooks)/pre-push"
 	@$(GUARD) doctor
 
 fmt: ## Format and auto-fix the code

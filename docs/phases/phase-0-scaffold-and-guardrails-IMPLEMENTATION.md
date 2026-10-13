@@ -123,6 +123,11 @@ true`) running `uv run --no-sync python -m horizon_compact.privacy.guard <mode>`
 pre-commit-hooks (large files, merge conflicts, toml, yaml, private keys, end of file, trailing whitespace) at
 the pre-commit stage, as in Musical Mycelium. **No `no-commit-to-branch`**: he commits to `main`.
 
+*(Amended 2026-10-13.)* **The pre-push hook no longer goes through pre-commit.** pre-commit 4.6.2 runs no pre-push
+hook when no pushed ref has new commits, so a tag-only push was never scanned (`docs/KNOWN-GAPS.md`, CLOSED
+2026-10-13). `default_install_hook_types` is now `[pre-commit, commit-msg]`; `make setup` installs
+`src/horizon_compact/privacy/hooks/pre-push` directly, and `doctor` checks that script's marker line.
+
 *(Two corrections during step 4, both read from the installed pre-commit 4.6.2 source.)* **The commit-msg hook
 keeps `pass_filenames` on**: pre-commit delivers the message file as the hook's one "filename"
 (`commands/run.py`), and `pass_filenames: false` would hand the guard nothing. The other two keep it off.

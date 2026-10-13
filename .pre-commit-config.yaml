@@ -1,13 +1,18 @@
-# Local guardrails. Install with `make setup`, which installs all three hook types below.
+# Local guardrails. Install with `make setup`.
 #
 # The name guard (Phase 0) is the reason this file exists: it keeps real company names out of a public
 # repository. It runs at three moments: on each commit's staged changes, on each commit message, and on
 # each push. CI never runs it; CI cannot read the private term file (docs/planning/08 §4.8).
 #
+# The PUSH guard is not configured here. `make setup` installs src/horizon_compact/privacy/hooks/pre-push
+# directly into the hooks directory, because pre-commit 4.6.2's `_pre_push_ns` returns None when no pushed
+# ref has new commits, so it skips every pre-push hook: a tag-only push was never scanned. Found on tag day,
+# 2026-10-13. Do not add a pre-push stage back to this file.
+#
 # ruff runs through `uv run`, not from ruff's own hook repository, so the hook, `make check` and CI all use
 # the one ruff version pinned in uv.lock. A second pin is how a hook and CI come to disagree.
 
-default_install_hook_types: [pre-commit, commit-msg, pre-push]
+default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
 
 repos:
@@ -29,14 +34,6 @@ repos:
         language: system
         always_run: true
         stages: [commit-msg]
-
-      - id: name-guard-push
-        name: name guard (everything being pushed)
-        entry: uv run --no-sync python -m horizon_compact.privacy.guard pre-push
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
 
       - id: ruff-format
         name: ruff format

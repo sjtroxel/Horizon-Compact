@@ -927,7 +927,19 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
-## OPEN 2026-10-13 — the pre-push name guard printed nothing on a tag-only push
+## CLOSED 2026-10-13 — the pre-push name guard printed nothing on a tag-only push (was OPEN, same day)
+
+**Closed 2026-10-13, late afternoon (Opus diagnosed, Sonnet built, Opus reviewed):** cause confirmed in the source: pre-commit 4.6.2's
+`_pre_push_ns` (`hook_impl.py`) returns `None` when no pushed ref carries a commit the remote lacks, and then runs no
+pre-push hook at all. That covers a tag-only push, and also a new branch name on an already-pushed commit; the guard
+would have scanned both, but was never called. **Fix:** the push guard no longer goes through the framework.
+`src/horizon_compact/privacy/hooks/pre-push` (tracked, a short bash script, fails closed) is installed by `make setup`
+straight into the hooks directory, overwriting the framework's old pre-push hook; `.pre-commit-config.yaml` has no
+pre-push stage; `guard doctor` counts a pre-push hook as installed only if it carries the script's marker line and is
+executable (git silently skips a non-executable hook). Tests in `tests/test_guard_git.py` push a tag and a branch name
+on an already-pushed commit through real git hooks. **He must run `make setup` once** (look for `doctor: hooks installed
+(pre-commit, commit-msg, pre-push)`); until then his clone still has the old hook and `make check`'s `doctor` says so.
+Nothing here is in the lock. The entry as first written:
 
 Found on tag day (`tag-record.md` §4). `git push origin prereg-v1`, a tag whose commit the remote already had, showed no
 hook output at all; on the commit push minutes earlier the guard printed "Passed". Likely pre-commit skipping its

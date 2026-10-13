@@ -11,6 +11,10 @@ Modes (Phase 0 IMPLEMENTATION doc §5):
 - ``doctor``       the three hooks are installed and the term file loads and passes its fingerprint
 - ``fingerprint``  prints the current longlist's SHA-256, for updating the term file
 
+The pre-commit and commit-msg hooks run through the pre-commit framework. The pre-push hook does NOT: it is
+``hooks/pre-push``, installed by ``make setup`` straight into the hooks directory, because pre-commit skips
+every pre-push hook when no pushed ref has new commits (a tag-only push; found 2026-10-13).
+
 Exit codes: 0 clean, 1 a term or a private path was found, 2 the guard could not run and so **fails
 closed** (no setting, unreadable or stale term file, a git error).
 
@@ -40,6 +44,7 @@ ENV_VAR = "HC_NAME_GUARD_TERMS"
 GIT_CONFIG_KEY = "hc.nameGuardTerms"
 HOOK_TYPES = ("pre-commit", "commit-msg", "pre-push")
 HOOK_MARKER = b"pre-commit"  # every hook script the pre-commit framework installs names itself
+PUSH_HOOK_MARKER = b"# horizon-compact name guard: pre-push"  # the first lines of hooks/pre-push
 
 CLEAN, FOUND, FAILED = 0, 1, 2
 
@@ -202,12 +207,14 @@ def _has_head() -> bool:
 def commits_to_push(remote_arg: str | None = None) -> list[str]:
     """Every commit on any local branch, tag or HEAD that the remote does not already have.
 
-    Deliberately wider than "the ref being pushed". pre-commit 4.6.2 hands a pre-push hook only the
-    FIRST ref of a multi-ref push that has new commits (``hook_impl.py``, ``_pre_push_ns`` returns on
-    it), and sets no to-ref at all for a first push that includes the root commit. Scanning every local
-    ref the remote lacks covers both. The cost is refusing a push while some unpushed local branch holds a
-    name, which is the safe direction to be wrong in. The remote comes from the framework's environment,
-    else git's own first hook argument, else ``origin``.
+    Deliberately wider than "the ref being pushed": the hook reads no refs from git's stdin, and scanning
+    every local ref the remote lacks covers a multi-ref push and a first push that includes the root commit.
+    The cost is refusing a push while some unpushed local branch holds a name, which is the safe direction
+    to be wrong in. The remote is git's own first hook argument, else ``origin``.
+
+    Since 2026-10-13 the hook is ``hooks/pre-push``, run by git directly, so ``PRE_COMMIT_TO_REF`` and
+    ``PRE_COMMIT_REMOTE_NAME`` are unset on a real push. They are still honored, and win over the argument,
+    so the guard behaves the same if the pre-commit framework ever runs it again.
     """
     to_ref = os.environ.get("PRE_COMMIT_TO_REF", "").strip()
     if to_ref and set(to_ref) == {"0"}:  # deleting a remote branch pushes no content
@@ -312,8 +319,11 @@ def mode_doctor() -> int:
     missing = []
     for hook in HOOK_TYPES:
         script = hooks_dir / hook
+        marker = PUSH_HOOK_MARKER if hook == "pre-push" else HOOK_MARKER
         try:
-            installed = HOOK_MARKER in script.read_bytes()
+            installed = marker in script.read_bytes()
+            if hook == "pre-push":  # git silently skips a hook that is not executable
+                installed = installed and os.access(script, os.X_OK)
         except OSError:
             installed = False
         if not installed:
