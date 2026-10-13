@@ -13,6 +13,7 @@ import signal
 import subprocess
 import sys
 from collections.abc import Callable, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 from types import FrameType
 
@@ -54,6 +55,7 @@ from horizon_compact.protocol.cases import CaseContent, CaseError, case_lock_tex
 from horizon_compact.protocol.gate import (
     PilotRefusal,
     check_official,
+    check_one_sweep_per_study,
     check_repeats,
     describe_decision,
     refusal_message,
@@ -75,6 +77,8 @@ from horizon_compact.protocol.lock import (
     render_lock,
     write_lock,
 )
+from horizon_compact.protocol.recordcheck import format_report as format_record_report
+from horizon_compact.protocol.recordcheck import run_checks as run_record_checks
 from horizon_compact.providers.anthropic import (
     AnthropicKeyError,
     AnthropicProvider,
@@ -133,6 +137,7 @@ from horizon_compact.sweep.refusals import make_calls, require_calls_before_anal
 from horizon_compact.sweep.runner import ROLES, Role, check_route, run_session, sweep_prefix
 from horizon_compact.sweep.spend import DEVELOPMENT_CAP_USD
 from horizon_compact.sweep.store import LocalStore, S3Store, Store
+from horizon_compact.sweep.tokens import tokens_report
 from horizon_compact.sweep.warning import SpendEstimate, format_warning, sweep_estimate
 
 EVIDENCE_RELATIVE = Path("docs/phases/evidence/phase-0.5/smoke")
@@ -588,6 +593,7 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         # The repeats the pilot set, read from the store the session writes to: a hand-typed command in the
         # container cannot skip them (protocol 8.3).
         check_repeats(store, plan_, args.pilot_sweep)
+        check_one_sweep_per_study(store, plan_)
 
     stop_requested = {"flag": False}
 
@@ -658,7 +664,9 @@ def cmd_sweep_launch(args: argparse.Namespace) -> int:
         # The pilot's repeats.json is read here, from the bucket, so a launch that would be refused in the
         # container is refused before it starts.
         session = _session(args, identify({}, _laptop_git))
-        check_repeats(_store(args, session), plan_, args.pilot_sweep)
+        official_store = _store(args, session)
+        check_repeats(official_store, plan_, args.pilot_sweep)
+        check_one_sweep_per_study(official_store, plan_)
     check_preflight(experiment, plan_, cap)
     session = session or _session(args, identify({}, _laptop_git))
     command = [
@@ -937,6 +945,14 @@ def cmd_sweep_report(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_sweep_tokens(args: argparse.Namespace) -> int:
+    """What thinking cost, in tokens, per S1 cell (Phase 4 runs half section 5.2). Reads token counts and
+    block counts only; run at the reveal."""
+    session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+    print(tokens_report(_store(args, session), args.experiment, args.sweep, args.vs))
+    return CLEAN_EXIT
+
+
 def cmd_sweep_stop(args: argparse.Namespace) -> int:
     session = _session(args, identify({}, _laptop_git))
     stopped = sweep_launch.stop_tasks(session.client("ecs"), args.model)
@@ -1090,10 +1106,44 @@ def cmd_protocol_repeats(args: argparse.Namespace, root: Path) -> int:
     return CLEAN_EXIT
 
 
+RECORD_CHECKS_FILE = "docs/phases/evidence/phase-4/record-checks.md"
+
+
+def cmd_protocol_records(args: argparse.Namespace, root: Path) -> int:
+    """The record checks (Phase 4 runs half section 5.3): read-only over every pilot and official sweep,
+    writing one evidence file of counts, ids, hashes and dates. Never reads a decision, a choice, a memo or
+    a reply."""
+    try:
+        lock = read_lock(lock_path(root))
+    except LockError as exc:
+        for reason in exc.reasons:
+            print(f"refused: {reason}", file=sys.stderr)
+        return REFUSED_EXIT
+    session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+    store = _store(args, session)
+    report = run_record_checks(store, lock, list(check_lock(root).failures))
+    sha, dirty = _laptop_git()
+    text = format_record_report(
+        report,
+        protocol=lock.protocol,
+        tree=f"{sha[:12]}{' plus uncommitted changes' if dirty else ''}",
+        made_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    )
+    target = root / RECORD_CHECKS_FILE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(text, encoding="utf-8", newline="\n")
+    for check in report.checks:
+        print(f"{'reported' if check.info else ('pass' if check.ok else 'FAIL'):<9}{check.name}")
+    print(f"written: {RECORD_CHECKS_FILE}")
+    return CLEAN_EXIT if report.ok else CHECK_FAILED_EXIT
+
+
 def cmd_protocol(args: argparse.Namespace) -> int:
     root: Path = args.root or default_repo_root()
     if args.action == "check":
         return cmd_protocol_check(root)
+    if args.action == "records":
+        return cmd_protocol_records(args, root)
     if args.action == "repeats":
         return cmd_protocol_repeats(args, root)
     return cmd_protocol_lock(root, args.models, args.experiment, args.write)
@@ -1377,6 +1427,16 @@ def build_parser() -> argparse.ArgumentParser:
     refusals_parser.add_argument("--store", choices=("local", "s3"), default="s3")
     refusals_parser.add_argument("--bucket", default=None)
     refusals_parser.add_argument("--profile", default=None)
+    tokens_parser = sweep_actions.add_parser(
+        "tokens",
+        help="The thinking sub-study's token cost against the grid's matching cells. Counts only; run at the reveal.",
+    )
+    tokens_parser.add_argument("--experiment", required=True)
+    tokens_parser.add_argument("--sweep", required=True, help="the grid's sweep id")
+    tokens_parser.add_argument("--vs", required=True, help="the thinking sub-study's sweep id")
+    tokens_parser.add_argument("--store", choices=("local", "s3"), default="s3")
+    tokens_parser.add_argument("--bucket", default=None)
+    tokens_parser.add_argument("--profile", default=None)
     stop_parser = sweep_actions.add_parser("stop", help="Stop a model's running sweep task")
     stop_parser.add_argument("--model", required=True)
     stop_parser.add_argument("--profile", default=None)
@@ -1497,6 +1557,14 @@ def build_parser() -> argparse.ArgumentParser:
     repeats_parser.add_argument("--bucket", default=None)
     repeats_parser.add_argument("--profile", default=None)
 
+    records_parser = protocol_actions.add_parser(
+        "records",
+        help="The record checks over every pilot and official sweep; read-only; writes the evidence file",
+    )
+    records_parser.add_argument("--store", choices=("local", "s3"), default="s3")
+    records_parser.add_argument("--bucket", default=None)
+    records_parser.add_argument("--profile", default=None)
+
     simulate = groups.add_parser(
         "simulate", help="Phase 3 simulations. Offline; calls no model and no AWS."
     )
@@ -1527,6 +1595,7 @@ SWEEP_COMMANDS = {
     "stop": cmd_sweep_stop,
     "awareness": cmd_sweep_awareness,
     "refusals": cmd_sweep_refusals,
+    "tokens": cmd_sweep_tokens,
 }
 
 

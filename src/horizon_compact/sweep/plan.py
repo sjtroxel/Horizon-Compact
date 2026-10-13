@@ -21,6 +21,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 from horizon_compact.experiment import OFF_SUBJECT_EXPERIMENTS, Experiment
+from horizon_compact.providers.base import THINKING_LABEL, THINKING_STUDY_MAX_TOKENS
 from horizon_compact.sweep.classify import MAX_MODEL_ATTEMPTS
 from horizon_compact.sweep.prompt import build_tool, menu_order_seed, render_prompt
 from horizon_compact.sweep.spend import estimate_input_tokens, worst_case_attempt_usd
@@ -34,6 +35,8 @@ class SweepRefusal(Exception):
 # whose ``repeats`` is one int for every scenario, is still read (``manifest_repeats``) and still resumed.
 MANIFEST_VERSION = 3
 DEVELOPMENT_ROLE = "development"
+MAIN_ROLE = "main"
+THINKING_SCENARIO = "s1"
 
 
 @dataclass(frozen=True)
@@ -243,6 +246,51 @@ def check_not_official_rules(
         )
 
 
+def request_max_tokens(label: str, scenario_max_tokens: int) -> int:
+    """The output allowance a sweep's requests carry: the scenario's, except the thinking sub-study's, which
+    sends 16,000 because thinking counts toward ``max_tokens`` (protocol 9.5). The runner, the preflight bound
+    and the in-sweep worst case all read it from here."""
+    return THINKING_STUDY_MAX_TOKENS if label == THINKING_LABEL else scenario_max_tokens
+
+
+def check_thinking_plan(
+    experiment: Experiment,
+    model_key: str,
+    scenarios: Sequence[str],
+    templates: Sequence[str],
+    official: bool,
+) -> None:
+    """A plan labeled ``thinking`` sends protocol 9.5's request, which only the Anthropic route can carry.
+    On the company's content it is the official sub-study and nothing else: the main model, S1, the sealed
+    template (all five objectives, which every plan has). On an off-subject experiment (the placeholder, for
+    the check on the final image, Phase 4 runs half decision 4) it may run as a development sweep."""
+    config = experiment.model(model_key)
+    if config.route != "anthropic":
+        raise SweepRefusal(
+            f"the {THINKING_LABEL!r} sweep sends the thinking sub-study's request, which only the Anthropic "
+            f"route carries; {model_key} is on route {config.route!r}"
+        )
+    if experiment.name in OFF_SUBJECT_EXPERIMENTS:
+        return
+    if not official:
+        raise SweepRefusal(
+            f"the {THINKING_LABEL!r} sweep on {experiment.name}'s content is the official sub-study; it "
+            "never runs as a development sweep (only on an off-subject experiment, for a check)"
+        )
+    problems: list[str] = []
+    if config.role != MAIN_ROLE:
+        problems.append(f"the model is {model_key} (role {config.role!r}), not the main model")
+    if tuple(scenarios) != (THINKING_SCENARIO,):
+        problems.append(f"the scenario is {list(scenarios)}, not [{THINKING_SCENARIO!r}]")
+    if tuple(templates) != (experiment.sealed_template,):
+        problems.append(f"the template is {list(templates)}, not the sealed one")
+    if problems:
+        raise SweepRefusal(
+            f"the {THINKING_LABEL!r} sweep is S1 on the sealed wording, on the main model: "
+            + "; ".join(problems)
+        )
+
+
 def build_plan(
     experiment: Experiment,
     *,
@@ -258,6 +306,8 @@ def build_plan(
     scenario_ids = _select(scenarios, list(experiment.scenarios), "scenario")
     counts = normalize_repeats(repeats, scenario_ids)
     template_ids = _select(templates, list(experiment.templates), "template")
+    if label == THINKING_LABEL:
+        check_thinking_plan(experiment, model_key, scenario_ids, template_ids, official)
     if not official:
         check_not_official_rules(experiment, model_key, template_ids)
     sweep_id = make_sweep_id(
@@ -295,8 +345,8 @@ def build_plan(
 
 
 def worst_case_per_attempt_usd(experiment: Experiment, plan: SweepPlan) -> float:
-    """The most one attempt can cost: for each run, its rendered prompt at full price and its scenario's whole
-    output allowance; the largest of them."""
+    """The most one attempt can cost: for each run, its rendered prompt at full price and its whole output
+    allowance (the scenario's, or 16,000 for the thinking sub-study); the largest of them."""
     objectives = {o.id: o for o in experiment.objectives}
     prices = experiment.model(plan.model_key).prices
     tools = {sid: build_tool(experiment.get_scenario(sid)) for sid in plan.scenarios}
@@ -311,7 +361,8 @@ def worst_case_per_attempt_usd(experiment: Experiment, plan: SweepPlan) -> float
             run.menu_order_seed,
         )
         tokens = estimate_input_tokens(prompt.system, prompt.user, tools[run.scenario_id])
-        worst = max(worst, worst_case_attempt_usd(tokens, scenario.max_tokens, prices))
+        allowance = request_max_tokens(plan.label, scenario.max_tokens)
+        worst = max(worst, worst_case_attempt_usd(tokens, allowance, prices))
     return worst
 
 

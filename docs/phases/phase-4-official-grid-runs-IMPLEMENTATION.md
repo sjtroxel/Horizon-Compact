@@ -209,6 +209,34 @@ records`. Then every command that reads a pilot or official record is his to run
 pastes. **It does not stop** a Python snippet that calls boto3 directly. That remains covered by the honor statement
 (§6.10), as in Phase 2.5.
 
+### 5.5 As built (2026-10-13)
+
+**[done] §5.1-5.4.** Sonnet built; Opus reviewed the whole diff. `make check` green, **2127 tests**; `hc protocol
+check` passes (nothing in the lock's three sets changed). Each guarded line was mutated once (11 mutations across
+5.1-5.3) and a test failed every time; every file was restored byte-identical.
+
+- **5.1** `sweep/runner.py`: a pilot or official progress line carries no objective id; a development line does.
+- **5.2** The constants live in `providers/base.py`, held word for word to protocol 9.5 by a test that reads
+  `protocol-v1.md`. The Anthropic route alone builds the request; Bedrock, OpenRouter and the local runtime refuse
+  it. `build_plan` refuses a `thinking` plan off the Anthropic route, and on the company's content unless it is
+  official, on the `main` model, S1 and the sealed template only; the placeholder may run it as development.
+  `check_repeats` compares S1 only for a `thinking` plan. One official sweep per study per model is
+  `check_one_sweep_per_study`, on official `run` and `launch` (labels `grid` and `thinking`; the probe has its own
+  command and is caught afterwards by the record checks). `hc sweep tokens` is `sweep/tokens.py`; it counts each
+  run's final model attempt, failed runs included, so a truncated sub-study run counts at its full output.
+- **5.3** `hc protocol records` is `protocol/recordcheck.py`. Two choices beyond the table: the image check is
+  *reported*, never failed (more than one digest lists its sessions); "after the tag" reads each record's own
+  `started_at`, since the store gives no write time. **Two faults found in review and fixed before commit:** the
+  request check compared calls with the lock's wording, which OpenRouter's records word differently (`reasoning
+  {effort: medium} sent` against `reasoning effort medium sent`), so every `gpt-oss-120b` call would have failed
+  it; it now expects each provider's own text, from one function the provider also uses, and a test runs both
+  providers to prove it. And a reply the DeepInfra pin refused (stored as `config_error`, never a result) no
+  longer fails the host check.
+- **5.4** The deny entries were added by him (`scratch/p4-deny.py`): Claude's auto mode refused to edit its own
+  permission file, which is the right default. **One beyond the doc:** `hc sweep tokens` is denied too (token
+  counts by objective are a view of the results). `tests/test_claude_settings.py` holds both forms of all seven.
+  Denying `hc sweep awareness` means §6.0 step 4's awareness dry run is his to run.
+
 ## 6. The runbook
 
 **His commands, one at a time.** Anything longer than one line goes in a `scratch/` script, as on tag day, with the
@@ -441,12 +469,12 @@ any publication and counted). And from this doc: Claude runs no command that rea
 
 ## 10. Order of work
 
-1. **[Opus] This doc**, approved by him (2026-10-13); with it, the scope doc's dated note (the fallback set's models, run set and
+1. **[done] [Opus] This doc**, approved by him (2026-10-13); with it, the scope doc's dated note (the fallback set's models, run set and
    cost), `KNOWN-GAPS.md` START HERE (with `R`'s CI run id, `38358554814`), and the ROADMAP row. One commit:
    `phase 4: runs-half implementation doc`.
-2. **[Opus] `errata-v1.md`** (finding 8): the status line and the stale bracket notes, each with what it should say;
+2. **[done, `ccbfcaa`] [Opus] `errata-v1.md`** (finding 8): the status line and the stale bracket notes, each with what it should say;
    no computation, content or rule changed. Reviewed by him; committed before the first pilot.
-3. **[Sonnet] §5.1-5.4**, one commit each or together; Opus reviews each diff. `make check` green; he commits and
+3. **[done 2026-10-13, built and reviewed; his commit, push and digest next] [Sonnet] §5.1-5.4** (§5.5), one commit each or together; Opus reviews each diff. `make check` green; he commits and
    pushes; Deploy green; the digest recorded (§6.0).
 4. **[him, Claude reading] §6.0-6.10**, in order.
 

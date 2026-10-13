@@ -56,6 +56,7 @@ from horizon_compact.providers.base import (
     TextRequest,
     Usage,
     prompt_sha256,
+    refuse_thinking_study,
     text_prompt_sha256,
 )
 
@@ -127,6 +128,20 @@ def _provider_key(name: str) -> str:
     return "".join(ch for ch in name.split("/", 1)[0].lower() if ch.isalnum())
 
 
+def served_by_pin(served_by: str | None, pin: str) -> bool:
+    """Whether a reply's host is the pinned one, by the same rule the provider refuses a reply with (the
+    record checks reuse it, so the two can never disagree)."""
+    return _provider_key(served_by or "") == _provider_key(pin)
+
+
+def thinking_note(reasoning_effort: str | None) -> str:
+    """What a call's record says about reasoning: the level sent, or that none was. The record checks compare
+    every stored call with this, for the lock's level."""
+    if reasoning_effort:
+        return f"reasoning effort {reasoning_effort} sent"
+    return "not set (the model's default)"
+
+
 def _error_code(status: int) -> str:
     """Name an HTTP failure with a code the classifier knows. Credentials, credit and permission problems stop
     the session; a rate limit and a server fault are retried with backoff."""
@@ -184,6 +199,7 @@ class OpenRouterProvider:
 
     @staticmethod
     def _decision_body(request: DecisionRequest) -> dict[str, Any]:
+        refuse_thinking_study(request, "OpenRouter")
         return {
             "model": request.route.invoke_id,
             "messages": [
@@ -297,11 +313,7 @@ class OpenRouterProvider:
             route_kind=route.route_kind,
             inference_profile=None,
             region=HOSTED_REGION,
-            thinking=(
-                f"reasoning effort {route.reasoning_effort} sent"
-                if route.reasoning_effort
-                else "not set (the model's default)"
-            ),
+            thinking=thinking_note(route.reasoning_effort),
             effort=route.reasoning_effort or "not set",
             temperature="not set; the serving provider's defaults",
             max_tokens=max_tokens,

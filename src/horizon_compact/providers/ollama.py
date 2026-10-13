@@ -38,6 +38,7 @@ from horizon_compact.providers.base import (
     RawDecision,
     Usage,
     prompt_sha256,
+    refuse_thinking_study,
 )
 
 DEFAULT_URL = "http://localhost:11434"
@@ -99,6 +100,7 @@ class OllamaProvider:
     # --- the request ---------------------------------------------------------------------------------------
 
     def request_body(self, request: DecisionRequest) -> dict[str, Any]:
+        refuse_thinking_study(request, "the local runtime")
         return {
             "model": request.route.invoke_id,
             "stream": False,

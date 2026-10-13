@@ -8,10 +8,13 @@ client the caller passes in; this module never imports ``boto3``.
 
 What is sent: ``model``, ``system``, one user message, the one tool, ``tool_choice: {"type": "auto"}``,
 ``max_tokens``, and ``thinking: {"type": "disabled"}`` when the route says thinking is off (decision C).
-**Never sent:** ``temperature``, ``top_p``, ``top_k`` (the model rejects non-default values, and the design
-never sets sampling), ``effort``, a cache breakpoint (decision F), ``inference_geo``, any beta header, any
-fallback model. The runner marks every request ``cache_system=True`` (Bedrock honors it); **this route ignores
-it, as OpenRouter's does**, so no ``cache_control`` is ever sent and no cache write is ever paid (decision F).
+**Sent only by a sweep labeled ``thinking``** (protocol 9.5, the sub-study): ``thinking`` as ``{"type":
+"adaptive", "display": "summarized"}``, ``output_config`` as ``{"effort": "high"}``, and ``max_tokens``
+16,000. **Never sent:** ``temperature``, ``top_p``, ``top_k`` (the model rejects non-default values, and the
+design never sets sampling), ``effort`` outside the sub-study, a cache breakpoint (decision F),
+``inference_geo``, any beta header, any fallback model. The runner marks every request
+``cache_system=True`` (Bedrock honors it); **this route ignores it, as OpenRouter's does**, so no
+``cache_control`` is ever sent and no cache write is ever paid (decision F).
 Extra fields a request asks for (a smoke call's) are refused here, not quietly dropped.
 
 **The SDK's own retries are off** (``max_retries=0``): the harness counts attempts, and a library retrying
@@ -52,6 +55,11 @@ from typing import TYPE_CHECKING, Any
 import anthropic
 
 from horizon_compact.providers.base import (
+    THINKING_STUDY_EFFORT_NOTE,
+    THINKING_STUDY_MAX_TOKENS,
+    THINKING_STUDY_OUTPUT_CONFIG,
+    THINKING_STUDY_THINKING,
+    THINKING_STUDY_THINKING_NOTE,
     DecisionRequest,
     ModelRoute,
     Provenance,
@@ -223,7 +231,26 @@ class AnthropicProvider:
             }
         ]
         body["tool_choice"] = {"type": "auto"}
+        if request.thinking_study:
+            self._apply_thinking_study(body, request)
         return body
+
+    @staticmethod
+    def _apply_thinking_study(body: dict[str, Any], request: DecisionRequest) -> None:
+        """Protocol 9.5's request: the grid's body with ``thinking`` replaced and ``output_config`` added; the
+        ``max_tokens`` is the sub-study's own, and the caller must already have set it (the runner does)."""
+        if not request.route.thinking_off:
+            raise ValueError(
+                "the thinking sub-study replaces the grid's thinking {type: disabled}; this route's "
+                "configuration does not send it"
+            )
+        if request.max_tokens != THINKING_STUDY_MAX_TOKENS:
+            raise ValueError(
+                f"the thinking sub-study sends max_tokens {THINKING_STUDY_MAX_TOKENS:,}, "
+                f"not {request.max_tokens:,}"
+            )
+        body["thinking"] = dict(THINKING_STUDY_THINKING)
+        body["output_config"] = dict(THINKING_STUDY_OUTPUT_CONFIG)
 
     def text_request_body(self, request: TextRequest) -> dict[str, Any]:
         """The same call with no ``tools`` and no ``tool_choice``: the model has nothing to call."""
@@ -231,7 +258,11 @@ class AnthropicProvider:
 
     def decide(self, request: DecisionRequest) -> RawDecision:
         return self._send(
-            self.request_body(request), request.route, request.max_tokens, prompt_sha256(request)
+            self.request_body(request),
+            request.route,
+            request.max_tokens,
+            prompt_sha256(request),
+            thinking_study=request.thinking_study,
         )
 
     def decide_text(self, request: TextRequest) -> RawDecision:
@@ -248,7 +279,13 @@ class AnthropicProvider:
         return _KEY_SHAPE.sub("[key]", text.replace(self._key, "[key]"))
 
     def _send(
-        self, body: dict[str, Any], route: ModelRoute, max_tokens: int, sha256: str
+        self,
+        body: dict[str, Any],
+        route: ModelRoute,
+        max_tokens: int,
+        sha256: str,
+        *,
+        thinking_study: bool = False,
     ) -> RawDecision:
         started = self._now()
         t0 = self._monotonic()
@@ -295,8 +332,16 @@ class AnthropicProvider:
             route_kind=route.route_kind,
             inference_profile=None,
             region=HOSTED_REGION,
-            thinking=THINKING_OFF if route.thinking_off else THINKING_DEFAULT,
-            effort="not set (the model's default)",
+            thinking=(
+                THINKING_STUDY_THINKING_NOTE
+                if thinking_study
+                else THINKING_OFF
+                if route.thinking_off
+                else THINKING_DEFAULT
+            ),
+            effort=THINKING_STUDY_EFFORT_NOTE
+            if thinking_study
+            else "not set (the model's default)",
             temperature="not set; the API rejects non-default values",
             max_tokens=max_tokens,
             prompt_sha256=sha256,

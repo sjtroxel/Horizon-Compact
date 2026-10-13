@@ -24,6 +24,7 @@ from horizon_compact.providers.base import (
     TextRequest,
     Usage,
     prompt_sha256,
+    refuse_thinking_study,
     text_prompt_sha256,
 )
 
@@ -45,6 +46,7 @@ def make_runtime_client(profile: str | None, region: str = REGION) -> BedrockRun
 
 
 def build_request(request: DecisionRequest) -> dict[str, Any]:
+    refuse_thinking_study(request, "Bedrock")
     system: list[dict[str, Any]] = [{"text": request.system}]
     if request.cache_system:
         system.append({"cachePoint": {"type": "default"}})

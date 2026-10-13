@@ -913,6 +913,23 @@ def test_an_official_run_that_matches_starts_a_session_under_the_official_role(
     assert reached.value.kwargs["role"] == "official"
 
 
+def stray_official_grid(store: LocalStore, exp: Experiment) -> None:
+    """An official grid of the same model already in the bucket, under another sweep id."""
+    other = build_plan(exp, model_key=MODEL, label="grid", repeats=1, seed=99, official=True)
+    key = f"{sweep_prefix(exp.name, other.sweep_id, 'official')}manifest.json"
+    assert store.put_new(key, json.dumps(other.manifest()))
+
+
+def test_an_official_run_of_a_study_the_model_already_has_is_refused(
+    at: Path, in_container: LocalStore, capsys: pytest.CaptureFixture[str]
+) -> None:
+    exp = load(at)
+    write_repeats(in_container, pilot_prefix(exp), fake_decision(exp, counts(exp)))
+    stray_official_grid(in_container, exp)
+    assert cli.main(official_run(at, "--pilot-sweep", PILOT_ID)) == 2
+    assert "already has an official 'grid' sweep" in capsys.readouterr().err
+
+
 def test_a_pilot_run_starts_under_the_pilot_role_and_needs_no_repeats_file(
     at: Path, in_container: LocalStore
 ) -> None:
@@ -1028,6 +1045,17 @@ def test_an_official_launch_refuses_repeats_that_differ_from_the_pilots(
     assert launch(at, "--official", "--pilot-sweep", PILOT_ID) == 2
     assert "scenario s2: the pilot sets 15 repeats, the plan has 1" in capsys.readouterr().err
     assert launcher.command == []  # nothing was started
+
+
+def test_an_official_launch_of_a_study_the_model_already_has_starts_nothing(
+    at: Path, launcher: Launcher, capsys: pytest.CaptureFixture[str]
+) -> None:
+    exp = load(at)
+    write_repeats(launcher.store, pilot_prefix(exp), fake_decision(exp, counts(exp)))  # type: ignore[attr-defined]
+    stray_official_grid(launcher.store, exp)  # type: ignore[attr-defined]
+    assert launch(at, "--official", "--pilot-sweep", PILOT_ID) == 2
+    assert "already has an official 'grid' sweep" in capsys.readouterr().err
+    assert launcher.command == []
 
 
 def test_an_official_launch_with_no_repeats_file_or_no_pilot_named_starts_nothing(

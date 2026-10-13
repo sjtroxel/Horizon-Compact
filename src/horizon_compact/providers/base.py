@@ -14,6 +14,16 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
+# The thinking sub-study (protocol 9.5; Phase 4 runs half, section 5.2). The sweep's label is the switch, and
+# the request it sends is exactly these fields: the grid's body with ``thinking: {"type": "disabled"}``
+# replaced and ``output_config`` added. A test holds each equal to the protocol's text.
+THINKING_LABEL = "thinking"
+THINKING_STUDY_THINKING: Mapping[str, str] = {"type": "adaptive", "display": "summarized"}
+THINKING_STUDY_OUTPUT_CONFIG: Mapping[str, str] = {"effort": "high"}
+THINKING_STUDY_MAX_TOKENS = 16_000
+THINKING_STUDY_THINKING_NOTE = "adaptive, display summarized: sent"
+THINKING_STUDY_EFFORT_NOTE = "high"
+
 RouteKind = Literal[
     "in_region", "geo_profile", "application_profile", "local", "openrouter", "anthropic"
 ]
@@ -61,6 +71,18 @@ class DecisionRequest:
     cache_system: bool = False
     # Extra response fields to ask for, e.g. "/stop_details" (a smoke call only; a sweep never sends it).
     additional_response_fields: Sequence[str] | None = None
+    # The thinking sub-study's request (protocol 9.5), sent only by a sweep labeled ``thinking``, and only by
+    # the Anthropic route: every other route refuses it (``refuse_thinking_study``).
+    thinking_study: bool = False
+
+
+def refuse_thinking_study(request: DecisionRequest, provider: str) -> None:
+    """The sub-study's request is Anthropic's alone; any other route asked for it is a mistake, so it raises
+    rather than quietly sending the grid's request under a sub-study's label."""
+    if request.thinking_study:
+        raise ValueError(
+            f"the thinking sub-study's request is Anthropic's only; {provider} refuses it"
+        )
 
 
 @dataclass(frozen=True)

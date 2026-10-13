@@ -7,7 +7,36 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-13, about 5:15 PM (Phase 4 runs-half doc APPROVED; §5 build next)
+> ## START HERE — where things stand, 2026-10-13, about 6:00 PM (Phase 4 runs-half §5 BUILT and reviewed; his commit next)
+>
+> **Measured:** `make check` green, **2127 tests**, root 13 of 16; `hc protocol check` ok (nothing frozen changed).
+> `errata-v1.md` is committed (`ccbfcaa`).
+>
+> **§5.1-5.4 are built** (Sonnet) **and reviewed** (Opus, the whole diff), in one commit he runs:
+> `phase 4: runs-half section 5 build`. As built: the runs-half doc §5.5. In short: the run log names no objective on
+> a pilot or official session; the thinking sub-study's request (the label `thinking` is the switch), its plan rules,
+> S1-only repeats and the 16,000-token bound; one official sweep per study per model; `hc sweep tokens`; `hc protocol
+> records` (the record checks); the deny entries, which he added (`scratch/p4-deny.py`), since Claude's auto mode
+> refused to edit its own permission file. **Opus's review found two faults, fixed before commit:** the record
+> check compared `gpt-oss-120b`'s calls with the lock's wording, which its records word differently, so every one
+> would have failed; and a reply the DeepInfra pin refused would have failed the host check. Eleven deliberate
+> breaks were each caught by a test. **Beyond the doc:** `hc sweep tokens` is denied to Claude too.
+>
+> **Closes** the OPEN entries of 2026-10-11 (the run log) and 2026-10-13 (`hc analyze` and the lock), below.
+>
+> **Next, in order (doc §6.0, then §6.1):**
+> 1. **His:** the commit, then the push. The push touches `src/`, so it deploys: **CI and Deploy green on that
+>    commit**, and the Deploy run's image digest goes into `docs/phases/evidence/phase-4/run-log.md`, which starts
+>    there. No sweep is running, so the push freeze (§7) does not apply yet.
+> 2. **Claude's live checks** (§6.0 step 2): Haiku 5.5's id, prices and output limit; `gpt-oss-120b`'s
+>    `deepinfra/bf16` endpoint and prices.
+> 3. **His readings** (§6.0 step 3): the Console, OpenRouter, AWS Billing. Claude writes them into `run-log.md`.
+> 4. **Dry runs** (§6.0 step 4). **All four are his now:** `hc sweep awareness` is denied to Claude, dry run included.
+> 5. §6.1, the placeholder check on the final image (decision 4), then the pilots (§6.2), where the push freeze starts.
+>
+> *The 5:15 PM block below is superseded on what is next; it stays as the day's record.*
+
+> ## START HERE — where things stood, 2026-10-13, about 5:15 PM (Phase 4 runs-half doc APPROVED; §5 build next)
 >
 > **Measured:** `make check` green, **2049 tests**, root 13 of 16. **`R`** (`8e6be96`) pushed, **CI `38358554814`
 > green**, so Phase 3.5 is closed. Today's other commit, `2eb818a` (the name guard's push hook installed directly,
@@ -983,7 +1012,13 @@ on a tag-only push, and either make it run or put `guard history` in the tag-day
 
 ---
 
-## OPEN 2026-10-13 — for Phase 4: `hc analyze` does not check an official sweep's model against the lock
+## CLOSED 2026-10-13 — for Phase 4: `hc analyze` does not check an official sweep's model against the lock (was OPEN, same day)
+
+**Closed 2026-10-13** (runs-half doc §5.3): the record checks' "model" check (`hc protocol records`, run from `main`
+before the reveal) refuses any pilot or official sweep whose manifest model is not one of the lock's, and any call
+whose model differs from its manifest's; a test breaks it on purpose. `hc analyze` is unchanged, since the official
+analysis runs from the tag. The entry as written:
+
 
 Found while rewriting the four tag-day tests (`test_sweep_refusals.py`). `run_analysis_gate` checks the lock, the
 content and the analysis set; an official sweep record on a model the lock does not name was analyzed. No such sweep
@@ -1026,7 +1061,13 @@ stops), never a wrong result. **Recommended, when the fallback set's models are 
 
 ---
 
-## OPEN 2026-10-11 — the run log shows each run's objective beside its status
+## CLOSED 2026-10-13 — the run log shows each run's objective beside its status (was OPEN, 2026-10-11)
+
+**Closed 2026-10-13** (runs-half doc §5.1, before the first pilot): a pilot or official session's progress line is
+`run 3/80 attempt 1: no_tool_call`, with no objective id; a development session's keeps it. Tested on every progress
+line the runner writes, the back-off line included. The awareness probe's lines keep their objective (§5.1; it runs
+after its model's grid). The entry as written:
+
 
 Found in Opus's review of the Phase 4 code half, step 6. Not from K4's diff. The runner's progress lines
 (`run 3/30 A attempt 1: no_tool_call`) name the objective and the status, and in the container they go to the task's

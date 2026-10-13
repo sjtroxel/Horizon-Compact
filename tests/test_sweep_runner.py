@@ -549,6 +549,38 @@ def test_every_attempt_reports_its_progress(tmp_path: Path) -> None:
     assert lines[-1].startswith("run 5/5 ")
 
 
+def test_a_development_session_names_the_objective_in_its_progress_lines(tmp_path: Path) -> None:
+    exp, plan = make_plan()
+    lines: list[str] = []
+    session(exp, plan, always(), LocalStore(tmp_path), progress=lines.append, role="development")
+    assert len(lines) == 5
+    for spec, line in zip(plan.runs, lines, strict=True):
+        assert f" {spec.objective_id} attempt 1: valid" in line
+
+
+@pytest.mark.parametrize("role", ["pilot", "official"])
+def test_a_pilot_or_official_session_never_names_the_objective_in_its_log(
+    tmp_path: Path, role: Role
+) -> None:
+    exp, plan = make_plan()
+    lines: list[str] = []
+    # a retry and an api error too, so every progress line the runner writes is covered
+    provider = ScriptedProvider(
+        lambda n, request: (
+            raw_error(request, "ThrottlingException", "Too many requests.")
+            if n == 2
+            else raw_ok(request)
+        )
+    )
+    session(exp, plan, provider, LocalStore(tmp_path), progress=lines.append, role=role)
+    assert any("backing off" in line for line in lines)
+    assert lines[0].startswith("run 1/5 attempt 1: valid")
+    for line in lines:
+        for objective in exp.objectives:
+            assert objective.id not in line.split()
+            assert f"{objective.id} attempt" not in line
+
+
 def test_a_stop_request_during_a_backoff_is_honoured_within_a_second(tmp_path: Path) -> None:
     exp, plan = make_plan()
     clock = FakeClock()

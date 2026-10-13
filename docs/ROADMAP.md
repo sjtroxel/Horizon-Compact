@@ -95,7 +95,17 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-13, about 5:15 PM (Phase 4 runs-half doc approved)
+### Where the build actually is — 2026-10-13, about 6:00 PM (Phase 4 runs-half §5 built and reviewed)
+
+**Measured 2026-10-13, about 6:00 PM:** `make check` green, **2127 tests passed**; `hc protocol check` ok.
+
+- **Phase 4 runs half, §5 built** (Sonnet) **and reviewed** (Opus; two faults in the record checks found and fixed
+  before commit): the run log, the thinking sub-study and one sweep per study, `hc protocol records`, the deny
+  entries. As built: the runs-half doc §5.5. His commit: `phase 4: runs-half section 5 build`.
+- **Next:** the push (CI and Deploy green, the digest into `run-log.md`), §6.0's live checks, readings and dry runs,
+  §6.1's placeholder check, then the pilots (`KNOWN-GAPS.md` START HERE).
+
+### Where the build was — 2026-10-13, about 5:15 PM (Phase 4 runs-half doc approved) *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-13, about 5:15 PM:** `make check` green, **2049 tests passed**; `R` = `8e6be96` pushed, CI
 `38358554814` green, so Phase 3.5 is closed; `2eb818a` (the name guard's push hook) pushed, CI `38472714245` green.

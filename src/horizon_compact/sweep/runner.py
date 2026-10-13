@@ -22,7 +22,13 @@ from typing import Any, Literal
 
 from horizon_compact.experiment import Experiment, Objective
 from horizon_compact.model_config import ModelConfig
-from horizon_compact.providers.base import DecisionRequest, ModelRoute, Provider, RawDecision
+from horizon_compact.providers.base import (
+    THINKING_LABEL,
+    DecisionRequest,
+    ModelRoute,
+    Provider,
+    RawDecision,
+)
 from horizon_compact.smoke.record import serialize_safely
 from horizon_compact.sweep.classify import (
     MAX_MODEL_ATTEMPTS,
@@ -40,6 +46,7 @@ from horizon_compact.sweep.plan import (
     SweepRefusal,
     check_preflight,
     manifest_repeats,
+    request_max_tokens,
 )
 from horizon_compact.sweep.prompt import RenderedPrompt, build_tool, render_prompt
 from horizon_compact.sweep.spend import (
@@ -329,17 +336,21 @@ def run_session(
             spec.wording_id,
             spec.menu_order_seed,
         )
+        # The sweep's label is the switch for the thinking sub-study's request (protocol 9.5), so a resumed
+        # session, which must match the stored manifest and so its label, can never quietly drop it.
+        allowance = request_max_tokens(plan.label, scenario.max_tokens)
         request = DecisionRequest(
             route=route,
             system=prompt.system,
             user=prompt.user,
             tool=tool,
-            max_tokens=scenario.max_tokens,
+            max_tokens=allowance,
             cache_system=True,
+            thinking_study=plan.label == THINKING_LABEL,
         )
         worst = worst_case_attempt_usd(
             estimate_input_tokens(prompt.system, prompt.user, tool),
-            scenario.max_tokens,
+            allowance,
             config.prices,
         )
         attempts = list(existing.attempts.get(spec.run_id, []))
@@ -388,8 +399,11 @@ def run_session(
             attempts.append(record)
             next_n += 1
             note = f" {outcome.detail}" if outcome.detail else ""
+            # A pilot or official session's log is read by people before the reveal, so it never names the
+            # objective (Phase 4 runs half, section 5.1); a development session's still does.
+            which = f" {spec.objective_id}" if role == "development" else ""
             progress(
-                f"run {position}/{len(plan.runs)} {spec.objective_id} attempt {next_n - 1}: "
+                f"run {position}/{len(plan.runs)}{which} attempt {next_n - 1}: "
                 f"{outcome.status}{note}  (${tally.cost:.4f} so far)"
             )
             if outcome.stop_session:

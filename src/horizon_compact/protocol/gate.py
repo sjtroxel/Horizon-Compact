@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -54,6 +55,7 @@ from horizon_compact.protocol.lock import (
     lock_path,
     read_lock,
 )
+from horizon_compact.providers.base import THINKING_LABEL
 from horizon_compact.sweep.identity import RunnerIdentity
 from horizon_compact.sweep.plan import SweepPlan, SweepRefusal, repeats_from_json
 from horizon_compact.sweep.runner import sweep_prefix
@@ -478,7 +480,11 @@ def describe_decision(decision: RepeatDecision) -> list[str]:
 def check_repeats(store: Store, plan: SweepPlan, pilot_sweep_id: str) -> None:
     """Refuse unless the pilot's ``repeats.json`` exists, is for this model and this content, and holds
     exactly the plan's count for every scenario (protocol 8.3). Raises ``SweepRefusal`` naming each
-    difference."""
+    difference.
+
+    **The thinking sub-study** (label ``thinking``; protocol 9.5, Phase 4 runs half section 5.2) runs S1 only,
+    "the same repeats as the main grid": its S1 count must equal the pilot's S1 count, and the pilot's other
+    scenarios are not compared. Every other check stands."""
     pilot_prefix = sweep_prefix(plan.experiment, pilot_sweep_id, "pilot")
     key = repeats_key(pilot_prefix)
     text = store.get(key)
@@ -520,9 +526,50 @@ def check_repeats(store: Store, plan: SweepPlan, pilot_sweep_id: str) -> None:
                 f"scenario {scenario_id}: the pilot sets {want} repeats, the plan has {have}"
             )
     extra = sorted(set(counts) - set(plan.scenarios))
-    if extra:
+    if extra and plan.label != THINKING_LABEL:
         problems.append(
             f"the pilot sets repeats for scenario(s) {extra} that this plan does not run"
         )
     if problems:
         raise SweepRefusal("\n".join(f"{REFUSED}: {line}" for line in problems))
+
+
+# --- one sweep per study per model (protocol 13.2) ---------------------------------------------------------
+
+OFFICIAL_STUDY_LABELS = (
+    "grid",
+    THINKING_LABEL,
+)  # the awareness probe is its own command, with its own prefix
+_OFFICIAL_MANIFEST = re.compile(r"^official/[^/]+/[^/]+/manifest\.json$")
+
+
+def check_one_sweep_per_study(store: Store, plan: SweepPlan) -> None:
+    """Refuse an official ``hc sweep run`` or ``launch`` whose study is not one of the official labels, or
+    whose model already has an official sweep with the same label under another sweep id. A resume of the
+    same sweep id is not refused. A sweep the gate refused is never run again under another label or seed
+    (protocol 13.2: each study runs once per protocol version)."""
+    if plan.label not in OFFICIAL_STUDY_LABELS:
+        raise SweepRefusal(
+            f"{REFUSED}: the label {plan.label!r} is not an official study's; the labels are "
+            f"{', '.join(OFFICIAL_STUDY_LABELS)} (the pilot's is {PILOT_LABEL!r}, the probe's its own command)"
+        )
+    others: list[str] = []
+    for key in store.list_keys(f"official/{plan.experiment}/"):
+        if not _OFFICIAL_MANIFEST.match(key):
+            continue
+        text = store.get(key)
+        try:
+            manifest = json.loads(text) if text else {}
+        except ValueError:
+            continue
+        if (
+            manifest.get("model_key") == plan.model_key
+            and manifest.get("label") == plan.label
+            and manifest.get("sweep_id") != plan.sweep_id
+        ):
+            others.append(str(manifest.get("sweep_id")))
+    if others:
+        raise SweepRefusal(
+            f"{REFUSED}: {plan.model_key} already has an official {plan.label!r} sweep ({', '.join(others)}); "
+            "one sweep per study per model (protocol 13.2), never a second under another seed or repeats"
+        )
