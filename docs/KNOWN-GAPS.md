@@ -7,6 +7,40 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-13, about 5:15 PM (Phase 4 runs-half doc APPROVED; §5 build next)
+>
+> **Measured:** `make check` green, **2049 tests**, root 13 of 16. **`R`** (`8e6be96`) pushed, **CI `38358554814`
+> green**, so Phase 3.5 is closed. Today's other commit, `2eb818a` (the name guard's push hook installed directly,
+> not through pre-commit; the CLOSED entry below), CI `38472714245` green.
+>
+> **Phase 4's runs-half IMPLEMENTATION doc is APPROVED** (his, about 5:10 PM, all four decisions (a)):
+> `docs/phases/phase-4-official-grid-runs-IMPLEMENTATION.md`. The scope doc carries a dated note for the fallback
+> set. In short: one reveal, after every sweep of both models has finished, every refusal call is made and the record
+> checks pass (decision 1); a manifest of every raw object committed at close, the full text later through the
+> publish path (2); the thinking sub-study reported with the frozen code only (3); a placeholder check on the final
+> image before the pilots (4). The run set and its seeds are fixed in the doc's §4.
+>
+> **Next, in order (doc §10):**
+> 1. `errata-v1.md` (the protocol's stale "DRAFT" status line and bracket notes; no computation, content or rule
+>    changed): drafted, his read, his commit.
+> 2. **The §5 build, Sonnet builds, Opus reviews each diff:** §5.1 the run log stops naming the objective; §5.2 the
+>    thinking sub-study request and one sweep per study per model; §5.3 `hc protocol records`, the record checks;
+>    §5.4 deny rules so Claude cannot run any command that reads a pilot or official record. These close the OPEN
+>    entries of 2026-10-11 (the run log) and 2026-10-13 (`hc analyze` and the lock; met by §5.3, since the official
+>    analysis runs from the tag).
+> 3. §6.0 (live checks, his three billing readings, dry runs) and §6.1 (the placeholder check). Neither starts the
+>    push freeze.
+> 4. **Then the runs, from the first pilot (doc §6.2).** The push freeze (§7) is one image per sweep: no push that
+>    deploys (`src/`, `experiment/`, `infra/`, `pyproject.toml`, `uv.lock`) while any sweep is unfinished. Doc pushes
+>    are always fine. About two days, set by `gpt-oss-120b`'s grid (about a day of task time on its own).
+>
+> **Found while writing the doc, recorded in its §3:** the sub-study could not run as built (`check_repeats` refuses
+> an S1-only plan); Haiku's grid needs `--allow-over-cap` (preflight bound $5.88-7.84); `gpt-oss-120b`'s host pin is
+> in the lock, so its slowness is handled by session limits only; the Phase 3.5 §25.3 placeholder call listed below
+> was already made (§25.5).
+>
+> *The 1:45 AM block below is superseded on what is next; it stays as the day's record.*
+
 > ## START HERE — where things stand, 2026-10-13, about 1:45 AM (`prereg-v1` TAGGED; Phase 3.5 closed with `R`)
 >
 > **Tag day is done** (Phase 3.5 IMPLEMENTATION doc §12, all seven steps; nothing called a model). `P` =
@@ -957,6 +991,10 @@ can exist outside a test, because the run gate refuses an unlisted model before 
 not a hole. **Recommended:** Phase 4's runs-half doc decides whether `hc analyze` also refuses a sweep whose manifest
 model is not one of the lock's. Run code, fixable after the tag.
 
+**Planned 2026-10-13 (runs-half doc §3 finding 2, §5.3):** not in `hc analyze`, because the official analysis runs from
+a checkout of the tag (protocol 14), so a later change there never reaches it. The check is the record checks' "Model"
+row, run from `main` before the reveal. Closes when §5.3 is built.
+
 ---
 
 ## CARRIED — from Phase 1 to Phase 1.5, 2026-10-11
@@ -996,6 +1034,9 @@ CloudWatch log. A person who reads that log before the blind refusal calls would
 `no_tool_call`, though not any reply's words. **Recommended:** run code, fixable after the tag: drop the objective id
 from the progress line on an official or pilot session (keep the run's position), with a test; until then, do not read
 an official sweep's log before the calls are made. Stated in no record yet.
+
+**Planned 2026-10-13 (runs-half doc §5.1):** fixed before the first pilot, not only before the grid, since the pilot
+is the first official-model run on the company's content. Closes when §5.1 is built.
 
 ---
 

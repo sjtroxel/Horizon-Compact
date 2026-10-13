@@ -79,7 +79,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built and closed 2026-10-09**, DoD audit in §19a (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, `4febc15`, `84d82d7`, plus step 13's commit) |
 | 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); **no-AWS steps built 2026-10-09** (1-7's drafting and 10; `dd3a28a`, `9eccb4a`, `15f66a2`, `a40d38b`, step 10 uncommitted); steps 7's runs, 8, 9, 11 and the tag wait on Bedrock; *superseded 2026-10-11 by §23 (no wait on Bedrock)*; step 8 dropped 2026-10-12 (his); **tag day 2026-10-13: `prereg-v1` on `P` `649e8b9`, protected, archived, released; DoD audit §26; CLOSED with `R`** |
-| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; **§7 steps 1-4 built 2026-10-10** (`24b40c5`, then steps 2-4 in one commit); steps 5-6 built and reviewed 2026-10-11 (K4, `fc577c5`), step 7 built and reviewed 2026-10-11 (K5); **step 8 (K6, Anthropic's API route, Phase 3.5 §23) built 2026-10-12 (Sonnet) and reviewed (Opus), uncommitted at the 2:30 AM handoff**; with K6 committed, the code half is complete; the runs half next, its doc immediately before the runs (Sonnet, Opus reviews). **Runs half:** not written; immediately before the runs |
+| 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; **§7 steps 1-4 built 2026-10-10** (`24b40c5`, then steps 2-4 in one commit); steps 5-6 built and reviewed 2026-10-11 (K4, `fc577c5`), step 7 built and reviewed 2026-10-11 (K5); **step 8 (K6, Anthropic's API route, Phase 3.5 §23) built 2026-10-12 (Sonnet) and reviewed (Opus), uncommitted at the 2:30 AM handoff**; with K6 committed, the code half is complete; the runs half next, its doc immediately before the runs (Sonnet, Opus reviews). **Runs half** (`phase-4-official-grid-runs-IMPLEMENTATION.md`): **APPROVED 2026-10-13 (his)**, its four decisions as recommended; the scope doc amended the same day for the fallback set; its §5 (four run-code items) built next, then the runs |
 | 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5; **split by code and search 2026-10-10 (his)** | **code half** (`phase-5-case-building-code-IMPLEMENTATION.md`, the dossier builder on synthetic filings, and the search runner, his 2026-10-11): **APPROVED 2026-10-11 (his)**, its four decisions as recommended; **§7 steps 1-6 done 2026-10-11** (`4cd6559`, `1e71f97`, `92d0346`, `9e2d14a`; Sonnet built, Opus reviewed each, every fix applied); **step 7 (search runner, selection log) built and reviewed, fixes applied**: **the code half is done** once he commits it. **Search half:** not written; immediately before the search |
 | 5.5 `case-runs` | **APPROVED 2026-10-04**, with Phase 5 | not written; immediately before its build |
 | 6 `explorer` | **APPROVED 2026-10-04**, all six decisions as recommended (6 amended by him); split into 6 and 6.5 | not written; immediately before its build |
@@ -95,7 +95,17 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-13, about 1:45 AM (`prereg-v1` tagged)
+### Where the build actually is — 2026-10-13, about 5:15 PM (Phase 4 runs-half doc approved)
+
+**Measured 2026-10-13, about 5:15 PM:** `make check` green, **2049 tests passed**; `R` = `8e6be96` pushed, CI
+`38358554814` green, so Phase 3.5 is closed; `2eb818a` (the name guard's push hook) pushed, CI `38472714245` green.
+
+- **Phase 4's runs-half IMPLEMENTATION doc is approved** (his, all four decisions as recommended), and the scope doc
+  carries a dated note for the fallback set (Haiku 5.5 and `gpt-oss-120b`; about $3 in all).
+- **Next:** `errata-v1.md`; the doc's §5 build (Sonnet, Opus reviews); §6.0-6.1; then the runs (`KNOWN-GAPS.md`
+  START HERE).
+
+### Where the build was — 2026-10-13, about 1:45 AM (`prereg-v1` tagged) *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-13, before `R`:** `make check` green, **2040 tests passed**; `P` = `649e8b9` pushed, CI
 `38355727520` green; `R` (the record and close-out) is his commit.
@@ -362,6 +372,14 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
+
+- **2026-10-13 — Phase 4's runs half: one reveal, the raw record by manifest, the sub-study by frozen code, a
+  placeholder check first** (his, all four decisions of the runs-half IMPLEMENTATION doc §8, as recommended). Nobody
+  reads a decision by objective until every sweep of both models has finished, every refusal call is made and the
+  record checks pass; at close a manifest of every pilot and official object (key, bytes, sha256) is committed and the
+  full text follows through the publish path; the thinking sub-study is reported with the frozen code beside the
+  grid's sealed-wording S1 result, with no new test; a placeholder check runs on the final image first. The scope doc
+  is amended for the fallback set. Runs-half doc §8; scope doc's dated note.
 
 - **2026-10-13 — `prereg-v1` tagged** (his, every step; Claude read each back). The protocol is fixed on `649e8b9`
   with the lock for `haiku-5-5` (main) and `gpt-oss-openrouter` (second family). Release notes left empty (his, as

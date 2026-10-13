@@ -13,6 +13,16 @@
 > sweep, the blind refusal-call workflow, whole-run-set analysis) is built first on fakes, from its own
 > IMPLEMENTATION doc (`phase-4-official-grid-code-IMPLEMENTATION.md`), while Bedrock is unavailable. The runbook's
 > IMPLEMENTATION doc is still written immediately before the runs.
+>
+> **Amended 2026-10-13 (his, with the runs half's IMPLEMENTATION doc, `phase-4-official-grid-runs-IMPLEMENTATION.md`):
+> the fallback set.** Under `prereg-v1` the models are **Haiku 5.5** (main, Anthropic's API) and **`gpt-oss-120b`**
+> (second family, OpenRouter pinned to DeepInfra), not Sonnet 4.6 and Nova Pro (Phase 3.5 IMPLEMENTATION doc §23,
+> protocol 5.1). Read every "Sonnet 4.6" below as Haiku 5.5 and every "Nova Pro" as `gpt-oss-120b`. Three lines
+> change beyond the names: the thinking sub-study runs on Haiku 5.5 with the request in protocol 9.5; the second
+> family's grid runs beside the main model's, not after it (its host is slow: about a day of task time); and the cost
+> is **about $3 in all** (about $1.5-2.3 of the prepaid Anthropic credit, $0.50-0.70 of his OpenRouter cash, $0.40 of
+> AWS credit), not $20-30, so the $60 re-plan point is not expected to be near. The rules, the decisions and the
+> definition of done are unchanged.
 
 ## What this phase is for
 
