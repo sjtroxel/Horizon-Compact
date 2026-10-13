@@ -1,5 +1,8 @@
 # Phase 3.5 — Pre-registration (v0.3.5)
 
+> **2026-10-13: CLOSED.** `prereg-v1` tagged on `649e8b9`; DoD audit in the IMPLEMENTATION doc §26; every value in
+> `docs/phases/evidence/phase-3.5/tag-record.md`.
+
 > **Scope doc.** Written 2026-10-04 from `planning/05` §2, §3.1, §5 (Phase 3's row) and §5.2, `planning/07` (all of
 > it: this phase freezes it), `planning/04` §1.2, §1.9 and §2.3, `planning/01` §3, `planning/08` §3.6, and
 > `planning/09` §5. **APPROVED 2026-10-04 (his)**, with all six decisions at the end taken as recommended.

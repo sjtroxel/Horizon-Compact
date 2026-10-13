@@ -33,7 +33,7 @@ that counts. Costs are `planning/03` estimates until Phase 4 measures them.
 | **1** `walking-skeleton` | v0.1 | The run path on **placeholder content, off the subject** (scenario, objectives, menu): Fargate, rate limiter, spend cap, official gate (closed), Bedrock, per-run write-once S3 | Container-run results in S3, each traceable to its image digest and input hashes; resume and cap shown | about $1 with 1.5 | **building since 2026-10-05**; steps 3, 9, 11, 12 wait on Bedrock quotas (`KNOWN-GAPS.md`) |
 | **1.5** `publish-path` | v0.1.5 | Scorer, committed static JSON, one page live at `horizon-compact.vercel.app` through CloudFront and Vercel | The placeholder sweep on the public URL, traceable; destroy and re-apply of `main` tested, raw results intact | cents | not started |
 | **2** `experiment-content` (split 2026-10-04: **2** `company-dossier`, **2.5** `scenarios-and-wordings`) | v0.2, v0.2.5 | The cited fictional dossier, the four scenarios, the sentence frame and three wording templates, the supplier source, lever caps, the neutrality review; development runs for format and clarity only, every change logged | Every dossier number sourced or marked as an assumption; every scenario passes the neutrality checklist; development runs parse under all five objectives | about $5-10 | **2 `company-dossier`: BUILT AND CLOSED 2026-10-06, out of order** (steps 1-9; `pyproject.toml` stays at Phase 1's version until Phases 1 and 1.5 close, Phase 2 decision 4); 2.5 not started |
-| **3** `preregistration-and-scoring` (split 2026-10-04: **3** `scoring-and-simulation`, **3.5** `preregistration`) | v0.3, v0.3.5 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | **3: built and closed 2026-10-09**; 3.5: IMPLEMENTATION doc approved 2026-10-09, build not started |
+| **3** `preregistration-and-scoring` (split 2026-10-04: **3** `scoring-and-simulation`, **3.5** `preregistration`) | v0.3, v0.3.5 | The protocol tagged `prereg-v1`; scoring tested on synthetic data only, including the verdict-rule simulation and the matcher calibration | Tag exists; the harness refuses an official sweep whose protocol hash does not match it; simulation results recorded in the protocol | $0 | **3: built and closed 2026-10-09**; **3.5: `prereg-v1` tagged and closed 2026-10-13** (`649e8b9`; `tag-record.md`) |
 | **4** `official-grid` | v0.4 | Pilot (excluded), then the full grid on Sonnet 4.6, then Nova Pro; robustness checks; first measured cost | Full grid run under the protocol on at least Sonnet 4.6; the $60 re-plan point checked | about $20-30 | not started |
 | **5** `real-cases` (split 2026-10-04: **5** `case-building`, **5.5** `case-runs`) | v0.5, v0.5.5 | Cases by the pre-registered selection rule, dossiers, foreshadowing check, recognition probe, a rubric committed before each case runs | At least three cases run and matched, including an invest or retool case; selection log complete | about $20-25 | not started |
 | **6** `explorer-and-methods` (split 2026-10-04: **6** `explorer`, **6.5** `methods-and-release`) | v0.6, v0.6.5 | The full site and the methods page | A hostile reader could re-run the experiment from the published inputs; every real-case memo passed the name scan | under $2 | not started |
@@ -78,7 +78,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | **APPROVED 2026-10-06**, its five decisions as recommended; **built and closed 2026-10-06**, DoD audit in §14 |
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built and closed 2026-10-09**, DoD audit in §19a (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, `4febc15`, `84d82d7`, plus step 13's commit) |
-| 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); **no-AWS steps built 2026-10-09** (1-7's drafting and 10; `dd3a28a`, `9eccb4a`, `15f66a2`, `a40d38b`, step 10 uncommitted); steps 7's runs, 8, 9, 11 and the tag wait on Bedrock |
+| 3.5 `preregistration` | **APPROVED 2026-10-04**, all six decisions as recommended (5 is decided in the phase, from evidence) | **APPROVED 2026-10-09 (his)**, its ten decisions as recommended, on his two conditions ($5 OpenRouter cap; fallback set if Bedrock is still dark on 2026-10-16 (tentative)); **no-AWS steps built 2026-10-09** (1-7's drafting and 10; `dd3a28a`, `9eccb4a`, `15f66a2`, `a40d38b`, step 10 uncommitted); steps 7's runs, 8, 9, 11 and the tag wait on Bedrock; *superseded 2026-10-11 by §23 (no wait on Bedrock)*; step 8 dropped 2026-10-12 (his); **tag day 2026-10-13: `prereg-v1` on `P` `649e8b9`, protected, archived, released; DoD audit §26; CLOSED with `R`** |
 | 4 `official-grid` | **APPROVED 2026-10-04**, all six decisions as recommended; not split; **split by code and runs 2026-10-10 (his)**, see the decision history | **code half** (`phase-4-official-grid-code-IMPLEMENTATION.md`): **APPROVED 2026-10-10 (his)**, its five decisions as recommended; **§7 steps 1-4 built 2026-10-10** (`24b40c5`, then steps 2-4 in one commit); steps 5-6 built and reviewed 2026-10-11 (K4, `fc577c5`), step 7 built and reviewed 2026-10-11 (K5); **step 8 (K6, Anthropic's API route, Phase 3.5 §23) built 2026-10-12 (Sonnet) and reviewed (Opus), uncommitted at the 2:30 AM handoff**; with K6 committed, the code half is complete; the runs half next, its doc immediately before the runs (Sonnet, Opus reviews). **Runs half:** not written; immediately before the runs |
 | 5 `case-building` | **APPROVED 2026-10-04**, all six decisions as recommended; split into 5 and 5.5; **split by code and search 2026-10-10 (his)** | **code half** (`phase-5-case-building-code-IMPLEMENTATION.md`, the dossier builder on synthetic filings, and the search runner, his 2026-10-11): **APPROVED 2026-10-11 (his)**, its four decisions as recommended; **§7 steps 1-6 done 2026-10-11** (`4cd6559`, `1e71f97`, `92d0346`, `9e2d14a`; Sonnet built, Opus reviewed each, every fix applied); **step 7 (search runner, selection log) built and reviewed, fixes applied**: **the code half is done** once he commits it. **Search half:** not written; immediately before the search |
 | 5.5 `case-runs` | **APPROVED 2026-10-04**, with Phase 5 | not written; immediately before its build |
@@ -95,7 +95,17 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-12, about 5:00 PM (handoff; tomorrow is tag day)
+### Where the build actually is — 2026-10-13, about 1:45 AM (`prereg-v1` tagged)
+
+**Measured 2026-10-13, before `R`:** `make check` green, **2040 tests passed**; `P` = `649e8b9` pushed, CI
+`38355727520` green; `R` (the record and close-out) is his commit.
+
+- **Phase 3.5 is closed** with `R`: `prereg-v1` tagged on `P`, ruleset `24974909`, Software Heritage snapshot
+  `swh:1:snp:df7dda44d8cf804cf004e73031249c8e5fe45e00`, release published, the gate proven against the tag, nothing
+  official in S3. `docs/phases/evidence/phase-3.5/tag-record.md`; DoD audit in the IMPLEMENTATION doc §26.
+- **Next: Phase 4's runs half**, its IMPLEMENTATION doc immediately before the runs (`KNOWN-GAPS.md` START HERE).
+
+### Where the build was — 2026-10-12, about 5:00 PM (handoff; tomorrow is tag day) *(superseded by the block above; kept as the day's record)*
 
 **Measured 2026-10-12, about 5:00 PM:** `make check` green, **2039 tests passed**, root 13 of 16; last pushed commit
 `46d8c8b`; `b1bc34c` not pushed; step 11's review files and the protocol's accepted review changes uncommitted (his one
@@ -352,6 +362,11 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 
 Newest first. Each entry names who decided and where the reasoning lives. Decisions made during planning are
 recorded in the planning docs themselves and are only indexed here.
+
+- **2026-10-13 — `prereg-v1` tagged** (his, every step; Claude read each back). The protocol is fixed on `649e8b9`
+  with the lock for `haiku-5-5` (main) and `gpt-oss-openrouter` (second family). Release notes left empty (his, as
+  recommended: no prose). `pyproject.toml` stays `0.0.5` (Phase 2 decision 4). Phase 3.5 IMPLEMENTATION doc §26;
+  `tag-record.md`.
 
 - **2026-10-11 — The fallback set taken now, Haiku 5.5 through Anthropic's API** (his idea; Opus scoped it the same
   evening; **DECIDED by him that evening, all eight decisions A-H as recommended**). Decision 5's fallback set is unchanged in content

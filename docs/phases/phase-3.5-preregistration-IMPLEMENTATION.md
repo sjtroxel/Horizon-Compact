@@ -1,5 +1,8 @@
 # Phase 3.5 — Pre-registration: IMPLEMENTATION (v0.3.5)
 
+> **2026-10-13: CLOSED.** `prereg-v1` tagged on `649e8b9`, protected, archived and released; the gate proven against the
+> tag; DoD audit in §26; every value in `docs/phases/evidence/phase-3.5/tag-record.md`.
+
 > **2026-10-11, DECIDED (his, all eight of §23.5's decisions as recommended):** §23, the fallback set taken on
 > 2026-10-12 with Haiku 5.5 reached through Anthropic's API on his prepaid credit. It moves decision 5's date and
 > Haiku's route; the design is otherwise unchanged.
@@ -857,10 +860,15 @@ API (his prepaid credit) and `gpt-oss-120b` through OpenRouter (his cash, inside
     `docs/phases/evidence/phase-3.5/review-raw.md`, `review-resolutions.md`, `review-lock.txt`.]*
     **[Opus, needs AWS under 7 (i)] The review** (§11): his call to send; the raw reply kept; each point marked; his decisions; changes made.
     C7.
-12. **[him, with Claude reading back] Tag day, steps 1-5** (§12). `P`.
+12. **[him, with Claude reading back] Tag day, steps 1-5** (§12). `P`. `[done]` 2026-10-13, 12:50-1:30 AM: `P` =
+    `649e8b9`, CI `38355727520`; ruleset `24974909`; tag object `c949580`; Software Heritage
+    `swh:1:snp:df7dda44d8cf804cf004e73031249c8e5fe45e00`; release published. Four tests that asserted "no lock yet"
+    were rewritten in `P` (§26).
 13. **[Opus] Tag day, steps 6-7:** the dry runs against the tag, the S3 listing that nothing official exists (DoD 5),
-    `tag-record.md`.
+    `tag-record.md`. `[done]` 2026-10-13: all seven dry runs as expected; no `official/` prefix.
 14. **[Sonnet] The close-out:** the DoD audit, `ROADMAP.md`, START HERE, version 0.3.5, the OPEN entries closed. `R`.
+    `[done]` 2026-10-13 (Opus, same session as the tag): §26. The version in `pyproject.toml` stays `0.0.5` (Phase 2
+    decision 4: it stays at Phase 1's version until Phases 1 and 1.5 close); "0.3.5" is the phase's label.
 
 ## 17. Definition of done, and the proof of each
 
@@ -1382,3 +1390,34 @@ content, off the subject; only the fields below were read):
 - Records say `thinking` "reasoning effort medium sent" and `effort` "medium"; `git_sha` `46d8c8b`.
 
 Added to `calls-inventory.md`, with the 2026-10-11 placeholder run on the same model, which the inventory had missed.
+
+## 26. Tag day and the DoD audit (2026-10-13, Opus; Phase 3.5 CLOSED)
+
+Tag day ran 2026-10-13, about 12:50 to 1:40 AM CDT, in §12's order; every step that changed the repository or GitHub
+was his, and nothing called a model. Every value is in `docs/phases/evidence/phase-3.5/tag-record.md`.
+
+**What the plan missed, recorded plainly.**
+
+- **Four tests asserted that no lock existed**, so writing the lock turned `make check` red (4 failed, 2035 passed).
+  The gate was right each time: it now refused for the post-lock reasons (a model outside the lock, an experiment
+  other than `company`). The tests were rewritten in `P` (tests are not in the lock); one became two, so 2040.
+- **The name guard's pre-push hook printed nothing on the tag push**, apparently because no new commits went up. The
+  guard's `history` mode was run by hand straight after (clean, 67 commits, tag names and messages included). OPEN
+  entry in `KNOWN-GAPS.md` for the next tag.
+- **§7.2's model case named Nova Pro**, which left v1 on 2026-10-11; the main model's `model_id` was changed instead.
+- **The archive took seconds**, not hours (§18), so steps 6-7 ran the same night.
+- Found while rewriting the tests, not a tag-day failure: `hc analyze` on an official sweep checks the lock, content
+  and analysis, not the sweep's model (the run gate refuses an unlisted model, so no such sweep can exist outside a
+  test). OPEN entry for Phase 4.
+
+| DoD (scope doc) | Met | Proof |
+|---|---|---|
+| 1. The protocol is complete against Delivers 2, and approved | yes | §9.2's fifteen-item outline is the protocol's fifteen sections, in order (`protocol-v1.md` §1-§15, headings checked 2026-10-13). His approvals: §1 on 2026-10-09; §2-15 on 2026-10-12, 4:30 PM; the three post-approval corrections (§1.1, §1.6, §2.7) read and accepted 2026-10-13, 12:54 AM |
+| 2. The independent review is done and committed, every point resolved before the tag | yes | `review-brief.md`, `review-raw.md`, `review-resolutions.md`, `review-lock.txt` in `0744c26` and earlier, all before `P`; ten points, each resolved and accepted by him 2026-10-12 |
+| 3. The tag exists, is protected, and has an outside timestamp that matches | yes | `tag-record.md` §2-6: `P` `649e8b9`; tag object `c949580`; ruleset `24974909` read back (created before the tag); `swh:1:snp:df7dda44d8cf804cf004e73031249c8e5fe45e00`, `visit_date` 2026-10-13T06:24:52Z, its `refs/tags/prereg-v1` resolving through `c949580` to `649e8b9` |
+| 4. The gate passes the tagged content and refuses changed content or scoring code; the case mode both ways | yes | `tag-record.md` §7: seven dry runs from a worktree of the tag (both models pass as tagged; refused on content, instrument, analysis, document and model identity, each naming the file or field); the case mode both ways in `tests/test_protocol_cases.py`, in CI on `P` |
+| 5. No official result exists; every model call accounted for | yes | `tag-record.md` §8: the bucket's only top-level prefix is `development/`, nothing under `official/`; `calls-inventory.md`, current through the review call, the last model call before the tag |
+| 6. `make check` and CI green | yes on `P`; `R` after his push | CI `38355727520` on `P`; `R`'s run id is recorded in the next handoff (a commit cannot carry its own run) |
+
+**Phase 3.5 is closed** once `R` is pushed and its CI is green. Next is Phase 4's runs half: its IMPLEMENTATION doc,
+written and approved immediately before the runs.

@@ -7,7 +7,31 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-12, about 5:00 PM (handoff: tomorrow is TAG DAY)
+> ## START HERE — where things stand, 2026-10-13, about 1:45 AM (`prereg-v1` TAGGED; Phase 3.5 closed with `R`)
+>
+> **Tag day is done** (Phase 3.5 IMPLEMENTATION doc §12, all seven steps; nothing called a model). `P` =
+> `649e8b9` (the lock, plus four tests that asserted "no lock yet", rewritten), CI `38355727520` green. Ruleset
+> `24974909` on `prereg-*` (updates, deletions, force pushes; no bypass). Tag object `c949580` -> `P`, pushed. Software
+> Heritage snapshot `swh:1:snp:df7dda44d8cf804cf004e73031249c8e5fe45e00`, visit 2026-10-13T06:24:52Z, tag resolving to
+> `P`. Release `prereg-v1`, empty notes. Seven dry runs from a worktree of the tag, all as expected; nothing under
+> `official/` in S3. **Every value is in `docs/phases/evidence/phase-3.5/tag-record.md`; the DoD audit is §26.**
+>
+> **Measured before `R`:** `make check` green, 2040 tests. **`R`** (`phase 3.5: tag record and close-out`) is his commit
+> and push; **its CI run id goes in the next handoff.** With it, Phase 3.5 is closed.
+>
+> **From here on, the frozen files are frozen.** A change to anything the lock hashes (the protocol, the company
+> content, `sweep/prompt.py`, `decision.py`, `classify.py`, everything in `analysis/`, `experiment.py`, a locked
+> model's identity in `models.toml`) makes the gate refuse every official sweep. Fix by erratum or `prereg-v2`
+> (protocol §14), never by editing.
+>
+> **Next: Phase 4's runs half**, its IMPLEMENTATION doc written and approved immediately before the runs (Opus to
+> scope; Sonnet to build). It carries: the placeholder call on `gpt-oss-120b` before any grid (§25.3), the thinking
+> sub-study option (`max_tokens` 16,000), the slow, throttled second-family host, and the OPEN entries below marked
+> for Phase 4 (two new tonight).
+>
+> *The 5:00 PM block below is superseded on what is next; it stays as the day's record.*
+
+> ## START HERE — where things stood, 2026-10-12, about 5:00 PM (handoff: tomorrow is TAG DAY)
 >
 > **Measured at handoff:** `make check` green, **2039 tests**, root 13 of 16. Last pushed `46d8c8b` (CI and Deploy
 > green). **Not pushed:** `b1bc34c`. **Not committed:** step 11's review files, the protocol's accepted review changes
@@ -903,6 +927,26 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
+## OPEN 2026-10-13 — the pre-push name guard printed nothing on a tag-only push
+
+Found on tag day (`tag-record.md` §4). `git push origin prereg-v1`, a tag whose commit the remote already had, showed no
+hook output at all; on the commit push minutes earlier the guard printed "Passed". Likely pre-commit skipping its
+pre-push hooks when no new commits go up (not verified). The tag's name and message were scanned by hand straight
+after (`guard history`, clean). **Before the next tag** (`prereg-v2`, or any case tag): confirm whether the hook runs
+on a tag-only push, and either make it run or put `guard history` in the tag-day steps.
+
+---
+
+## OPEN 2026-10-13 — for Phase 4: `hc analyze` does not check an official sweep's model against the lock
+
+Found while rewriting the four tag-day tests (`test_sweep_refusals.py`). `run_analysis_gate` checks the lock, the
+content and the analysis set; an official sweep record on a model the lock does not name was analyzed. No such sweep
+can exist outside a test, because the run gate refuses an unlisted model before any call, so this is defense in depth,
+not a hole. **Recommended:** Phase 4's runs-half doc decides whether `hc analyze` also refuses a sweep whose manifest
+model is not one of the lock's. Run code, fixable after the tag.
+
+---
+
 ## CARRIED — from Phase 1 to Phase 1.5, 2026-10-11
 
 Found by Phase 1's build and its step 9 run (`docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md` §21); each lands
@@ -963,7 +1007,10 @@ Found in Opus's review of the Phase 4 code half, step 4. Both are run code (fixa
 
 ---
 
-## OPEN — for Phase 3.5: Claude Haiku 5.5 as a model-set candidate, 2026-10-08
+## CLOSED 2026-10-13 — for Phase 3.5: Claude Haiku 5.5 as a model-set candidate (was OPEN, 2026-10-08)
+
+**Closed 2026-10-13 with the tag:** Haiku 5.5 is v1's main model, through Anthropic's API (§23, decided 2026-10-11;
+roles §24), locked in `prereg.lock` as `haiku-5-5`, `main`. The entry as first written:
 
 **Decided as a procedure 2026-10-09 (his, Phase 3.5 IMPLEMENTATION doc decisions 2 and 5):** Haiku 5.5 joins as a third
 official model if Bedrock serves it at build step 9; if Bedrock is not answering by 2026-10-16 (tentative), it becomes the main
@@ -991,7 +1038,10 @@ runs, so OpenRouter is not an official route without a design change.
 
 ---
 
-## OPEN — for Phase 3.5: Nova Pro must use its tagged profile, 2026-10-08
+## CLOSED 2026-10-13 — for Phase 3.5: Nova Pro must use its tagged profile (was OPEN, 2026-10-08)
+
+**Closed 2026-10-13, moot:** Nova Pro left v1 on 2026-10-11 (Phase 3.5 §23); `prereg.lock` names only `haiku-5-5` and
+`gpt-oss-openrouter`. If a later version adds a Bedrock model, this rule applies to it. The entry as first written:
 
 Phase 0.5 decision 3 is (c) (his, 2026-10-08): the tag budget counts only calls made through the tagged application
 inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-sonnet-4-6` already; **Nova Pro is not in
@@ -1051,7 +1101,10 @@ supplies the case content from private storage and calls `check_case_official`. 
 
 ---
 
-## OPEN — prerequisite of Phase 3.5's tag: the Nova Lite probes and format runs, 2026-10-07
+## CLOSED 2026-10-12 — prerequisite of Phase 3.5's tag: the Nova Lite probes and format runs (was OPEN, 2026-10-07)
+
+**Closed 2026-10-12, dropped (his; Phase 3.5 step 8):** Nova Lite left with Bedrock; the tag went ahead without these
+runs, and protocol §2.5 says so. Recorded closed with the tag, 2026-10-13. The entry as first written:
 
 **2026-10-09 (his, Phase 3.5 IMPLEMENTATION doc decisions 4 and 5):** run on Bedrock under the credits when quotas
 return; if Bedrock is not answering by 2026-10-16 (tentative), through OpenRouter (`amazon/nova-lite-v1`, under $0.25, inside his
