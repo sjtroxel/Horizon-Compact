@@ -474,9 +474,12 @@ any publication and counted). And from this doc: Claude runs no command that rea
    `phase 4: runs-half implementation doc`.
 2. **[done, `ccbfcaa`] [Opus] `errata-v1.md`** (finding 8): the status line and the stale bracket notes, each with what it should say;
    no computation, content or rule changed. Reviewed by him; committed before the first pilot.
-3. **[done 2026-10-13, built and reviewed; his commit, push and digest next] [Sonnet] §5.1-5.4** (§5.5), one commit each or together; Opus reviews each diff. `make check` green; he commits and
+3. **[done 2026-10-13, `50f6f21`, Deploy green, digest in `run-log.md`] [Sonnet] §5.1-5.4** (§5.5), one commit each or together; Opus reviews each diff. `make check` green; he commits and
    pushes; Deploy green; the digest recorded (§6.0).
-4. **[him, Claude reading] §6.0-6.10**, in order.
+4. **[him, Claude reading] §6.0-6.10**, in order. *[§6.0-6.7 done 2026-10-13/14: §6.1 passed; pilots complete,
+   `repeats.json` written; projection committed `8eb3d43` before the first grid; every sweep in §4 complete on one
+   image; refusal calls made (gpt-oss grid, 0 of 2 refusals); every record check passes. Two run-code faults found
+   and logged, not fixed (`run-log.md`; KNOWN-GAPS OPEN 2026-10-14). §6.8 the reveal next, then §6.9-6.10.]*
 
 **Model choice:** Sonnet for step 3; Opus to review it and for the reveal's reading. The runs themselves need little
 of either, since Claude only reads pasted status lines.

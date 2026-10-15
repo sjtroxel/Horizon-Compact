@@ -62,6 +62,13 @@ real launches will carry these same ids.
 | 2026-10-14 00:05:02 UTC | `thinking-haiku-5-5-fd5e6f49` (development, placeholder) | `haiku-5-5` | task `9658ab03fed94e4985640b98f8123bae` | complete | 5 of 5, all `valid`, 5 attempts | 0.0150 | §6.1, the sub-study's request |
 | 2026-10-14 00:28:29 UTC | `pilot-haiku-5-5-0b9d9e79` (pilot) | `haiku-5-5` | fargate | complete | 80 of 80: 79 `valid`, 1 `schema_invalid`; 94 attempts (79 `valid`, 10 `sum_mismatch`, 5 `schema_invalid`) | 0.1314 | §6.2, cap $1 |
 | 2026-10-14 00:28:26 UTC | `pilot-gpt-oss-openrouter-1f75b653` (pilot) | `gpt-oss-openrouter` | fargate | complete | 80 of 80: 76 `valid`, 4 `schema_invalid`; 95 attempts (76 `valid`, 15 `schema_invalid`, 1 `sum_mismatch`, 3 `api_error`) | 0.0368 | §6.2, cap $1 |
+| 2026-10-14 about 09:50 UTC (4:50 AM CDT) | `grid-haiku-5-5-0b99fabb` (official) | `haiku-5-5` | task `42cc50d429c14c71923f7621ceb5a671` (session 09:52:25 UTC) | complete | 990 of 990: 980 `valid`, 10 `sum_mismatch`; 1,128 attempts (980 `valid`, 134 `sum_mismatch`, 14 `schema_invalid`) | 1.5750 | §6.4, launched after `8eb3d43` (projection) was pushed; dry run passed; cap $7, max 300 min; read 8:02 AM CDT |
+| 2026-10-14 about 09:50 UTC (4:50 AM CDT) | `grid-gpt-oss-openrouter-fe599ad2` (official) | `gpt-oss-openrouter` | task `038bd3d2804c4b82864b9f88bae2f14e` (session 09:52:27 UTC) | **crashed** (its summary says `complete`: fault 2 below) | 490 of 1,200 by the end; 551 attempts | 0.2208 | §6.4, the same; cap $3, max 720 min. Unhandled `IncompleteRead` (fault 1 below) |
+| 2026-10-14 about 13:03 UTC (8:03 AM CDT) | `thinking-haiku-5-5-418caa9c` (official) | `haiku-5-5` | task `aff26f26744c453ca064c99ada37a79b` (session 13:03:48 UTC) | complete | 100 of 100, all `valid`, 100 attempts (none `truncated`) | 0.3688 | §6.5, after Haiku's grid completed; dry run passed; cap $3, max 180 min. The awareness probe's launch in the same script was refused by the one-task-per-model check (nothing written; its dry run passed); it waits for this one |
+| 2026-10-14 about 14:02 UTC (9:02 AM CDT) | `awareness-haiku-5-5-0ce6ad12` (official) | `haiku-5-5` | task `38da4f1ca85d442dac1b132add90b6b3` | | 15 calls | | §6.5, after the sub-study completed; dry run passed; cap $1, max 60 min. Its replies are not read until the reveal |
+| 2026-10-14 about 15:47 UTC (10:47 AM CDT) | `grid-gpt-oss-openrouter-fe599ad2` (official) | `gpt-oss-openrouter` | task `94e6ce3cff9544d6ba84317e21aec883` (session 15:47:45 UTC) | complete | 1,200 of 1,200 (782 attempts this session): 1,158 `valid`, 3 `valid_rescaled`, 33 `schema_invalid`, 2 `no_tool_call`, 2 `sum_mismatch`, 1 `truncated`, 1 `unexpected_stop`; 1,333 attempts over both sessions | 0.5422 (sweep total) | §6.4, resume after the crash (`scratch/p4-gptoss-resume.sh`); dry run passed; cap $3, max 720 min |
+| 2026-10-15 00:04 UTC (7:04 PM CDT) | `awareness-gpt-oss-openrouter-6a05acef` (official) | `gpt-oss-openrouter` | task `6664dcab3434470eb2c16e2900d75407` | | 15 calls | | §6.5, after gpt-oss's grid completed; dry run passed; cap $1, max 120 min. Its replies are not read until the reveal |
+| 2026-10-15 about 00:10 UTC (7:10 PM CDT) | `grid-gpt-oss-openrouter-fe599ad2` refusal calls | | his, on the laptop | written | 2 cases, **0 called refusals** | | §6.6, `refusal-calls.json` and `.meta.json`, write-once. Haiku's grid and sub-study had no `no_tool_call` run, so no file |
 
 ## §6.1 the placeholder check on the final image (decision 4): passed
 
@@ -88,3 +95,22 @@ Read by Claude from the 76 synced objects (`scratch/p4-check-sync.sh`; garden co
 
 **Pilots' caps checked** (Claude, from the plans, no records read): preflight bounds $0.52 (`haiku-5-5`) and $0.18
 (`gpt-oss-openrouter`), both under the $1 cap §6.2 sets.
+
+## Faults found during the runs (not fixed until the last sweep ends: the push freeze)
+
+**2026-10-14, `grid-gpt-oss-openrouter-fe599ad2`, first session (task `038bd3d2…`), crashed at 490 of 1,200.** Read
+from the task's last 40 log lines (status and traceback only).
+
+1. **Cause: an unhandled `http.client.IncompleteRead`.** OpenRouter's connection dropped part way through a reply's
+   body (231 bytes read). `providers/openrouter.py` `_post` reads the body with `response.read()`; the caller turns
+   `urllib.error` and `OSError` into an `api_error` record, but `IncompleteRead` is an `http.client.HTTPException`,
+   neither of those, so it escaped the session. A transient network fault, not tied to a run: a resume is safe. The
+   in-flight attempt left no record (it may still have been billed by OpenRouter, a fraction of a cent, which the
+   §6.9 bill reconciliation will show as a small gap). It can happen again; each time, the same resume.
+2. **The session's summary says `stopped: complete`, not `crashed`.** `sweep/runner.py` `run_session` sets
+   `stopped = "complete"` before the loop over runs rather than after it, so an exception that leaves the loop is
+   recorded as complete. The run records are unaffected (each attempt is written as it finishes); only the session
+   summary's label is wrong. The record checks (§6.7) will show a `complete` session with 490 runs finished; this
+   entry explains it.
+
+Both are fixed after the last sweep, with tests, as a code commit of their own (no image change mid-run).

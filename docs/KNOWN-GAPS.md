@@ -7,6 +7,44 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-14, about 7:30 PM (Phase 4: EVERY SWEEP RUN, record checks pass; the reveal next)
+>
+> **Measured:** `make check` green, **2127 tests** (no code changed since `50f6f21`); `hc protocol check` ok. Last commit
+> `8eb3d43` (pilots, repeats, projection), pushed. Tonight's commit: `record-checks.md`, `run-log.md` and these docs.
+>
+> **Phase 4 runs-half §6.0-6.7 are done** (runs-half doc §10 step 4; the whole story, with every task id, in
+> `docs/phases/evidence/phase-4/run-log.md`):
+> - §6.1 placeholder check on the final image passed; both pilots complete; `repeats.json` written once per model:
+>   **Haiku S1 20, S2 6, S3 20, S4 20 (990 runs); `gpt-oss-120b` 20 everywhere (1,200 runs)** (`pilot-*.md`).
+> - `projection.md` committed and pushed (`8eb3d43`) **before** the first grid launch; the re-plan check passed, no cut.
+> - Every sweep in §4 complete, all on image `sha256:ff978703…436723`: both grids, the thinking sub-study (100 of 100
+>   valid, none truncated), both awareness probes (15 of 15 each).
+> - Refusal calls (§6.6, his): `gpt-oss-120b`'s grid had 2 `no_tool_call` runs, **0 called refusals**; Haiku's grid and
+>   the sub-study had none, so no file.
+> - **Record checks (§6.7): every check passes** (`record-checks.md`; the image check is "reported": one digest).
+> - **Measured cost of the runs:** about **$2.12 of the Anthropic credit** and **$0.585 of his OpenRouter cash** before
+>   the fee, both under `projection.md`. AWS not yet read (§6.9).
+>
+> **Nobody has read a decision by objective.** Claude read only status counts, the record checks and file names.
+>
+> **Two run-code faults, found and logged, NOT fixed** (OPEN entry below): an unhandled `IncompleteRead` crashed
+> `gpt-oss-120b`'s first grid session at 490 runs (resumed cleanly), and the runner labels a crashed session
+> `complete`. Fixed after the reveal, with tests, as their own commit.
+>
+> **Next, tomorrow morning, in order:**
+> 1. **§6.8 the reveal.** From a detached worktree of `prereg-v1` (`649e8b9`) with `uv sync --frozen`:
+>    `hc analyze` once each for `grid-haiku-5-5-0b99fabb`, `grid-gpt-oss-openrouter-fe599ad2` and
+>    `thinking-haiku-5-5-418caa9c`, `--root` the main checkout; then, from `main`, `hc sweep awareness --report` for each
+>    model into `awareness-<model>.md`, and `hc sweep tokens` for the sub-study. All denied to Claude: he runs them;
+>    Claude writes the scripts and reads what he pastes. **On Opus.**
+> 2. §6.9 measured cost (the three bills), §6.10 the close (DoD audit, honor statements, ROADMAP row).
+> 3. The two faults' fix (OPEN entry), after the results files are committed.
+>
+> **His, not Claude's:** whether to read the results the moment they print, or let Claude write them up first.
+> **Not part of v1:** the Bedrock case (BLOCKED entry, 2026-10-14 note): Nova Lite and Sonnet 4.6 still throttled.
+>
+> *The 2026-10-13 6:00 PM block below is superseded on what is next; it stays as the day's record.*
+
 > ## START HERE — where things stand, 2026-10-13, about 6:00 PM (Phase 4 runs-half §5 BUILT and reviewed; his commit next)
 >
 > **Measured:** `make check` green, **2127 tests**, root 13 of 16; `hc protocol check` ok (nothing frozen changed).
@@ -990,6 +1028,24 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
+## OPEN 2026-10-14 — two run-code faults found during the grid (fix after the reveal)
+
+Found on `grid-gpt-oss-openrouter-fe599ad2`'s first session, which stopped at 490 of 1,200; full account in
+`docs/phases/evidence/phase-4/run-log.md`, "Faults found during the runs". Not fixed during the runs (the push freeze:
+one image per sweep). No run record is affected, and the record checks pass.
+
+1. **`providers/openrouter.py` `_post` lets `http.client.IncompleteRead` escape.** The caller turns `urllib.error` and
+   `OSError` into an `api_error`; `IncompleteRead` (an `http.client.HTTPException`) is neither, so a connection dropped
+   mid-body ends the session. Fix: catch it (and a body that is not JSON) as an `api_error`, with a test using a fake
+   response. Check the Anthropic provider for the same gap.
+2. **`sweep/runner.py` `run_session` records a crash as `stopped: complete`.** It sets `stopped = "complete"` before
+   the loop over runs, so an exception leaving the loop is recorded as complete. Fix: set it after the loop; a test
+   where the provider raises asserts `crashed`.
+
+**Closes when:** both fixed with tests, `make check` green, after the results files are committed.
+
+---
+
 ## CLOSED 2026-10-13 — the pre-push name guard printed nothing on a tag-only push (was OPEN, same day)
 
 **Closed 2026-10-13, late afternoon (Opus diagnosed, Sonnet built, Opus reviewed):** cause confirmed in the source: pre-commit 4.6.2's
@@ -1316,6 +1372,13 @@ doc §2 ran them in the morning; build step 1 re-read the files themselves in th
 Anthropic's API and `gpt-oss-120b` through OpenRouter (Phase 3.5 IMPLEMENTATION doc §23). The entry stays as the
 record; Fargate, S3, ECR and SSM are unaffected and stay in use. If Bedrock answers before the tag, decision 5's rule
 applies (he chooses which set the protocol names).*
+
+*2026-10-14 (his case 179097558200946, which a person is handling): AWS wrote "approved" at 00:22 CDT, then, asked
+directly, listed 12 models "available" to the account (mostly older Claude, Nova Premier, Jamba, Command R; four are
+not text models) and said access "depends on the account usage strong usage and spend history", without saying
+whether credit-paid usage counts. Nova Lite and Sonnet 4.6 were still throttled at 10:37 UTC (`scratch/throttle-check.py`;
+request ids in the case). None of the listed models has been test-called. Irrelevant to v1; a question for a later
+version only.*
 
 **What happened.** On 2026-10-05 every Bedrock call on the account returns `ThrottlingException`, HTTP 429, "Too many
 tokens per day, please wait before trying again": Nova Lite (the step 3 development run, 28 attempts, $0) and Sonnet 4.6
