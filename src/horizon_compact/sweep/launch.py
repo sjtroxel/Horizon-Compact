@@ -83,6 +83,10 @@ def launch_task(ecs: ECSClient, ec2: EC2Client, *, model_key: str, command: list
         launchType="FARGATE",
         count=1,
         startedBy=STARTED_BY,
+        # The task takes the task definition's tags (Terraform's defaults, `Project` among them), so its
+        # Fargate cost is attributed to this project (KNOWN-GAPS 2026-10-15). Needs ecs:TagResource at RunTask
+        # in infra/iam/horizon-compact-dev-policy.json.
+        propagateTags="TASK_DEFINITION",
         networkConfiguration=_network(ec2),  # type: ignore[arg-type]
         overrides={"containerOverrides": [{"name": CONTAINER, "command": command}]},
     )

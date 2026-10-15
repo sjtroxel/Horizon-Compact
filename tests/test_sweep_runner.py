@@ -324,6 +324,24 @@ def test_a_request_error_stops_the_session_and_leaves_the_run_unfinished(tmp_pat
     assert summary["stopped"] == "config_error"
 
 
+def test_an_exception_mid_session_is_summarized_as_crashed_not_complete(tmp_path: Path) -> None:
+    # The fault of 2026-10-14: a session that crashed at 490 of 1,200 was summarized as "complete".
+    exp, plan = make_plan()
+    store = LocalStore(tmp_path)
+
+    def script(n: int, request: DecisionRequest) -> RawDecision:
+        if n == 3:
+            raise RuntimeError("the connection went away")
+        return raw_ok(request)
+
+    with pytest.raises(RuntimeError):
+        session(exp, plan, ScriptedProvider(script), store)
+    assert len(objects(store, plan.sweep_id, "final.json")) == 2
+    summary = objects(store, plan.sweep_id, "/sessions/")[0]
+    assert summary["stopped"] == "crashed"
+    assert summary["runs_finished_this_session"] == 2
+
+
 def test_the_cap_stops_the_session_before_the_attempt_that_would_pass_it(tmp_path: Path) -> None:
     exp, plan = make_plan()  # Nova Lite: worst case per attempt is a fraction of a cent
     store = LocalStore(tmp_path)

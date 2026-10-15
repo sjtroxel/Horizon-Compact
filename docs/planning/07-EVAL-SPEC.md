@@ -44,6 +44,8 @@
   §8 the t quantile, the corrected precision at the cap, rule (a) never setting n, 0.84 as written, the pilot's two
   wordings; §10.4 dimensions, distance, the matched-set reading rule, `D*` and `k*` per shape, the opposite check
   (his decision 2, 2026-10-09); §14 item 5 the false-no-split target (decision 4).
+  **Patched 2026-10-15 (his), from Phase 4's measured cost (`docs/phases/evidence/phase-4/run-log.md` §6.9):** §13
+  a measured note; the table stays as the record of the Sonnet 4.6 plan.
 - **Read after:** `06-NARRATIVE-AND-VOCABULARY`. **Read before:** `08-REVIEW`.
 - **What this doc is:** the measurement design. **What it is not:** the pre-registration itself. In Phase 3 (`05`
   §5) this design is filled in with the final wordings, dossier and numbers, committed and tagged `prereg-v1`, and from
@@ -763,6 +765,13 @@ at its cap (`02` §2.1): **$25 per official sweep, $5 per development sweep** (h
 Inside the $80 ceiling, and past the **$60 re-plan point** (`04` §3.4), which will trigger. At that point the cut list
 applies (`05` §5.1): Nova Pro first. If the pilot's spread is smaller, repeats fall and so does the total (at 10
 repeats, about $57).
+
+*Measured 2026-10-15 (Phase 4, `docs/phases/evidence/phase-4/run-log.md` §6.9):* v1 ran on Haiku 5.5 and
+`gpt-oss-120b` (Phase 3.5 §23), not Sonnet 4.6 and Nova Pro. Both pilots, both grids (Haiku 5.5 990 runs at the
+repeats its pilot set, `gpt-oss-120b` 1,200), the thinking sub-study (100) and both awareness probes (15 each) cost
+**about $3.01** in all, retries included: $2.11 of Anthropic credit, $0.59 of his OpenRouter cash, $0.31 of AWS
+credit, no AWS cash. Cumulative project spend is at most about $28 (an overstatement: it counts the shared AWS
+credits' whole use). **The $60 re-plan point did not trigger; nothing on the cut list was needed for cost.**
 
 ---
 

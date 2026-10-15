@@ -40,6 +40,7 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import getpass
+import http.client
 import json
 import time
 import urllib.error
@@ -227,7 +228,8 @@ class OpenRouterProvider:
         return text.replace(self._key, "[key]")
 
     def _post(self, body: dict[str, Any]) -> dict[str, Any]:
-        """One request. Raises ``urllib.error`` and ``OSError`` for the caller to turn into a record."""
+        """One request. Raises ``urllib.error``, ``OSError`` and ``http.client.HTTPException`` for the caller
+        to turn into a record."""
         http_request = urllib.request.Request(
             self._url,
             data=json.dumps(body).encode("utf-8"),
@@ -294,7 +296,9 @@ class OpenRouterProvider:
             error = {"code": code, "message": self._scrub(str(reason))}
         except ValueError as exc:  # the server answered, but not with JSON
             error = {"code": _SERVER_ERROR, "message": f"the reply is not JSON: {exc}"}
-        except OSError as exc:  # a connection that dropped part way
+        # A connection that dropped part way: OSError, or http.client's IncompleteRead when the body stops
+        # short (an HTTPException, which is not an OSError; it ended a grid session, KNOWN-GAPS 2026-10-14).
+        except (OSError, http.client.HTTPException) as exc:
             error = {
                 "code": _CONNECTION_ERROR,
                 "message": self._scrub(f"{type(exc).__name__}: {exc}"),

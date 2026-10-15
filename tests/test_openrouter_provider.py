@@ -4,7 +4,9 @@ tests is a made-up string."""
 
 from __future__ import annotations
 
+import http.client
 import json
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -247,6 +249,30 @@ def test_a_reply_that_is_not_json_is_a_server_fault() -> None:
     with FakeOpenRouter(lambda body: (200, b"<html>gateway</html>")) as server:
         result = decide(server)
     assert result.error is not None and result.error["code"] == "InternalServerException"
+
+
+def test_a_body_that_stops_short_is_an_api_error_the_classifier_retries(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # The fault of 2026-10-14: the connection dropped 231 bytes into the reply, and IncompleteRead (an
+    # http.client.HTTPException, not an OSError) escaped and ended the session.
+    class Dropped:
+        def __enter__(self) -> Dropped:
+            return self
+
+        def __exit__(self, *exc: object) -> None:
+            return None
+
+        def read(self) -> bytes:
+            raise http.client.IncompleteRead(b"x" * 231, 4000)
+
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *args, **kwargs: Dropped())
+    result = OpenRouterProvider(KEY, DEAD_URL).decide(request())
+    assert result.status == "api_error"
+    assert result.error is not None and result.error["code"] == "EndpointConnectionError"
+    assert "IncompleteRead" in result.error["message"]
+    outcome = classify(result, experiment().scenario)
+    assert (outcome.retry, outcome.stop_session) == ("backoff", False)
 
 
 def test_a_server_that_is_not_there_is_an_api_error_the_classifier_retries_with_backoff() -> None:

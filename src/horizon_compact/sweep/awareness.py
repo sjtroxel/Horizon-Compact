@@ -417,4 +417,6 @@ def awareness_report(store: Store, experiment: Experiment, plan: SweepPlan) -> s
                 *(f"> {row}" if row else ">" for row in reply.splitlines()),
                 "",
             ]
-    return "\n".join(lines)
+    # No trailing newline: the command prints this, and print adds the one a file should end with (two failed
+    # the end-of-file hook at the reveal's commit; KNOWN-GAPS OPEN 2026-10-15).
+    return "\n".join(lines).rstrip("\n")

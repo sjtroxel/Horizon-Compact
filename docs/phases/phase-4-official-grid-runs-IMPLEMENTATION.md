@@ -480,6 +480,8 @@ any publication and counted). And from this doc: Claude runs no command that rea
    `repeats.json` written; projection committed `8eb3d43` before the first grid; every sweep in §4 complete on one
    image; refusal calls made (gpt-oss grid, 0 of 2 refusals); every record check passes. Two run-code faults found
    and logged, not fixed (`run-log.md`; KNOWN-GAPS OPEN 2026-10-14). §6.8 the reveal next, then §6.9-6.10.]*
+   *[§6.8 done 2026-10-15, `6d1ef6a` (CI and Deploy green); §6.9 done the same morning (`run-log.md` §6.9); §6.10's
+   DoD audit in §13.]*
 
 **Model choice:** Sonnet for step 3; Opus to review it and for the reveal's reading. The runs themselves need little
 of either, since Claude only reads pasted status lines.
@@ -509,3 +511,54 @@ before the grid.
 
 **Time:** about a day of build and review for §5; then about two days of run time, set by `gpt-oss-120b`'s grid,
 watched a few times a day; the reveal and close about half a day.
+
+## 13. DoD audit, 2026-10-15
+
+Against §11 (the scope doc's DoD, for the fallback set). Drafted by Claude (Opus) from the repo; every item points at
+its evidence. **Passes 8 of 9 outright; item 9 passes when the close commit's CI is green.**
+
+| # | Item | Result | Evidence |
+|---|---|---|---|
+| 1 | The pilots ran and are excluded | **pass** | Both under `pilot/` (`record-checks.md`, role `pilot`); `hc analyze` at the tag takes only `official` or `development`, so no results file can read a pilot; the three results files name only official sweeps |
+| 2 | Repeats from the pilots by the gate; projection committed before the first grid run | **pass** | `repeats.json` written once per model under each pilot's prefix (`pilot-*.md`); `projection.md` in `8eb3d43`, committed 2026-10-14 09:44:55 UTC, pushed before the launch; both grid sessions started 09:52:25 and 09:52:27 UTC (`run-log.md`, Sessions) |
+| 3 | Haiku 5.5's grid ran under the protocol, with per-cell counts, failure and refusal rates, and first attempt beside final | **pass** | `grid-haiku-5-5-0b99fabb`: 990 of 990 finished, one image (`record-checks.md`); its results file has 60 cells, each with `attempted`, `valid`, `rescaled`, `refused`, `failed_by_type`, and a `first_attempt` block on every comparison |
+| 4 | The thinking sub-study and both awareness probes ran | **pass** | `thinking-haiku-5-5-418caa9c` 100 of 100 valid, none truncated; `awareness-haiku-5-5-0ce6ad12` and `awareness-gpt-oss-openrouter-6a05acef` 15 of 15 each (`record-checks.md`; `awareness-*.md`) |
+| 5 | `gpt-oss-120b`'s grid ran | **pass** | `grid-gpt-oss-openrouter-fe599ad2`: 1,200 of 1,200 over two sessions; the first crashed at 490 (fault 1, a network read) and was resumed, nothing re-run (`run-log.md`, Faults) |
+| 6 | The frozen analysis produced every verdict | **pass** | Three results files written by `hc analyze` from a detached worktree of `prereg-v1` (HEAD `649e8b9`, clean, its own `uv sync --frozen` environment, package loaded from the worktree), committed in `6d1ef6a` |
+| 7 | The record checks pass | **pass** | `record-checks.md` (`927561b`): every check passes; image "reported", one digest across all seven sweeps |
+| 8 | Measured cost replaces the estimates, confirmed against the bills; the $60 point checked | **pass** | `run-log.md` §6.9: about $3.01 in all, each pot reconciled with the records; dated patches to `planning/03` §4 and §7, `planning/07` §13; ROADMAP's cost cell; cumulative at most about $28 |
+| 9 | `make check` and CI green | **pass at `6d1ef6a`; the close commit's CI owed** | `make check` green, 2127 tests, 2026-10-15; CI `38750042773` and Deploy `38750042919` green on `6d1ef6a` |
+
+**The scope doc's rules, held:**
+
+- **Nothing outside the protocol is official:** no sweep was refused and re-run under another label.
+- **The run set was fixed before the first official run** and not changed: the crash's resume filled missing runs
+  only (record check "complete").
+- **Failures are outcomes:** none stopped, restarted or re-ran a sweep; the one stop was an infrastructure fault.
+- **Run-code fixes logged; analysis code untouched:** the two faults are logged and were not fixed during the runs
+  (KNOWN-GAPS OPEN 2026-10-14); `hc protocol check` ok; record check "frozen files" passes.
+- **No model id changed mid-grid** (record check "model").
+- **Every result is published:** all three results files and every awareness reply are committed, before any
+  write-up.
+- **Rule zero:** the name guard passed on every commit of the phase; all content is the fictional company's.
+
+**Found at the close, not in the DoD:** two small faults (KNOWN-GAPS OPEN 2026-10-15): sweep tasks carry no cost
+tag, and the awareness report's extra trailing newline, which made the end-of-file hook edit both awareness files at
+the reveal's commit (one blank line each, no reply changed). And the large-file hook now admits results files
+(`.pre-commit-config.yaml`, in `6d1ef6a`).
+
+### 13.1 Honor statements
+
+**Claude's (Opus, 2026-10-15).** In this session I read no decision, choice, allocation, memo or reply by objective
+before he ran `scratch/p4-reveal-analyze.sh`; before that I read code, docs, the CLI's arguments and the run log's
+counts. I made the tag's worktree myself, which reads no record. The earlier sessions of this phase recorded the same
+of themselves (START HERE, 2026-10-14: "Claude read only status counts, the record checks and file names"), and §5.4's
+deny list kept every record-reading command from Claude throughout; I can vouch for those sessions only through
+that record, not from memory. Nothing was seen by accident that I know of.
+
+**His (2026-10-15, quoted as he gave it):**
+
+> Honor Statement of sjtroxel: (a) I saw no decision broken down by objective before this morning's analysis script.
+> (b) I did not see the objectives of the runs on the refusal calls on gpt-oss's 2 no_tool_call. (c) So far as I am
+> aware I did not see and certainly did not comprehend anything accidental from the runs within the logs e.g. on the
+> Anthropic or OpenRouter reports or elsewhere. This is the honor statement of sjtroxel.

@@ -495,6 +495,17 @@ def test_the_report_says_which_calls_are_not_recorded(
     assert "Calls recorded: 4 of 15" in text and text.count("_not recorded_") == 11
 
 
+def test_the_printed_report_ends_in_exactly_one_newline(
+    company: Experiment, plan: SweepPlan, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # The command prints the report into a file; a second trailing newline made the end-of-file hook edit it.
+    store = LocalStore(tmp_path)
+    run(company, plan, TextScript(), store)
+    print(awareness_report(store, company, plan))
+    out = capsys.readouterr().out
+    assert out.endswith("\n") and not out.endswith("\n\n")
+
+
 # --- the command ------------------------------------------------------------------------------------
 
 

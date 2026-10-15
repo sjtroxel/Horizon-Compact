@@ -114,3 +114,40 @@ from the task's last 40 log lines (status and traceback only).
    entry explains it.
 
 Both are fixed after the last sweep, with tests, as a code commit of their own (no image change mid-run).
+
+## §6.9 The measured cost
+
+His readings, 2026-10-15 about 10:30 AM CDT, after every sweep and the reveal; set against the readings before the
+first pilot (above) and the record checks' per-sweep totals (`record-checks.md`).
+
+| Pot | Before (2026-10-13) | After (2026-10-15) | Drawn | The records say | Gap |
+|---|---|---|---|---|---|
+| Anthropic prepaid credit | $18.06 | $15.95 | **$2.11** | **$2.1156**: §6.1 $0.0297, pilot $0.1314, grid $1.5750, thinking $0.3688, awareness $0.0107 | under a cent |
+| OpenRouter (his cash) | $5.95 | $5.36 | **$0.59** | **$0.5853**: §6.1 $0.0035, pilot $0.0368, grid $0.5422, awareness $0.0028 | about half a cent; the crash's unrecorded in-flight attempt (fault 1) fits inside it |
+| AWS credits (shared with Musical Mycelium) | estimated used $24.12 | estimated used $24.43 | **about $0.31** of credit | not in the records; projected about $0.40 | n/a |
+
+**AWS, from Cost Explorer** (2026-10-13 to 2026-10-15 UTC, daily, grouped by the `Project` cost allocation tag;
+AWS's estimated charges, and 10/15 may still be filling in):
+
+- **Credits excluded (what was used):** $0.31 in all, $0.01 on 10/13 and $0.30 on 10/14. `horizon-compact` $0.04,
+  `musical-mycelium` $0.00, **no `Project` tag $0.27**.
+- **Credits included (what was paid):** **$0.00** net. **No cash.** The credit lands mostly on the untagged row, so
+  the rows read +$0.04 and -$0.05.
+- **The untagged $0.27 is this project's Fargate tasks** (his judgment and Claude's): `sweep/launch.py`'s `run_task`
+  passes no tags, so a task's compute cost carries no `Project` tag (KNOWN-GAPS OPEN 2026-10-15), and Musical
+  Mycelium spent $0.00 over the same days. The whole $0.31 is counted as this project's, which can only overstate it.
+
+**Phase 4 in all: about $3.01** ($2.11 of the Anthropic credit, $0.59 of his cash, $0.31 of AWS credit), against
+`projection.md`'s expected spend of about $3 and far under every cap. The records alone account for $2.70; AWS is the
+rest.
+
+**Per run, from the records (retries included):** Haiku 5.5's grid $0.0016 a run (990 runs, 1,128 attempts);
+`gpt-oss-120b`'s grid $0.00045 a run (1,200 runs, 1,333 attempts); the thinking sub-study $0.0037 a run (100 runs).
+Output tokens on S1 under `w2` (`thinking-tokens.md`): **1,406** a run on the grid, **6,026** with thinking.
+
+**The $60 re-plan point (scope DoD 8): passes.** Cumulative project spend to date, every pot, at most about **$28**:
+the Anthropic credit's whole draw since it was bought ($18.19 to $15.95, $2.24); his OpenRouter cash, about $1.25
+(Phase 2.5's development runs about $0.24, the 2026-10-09 to 10-12 tally about $0.38, Phase 4 $0.59, rounded up);
+and the AWS credits' whole estimated use since 2026-07-30, $24.43, which includes Musical Mycelium's and so
+overstates this project's. Against the $60 point and the $80 ceiling, with Phase 5 estimated at about $2 (Phase
+3.5 §23.4).

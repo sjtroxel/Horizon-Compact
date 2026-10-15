@@ -12,6 +12,9 @@
 - **Patched 2026-10-05 (his):** §1 and §2.1, Sonnet 5.5 is no longer awaited and Sonnet 4.6 is the v1 main
   model, fixed (`docs/KNOWN-GAPS.md`, the closed Sonnet 5.5 entry). Every estimate here was already on Sonnet
   4.6's price, so no figure changes.
+- **Patched 2026-10-15 (his), from Phase 4's measured cost (`docs/phases/evidence/phase-4/run-log.md`, §6.9):** §4
+  a measured note under the table; §7 item 5 closed for the fictional company. The estimates above stay as the
+  record of what was planned; they were made for Sonnet 4.6 and Nova Pro, and v1 ran Haiku 5.5 and `gpt-oss-120b`.
 - **The one-line answer:** v1 should cost **roughly $50-110 in total**, almost all of it model tokens, inside the
   **$135.97** of credits he has left, which expire **2027-07-30** and are **shared with Musical Mycelium**. The
   biggest swing factor is whether the model "thinks" before answering (§3.3).
@@ -130,6 +133,14 @@ reason for thinking, and the "both, as a finding" option is run on a subset only
 
 **If Sonnet 5.5 access arrives:** the Claude lines drop by about a third. *(2026-10-05: not awaited.)*
 
+*Measured 2026-10-15 (Phase 4, `docs/phases/evidence/phase-4/run-log.md` §6.9):* the whole fictional-company phase
+(two pilots, both 20-repeat grids, the thinking sub-study, both awareness probes) cost **about $3.01**: $2.11 of
+Anthropic credit (Haiku 5.5), $0.59 of his OpenRouter cash (`gpt-oss-120b`), $0.31 of AWS credit (Fargate and S3),
+**no AWS cash**. Per run: Haiku 5.5 $0.0016, `gpt-oss-120b` $0.00045, Haiku 5.5 with thinking $0.0037. Phase 4's
+estimate (about $20-30) was seven to ten times higher mostly because of the models, not the volumes: Haiku 5.5 costs a small fraction
+of Sonnet 4.6. **Output tokens ran about twice §3.2's assumption:** 1,406 a run on S1 without thinking (against
+~700), 6,026 with thinking (against ~2,700).
+
 ## 5. Options considered and rejected for v1
 
 - **Bedrock batch inference (50% off for Sonnet 4.6).** *Verified 2026-10-02 in the AWS batch docs:* batch
@@ -182,4 +193,5 @@ $55 for Musical Mycelium and contingencies. The harness caps and the Budgets ala
    Nova Pro 25 requests and 2,000,000 tokens per minute cross-region. Requests are the binding limit (`04` §3.1).
 4. Whether a newer non-Anthropic model than Nova Pro is available to his account (Nova Pro's published knowledge
    cutoff is October 2024; fine for the experiment, but dated).
-5. Replace every estimate in §3-4 with measured numbers after the first small sweep.
+5. Replace every estimate in §3-4 with measured numbers after the first small sweep. *Closed 2026-10-15 for the
+   fictional company* (the measured note in §4); the real cases are measured in Phase 5.5.

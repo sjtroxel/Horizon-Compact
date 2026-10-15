@@ -104,6 +104,9 @@ def test_the_task_runs_the_explicit_revision_on_fargate_with_the_command_overrid
         1,
     )
     assert kwargs["overrides"] == {"containerOverrides": [{"name": "sweep", "command": COMMAND}]}
+    # The task definition's tags, so the task's cost carries `Project`; no tags are set here.
+    assert kwargs["propagateTags"] == "TASK_DEFINITION"
+    assert "tags" not in kwargs
     network = kwargs["networkConfiguration"]["awsvpcConfiguration"]
     assert network == {
         "subnets": ["subnet-0", "subnet-1"],

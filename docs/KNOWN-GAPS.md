@@ -7,7 +7,38 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-14, about 7:30 PM (Phase 4: EVERY SWEEP RUN, record checks pass; the reveal next)
+> ## START HERE — where things stand, 2026-10-15, about noon (PHASE 4 CLOSED: the reveal, the bills, the close)
+>
+> **Measured:** `make check` green, **2130 tests** (three new, one per fix); `hc protocol check` ok. **`6d1ef6a`** (the reveal) pushed, **CI
+> `38750042773` and Deploy `38750042919` green**. Today's close commit carries the docs below; its CI is owed.
+>
+> **Phase 4 is closed** (runs-half doc §13: DoD 8 of 9 pass, item 9 with the close commit's CI; both honor
+> statements in §13.1, his quoted as he gave it):
+> - **§6.8 the reveal:** `hc analyze` from a detached worktree of `prereg-v1` (`649e8b9`, its own `uv sync --frozen`),
+>   three results files under `experiment/results/prereg-v1/`; `awareness-<model>.md` for both models and
+>   `thinking-tokens.md` in `docs/phases/evidence/phase-4/`. All committed unedited in `6d1ef6a`, before any write-up.
+>   The large-file hook now admits results files (`.pre-commit-config.yaml`).
+> - **What the record says, in one line:** on C vs D, Haiku 5.5 split on S1, S3 and S4 and `gpt-oss-120b` on S1 and
+>   S3; the rest inconclusive; **no "no split" on C vs D for either model.** The verdicts are in the results files; no
+>   write-up exists yet, and public prose is his (Phase 7).
+> - **§6.9 the measured cost: about $3.01** ($2.11 Anthropic credit, $0.59 his OpenRouter cash, $0.31 AWS credit, no
+>   AWS cash), each pot reconciled with the records (`run-log.md` §6.9); cumulative at most about $28; dated patches
+>   to `planning/03` and `planning/07` §13; the ROADMAP's rows.
+>
+> **Four run-code faults fixed in the close commit, each with a test that fails on the old code:** the
+> `IncompleteRead` escape, a crash labeled `complete` (CLOSED 2026-10-14 entry below), and the awareness report's
+> extra trailing newline. **And the fourth, sweep tasks' cost tag** (OPEN 2026-10-15 item 1): he added
+> `ecs:TagResource` at `RunTask` to the console policy, and `launch` now propagates the task definition's tags;
+> **proved at the next launch** (if refused, AccessDenied before any task starts).
+>
+> **Next, in order:**
+> 1. **His:** the close commit, `phase 4: close` (docs and the four fixes), then the push. It touches `src/`, so it
+>    deploys: CI and Deploy green. Claude then removes the tag's worktree (`git worktree remove`, scratchpad path).
+> 2. Phase 5's search half: its IMPLEMENTATION doc, immediately before the search (ROADMAP row 5).
+>
+> *The 2026-10-14 7:30 PM block below is superseded on what is next; it stays as the day's record.*
+
+> ## START HERE — where things stood, 2026-10-14, about 7:30 PM (Phase 4: EVERY SWEEP RUN, record checks pass; the reveal next)
 >
 > **Measured:** `make check` green, **2127 tests** (no code changed since `50f6f21`); `hc protocol check` ok. Last commit
 > `8eb3d43` (pilots, repeats, projection), pushed. Tonight's commit: `record-checks.md`, `run-log.md` and these docs.
@@ -1028,7 +1059,41 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
-## OPEN 2026-10-14 — two run-code faults found during the grid (fix after the reveal)
+## OPEN 2026-10-15 — two small faults found at the reveal and the bills (both fixed 2026-10-15; item 1's proof owed)
+
+Found on 2026-10-15; neither touches a run record, a results file or a verdict.
+
+1. **Sweep tasks carry no cost tag.** `sweep/launch.py` `launch` calls `run_task` with neither `propagateTags` nor
+   `tags`, so a task's Fargate cost has no `Project` tag: Cost Explorer put Phase 4's $0.27 of Fargate under "No tag
+   key" (`docs/phases/evidence/phase-4/run-log.md` §6.9). Fix: `propagateTags="TASK_DEFINITION"` (the task
+   definition carries Terraform's default tags), with a test on the fake ECS client. **Checked 2026-10-15: not a
+   code-only fix.** The launch runs on the laptop as `horizon-compact-dev`, whose policy
+   (`infra/iam/horizon-compact-dev-policy.json`, pasted into the console by him, not Terraform) grants `ecs:RunTask`
+   and no `ecs:TagResource`; AWS evaluates `ecs:TagResource` whenever a resource is created with tags (the ECS
+   guide, "Grant permission to tag resources on creation", read 2026-10-15; whether `propagateTags` alone counts is
+   not stated there, so assume it does). The code alone would make the next launch fail with AccessDenied. **So it
+   waits for Phase 5.5's prep:** the policy file gains `ecs:TagResource` on `task/horizon-compact/*` with the
+   condition `ecs:CreateAction` = `RunTask`, he updates the console policy, and the code change follows, proved by
+   the first placeholder launch after it. Nothing launches before then, and the cost is only attribution.
+   *Done the same day instead (his):* statement `TagSweepTasksAtLaunch` added to the policy file (5,727 of 6,144
+   characters) and to the console policy by him ("Policy horizon-compact-dev updated", about 12:20 PM CDT); then
+   `launch` passes `propagateTags="TASK_DEFINITION"` (Deploy registers every revision through Terraform, whose
+   default tags carry `Project`); the launch test asserts it and fails on the old code. **Not yet proved live:** the
+   first launch after the close commit deploys shows it. If the permission is wrong, that launch is refused with
+   AccessDenied before any task starts or any model is called; then fix the policy and launch again.
+2. **`hc sweep awareness --report` ends its output with one blank line too many.** `cli.py` prints
+   `awareness_report(...)` (`sweep/awareness.py`), whose text already ends in a newline, so a report written to a
+   file fails the `end-of-file-fixer` hook, which then edits the file. It did at the reveal's commit: one trailing
+   blank line removed from each `awareness-<model>.md`, no reply changed. Fix: no extra newline, with a test that
+   the output ends in exactly one. *CLOSED 2026-10-15:* `awareness_report` returns its text without a trailing
+   newline; `test_the_printed_report_ends_in_exactly_one_newline` (fails on the old code).
+
+**Closes when:** the first launch after the close commit starts its task (Phase 5.5's prep at the latest), and a
+later Cost Explorer reading shows that task's Fargate cost under `horizon-compact`.
+
+---
+
+## CLOSED 2026-10-15 — two run-code faults found during the grid (fixed after the reveal)
 
 Found on `grid-gpt-oss-openrouter-fe599ad2`'s first session, which stopped at 490 of 1,200; full account in
 `docs/phases/evidence/phase-4/run-log.md`, "Faults found during the runs". Not fixed during the runs (the push freeze:
@@ -1043,6 +1108,15 @@ one image per sweep). No run record is affected, and the record checks pass.
    where the provider raises asserts `crashed`.
 
 **Closes when:** both fixed with tests, `make check` green, after the results files are committed.
+
+*CLOSED 2026-10-15, after the reveal (`6d1ef6a`):* (1) `providers/openrouter.py` `_send` catches
+`http.client.HTTPException` beside `OSError` as a connection error, the classifier's backoff retry;
+`test_a_body_that_stops_short_is_an_api_error_the_classifier_retries` raises the same `IncompleteRead` (231 bytes)
+and fails on the old code. A body that is not JSON was already an `api_error` (`ValueError`). The Anthropic
+provider has no such gap: the SDK reads a non-streamed body inside its own send, where any failure becomes
+`APIConnectionError`, which is already handled. (2) `sweep/runner.py` `run_session` sets `stopped = "complete"` in
+the loop's `else`, so an exception keeps `crashed`; `test_an_exception_mid_session_is_summarized_as_crashed_not_complete`
+fails on the old code (`'complete' == 'crashed'`). Neither file is frozen by `prereg-v1`; `hc protocol check` ok.
 
 ---
 

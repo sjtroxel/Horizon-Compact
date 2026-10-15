@@ -429,9 +429,10 @@ def run_session(
             tally.finished += 1
             return None
 
+    # "crashed" until the loop ends on its own terms: an exception leaving it keeps the label (KNOWN-GAPS OPEN
+    # 2026-10-14; it used to be set to "complete" before the loop, so a crash was summarized as complete).
     stopped = "crashed"
     try:
-        stopped = "complete"
         for position, spec in enumerate(plan.runs, 1):
             if spec.run_id in existing.finals:
                 continue
@@ -439,6 +440,8 @@ def run_session(
             if reason is not None:
                 stopped = reason
                 break
+        else:
+            stopped = "complete"
     finally:
         summary = {
             "record_version": RECORD_VERSION,
