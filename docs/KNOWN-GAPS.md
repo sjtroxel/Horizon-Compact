@@ -7,7 +7,30 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-15, about noon (PHASE 4 CLOSED: the reveal, the bills, the close)
+> ## START HERE — where things stand, 2026-10-15, afternoon (Phase 5 search-half doc APPROVED; THE SEARCH RUNS TOMORROW BY RULE)
+>
+> **Measured at the start of the session:** last commit `fe5c546` (Phase 4 close), pushed, tree clean; one worktree
+> (`main`). After today's doc edits: `make check` green, **2130 tests** (no code changed).
+>
+> **Phase 4 is closed.** **Phase 5's search-half IMPLEMENTATION doc is written** (Opus):
+> `docs/phases/phase-5-case-building-search-IMPLEMENTATION.md`. **APPROVED 2026-10-15, about 3:50 PM (his), all seven
+> decisions in §8 as recommended.**
+>
+> **The search date is 2026-10-16, by rule** (protocol §12.2: the day after the official results are committed;
+> `6d1ef6a`, 2026-10-15). Window 2026-08-01 to 2026-10-15; fallback month July 2026. No earlier doc wrote the date down.
+>
+> **Next, in order (search-half doc §5):**
+> 1. **His:** ~~decide §8~~ (done). His commit: `phase 5: search-half implementation doc` (this doc and today's
+>    stale-doc fixes).
+> 2. Tonight or tomorrow morning: the EFTS reply-shape check (one request, a week in **January 2025**, never inside
+>    July-October 2026), `hc case search` built (Sonnet) and reviewed (Opus), the projection with his three readings.
+> 3. **2026-10-16: his one command, `hc case search --date 2026-10-16`.**
+> 4. Then Stage C (the case code) and Stage D (the cases, one at a time within a type).
+>
+> **Not closed from earlier phases (not Phase 5's prerequisites):** Phase 1's DoD 7 and close-out C6; Phase 1.5
+> (needed before Phase 6). OPEN entry below.
+
+> ## START HERE — where things stood, 2026-10-15, about noon (PHASE 4 CLOSED: the reveal, the bills, the close)
 >
 > **Measured:** `make check` green, **2130 tests** (three new, one per fix); `hc protocol check` ok. **`6d1ef6a`** (the reveal) pushed, **CI
 > `38750042773` and Deploy `38750042919` green**. Today's close commit carries the docs below; its CI is owed.
@@ -37,6 +60,9 @@ case by its type and a neutral label. The names live only in the private longlis
 > 2. Phase 5's search half: its IMPLEMENTATION doc, immediately before the search (ROADMAP row 5).
 >
 > *The 2026-10-14 7:30 PM block below is superseded on what is next; it stays as the day's record.*
+>
+> *Superseded on what is next by the 2026-10-15 afternoon block above. Item 1 is done: `fe5c546` pushed, CI and
+> Deploy green by his report, the tag's worktree removed (`git worktree list` shows only `main`, checked 2026-10-15).*
 
 > ## START HERE — where things stood, 2026-10-14, about 7:30 PM (Phase 4: EVERY SWEEP RUN, record checks pass; the reveal next)
 >
@@ -1059,6 +1085,18 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
+## OPEN 2026-10-15 — Phases 1 and 1.5 are not closed
+
+Found while checking "are Phases 1-4 done" (his question, 2026-10-15). **Phase 1:** built and DoD 1-6 met (DoD 1 on Haiku
+5.5, IMPLEMENTATION doc §21a), but **DoD 7 (the phase's spend from the bill) and C6 (the close-out: DoD audit,
+version 0.1.0) were never done.** The spend was cents (about $0.07 of credit and his cash, plus Fargate inside the AWS
+credit). **Phase 1.5 `publish-path`** (the scorer's JSON, one page on the public URL, the destroy-and-re-apply test)
+**has not started**; its IMPLEMENTATION doc is unwritten, and the CARRIED entry below lists its inputs. Neither blocks
+Phase 5 or 5.5; Phase 1.5 is Phase 6's prerequisite. `pyproject.toml` stays `0.0.5` until both close (Phase 2
+decision 4). **Closes when:** Phase 1's C6 is committed, and Phase 1.5 is built and closed.
+
+---
+
 ## OPEN 2026-10-15 — two small faults found at the reveal and the bills (both fixed 2026-10-15; item 1's proof owed)
 
 Found on 2026-10-15; neither touches a run record, a results file or a verdict.
@@ -1276,6 +1314,11 @@ inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-son
 
 ## OPEN — for Phase 5: the case mode's readers and wiring, 2026-10-09
 
+*2026-10-15: planned in the search-half IMPLEMENTATION doc: the record writer (`hc case lock`), the S3 probe reader and
+the GitHub reader are built in its Stage C (§4.8, §4.10) and proved on the probes; the launch's order check and the
+container session that supplies case content are Phase 5.5's. The probe runner is Phase 5's (Phase 3.5 §24.2, dated
+note).*
+
 Phase 3.5 step 6 built the case mode's checks (`protocol/cases.py`) on interfaces, tested with fakes. Phase 5 builds:
 **the record writer** (`experiment/cases/<label>/case.lock`, the format in the Phase 3.5 IMPLEMENTATION doc §16 step 6);
 **the GitHub reader** (each Actions run's `created_at`, from the API, and the record at its head commit, from
@@ -1286,7 +1329,7 @@ supplies the case content from private storage and calls `check_case_official`. 
 
 ---
 
-## OPEN — for Phase 4, from the Phase 3 IMPLEMENTATION doc, 2026-10-08
+## CLOSED 2026-10-11 — for Phase 4, from the Phase 3 IMPLEMENTATION doc (was OPEN, 2026-10-08; every item closed below)
 
 - **Repeats per scenario.** The repeat rule gives one count per scenario (shares by the pilot's spread, choice rates
   at the cap of 20); `sweep/plan.py` takes one `repeats` for the whole sweep. Phase 4's IMPLEMENTATION doc adds
@@ -1342,7 +1385,7 @@ Estimated under $0.15 of AWS credit. Phase 2.5 IMPLEMENTATION doc §22.1.
 
 ---
 
-## OPEN — for Phase 4: `hc sweep launch --official` does not pass `--official` to the task, 2026-10-07
+## CLOSED 2026-10-10 — for Phase 4: `hc sweep launch --official` does not pass `--official` to the task (was OPEN, 2026-10-07)
 
 Found in Opus's review of Phase 2.5 steps 1-3. `cmd_sweep_launch` checks the protocol lock on the laptop when
 `--official` is given, but the container command it builds (`sweep run ...`) has no `--official`, so the task runs
@@ -1660,7 +1703,7 @@ recommendation are in the Phase 0 scope doc. **His decision.**
 
 ---
 
-## OPEN — Phase 0.5 checks, from `planning/09` §5, 2026-10-03
+## CLOSED 2026-10-08 — Phase 0.5 checks, from `planning/09` §5 (was OPEN, 2026-10-03; every row closed below)
 
 `planning/09` calls these the Phase 0 checks; they moved to Phase 0.5 with the AWS half (2026-10-03, his).
 Each is Claude's, using live sources only. None blocks Phase 0.
@@ -1770,7 +1813,7 @@ provisionally); §14 items 2-4 marked closed with a pointer here.
 
 ---
 
-## OPEN — owed by him, 2026-10-03
+## CLOSED 2026-10-05 — owed by him (was OPEN, 2026-10-03; every item done below)
 
 - ~~**Create the empty public GitHub repo `Horizon-Compact`**~~ **Done 2026-10-03**, with `f214280` pushed to it.
 - ~~**The one-line disclosure in `docs/planning/README.md`**~~ **Done 2026-10-03**, his words, in `4405412`.

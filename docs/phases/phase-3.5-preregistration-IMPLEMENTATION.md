@@ -1188,6 +1188,9 @@ to them, which covers every planned use; adding `s4shape` to that list is not pa
    (its "keeps `role = development` until ..." is settled); `KNOWN-GAPS.md` closes the OPEN of 2026-10-12 and carries
    one item to Phase 5.5 (below).
 
+*Dated note, 2026-10-15: the probe runner is Phase 5's, not 5.5's: the Phase 5 scope doc puts the probe before the
+freeze (Delivers 8), and the scope doc governs. Its own model rule is in the search-half doc §4.8.*
+
 **Carried to Phase 5.5, not built here:** the real cases' recognition probes run on every official model
 (protocol §12.8) and have no runner yet (`protocol/cases.py` only reads their records). That runner must not reuse
 `check_probe_model`'s development-only rule, or it will refuse the very models it is for; its own rule goes in that

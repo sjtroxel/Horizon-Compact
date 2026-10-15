@@ -1,7 +1,8 @@
 # Phase 5 — Case Building, code half: IMPLEMENTATION (v0.5)
 
 > **IMPLEMENTATION doc, code half. Written 2026-10-11 (Opus). APPROVED 2026-10-11 (his), all four decisions in §6 as
-> recommended, (a). Not yet built.** Written after
+> recommended, (a). Built 2026-10-11, §7 steps 1-7 (`4cd6559` through `8271785`); the search half is
+> `phase-5-case-building-search-IMPLEMENTATION.md` (dated note, 2026-10-15).** Written after
 > Phase 5 was split by code and search (his, 2026-10-10; the scope doc's dated note; ROADMAP decision history).
 > Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its six decisions as recorded), the protocol
 > draft (`experiment/protocol/protocol-v1.md` §12, all of it), `planning/01` §4.6, §4.8 and §5, `planning/02` §2.7 as
