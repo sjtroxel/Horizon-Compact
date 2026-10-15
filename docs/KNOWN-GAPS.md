@@ -7,28 +7,42 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-15, afternoon (Phase 5 search-half doc APPROVED; THE SEARCH RUNS TOMORROW BY RULE)
+> ## START HERE — where things stand, 2026-10-15, about 4:20 PM (handoff: Stage A built; THE SEARCH RUNS TOMORROW, 2026-10-16, BY RULE)
 >
-> **Measured at the start of the session:** last commit `fe5c546` (Phase 4 close), pushed, tree clean; one worktree
-> (`main`). After today's doc edits: `make check` green, **2130 tests** (no code changed).
+> **Measured at handoff:** `make check` green, **2135 tests**. Last pushed commit `74a2e83` (the search-half doc,
+> approved). **Not committed at handoff (his, tonight):** `hc case search` and its tests (`cli.py`,
+> `casebuild/search.py`, `tests/test_case_cli.py`), the doc's §11, `evidence/phase-5/projection.md`, this block. If `git log` lacks
+> `phase 5: hc case search and the reply check`, that commit did not happen.
 >
-> **Phase 4 is closed.** **Phase 5's search-half IMPLEMENTATION doc is written** (Opus):
-> `docs/phases/phase-5-case-building-search-IMPLEMENTATION.md`. **APPROVED 2026-10-15, about 3:50 PM (his), all seven
-> decisions in §8 as recommended.**
+> **Today:** Phase 4 closed (`6d1ef6a`, `fe5c546`). **Phase 5's search-half IMPLEMENTATION doc written and APPROVED**
+> (his, about 3:50 PM, all seven decisions in §8 as recommended): `docs/phases/phase-5-case-building-search-IMPLEMENTATION.md`.
+> **Stage A, done:** the SEC reply's shape checked on 2025 dates only (matches `search.py`; a page is 100 hits; 8-K/A
+> dropped by the form filter, kept as built), and `hc case search` built and reviewed (Opus), both in the doc's §11.
+> His SEC User-Agent is now in local git config `hc.secUserAgent`.
 >
-> **The search date is 2026-10-16, by rule** (protocol §12.2: the day after the official results are committed;
-> `6d1ef6a`, 2026-10-15). Window 2026-08-01 to 2026-10-15; fallback month July 2026. No earlier doc wrote the date down.
+> **The search date is 2026-10-16, by rule** (protocol §12.2; results committed in `6d1ef6a`, 2026-10-15). Window
+> 2026-08-01 to 2026-10-15 whatever day it runs (decision 1); fallback month July 2026.
 >
-> **Next, in order (search-half doc §5):**
-> 1. **His:** ~~decide §8~~ (done). His commit: `phase 5: search-half implementation doc` (this doc and today's
->    stale-doc fixes).
-> 2. Tonight or tomorrow morning: the EFTS reply-shape check (one request, a week in **January 2025**, never inside
->    July-October 2026), `hc case search` built (Sonnet) and reviewed (Opus), the projection with his three readings.
-> 3. **2026-10-16: his one command, `hc case search --date 2026-10-16`.**
-> 4. Then Stage C (the case code) and Stage D (the cases, one at a time within a type).
+> **Tonight, his, one command at a time:** (1) `git add -A && git commit -m "phase 5: hc case search and the reply
+> check"`; (2) `git push` (deploys; CI and Deploy green); (3) `mkdir ~/horizon-compact-appendix`; (4) `git config
+> hc.appendixDir /home/sjtroxel/horizon-compact-appendix` (decision 7: outside every repository).
 >
-> **Not closed from earlier phases (not Phase 5's prerequisites):** Phase 1's DoD 7 and close-out C6; Phase 1.5
-> (needed before Phase 6). OPEN entry below.
+> **TOMORROW, 2026-10-16, first move, in order:**
+> 1. Check tonight's four steps landed (`git log -1`, CI and Deploy green, `git config --get hc.appendixDir`).
+> 2. ~~The projection~~ **done 2026-10-15** from his 10:30 AM readings (nothing paid has run since):
+>    `docs/phases/evidence/phase-5/projection.md`, passes (about $35 cumulative after Phases 5 and 5.5, worst about
+>    $41). It rides in tonight's commit, so it predates the search.
+> 3. **The search, his one command:** `hc case search --date 2026-10-16`. Done looks like: counts per query and per
+>    type printed, no name; `candidates.json` and `selection-log-1.json` in the appendix's `search/` folder. A stop
+>    part-way: run the same command again the same day.
+> 4. Then Stage C (the case code: `hc case log`, `hc case build` with the Sonnet 5.5 extraction entry, scenario
+>    check, `hc case lock`, the reader, the probe and its IAM change), Sonnet builds, Opus reviews.
+>
+> **His, not Claude's:** when to run the search on the 16th (any time that day); whether to close Phase 1 (DoD 7 and
+> C6, about 20 minutes, doc-only) before or after Stage C. **Not closed from earlier phases (not Phase 5's
+> prerequisites):** Phase 1's DoD 7 and C6; Phase 1.5 (before Phase 6). OPEN entry below.
+>
+> *The 2026-10-15 afternoon block (approval) is folded into this one.*
 
 > ## START HERE — where things stood, 2026-10-15, about noon (PHASE 4 CLOSED: the reveal, the bills, the close)
 >

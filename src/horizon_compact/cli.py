@@ -6,6 +6,7 @@ calls nothing. Every command that calls a model or authenticates to AWS is typed
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import os
 import random
@@ -13,7 +14,7 @@ import signal
 import subprocess
 import sys
 from collections.abc import Callable, Sequence
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from types import FrameType
 
@@ -23,12 +24,23 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 import horizon_compact
 from horizon_compact.casebuild.appendix import AppendixError, open_case
+from horizon_compact.casebuild.edgar import EdgarClient, EdgarError, UrllibTransport
+from horizon_compact.casebuild.edgar import user_agent as sec_user_agent
 from horizon_compact.casebuild.foreshadow import (
     ForeshadowError,
     find_hits,
     format_hits,
     parse_terms,
     write_hits,
+)
+from horizon_compact.casebuild.search import (
+    RULE_DATE,
+    LogError,
+    SearchError,
+    SelectionLog,
+    run_search,
+    write_candidates,
+    write_log_version,
 )
 from horizon_compact.dossier.check import default_repo_root, run_checks
 from horizon_compact.dossier.figures import FigureError, load_figures
@@ -1045,10 +1057,54 @@ def cmd_case_hashes(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def _today() -> date:
+    """The local date; a function so the tests can set it."""
+    return date.today()
+
+
+def cmd_case_search(args: argparse.Namespace) -> int:
+    """The search of protocol §12.3, once (search-half IMPLEMENTATION doc §4.4). Prints counts only."""
+    today = _today()
+    if args.date != today:
+        raise SearchError(f"--date {args.date.isoformat()} is not today ({today.isoformat()})")
+    if today < RULE_DATE:
+        raise SearchError(
+            f"the search runs on {RULE_DATE.isoformat()} by rule (protocol §12.2), not before"
+        )
+    deviation = (args.deviation or "").strip()
+    if today != RULE_DATE and not deviation:
+        raise SearchError(
+            f"the rule date was {RULE_DATE.isoformat()}: a later search is a deviation, so give "
+            '--deviation "<the reason>"'
+        )
+    case = open_case("search")
+    if (case.directory / "candidates.json").exists():
+        raise SearchError("the search has already run: candidates.json exists, and it runs once")
+    client = EdgarClient(appendix=case, transport=UrllibTransport(), user_agent=sec_user_agent())
+    result = run_search(client, RULE_DATE)
+    record = {**result.record, "run_on": today.isoformat(), "deviation": deviation or None}
+    result = dataclasses.replace(result, record=record)
+    write_candidates(case, result)
+    log_name = write_log_version(case, SelectionLog.start(result.candidates))
+    print(f"search: window to {result.end.isoformat()}, run on {today.isoformat()}")
+    for query in record["queries"]:
+        dropped = ", ".join(f"{n} {why}" for why, n in sorted(query["dropped"].items())) or "none"
+        print(
+            f"  channel {query['channel']} {query['query']}: {query['total']} documents, "
+            f"{query['pages']} pages, {query['filings_kept']} filings kept; dropped: {dropped}"
+        )
+    for key, count in record["candidates"].items():
+        print(f"  {key}: {count} candidates")
+    print(f"written: candidates.json and {log_name} in the appendix's search folder")
+    return CLEAN_EXIT
+
+
 def cmd_case(args: argparse.Namespace) -> int:
     try:
+        if args.action == "search":
+            return cmd_case_search(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
-    except (AppendixError, ForeshadowError, CaseError) as exc:
+    except (AppendixError, ForeshadowError, CaseError, SearchError, EdgarError, LogError) as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return REFUSED_EXIT
 
@@ -1485,6 +1541,15 @@ def build_parser() -> argparse.ArgumentParser:
     hashes.add_argument("label", help="the case's neutral label, such as closure-1")
     hashes.add_argument("--rubric", type=Path, required=True, help="the rubric file")
     hashes.add_argument("--probe-set", type=int, choices=(1, 2), default=1)
+    search = case_actions.add_parser(
+        "search",
+        help="The real-case search of protocol §12.3, run once on the rule date. Reads the SEC; "
+        "writes candidates into the appendix; prints counts only.",
+    )
+    search.add_argument(
+        "--date", type=date.fromisoformat, required=True, help="today's date, YYYY-MM-DD"
+    )
+    search.add_argument("--deviation", help="the reason, if the search runs after the rule date")
 
     probes = groups.add_parser(
         "probes", help="Phase 2.5 comprehension probes. Development models only; no objective."

@@ -95,7 +95,10 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-15, afternoon (Phase 4 closed; Phase 5 search-half doc written)
+### Where the build actually is — 2026-10-15, about 4:20 PM (Phase 4 closed; Phase 5 search-half doc approved; Stage A built)
+
+**Measured at handoff:** `make check` green, **2135 tests**. `hc case search` built and reviewed, his commit
+tonight; the search runs 2026-10-16 by rule (`KNOWN-GAPS.md` START HERE).
 
 - **Phase 4 closed** (`6d1ef6a` the reveal, `fe5c546` the close and four fault fixes; CI and Deploy green by his
   report). Measured about $3.01; cumulative at most about $28.

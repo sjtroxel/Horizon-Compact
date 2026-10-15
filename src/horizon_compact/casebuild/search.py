@@ -45,6 +45,9 @@ from horizon_compact.casebuild.edgar import EdgarClient
 EFTS_URL = "https://efts.sec.gov/LATEST/search-index"
 WINDOW_START = date(2026, 8, 1)  # protocol §12.2
 FALLBACK_START = date(2026, 7, 1)  # the month after the latest cutoff, held apart
+# §12.2: the day after the official grid's results were committed (`6d1ef6a`, 2026-10-15). The window
+# ends the day before it whatever day the search runs (search-half doc, decision 1, his, 2026-10-15).
+RULE_DATE = date(2026, 10, 16)
 FORM = "8-K"
 MANUFACTURING = (2000, 3999)
 MAX_RESULTS = 10_000  # the most a query can be paged through; more is a deviation to report

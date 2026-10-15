@@ -416,4 +416,36 @@ protocol's check done the same way each time.
 
 ## 11. As built
 
-*Empty until the build.*
+**Stage A step 2, the reply's shape (2026-10-15, about 3:58 PM CDT).** Three read-only requests by him
+(`scratch/sec-efts-shape.sh`, `scratch/sec-efts-paging.sh`, his User-Agent now in local git config
+`hc.secUserAgent`), query `"Item 2.05"`, forms 8-K, dates in the first half of **2025** only, so no candidate was
+seen. Read by Claude from the printed structure, no name printed:
+- **HTTP 200.** Top level `took`, `timed_out`, `_shards`, `hits`, `aggregations`, `query`. `hits.total` is
+  `{value, relation}` with `relation` `eq`; `hits.hits` a list. Each hit has `_id` (`<accession>:<file>`),
+  `_index`, `_score`, `_source`.
+- `_source` holds every field `search.py` reads: `adsh` (text), `form` (text), `file_date` (`YYYY-MM-DD`), `items`
+  (**a list of text**, `['2.05', '7.01']`), `sics` (**a list of text**, `['5311']`), `ciks` and `display_names`
+  (lists). Also present, unread: `biz_locations`, `biz_states`, `inc_states`, `file_num`, `film_num`,
+  `file_description`, `file_type`, `period_ending`, `root_forms`, `sequence`, `xsl`.
+- **Paging works:** 160 hits for the half-year; `from=0` returned 100, `from=100` returned 60; no id on both pages;
+  100 distinct accession numbers on the first page. **A page is 100 hits.**
+- **A search for forms 8-K also returns 8-K/A.** `filter_reason` drops them ("form is 8-K/A, not 8-K"), the literal
+  reading of protocol §12.3's Forms column; an amendment's original 8-K is found by the same query. Kept as built,
+  and the drop is counted in each query's record.
+
+**Nothing in `search.py` needed changing.**
+
+**Stage A step 3, `hc case search` (2026-10-15, Opus built and reviewed; for his commit).** `RULE_DATE`
+(2026-10-16) in `casebuild/search.py`; `cmd_case_search` in `cli.py`. It refuses: a `--date` that is not today's
+local date; any day before the rule date; a later day without `--deviation "<reason>"`; a second run
+(`search/candidates.json` exists). It always searches through 2026-10-15 (decision 1), records `run_on` and the
+deviation in `candidates.json`, writes `selection-log-1.json` and its public view, and prints per-query counts, the
+filter drops and the candidates per type and pool, never a name or an accession number. A run stopped part-way (a
+403, a network fault) writes no candidate list; its fetched pages stay in the search folder's cache, and the same
+command finishes it. Five tests in `tests/test_case_cli.py` on fake replies of the real shape; 2135 tests,
+`make check` green.
+
+**Stage A step 4, the projection (2026-10-15, about 4:25 PM CDT).** From his readings of 10:30 AM the same day
+(nothing paid has run since): `docs/phases/evidence/phase-5/projection.md`. **Passes:** about $35 cumulative after
+Phases 5 and 5.5, at worst about $41; inside the Anthropic workspace limit and his $5 OpenRouter cap. Committed with
+step 3, before the search.
