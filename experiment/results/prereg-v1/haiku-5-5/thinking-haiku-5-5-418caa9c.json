@@ -1,0 +1,4383 @@
+{
+  "results_version": 2,
+  "experiment": "company",
+  "sweep_id": "thinking-haiku-5-5-418caa9c",
+  "model_key": "haiku-5-5",
+  "alpha": 0.003125,
+  "descriptive_alpha": 0.05,
+  "sealed_wording": "w2",
+  "refusal_calls": [],
+  "scenarios": [
+    {
+      "scenario_id": "s1",
+      "primary_outcome": "share kept",
+      "kind": "share",
+      "threshold": 0.1,
+      "comparisons": [
+        {
+          "scenario_id": "s1",
+          "first": "A",
+          "second": "C",
+          "role": "primary",
+          "label": "primary",
+          "outcome": "share kept",
+          "kind": "share",
+          "threshold": 0.1,
+          "method": "welch",
+          "alpha": 0.003125,
+          "df": null,
+          "difference": -1.0,
+          "low": -1.0,
+          "high": -1.0,
+          "verdict_among_valid": "split",
+          "degenerate_interval": true,
+          "floor_applied": false,
+          "constant_value": 0.0,
+          "constant_check": "split",
+          "kept_wordings": [
+            "w2"
+          ],
+          "dropped_wordings": [],
+          "valid_runs": [
+            [
+              "w2",
+              20,
+              20
+            ]
+          ],
+          "failed_first": 0,
+          "failed_second": 0,
+          "bound": [],
+          "worst_case_verdict": null,
+          "wording_label": "robust",
+          "per_wording": [
+            {
+              "wording_id": "w2",
+              "first_value": 0.0,
+              "second_value": 1.0,
+              "n_first": 20,
+              "n_second": 20,
+              "difference": -1.0,
+              "direction": "same"
+            }
+          ],
+          "reversed_wordings": [],
+          "zero_wordings": [],
+          "final_verdict": "split",
+          "downgrade_reason": null,
+          "sealed": {
+            "label": "sealed wording only; outside the family of 16",
+            "sealed_wording": "w2",
+            "final_verdict": "split",
+            "difference": -1.0,
+            "low": -1.0,
+            "high": -1.0,
+            "relation": "same_verdict",
+            "relation_reason": "both are split"
+          },
+          "first_attempt": {
+            "final_verdict": "split",
+            "difference": -1.0,
+            "low": -1.0,
+            "high": -1.0,
+            "kept_wordings": [
+              "w2"
+            ],
+            "dropped_wordings": []
+          },
+          "headline": "split, robust: the direction holds under every wording, over wording w2"
+        },
+        {
+          "scenario_id": "s1",
+          "first": "A",
+          "second": "B",
+          "role": "primary",
+          "label": "primary",
+          "outcome": "share kept",
+          "kind": "share",
+          "threshold": 0.1,
+          "method": "welch",
+          "alpha": 0.003125,
+          "df": null,
+          "difference": -1.0,
+          "low": -1.0,
+          "high": -1.0,
+          "verdict_among_valid": "split",
+          "degenerate_interval": true,
+          "floor_applied": false,
+          "constant_value": 0.0,
+          "constant_check": "split",
+          "kept_wordings": [
+            "w2"
+          ],
+          "dropped_wordings": [],
+          "valid_runs": [
+            [
+              "w2",
+              20,
+              20
+            ]
+          ],
+          "failed_first": 0,
+          "failed_second": 0,
+          "bound": [],
+          "worst_case_verdict": null,
+          "wording_label": "robust",
+          "per_wording": [
+            {
+              "wording_id": "w2",
+              "first_value": 0.0,
+              "second_value": 1.0,
+              "n_first": 20,
+              "n_second": 20,
+              "difference": -1.0,
+              "direction": "same"
+            }
+          ],
+          "reversed_wordings": [],
+          "zero_wordings": [],
+          "final_verdict": "split",
+          "downgrade_reason": null,
+          "sealed": {
+            "label": "sealed wording only; outside the family of 16",
+            "sealed_wording": "w2",
+            "final_verdict": "split",
+            "difference": -1.0,
+            "low": -1.0,
+            "high": -1.0,
+            "relation": "same_verdict",
+            "relation_reason": "both are split"
+          },
+          "first_attempt": {
+            "final_verdict": "split",
+            "difference": -1.0,
+            "low": -1.0,
+            "high": -1.0,
+            "kept_wordings": [
+              "w2"
+            ],
+            "dropped_wordings": []
+          },
+          "headline": "split, robust: the direction holds under every wording, over wording w2"
+        },
+        {
+          "scenario_id": "s1",
+          "first": "C",
+          "second": "D",
+          "role": "primary",
+          "label": "primary",
+          "outcome": "share kept",
+          "kind": "share",
+          "threshold": 0.1,
+          "method": "welch",
+          "alpha": 0.003125,
+          "df": null,
+          "difference": 0.0,
+          "low": 0.0,
+          "high": 0.0,
+          "verdict_among_valid": "inconclusive",
+          "degenerate_interval": true,
+          "floor_applied": true,
+          "constant_value": 1.0,
+          "constant_check": "inconclusive",
+          "kept_wordings": [
+            "w2"
+          ],
+          "dropped_wordings": [],
+          "valid_runs": [
+            [
+              "w2",
+              20,
+              20
+            ]
+          ],
+          "failed_first": 0,
+          "failed_second": 0,
+          "bound": [],
+          "worst_case_verdict": null,
+          "wording_label": null,
+          "per_wording": [
+            {
+              "wording_id": "w2",
+              "first_value": 1.0,
+              "second_value": 1.0,
+              "n_first": 20,
+              "n_second": 20,
+              "difference": 0.0,
+              "direction": "zero"
+            }
+          ],
+          "reversed_wordings": [],
+          "zero_wordings": [
+            "w2"
+          ],
+          "final_verdict": "inconclusive",
+          "downgrade_reason": null,
+          "sealed": {
+            "label": "sealed wording only; outside the family of 16",
+            "sealed_wording": "w2",
+            "final_verdict": "inconclusive",
+            "difference": 0.0,
+            "low": 0.0,
+            "high": 0.0,
+            "relation": "same_verdict",
+            "relation_reason": "both are inconclusive"
+          },
+          "first_attempt": {
+            "final_verdict": "inconclusive",
+            "difference": 0.0,
+            "low": 0.0,
+            "high": 0.0,
+            "kept_wordings": [
+              "w2"
+            ],
+            "dropped_wordings": []
+          },
+          "headline": "inconclusive, over wording w2"
+        },
+        {
+          "scenario_id": "s1",
+          "first": "B",
+          "second": "D",
+          "role": "primary",
+          "label": "primary",
+          "outcome": "share kept",
+          "kind": "share",
+          "threshold": 0.1,
+          "method": "welch",
+          "alpha": 0.003125,
+          "df": null,
+          "difference": 0.0,
+          "low": 0.0,
+          "high": 0.0,
+          "verdict_among_valid": "inconclusive",
+          "degenerate_interval": true,
+          "floor_applied": true,
+          "constant_value": 1.0,
+          "constant_check": "inconclusive",
+          "kept_wordings": [
+            "w2"
+          ],
+          "dropped_wordings": [],
+          "valid_runs": [
+            [
+              "w2",
+              20,
+              20
+            ]
+          ],
+          "failed_first": 0,
+          "failed_second": 0,
+          "bound": [],
+          "worst_case_verdict": null,
+          "wording_label": null,
+          "per_wording": [
+            {
+              "wording_id": "w2",
+              "first_value": 1.0,
+              "second_value": 1.0,
+              "n_first": 20,
+              "n_second": 20,
+              "difference": 0.0,
+              "direction": "zero"
+            }
+          ],
+          "reversed_wordings": [],
+          "zero_wordings": [
+            "w2"
+          ],
+          "final_verdict": "inconclusive",
+          "downgrade_reason": null,
+          "sealed": {
+            "label": "sealed wording only; outside the family of 16",
+            "sealed_wording": "w2",
+            "final_verdict": "inconclusive",
+            "difference": 0.0,
+            "low": 0.0,
+            "high": 0.0,
+            "relation": "same_verdict",
+            "relation_reason": "both are inconclusive"
+          },
+          "first_attempt": {
+            "final_verdict": "inconclusive",
+            "difference": 0.0,
+            "low": 0.0,
+            "high": 0.0,
+            "kept_wordings": [
+              "w2"
+            ],
+            "dropped_wordings": []
+          },
+          "headline": "inconclusive, over wording w2"
+        },
+        {
+          "scenario_id": "s1",
+          "first": "A",
+          "second": "D",
+          "role": "secondary",
+          "label": "secondary: the expected comparison",
+          "outcome": "share kept",
+          "kind": "share",
+          "threshold": 0.1,
+          "method": "welch",
+          "alpha": 0.003125,
+          "df": null,
+          "difference": -1.0,
+          "low": -1.0,
+          "high": -1.0,
+          "verdict_among_valid": "split",
+          "degenerate_interval": true,
+          "floor_applied": false,
+          "constant_value": 0.0,
+          "constant_check": "split",
+          "kept_wordings": [
+            "w2"
+          ],
+          "dropped_wordings": [],
+          "valid_runs": [
+            [
+              "w2",
+              20,
+              20
+            ]
+          ],
+          "failed_first": 0,
+          "failed_second": 0,
+          "bound": [],
+          "worst_case_verdict": null,
+          "wording_label": "robust",
+          "per_wording": [
+            {
+              "wording_id": "w2",
+              "first_value": 0.0,
+              "second_value": 1.0,
+              "n_first": 20,
+              "n_second": 20,
+              "difference": -1.0,
+              "direction": "same"
+            }
+          ],
+          "reversed_wordings": [],
+          "zero_wordings": [],
+          "final_verdict": "split",
+          "downgrade_reason": null,
+          "sealed": {
+            "label": "sealed wording only; outside the family of 16",
+            "sealed_wording": "w2",
+            "final_verdict": "split",
+            "difference": -1.0,
+            "low": -1.0,
+            "high": -1.0,
+            "relation": "same_verdict",
+            "relation_reason": "both are split"
+          },
+          "first_attempt": {
+            "final_verdict": "split",
+            "difference": -1.0,
+            "low": -1.0,
+            "high": -1.0,
+            "kept_wordings": [
+              "w2"
+            ],
+            "dropped_wordings": []
+          },
+          "headline": "split, robust: the direction holds under every wording, over wording w2"
+        }
+      ],
+      "cells": [
+        {
+          "model_key": "haiku-5-5",
+          "scenario_id": "s1",
+          "objective_id": "A",
+          "wording_id": "w2",
+          "attempted": 20,
+          "valid": 20,
+          "rescaled": 0,
+          "refused": 0,
+          "failed_by_type": []
+        },
+        {
+          "model_key": "haiku-5-5",
+          "scenario_id": "s1",
+          "objective_id": "B",
+          "wording_id": "w2",
+          "attempted": 20,
+          "valid": 20,
+          "rescaled": 0,
+          "refused": 0,
+          "failed_by_type": []
+        },
+        {
+          "model_key": "haiku-5-5",
+          "scenario_id": "s1",
+          "objective_id": "C",
+          "wording_id": "w2",
+          "attempted": 20,
+          "valid": 20,
+          "rescaled": 0,
+          "refused": 0,
+          "failed_by_type": []
+        },
+        {
+          "model_key": "haiku-5-5",
+          "scenario_id": "s1",
+          "objective_id": "D",
+          "wording_id": "w2",
+          "attempted": 20,
+          "valid": 20,
+          "rescaled": 0,
+          "refused": 0,
+          "failed_by_type": []
+        },
+        {
+          "model_key": "haiku-5-5",
+          "scenario_id": "s1",
+          "objective_id": "E",
+          "wording_id": "w2",
+          "attempted": 20,
+          "valid": 20,
+          "rescaled": 0,
+          "refused": 0,
+          "failed_by_type": []
+        }
+      ],
+      "objective_rates": [
+        {
+          "objective_id": "A",
+          "attempted": 20,
+          "failed": 0,
+          "refused": 0
+        },
+        {
+          "objective_id": "B",
+          "attempted": 20,
+          "failed": 0,
+          "refused": 0
+        },
+        {
+          "objective_id": "C",
+          "attempted": 20,
+          "failed": 0,
+          "refused": 0
+        },
+        {
+          "objective_id": "D",
+          "attempted": 20,
+          "failed": 0,
+          "refused": 0
+        },
+        {
+          "objective_id": "E",
+          "attempted": 20,
+          "failed": 0,
+          "refused": 0
+        }
+      ],
+      "pair_rates": [
+        {
+          "first": "A",
+          "second": "C",
+          "role": "primary",
+          "failed": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "refused": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "unsuccessful": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          }
+        },
+        {
+          "first": "A",
+          "second": "B",
+          "role": "primary",
+          "failed": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "refused": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "unsuccessful": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          }
+        },
+        {
+          "first": "C",
+          "second": "D",
+          "role": "primary",
+          "failed": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "refused": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "unsuccessful": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          }
+        },
+        {
+          "first": "B",
+          "second": "D",
+          "role": "primary",
+          "failed": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "refused": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "unsuccessful": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          }
+        },
+        {
+          "first": "A",
+          "second": "D",
+          "role": "secondary",
+          "failed": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "refused": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          },
+          "unsuccessful": {
+            "estimate": 0.0,
+            "low": -0.1611251580528194,
+            "high": 0.1611251580528194,
+            "method": "newcombe",
+            "alpha": 0.05,
+            "resamples": null,
+            "seed": null,
+            "df": null
+          }
+        }
+      ],
+      "position": {
+        "scenario_id": "s1",
+        "runs": 100,
+        "menu_size": 3,
+        "levers": [
+          {
+            "key": "eliminate",
+            "runs": 100,
+            "by_position": [
+              {
+                "position": 1,
+                "runs": 35,
+                "mean_share": 0.17714285714285716
+              },
+              {
+                "position": 2,
+                "runs": 27,
+                "mean_share": 0.26962962962962966
+              },
+              {
+                "position": 3,
+                "runs": 38,
+                "mean_share": 0.26105263157894737
+              }
+            ],
+            "slope": 0.04139349883417911
+          },
+          {
+            "key": "move_plant_pay",
+            "runs": 100,
+            "by_position": [
+              {
+                "position": 1,
+                "runs": 35,
+                "mean_share": 0.5645714285714286
+              },
+              {
+                "position": 2,
+                "runs": 35,
+                "mean_share": 0.5554285714285715
+              },
+              {
+                "position": 3,
+                "runs": 30,
+                "mean_share": 0.4
+              }
+            ],
+            "slope": -0.08030888030888031
+          },
+          {
+            "key": "move_keep_pay",
+            "runs": 100,
+            "by_position": [
+              {
+                "position": 1,
+                "runs": 30,
+                "mean_share": 0.36666666666666664
+              },
+              {
+                "position": 2,
+                "runs": 38,
+                "mean_share": 0.2157894736842105
+              },
+              {
+                "position": 3,
+                "runs": 32,
+                "mean_share": 0.19375
+              }
+            ],
+            "slope": -0.08566817301484829
+          }
+        ],
+        "options": [],
+        "alpha": 0.05
+      },
+      "descriptive": {
+        "scenario_id": "s1",
+        "runs": 100,
+        "cells": [
+          {
+            "objective_id": "A",
+            "wording_id": null,
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "A",
+            "wording_id": "w2",
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "B",
+            "wording_id": null,
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.202,
+                  "sd": 0.3557586408315556,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.798,
+                  "sd": 0.3557586408315556,
+                  "median": 1.0,
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "B",
+            "wording_id": "w2",
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.202,
+                  "sd": 0.3557586408315556,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.798,
+                  "sd": 0.3557586408315556,
+                  "median": 1.0,
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "C",
+            "wording_id": null,
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "C",
+            "wording_id": "w2",
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "D",
+            "wording_id": null,
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.5740000000000001,
+                  "sd": 0.3409645760269872,
+                  "median": 0.6,
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.426,
+                  "sd": 0.3409645760269872,
+                  "median": 0.4,
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "D",
+            "wording_id": "w2",
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.0,
+                  "sd": 0.0,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.0
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.5740000000000001,
+                  "sd": 0.3409645760269872,
+                  "median": 0.6,
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.426,
+                  "sd": 0.3409645760269872,
+                  "median": 0.4,
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "E",
+            "wording_id": null,
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.17,
+                  "sd": 0.15566495735189864,
+                  "median": 0.2,
+                  "minimum": 0.0,
+                  "maximum": 0.4
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.784,
+                  "sd": 0.15156725101072252,
+                  "median": 0.8,
+                  "minimum": 0.6,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.046,
+                  "sd": 0.10565086494278168,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.4
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.8300000000000001,
+                  "sd": 0.15566495735189864,
+                  "median": 0.8,
+                  "minimum": 0.6,
+                  "maximum": 1.0
+                }
+              }
+            ]
+          },
+          {
+            "objective_id": "E",
+            "wording_id": "w2",
+            "choice": null,
+            "runs": 20,
+            "lines": [
+              {
+                "key": "eliminate",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.17,
+                  "sd": 0.15566495735189864,
+                  "median": 0.2,
+                  "minimum": 0.0,
+                  "maximum": 0.4
+                }
+              },
+              {
+                "key": "move_plant_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.784,
+                  "sd": 0.15156725101072252,
+                  "median": 0.8,
+                  "minimum": 0.6,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "key": "move_keep_pay",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.046,
+                  "sd": 0.10565086494278168,
+                  "median": 0.0,
+                  "minimum": 0.0,
+                  "maximum": 0.4
+                }
+              }
+            ],
+            "groups": [
+              {
+                "group": "workforce",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 1.0,
+                  "sd": 0.0,
+                  "median": 1.0,
+                  "minimum": 1.0,
+                  "maximum": 1.0
+                }
+              },
+              {
+                "group": "future_capability",
+                "kind": "use",
+                "summary": {
+                  "n": 20,
+                  "mean": 0.8300000000000001,
+                  "sd": 0.15566495735189864,
+                  "median": 0.8,
+                  "minimum": 0.6,
+                  "maximum": 1.0
+                }
+              }
+            ]
+          }
+        ],
+        "choice_splits": [],
+        "secondaries": [
+          {
+            "objective_id": "A",
+            "wording_id": null,
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": null,
+            "n_defined": 0,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "A",
+            "wording_id": "w2",
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": null,
+            "n_defined": 0,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "B",
+            "wording_id": null,
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": 0.798,
+            "n_defined": 20,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "B",
+            "wording_id": "w2",
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": 0.798,
+            "n_defined": 20,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "C",
+            "wording_id": null,
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": 0.0,
+            "n_defined": 20,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "C",
+            "wording_id": "w2",
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": 0.0,
+            "n_defined": 20,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "D",
+            "wording_id": null,
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": 0.426,
+            "n_defined": 20,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "D",
+            "wording_id": "w2",
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": 0.426,
+            "n_defined": 20,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "E",
+            "wording_id": null,
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": 0.04818181818181818,
+            "n_defined": 20,
+            "n_runs": 20
+          },
+          {
+            "objective_id": "E",
+            "wording_id": "w2",
+            "choice": null,
+            "name": "keep_pay_share_of_moved",
+            "mean": 0.04818181818181818,
+            "n_defined": 20,
+            "n_runs": 20
+          }
+        ],
+        "distances": [
+          {
+            "objective_id": "A",
+            "e_to_objective": 0.83,
+            "e_pairs": 400,
+            "e_choice_only_pairs": 0,
+            "self_distance": 0.0,
+            "self_pairs": 190,
+            "self_choice_only_pairs": 0
+          },
+          {
+            "objective_id": "B",
+            "e_to_objective": 0.782,
+            "e_pairs": 400,
+            "e_choice_only_pairs": 0,
+            "self_distance": 0.3277894736842105,
+            "self_pairs": 190,
+            "self_choice_only_pairs": 0
+          },
+          {
+            "objective_id": "C",
+            "e_to_objective": 0.21599999999999997,
+            "e_pairs": 400,
+            "e_choice_only_pairs": 0,
+            "self_distance": 0.0,
+            "self_pairs": 190,
+            "self_choice_only_pairs": 0
+          },
+          {
+            "objective_id": "D",
+            "e_to_objective": 0.4525,
+            "e_pairs": 400,
+            "e_choice_only_pairs": 0,
+            "self_distance": 0.3926315789473684,
+            "self_pairs": 190,
+            "self_choice_only_pairs": 0
+          },
+          {
+            "objective_id": "E",
+            "e_to_objective": null,
+            "e_pairs": 0,
+            "e_choice_only_pairs": 0,
+            "self_distance": 0.2143157894736842,
+            "self_pairs": 190,
+            "self_choice_only_pairs": 0
+          }
+        ],
+        "per_run": [
+          {
+            "run_id": "r-00eed66e1f2d",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 2,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-014421133e68",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 9,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-0158be7598d3",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 0,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-01c015bfe9b6",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 16,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-09f9ca428fd6",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 10,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-0f1a8ccb8582",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 3,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-0f9db6cd9102",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 2,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-17b3b8e9ff0c",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 12,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-23bb69e92eff",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 5,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-273a41ae1a72",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 12,
+            "choice": null,
+            "primary": 0.8,
+            "shares": [
+              [
+                "eliminate",
+                0.2
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-274e5f5fb483",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 10,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-2804f782c209",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 19,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-314d4f38a138",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 17,
+            "choice": null,
+            "primary": 0.6,
+            "shares": [
+              [
+                "eliminate",
+                0.4
+              ],
+              [
+                "move_plant_pay",
+                0.6
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-345f9be71590",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 13,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-35740a3ed8bb",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 2,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-365ee4b4039a",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 4,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-366bc088a93d",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 14,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.4
+              ],
+              [
+                "move_keep_pay",
+                0.6
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.6
+              ]
+            ]
+          },
+          {
+            "run_id": "r-3794370b91e4",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 4,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-39f0846d1b18",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 14,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-3b10c541a251",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 12,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-3df084517474",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 12,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-3f158a351ca1",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 3,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.68
+              ],
+              [
+                "move_keep_pay",
+                0.32
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.32
+              ]
+            ]
+          },
+          {
+            "run_id": "r-41b0d185ae6e",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 8,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-42b8030275cc",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 17,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-43e0233771f3",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 4,
+            "choice": null,
+            "primary": 0.6,
+            "shares": [
+              [
+                "eliminate",
+                0.4
+              ],
+              [
+                "move_plant_pay",
+                0.6
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-471921245562",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 13,
+            "choice": null,
+            "primary": 0.8,
+            "shares": [
+              [
+                "eliminate",
+                0.2
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-4747e2f6f5cf",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 6,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-4e37748d1d6e",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 1,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-503c6e6466e4",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 8,
+            "choice": null,
+            "primary": 0.6,
+            "shares": [
+              [
+                "eliminate",
+                0.4
+              ],
+              [
+                "move_plant_pay",
+                0.6
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-51068c08c5b9",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 9,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-5142045b96b1",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 19,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.2
+              ],
+              [
+                "move_keep_pay",
+                0.8
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.8
+              ]
+            ]
+          },
+          {
+            "run_id": "r-585f33d61066",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 6,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-590201a25fbd",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 1,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-5ead97c1037f",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 5,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.6
+              ],
+              [
+                "move_keep_pay",
+                0.4
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.4
+              ]
+            ]
+          },
+          {
+            "run_id": "r-5f230a018045",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 0,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-5fd29283c188",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 8,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.2
+              ],
+              [
+                "move_keep_pay",
+                0.8
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.8
+              ]
+            ]
+          },
+          {
+            "run_id": "r-64040f26ed17",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 3,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.52
+              ],
+              [
+                "move_keep_pay",
+                0.48
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.48
+              ]
+            ]
+          },
+          {
+            "run_id": "r-659fb43fb964",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 1,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-65e15fb65a01",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 12,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-6711b7bda968",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 7,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-6a07014bc5b4",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 4,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.68
+              ],
+              [
+                "move_keep_pay",
+                0.32
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.32
+              ]
+            ]
+          },
+          {
+            "run_id": "r-6a15475f8384",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 11,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-6c56c7bac62a",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 13,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.4
+              ],
+              [
+                "move_keep_pay",
+                0.6
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.6
+              ]
+            ]
+          },
+          {
+            "run_id": "r-6d04949c3729",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 0,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-721799e6a936",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 1,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.64
+              ],
+              [
+                "move_keep_pay",
+                0.36
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.36
+              ]
+            ]
+          },
+          {
+            "run_id": "r-78dc26d38121",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 18,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-7a51daac9428",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 19,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.2
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.2
+              ]
+            ]
+          },
+          {
+            "run_id": "r-7c08dc559ef7",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 6,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-7d7bd8dfc6d1",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 10,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-805faf8e2339",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 7,
+            "choice": null,
+            "primary": 0.64,
+            "shares": [
+              [
+                "eliminate",
+                0.36
+              ],
+              [
+                "move_plant_pay",
+                0.64
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-84c377635747",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 8,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-85b1ab22066e",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 0,
+            "choice": null,
+            "primary": 0.88,
+            "shares": [
+              [
+                "eliminate",
+                0.12
+              ],
+              [
+                "move_plant_pay",
+                0.76
+              ],
+              [
+                "move_keep_pay",
+                0.12
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.13636363636363635
+              ]
+            ]
+          },
+          {
+            "run_id": "r-87407634d3f4",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 13,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-89c5cb00761d",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 14,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-89d64865d89d",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 7,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-8fb735d35c25",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 18,
+            "choice": null,
+            "primary": 0.8,
+            "shares": [
+              [
+                "eliminate",
+                0.2
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-90fa835e827f",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 16,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.6
+              ],
+              [
+                "move_keep_pay",
+                0.4
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.4
+              ]
+            ]
+          },
+          {
+            "run_id": "r-9515d1c3f592",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 10,
+            "choice": null,
+            "primary": 0.8,
+            "shares": [
+              [
+                "eliminate",
+                0.2
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-965b0f257a6d",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 1,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-9fcfdf31c242",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 9,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-a0949bb92112",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 15,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-a4b980f613ec",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 5,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-abf61a271a9b",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 2,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-af527fff129b",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 11,
+            "choice": null,
+            "primary": 0.6,
+            "shares": [
+              [
+                "eliminate",
+                0.4
+              ],
+              [
+                "move_plant_pay",
+                0.6
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-b34e697ce343",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 16,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-b3bbcfb98413",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 5,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-b4726599e47b",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 11,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.52
+              ],
+              [
+                "move_keep_pay",
+                0.48
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.48
+              ]
+            ]
+          },
+          {
+            "run_id": "r-b87066800600",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 3,
+            "choice": null,
+            "primary": 0.8,
+            "shares": [
+              [
+                "eliminate",
+                0.2
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-b9115385e15a",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 11,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-b91b77e295e0",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 7,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-b980d5983fb1",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 15,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-c07bb0caef97",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 10,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-c14494f27b97",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 6,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-c61105d825d4",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 3,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-c620c198aff1",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 8,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-c63135c33b94",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 18,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-c6ee82ef2cc2",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 2,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-cc3fffb81476",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 17,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.2
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.2
+              ]
+            ]
+          },
+          {
+            "run_id": "r-ccc8b3c94ee3",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 19,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-cda32698e340",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 18,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.4
+              ],
+              [
+                "move_keep_pay",
+                0.6
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.6
+              ]
+            ]
+          },
+          {
+            "run_id": "r-d01e36ab1485",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 17,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-d0c3c0d50083",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 18,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-d18e935abc1c",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 0,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-d31fa3aedc76",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 11,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.52
+              ],
+              [
+                "move_keep_pay",
+                0.48
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.48
+              ]
+            ]
+          },
+          {
+            "run_id": "r-d611e7cf2dec",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 15,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-d8d63c9e0a35",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 9,
+            "choice": null,
+            "primary": 0.88,
+            "shares": [
+              [
+                "eliminate",
+                0.12
+              ],
+              [
+                "move_plant_pay",
+                0.68
+              ],
+              [
+                "move_keep_pay",
+                0.2
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.22727272727272727
+              ]
+            ]
+          },
+          {
+            "run_id": "r-dbc392114150",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 15,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-dd7c08c2ab3a",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 17,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-dfaa4b34563a",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 13,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-e0099e2853f7",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 5,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-e54e03e96b5d",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 16,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                1.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                1.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-e97a39b67534",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 7,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.6
+              ],
+              [
+                "move_keep_pay",
+                0.4
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.4
+              ]
+            ]
+          },
+          {
+            "run_id": "r-ea7a794476c8",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 9,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-eb2ba171b3ac",
+            "objective_id": "A",
+            "wording_id": "w2",
+            "repeat": 4,
+            "choice": null,
+            "primary": 0.0,
+            "shares": [
+              [
+                "eliminate",
+                1.0
+              ],
+              [
+                "move_plant_pay",
+                0.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                null
+              ]
+            ]
+          },
+          {
+            "run_id": "r-eed22be6b01d",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 6,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-f2e4d444ea24",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 15,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-f31c2231c712",
+            "objective_id": "B",
+            "wording_id": "w2",
+            "repeat": 14,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.2
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.2
+              ]
+            ]
+          },
+          {
+            "run_id": "r-f51fd3eceae8",
+            "objective_id": "E",
+            "wording_id": "w2",
+            "repeat": 14,
+            "choice": null,
+            "primary": 0.8,
+            "shares": [
+              [
+                "eliminate",
+                0.2
+              ],
+              [
+                "move_plant_pay",
+                0.8
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          },
+          {
+            "run_id": "r-f575ec455ed3",
+            "objective_id": "D",
+            "wording_id": "w2",
+            "repeat": 19,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                0.56
+              ],
+              [
+                "move_keep_pay",
+                0.44
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.44
+              ]
+            ]
+          },
+          {
+            "run_id": "r-f9f2b55b4016",
+            "objective_id": "C",
+            "wording_id": "w2",
+            "repeat": 16,
+            "choice": null,
+            "primary": 1.0,
+            "shares": [
+              [
+                "eliminate",
+                0.0
+              ],
+              [
+                "move_plant_pay",
+                1.0
+              ],
+              [
+                "move_keep_pay",
+                0.0
+              ]
+            ],
+            "secondary": [
+              [
+                "keep_pay_share_of_moved",
+                0.0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "scenarios_without_runs": [
+    "s2",
+    "s3",
+    "s4"
+  ]
+}
