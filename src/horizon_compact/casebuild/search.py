@@ -391,10 +391,28 @@ class Result:
     )
 
 
+READINGS = ("pass", "fail", "cannot_tell")
+
+
+@dataclass(frozen=True)
+class ReaderReply:
+    """The reader's reply a read is logged from: the reply file's name in the candidate's folder, its sha256
+    and the reading it holds. The log takes its verdict from the reading, never from a word typed beside it:
+    "pass" disputes the rejection; "fail" agrees; "cannot_tell" is not a dispute, so the rejection stands
+    (search-half doc §11, the step 9 review, decision 8)."""
+
+    reply: str
+    reply_sha256: str
+    reading: str
+
+
 @dataclass
 class Read:
     agrees: bool
     resolution: str | None = None
+    reply: str | None = None
+    reply_sha256: str | None = None
+    reading: str | None = None
 
 
 @dataclass
@@ -544,14 +562,26 @@ class SelectionLog:
         )
 
     def record_read(
-        self, candidate_id: str, criterion: str, *, agrees: bool, resolution: str | None = None
+        self,
+        candidate_id: str,
+        criterion: str,
+        *,
+        reply: ReaderReply,
+        resolution: str | None = None,
     ) -> None:
-        """The independent reader's read of a rejection on criterion 3, 4 or 5. A disagreement is resolved by
-        him and logged with the reason, and the rejection then does not stand (§12.4): the candidate goes on
-        to the next criterion. A read cannot be changed once a later criterion has been recorded."""
+        """The independent reader's read of a rejection on criterion 3, 4 or 5, logged from the reader's reply
+        (its file name, sha256 and reading), so a read cannot be logged that was never made and its verdict
+        cannot differ from the reply's. A disagreement is logged with his reason, and the rejection then does
+        not stand (§12.4): the candidate goes on to the next criterion. A read cannot be changed once a later
+        criterion has been recorded."""
         row = self._row(candidate_id)
         if criterion not in READ_REQUIRED:
             raise LogError(f"only a rejection on {', '.join(READ_REQUIRED)} is read")
+        if reply.reading not in READINGS:
+            raise LogError(f"a read's reading is one of {', '.join(READINGS)}")
+        if not (reply.reply.strip() and re.fullmatch(r"[0-9a-f]{64}", reply.reply_sha256)):
+            raise LogError("a read names the reader's reply file and its sha256")
+        agrees = reply.reading != "pass"
         result = row.results.get(criterion)
         if result is None or result.result != "fail":
             raise LogError(f"{candidate_id} did not fail {criterion}")
@@ -569,7 +599,9 @@ class SelectionLog:
                 f"{'agreed' if previous.agrees else 'disputed'} and later criteria are recorded; "
                 "a read cannot change now"
             )
-        row.reads[criterion] = Read(agrees, resolution)
+        row.reads[criterion] = Read(
+            agrees, resolution, reply.reply, reply.reply_sha256, reply.reading
+        )
 
     def selection(self, case_type: str) -> Selection:
         """The first k that passed, in order of first disclosure (ties by id), window first. A candidate
@@ -678,14 +710,14 @@ class SelectionLog:
                             log.record_read(
                                 r["id"],
                                 criterion,
-                                agrees=read["agrees"],
+                                reply=_saved_reply(read),
                                 resolution=read.get("resolution"),
                             )
                     for criterion, read in reads.items():  # a read with no result to read: refused
                         log.record_read(
                             r["id"],
                             criterion,
-                            agrees=read["agrees"],
+                            reply=_saved_reply(read),
                             resolution=read.get("resolution"),
                         )
             return log
@@ -730,6 +762,14 @@ class SelectionLog:
                 ],
             }
         return view
+
+
+def _saved_reply(read: dict[str, Any]) -> ReaderReply:
+    """A saved read's reply, checked against its saved verdict: a hand edit of either is refused."""
+    reply = ReaderReply(str(read["reply"]), str(read["reply_sha256"]), str(read["reading"]))
+    if read["agrees"] is not (reply.reading != "pass"):
+        raise LogError("a saved read's verdict differs from its reading")
+    return reply
 
 
 def load_newest_log(case: CaseAppendix) -> SelectionLog:

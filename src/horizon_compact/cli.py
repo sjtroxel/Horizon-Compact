@@ -96,7 +96,12 @@ from horizon_compact.probes.run import (
     probe_run_id,
     run_probes,
 )
-from horizon_compact.protocol.caselock import CaseLockError, lock_case, scenario_check_passes
+from horizon_compact.protocol.caselock import (
+    CaseLockError,
+    lock_case,
+    reads_settled_for_lock,
+    scenario_check_passes,
+)
 from horizon_compact.protocol.cases import (
     CaseContent,
     CaseError,
@@ -145,6 +150,17 @@ from horizon_compact.providers.openrouter import (
     OpenRouterProvider,
     read_key,
     ssm_key_fetcher,
+)
+from horizon_compact.reader.briefs import BriefError
+from horizon_compact.reader.entry import ReaderModelError
+from horizon_compact.reader.material import MaterialError
+from horizon_compact.reader.read import (
+    Preview,
+    ReaderError,
+    ReadOutcome,
+    record_resolution,
+    rejection_reply_on_record,
+    run_read,
 )
 from horizon_compact.scenarios.check import run_checks as scenarios_run_checks
 from horizon_compact.scenarios.render import (
@@ -1101,7 +1117,13 @@ def cmd_case_lock(args: argparse.Namespace) -> int:
     """Write ``experiment/cases/<label>/case.lock`` (search-half doc §5 step 8a). Every refusal first."""
     case = open_case(args.label)
     root: Path = args.root or default_repo_root()
-    written = lock_case(case, root, probe_set=args.probe_set, scenario_check=scenario_check_passes)
+    written = lock_case(
+        case,
+        root,
+        probe_set=args.probe_set,
+        scenario_check=scenario_check_passes,
+        reads_check=reads_settled_for_lock,
+    )
     print(
         f"{args.label}: wrote {case_path(args.label)} (probe set {written.probe_set}, hashes only)"
     )
@@ -1130,6 +1152,112 @@ def cmd_case_scenario(args: argparse.Namespace) -> int:
         return CHECK_FAILED_EXIT
     print("scenario check: ok")
     return CLEAN_EXIT
+
+
+def _reader_provider() -> TextProvider:
+    """OpenRouter with his key, from ``OPENROUTER_API_KEY`` or a hidden prompt; a function so the tests can
+    set it. Asked for last, after every refusal and the spend warning."""
+    try:
+        return OpenRouterProvider(read_key(os.environ))
+    except OpenRouterKeyError as exc:
+        raise ReaderError(str(exc)) from exc
+
+
+def _confirm_reader_spend(preview: Preview, *, yes: bool) -> bool:
+    """The reader's calls are paid from his own OpenRouter credit. Print the most this read can cost and ask;
+    anything but ``y`` sends nothing."""
+    where = f"{preview.kind}" + (f" ({preview.criterion})" if preview.criterion else "")
+    print(
+        f"reader: {preview.model_id}, {where}, attempt {preview.attempt}: at most about "
+        f"{preview.input_tokens_at_most:,} tokens in, and the most this read can cost is about "
+        f"${preview.worst_case_usd:.2f} of your own OpenRouter credit (usually far less)"
+    )
+    unknown = (
+        f", plus {preview.replies_of_unknown_cost} reply record(s) whose cost cannot be read"
+        if preview.replies_of_unknown_cost
+        else ""
+    )
+    print(
+        f"reader spend so far, every case in the appendix: about ${preview.spent_so_far_usd:.2f}{unknown}; "
+        f"with this read, at most about ${preview.spent_so_far_usd + preview.worst_case_usd:.2f}"
+    )
+    if yes:
+        return True
+    try:
+        answer = input("Continue? [y/N] ")
+    except EOFError:
+        answer = ""
+    return answer.strip().lower() == "y"
+
+
+def _print_reader_outcome(label: str, done: ReadOutcome) -> None:
+    """Counts, the reading and the file names, never a name, a figure or an excerpt."""
+    print(
+        f"{label}: {done.kind} read, attempt {done.attempt}: {done.input_tokens:,} tokens in, "
+        f"{done.output_tokens:,} out, about ${done.estimated_usd:.4f}; wrote {done.request_name} "
+        f"and {done.reply_name}"
+    )
+    if not done.usable:
+        print(
+            f"  NO READING: {done.problem}. A later attempt is allowed only because none was produced."
+        )
+        return
+    print(f"  reader's reading: {done.reading}")
+    parsed = done.parsed or {}
+    if done.kind == "rejection":
+        meaning = {
+            "fail": "agrees: the rejection stands",
+            "pass": "DISPUTES: the rejection does not stand (protocol §12.4); log your reason with it",
+            "cannot_tell": "could not tell: not a dispute, so the rejection stands (decision 8)",
+        }[str(done.reading)]
+        print(f"  {meaning}")
+        print(
+            f"  to log it: hc case log {done.candidate_type} read {label} {done.criterion}"
+            + (' --resolution "..."' if done.reading == "pass" else "")
+        )
+    elif done.kind == "scenario":
+        print(
+            f"  concerns listed: {len(parsed.get('concerns', []))} (read them in {done.reply_name})"
+        )
+    else:
+        lines = parsed.get("lines", [])
+        disagreed = sum(1 for line in lines if not line.get("agrees"))
+        print(
+            f"  lines read: {len(lines)}, disagreeing: {disagreed}, stating a reason: "
+            f"{len(parsed.get('reasons_stated', []))} (read them in {done.reply_name})"
+        )
+    if done.kind in ("scenario", "rubric") and done.reading in ("concerns", "disagrees"):
+        print(
+            f'  before the lock: fix and re-read, or hc case resolve {label} {done.kind} --resolution "..."'
+        )
+
+
+def cmd_case_resolve(args: argparse.Namespace) -> int:
+    """His written resolution of a "concerns" or "disagrees" reading of a case's current scenario or rubric
+    (the step 9 review, decision 6). Write-once; ``hc case lock`` reads it."""
+    case = open_case(args.label)
+    name = record_resolution(case, args.kind, args.resolution, _today().isoformat())
+    print(f"{args.label}: wrote {name}")
+    return CLEAN_EXIT
+
+
+def cmd_case_reader(args: argparse.Namespace) -> int:
+    """One independent read (protocol §12.9; search-half doc §4.9). It records the request and the reply in
+    the case's folder and decides nothing: a rejection's outcome is logged by `hc case log ... read`."""
+    case = open_case(args.label)
+    root = default_repo_root()
+    done = run_read(
+        case,
+        args.kind,
+        args.criterion,
+        repo_root=root,
+        git=git_in(root),
+        search=open_case("search"),
+        confirm=lambda preview: _confirm_reader_spend(preview, yes=args.yes),
+        make_provider=_reader_provider,
+    )
+    _print_reader_outcome(args.label, done)
+    return CLEAN_EXIT if done.usable else CHECK_FAILED_EXIT
 
 
 def _today() -> date:
@@ -1204,7 +1332,16 @@ def _log_status(row: Row) -> str:
         if criterion in row.results and row.results[criterion].result == "fail":
             read = row.reads.get(criterion)
             parts.append(
-                "read: " + ("NOT YET" if read is None else "agrees" if read.agrees else "DISAGREES")
+                "read: "
+                + (
+                    "NOT YET"
+                    if read is None
+                    else "could not tell (stands)"
+                    if read.reading == "cannot_tell"
+                    else "agrees"
+                    if read.agrees
+                    else "DISAGREES"
+                )
             )
     next_criterion = next((c for c in CRITERIA if c not in row.results), None)
     if row.failed:
@@ -1287,10 +1424,10 @@ def cmd_case_log(args: argparse.Namespace) -> int:
         )
         what = f"{args.criterion} {args.result}"
     else:
-        log.record_read(
-            args.id, args.criterion, agrees=args.verdict == "agree", resolution=args.resolution
-        )
-        what = f"read of {args.criterion}: {args.verdict}"
+        reply = rejection_reply_on_record(open_case(args.id), args.criterion)
+        log.record_read(args.id, args.criterion, reply=reply, resolution=args.resolution)
+        verdict = "disputes" if reply.reading == "pass" else "agrees"
+        what = f"read of {args.criterion}: {reply.reading} ({verdict}), from {reply.reply}"
     name = write_log_version(case, log)
     print(f"{args.id}: {what}; wrote {name}")
     print(f"  {_log_status(log.rows[args.id])}")
@@ -1450,6 +1587,10 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_lock(args)
         if args.action == "scenario":
             return cmd_case_scenario(args)
+        if args.action == "reader":
+            return cmd_case_reader(args)
+        if args.action == "resolve":
+            return cmd_case_resolve(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (
         AppendixError,
@@ -1471,6 +1612,10 @@ def cmd_case(args: argparse.Namespace) -> int:
         SplitRefused,
         CaseLockError,
         ScenarioRefused,
+        ReaderError,
+        ReaderModelError,
+        MaterialError,
+        BriefError,
     ) as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return REFUSED_EXIT
@@ -1957,6 +2102,28 @@ def build_parser() -> argparse.ArgumentParser:
         scenario_actions.add_parser(name, help=text).add_argument(
             "label", help="the candidate's neutral id, such as closure-01"
         )
+    reader = case_actions.add_parser(
+        "reader",
+        help="One independent read (protocol §12.9): a rejection on criterion 3 or 4, a case's scenario or "
+        "its rubric, sent to the reader model with its fixed brief. Costs his own OpenRouter credit. "
+        "Writes the request and reply into the case's folder; logs nothing.",
+    )
+    reader.add_argument("label", help="the candidate's neutral id, such as closure-01")
+    reader.add_argument("kind", choices=("rejection", "scenario", "rubric"))
+    reader.add_argument(
+        "--criterion",
+        choices=("real_decision", "maps_to_shape"),
+        help="for a rejection: the criterion whose rejection is read",
+    )
+    reader.add_argument("--yes", action="store_true", help="skip the spend question")
+    resolve = case_actions.add_parser(
+        "resolve",
+        help="His written resolution of a 'concerns' or 'disagrees' reading of the case's current scenario "
+        "or rubric; `hc case lock` refuses until each such reading has one. Write-once.",
+    )
+    resolve.add_argument("label", help="the candidate's neutral id, such as closure-01")
+    resolve.add_argument("kind", choices=("scenario", "rubric"))
+    resolve.add_argument("--resolution", required=True, help="what he decided, and why")
     assemble = case_actions.add_parser(
         "assemble",
         help="Write the case's dossier once every flag has a decision in reviewed-flags.json",
@@ -1992,8 +2159,10 @@ def build_parser() -> argparse.ArgumentParser:
     read = log_actions.add_parser("read", help="The independent reader's read of a rejection")
     read.add_argument("id", help="the candidate's neutral id, such as closure-01")
     read.add_argument("criterion", choices=READ_REQUIRED)
-    read.add_argument("verdict", choices=("agree", "disagree"))
-    read.add_argument("--resolution", help="required on a disagreement: his decision and why")
+    read.add_argument(
+        "--resolution",
+        help="required when the reader disputes the rejection: his reason, logged with it",
+    )
 
     probes = groups.add_parser(
         "probes", help="Phase 2.5 comprehension probes. Development models only; no objective."

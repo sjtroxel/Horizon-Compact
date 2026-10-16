@@ -46,6 +46,7 @@ def setup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, Path]:
     )
     monkeypatch.setenv("HC_APPENDIX_DIR", str(appendix))
     monkeypatch.setattr(cli, "scenario_check_passes", lambda case: None)
+    monkeypatch.setattr(cli, "reads_settled_for_lock", lambda case: None)
     return appendix, repo
 
 
@@ -219,7 +220,9 @@ def test_lock_case_refuses_a_probe_set_outside_one_and_two(setup: tuple[Path, Pa
     appendix, repo = setup
     case = CaseAppendix(appendix, "closure-1")
     with pytest.raises(CaseLockError, match="not 1 or 2"):
-        lock_case(case, repo, probe_set=3, scenario_check=lambda c: None)
+        lock_case(
+            case, repo, probe_set=3, scenario_check=lambda c: None, reads_check=lambda c: None
+        )
     assert not (repo / "experiment").exists()
 
 
@@ -254,6 +257,11 @@ def test_set_1_never_replaces_a_lock_that_appears_before_the_write(
         target.write_text("theirs\n", encoding="utf-8")
 
     with pytest.raises(CaseLockError, match="write-once"):
-        lock_case(CaseAppendix(appendix, "closure-1"), repo, scenario_check=racing)
+        lock_case(
+            CaseAppendix(appendix, "closure-1"),
+            repo,
+            scenario_check=racing,
+            reads_check=lambda c: None,
+        )
     assert target.read_text(encoding="utf-8") == "theirs\n"
     assert [p.name for p in target.parent.iterdir()] == ["case.lock"]

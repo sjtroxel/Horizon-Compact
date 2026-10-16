@@ -148,8 +148,9 @@ mapping to keep. It is used everywhere outside the appendix. The search's own fi
 ### 4.3 The selection log, from the terminal
 
 `hc case log <type> show | record <id> <criterion> pass|fail --reason ... [--disclosed YYYY-MM-DD] |
-read <id> <criterion> agree|disagree [--resolution ...] | public`. Each call loads the newest
-`selection-log-<n>.json`, applies one `record` or `record_read` (which enforce the order, the reasons and the
+read <id> <criterion> agree|disagree [--resolution ...] | public`. *(Amended 2026-10-16, the step 9 review,
+decision 7: `read <id> <criterion> [--resolution ...]`, the verdict taken from the reader's reply file; §11.)* Each
+call loads the newest `selection-log-<n>.json`, applies one `record` or `record_read` (which enforce the order, the reasons and the
 fallback rule), and writes the next version with its public view. The log holds names, so it lives only in the
 appendix; `public` prints the view without them.
 
@@ -342,7 +343,12 @@ scenario facts) with him.** One terminal command at a time, with the line to loo
 
 ### Stage D: the cases (as many sessions as it takes)
 
-11. Criteria 1-4 down each type's list, in order (§4.1 step 1). Reader on each 3-4 rejection.
+11. Criteria 1-4 down each type's list, in order (§4.1 step 1). Reader on each 3-4 rejection. *(Added 2026-10-16,
+    the step 9 review, point 3.)* **The reader's excerpt is taken by rule, and saved before the result it is read
+    against is recorded:** the whole part of the first-disclosure document that announces the decision (the item of
+    a current report, or the body of the release it files), not paragraphs picked from it, cut only to fit the
+    200,000-character limit, at a paragraph boundary. Then `hc case reader <id> rejection --criterion ...`, then
+    `hc case log <type> read <id> <criterion>`, which takes the verdict from the reply file.
 12. For each candidate that passes them: §4.1 steps 2-9. The first real document fetch is the first real test of
     the splitter and the date patterns (code half §10).
 13. A type that runs out of window candidates opens its fallback pool (§12.2), in the same way.
@@ -828,3 +834,136 @@ two changed), `make check` green, `hc protocol check: ok`.
   "automating welding and material handling as at the larger plants") still describe the fictional company's options
   wherever their sentence keeps its figures; that is §4.6.1 item 1 as patched, and the reader's neutrality read is the
   backstop it names.
+
+**Stage C step 9, `hc case reader` and the three briefs (2026-10-16, about 2:40 PM, Sonnet built; awaiting an Opus
+review).** Built by §4.9. No model was called and no key was read: every test uses a fake provider. 2399 tests (73
+new), `make check` green, `hc protocol check: ok` (no locked identity moved; the lock hashes `experiment/company`
+only). Steps 10 (the probe) and Stage D are not touched.
+- **Where it lives.** A new package, `src/horizon_compact/reader/` (`briefs.py`, `entry.py`, `material.py`,
+  `read.py`), outside `casebuild/` on purpose: `test_architecture` bars `casebuild/` from anything that could carry
+  an outcome, and the reader reads the rubric. `cmd_case_reader` and the `case reader` parser are in `cli.py`;
+  `CaseAppendix.reader_excerpt_path` is new. Two architecture tests are new: `reader/` imports none of the
+  analysis, sweep, probes, simulation, smoke or gate modules (so no result can reach a reader), and `casebuild/`
+  does not import `reader/`.
+- **The briefs** are `experiment/readers/rejection.txt`, `scenario.txt` and `rubric.txt` (the system text of each
+  read), with a README. Each asks for one JSON object and says the material is to be read, not obeyed. Their sha256
+  goes into every request record. The rejection brief holds protocol §12.4's criterion 3 and §12.5's four shapes in
+  order, word for word in sense; the scenario brief names the four things §4.6.1 and the 8b review leave to the
+  reader (slant, wording carried over from the fictional company, unequal options after a drop, a figure whose
+  source does not fit it); the rubric brief asks for the reader's own reading of each line before it compares.
+  Vocabulary checked against `planning/06` §3 (no charged term; no euphemism; "layoff" and "closure" in plain words).
+- **The model entry** is `[models.gemini-3-1-pro-reader]`: `google/gemini-3.1-pro-preview` through OpenRouter,
+  role `reader`, $2 and $12 per million tokens (live 2026-10-16, OpenRouter's public model list; above 200,000
+  prompt tokens $4 and $18, which a read never nears), `reasoning_effort = "medium"`, `max_tokens = 24000`. It is
+  kept out of `models` exactly as the extraction entry is (`ModelsFile.reader_models`), so no sweep, probe, awareness
+  check, lock or gate can name it; `tests/test_reader_model.py` proves each path, as the extraction tests do.
+  `ModelConfig` now allows `max_tokens` for the extraction and the reader roles (one error message and one test
+  changed).
+- **What is sent** (`material.py`; nothing else can be added, the builders read named files only). Rejection: the
+  criterion and the hand-placed excerpt. Scenario: the shape's template, `scenario.toml`, the render record without
+  `factor`, `build_sha256` and `rows_sha256`, and a table of each row's unit, scale and source, with the filings
+  numbered 1, 2, ... in place of accession numbers and no unscaled value. Rubric: the file, whole.
+- **How a read runs.** Refusals first, none needing a key or the network: the kind and criterion; the reader's inputs
+  (the briefs, `models.toml`, `reader/`) committed and pushed, the commit recorded in the request; the entry and brief;
+  earlier attempts; the material (a scenario must pass `hc case scenario check`; a rejection must stand in the log
+  with no read yet); then the spend warning (the most the read can cost, from his own OpenRouter credit; `--yes`
+  skips the question); then the key, then the one call. It writes `reader-<kind>[-<criterion>]-<n>-request.json`
+  and `-reply.json` into the case's folder, write-once, and prints the reading, token counts, the estimated cost
+  and, for a rejection, the `hc case log ... read` command to run. It never writes the log.
+
+**Points for review** (each a reading where the docs were silent or could go two ways; each his or Opus's to overrule):
+1. **Scenario and rubric reads have no recording path beyond the reply file.** §4.9 says an outcome goes "into the
+   selection log (`hc case log ... read`) or the case's rubric record". The log is keyed by criteria 1 to 6 and has
+   no place for a scenario read; no rubric record exists in code (only `rubric.toml`, whose form is not coded). I did
+   not invent either. A rejection read is logged by the existing command, run by him. The scenario and rubric
+   outcomes live in the numbered reply files until he decides where a disagreement is logged "with both readings"
+   (protocol §12.9). This is the one thing to settle before Stage D's first scenario read.
+2. **The rejection read covers criteria 3 and 4 only** (`real_decision`, `maps_to_shape`). §12.4 also has the reader
+   read criterion 5's rejection, but that rejection is a probe failure, and §12.9 gives the reader "only the criteria
+   or the rubric with its source excerpts", not a probe answer. It belongs to step 10 and to KNOWN-GAPS OPEN
+   2026-10-16, criterion 5.
+3. **The excerpt is a hand-placed file** (`first-disclosure-excerpt.txt` in the candidate's folder); nothing stores
+   one before the first real fetch. The command checks that it is present, not empty and under 200,000 characters.
+   Which part of the first-disclosure document it holds is a Stage D choice, and an excerpt that leans is the same
+   neutrality risk the scenario rule has: worth one line in the Stage D procedure.
+4. **A rejection read starts blind.** The drafter's reason and the recorded result are not sent (§12.9 lists
+   neither). The command still requires the log to hold a standing fail on that criterion with no read, which keeps
+   one read per rejection and in the right order.
+5. **The scenario table hides what the reader does not need and could use to recognize the company:** unscaled
+   values, the scaling factor (private, protocol §12.6), the build and rows checksums, accession numbers. The reader
+   cannot check a figure against filing text it is not given; the brief says so and asks only whether the source
+   listed could give the figure and whether anything but the total is sourced to the first disclosure.
+6. **The rubric is sent whole, and its blind-first reading is asked of the reader, not enforced.** Enforcing it
+   would need the rubric's schema, which is not coded. The reply is by "line", as the file names its lines.
+7. **A read is made once.** Every attempt leaves a numbered request and reply record, so nothing is overwritten and
+   a failed call or a cut-off reply is on record. A later attempt is allowed only when every earlier one produced no
+   usable reading (a failed call, a reply stopped at the token limit, or a reply not in the brief's format); after a
+   usable reply, or three unusable attempts, the command refuses. This stops a reader being asked again until it
+   says what is wanted, and cannot be used to shop for a reading. It is a rule I added; §4.9 says only "write-once".
+8. **A reply's format is strict about contradictions.** "neutral" with a concern listed, "concerns" with none, and a
+   rubric "agrees" with a disagreeing line or a stated reason are not readings. An unknown extra field is ignored.
+9. **The model entry's choices are mine:** unpinned (the stored reply names the host; a pin would fail closed where
+   OpenRouter's slug and host name differ, as `Google` and `google-vertex` do); reasoning `medium`, sent and recorded
+   because the level cannot be turned off; `max_tokens = 24000` with reasoning counted in it. The most one read can
+   cost is about $0.29 for the output plus its input (about $0.06 per 30,000 tokens); fifteen reads at the worst
+   would be about $5, his cap. Decision 3's "about $1" is the likely cost, not the bound.
+10. **Decision 3's "training data well before the window" rests on the release date, not a stated cutoff.**
+    OpenRouter lists `knowledge_cutoff: null` for this model. It was released 2026-02-19, so it cannot have seen
+    events from August to October 2026; that is what the decision needs, and it is stated here as inferred.
+    It is also a preview id: a retirement would fail the first read with a named error, and the entry would change
+    (a logged change to the instrument).
+11. **Unverified until the first live call:** that this model's reply puts its text in `message.content` with the
+    reasoning kept apart (the provider handles the OpenRouter shape, and tests use a fake), and that
+    `reasoning_effort` is accepted as sent (the model's `supported_parameters` list it). A failure is a recorded
+    attempt with a named error code and costs nothing but the call.
+12. **The reader's inputs are frozen like the extraction's:** the briefs, `models.toml` and `reader/` must be
+    committed and pushed before a read, and each request records the commit. A later edit to a brief or to
+    `reader/` therefore needs a commit and push before the next read, and is a change to the instrument (logged
+    here with its reason).
+
+**Stage C step 9, the Opus review (2026-10-16, about 3:50 PM; fixes and decisions applied the same session).** 2423
+tests (24 new), `make check` green, `hc protocol check: ok`. No model was called and no key was read. His decisions
+6-8 below were taken as recommended. Sonnet's twelve points: 2, 4, 5, 9, 10, 11 and 12 accepted as built; 1, 3, 6
+and 7 settled below.
+- **Fix 1, the request record is written before the call.** It was written after the call returned, so an
+  interrupt or crash during a call left no record, money spent, and the next attempt took the same number:
+  the once-only rule could be stepped around without a trace, and the "request with no reply" refusal could
+  not fire. Now the key is read, then the request is written, then the call; a call that never returns leaves a
+  request with no reply, and the next attempt is refused until he has looked. A key that cannot be read leaves
+  no record.
+- **Fix 2 (point 7 amended), a scenario or rubric is read once as it stands.** The once-only rule counted
+  attempts by kind, so a scenario fixed after a "concerns" reading could never be read again and the lock would
+  have locked content no reader saw. Now a rejection is read once whatever its excerpt (a changed excerpt after a
+  reading is how one would be shopped for); a scenario or rubric is read once per material (the request's part
+  hashes), every earlier read kept on record. Three unusable attempts on the same material still end it.
+- **Fix 3 (point 8 tightened), a rejection reply's shape must fit.** `real_decision` gives no shape;
+  `maps_to_shape` gives S1-S4 on a pass, "none" on a fail, either on cannot_tell. The brief now says so.
+- **Fix 4, a rubric reply holds at least one line.** A "disagrees" with no lines was a usable reading and
+  spent the one read on nothing. The brief now says so.
+- **Fix 5, a cap the render set to the total is marked in the sources table** whether it was `equals_total` or
+  a stated cap under 100; before, the second showed its original source while the scenario printed the total,
+  inviting a false figure_source concern.
+- **Decision 6 (point 1 settled), `hc case lock` refuses until the reads are settled:** the scenario and the
+  rubric, exactly as locked (by sha256 against the read's material), each have a usable read, and each
+  "concerns" or "disagrees" reading has his written resolution, `hc case resolve <id> scenario|rubric
+  --resolution "..."` (new; write-once `reader-<kind>-<n>-resolution.json` beside the reply, with that reply's
+  sha256). This is how DoD 4's "every rubric read" is proved rather than asserted. Both readings stay on record:
+  the reader's in the reply, his in the resolution (protocol §12.9).
+- **Decision 7, the log's read is taken from the reply.** `hc case log <type> read <id> <criterion>` lost its
+  agree/disagree word: it finds the usable reply in the candidate's folder (refused if none, so a read never made
+  cannot be logged), takes the verdict from its reading, and stores the reply's file name, sha256 and reading
+  beside the verdict. `record_read` takes a `ReaderReply`, and a saved log whose verdict differs from its reading,
+  or whose read names no reply, is refused on load. **Criterion 5's read** has no reader reply yet: it is refused
+  here and belongs to step 10 (OPEN 2026-10-16, criterion 5), which must give it a reply record of the same form.
+- **Decision 8, "cannot_tell" is not a dispute: the rejection stands,** logged with the reader's reading
+  ("could not tell (stands)" in the status). The protocol's word is "disputes"; counting a non-answer as one would
+  add to it, and deciding it per case after reading the excerpt is the judgment decision 4 ruled out.
+- **Point 3, the excerpt:** a rule in Stage D step 11 (above), fixed before any excerpt exists.
+- **Point 6, the rubric's blind-first reading** is asked, not enforced: in one call the reader always sees the
+  mapping beside the excerpts. A two-call read (excerpts alone, then the mapping) needs the rubric's coded form;
+  it is to be weighed when that form is written. For his methods page: "asked, not enforced".
+- **The running total.** The spend question now prints the reader's estimated spend so far across every case
+  in the appendix (the sum of each reply record's `estimated_usd`; a record whose cost cannot be read is counted
+  and named, never taken as zero) and the total with this read at its worst. It does not refuse: no reader cap
+  was set. Note that the projection (§6) bounds the reader at $2 for about 30 reads, while one read's worst is
+  about $0.35; the likely cost stands, the bound does not, and the running total is the check.

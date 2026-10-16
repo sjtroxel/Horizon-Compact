@@ -48,6 +48,7 @@ from horizon_compact.protocol.cases import (
 from test_casebuild_assemble import COUNTS, PLAIN, Scripted, fill_in
 from test_casebuild_extract import FACTS, FakeTextProvider, ok
 from test_casebuild_frozen import fake_git
+from test_casebuild_search import AGREED, DISPUTED
 
 DOSSIER = b'title = "t"\ntext = """x"""\n'
 SCENARIO = b'title = "s"\ntext = """y"""\n'
@@ -330,7 +331,7 @@ def test_log_refuses_what_the_log_refuses_and_writes_nothing(
         # no such candidate
         ["closure", "record", "closure-99", "first_disclosure", "fail", "--reason", "r"],
         # a read of a candidate that was not rejected
-        ["closure", "read", "closure-01", "real_decision", "agree"],
+        ["closure", "read", "closure-01", "real_decision"],
     ]
     for words in refused:
         assert _log(*words) == REFUSED_EXIT, words
@@ -348,10 +349,17 @@ def test_log_refuses_an_id_of_another_type(
     assert not (folder / "selection-log-2.json").exists()
 
 
-def test_log_read_needs_a_resolution_on_a_disagreement(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
-    folder = _log_setup(tmp_path, monkeypatch, capsys)
+def _reply_on_disk(folder: Path, reading: str) -> None:
+    """A usable reader reply in closure-01's folder, as `hc case reader` writes it."""
+    case = folder.parent / "closure-01"
+    case.mkdir(exist_ok=True)
+    stem = case / "reader-rejection-real_decision-1"
+    Path(f"{stem}-request.json").write_text(json.dumps({"material_sha256": {}}), encoding="utf-8")
+    reply = {"usable": True, "parsed": {"reading": reading}, "estimated_usd": "0.01"}
+    Path(f"{stem}-reply.json").write_text(json.dumps(reply), encoding="utf-8")
+
+
+def _rejected_on_real_decision(capsys: pytest.CaptureFixture[str]) -> None:
     assert _log("closure", "record", "closure-01", "first_disclosure", "pass", "--reason", "r",
                 "--disclosed", "2026-08-18") == CLEAN_EXIT  # fmt: skip
     assert (
@@ -360,13 +368,37 @@ def test_log_read_needs_a_resolution_on_a_disagreement(
     assert _log("closure", "record", "closure-01", "inside_window", "pass", "--reason", "r") == 0
     assert _log("closure", "record", "closure-01", "real_decision", "fail", "--reason", "r") == 0
     capsys.readouterr()
-    assert _log("closure", "read", "closure-01", "real_decision", "disagree") == REFUSED_EXIT
+
+
+def test_log_read_takes_its_verdict_from_the_readers_reply_and_needs_a_resolution_on_a_dispute(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _rejected_on_real_decision(capsys)
+    assert _log("closure", "read", "closure-01", "real_decision") == REFUSED_EXIT
+    assert "no usable read" in capsys.readouterr().err  # a read never made cannot be logged
+    _reply_on_disk(folder, "pass")
+    assert _log("closure", "read", "closure-01", "real_decision") == REFUSED_EXIT
     assert "resolved by him" in capsys.readouterr().err
-    words = ["closure", "read", "closure-01", "real_decision", "disagree"]
+    words = ["closure", "read", "closure-01", "real_decision"]
     assert _log(*words, "--resolution", "his call, and why") == CLEAN_EXIT
     out = capsys.readouterr().out
     assert "read: DISAGREES" in out and "wrote selection-log-6.json" in out
-    assert (folder / "selection-log-6.json").is_file()
+    assert "from reader-rejection-real_decision-1-reply.json" in out
+    saved = json.loads((folder / "selection-log-6.json").read_text())["rows"]
+    read = next(r for r in saved if r["id"] == "closure-01")["reads"]["real_decision"]
+    assert read["reading"] == "pass" and read["agrees"] is False and len(read["reply_sha256"]) == 64
+
+
+def test_log_read_of_a_reader_who_could_not_tell_lets_the_rejection_stand(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _rejected_on_real_decision(capsys)
+    _reply_on_disk(folder, "cannot_tell")
+    assert _log("closure", "read", "closure-01", "real_decision") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "read: could not tell (stands)" in out and "finished: rejected" in out
 
 
 def test_log_public_prints_the_public_view_with_no_name_and_writes_nothing(
@@ -539,11 +571,11 @@ def _build_setup(
     for criterion in CRITERIA[1:passes]:
         if criterion == agreed:  # rejected, and the independent reader agrees: nothing follows
             log.record("closure-01", criterion, "fail", "r")
-            log.record_read("closure-01", criterion, agrees=True)
+            log.record_read("closure-01", criterion, reply=AGREED)
             break
         if criterion == disputed:  # rejected, and the independent reader disputes it
             log.record("closure-01", criterion, "fail", "r")
-            log.record_read("closure-01", criterion, agrees=False, resolution="he finds it holds")
+            log.record_read("closure-01", criterion, reply=DISPUTED, resolution="he finds it holds")
         else:
             log.record("closure-01", criterion, "pass", "r")
     write_log_version(search, log)

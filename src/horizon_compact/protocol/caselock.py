@@ -5,7 +5,9 @@ rubric, hashes only, never content. It is written by ``content_hashes`` and ``ca
 functions the gate and ``hc case hashes`` use, so what is written is what the gate recomputes.
 
 Every refusal comes before the write: the label, the three files, the state of an existing lock, at set 1
-the dossier's hash against ``assembly.json``, and the scenario check (``casebuild/scenario.py``). A write is
+the dossier's hash against ``assembly.json``, the scenario check (``casebuild/scenario.py``), and the
+independent reads: the scenario and the rubric as they stand each read, and each "concerns" or "disagrees"
+reading resolved by him (``reader/read.py``, ``reads_settled``; the step 9 review, decision 6). A write is
 atomic (a temporary file linked into place at set 1, so it never replaces one; replaced at set 2), so a
 crash leaves no half lock.
 
@@ -37,6 +39,7 @@ from horizon_compact.protocol.cases import (
     content_hashes,
     parse_case,
 )
+from horizon_compact.reader.read import ReaderError, reads_settled
 
 
 class CaseLockError(Exception):
@@ -59,6 +62,14 @@ def scenario_check_passes(case: CaseAppendix, repo_root: Path | None = None) -> 
         raise CaseLockError("the scenario check failed: " + "; ".join(format_failures(failures)))
 
 
+def reads_settled_for_lock(case: CaseAppendix) -> None:
+    """Refuse unless the scenario and the rubric being locked have their independent reads, settled."""
+    try:
+        reads_settled(case)
+    except ReaderError as exc:
+        raise CaseLockError(str(exc)) from exc
+
+
 def _read(path: Path, what: str) -> bytes:
     if not path.is_file():
         raise CaseLockError(f"{what} does not exist: {path.name} is not in the case's folder")
@@ -74,6 +85,7 @@ def lock_case(
     *,
     probe_set: int = 1,
     scenario_check: Callable[[CaseAppendix], None] = scenario_check_passes,
+    reads_check: Callable[[CaseAppendix], None] = reads_settled_for_lock,
 ) -> WrittenLock:
     try:
         relative = case_path(case.label)
@@ -115,6 +127,7 @@ def lock_case(
         raise CaseLockError(f"probe set {probe_set} is not 1 or 2")
 
     scenario_check(case)
+    reads_check(case)
 
     text = case_lock_text(case.label, probe_set, hashes)
     target.parent.mkdir(parents=True, exist_ok=True)

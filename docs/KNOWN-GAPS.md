@@ -7,6 +7,49 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-16, about 3:50 PM (STEP 9 BUILT AND REVIEWED, UNCOMMITTED)
+>
+> **Measured:** `make check` green, **2423 tests**; `hc protocol check: ok`. Last commit `1e899ed` (pushed).
+> **Uncommitted:** step 9 (`hc case reader`, the three briefs, the reader's entry), **reviewed (Opus), five fixes
+> applied and his decisions 6-8 taken as recommended** (search-half doc §11, "Stage C step 9, the Opus review"): the
+> request is recorded before the call; a scenario or rubric is read once as it stands (a rejection once, whatever
+> its excerpt); a rejection reply's shape must fit; a rubric reply needs a line; a cap set to the total is marked in
+> the sources table; `hc case lock` refuses until the scenario and rubric it locks are read and any "concerns" or
+> "disagrees" is resolved (`hc case resolve`, new); `hc case log ... read` takes its verdict from the reply file
+> (no agree/disagree word any more); "cannot_tell" is not a dispute, so the rejection stands; the spend question
+> prints the reader's running total. Stage D step 11 now fixes how the excerpt is taken. No model was called.
+>
+> **Next, in order:** (1) his commit `phase 5: hc case reader and briefs` and push (the reader refuses to run until
+> pushed); (2) step 10, the probe, which must give a criterion 5 read a reply record of the same form (decision 7).
+> **Before the first S1 or S3 render:** OPEN 2026-10-16, pay per head in a case scenario. **At Stage D, S3:** OPEN
+> 2026-10-16, S3 renders only with every option's figures. **Before any set-2 lock:** OPEN 2026-10-16, where a
+> coarsened dossier lives. **His decision, at step 10:** OPEN 2026-10-16, criterion 5.
+>
+> **For his methods page** (his to write): the rubric's blind-first reading is asked of the reader, not enforced;
+> the reader's training cutoff is inferred from its release date (2026-02-19), not stated by the vendor.
+>
+> *The 2:40 PM block below is superseded; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-16, about 2:40 PM (STEP 9 BUILT BY SONNET, UNCOMMITTED, AWAITING AN OPUS REVIEW)
+>
+> **Measured:** `make check` green, **2399 tests**; `hc protocol check: ok`. Last commit `1e899ed` (`phase 5: hc case
+> scenario render and check`, pushed). **Uncommitted:** step 9, `hc case reader <id> rejection|scenario|rubric`: the
+> package `src/horizon_compact/reader/`, `cmd_case_reader`, the three briefs in `experiment/readers/`, the reader's
+> entry in `experiment/models.toml` (Gemini 3.1 Pro through OpenRouter, role `reader`, kept out of `models`),
+> `tests/test_reader.py`, `tests/test_reader_model.py`, three architecture tests, and search-half doc §11 "Stage C step
+> 9" with twelve points for review. No model was called and no key was read. **Nothing in step 9 may run for real
+> until it is committed and pushed** (the command refuses otherwise, by design).
+>
+> **Next, in order:** (1) the Opus review of step 9, ideally in a fresh chat (points 1, 6 and 7 matter most: no
+> recording path for scenario and rubric reads, the rubric's blind-first reading not being enforced, and the
+> one-read rule); (2) his commit `phase 5: hc case reader and briefs` and push; (3) step 10, the probe. **Before the
+> first scenario or rubric read (Stage D):** point 1, where those outcomes are logged. **Before the first S1 or S3
+> render:** OPEN 2026-10-16, pay per head in a case scenario. **At Stage D, S3:** OPEN 2026-10-16, S3 renders only with
+> every option's figures. **Before any set-2 lock:** OPEN 2026-10-16, where a coarsened dossier lives. **His decision,
+> at step 10:** OPEN 2026-10-16, criterion 5.
+>
+> *The 2:30 PM block below is superseded on what is next; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-16, about 2:30 PM (STEP 8b BUILT AND REVIEWED, UNCOMMITTED)
 >
 > **Measured:** `make check` green, **2326 tests**; `hc protocol check: ok`. Last commit `fd84ee9`. **Uncommitted:**

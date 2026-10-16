@@ -144,6 +144,12 @@ class CaseAppendix:
         return self.directory / "scenario-render.json"
 
     @property
+    def reader_excerpt_path(self) -> Path:
+        """The candidate's first-disclosure excerpt, placed by hand for the independent reader of a rejection
+        (§4.9): the part of the first-disclosure document the criterion turns on. Private."""
+        return self.directory / "first-disclosure-excerpt.txt"
+
+    @property
     def terms_path(self) -> Path:
         """The case's private term list (`term: Name => role` lines), written by hand before the build."""
         return self.directory / "terms.txt"

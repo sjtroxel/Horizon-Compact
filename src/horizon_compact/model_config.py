@@ -15,6 +15,10 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 # not an experiment model: ``ModelsFile`` keeps it out of ``models``, so no sweep, probe, awareness check or
 # lock can name it, and only ``hc case build`` reads it.
 EXTRACTION_ROLE = "extraction"
+# The role of the model that reads a case's rejections, scenario and rubric as the independent reader
+# (protocol §12.9; search-half doc §4.9 and decision 3). Kept out of ``models`` the same way, so no sweep,
+# probe or lock can name it, and only ``hc case reader`` reads it.
+READER_ROLE = "reader"
 
 
 class _Strict(BaseModel):
@@ -56,8 +60,10 @@ class ModelConfig(_Strict):
     # than left to OpenRouter's default (Phase 3.5 section 25). Left out, nothing is sent. Refused for any
     # other route.
     reasoning_effort: Literal["low", "medium", "high"] | None = None
-    # The output allowance of every call to an extraction model, fixed in its entry so it is recorded with the
-    # model and not chosen at the command line. Required for the extraction role, refused for any other.
+    # The output allowance of every call to an extraction or reader model, fixed in its entry so it is
+    # recorded with the model and not chosen at the command line. Required for those two roles, refused for
+    # any other.
+    # (A reader's reasoning tokens count toward it.)
     max_tokens: int | None = Field(default=None, gt=0)
 
     @model_validator(mode="after")
@@ -85,45 +91,56 @@ class ModelConfig(_Strict):
                     "an extraction model is on the anthropic route, with thinking off "
                     '("off" or "between_tools") and a max_tokens, all fixed in its entry'
                 )
+        elif self.role == READER_ROLE:
+            if self.route != "openrouter" or self.max_tokens is None:
+                raise ValueError(
+                    "a reader model is on the openrouter route, with a max_tokens fixed in its entry"
+                )
         elif self.max_tokens is not None:
-            raise ValueError("max_tokens is for an extraction model")
+            raise ValueError("max_tokens is for an extraction or reader model")
         elif self.thinking == "between_tools":
             raise ValueError('thinking = "between_tools" is for an extraction model')
         return self
 
 
 class ModelsFile(_Strict):
-    """``models.toml``. **The extraction model is kept out of ``models``.** Every sweep plan, run, probe,
-    awareness check, cost estimate, lock and gate reads ``models``, so an entry with role ``extraction``
-    is, to all of them, an unknown model: it cannot be planned, probed or locked, with no per-path check
-    to forget. Only ``extraction()`` reaches it."""
+    """``models.toml``. **The extraction and reader models are kept out of ``models``.** Every sweep plan,
+    run, probe, awareness check, cost estimate, lock and gate reads ``models``, so an entry with role
+    ``extraction`` or ``reader`` is, to all of them, an unknown model: it cannot be planned, probed or
+    locked, with no per-path check to forget. Only ``extraction()`` and ``reader()`` reach them."""
 
     pace_fraction: float = Field(gt=0, le=1)
     models: dict[str, ModelConfig]
     extraction_models: dict[str, ModelConfig] = Field(default_factory=dict)
+    reader_models: dict[str, ModelConfig] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
-    def _set_the_extraction_model_apart(cls, data: Any) -> Any:
+    def _set_the_case_tool_models_apart(cls, data: Any) -> Any:
         if not isinstance(data, dict) or not isinstance(data.get("models"), dict):
             return data
-        if "extraction_models" in data:
-            raise ValueError(
-                "extraction_models is not a models.toml key; give the entry role = 'extraction'"
-            )
+        for field_name in ("extraction_models", "reader_models"):
+            if field_name in data:
+                needed = EXTRACTION_ROLE if field_name == "extraction_models" else READER_ROLE
+                raise ValueError(
+                    f"{field_name} is not a models.toml key; give the entry role = '{needed}'"
+                )
         models: dict[str, Any] = {}
         extraction: dict[str, Any] = {}
+        readers: dict[str, Any] = {}
         for key, entry in data["models"].items():
-            is_extraction = isinstance(entry, dict) and entry.get("role") == EXTRACTION_ROLE
-            (extraction if is_extraction else models)[key] = entry
-        return {**data, "models": models, "extraction_models": extraction}
+            entry_role = entry.get("role") if isinstance(entry, dict) else None
+            target = {EXTRACTION_ROLE: extraction, READER_ROLE: readers}.get(
+                str(entry_role), models
+            )
+            target[key] = entry
+        return {**data, "models": models, "extraction_models": extraction, "reader_models": readers}
 
     @model_validator(mode="after")
-    def _one_extraction_model_at_most(self) -> ModelsFile:
-        if len(self.extraction_models) > 1:
-            raise ValueError(
-                f"at most one extraction model, found {', '.join(sorted(self.extraction_models))}"
-            )
+    def _one_of_each_case_tool_model_at_most(self) -> ModelsFile:
+        for what, found in (("extraction", self.extraction_models), ("reader", self.reader_models)):
+            if len(found) > 1:
+                raise ValueError(f"at most one {what} model, found {', '.join(sorted(found))}")
         return self
 
     def extraction(self) -> tuple[str, ModelConfig]:
@@ -131,3 +148,9 @@ class ModelsFile(_Strict):
         for key, config in self.extraction_models.items():
             return key, config
         raise ValueError("models.toml has no extraction model")
+
+    def reader(self) -> tuple[str, ModelConfig]:
+        """The independent reader's key and entry."""
+        for key, config in self.reader_models.items():
+            return key, config
+        raise ValueError("models.toml has no reader model")

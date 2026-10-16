@@ -770,9 +770,14 @@ def test_a_failing_check_prints_failures_by_criterion_and_never_a_name_figure_or
 
 
 def test_lock_passes_end_to_end_once_the_check_passes(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     import hashlib
+
+    from horizon_compact import cli
+
+    # the independent reads are the reader's tests' business (tests/test_reader.py)
+    monkeypatch.setattr(cli, "reads_settled_for_lock", lambda case: None)
 
     case = make_case(tmp_path, "S3")
     dossier = b'title = "t"\ntext = """canary dossier"""\n'

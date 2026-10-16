@@ -22,6 +22,7 @@ from horizon_compact.casebuild.search import (
     K,
     LogError,
     Query,
+    ReaderReply,
     Row,
     SearchError,
     SelectionLog,
@@ -38,6 +39,12 @@ ROOT = Path(__file__).resolve().parents[1]
 SEARCH_DATE = date(2026, 11, 1)
 END = date(2026, 10, 31)
 CLOSURE = QUERIES[0]
+
+
+# A reader's reply as the log stores it (the file itself is the reader's test's business).
+AGREED = ReaderReply("reader-rejection-x-1-reply.json", "a" * 64, "fail")
+DISPUTED = ReaderReply("reader-rejection-x-1-reply.json", "b" * 64, "pass")
+UNSURE = ReaderReply("reader-rejection-x-1-reply.json", "c" * 64, "cannot_tell")
 
 
 def raw_hit(
@@ -553,11 +560,11 @@ def test_a_rejection_on_criterion_3_4_or_5_needs_an_independent_read_and_a_disag
         "closure-01: its rejection on real_decision has not been read by the independent reader"
     ]
     with pytest.raises(LogError, match="resolved by him"):
-        log.record_read("closure-01", "real_decision", agrees=False)
+        log.record_read("closure-01", "real_decision", reply=DISPUTED)
     with pytest.raises(LogError, match="did not fail"):
-        log.record_read("closure-01", "maps_to_shape", agrees=True)
+        log.record_read("closure-01", "maps_to_shape", reply=AGREED)
     log.record_read(
-        "closure-01", "real_decision", agrees=False, resolution="he finds real alternatives"
+        "closure-01", "real_decision", reply=DISPUTED, resolution="he finds real alternatives"
     )
     assert log.problems() == []
     log.record(
@@ -565,7 +572,7 @@ def test_a_rejection_on_criterion_3_4_or_5_needs_an_independent_read_and_a_disag
     )  # not 3, 4 or 5: not read
     assert log.problems() == []
     with pytest.raises(LogError, match="only a rejection on"):
-        log.record_read("closure-02", "first_disclosure", agrees=True)
+        log.record_read("closure-02", "first_disclosure", reply=AGREED)
 
 
 def fail_at(log: SelectionLog, candidate_id: str, criterion: str, day: int = 1) -> None:
@@ -579,7 +586,7 @@ def fail_at(log: SelectionLog, candidate_id: str, criterion: str, day: int = 1) 
 
 
 def dispute(log: SelectionLog, candidate_id: str, criterion: str) -> None:
-    log.record_read(candidate_id, criterion, agrees=False, resolution="he finds it holds")
+    log.record_read(candidate_id, criterion, reply=DISPUTED, resolution="he finds it holds")
 
 
 def test_a_rejection_the_reader_disputes_does_not_stand_and_the_candidate_goes_on() -> None:
@@ -606,7 +613,7 @@ def test_a_rejection_the_reader_disputes_does_not_stand_and_the_candidate_goes_o
 def test_a_rejection_the_reader_agrees_with_still_stands() -> None:
     log = log_of("closure-01")
     fail_at(log, "closure-01", "maps_to_shape")
-    log.record_read("closure-01", "maps_to_shape", agrees=True)
+    log.record_read("closure-01", "maps_to_shape", reply=AGREED)
     row = log.rows["closure-01"]
     assert row.failed == "maps_to_shape" and not row.disputed("maps_to_shape")
     with pytest.raises(LogError, match="nothing follows a failure"):
@@ -660,19 +667,19 @@ def test_an_unread_rejection_on_3_4_or_5_holds_the_selection_and_the_fallback_op
     )
     with pytest.raises(LogError, match="fallback candidate"):  # the window is not known to be short
         log.record("ai-f01", "first_disclosure", "pass", "ok", disclosed=D)
-    log.record_read("ai-01", "maps_to_shape", agrees=True)
+    log.record_read("ai-01", "maps_to_shape", reply=AGREED)
     assert row.finished and log.selection("ai").cases == ("ai-02",)
 
 
 def test_a_read_cannot_change_once_a_later_criterion_is_recorded() -> None:
     log = log_of("closure-01")
     fail_at(log, "closure-01", "real_decision")
-    log.record_read("closure-01", "real_decision", agrees=True)
+    log.record_read("closure-01", "real_decision", reply=AGREED)
     dispute(log, "closure-01", "real_decision")  # no later criterion yet: a changed read is allowed
     log.record("closure-01", "maps_to_shape", "pass", "ok")
     dispute(log, "closure-01", "real_decision")  # the same read again changes nothing
     with pytest.raises(LogError, match="a read cannot change now"):
-        log.record_read("closure-01", "real_decision", agrees=True)
+        log.record_read("closure-01", "real_decision", reply=AGREED)
 
 
 def test_a_disputed_log_round_trips_and_a_hand_edit_cannot_dispute_without_a_resolution() -> None:
@@ -689,8 +696,20 @@ def test_a_disputed_log_round_trips_and_a_hand_edit_cannot_dispute_without_a_res
     with pytest.raises(LogError, match="resolved by him"):
         SelectionLog.from_text(json.dumps(saved))
     saved = json.loads(log.to_text())
-    saved["rows"][0]["reads"]["first_disclosure"] = {"agrees": False, "resolution": "x"}
+    saved["rows"][0]["reads"]["first_disclosure"] = {
+        **saved["rows"][0]["reads"]["real_decision"],
+        "resolution": "x",
+    }
     with pytest.raises(LogError, match="only a rejection"):
+        SelectionLog.from_text(json.dumps(saved))
+    for edit in ({"agrees": True}, {"reading": "fail"}):  # a verdict that differs from its reading
+        saved = json.loads(log.to_text())
+        saved["rows"][0]["reads"]["real_decision"].update(edit)
+        with pytest.raises(LogError, match="differs from its reading"):
+            SelectionLog.from_text(json.dumps(saved))
+    saved = json.loads(log.to_text())
+    del saved["rows"][0]["reads"]["real_decision"]["reply_sha256"]
+    with pytest.raises(LogError, match="cannot be read"):  # a read with no reply is refused
         SelectionLog.from_text(json.dumps(saved))
 
 
@@ -699,7 +718,7 @@ def test_the_public_view_marks_a_disputed_rejection_and_still_carries_no_name() 
     fail_at(log, "closure-01", "real_decision")
     dispute(log, "closure-01", "real_decision")
     fail_at(log, "closure-02", "maps_to_shape", day=2)
-    log.record_read("closure-02", "maps_to_shape", agrees=True)
+    log.record_read("closure-02", "maps_to_shape", reply=AGREED)
     rows = {r["id"]: r for r in log.public_view()["closure"]["rows"]}
     assert rows["closure-01"]["criteria"]["real_decision"] == {
         "result": "fail",
@@ -722,7 +741,7 @@ def test_the_log_round_trips_through_its_text() -> None:
     for criterion in CRITERIA[1:3]:
         log.record("ai-01", criterion, "pass", "ok")
     log.record("ai-01", "real_decision", "fail", "forced")
-    log.record_read("ai-01", "real_decision", agrees=True)
+    log.record_read("ai-01", "real_decision", reply=AGREED)
     again = SelectionLog.from_text(log.to_text())
     assert again.to_text() == log.to_text()
     assert again.selection("closure") == log.selection("closure")

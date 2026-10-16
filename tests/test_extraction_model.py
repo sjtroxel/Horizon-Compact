@@ -114,7 +114,7 @@ def test_an_extraction_entry_needs_the_anthropic_route_thinking_off_and_a_max_to
 
 
 def test_max_tokens_is_refused_on_any_other_role() -> None:
-    with pytest.raises(ValidationError, match="extraction model"):
+    with pytest.raises(ValidationError, match="extraction or reader model"):
         ModelConfig.model_validate(_entry(role="main", thinking="off"))
 
 

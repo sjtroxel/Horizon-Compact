@@ -760,3 +760,51 @@ def test_the_outcome_import_scan_catches_what_it_is_meant_to() -> None:
         "from horizon_compact.providers.base import TextRequest",
     ):
         assert not _outcome_imports(ast.parse(source)), source
+
+
+# --- the independent reader never sees the grid's results (search-half doc §4.9; protocol §12.9) ---
+
+READER = ROOT / "src" / "horizon_compact" / "reader"
+# Whatever holds a result, a run record, a probe answer or the analysis of them. The reader reads named files
+# of one case's folder and the shape's template; if it cannot import these, no result can reach it.
+RESULT_MODULES = (
+    "horizon_compact.analysis",
+    "horizon_compact.simulation",
+    "horizon_compact.sweep",
+    "horizon_compact.probes",
+    "horizon_compact.smoke",
+    "horizon_compact.protocol.gate",
+)
+
+
+def test_the_reader_cannot_import_anything_that_holds_a_result() -> None:
+    offenders: list[str] = []
+    for path in sorted(READER.rglob("*.py")):
+        for lineno, module in _imported_modules(ast.parse(path.read_text(encoding="utf-8"))):
+            if any(module == m or module.startswith(f"{m}.") for m in RESULT_MODULES):
+                offenders.append(f"{path.name}:{lineno} {module}")
+    assert not offenders, f"reader/ imports something that holds a result: {offenders}"
+
+
+def test_the_reader_import_scan_catches_what_it_is_meant_to() -> None:
+    def hits(source: str) -> bool:
+        return any(
+            m == r or m.startswith(f"{r}.")
+            for _, m in _imported_modules(ast.parse(source))
+            for r in RESULT_MODULES
+        )
+
+    assert hits("from horizon_compact.analysis import matcher")
+    assert hits("from horizon_compact.sweep.plan import build_plan")
+    assert hits("import horizon_compact.probes.run")
+    assert not hits("from horizon_compact.providers.base import TextRequest")
+
+
+def test_the_case_builder_cannot_import_the_reader() -> None:
+    offenders = [
+        f"{path.name}:{lineno} {module}"
+        for path in sorted(CASEBUILD.rglob("*.py"))
+        for lineno, module in _imported_modules(ast.parse(path.read_text(encoding="utf-8")))
+        if "horizon_compact.reader" in module
+    ]
+    assert not offenders, f"casebuild/ imports the reader: {offenders}"

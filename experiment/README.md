@@ -5,6 +5,9 @@ image, so the image digest pins the code and the content together (Phase 1 decis
 hash of every file it read.
 
 - `models.toml`: how each model is reached, its request quota and its prices. Config, not content; never in code.
+- `readers/`: **the independent reader's three fixed briefs** (Phase 5 search half, protocol section 12.9): the system text
+  of a read of a rejection, a scenario and a rubric. Committed and pushed before the first read; each request record
+  holds the brief's sha256. Not part of any experiment folder, and not in the lock.
 - `placeholder/`: **the walking skeleton's placeholder, off the experiment's subject entirely** (Phase 1 decision 2).
   Its rule is written at the top of each of its files. **The layout every experiment folder follows** (Phase 2.5):
   `dossier.toml`, `objectives.toml` (the objectives, the wording templates `w1` to `w3` and, for an experiment that
