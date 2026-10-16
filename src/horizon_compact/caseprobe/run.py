@@ -26,6 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from horizon_compact.casebuild.frozen import FrozenInputsError, Git
 from horizon_compact.caseprobe.layout import (
     CONTENT_FILES,
     PROBE_CALLS,
@@ -37,6 +38,7 @@ from horizon_compact.caseprobe.layout import (
     error_key,
     probes_prefix,
 )
+from horizon_compact.caseprobe.upload import lock_pushed
 from horizon_compact.model_config import ModelConfig
 from horizon_compact.protocol.cases import (
     CaseContent,
@@ -152,6 +154,74 @@ def probe_worst_case_usd(system: str, config: ModelConfig) -> float:
     return worst_case_attempt_usd(tokens, PROBE_MAX_TOKENS, config.prices)
 
 
+def _checked_content(
+    *,
+    label: str,
+    probe_set: int,
+    config: ModelConfig,
+    repo_root: Path,
+    store: Store,
+    cap_usd: float,
+) -> tuple[CaseContent, float]:
+    """The stored content, proved against ``case.lock`` for this set, and one call's worst case, proved under
+    the cap. The container and the laptop's launch both make these checks."""
+    try:
+        record = read_case(repo_root, label)
+    except CaseError as exc:
+        raise ProbeRefused(f"{exc} (the image must carry the case record)") from exc
+    if record.probe_set != probe_set:
+        raise ProbeRefused(
+            f"{case_path(label)} is for probe set {record.probe_set}, not {probe_set}"
+        )
+    content = load_content(store, label, probe_set)
+    mismatched = check_case_content(record, content)
+    if mismatched:
+        raise ProbeRefused("; ".join(mismatched))
+    worst = probe_worst_case_usd(content.dossier.decode("utf-8"), config)
+    bound = round(PROBE_CALLS * worst, 4)
+    if bound > cap_usd:
+        raise ProbeRefused(
+            f"the worst case for {PROBE_CALLS} probe calls is ${bound:.2f}, above the cap of ${cap_usd:.2f}"
+        )
+    return content, worst
+
+
+def check_probe_launch(
+    *,
+    label: str,
+    probe_set: int,
+    model_key: str,
+    config: ModelConfig,
+    repo_root: Path,
+    git: Git,
+    store: Store,
+    cap_usd: float,
+) -> float:
+    """The laptop's checks before a probe task starts, so a launch the container would refuse is refused
+    here, before any task: the model, the lock pushed (the deployed image must carry it), the stored content
+    hashing to it, the cap, and a set not already complete for this model. Returns the worst case for the
+    three calls. The container makes its own checks again; these are a convenience, not the guarantee."""
+    check_probe_model(model_key, config)
+    try:
+        lock_pushed(git, label)
+    except FrozenInputsError as exc:
+        raise ProbeRefused(str(exc)) from exc
+    _, worst = _checked_content(
+        label=label,
+        probe_set=probe_set,
+        config=config,
+        repo_root=repo_root,
+        store=store,
+        cap_usd=cap_usd,
+    )
+    existing = set(store.list_keys(f"{probes_prefix(label, probe_set)}{model_key}/"))
+    if all(call_key(label, probe_set, model_key, n) in existing for n in range(1, PROBE_CALLS + 1)):
+        raise ProbeRefused(
+            f"{model_key} already has all {PROBE_CALLS} calls of set {probe_set}: nothing to launch"
+        )
+    return round(PROBE_CALLS * worst, 4)
+
+
 def run_case_probe(
     *,
     label: str,
@@ -177,26 +247,16 @@ def run_case_probe(
             "a case probe runs in the container only: an official result carries an image digest"
         )
     check_probe_model(model_key, config)
-    try:
-        record = read_case(repo_root, label)
-    except CaseError as exc:
-        raise ProbeRefused(f"{exc} (the image must carry the case record)") from exc
-    if record.probe_set != probe_set:
-        raise ProbeRefused(
-            f"{case_path(label)} in the image is for probe set {record.probe_set}, not {probe_set}"
-        )
-    content = load_content(store, label, probe_set)
-    mismatched = check_case_content(record, content)
-    if mismatched:
-        raise ProbeRefused("; ".join(mismatched))
+    content, worst = _checked_content(
+        label=label,
+        probe_set=probe_set,
+        config=config,
+        repo_root=repo_root,
+        store=store,
+        cap_usd=cap_usd,
+    )
     lock_text = (repo_root / case_path(label)).read_bytes()
     system = content.dossier.decode("utf-8")
-    worst = probe_worst_case_usd(system, config)
-    bound = round(PROBE_CALLS * worst, 4)
-    if bound > cap_usd:
-        raise ProbeRefused(
-            f"the worst case for {PROBE_CALLS} probe calls is ${bound:.2f}, above the cap of ${cap_usd:.2f}"
-        )
 
     prefix = probes_prefix(label, probe_set)
     existing = set(store.list_keys(f"{prefix}{model_key}/"))

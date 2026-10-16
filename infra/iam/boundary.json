@@ -59,7 +59,8 @@
       "Resource": [
         "arn:aws:s3:::${results_bucket}/development/*",
         "arn:aws:s3:::${results_bucket}/pilot/*",
-        "arn:aws:s3:::${results_bucket}/official/*"
+        "arn:aws:s3:::${results_bucket}/official/*",
+        "arn:aws:s3:::${results_bucket}/cases/*"
       ]
     },
     {
@@ -72,7 +73,8 @@
           "s3:prefix": [
             "development/*",
             "pilot/*",
-            "official/*"
+            "official/*",
+            "cases/*"
           ]
         }
       }

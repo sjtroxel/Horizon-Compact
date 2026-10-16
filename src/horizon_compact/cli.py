@@ -74,7 +74,7 @@ from horizon_compact.casebuild.search import (
 from horizon_compact.casebuild.sections import build_section_inputs
 from horizon_compact.casebuild.splitter import SplitRefused
 from horizon_compact.casebuild.terms import CaseTerm, CaseTermsError, parse_case_terms
-from horizon_compact.caseprobe.run import ProbeRefused, run_case_probe
+from horizon_compact.caseprobe.run import ProbeRefused, check_probe_launch, run_case_probe
 from horizon_compact.caseprobe.upload import UploadError, upload_case
 from horizon_compact.caseprobe.verdict import VerdictError, probe_verdict
 from horizon_compact.dossier.check import default_repo_root, run_checks
@@ -1348,6 +1348,40 @@ def _case_probe_world(
     return provider, store, account_id
 
 
+def _launch_case_probe(
+    args: argparse.Namespace, root: Path, probe_set: int, config: ModelConfig
+) -> int:
+    """Start the probe as a Fargate task, after the laptop's own checks (``check_probe_launch``). The task
+    runs ``hc case probe`` without ``--launch`` and checks everything again in the container."""
+    store = _case_bucket_store(args)
+    bound = check_probe_launch(
+        label=args.label,
+        probe_set=probe_set,
+        model_key=args.model,
+        config=config,
+        repo_root=root,
+        git=git_in(root),
+        store=store,
+        cap_usd=args.cap_usd,
+    )
+    session = boto3.Session(
+        profile_name=args.profile, region_name=os.environ.get(REGION_ENV, REGION)
+    )
+    command = [
+        "case", "probe", args.label,
+        "--model", args.model,
+        "--set", str(probe_set),
+        "--cap-usd", str(args.cap_usd),
+    ]  # fmt: skip
+    arn = sweep_launch.launch_task(
+        session.client("ecs"), session.client("ec2"), model_key=args.model, command=command
+    )
+    print(f"launched:        {arn.rsplit('/', 1)[-1]}")
+    print(f"probe:           {args.label} set {probe_set} {args.model} (worst case ${bound:.4f})")
+    print(f"read it back:    hc case probe-verdict {args.label} --set {probe_set} --profile ...")
+    return CLEAN_EXIT
+
+
 def cmd_case_probe(args: argparse.Namespace) -> int:
     """The recognition probe for one case and one model: the container's command (protocol §12.8)."""
     root = default_repo_root()
@@ -1360,6 +1394,8 @@ def cmd_case_probe(args: argparse.Namespace) -> int:
     config = models.models.get(args.model)
     if config is None:
         raise ProbeRefused(f"{args.model!r} is not a model in {MODELS_FILE}")
+    if args.launch:
+        return _launch_case_probe(args, root, probe_set, config)
     identity = identify(os.environ, _laptop_git)
     provider, store, account_id = _case_probe_world(args, args.model, config, identity)
 
@@ -2363,6 +2399,12 @@ def build_parser() -> argparse.ArgumentParser:
     probe.add_argument(
         "--cap-usd", type=float, default=2.0, help="the most the three calls may cost"
     )
+    probe.add_argument(
+        "--launch",
+        action="store_true",
+        help="from the laptop: check the case, then start the probe as a Fargate task (needs --profile)",
+    )
+    probe.add_argument("--profile", help="the AWS profile, for --launch (no default)")
     for sub in (upload, verdict, probe):
         sub.add_argument(
             "--set", type=int, choices=(1, 2), help="default: the set case.lock is for"

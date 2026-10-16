@@ -1214,3 +1214,54 @@ def test_the_log_never_takes_an_earlier_sets_reply_for_a_later_set_not_yet_read(
     verdict(case, bucket, ["y"], probe_set=2)
     with pytest.raises(ReaderError, match="probe set 2 has flagged answers and no usable read"):
         rejection_reply_on_record(case, "not_recognizable")
+
+
+# --- 10b: the laptop's launch ---------------------------------------------------------------------
+
+
+def test_hc_case_probe_launch_checks_the_case_on_the_laptop_then_starts_the_task(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    bucket = FakeBucket()
+    repo, case = locked(tmp_path)
+    launched: list[tuple[str, list[str]]] = []
+    git = {"run": fake_git()}
+
+    def launch_task(ecs: object, ec2: object, *, model_key: str, command: list[str]) -> str:
+        launched.append((model_key, command))
+        return "arn:aws:ecs:us-east-1:123:task/horizon-compact/abc123"
+
+    class Session:
+        def __init__(self, **kwargs: object) -> None:
+            pass
+
+        def client(self, name: str) -> object:
+            return name
+
+    monkeypatch.setattr(cli, "default_repo_root", lambda: repo)
+    monkeypatch.setattr(cli, "git_in", lambda root: git["run"])
+    monkeypatch.setattr(cli, "_case_bucket_store", lambda args: bucket)
+    monkeypatch.setattr("horizon_compact.sweep.launch.launch_task", launch_task)
+    monkeypatch.setattr("boto3.Session", Session)
+    launch = ["case", "probe", LABEL, "--model", "haiku-5-5", "--launch", "--profile", "p"]
+
+    assert main(launch) == REFUSED_EXIT  # nothing uploaded yet
+    assert "run `hc case upload` first" in capsys.readouterr().err
+    upload_case(case, repo, probe_set=1, git=fake_git(), store=bucket)  # type: ignore[arg-type]
+    git["run"] = fake_git(remotes="")
+    assert main(launch) == REFUSED_EXIT
+    assert "not on any remote branch" in capsys.readouterr().err
+    git["run"] = fake_git()
+    assert main(launch) == CLEAN_EXIT
+    assert launched == [
+        (
+            "haiku-5-5",
+            ["case", "probe", LABEL, "--model", "haiku-5-5", "--set", "1", "--cap-usd", "2.0"],
+        )
+    ]
+    assert "launched:        abc123" in capsys.readouterr().out
+    for n in (1, 2, 3):
+        bucket.put_new(call_key(LABEL, 1, "haiku-5-5", n), "{}")
+    assert main(launch) == REFUSED_EXIT
+    assert "nothing to launch" in capsys.readouterr().err
+    assert len(launched) == 1

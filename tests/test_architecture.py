@@ -373,10 +373,11 @@ def _results_prefixes(name: str) -> tuple[list[str], list[str]]:
     return objects, listed
 
 
-def test_task_role_and_boundary_grant_exactly_the_three_results_prefixes() -> None:
+def test_task_role_and_boundary_grant_exactly_the_four_results_prefixes() -> None:
     """Phase 4 code half section 4.2: development, pilot and official, and nothing else in the bucket (the
-    pilot is its own top-level prefix so it can never sit beside the grid)."""
-    wanted = ["development/*", "pilot/*", "official/*"]
+    pilot is its own top-level prefix so it can never sit beside the grid). Phase 5 search-half doc §4.8 adds
+    ``cases/``, a real case's private content and probe records, which the publish path never reads."""
+    wanted = ["development/*", "pilot/*", "official/*", "cases/*"]
     for name in ("task.json", "boundary.json"):
         objects, listed = _results_prefixes(name)
         assert sorted(objects) == sorted(wanted), name

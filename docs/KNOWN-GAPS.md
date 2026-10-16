@@ -7,6 +7,41 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-16, about 5:35 PM, HANDOFF (STAGE C COMMITTED; HIS PUSH AND THE DEPLOY CLOSE IT)
+>
+> **Measured at handoff:** `make check` green, **2497 tests**; `hc protocol check: ok`. **Committed, not yet pushed
+> at handoff:** step 10b and this handoff, one commit `phase 5: case probe grant and launch` (on `9842054`, step 10a,
+> pushed). The boundary is applied (his, about 5:15 PM). **The first real probe moved to Stage D** (search-half doc §5
+> step 10, dated note): no case exists to probe.
+>
+> **First move next session:** (1) if not already done, his `git push`, then the Deploy run's `apply main` job green
+> (it applies the task role's `cases/*` and builds the image with `hc case probe`). With that, **Stage C is done.**
+> (2) **Stage D, step 11** (search-half doc §5): criteria 1-4 down each type's list, in order, the reader on each
+> criterion 3-4 rejection, its excerpt taken by rule. Done for a type is its first candidate through criteria 1-4,
+> or the type's list exhausted. **Owed at the first case's probe launch:** the probe proves the task role's
+> `cases/*` grant, `LastModified` on a `cases/` object, the 10a point 15 items, and OPEN 2026-10-15 item 1 (the
+> task's cost tag). **Before the first S1 or S3 render:** OPEN 2026-10-16, pay per head. **At Stage D, S3:** OPEN
+> 2026-10-16, every option's figures. **Before any set-2 lock:** OPEN 2026-10-16, where a coarsened dossier lives.
+>
+> *The 5:10 PM block below is superseded; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-16, about 5:10 PM (STAGE C BUILT; HIS APPLY AND PUSH CLOSE IT)
+>
+> **Measured:** `make check` green, **2497 tests**; `hc protocol check: ok`. Last commit `9842054` (step 10a,
+> pushed). **Uncommitted:** step 10b (search-half doc §11): `cases/*` in the task role and the boundary, and `hc case
+> probe --launch`. **The first real probe moved to Stage D** (dated note, §5 step 10): no case exists to probe.
+>
+> **The boundary is APPLIED** (his, 2026-10-16 about 5:15 PM: bootstrap plan read, 0 add / 1 change / 0 destroy, the
+> two `cases/*` lines only).
+>
+> **Next, in order:** (1) done; (2) his commit `phase 5: case probe grant and launch` and push; the deploy applies
+> `main` (the task role's policy only) and builds the image: check its `apply main` job is green. Then **Stage C is
+> done.** (3) Stage D, step 11: criteria 1-4 down each type's list. **Before the first S1 or S3 render:** OPEN
+> 2026-10-16, pay per head. **At Stage D, S3:** OPEN 2026-10-16, every option's figures. **Before any set-2 lock:**
+> OPEN 2026-10-16, where a coarsened dossier lives.
+>
+> *The 4:50 PM block below is superseded on what is next; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-16, about 4:50 PM (STEP 10a BUILT AND REVIEWED, UNCOMMITTED)
 >
 > **Measured:** `make check` green, **2496 tests**; `hc protocol check: ok`. Last commit `2d45a72` (pushed).
@@ -1368,7 +1403,7 @@ whether it may touch the scenario text as well as the dossier. **Settle it when 
 probe), before any set-2 lock;** then point `lock_case`'s set-2 branch at that path and check it against that record.
 Nothing reaches set 2 before a probe has failed.
 
-## CLOSED 2026-10-16, his decision, built in step 10a (awaiting his commit) — a disputed probe failure (criterion 5) passed the log but not the gate
+## CLOSED 2026-10-16, his decision, built in step 10a (committed `9842054`, pushed) — a disputed probe failure (criterion 5) passed the log but not the gate
 
 Found in the Opus review of the disputed-rejection fix. Protocol §12.4 has the independent reader read every
 rejection on criterion 5, and a disputed one does not stand, so the log now counts the probe as met. Protocol §12.10's
@@ -1637,6 +1672,8 @@ inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-son
 ---
 
 ## OPEN — for Phase 5: the case mode's readers and wiring, 2026-10-09
+
+*2026-10-16: the record writer (`hc case lock`, 8a), the S3 probe reader, the GitHub reader and the probe runner are built (10a, 10b) and tested on fakes; their live proof is the first case's probe (Stage D). The launch's order check and the container session stay Phase 5.5's.*
 
 *2026-10-15: planned in the search-half IMPLEMENTATION doc: the record writer (`hc case lock`), the S3 probe reader and
 the GitHub reader are built in its Stage C (§4.8, §4.10) and proved on the probes; the launch's order check and the

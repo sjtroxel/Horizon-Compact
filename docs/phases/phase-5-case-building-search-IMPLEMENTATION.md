@@ -356,6 +356,9 @@ scenario facts) with him.** One terminal command at a time, with the line to loo
     `probe-verdict`, the S3 and GitHub readers, and the criterion 5 read (as built, §11). No `task.json` or
     Terraform change, no AWS call, no real probe. **10b.** `task.json` (his Terraform plan and apply, Claude reading
     the plan), launching the task, and the first real probe.
+    *(Dated note, 2026-10-16, about 5:10 PM.)* **The first real probe moves to Stage D,** as the first case's own
+    probe: a probe needs a locked, uploaded case, and no case exists before Stage D. 10b is the grant (`task.json`
+    and `boundary.json` gain `cases/*`) and `hc case probe --launch`. With his apply and push, Stage C is done.
 
 ### Stage D: the cases (as many sessions as it takes)
 
@@ -1105,3 +1108,18 @@ fixes applied, and his decision on a fifth; 2496 tests, `make check` green.
   material gives §12.8's sentence word for word; the brief adds that a name counts "written in full or in a form a
   reader would take for it", and that a listed term used only as an ordinary word does not. Both kept, as a stated
   interpretation of the pre-registered definition, made before any read. **For his methods page** (his to write).
+
+**Stage C step 10b, the grant and the launch (2026-10-16, about 5:10 PM; Opus built).** 2497 tests, `make check`
+green. No AWS call was made from here; the apply is his.
+- **The grant.** `infra/iam/task.json` and `infra/iam/boundary.json` each gain `cases/*` on `ResultsObjects`
+  (`s3:GetObject`, `s3:PutObject`) and on `ResultsList`'s `s3:prefix`, nothing wider; the architecture test now
+  pins the four prefixes. The boundary is the `bootstrap` root (his plan and apply); the task role is `main`, which
+  the deploy applies on push. The list grant also means a missing verdict reads as missing, not AccessDenied.
+- **`hc case probe <label> --model m --launch --profile p`** (laptop). Before any task starts, the container's
+  checks are made again on the laptop (`check_probe_launch`): the model's role and route, `case.lock` committed and
+  on a remote branch, the stored content hashing to it for this set, the worst case under the cap, and a set not
+  already complete for this model. Then one Fargate task running `hc case probe <label> --model m --set n
+  --cap-usd c`, which checks everything again. One task per model at a time (the sweep launcher's rule: tasks share
+  the model's request quota).
+- **Not proved until the first case:** the task role's grant in use, `LastModified` on a `cases/` call object, and
+  the three unverified points of 10a point 15. All are the first case's probe, Stage D.
