@@ -211,3 +211,256 @@ def test_a_late_search_needs_a_reason_and_keeps_the_rule_dates_window(
 
 def test_the_rule_date_is_the_day_after_the_results_commit() -> None:
     assert date(2026, 10, 16) == RULE_DATE
+
+
+# --- hc case log (search-half IMPLEMENTATION doc §4.3) ------------------------------------------------------
+
+
+def _log_setup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> Path:
+    """A search run on fake replies: closure-01 in the window, closure-f01 in the fallback month."""
+    folder, _ = _search_setup(tmp_path, monkeypatch, RULE_DATE)
+    assert main(["case", "search", "--date", RULE_DATE.isoformat()]) == CLEAN_EXIT
+    capsys.readouterr()
+    return folder
+
+
+def _log(*words: str) -> int:
+    return main(["case", "log", *words])
+
+
+def _guard_terms(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A fictional term file, set explicitly so no test ever reads the real one through git config."""
+    folder = tmp_path / "guard"
+    folder.mkdir()
+    longlist = folder / "longlist.md"
+    longlist.write_text("a fictional longlist\n", encoding="utf-8")
+    digest = hashlib.sha256(longlist.read_bytes()).hexdigest()
+    terms = folder / "terms.txt"
+    terms.write_text(
+        f"longlist: {longlist}\nlonglist-sha256: {digest}\nterm-i: Zarnothic\n", encoding="utf-8"
+    )
+    monkeypatch.setenv("HC_NAME_GUARD_TERMS", str(terms))
+
+
+def test_log_record_writes_the_next_version_and_leaves_the_earlier_one_alone(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    first = (folder / "selection-log-1.json").read_bytes()
+    args = ["closure", "record", "closure-01", "first_disclosure", "pass"]
+    assert _log(*args, "--reason", "first said here", "--disclosed", "2026-08-18") == CLEAN_EXIT
+    assert "wrote selection-log-2.json" in capsys.readouterr().out
+    assert (folder / "selection-log-1.json").read_bytes() == first
+    assert (folder / "selection-public-2.json").is_file()
+    assert (
+        _log("closure", "record", "closure-01", "public_and_filing", "fail", "--reason", "x") == 0
+    )
+    assert "wrote selection-log-3.json" in capsys.readouterr().out
+    rows = json.loads((folder / "selection-log-3.json").read_text())["rows"]
+    done = next(r for r in rows if r["id"] == "closure-01")
+    assert list(done["results"]) == ["first_disclosure", "public_and_filing"]
+
+
+def test_log_loads_the_newest_version_by_number_not_by_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    text = (folder / "selection-log-1.json").read_text()
+    for n in range(2, 11):  # copies of the empty log, so only the highest number is newest
+        (folder / f"selection-log-{n}.json").write_text(text)
+    args = ["closure", "record", "closure-01", "first_disclosure", "pass", "--reason", "r"]
+    assert _log(*args, "--disclosed", "2026-08-18") == CLEAN_EXIT
+    assert "wrote selection-log-11.json" in capsys.readouterr().out
+
+
+def test_log_refuses_what_the_log_refuses_and_writes_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    before = sorted(p.name for p in folder.iterdir())
+    refused = [
+        # out of order: the first criterion is first_disclosure
+        ["closure", "record", "closure-01", "public_and_filing", "pass", "--reason", "r"],
+        # a passed first_disclosure with no date
+        ["closure", "record", "closure-01", "first_disclosure", "pass", "--reason", "r"],
+        # a date on a result that carries none
+        [
+            "closure",
+            "record",
+            "closure-01",
+            "first_disclosure",
+            "fail",
+            "--reason",
+            "r",
+            "--disclosed",
+            "2026-08-18",
+        ],
+        # a blank reason
+        ["closure", "record", "closure-01", "first_disclosure", "fail", "--reason", "  "],
+        # a fallback candidate while the window is unchecked
+        ["closure", "record", "closure-f01", "first_disclosure", "fail", "--reason", "r"],
+        # no such candidate
+        ["closure", "record", "closure-99", "first_disclosure", "fail", "--reason", "r"],
+        # a read of a candidate that was not rejected
+        ["closure", "read", "closure-01", "real_decision", "agree"],
+    ]
+    for words in refused:
+        assert _log(*words) == REFUSED_EXIT, words
+        assert capsys.readouterr().err.startswith("refused:")
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_log_refuses_an_id_of_another_type(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    words = ["retool", "record", "closure-01", "first_disclosure", "fail", "--reason", "r"]
+    assert _log(*words) == REFUSED_EXIT
+    assert "is a closure candidate, not retool" in capsys.readouterr().err
+    assert not (folder / "selection-log-2.json").exists()
+
+
+def test_log_read_needs_a_resolution_on_a_disagreement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    assert _log("closure", "record", "closure-01", "first_disclosure", "pass", "--reason", "r",
+                "--disclosed", "2026-08-18") == CLEAN_EXIT  # fmt: skip
+    assert (
+        _log("closure", "record", "closure-01", "public_and_filing", "pass", "--reason", "r") == 0
+    )
+    assert _log("closure", "record", "closure-01", "inside_window", "pass", "--reason", "r") == 0
+    assert _log("closure", "record", "closure-01", "real_decision", "fail", "--reason", "r") == 0
+    capsys.readouterr()
+    assert _log("closure", "read", "closure-01", "real_decision", "disagree") == REFUSED_EXIT
+    assert "resolved by him" in capsys.readouterr().err
+    words = ["closure", "read", "closure-01", "real_decision", "disagree"]
+    assert _log(*words, "--resolution", "his call, and why") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "read: DISAGREES" in out and "wrote selection-log-6.json" in out
+    assert (folder / "selection-log-6.json").is_file()
+
+
+def test_log_public_prints_the_public_view_with_no_name_and_writes_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    words = ["closure", "record", "closure-01", "first_disclosure", "fail"]
+    secret = "the Canary Cages Inc filing was not first"
+    assert _log(*words, "--reason", secret, "--public-reason", "an earlier public mention") == 0
+    capsys.readouterr()
+    before = sorted(p.name for p in folder.iterdir())
+    assert _log("closure", "public") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    for private in ("Canary", "0009999999", "2026-08", "2026-07", secret, "3990", "ciks"):
+        assert private not in out, private
+    view = json.loads(out)
+    assert set(view) == {"closure"}  # the type named, not every type
+    row = next(r for r in view["closure"]["rows"] if r["id"] == "closure-01")
+    assert row["criteria"]["first_disclosure"] == {
+        "result": "fail",
+        "reason": "an earlier public mention",
+    }
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_log_without_a_public_reason_leaves_the_public_reason_empty_not_the_private_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _log_setup(tmp_path, monkeypatch, capsys)
+    secret = "the Canary Cages Inc filing was not first"
+    assert (
+        _log("closure", "record", "closure-01", "first_disclosure", "fail", "--reason", secret) == 0
+    )
+    capsys.readouterr()
+    assert _log("closure", "public") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "Canary" not in out
+    row = next(r for r in json.loads(out)["closure"]["rows"] if r["id"] == "closure-01")
+    assert row["criteria"]["first_disclosure"]["reason"] is None
+
+
+def test_log_show_prints_the_candidates_with_their_names_and_their_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    before = sorted(p.name for p in folder.iterdir())
+    assert _log("closure", "show") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "closure-01 window filed 2026-08-20 0009999999-26-000030 Canary Cages Inc" in out
+    assert "closure-f01 fallback" in out and "next: first_disclosure" in out
+    assert "waiting: closure-01: no first-disclosure result" in out
+    assert out.count("filed ") == 2  # the two closure candidates; no other type's
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_log_refuses_before_the_search_has_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("HC_APPENDIX_DIR", str(tmp_path))
+    assert _log("closure", "show") == REFUSED_EXIT
+    assert "the search has not run" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        "Canary Cages said so first",  # the display name without its legal form
+        "canary cages said so first",  # in any case
+        "found under 0009999999-26-000030",  # the accession number
+        "the filer 9999999 said so",  # the CIK without its leading zeros
+        "a Zarnothic report came first",  # a term from the name guard's list
+        "an earlier mention on 2026-07-02",  # a date
+        "   ",  # blank
+    ],
+)
+def test_log_refuses_a_public_reason_that_identifies_and_writes_nothing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    reason: str,
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    before = sorted(p.name for p in folder.iterdir())
+    words = ["closure", "record", "closure-01", "first_disclosure", "fail", "--reason", "r"]
+    assert _log(*words, "--public-reason", reason) == REFUSED_EXIT
+    err = capsys.readouterr().err
+    assert err.startswith("refused:") and "Canary" not in err and "Zarnothic" not in err
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_log_refuses_a_public_reason_it_cannot_check_without_the_term_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    monkeypatch.setenv("HC_NAME_GUARD_TERMS", str(tmp_path / "no-such-file"))
+    words = ["closure", "record", "closure-01", "first_disclosure", "fail", "--reason", "r"]
+    assert _log(*words, "--public-reason", "an earlier public mention") == REFUSED_EXIT
+    assert "without the name guard" in capsys.readouterr().err
+    assert not (folder / "selection-log-2.json").exists()
+
+
+def test_candidate_terms_catch_the_name_tickers_and_numbers_not_ordinary_words() -> None:
+    from horizon_compact.casebuild.search import candidate_terms
+
+    record = {
+        "names": ["Zarnoth Widget Works, Inc.  (ZWW, ZWWP)  (CIK 0000123456)"],
+        "ciks": ["0000123456"],
+        "accession": "0000123456-26-000001",
+    }
+    terms = candidate_terms(record)
+
+    def hit(text: str) -> bool:
+        return any(term.pattern.search(text) for term in terms)
+
+    for text in ("zarnoth widget works", "ZWW", "ZWWP", "123456", "0000123456-26-000001"):
+        assert hit(text), text
+    for text in ("a widget plant", "zww", "an earlier public mention", "1234567"):
+        assert not hit(text), text
+    short = candidate_terms({"names": ["QX INC  (CIK 0000000042)"]})
+    assert any(term.pattern.search("filed by QX") for term in short)
+    assert not any(term.pattern.search("a qx b") for term in short)

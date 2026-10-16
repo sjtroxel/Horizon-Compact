@@ -1,7 +1,7 @@
 # Phase 5 — Case Building, search half: IMPLEMENTATION (v0.5)
 
 > **IMPLEMENTATION doc, search half. Written 2026-10-15 (Opus), immediately before the search. APPROVED 2026-10-15 (his,
-> about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -449,3 +449,70 @@ command finishes it. Five tests in `tests/test_case_cli.py` on fake replies of t
 (nothing paid has run since): `docs/phases/evidence/phase-5/projection.md`. **Passes:** about $35 cumulative after
 Phases 5 and 5.5, at worst about $41; inside the Anthropic workspace limit and his $5 OpenRouter cap. Committed with
 step 3, before the search.
+
+**Stage B step 5, the search (2026-10-16, about 8:55 AM CDT, his command).** `hc case search --date 2026-10-16`, run
+on the rule date: `run_on` 2026-10-16, `deviation` null, window 2026-08-01 to 2026-10-15, fallback month from
+2026-07-01. Written to the appendix's `search/` folder: `candidates.json`, `selection-log-1.json`,
+`selection-public-1.json`, and the page cache. Read by Claude from the printed counts and the per-query records in
+`candidates.json`, no name printed. **No short read and no `MAX_RESULTS` hit:** every query's `documents_read`
+equals its `total`; the largest is 132 (two pages).
+
+| channel | query | hits | pages | filings kept | documents dropped |
+|---|---|---|---|---|---|
+| 1 | `"Item 2.05"` | 71 | 1 | 36 | 4 form 8-K/A, 31 SIC outside 2000-3999 |
+| 2 | `"new manufacturing facility"` | 3 | 1 | 2 | 1 items lack 7.01 or 8.01 |
+| 2 | `"new production facility"` | 2 | 1 | 1 | 1 SIC |
+| 2 | `"expand production"` | 21 | 1 | 10 | 7 items, 3 SIC |
+| 2 | `"expansion of our manufacturing"` | 5 | 1 | 2 | 3 items |
+| 2 | `"capacity expansion"` | 132 | 2 | 49 | 2 form 8-K/A, 53 items, 23 SIC |
+| 2 | `"retool"` | 6 | 1 | 1 | 1 items, 4 SIC |
+| 3 | `"artificial intelligence" "reduction in force"` | 48 | 1 | 46 | 1 form 8-K/A |
+| 3 | `"artificial intelligence" "workforce reduction"` | 17 | 1 | 17 | none |
+| 3 | `"artificial intelligence" "reduce our workforce"` | 0 | 0 | 0 | none |
+| 3 | `"AI" "reduction in force"` | 50 | 1 | 48 | 2 form 8-K/A |
+| 3 | `"automation" "workforce reduction"` | 5 | 1 | 5 | none |
+
+`filings kept` counts distinct accession numbers; a drop counts documents, so a query's kept plus dropped can fall
+short of its hits by the extra documents (exhibits) of filings already kept. **Candidates per type, after the union
+by accession number within a type:** closure 29 window and 7 fallback (36, the same as channel 1's kept); retool 44
+and 18 (62, from 65 kept: three filings found by two queries); ai 50 and 26 (76, from 116 kept). Each type's window
+pool is many times its k (2, 2, 1). One query returned no hits; that is a result, not a deviation. Nothing else was
+decided that day, by rule. Next: Stage C.
+
+**Stage C step 6, `hc case log` (2026-10-16, Sonnet built; for Opus's review, then his commit).**
+`cmd_case_log` in `cli.py`; `load_newest_log` in `casebuild/search.py`. `hc case log <type> show | record <id>
+<criterion> pass|fail --reason ... [--public-reason ...] [--disclosed YYYY-MM-DD] | read <id> <criterion>
+agree|disagree [--resolution ...] | public`. Each call loads the newest `selection-log-<n>.json` (by number, so 10
+follows 9), rebuilt through `from_text`; `record` and `read` apply exactly one change and write the next numbered pair
+with `write_log_version`; `show` and `public` write nothing; a `LogError` prints `refused: ...` and writes nothing.
+An id of another type than the one named is refused. Three things for the review:
+- **§4.3 says the log holds names; the code's log does not.** A row holds the id, type, pool and accession number;
+  the names are in `candidates.json`. So `show` joins the two (id, pool, filing date, accession number, names, and
+  each criterion's state, the next criterion, the read's state, the type's selection and open problems), and is for
+  his terminal only. `public` prints `public_view()` only.
+- **`--public-reason` was added** (§4.3's command line did not list it). Without it a `public_reason` could never be
+  set from the terminal, and the public view's `reason` would always be empty. Left off, it is empty, never the
+  private `--reason`; tested both ways. Its help text says no name, date, figure or place that identifies.
+- **`show` omits the reasons** (they can name the company and can be long); they are in the log file.
+Nine tests in `tests/test_case_cli.py` on a fake search run (canary names only): a new version and the earlier one
+untouched, newest-by-number, seven refusals writing nothing, the other-type refusal, the disagreement needing a
+resolution, `public` showing no name and writing nothing, `show`, and a log before the search. 2144 tests,
+`make check` green.
+
+**Step 6 reviewed (2026-10-16, Opus); fixes applied.** The three points above accepted: `show` reads
+`candidates.json` (names on his terminal only), `--public-reason` kept (protocol §12.4 publishes the log "with each
+criterion passed or failed and why", so the public view needs a written reason), `show` without reasons. Found and
+fixed:
+- **A public reason could name a rejected candidate and pass the name guard on commit:** only a case's
+  identifiers go into the term file (§4.1 step 2), so most candidates' names never do. `_check_public_reason` now
+  refuses, before anything is written, a public reason holding a name-guard term, any candidate's display name
+  (without parentheses and legal form, any case; a name under three letters in its own case), ticker, CIK (with or
+  without leading zeros) or accession number (`candidate_terms` in `search.py`), or a date; it fails closed without
+  the term file or the candidate list, and says which kind of match, never the match. Checked on the real list by
+  counts only: every one of the 174 candidates yields a name term, and thirteen ordinary reasons ("an earlier public
+  mention", "not publicly traded" and so on) pass.
+- **`public` printed every type's view** under one type's name; it now prints the named type only.
+- **A `show` test assertion was vacuous** (no other type in the fake search); replaced.
+Ten tests added (seven refusals, the missing term file, `candidate_terms` including a short name); every test sets
+`HC_NAME_GUARD_TERMS` to a fictional file, so none reads the real one through git config. 2153 tests, `make check`
+green.

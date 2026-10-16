@@ -17,13 +17,14 @@ from collections.abc import Callable, Sequence
 from datetime import UTC, date, datetime
 from pathlib import Path
 from types import FrameType
+from typing import Any
 
 import boto3
 import botocore
 from botocore.exceptions import BotoCoreError, ClientError
 
 import horizon_compact
-from horizon_compact.casebuild.appendix import AppendixError, open_case
+from horizon_compact.casebuild.appendix import AppendixError, CaseAppendix, open_case
 from horizon_compact.casebuild.edgar import EdgarClient, EdgarError, UrllibTransport
 from horizon_compact.casebuild.edgar import user_agent as sec_user_agent
 from horizon_compact.casebuild.foreshadow import (
@@ -34,10 +35,18 @@ from horizon_compact.casebuild.foreshadow import (
     write_hits,
 )
 from horizon_compact.casebuild.search import (
+    CRITERIA,
+    ISO_DATE,
+    READ_REQUIRED,
     RULE_DATE,
+    TYPES,
+    K,
     LogError,
+    Row,
     SearchError,
     SelectionLog,
+    candidate_terms,
+    load_newest_log,
     run_search,
     write_candidates,
     write_log_version,
@@ -53,6 +62,8 @@ from horizon_compact.dossier.render import (
 )
 from horizon_compact.experiment import Experiment, ExperimentError, load_experiment
 from horizon_compact.model_config import ModelConfig
+from horizon_compact.privacy.guard import GuardError, load_configured_term_file
+from horizon_compact.privacy.names import find_terms
 from horizon_compact.probes.questions import ProbeError
 from horizon_compact.probes.run import (
     ProbeSet,
@@ -1099,10 +1110,127 @@ def cmd_case_search(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def _log_candidates(case: CaseAppendix) -> dict[str, dict[str, Any]]:
+    """The private candidate list by id, for ``show``; empty if the search folder has none."""
+    path = case.directory / "candidates.json"
+    if not path.exists():
+        return {}
+    try:
+        return {c["id"]: c for c in json.loads(path.read_text(encoding="utf-8"))["list"]}
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise LogError(f"candidates.json cannot be read: {type(exc).__name__}") from exc
+
+
+def _log_status(row: Row) -> str:
+    parts = []
+    for criterion in CRITERIA:
+        if criterion not in row.results:
+            continue
+        result = row.results[criterion]
+        word = "pass" if result.result == "pass" else "FAIL"
+        parts.append(f"{criterion} {word}" + (f" {result.disclosed}" if result.disclosed else ""))
+    if row.failed in READ_REQUIRED:
+        read = row.reads.get(row.failed)
+        parts.append(
+            "read: " + ("NOT YET" if read is None else "agrees" if read.agrees else "DISAGREES")
+        )
+    next_criterion = next((c for c in CRITERIA if c not in row.results), None)
+    if row.failed:
+        parts.append("finished: rejected")
+    elif next_criterion is None:
+        parts.append("finished: passed all")
+    else:
+        parts.append(f"next: {next_criterion}")
+    return " | ".join(parts)
+
+
+def _log_show(case: CaseAppendix, log: SelectionLog, case_type: str) -> None:
+    """For his terminal only: the private candidate details beside the log's state. Names appear here."""
+    details = _log_candidates(case)
+    chosen = log.selection(case_type)
+    print(f"{case_type} (k={K[case_type]}): cases {', '.join(chosen.cases) or 'none yet'}")
+    for row in log.rows.values():
+        if row.type != case_type:
+            continue
+        found = details.get(row.id, {})
+        names = "; ".join(found.get("names", [])) or "(no name on file)"
+        print(f"  {row.id} {row.pool} filed {found.get('file_date', '?')} {row.accession} {names}")
+        print(f"      {_log_status(row)}")
+    for line in chosen.waiting:
+        print(f"  waiting: {line}")
+    if chosen.complete:
+        print(f"  selection complete; shortfall {chosen.shortfall}")
+    for line in log.problems():
+        print(f"  open: {line}")
+
+
+def _check_public_reason(text: str, details: dict[str, dict[str, Any]]) -> None:
+    """A public reason goes into the public view, so it is refused, before anything is written, if it holds a
+    name-guard term, any candidate's name, ticker, CIK or accession number, or a date. Fails closed: with no
+    term file or no candidate list it cannot be checked, so it is refused. Says which, never the match."""
+    if not text.strip():
+        raise LogError("a public reason, when given, is not blank")
+    if not details:
+        raise LogError("candidates.json is missing, so a public reason cannot be checked")
+    try:
+        term_file = load_configured_term_file()
+    except GuardError as exc:
+        raise LogError(f"a public reason cannot be checked without the name guard: {exc}") from exc
+    if find_terms(text, term_file):
+        raise LogError("the public reason holds a term from the name guard's list")
+    for candidate_id, record in details.items():
+        if any(term.pattern.search(text) for term in candidate_terms(record)):
+            raise LogError(f"the public reason holds {candidate_id}'s name or number")
+    if ISO_DATE.search(text):
+        raise LogError("the public reason holds a date; the public view carries none")
+
+
+def cmd_case_log(args: argparse.Namespace) -> int:
+    """The selection log from the terminal (search-half IMPLEMENTATION doc §4.3): `show` and `public` read the
+    newest version; `record` and `read` apply exactly one change and write the next, never an earlier one."""
+    case = open_case("search")
+    log = load_newest_log(case)
+    if args.log_action == "show":
+        _log_show(case, log, args.type)
+        return CLEAN_EXIT
+    if args.log_action == "public":
+        view = {args.type: log.public_view()[args.type]}
+        print(json.dumps(view, indent=2, ensure_ascii=False))
+        return CLEAN_EXIT
+    row = log.rows.get(args.id)
+    if row is None:
+        raise LogError(f"no candidate {args.id!r} in the log")
+    if row.type != args.type:
+        raise LogError(f"{args.id} is a {row.type} candidate, not {args.type}")
+    if args.log_action == "record":
+        if args.public_reason is not None:
+            _check_public_reason(args.public_reason, _log_candidates(case))
+        log.record(
+            args.id,
+            args.criterion,
+            args.result,
+            args.reason,
+            public_reason=args.public_reason,
+            disclosed=args.disclosed,
+        )
+        what = f"{args.criterion} {args.result}"
+    else:
+        log.record_read(
+            args.id, args.criterion, agrees=args.verdict == "agree", resolution=args.resolution
+        )
+        what = f"read of {args.criterion}: {args.verdict}"
+    name = write_log_version(case, log)
+    print(f"{args.id}: {what}; wrote {name}")
+    print(f"  {_log_status(log.rows[args.id])}")
+    return CLEAN_EXIT
+
+
 def cmd_case(args: argparse.Namespace) -> int:
     try:
         if args.action == "search":
             return cmd_case_search(args)
+        if args.action == "log":
+            return cmd_case_log(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (AppendixError, ForeshadowError, CaseError, SearchError, EdgarError, LogError) as exc:
         print(f"refused: {exc}", file=sys.stderr)
@@ -1550,6 +1678,38 @@ def build_parser() -> argparse.ArgumentParser:
         "--date", type=date.fromisoformat, required=True, help="today's date, YYYY-MM-DD"
     )
     search.add_argument("--deviation", help="the reason, if the search runs after the rule date")
+    log = case_actions.add_parser(
+        "log",
+        help="The selection log (protocol §12.4) in the appendix: show, record a criterion, record the "
+        "independent reader's read, or print the public view. Each change writes the next version.",
+    )
+    log.add_argument("type", choices=TYPES)
+    log_actions = log.add_subparsers(dest="log_action", required=True)
+    log_actions.add_parser(
+        "show", help="Candidates and their state, with names: for the terminal only"
+    )
+    log_actions.add_parser("public", help="The public view, with no name; writes nothing")
+    record = log_actions.add_parser(
+        "record", help="The next criterion for a candidate, with its reason"
+    )
+    record.add_argument("id", help="the candidate's neutral id, such as closure-01")
+    record.add_argument("criterion", choices=CRITERIA)
+    record.add_argument("result", choices=("pass", "fail"))
+    record.add_argument("--reason", required=True, help="private: it may name the company")
+    record.add_argument(
+        "--public-reason",
+        help="optional, goes in the public view: no name, date, figure or place that identifies",
+    )
+    record.add_argument(
+        "--disclosed",
+        type=date.fromisoformat,
+        help="YYYY-MM-DD; with a passed first_disclosure, and only then",
+    )
+    read = log_actions.add_parser("read", help="The independent reader's read of a rejection")
+    read.add_argument("id", help="the candidate's neutral id, such as closure-01")
+    read.add_argument("criterion", choices=READ_REQUIRED)
+    read.add_argument("verdict", choices=("agree", "disagree"))
+    read.add_argument("--resolution", help="required on a disagreement: his decision and why")
 
     probes = groups.add_parser(
         "probes", help="Phase 2.5 comprehension probes. Development models only; no objective."

@@ -7,7 +7,30 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-15, about 4:20 PM (handoff: Stage A built; THE SEARCH RUNS TOMORROW, 2026-10-16, BY RULE)
+> ## START HERE — where things stand, 2026-10-16, about 9:10 AM (THE SEARCH HAS RUN, on the rule date; Stage C next)
+>
+> **Measured:** last pushed commit `4a0d3f3` (`hc case search`), CI and Deploy green on it. Last night's four steps
+> landed (commit, push, `~/horizon-compact-appendix`, `hc.appendixDir`). **Not committed (his):** this block, the
+> ROADMAP's row 5 and the search-half doc's status line and §11 entry, docs only.
+>
+> **The search ran 2026-10-16, about 8:55 AM, his command, with no deviation** (search-half doc §11, the per-query
+> table): every query read in full, none near `MAX_RESULTS`. Candidates: closure 29 window and 7 fallback, retool 44
+> and 18, ai 50 and 26. The files are in the appendix's `search/` folder only; no name or accession number is in the
+> repo.
+>
+> **Next, in order:**
+> 1. **Stage C step 6, `hc case log`** (doc §4.3): **built (Sonnet) and reviewed (Opus) 2026-10-16, fixes applied,
+>    2153 tests, `make check` green** (doc §11). **His commit carries this record
+>    and step 6 together** (his choice, 2026-10-16): `phase 5: search record and hc case log`. Then steps 7-10 (§5).
+>    Step 7's extraction entry and `hc case build` are **committed and pushed before the first real document is
+>    fetched**.
+>
+> **His, not Claude's:** whether to close Phase 1 (DoD 7 and C6, doc-only) before or after Stage C. Phase 1.5 is
+> still before Phase 6. OPEN entry below.
+>
+> *The 2026-10-15 4:20 PM block below is superseded on what is next; it stays as the day's record.*
+
+> ## START HERE — where things stood, 2026-10-15, about 4:20 PM (handoff: Stage A built; THE SEARCH RUNS TOMORROW, 2026-10-16, BY RULE)
 >
 > **Measured at handoff:** `make check` green, **2135 tests**. Last pushed commit `74a2e83` (the search-half doc,
 > approved). **Not committed at handoff (his, tonight):** `hc case search` and its tests (`cli.py`,

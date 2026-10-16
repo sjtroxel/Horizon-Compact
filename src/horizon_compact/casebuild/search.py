@@ -32,6 +32,7 @@ and fails on any other.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -41,6 +42,7 @@ from urllib.parse import urlencode
 from horizon_compact.casebuild.appendix import CaseAppendix
 from horizon_compact.casebuild.cutoff import CutoffError, parse_date
 from horizon_compact.casebuild.edgar import EdgarClient
+from horizon_compact.privacy.names import Term, compile_term
 
 EFTS_URL = "https://efts.sec.gov/LATEST/search-index"
 WINDOW_START = date(2026, 8, 1)  # protocol §12.2
@@ -663,6 +665,69 @@ class SelectionLog:
                 ],
             }
         return view
+
+
+def load_newest_log(case: CaseAppendix) -> SelectionLog:
+    """The log in the highest-numbered ``selection-log-<n>.json`` (numerically: 10 is after 9), rebuilt
+    through ``from_text`` so a hand-edited file cannot step around the rules. Earlier ones are not read."""
+    numbers = [
+        int(m.group(1))
+        for path in case.directory.glob("selection-log-*.json")
+        if (m := re.fullmatch(r"selection-log-(\d+)\.json", path.name))
+    ]
+    if not numbers:
+        raise LogError("there is no selection log yet: the search has not run")
+    path = case.directory / f"selection-log-{max(numbers)}.json"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise LogError(f"cannot read {path.name}: {exc.strerror or type(exc).__name__}") from exc
+    return SelectionLog.from_text(text)
+
+
+# A display name's trailing legal form, dropped so "Canary Cages" is caught as well as "Canary Cages Inc".
+_LEGAL_FORMS = {
+    "inc",
+    "corp",
+    "corporation",
+    "co",
+    "company",
+    "ltd",
+    "llc",
+    "plc",
+    "lp",
+    "nv",
+    "sa",
+    "ag",
+}
+ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def candidate_terms(record: Mapping[str, Any]) -> tuple[Term, ...]:
+    """What identifies one candidate in a written reason, matched as the name guard matches: each display
+    name without its parentheses and legal form (any case), each ticker in its parentheses (exact case), each
+    CIK and the accession number. The term file cannot do this: a rejected candidate's name is never in it."""
+    terms: list[Term] = []
+    for name in record.get("names", []):
+        core = name.split(" (")[0].replace(",", " ").replace(".", " ").split()
+        while core and core[-1].lower() in _LEGAL_FORMS:
+            core.pop()
+        if core:  # a short name ("AB") is matched in its own case, so "ab" in a sentence is not
+            text = " ".join(core)
+            terms.append(compile_term(text, ignore_case=len(text) >= 3))
+        for inside in re.findall(r"\(([^)]*)\)", name):
+            if not inside.upper().startswith("CIK"):
+                terms.extend(
+                    compile_term(t.strip(), ignore_case=False)
+                    for t in inside.split(",")
+                    if t.strip()
+                )
+    for number in (*record.get("ciks", []), record.get("accession", "")):
+        if number:
+            terms.append(compile_term(str(number), ignore_case=False))
+            if str(number).lstrip("0") and str(number).lstrip("0") != str(number):
+                terms.append(compile_term(str(number).lstrip("0"), ignore_case=False))
+    return tuple(terms)
 
 
 def write_log_version(case: CaseAppendix, log: SelectionLog) -> str:
