@@ -90,7 +90,14 @@ from horizon_compact.probes.run import (
     probe_run_id,
     run_probes,
 )
-from horizon_compact.protocol.cases import CaseContent, CaseError, case_lock_text, content_hashes
+from horizon_compact.protocol.caselock import CaseLockError, lock_case, scenario_check_passes
+from horizon_compact.protocol.cases import (
+    CaseContent,
+    CaseError,
+    case_lock_text,
+    case_path,
+    content_hashes,
+)
 from horizon_compact.protocol.gate import (
     PilotRefusal,
     check_official,
@@ -1084,6 +1091,18 @@ def cmd_case_hashes(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_case_lock(args: argparse.Namespace) -> int:
+    """Write ``experiment/cases/<label>/case.lock`` (search-half doc §5 step 8a). Every refusal first."""
+    case = open_case(args.label)
+    root: Path = args.root or default_repo_root()
+    written = lock_case(case, root, probe_set=args.probe_set, scenario_check=scenario_check_passes)
+    print(
+        f"{args.label}: wrote {case_path(args.label)} (probe set {written.probe_set}, hashes only)"
+    )
+    print("next: his commit and push; CI's run on that commit is the time the gate reads")
+    return CLEAN_EXIT
+
+
 def _today() -> date:
     """The local date; a function so the tests can set it."""
     return date.today()
@@ -1398,6 +1417,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_search(args)
         if args.action == "log":
             return cmd_case_log(args)
+        if args.action == "lock":
+            return cmd_case_lock(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (
         AppendixError,
@@ -1417,6 +1438,7 @@ def cmd_case(args: argparse.Namespace) -> int:
         FrozenInputsError,
         AnthropicKeyError,
         SplitRefused,
+        CaseLockError,
     ) as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return REFUSED_EXIT
@@ -1854,6 +1876,20 @@ def build_parser() -> argparse.ArgumentParser:
     hashes.add_argument("label", help="the case's neutral label, such as closure-1")
     hashes.add_argument("--rubric", type=Path, required=True, help="the rubric file")
     hashes.add_argument("--probe-set", type=int, choices=(1, 2), default=1)
+    lock = case_actions.add_parser(
+        "lock",
+        help="Write experiment/cases/<label>/case.lock (hashes only) from the appendix's dossier, scenario "
+        "and rubric. Refuses unless the scenario check passes; probe set 1 is write-once.",
+    )
+    lock.add_argument("label", help="the candidate's neutral id, such as closure-01")
+    lock.add_argument(
+        "--probe-set",
+        type=int,
+        choices=(1, 2),
+        default=1,
+        help="2 only after a coarsening (protocol §12.8): same rubric, a different dossier",
+    )
+    lock.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
     search = case_actions.add_parser(
         "search",
         help="The real-case search of protocol §12.3, run once on the rule date. Reads the SEC; "

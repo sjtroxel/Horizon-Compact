@@ -129,6 +129,16 @@ class CaseAppendix:
         return self.directory / "scenario.toml"
 
     @property
+    def rubric_path(self) -> Path:
+        """The rubric (§4.7), written by hand from post-event filings; private, only its hash is committed."""
+        return self.directory / "rubric.toml"
+
+    @property
+    def scenario_render_path(self) -> Path:
+        """What the scenario render used and dropped (§4.6.1 item 8); written by step 8b."""
+        return self.directory / "scenario-render.json"
+
+    @property
     def terms_path(self) -> Path:
         """The case's private term list (`term: Name => role` lines), written by hand before the build."""
         return self.directory / "terms.txt"

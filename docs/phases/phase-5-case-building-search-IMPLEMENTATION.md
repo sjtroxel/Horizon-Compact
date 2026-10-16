@@ -1,7 +1,8 @@
 # Phase 5 — Case Building, search half: IMPLEMENTATION (v0.5)
 
 > **IMPLEMENTATION doc, search half. Written 2026-10-15 (Opus), immediately before the search. APPROVED 2026-10-15 (his,
-> about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** **Patched 2026-10-16 (his): §4.6.1, the case scenario
+> is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -203,10 +204,55 @@ choice keys, the extra rules, the instruction and headings, word for word. The f
 5. **The option texts** use the fictional shape's sentences with the case's figures, or, where the case has none,
    the same sentences with the figures removed and nothing added.
 
-`hc case scenario check <label>` checks the file against its shape: same keys, kinds, labels, rules and wording
+~~`hc case scenario check <label>` checks the file against its shape: same keys, kinds, labels, rules and wording
 outside the facts; every cap either equal to the total or listed with its source in `build.json`; no digit outside a
-figure; and no figure absent from the case's figure sources. **The reader reads every case's scenario file for
-neutrality** (decision 4), given the shape and the sources, not the rubric.
+figure; and no figure absent from the case's figure sources.~~ *Superseded by the patch below: `build.json` is written
+once by `prepare_case` and cannot take a later list, nothing recorded the scenario's figure sources, and rule 5
+cannot be applied clause by clause (taking a figure out of "about $4,566 a person" leaves broken text).* **The reader
+reads every case's scenario file for neutrality** (decision 4), given the shape and the sources, not the rubric.
+
+#### 4.6.1 Patch 2026-10-16 (his, about 12:46 PM CDT): the scenario is rendered, not written
+
+Found while building step 8 (Sonnet stopped on it; Opus reviewed). The case scenario is made **the way the fictional
+ones are: the shape's own template, rows, a render, and a check that re-renders and compares byte for byte**
+(`scenarios/render.py`, `hc scenarios check`). Rules 1-5 above stand; this says how they are carried out.
+
+1. **The template is the shape's `experiment/company/scenarios/sN.source.toml`, unchanged.** Every word of the case
+   scenario comes from it; nothing is written per case except rows.
+2. **The rows: `scenario-figures.toml` in the case's appendix folder,** written by Claude (Opus) with him at Stage D.
+   One row per placeholder the case can fill, keyed by the template's row id: the **unscaled** value, the fictional
+   row's unit, a `scale` of `dollars`, `heads` or `none`, and a source. A source is `pre_cutoff` (an accession number
+   in the case's `sources.json`, admitted by `cutoff.admit`, and a locator) or `first_disclosure` (a locator; its date
+   is the selection log's `disclosed` date), **and only the total may be `first_disclosure`** (rule 1). A cap row may
+   instead say `equals_total = true` (rule 3). `scale = "none"` on a dollar row needs `per` (a head, an hour): only a
+   ratio of two scaled quantities escapes scaling (protocol §12.6).
+3. **Label rows** (`plant_6_no` and the like) take the fictional value. They are names in the wording, not facts.
+4. **Derived rows** use the fictional row's formula from `scenario-figures.toml`, and are filled only when every row
+   the formula names is a case row. The menu heading's sum of caps is always derivable, since every cap is a row.
+5. **Scaling** by `build.json`'s factor with `scale.py`'s functions, as the dossier: dollars to three significant
+   figures, heads to the nearest 5. **A heads figure under 100 reads "fewer than 100" in the text. A total under 100
+   fails criterion 4** (the protocol forbids stating it, and the decision needs a whole number), and the rejection goes
+   to the reader. **A cap under 100 is treated as unstated and equals the total** (rule 3's reasoning: a limit that
+   cannot be stated is not imposed), recorded.
+6. **Rule 5, mechanically: a sentence holding a placeholder with no row is dropped whole.** A sentence ends at `.`,
+   `?` or `!` followed by a space, a line break or the end of the field. A paragraph left empty is dropped. A lever's
+   `detail` or `note` left empty is omitted. **If any option text drops a sentence, every sentence with a placeholder
+   is dropped from every option text** (protocol §12.6's equal treatment); for a shape with no choice (S1), the
+   levers' `detail`s are its options and the same holds across them. An option text, the role, the menu heading or
+   the instruction left empty is a render refusal.
+7. **A rule whose numbers have no rows** (S2's joint cap) is omitted with the sentences that describe it, by 6, and
+   recorded: a limit no one stated is not imposed.
+8. **`hc case scenario render <label>`** writes `scenario.toml` (the harness's format, the fictional header replaced by
+   a case one) and `scenario-render.json` (rows used, sentences dropped by field, rules omitted, caps set to the
+   total, the factor and `build.json`'s sha256), each once. The rendered data must pass the `Scenario` model.
+9. **`hc case scenario check <label>`** re-renders in memory and compares with `scenario.toml` byte for byte, and
+   re-checks every source (admitted, in `sources.json`, the total alone first-disclosure). It prints failures by
+   criterion and never a name, a figure or an excerpt. A pass is what `hc case lock` requires.
+
+**What this costs:** a dropped sentence can take context with it (S3's first sentence holds both the headcount and
+the payroll). The total still stands in the menu heading and the instruction, and the reader's neutrality read of
+every scenario is the backstop. **The alternative,** figure-free wordings of every sentence written for all four
+shapes now, was declined: it is prose chosen after the candidate list exists.
 
 ### 4.7 The rubric
 
@@ -288,7 +334,8 @@ scenario facts) with him.** One terminal command at a time, with the line to loo
 6. `hc case log` (§4.3).
 7. The extraction entry in `models.toml` with its tripwire tests; `hc case build` and `hc case assemble` (§4.5).
    **Committed and pushed before the first real document is fetched.**
-8. `hc case scenario check` (§4.6) and `hc case lock` (writes `case.lock` from `content_hashes`).
+8. *(Split 2026-10-16, his.)* **8a.** `hc case lock` (writes `case.lock` from `content_hashes`), refusing until the
+   scenario check passes. **8b.** `hc case scenario render` and `hc case scenario check` by the §4.6.1 patch.
 9. The reader command and its three briefs (§4.9), committed before the first read.
 10. The probe: `upload`, the container command, `probe-verdict`, `task.json` (his Terraform plan and apply, Claude
     reading the plan), the S3 and GitHub readers (§4.8, §4.10).
@@ -634,3 +681,52 @@ every model", read from the probe records. So a disputed probe failure would pas
 the gate. Which governs is his call at step 10 (`probe-verdict`); nothing reaches it before a probe has run.
 
 2230 tests, `make check` green, `hc protocol check: ok`.
+
+**Stage C step 8a, `hc case lock` (2026-10-16, about 1:15 PM, Sonnet built; awaiting an Opus review).** Step 8b (scenario
+render and check, §4.6.1) is not built.
+- **Where it lives.** `protocol/caselock.py` (`lock_case`, `scenario_check_passes`, `CaseLockError`) and `cmd_case_lock`
+  in `cli.py`. **It is not in `casebuild/`:** `test_architecture` bars that package from importing
+  `protocol.cases`, and the lock reads the rubric, so the guard was kept and the module put beside `cases.py`.
+  `CaseAppendix` gains `rubric_path` (`rubric.toml`) and `scenario_render_path` (`scenario-render.json`).
+- **What it does.** Hashes the appendix's `dossier.toml`, `scenario.toml` and `rubric.toml` with `content_hashes`, text
+  by `case_lock_text`, written to `experiment/cases/<label>/case.lock` in the repo by a temporary file replaced into
+  place. A test proves `hc case lock` and `hc case hashes` produce the same text, and that the gate's
+  `check_case_content` accepts it. Hashes only; the label is checked by the appendix's label pattern and `case_path`.
+- **Refusals, all before the write:** a bad label; any of the three files missing; probe set 1 with a lock already
+  there (write-once); probe set 2 with no lock, an unreadable lock, a lock already at set 2, a changed rubric, or the
+  same dossier; a probe set that is not 1 or 2; a scenario check that does not pass.
+- **`scenario_check_passes(case)` always refuses** ("the scenario check is not built (step 8b)") until 8b replaces its
+  body. The lock takes it as a parameter, so tests inject a passing one. **Until 8b, no real `case.lock` can be
+  written.**
+- **Tests (17, `tests/test_protocol_caselock.py`), fictional canaries only.** 2247 tests, `make check` green,
+  `hc protocol check: ok`.
+
+**Points for review:**
+1. **That set 1 actually failed is not checked** for `--probe-set 2`; the probe records do not exist until step 10.
+   The gate's `check_case_probes` refuses a re-probe whose first set passed, so the failure is caught late, not
+   missed. A step-10 hook (the lock reading the probe verdicts) would close it; not built.
+2. **The label is not checked against the search's candidate list** (the doc says "the neutral candidate id"; only the
+   label's shape is checked). `hc case build` does check it. Adding it here would need the search file at lock time.
+3. **The lock does not check that the dossier and scenario came from the same build** (no `assembly.json` or
+   `scenario-render.json` hash check). 8b's render record is where that belongs.
+4. **A set 2 may change the scenario file as well as the dossier;** only the rubric must be unchanged. The doc and the
+   gate say the same; noted in case a coarsening should leave the scenario alone.
+5. **The move out of `casebuild/`** was forced by the architecture test, not chosen; check it is the right home.
+
+**Stage C step 8a, the Opus review (2026-10-16, about 1:30 PM, in the same chat).** The core is right: the lock is
+written by the gate's own `content_hashes` and `case_lock_text`, every refusal precedes the write, and the set-2 rules
+match `check_case_order`'s. Checked beyond the tests (which use a temporary repo): `experiment/cases/` lies in no frozen
+set (`protocol/sets.py`'s patterns cover only `sweep/` and `analysis/` code), so a committed lock leaves `hc protocol
+check` ok; and the image copies all of `experiment/` (`infra/docker/Dockerfile`), so the container gate finds it. The
+move to `protocol/` (point 5) is right: the architecture test's guard is the design, and `protocol/` is where the case
+record lives. Fixed:
+1. **A hand-edited dossier would have been locked.** Set 1 now requires `assembly.json` and its `dossier_sha256` to
+   match, so the locked dossier is the one that passed the flag review and the term check. This also answers point 2:
+   `assembly.json` exists only for a candidate `hc case build` accepted. Two tests.
+2. **Set 1 was not truly write-once:** `exists()` then `replace()` would overwrite a lock written in between. Set 1 now
+   links the temporary file into place (as the appendix's `write_once` does); set 2 still replaces. One test.
+
+Points 1 and 4 accepted as written (the gate's `check_case_probes` catches a re-probe after a passing set; whether a
+coarsening may touch the scenario belongs to the coarsening design). **Logged, not fixed:** the set-2 branch reads the
+write-once `dossier.toml`, so it is reachable today only by a hand replacement (KNOWN-GAPS OPEN 2026-10-16, "where a
+coarsened dossier lives"). 2250 tests, `make check` green, `hc protocol check: ok`.

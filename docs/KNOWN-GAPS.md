@@ -7,7 +7,48 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-16, about 12:05 PM (DISPUTED-REJECTION FIX BUILT AND REVIEWED, UNCOMMITTED)
+> ## START HERE — where things stand, 2026-10-16, about 1:30 PM (STEP 8a BUILT AND REVIEWED, UNCOMMITTED)
+>
+> **Measured:** `make check` green, **2250 tests**; `hc protocol check: ok`. Last commit `3ab62bf`. **Uncommitted:** the
+> §4.6.1 patch (docs) and step 8a, `hc case lock`, built (Sonnet) and **reviewed (Opus), two fixes applied** (search-half
+> doc §11, "Stage C step 8a, the Opus review"): set 1 now refuses a dossier that is not the one `hc case assemble`
+> wrote, and set 1 is truly write-once. **Until 8b, no real `case.lock` can be written** (by design).
+>
+> **Next, in order:** (1) his commit `phase 5: hc case lock` (with the patch, or the patch first) and push; (2) step 8b,
+> `hc case scenario render` and `check` (§4.6.1), Sonnet, then an Opus review in a fresh chat. **Before any set-2 lock:**
+> OPEN 2026-10-16, where a coarsened dossier lives. **His decision, at step 10:** OPEN 2026-10-16, criterion 5.
+>
+> *The 1:15 PM block below is superseded on what is next; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-16, about 1:15 PM (STEP 8a BUILT BY SONNET, UNCOMMITTED, AWAITING AN OPUS REVIEW)
+>
+> **Measured:** `make check` green, **2247 tests**; `hc protocol check: ok`. Last commit `3ab62bf`. **Uncommitted:** the
+> §4.6.1 patch (docs), and step 8a: `hc case lock` (`protocol/caselock.py`, `cmd_case_lock`, two `CaseAppendix` paths,
+> `tests/test_protocol_caselock.py`), search-half doc §11 "Stage C step 8a" with five points for review. **Until 8b, no
+> real `case.lock` can be written:** `scenario_check_passes` refuses by design.
+>
+> **Next, in order:** (1) the Opus review of 8a; (2) his commit (the patch may go first, `phase 5: case scenario
+> patch`; then `phase 5: hc case lock`) and push; (3) step 8b, `hc case scenario render` and `check` (§4.6.1), then its
+> Opus review, ideally in a fresh chat. **His decision, at step 10:** OPEN 2026-10-16, criterion 5's dispute against
+> the gate.
+>
+> *The 12:50 PM block below is superseded on what is next; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-16, about 12:50 PM (STEP 8 SPLIT; §4.6.1 PATCH WRITTEN, UNCOMMITTED)
+>
+> **Measured:** last commit `3ab62bf` (`phase 5: disputed rejections do not stand`). **Uncommitted, docs only:** the
+> search-half doc's §4.6.1 patch (his, about 12:46 PM): the case scenario is **rendered** from the shape's own
+> `sN.source.toml` with per-case rows in the appendix, a sentence whose figure has no row dropped whole, and checked by
+> re-render byte for byte. It replaces §4.6's "listed in `build.json`" (`build.json` is write-once). Stage C step 8 is
+> split: **8a** `hc case lock`, **8b** `hc case scenario render` and `check`.
+>
+> **Next, in order:** (1) his commit `phase 5: case scenario patch` (docs only); (2) step 8a, Sonnet, then an Opus
+> review; (3) step 8b, Sonnet, then an Opus review. **His decision, at step 10:** OPEN 2026-10-16, criterion 5's
+> dispute against the gate.
+>
+> *The 12:05 PM block below is superseded on what is next; it stays as the record.*
+
+> ## START HERE — where things stood, 2026-10-16, about 12:05 PM (DISPUTED-REJECTION FIX BUILT AND REVIEWED, UNCOMMITTED)
 >
 > **Measured:** `make check` green, **2230 tests**; `hc protocol check: ok`. Step 7 is committed and pushed (`a31f8a0`).
 > **Uncommitted:** the disputed-rejection fix, built (Sonnet) and **reviewed (Opus), one fix applied** (search-half doc
@@ -1181,6 +1222,17 @@ case by its type and a neutral label. The names live only in the private longlis
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
 
 ---
+
+## OPEN 2026-10-16 — where a coarsened dossier lives (before any probe set 2)
+
+`hc case lock --probe-set 2` (step 8a) reads the coarsened dossier from the appendix's `dossier.toml`, but that file is
+written once by `hc case assemble` and no code ever rewrites it. So today a set-2 lock can only be reached by replacing
+a write-once file by hand, with no build record behind it (set 1 checks the dossier against `assembly.json`; set 2
+cannot, since a coarsened dossier has none). The coarsening procedure (protocol §12.8) is not designed: where its
+dossier is written (the S3 layout of §4.8 already has `set-<n>/`; the appendix has nothing), what record it leaves, and
+whether it may touch the scenario text as well as the dossier. **Settle it when coarsening is built (after step 10's
+probe), before any set-2 lock;** then point `lock_case`'s set-2 branch at that path and check it against that record.
+Nothing reaches set 2 before a probe has failed.
 
 ## OPEN 2026-10-16 — a disputed probe failure (criterion 5) passes the log but not the gate
 
