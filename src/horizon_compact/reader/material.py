@@ -30,6 +30,7 @@ from horizon_compact.casebuild.scenario import (
     format_failures,
     parse_rows,
 )
+from horizon_compact.casebuild.terms import CaseTermsError, parse_case_terms
 from horizon_compact.experiment import SOURCE_SUFFIX
 from horizon_compact.scenarios.render import SCENARIOS_DIR
 
@@ -37,6 +38,14 @@ MAX_PART_CHARS = 200_000
 # The render record's fields that are private (the scaling factor, protocol §12.6) or only a checksum.
 _PRIVATE_RECORD_FIELDS = ("factor", "build_sha256", "rows_sha256")
 REJECTION_CRITERIA = ("real_decision", "maps_to_shape")
+# Criterion 5 (protocol §12.4, §12.8): a probe failure is read from the flagged answers, not an excerpt.
+PROBE_CRITERION = "not_recognizable"
+READ_CRITERIA = (*REJECTION_CRITERIA, PROBE_CRITERION)
+# Protocol §12.8's definition, word for word: the only definition the reader of a probe failure is given.
+NAMES_THE_COMPANY = (
+    "A call names the company if its answer contains the company's name or a former name, its ticker, "
+    "or one of its brands."
+)
 
 
 class MaterialError(Exception):
@@ -77,11 +86,77 @@ def _assemble(kind: str, criterion: str | None, blocks: list[tuple[str, str]]) -
     return Material(kind, criterion, user, {name: _sha256(text) for name, text in blocks})
 
 
-def rejection_material(case: CaseAppendix, criterion: str) -> Material:
+def flagged_answers_text(answers: list[str]) -> str:
+    """The flagged answers as the reader sees them, numbered; the one place the block is made, so a verdict
+    can prove a reply was given exactly these answers (``part_sha256``)."""
+    return "\n\n".join(
+        f"Answer {n}:\n{answer.strip()}" for n, answer in enumerate(answers, start=1)
+    )
+
+
+def part_sha256(text: str) -> str:
+    return _sha256(text)
+
+
+def _flagged_answers(case: CaseAppendix, probe_set: int) -> list[str]:
+    path = case.probe_flagged_path(probe_set)
+    try:
+        record = json.loads(_read_text(path, "the flagged probe answers"))
+    except ValueError as exc:
+        raise MaterialError(f"the flagged probe answers are not valid JSON: {path.name}") from exc
+    answers = record.get("answers") if isinstance(record, dict) else None
+    if (
+        not isinstance(answers, list)
+        or not answers
+        or not all(isinstance(a, str) and a.strip() for a in answers)
+        or record.get("probe_set") != probe_set
+    ):
+        raise MaterialError(
+            f"{path.name} does not hold the flagged answers of probe set {probe_set}: "
+            "run `hc case probe-verdict` first"
+        )
+    return [str(a) for a in answers]
+
+
+def _term_directives(case: CaseAppendix) -> str:
+    """The case's term list as the reader sees it: its ``term:`` and ``term-i:`` lines and nothing else. A
+    comment on the list is his note, not material, and does not leave the laptop."""
+    text = _read_text(case.terms_path, "the case's term list")
+    try:
+        parse_case_terms(text)
+    except CaseTermsError as exc:
+        raise MaterialError(f"the case's term list is malformed: {exc}") from exc
+    lines = (line.strip() for line in text.splitlines())
+    return "\n".join(line for line in lines if line and not line.startswith("#"))
+
+
+def probe_rejection_material(case: CaseAppendix, probe_set: int) -> Material:
+    """A criterion 5 read: §12.8's definition, the flagged answers and the case's private term list, and
+    nothing else. Not the dossier (the reader must not be able to recognize the company from it), not a
+    result, not the other answers."""
+    return _assemble(
+        "rejection",
+        PROBE_CRITERION,
+        [
+            ("Definition", NAMES_THE_COMPANY),
+            ("Term list", _term_directives(case)),
+            ("Flagged answers", flagged_answers_text(_flagged_answers(case, probe_set))),
+        ],
+    )
+
+
+def rejection_material(
+    case: CaseAppendix, criterion: str, probe_set: int | None = None
+) -> Material:
+    if criterion == PROBE_CRITERION:
+        if probe_set is None:
+            raise MaterialError("a probe read names its probe set")
+        return probe_rejection_material(case, probe_set)
+    if probe_set is not None:
+        raise MaterialError("only a probe read names a probe set")
     if criterion not in REJECTION_CRITERIA:
         raise MaterialError(
-            f"{criterion!r} is not a criterion the reader reads from an excerpt: "
-            f"{', '.join(REJECTION_CRITERIA)} (a probe failure is read at the probe step)"
+            f"{criterion!r} is not a criterion the reader reads: {', '.join(READ_CRITERIA)}"
         )
     excerpt = _read_text(case.reader_excerpt_path, "the first-disclosure excerpt")
     return _assemble("rejection", criterion, [("Excerpt", excerpt)])

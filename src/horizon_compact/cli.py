@@ -13,6 +13,7 @@ import random
 import signal
 import subprocess
 import sys
+import tomllib
 from collections.abc import Callable, Sequence
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -73,6 +74,9 @@ from horizon_compact.casebuild.search import (
 from horizon_compact.casebuild.sections import build_section_inputs
 from horizon_compact.casebuild.splitter import SplitRefused
 from horizon_compact.casebuild.terms import CaseTerm, CaseTermsError, parse_case_terms
+from horizon_compact.caseprobe.run import ProbeRefused, run_case_probe
+from horizon_compact.caseprobe.upload import UploadError, upload_case
+from horizon_compact.caseprobe.verdict import VerdictError, probe_verdict
 from horizon_compact.dossier.check import default_repo_root, run_checks
 from horizon_compact.dossier.figures import FigureError, load_figures
 from horizon_compact.dossier.render import (
@@ -82,8 +86,14 @@ from horizon_compact.dossier.render import (
     parse_template,
     render_outputs,
 )
-from horizon_compact.experiment import Experiment, ExperimentError, load_experiment
-from horizon_compact.model_config import ModelConfig
+from horizon_compact.experiment import (
+    MODELS_FILE,
+    Experiment,
+    ExperimentError,
+    default_experiment_dir,
+    load_experiment,
+)
+from horizon_compact.model_config import ModelConfig, ModelsFile
 from horizon_compact.privacy.guard import GuardError, load_configured_term_file
 from horizon_compact.privacy.names import find_terms
 from horizon_compact.probes.questions import ProbeError
@@ -108,6 +118,7 @@ from horizon_compact.protocol.cases import (
     case_lock_text,
     case_path,
     content_hashes,
+    read_case,
 )
 from horizon_compact.protocol.gate import (
     PilotRefusal,
@@ -153,7 +164,7 @@ from horizon_compact.providers.openrouter import (
 )
 from horizon_compact.reader.briefs import BriefError
 from horizon_compact.reader.entry import ReaderModelError
-from horizon_compact.reader.material import MaterialError
+from horizon_compact.reader.material import PROBE_CRITERION, MaterialError
 from horizon_compact.reader.read import (
     Preview,
     ReaderError,
@@ -1212,9 +1223,14 @@ def _print_reader_outcome(label: str, done: ReadOutcome) -> None:
         }[str(done.reading)]
         print(f"  {meaning}")
         print(
-            f"  to log it: hc case log {done.candidate_type} read {label} {done.criterion}"
+            f"  to log it: hc case log {done.candidate_type or '<type>'} read {label} {done.criterion}"
             + (' --resolution "..."' if done.reading == "pass" else "")
         )
+        if done.criterion == PROBE_CRITERION:
+            print(
+                f"  then settle the probe: hc case probe-verdict {label} --set {done.probe_set}"
+                + (' --resolution "..."' if done.reading == "pass" else "")
+            )
     elif done.kind == "scenario":
         print(
             f"  concerns listed: {len(parsed.get('concerns', []))} (read them in {done.reply_name})"
@@ -1246,10 +1262,16 @@ def cmd_case_reader(args: argparse.Namespace) -> int:
     the case's folder and decides nothing: a rejection's outcome is logged by `hc case log ... read`."""
     case = open_case(args.label)
     root = default_repo_root()
+    probe_set = None
+    if args.criterion == PROBE_CRITERION:
+        probe_set = args.set or _lock_probe_set(root, args.label)
+    elif args.set is not None:
+        raise ReaderError("--set is for a read of a probe failure (--criterion not_recognizable)")
     done = run_read(
         case,
         args.kind,
         args.criterion,
+        probe_set=probe_set,
         repo_root=root,
         git=git_in(root),
         search=open_case("search"),
@@ -1258,6 +1280,178 @@ def cmd_case_reader(args: argparse.Namespace) -> int:
     )
     _print_reader_outcome(args.label, done)
     return CLEAN_EXIT if done.usable else CHECK_FAILED_EXIT
+
+
+def _lock_probe_set(root: Path, label: str) -> int:
+    """The probe set the committed ``case.lock`` is for: the default of every probe command."""
+    return read_case(root, label).probe_set
+
+
+def _case_bucket_store(args: argparse.Namespace) -> Store:
+    """The results bucket from the laptop, under a named profile (no default). A function so the tests can
+    set it. The ``cases/`` prefix is private: the dev user holds ``s3:*`` on the bucket already."""
+    if not args.profile:
+        raise SweepRefusal("on a laptop, --profile is required and has no default")
+    bucket = args.bucket or os.environ.get(RESULTS_BUCKET_ENV)
+    if not bucket:
+        raise SweepRefusal(f"--bucket or {RESULTS_BUCKET_ENV} is required")
+    session = boto3.Session(
+        profile_name=args.profile, region_name=os.environ.get(REGION_ENV, REGION)
+    )
+    return S3Store(session.client("s3"), bucket)
+
+
+def cmd_case_upload(args: argparse.Namespace) -> int:
+    """Put the locked case's dossier, scenario and rubric in private storage, write-once, after checking them
+    against the committed, pushed ``case.lock`` (search-half doc §4.8)."""
+    root = default_repo_root()
+    probe_set = args.set or _lock_probe_set(root, args.label)
+    case = open_case(args.label)
+    git = git_in(root)
+    done = upload_case(case, root, probe_set=probe_set, git=git, store=_case_bucket_store(args))
+    print(
+        f"{args.label}: set {done.probe_set}: wrote {', '.join(done.written) or 'nothing'}"
+        + (f"; already stored: {', '.join(done.already_there)}" if done.already_there else "")
+    )
+    return CLEAN_EXIT
+
+
+def _case_probe_world(
+    args: argparse.Namespace, key: str, config: ModelConfig, identity: RunnerIdentity
+) -> tuple[TextProvider, Store, str]:
+    """The provider, results store and account id of a case probe, in the container only: the task role
+    reads the key from SSM and keeps the records in the results bucket. A function so the tests can set it."""
+    if not identity.in_container:
+        raise ProbeRefused(
+            "a case probe runs in the container only: an official result carries an image digest"
+        )
+    session = boto3.Session(region_name=os.environ.get(REGION_ENV, REGION))
+    account_id = session.client("sts").get_caller_identity()["Account"]
+    bucket = args.bucket or os.environ.get(RESULTS_BUCKET_ENV)
+    if not bucket:
+        raise ProbeRefused(f"--bucket or {RESULTS_BUCKET_ENV} is required")
+    store = S3Store(session.client("s3"), bucket)
+    provider: TextProvider
+    try:
+        if config.route == "openrouter":
+            provider = OpenRouterProvider(
+                read_key({}, ask=lambda: "", ssm_fetch=ssm_key_fetcher(session.client("ssm")))
+            )
+        else:
+            provider = AnthropicProvider(
+                read_anthropic_key(
+                    {}, ask=lambda: "", ssm_fetch=anthropic_ssm_key_fetcher(session.client("ssm"))
+                )
+            )
+    except (OpenRouterKeyError, AnthropicKeyError) as exc:
+        raise ProbeRefused(str(exc)) from exc
+    return provider, store, account_id
+
+
+def cmd_case_probe(args: argparse.Namespace) -> int:
+    """The recognition probe for one case and one model: the container's command (protocol §12.8)."""
+    root = default_repo_root()
+    probe_set = args.set or _lock_probe_set(root, args.label)
+    models_path = default_experiment_dir() / MODELS_FILE
+    try:
+        models = ModelsFile.model_validate(tomllib.loads(models_path.read_text("utf-8")))
+    except (OSError, ValueError) as exc:
+        raise ProbeRefused(f"{MODELS_FILE} cannot be read ({type(exc).__name__})") from exc
+    config = models.models.get(args.model)
+    if config is None:
+        raise ProbeRefused(f"{args.model!r} is not a model in {MODELS_FILE}")
+    identity = identify(os.environ, _laptop_git)
+    provider, store, account_id = _case_probe_world(args, args.model, config, identity)
+
+    stop_requested = {"flag": False}
+
+    def request_stop(signum: int, frame: FrameType | None) -> None:
+        stop_requested["flag"] = True
+
+    signal.signal(signal.SIGTERM, request_stop)
+    signal.signal(signal.SIGINT, request_stop)
+    done = run_case_probe(
+        label=args.label,
+        probe_set=probe_set,
+        model_key=args.model,
+        config=config,
+        pace_fraction=models.pace_fraction,
+        repo_root=root,
+        provider=provider,
+        store=store,
+        identity=identity,
+        account_id=account_id,
+        cap_usd=args.cap_usd,
+        harness_version=horizon_compact.__version__,
+        rng=random.Random(),
+        should_stop=lambda: stop_requested["flag"],
+        progress=lambda line: print(line, file=sys.stderr, flush=True),
+    )
+    print(f"probe:           {args.label} set {probe_set} {args.model}")
+    print(f"stopped:         {done.stopped}")
+    print(f"calls recorded:  {done.calls_done_before + done.calls_done_now} of {done.calls_total}")
+    print(f"this session:    {done.api_calls_now} calls, ${done.cost_usd_now:.4f}")
+    return CLEAN_EXIT if done.clean else NOT_CLEAN_EXIT
+
+
+def cmd_case_probe_verdict(args: argparse.Namespace) -> int:
+    """Whether each answer names the company, and the verdict records the gate reads (protocol §12.8). In two
+    steps when an answer names the company: his read, then the independent reader's, then the records."""
+    root = default_repo_root()
+    probe_set = args.set or _lock_probe_set(root, args.label)
+    case = open_case(args.label)
+
+    def ask(prompt: str) -> str:
+        try:
+            return input(prompt)
+        except EOFError as exc:
+            # Never read as "does not name it": the reads are saved write-once.
+            raise VerdictError(
+                "the input ended before every answer was read: nothing was saved"
+            ) from exc
+
+    done = probe_verdict(
+        case,
+        _case_bucket_store(args),
+        probe_set=probe_set,
+        resolution=args.resolution,
+        today=_today(),
+        ask=ask,
+        show=print,
+    )
+    if done.stage == "needs_reader":
+        print(
+            f"{args.label} set {probe_set}: {done.flagged} of {done.calls} answers name the company by "
+            "your read; no verdict is written yet."
+        )
+        print(
+            f"next: hc case reader {args.label} rejection --criterion {PROBE_CRITERION} --set "
+            f"{probe_set}, then this command again"
+        )
+        return CLEAN_EXIT
+    outcome = (
+        f"{done.flagged} answer(s) named the company; the reader DISPUTES it, so they pass on your "
+        "resolution (not coarsened)"
+        if done.disputed
+        else f"{done.flagged} answer(s) named the company, and they fail"
+        if done.flagged
+        else "no answer named the company: every call passes"
+    )
+    print(
+        f"{args.label} set {probe_set}: {outcome}; wrote {done.written} verdict(s) of {done.calls}"
+    )
+    if done.flagged and done.disputed:
+        print(
+            f"next, in the log: hc case log <type> record {args.label} {PROBE_CRITERION} fail --reason "
+            f'"..." and then hc case log <type> read {args.label} {PROBE_CRITERION} --resolution "..."'
+            " (the reader's dispute lets the candidate go on)"
+        )
+    elif done.flagged:
+        print(
+            "the failure stands: coarsen the dossier once and lock it as set 2 (protocol §12.8). Log "
+            f"{PROBE_CRITERION} as failed (record, then read) only if set 2 fails too, which drops the case"
+        )
+    return CLEAN_EXIT
 
 
 def _today() -> date:
@@ -1589,6 +1783,12 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_scenario(args)
         if args.action == "reader":
             return cmd_case_reader(args)
+        if args.action == "upload":
+            return cmd_case_upload(args)
+        if args.action == "probe":
+            return cmd_case_probe(args)
+        if args.action == "probe-verdict":
+            return cmd_case_probe_verdict(args)
         if args.action == "resolve":
             return cmd_case_resolve(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
@@ -1616,6 +1816,10 @@ def cmd_case(args: argparse.Namespace) -> int:
         ReaderModelError,
         MaterialError,
         BriefError,
+        UploadError,
+        ProbeRefused,
+        VerdictError,
+        SweepRefusal,
     ) as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return REFUSED_EXIT
@@ -2112,8 +2316,15 @@ def build_parser() -> argparse.ArgumentParser:
     reader.add_argument("kind", choices=("rejection", "scenario", "rubric"))
     reader.add_argument(
         "--criterion",
-        choices=("real_decision", "maps_to_shape"),
-        help="for a rejection: the criterion whose rejection is read",
+        choices=("real_decision", "maps_to_shape", PROBE_CRITERION),
+        help="for a rejection: the criterion whose rejection is read; not_recognizable reads a probe "
+        "failure from the flagged answers (never the dossier)",
+    )
+    reader.add_argument(
+        "--set",
+        type=int,
+        choices=(1, 2),
+        help="for not_recognizable: the probe set read (default: the set the committed case.lock is for)",
     )
     reader.add_argument("--yes", action="store_true", help="skip the spend question")
     resolve = case_actions.add_parser(
@@ -2124,6 +2335,41 @@ def build_parser() -> argparse.ArgumentParser:
     resolve.add_argument("label", help="the candidate's neutral id, such as closure-01")
     resolve.add_argument("kind", choices=("scenario", "rubric"))
     resolve.add_argument("--resolution", required=True, help="what he decided, and why")
+    upload = case_actions.add_parser(
+        "upload",
+        help="Put the locked case's dossier, scenario and rubric in private storage (cases/<label>/set-<n>/), "
+        "write-once, after checking them against the committed, pushed case.lock. Laptop, named profile.",
+    )
+    upload.add_argument("label", help="the case's neutral label, such as closure-1")
+    verdict = case_actions.add_parser(
+        "probe-verdict",
+        help="Judge a probe set's answers (his read, the term list, the independent reader on a failure) and "
+        "write one verdict record per call. Laptop, named profile.",
+    )
+    verdict.add_argument("label", help="the case's neutral label, such as closure-1")
+    verdict.add_argument(
+        "--resolution",
+        help="required when the reader disputes a failure: his reason, recorded with it",
+    )
+    probe = case_actions.add_parser(
+        "probe",
+        help="The container's command: three recognition-probe calls of one model on one case and set "
+        "(protocol §12.8). Refuses outside the container.",
+    )
+    probe.add_argument("label", help="the case's neutral label, such as closure-1")
+    probe.add_argument(
+        "--model", required=True, help="a models.toml key: haiku-5-5 or gpt-oss-openrouter"
+    )
+    probe.add_argument(
+        "--cap-usd", type=float, default=2.0, help="the most the three calls may cost"
+    )
+    for sub in (upload, verdict, probe):
+        sub.add_argument(
+            "--set", type=int, choices=(1, 2), help="default: the set case.lock is for"
+        )
+        sub.add_argument("--bucket", help=f"the results bucket (else {RESULTS_BUCKET_ENV})")
+    for sub in (upload, verdict):
+        sub.add_argument("--profile", help="the AWS profile (no default)")
     assemble = case_actions.add_parser(
         "assemble",
         help="Write the case's dossier once every flag has a decision in reviewed-flags.json",

@@ -7,6 +7,43 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-16, about 4:50 PM (STEP 10a BUILT AND REVIEWED, UNCOMMITTED)
+>
+> **Measured:** `make check` green, **2496 tests**; `hc protocol check: ok`. Last commit `2d45a72` (pushed).
+> **Uncommitted:** step 10a (the 4:20 PM block below), **reviewed (Opus), four fixes applied and his decision on the
+> brief's reading of §12.8 taken** (search-half doc §11, "Stage C step 10a, the Opus review"): his probe read takes
+> only a plain yes or no; the brief no longer tells the reader the answers were flagged; only the term list's
+> directives are sent; the log takes the reply of the newest set with flagged answers. No model was called.
+>
+> **Next, in order:** (1) his commit `phase 5: case probe, verdict and gate readers` and push (the reader refuses to
+> run until pushed); (2) **10b**, his: the `task.json` change (his plan and apply, Claude reading the plan; a role
+> without `s3:ListBucket` makes a missing verdict an AccessDenied, which crashes the S3 reader rather than failing
+> it quietly: still closed, but grant the list as §4.8 says), launching the probe task, the first real probe. The
+> three other OPENs below stand.
+>
+> *The 4:20 PM block below is superseded on what is next; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-16, about 4:20 PM (STEP 10a BUILT BY SONNET, UNCOMMITTED, AWAITING AN OPUS REVIEW)
+>
+> **Measured:** `make check` green, **2493 tests**; `hc protocol check: ok`. Last commit `2d45a72` (`phase 5: hc case
+> reader and briefs`, pushed; the 3:50 PM block's "uncommitted" is stale). **Uncommitted:** step 10a, every piece of
+> step 10 that runs on fakes: the new package `src/horizon_compact/caseprobe/` (`upload`, the container's probe run,
+> `probe-verdict`, the S3 probe reader, the GitHub reader), `hc case upload`, `hc case probe`, `hc case
+> probe-verdict`, and the criterion 5 read (`hc case reader <id> rejection --criterion not_recognizable`, in
+> `reader/material.py`, `reader/read.py` and the rejection brief). **His criterion 5 decision is built** (see the
+> CLOSED entry below): a reader's dispute can turn a probe failure into a pass, the verdict record carries the final
+> `passed`, and the log and the gate agree. Search-half doc §11, "Stage C step 10a", has the points for review.
+> No model was called, no key was read, no AWS call was made, and no `task.json` or Terraform file changed.
+>
+> **Next, in order:** (1) the Opus review of 10a, ideally in a fresh chat; (2) his commit `phase 5: case probe, verdict
+> and gate readers` and push (the reader refuses to run until its inputs, which this step changed, are pushed); (3)
+> **10b**, his: the `task.json` change (his Terraform plan and apply, Claude reading the plan), launching the probe
+> task, and the first real probe. **Before the first S1 or S3 render:** OPEN 2026-10-16, pay per head in a case
+> scenario. **At Stage D, S3:** OPEN 2026-10-16, S3 renders only with every option's figures. **Before any set-2
+> lock:** OPEN 2026-10-16, where a coarsened dossier lives.
+>
+> *The 3:50 PM block below is superseded on what is next; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-16, about 3:50 PM (STEP 9 BUILT AND REVIEWED, UNCOMMITTED)
 >
 > **Measured:** `make check` green, **2423 tests**; `hc protocol check: ok`. Last commit `1e899ed` (pushed).
@@ -1331,7 +1368,7 @@ whether it may touch the scenario text as well as the dossier. **Settle it when 
 probe), before any set-2 lock;** then point `lock_case`'s set-2 branch at that path and check it against that record.
 Nothing reaches set 2 before a probe has failed.
 
-## OPEN 2026-10-16 — a disputed probe failure (criterion 5) passes the log but not the gate
+## CLOSED 2026-10-16, his decision, built in step 10a (awaiting his commit) — a disputed probe failure (criterion 5) passed the log but not the gate
 
 Found in the Opus review of the disputed-rejection fix. Protocol §12.4 has the independent reader read every
 rejection on criterion 5, and a disputed one does not stand, so the log now counts the probe as met. Protocol §12.10's
@@ -1341,6 +1378,19 @@ disagree: a disputed probe failure passes the log and is refused at the gate. **
 (`probe-verdict`):** whether a dispute on criterion 5 can change a probe's verdict (and so the gate), or whether
 criterion 5 is decided by the probe records alone and the reader's dispute only logged. Nothing reaches this before
 a probe has run. **Closes when:** he has decided, and step 10 is built to match.
+
+**Decided 2026-10-16 (his), built the same day as step 10a.** A reader's dispute CAN turn a probe failure into a
+pass, and the probe's verdict record carries the result, so the selection log and the gate's check (3) always
+agree. The reader reads a criterion 5 rejection with `hc case reader <id> rejection --criterion not_recognizable`
+and is shown only §12.8's definition of "names the company", the flagged probe answers and the case's private term
+list: never the dossier, never a result. Its reply is recorded as in step 9 (numbered request and reply,
+write-once, per probe set), and `rejection_reply_on_record` accepts `not_recognizable`, so `hc case log ... read`
+logs it from the reply (decision 7). Each call's verdict record (`call-<i>.verdict.json`) holds the original verdict,
+the reply's file name and sha256, his resolution on a dispute and the final `passed`; the gate's S3 reader reads only
+that `passed`. A disputed failure is not coarsened. "cannot_tell" is not a dispute (decision 8), so those calls fail.
+A test (`test_the_readers_reading_decides_the_final_passed_and_the_log_always_agrees`) runs all three readings
+through the reader, the verdict, the log and the gate and asserts the log and the gate agree. Search-half doc §11,
+"Stage C step 10a", has the build and the points for review.
 
 ---
 

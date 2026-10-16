@@ -280,6 +280,12 @@ Phase 5.5 publishes what §12.11 allows. The reader reads the mapping with the e
   case's term list, asks him to confirm or overrule any answer that is not "unknown", and writes one
   `verdict.json` per call beside it, write-once, with `passed`. The gate's S3 reader builds `ProbeRecord` from the
   call object's `LastModified` and the verdict's `passed`.
+- *(Amended 2026-10-16, his decision on criterion 5; built in 10a, §11.)* **The verdict is two steps when an answer
+  names the company.** A verdict object is write-once and carries the final `passed`, so it is written only once the
+  set is settled: his read of each answer is saved in the appendix (`probe-reads-set-<n>.json`), the flagged answers
+  go to the independent reader, and the verdicts are written after the reader's reply is on record, from that reply.
+  The verdict key is `call-<i>.verdict.json` beside `call-<i>.json`. It holds the original verdict, the reply's file
+  name and sha256, his resolution on a dispute and the final `passed`.
 - **The prefix is private forever:** `cases/` is not read by the publish path (Phase 1.5), not listed in any manifest
   Phase 4's decision 2 commits, and the task role's new statement grants `cases/*` and nothing wider.
 - **Infrastructure (his apply):** `task.json` gains `s3:GetObject` and `s3:PutObject` on `cases/*` and the list
@@ -293,6 +299,12 @@ sources; or the rubric with its excerpts), never the grid's results, and writes 
 appendix, write-once. The briefs are committed before the first read. The reader's model is decision 3. Each read's
 outcome goes into the selection log (`hc case log ... read`) or the case's rubric record; a disagreement is his to
 resolve, logged with both readings.
+
+*(Added 2026-10-16, his decision on criterion 5.)* The reader also reads a criterion 5 rejection, a probe failure:
+`hc case reader <id> rejection --criterion not_recognizable [--set n]`. It is shown only §12.8's definition of
+"names the company", the answers flagged as naming it, and the case's private term list; never the dossier, never
+a result. Its reply is recorded like any other, per probe set, and a "pass" (the flagged answers do not name the
+company) disputes the failure: the verdict records carry the final result (§4.8), so the log and the gate agree.
 
 ### 4.10 The gate's readers, proved on the probes
 
@@ -340,6 +352,10 @@ scenario facts) with him.** One terminal command at a time, with the line to loo
 9. The reader command and its three briefs (§4.9), committed before the first read.
 10. The probe: `upload`, the container command, `probe-verdict`, `task.json` (his Terraform plan and apply, Claude
     reading the plan), the S3 and GitHub readers (§4.8, §4.10).
+    *(Split 2026-10-16, his.)* **10a.** Everything that runs on fakes: `upload`, the container's probe command,
+    `probe-verdict`, the S3 and GitHub readers, and the criterion 5 read (as built, §11). No `task.json` or
+    Terraform change, no AWS call, no real probe. **10b.** `task.json` (his Terraform plan and apply, Claude reading
+    the plan), launching the task, and the first real probe.
 
 ### Stage D: the cases (as many sessions as it takes)
 
@@ -967,3 +983,125 @@ and 7 settled below.
   and named, never taken as zero) and the total with this read at its worst. It does not refuse: no reader cap
   was set. Note that the projection (§6) bounds the reader at $2 for about 30 reads, while one read's worst is
   about $0.35; the likely cost stands, the bound does not, and the running total is the check.
+
+**Stage C step 10a, the probe code on fakes (2026-10-16, about 4:20 PM; Sonnet built; for an Opus review).**
+2493 tests (70 new), `make check` green, `hc protocol check: ok` (no locked identity moved). No model was called, no key was
+read, no AWS call was made, and no `task.json` or Terraform file changed. What 10a is and is not is in §5, step 10.
+
+**His decision, criterion 5 (closes KNOWN-GAPS OPEN 2026-10-16, "a disputed probe failure"; recorded there too).** A
+reader's dispute CAN turn a probe failure into a pass, and the probe's verdict record carries the result, so the
+selection log and the gate's check (3) always agree. The reader is shown only §12.8's definition of "names the
+company", the flagged answers and the case's private term list. The verdict record holds the original verdict, the
+reply's file name and sha256, his resolution on a dispute and the final `passed`; the gate reads only `passed`. A
+disputed failure is not coarsened. Proof: `test_the_readers_reading_decides_the_final_passed_and_the_log_always_agrees`
+takes the reader's three readings through the reply, the verdict, the log row and the gate's `check_case_probes`.
+
+- **Where it lives.** A new package, `src/horizon_compact/caseprobe/`: `layout.py` (the S3 keys, §12.8's message),
+  `upload.py`, `run.py` (the container's three calls), `verdict.py`, `s3reader.py`, `github.py`. Not in `probes/`
+  (the Phase 2.5 comprehension probes), and not in `casebuild/` or `reader/`, which the architecture tests bar from
+  anything holding a result or a probe answer. `horizon_compact.caseprobe` is added to the reader's barred modules, and
+  a new test bars `casebuild/` from importing it. **The one channel from a probe answer to the reader is a file** the
+  reader's material builder reads (`probe-flagged-set-<n>.json`), never an import.
+- **The reader, extended.** `reader/material.py`: `PROBE_CRITERION`, `NAMES_THE_COMPANY` (§12.8's sentence, checked
+  against the protocol text by a test), `probe_rejection_material` (three parts: Definition, Term list, Flagged
+  answers; nothing else can be added). `reader/read.py`: a per-set stem (`reader-rejection-not_recognizable-set<n>`),
+  `probe_set` on `run_read`, `probe_read_ready`, `probe_reply_on_record`, and `rejection_reply_on_record` accepting
+  `not_recognizable`. `experiment/readers/rejection.txt` gained the third criterion (its sha256 changed; no read has
+  yet been made with any brief, so this is not a change to the instrument after use).
+- **`hc case upload <label> [--set n] --profile p [--bucket b]`** (laptop). Refuses unless `case.lock` is committed and
+  on a remote branch with the working copy unchanged, is for that probe set, and the three files hash to it; then
+  three exclusive puts to `cases/<label>/set-<n>/`. A re-run passes where the stored object equals the file; one that
+  differs stops the run before any put.
+- **`hc case probe <label> --model m [--set n] [--cap-usd c]`** (the container's command). Refuses before any call
+  outside a container; for a model whose role is not `main` or `second_family`, or whose route is not Anthropic or
+  OpenRouter, or an unpinned OpenRouter model; for a `case.lock` in the image that is missing or for another set; for
+  content in storage that does not hash to it; for a worst case above the cap. Then three calls: the dossier as the
+  system text, §12.8's message word for word, no tool, `max_tokens` 4000. A reply is never retried; an API error is
+  retried with backoff and kept under `errors/`; a call with a record is skipped. Each answer is one write-once
+  object with the usual provenance, image digest included.
+- **`hc case probe-verdict <label> [--set n] [--resolution "..."] --profile p`** (laptop). Step 1: every answer that
+  is not exactly "unknown" is shown with a term-list hint and he answers whether it names the company; everything is
+  saved (`probe-reads-set-<n>.json`, write-once), so a re-run never asks again. If none names it, every call passes
+  and the verdict objects are written. Otherwise the flagged answers go to `probe-flagged-set-<n>.json` and the
+  command stops and says to run `hc case reader <label> rejection --criterion not_recognizable --set n`. Step 2 (the
+  same command again): with the reply on record, "fail" and "cannot_tell" leave the flagged calls failed, "pass" passes
+  them and needs his `--resolution`. The reply must have been given exactly the flagged answers now on record (the
+  request's part hash is compared).
+- **The S3 probe reader** (`read_probe_records`): one `ProbeRecord` per call object, `LastModified` from the listing,
+  `passed` from the verdict. **Fails closed:** a call with no verdict, a verdict naming another call, or a `passed` that
+  is not literally `true` is not passed. **The GitHub reader** (`read_ci_runs`): one `CiRun` per Actions run from `gh
+  api --paginate ... --jq` (one JSON object per line) and the record at its head commit from `git show`, `None` where
+  the commit holds none; both programs are injected. Both feed `check_case_probes` and `check_case_order` in tests.
+
+**Points for review** (each a reading where the docs were silent or could go two ways; each his or Opus's to overrule):
+1. **One reading covers every flagged answer of a set.** The reply has one `reading`; "pass" means no flagged answer
+   names the company and disputes all of that set's flagged calls, "fail" means at least one does. A per-answer reading
+   would let a dispute clear one call and not another; I did not build it because the rejection reply's form is one
+   reading per criterion and the log holds one. If two flagged answers differ in kind, the reader says "fail".
+2. **Only the answers he flagged go to the reader.** A term-list hit he overruled is not flagged, so the reader does not
+   see it. The reader therefore disputes his reads of answers he thought named the company; it never second-guesses an
+   answer he passed. The alternative (send every non-"unknown" answer) enlarges what leaves the laptop and widens the
+   reader's task to the whole probe.
+3. **The term list, with its names, is sent to OpenRouter and the reader model's vendor.** The decision asks for it. It
+   is the one place a real company name leaves the laptop in Phase 5 outside the SEC; the dossier never does. The request
+   record in the private appendix holds it, as it holds an excerpt.
+4. **The read is per probe set and made once per set** (`-set1`, `-set2` in the file names). `--set` defaults to the set
+   the committed `case.lock` is for. The log's criterion 5 holds the candidate's final probe outcome, so `hc case log
+   ... read` takes the newest set with a usable reply. A first-set failure that stands is coarsened, not rejected, so it is
+   not logged unless set 2 also fails; the verdict command prints which of the two next steps applies.
+5. **A criterion 5 read does not need a standing fail in the log** (criteria 3 and 4 do). A first-set failure is not yet a
+   rejection. It does refuse if the log already holds a criterion 5 read. His order on a failure: `probe-verdict`,
+   `hc case reader`, `probe-verdict` again; then, if the rejection goes on to stand or is disputed, `hc case log ...
+   record ... not_recognizable fail` and `read`.
+6. **"cannot_tell" is not a dispute** (decision 8 carried over): the flagged calls fail and a `--resolution` is refused.
+7. **The verdict is written only when the set is settled**, because the S3 write-once rule would otherwise forbid
+   updating a verdict after the reader's reply. The cost is that nothing is in S3 between his read and the reader; his
+   reads live in the private appendix until then. A run that stops part-way writing verdicts is finished by the same
+   command (a stored verdict equal to the one it would write is skipped; one that differs stops it).
+8. **Key names.** The spec said "one `verdict.json` per call beside" the call object; the verdict is
+   `call-<i>.verdict.json` beside `call-<i>.json`, so a listing tells them apart and the reader pairs them by name.
+9. **"Unknown" is the exact word**, ignoring case, punctuation and whitespace (`Unknown.`, `**UNKNOWN**`); anything
+   longer, an empty answer, or a call whose status is not "replied" (truncated, no text) goes to his read.
+10. **`max_tokens` is 4000 for every probe call and the default cap is $2.** §12.8 fixes neither. A reasoning model's
+    reasoning counts toward the 4000; a truncated answer is stored with status `truncated` and goes to his read. The cap
+    check uses the same worst-case estimate as a sweep. Measured from `models.toml`'s prices: the worst case for three
+    calls is about $0.015 (Haiku 5.5) and $0.005 (gpt-oss) on a 30,000-token dossier, and $0.036 and $0.013 on a
+    100,000-token one, so $2 never binds; it is a tripwire against a wrong file.
+11. **The container is the only place a case probe runs.** There is no laptop path (the sweeps have one for development);
+    the probe is official-only, so a laptop run is refused before any key is read. Bedrock and local routes are refused.
+12. **`upload` requires the lock pushed, not only committed.** Stricter than §4.8's wording; the container needs the pushed,
+    deployed image anyway, and the gate's order check compares the CI run's time with the first probe's.
+13. **The verdict covers whatever models have calls in the set** (each must have exactly calls 1 to 3). It does not check
+    that both official models are present: the gate does, from `lock.models`.
+14. **What is NOT built, on purpose (10b or later):** `task.json` (`s3:GetObject` and `s3:PutObject` on `cases/*`);
+    launching the task (`--launch`, like the awareness probe's); any command that runs `check_case_order` and
+    `check_case_probes` from the laptop on a frozen case (Stage E's proof, and Phase 5.5's wiring into `hc sweep
+    launch`); a check at `hc case lock --probe-set 2` that set 1 actually failed, which the probe records can now answer.
+15. **Unverified until the first live use:** that `gh api --paginate` with this `--jq` prints one object per line across
+    pages and fills `{owner}/{repo}` from the clone; what GitHub's run listing holds once a run is expired or deleted (a
+    missing run is absent, so the order check refuses: fails closed); that `LastModified` from `list_objects_v2` is the
+    time the write-once object was written (it is S3's own); and that OpenRouter's pinned route answers a no-tool
+    request with the text in `message.content` (the same unverified assumption as the reader's, point 11 of step 9).
+16. **The reader's frozen inputs changed** (`reader/`, `experiment/readers/rejection.txt`), so `hc case reader` refuses
+    until this step is committed and pushed, by design.
+
+**Stage C step 10a, the Opus review (2026-10-16, about 4:50 PM).** Points 1, 6-9, 11 and 12 stand as built. Four
+fixes applied, and his decision on a fifth; 2496 tests, `make check` green.
+- **His read takes only a plain yes or no.** It took exactly `y` as "names it" and anything else (Enter, `yes`, the
+  end of input) as "does not", and the read is saved write-once, so a stray Enter passed an answer that named the
+  company with no way back. Now y/yes/n/no only, asked again up to three times, then refused; the end of input is
+  refused. Nothing is saved until every answer is read.
+- **The brief no longer tells the reader the answers were flagged.** "Each answer was set aside because a check
+  flagged it as naming the company" contradicted the brief's own "you have not been told what anyone else
+  concluded"; criteria 3 and 4 are not told a rejection was made either. Removed.
+- **Only the term list's directives leave the laptop** (amends point 3). The raw file was sent, comments included,
+  and the list also holds people, products and places; the brief described it as names, tickers and brands only.
+  Now only the `term:` and `term-i:` lines are sent (the list must parse), and the brief says what the roles may be
+  and that a person or a place alone does not name the company.
+- **The log takes the reply of the newest set with flagged answers** (amends point 4). It took the newest set with
+  any reply, so after a coarsened set 2 was flagged and before its read, `hc case log ... read` would log set 1's
+  reply. It now refuses until that set is read.
+- **His decision: the brief's reading of §12.8's definition stands** (point 3 of this review, 2026-10-16). The
+  material gives §12.8's sentence word for word; the brief adds that a name counts "written in full or in a form a
+  reader would take for it", and that a listed term used only as an ordinary word does not. Both kept, as a stated
+  interpretation of the pre-registered definition, made before any read. **For his methods page** (his to write).

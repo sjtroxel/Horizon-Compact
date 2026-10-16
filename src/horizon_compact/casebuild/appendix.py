@@ -149,6 +149,16 @@ class CaseAppendix:
         (§4.9): the part of the first-disclosure document the criterion turns on. Private."""
         return self.directory / "first-disclosure-excerpt.txt"
 
+    def probe_reads_path(self, probe_set: int) -> Path:
+        """Every recognition-probe answer of one set and what he read in it (protocol §12.8); written by
+        ``hc case probe-verdict``. Private: it holds the model's answers."""
+        return self.directory / f"probe-reads-set-{probe_set}.json"
+
+    def probe_flagged_path(self, probe_set: int) -> Path:
+        """Only the answers of one set that name the company, for the independent reader of a criterion 5
+        rejection (§12.9): a JSON object ``{"probe_set": n, "answers": ["...", ...]}``. Private."""
+        return self.directory / f"probe-flagged-set-{probe_set}.json"
+
     @property
     def terms_path(self) -> Path:
         """The case's private term list (`term: Name => role` lines), written by hand before the build."""

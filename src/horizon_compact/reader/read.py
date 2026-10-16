@@ -169,8 +169,8 @@ _SHAPES = ("S1", "S2", "S3", "S4")
 def _shape_problem(reply: RejectionReply) -> str | None:
     """The shape fits the criterion and the reading: none on ``real_decision``; on ``maps_to_shape`` one of
     the four on a pass, "none" on a fail, either on cannot_tell."""
-    if reply.criterion == "real_decision":
-        return None if reply.shape is None else "the reply names a shape on real_decision"
+    if reply.criterion in ("real_decision", materials.PROBE_CRITERION):
+        return None if reply.shape is None else f"the reply names a shape on {reply.criterion}"
     allowed = {
         "pass": _SHAPES,
         "fail": ("none",),
@@ -184,8 +184,14 @@ def _shape_problem(reply: RejectionReply) -> str | None:
 # --- the record -----------------------------------------------------------------------------------------
 
 
-def stem(kind: str, criterion: str | None) -> str:
-    return f"reader-{kind}" + (f"-{criterion}" if criterion else "")
+def stem(kind: str, criterion: str | None, probe_set: int | None = None) -> str:
+    """A criterion 5 read is per probe set (``-set2``): a coarsened case is probed again, and that failure
+    is read in its own right."""
+    return (
+        f"reader-{kind}"
+        + (f"-{criterion}" if criterion else "")
+        + (f"-set{probe_set}" if probe_set is not None else "")
+    )
 
 
 def _request_name(stem_: str, attempt: int) -> str:
@@ -330,6 +336,7 @@ class ReadOutcome:
     request_name: str
     reply_name: str
     candidate_type: str | None
+    probe_set: int | None = None
 
 
 def rejection_ready(search: CaseAppendix, candidate: str, criterion: str) -> str:
@@ -350,11 +357,29 @@ def rejection_ready(search: CaseAppendix, candidate: str, criterion: str) -> str
     return row.type
 
 
+def probe_read_ready(search: CaseAppendix, candidate: str) -> str | None:
+    """A criterion 5 read comes before the log's result (a first-set failure is not yet a rejection: it is
+    coarsened unless the reader disputes it), so the log need not hold a fail. It must not already hold a
+    read. Returns the candidate's type when the log has the candidate, else None."""
+    try:
+        row = load_newest_log(search).rows.get(candidate)
+    except LogError as exc:
+        raise ReaderError(f"the selection log cannot be read: {exc}") from exc
+    if row is None:
+        return None
+    if materials.PROBE_CRITERION in row.reads:
+        raise ReaderError(
+            f"{candidate}'s rejection on {materials.PROBE_CRITERION} already has a read in the log"
+        )
+    return row.type
+
+
 def run_read(
     case: CaseAppendix,
     kind: str,
     criterion: str | None,
     *,
+    probe_set: int | None = None,
     repo_root: Path,
     git: Git,
     search: CaseAppendix,
@@ -365,16 +390,21 @@ def run_read(
         raise ReaderError(f"{kind!r} is not a kind of read: {', '.join(KINDS)}")
     if (kind == "rejection") != (criterion is not None):
         raise ReaderError("a rejection read names its criterion, and the other kinds name none")
+    if (criterion == materials.PROBE_CRITERION) != (probe_set is not None):
+        raise ReaderError("a read of a probe failure names its probe set, and no other read does")
     frozen = frozen_reader_inputs(git)
     key, config = load_reader_model(repo_root / "experiment")
     assert config.max_tokens is not None  # a reader entry always has one (ModelConfig checks)
     brief: Brief = load_brief(repo_root, kind)
-    name = stem(kind, criterion)
+    name = stem(kind, criterion, probe_set)
     candidate_type: str | None = None
     if kind == "rejection":
         assert criterion is not None
-        candidate_type = rejection_ready(search, case.label, criterion)
-        material = materials.rejection_material(case, criterion)
+        if criterion == materials.PROBE_CRITERION:
+            candidate_type = probe_read_ready(search, case.label)
+        else:
+            candidate_type = rejection_ready(search, case.label, criterion)
+        material = materials.rejection_material(case, criterion, probe_set)
     elif kind == "scenario":
         material = materials.scenario_material(case, repo_root)
     else:
@@ -407,6 +437,7 @@ def run_read(
         "record_version": RECORD_VERSION,
         "kind": kind,
         "criterion": criterion,
+        "probe_set": probe_set,
         "attempt": attempt,
         "reader_model": key,
         "reader_entry_sha256": entry_sha256(key, config),
@@ -428,6 +459,7 @@ def run_read(
         "record_version": RECORD_VERSION,
         "kind": kind,
         "criterion": criterion,
+        "probe_set": probe_set,
         "attempt": attempt,
         "status": decision.status,
         "stop_reason": decision.stop_reason,
@@ -456,6 +488,7 @@ def run_read(
         request_name=request_name,
         reply_name=reply_name,
         candidate_type=candidate_type,
+        probe_set=probe_set,
     )
 
 
@@ -491,20 +524,56 @@ def _file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+PROBE_SETS_NEWEST_FIRST = (2, 1)  # protocol §12.8: the first probe set, and one re-probe
+
+
+def probe_reply_on_record(case: CaseAppendix, probe_set: int) -> tuple[ReaderReply, Path] | None:
+    """The usable reply to the reader's read of probe set ``probe_set``'s flagged answers, or None when the
+    set has not been read. Its file name, sha256 and reading are what a probe verdict and the log record."""
+    found = _usable_reads(case, stem("rejection", materials.PROBE_CRITERION, probe_set))
+    if not found:
+        return None
+    attempt, path = found[0]
+    if attempt.reading not in ("pass", "fail", "cannot_tell"):
+        raise ReaderError(f"{path.name} cannot be read back: look at it before using it")
+    return ReaderReply(path.name, _file_sha256(path), attempt.reading), path
+
+
+def reply_material(reply_path: Path) -> dict[str, str] | None:
+    """The part hashes of the request the reply answered (the pair's request record), or None."""
+    request = _load(reply_path.with_name(reply_path.name.replace("-reply.json", "-request.json")))
+    parts = request.get("material_sha256") if request else None
+    return parts if isinstance(parts, dict) else None
+
+
 def rejection_reply_on_record(case: CaseAppendix, criterion: str) -> ReaderReply:
     """The usable reply ``hc case log ... read`` logs a rejection's read from: its file, sha256 and
-    reading. Refused when no usable read exists, so a read cannot be logged that was never made."""
-    if criterion not in materials.REJECTION_CRITERIA:
-        raise ReaderError(
-            f"a read of {criterion} is not a reader reply: it is logged at the probe step (step 10)"
-        )
-    name = stem("rejection", criterion)
-    found = _usable_reads(case, name)
-    if not found:
+    reading. Refused when no usable read exists, so a read cannot be logged that was never made. For
+    criterion 5 it is the reply for the newest probe set with flagged answers: the log holds the candidate's
+    final probe outcome, and an earlier set's reply never stands in for a later set not yet read."""
+    if criterion not in materials.READ_CRITERIA:
+        raise ReaderError(f"{criterion!r} is not a criterion the reader reads")
+    if criterion == materials.PROBE_CRITERION:
+        for probe_set in PROBE_SETS_NEWEST_FIRST:
+            if not case.probe_flagged_path(probe_set).is_file():
+                continue
+            found = probe_reply_on_record(case, probe_set)
+            if found is None:
+                raise ReaderError(
+                    f"{case.label}'s probe set {probe_set} has flagged answers and no usable read: run "
+                    f"`hc case reader {case.label} rejection --criterion {criterion} --set {probe_set}` first"
+                )
+            return found[0]
         raise ReaderError(
             f"{case.label} has no usable read of its {criterion} rejection: run `hc case reader` first"
         )
-    attempt, path = found[0]
+    name = stem("rejection", criterion)
+    found_reads = _usable_reads(case, name)
+    if not found_reads:
+        raise ReaderError(
+            f"{case.label} has no usable read of its {criterion} rejection: run `hc case reader` first"
+        )
+    attempt, path = found_reads[0]
     if attempt.reading not in ("pass", "fail", "cannot_tell"):
         raise ReaderError(f"{path.name} cannot be read back: look at it before logging")
     return ReaderReply(path.name, _file_sha256(path), attempt.reading)

@@ -244,9 +244,9 @@ def test_a_rejection_read_sends_the_criterion_and_the_excerpt_and_nothing_else(
     assert "drafter's reason" not in sent.user and list(sent.parts) == ["Excerpt"]
 
 
-@pytest.mark.parametrize("bad", ["not_recognizable", "first_disclosure", "nonsense"])
-def test_a_rejection_read_is_for_criterion_3_or_4_only(tmp_path: Path, bad: str) -> None:
-    with pytest.raises(MaterialError, match="not a criterion the reader reads from an excerpt"):
+@pytest.mark.parametrize("bad", ["first_disclosure", "nonsense"])
+def test_a_rejection_read_is_for_criteria_3_4_and_5_only(tmp_path: Path, bad: str) -> None:
+    with pytest.raises(MaterialError, match="is not a criterion the reader reads"):
         material.rejection_material(rejected_candidate(tmp_path), bad)
 
 
@@ -859,8 +859,10 @@ def test_the_log_reads_back_the_usable_reply_with_its_hash(
     case = rejected_candidate(tmp_path)
     with pytest.raises(ReaderError, match="no usable read"):
         rejection_reply_on_record(case, "real_decision")
-    with pytest.raises(ReaderError, match="probe step"):
+    with pytest.raises(ReaderError, match="no usable read"):
         rejection_reply_on_record(case, "not_recognizable")
+    with pytest.raises(ReaderError, match="not a criterion the reader reads"):
+        rejection_reply_on_record(case, "first_disclosure")
     reject = (ID, "rejection", "--criterion", "real_decision")
     run_reader(monkeypatch, Replies(ok("no")), *reject)  # an unusable attempt is never logged
     with pytest.raises(ReaderError, match="no usable read"):

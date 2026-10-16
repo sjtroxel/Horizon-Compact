@@ -772,6 +772,7 @@ RESULT_MODULES = (
     "horizon_compact.simulation",
     "horizon_compact.sweep",
     "horizon_compact.probes",
+    "horizon_compact.caseprobe",
     "horizon_compact.smoke",
     "horizon_compact.protocol.gate",
 )
@@ -797,6 +798,7 @@ def test_the_reader_import_scan_catches_what_it_is_meant_to() -> None:
     assert hits("from horizon_compact.analysis import matcher")
     assert hits("from horizon_compact.sweep.plan import build_plan")
     assert hits("import horizon_compact.probes.run")
+    assert hits("from horizon_compact.caseprobe.verdict import probe_verdict")
     assert not hits("from horizon_compact.providers.base import TextRequest")
 
 
@@ -808,3 +810,23 @@ def test_the_case_builder_cannot_import_the_reader() -> None:
         if "horizon_compact.reader" in module
     ]
     assert not offenders, f"casebuild/ imports the reader: {offenders}"
+
+
+def test_the_case_builder_cannot_import_the_case_probe_which_holds_probe_answers() -> None:
+    offenders = [
+        f"{path.name}:{lineno} {module}"
+        for path in sorted(CASEBUILD.rglob("*.py"))
+        for lineno, module in _imported_modules(ast.parse(path.read_text(encoding="utf-8")))
+        if "horizon_compact.caseprobe" in module
+    ]
+    assert not offenders, f"casebuild/ imports the case probe: {offenders}"
+
+
+def test_the_reader_reads_the_flagged_answers_from_a_file_not_from_the_case_probe() -> None:
+    # The flagged-answers file is the one channel from the probe to the reader; no import carries it.
+    imported = [
+        module
+        for path in sorted(READER.rglob("*.py"))
+        for _, module in _imported_modules(ast.parse(path.read_text(encoding="utf-8")))
+    ]
+    assert not [m for m in imported if "caseprobe" in m]
