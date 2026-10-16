@@ -127,13 +127,14 @@ def test_lock_refuses_until_the_scenario_check_passes(
     assert not (repo / "experiment").exists()
 
 
-def test_the_real_scenario_check_refuses_until_step_8b(
+def test_the_real_scenario_check_refuses_a_case_with_no_render(
     setup: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """The real check (step 8b) reads build.json, which this fixture's case does not have."""
     _, repo = setup
     monkeypatch.setattr(cli, "scenario_check_passes", scenario_check_passes)
     assert _lock(repo) == REFUSED_EXIT
-    assert "the scenario check is not built (step 8b)" in capsys.readouterr().err
+    assert "the scenario check failed" in capsys.readouterr().err
     assert not (repo / "experiment").exists()
 
 

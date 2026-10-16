@@ -5,8 +5,9 @@ rubric, hashes only, never content. It is written by ``content_hashes`` and ``ca
 functions the gate and ``hc case hashes`` use, so what is written is what the gate recomputes.
 
 Every refusal comes before the write: the label, the three files, the state of an existing lock, at set 1
-the dossier's hash against ``assembly.json``, and the scenario check. A write is atomic (a temporary file
-linked into place at set 1, so it never replaces one; replaced at set 2), so a crash leaves no half lock.
+the dossier's hash against ``assembly.json``, and the scenario check (``casebuild/scenario.py``). A write is
+atomic (a temporary file linked into place at set 1, so it never replaces one; replaced at set 2), so a
+crash leaves no half lock.
 
 **Probe set 1 is write-once.** A second lock is allowed only as probe set 2 after a coarsening (protocol
 §12.8): the existing lock must be set 1, the rubric must hash the same (no model sees a case before its
@@ -26,6 +27,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from horizon_compact.casebuild.appendix import CaseAppendix
+from horizon_compact.casebuild.scenario import check_scenario, format_failures
+from horizon_compact.dossier.check import default_repo_root
 from horizon_compact.protocol.cases import (
     CaseContent,
     CaseError,
@@ -47,13 +50,13 @@ class WrittenLock:
     text: str
 
 
-def scenario_check_passes(case: CaseAppendix) -> None:
-    """Refuse unless the case's scenario passes ``hc case scenario check`` (§4.6.1 item 9).
-
-    Step 8b builds the check; until then there is nothing that can pass, so this refuses. The lock takes
-    this as a parameter, so a test injects a passing one and 8b replaces this body only.
-    """
-    raise CaseLockError("the scenario check is not built (step 8b)")
+def scenario_check_passes(case: CaseAppendix, repo_root: Path | None = None) -> None:
+    """Refuse unless the case's scenario passes ``hc case scenario check`` (§4.6.1 item 9): every source
+    re-checked, and ``scenario.toml`` equal to a fresh render byte for byte. The templates are the
+    repository's own; the message names criteria and row ids, never a figure."""
+    failures = check_scenario(case, repo_root or default_repo_root())
+    if failures:
+        raise CaseLockError("the scenario check failed: " + "; ".join(format_failures(failures)))
 
 
 def _read(path: Path, what: str) -> bytes:

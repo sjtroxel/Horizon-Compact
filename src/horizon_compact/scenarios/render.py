@@ -375,10 +375,11 @@ def _pairs(item: dict[str, Any]) -> str:
     return "".join(f"{key} = {_value(value)}\n" for key, value in item.items())
 
 
-def toml_text(data: dict[str, Any], source_name: str) -> str:
-    """The rendered file. Scalars first, then the tables, in a fixed order so the bytes are reproducible."""
+def toml_text(data: dict[str, Any], source_name: str, header: str = _RENDERED_HEADER) -> str:
+    """The rendered file. Scalars first, then the tables, in a fixed order so the bytes are reproducible.
+    ``header`` has one ``{source}`` field; a case's render passes its own."""
     scalars = {k: v for k, v in data.items() if k not in ("levers", "choice", "rules")}
-    out = [_RENDERED_HEADER.format(source=source_name), _pairs(scalars)]
+    out = [header.format(source=source_name), _pairs(scalars)]
     for lever in data["levers"]:
         out.append(f"\n[[levers]]\n{_pairs(lever)}")
     choice = data.get("choice")

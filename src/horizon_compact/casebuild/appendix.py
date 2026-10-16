@@ -134,6 +134,11 @@ class CaseAppendix:
         return self.directory / "rubric.toml"
 
     @property
+    def scenario_figures_path(self) -> Path:
+        """The case's rows for its scenario (§4.6.1 item 2), written by hand at Stage D; private."""
+        return self.directory / "scenario-figures.toml"
+
+    @property
     def scenario_render_path(self) -> Path:
         """What the scenario render used and dropped (§4.6.1 item 8); written by step 8b."""
         return self.directory / "scenario-render.json"

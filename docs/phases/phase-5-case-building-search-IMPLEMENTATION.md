@@ -730,3 +730,101 @@ Points 1 and 4 accepted as written (the gate's `check_case_probes` catches a re-
 coarsening may touch the scenario belongs to the coarsening design). **Logged, not fixed:** the set-2 branch reads the
 write-once `dossier.toml`, so it is reachable today only by a hand replacement (KNOWN-GAPS OPEN 2026-10-16, "where a
 coarsened dossier lives"). 2250 tests, `make check` green, `hc protocol check: ok`.
+
+**Stage C step 8b, `hc case scenario render` and `check` (2026-10-16, about 1:45 PM, Sonnet built; reviewed below).** Built by §4.6.1, items 1 to 9. Steps 9 and 10, coarsening and the real rows files are not touched.
+- **Where it lives.** `casebuild/scenario.py` (the rows file's model, `render_in_memory`, `render_case_scenario`,
+  `check_scenario`, `drop_sentences`); `cmd_case_scenario` and the `case scenario render|check <label>` parsers in
+  `cli.py`; `CaseAppendix.scenario_figures_path`; `toml_text` in `scenarios/render.py` gained an optional `header`
+  argument (its default is the old header, so `hc scenarios check` is byte-for-byte unchanged). **No architecture
+  rule blocked an import:** `casebuild/` imports `scenarios.render`, `dossier.figures` and `experiment`, none of
+  which the rule bars, and `protocol/caselock.py` imports `casebuild/scenario.py`. `scenario_check_passes` in
+  `protocol/caselock.py` now calls `check_scenario` and raises `CaseLockError` with the failures by criterion.
+- **How the fill is reused.** The sentence drops are made on the template (a copy of the parsed `ScenarioSource`
+  with the dropped sentences removed, the rules without rows removed, the lever details emptied), and then the
+  existing `fill_scenario` runs over a `FigureSet` of the case's values: its `Filler`, caps, total, rules and
+  `Scenario` validation are the fictional render's own. The case's values are `Resolved` objects over the
+  fictional rows (so units and formatting are the fictional ones), built by scaling each file row with
+  `scale.py` and filling derived rows with `evaluate_formula` over the fictional formulas.
+- **The rows file** is `scenario-figures.toml` in the appendix, `[rows.<row_id>]` tables with `value` (unscaled),
+  `unit` (must equal the fictional row's), `scale` (`dollars`, `heads`, `none`), `per` (required on an unscaled
+  dollar row, refused elsewhere), `source` (`pre_cutoff` with an `accession`, or `first_disclosure`) and `locator`;
+  or `equals_total = true` and nothing else, on a lever's cap. Refused: an id that is not a fictional row, a label
+  row, `equals_total` on a row that is no cap, `first_disclosure` on any row but the total.
+- **The check** (`check_scenario`) loads the same inputs, re-checks every source (an accession in `sources.json`
+  that `cutoff.admit` accepts against `build.json`'s cut-off, which must equal `sources.json`'s; the total alone
+  first-disclosure, its date the newest selection log's `disclosed`, one day after the cut-off), then re-renders in
+  memory and compares **both** `scenario.toml` and `scenario-render.json` byte for byte. It prints failures grouped
+  by criterion (`rows file`, `cut-off rule`, `first-disclosure rule`, `criterion 4 (maps_to_shape)`, `render`) with
+  row ids, lever keys and counts only; a test proves a name, a figure and an accession typed into the rows file
+  never reach the output. The selection log is read only when a row is `first_disclosure`.
+- **Tests (71 new, `tests/test_casebuild_scenario.py`), fictional canaries only,** run against the real S1 to S4
+  templates with rows generated from each shape's own fictional figures: a fully sourced case on all four, the
+  shape's words and structure kept, a sparse case with dropped sentences, equal treatment across S1's lever details,
+  equal treatment emptying an S3 option text (refused), caps equal to the total (explicit, under 100 stated, under
+  100 derived), a total under 100 refused (three scalings), an omitted S2 joint-cap rule, every row and source
+  refusal, a hand-edited `scenario.toml` and an edited record failing the check, the rows changing after the
+  render, `hc case lock` passing end to end after the render and refusing before it. 2321 tests, `make check`
+  green, `hc protocol check: ok`.
+
+**Points for review** (each is a reading of §4.6.1 where it was silent or could be read two ways; none was a fork I
+stopped on, but each is his or Opus's to overrule):
+1. **A count derived from a headcount is a headcount.** A derived row of unit `count` whose formula reads a
+   `heads` row (or another such row) is treated as a heads figure: under 100 it reads "fewer than 100", which blocks
+   the formulas that use it. §4.6.1 item 5 speaks of "a heads figure"; the protocol says "a scaled headcount".
+   Reading it narrowly (file rows only) would print, for example, S3's "29 people may accept" at a small plant.
+   A cap that is under 100 by either route equals the total (the same rule, item 5).
+2. **A cap with no row, no formula and no `equals_total` is refused,** not defaulted to the total. Item 2 says a cap
+   row "may" say `equals_total` and item 4 says "every cap is a row"; the strict reading makes the rows file say it.
+   **This bites S4:** `s4_use_cap` is derived from the seven cut caps and `s4_annual`, so a case that lacks any of
+   them must write `s4_use_cap = { equals_total = true }` (23 of 37 single-row removals refuse for this reason).
+3. **A file row overrides a fictional derived row of the same id.** Needed because every shape's total is derived in
+   the fictional figures (`s1_roles`, `s2_shortfall`, `hc_p6`); it also lets a case state any other derived figure
+   directly. A file row for a derived id is not range-checked.
+4. **A scaled value is rounded to the fictional row's step** (`resolve`'s rule) after the three-figure or nearest-5
+   rounding, so the text and the formulas see the same number. For a `usd_m` row below $10 million this rounds the
+   three figures to one decimal of a million.
+5. **An emptied situation or currency note is refused** along with the four fields item 6 names. Neither can be
+   emptied by the real templates (the total is always present); the check is for a changed template.
+6. **S3 and S4 are whole or refused, by the rule as written.** Sweeping every base row out of a fully sourced case
+   one at a time: S1 renders in all 34 (in 23 of them equal treatment empties the lever details, which item 6 allows); S3 renders
+   only when the missing figure sits in the situation text (11 of 41), because any dropped sentence in an option text
+   takes every figure out of all three and the retool and sell texts are made only of sentences with figures, so the
+   retool text empties and the render refuses; S4's fund text is one sentence holding `s4_annual` and `s4_years`, so a
+   case without `s4_years` from a pre-cut-off document refuses (rule 1 forbids taking it from the disclosure). This
+   is what item 6 and "What this costs" imply; it is stated here so it is not a surprise at Stage D.
+7. **`scenario-render.json` is compared byte for byte too,** which item 9 does not ask. It holds no figure; the
+   comparison keeps the record honest (it is the record of what was dropped).
+8. **The render writes `scenario.toml` first and the record second.** If the second write is refused, the first
+   stands and the case needs its folder cleared by hand (as `hc case build` does for its three files).
+
+**Stage C step 8b, the Opus review (2026-10-16, about 2:30 PM).** Read against §4.6 and §4.6.1 with the four real
+templates and the fictional rows. **Three faults found and fixed; the eight points accepted.** 2326 tests (five new,
+two changed), `make check` green, `hc protocol check: ok`.
+- **Fixed: a headcount could be stated unscaled.** Nothing stopped a rows file giving a plant's headcount, or any
+  other count of people, with `scale = "none"`: it printed rounded only to the fictional step (a probe: 1,234 people
+  rendered as "1,230 employees"), escaping both the factor and "fewer than 100". Now a case row for any count the
+  fictional figures derive (every one is a number of people: `hc_*`, `s1_roles*`, `s3_movers`, the positions, the
+  plants' hires) must be `heads`, and in a shape whose unit is people the total and every stated cap must be a
+  headcount. Count rows the fictional figures give as values (months, weeks, industry statistics) may stay unscaled.
+- **Fixed: a cap set to the total was printed as a figure.** A cap at `equals_total`, or set to the total because it
+  is under 100, holds the total so the lever works, and the text then printed that value wherever the cap's row
+  appears: S3's "at most {s3_movers} people" read as the whole plant, "the retooled plant needs {total} of its {total}
+  positions", S2's wage-cut maximum stated as the whole shortfall. No source gives those numbers (§4.6 rule 2), and
+  rule 3 speaks of caps, not text. Now such a cap, and every row derived from it, is a **stand-in**: the menu heading
+  may print it (its sum of caps is the sum of what the model is given), and every other text drops its sentence by
+  item 6. Consequence for S3: an `equals_total` on `s3_retool_positions` or `s3_buyer_positions` now refuses the
+  render (KNOWN-GAPS OPEN 2026-10-16, "S3 renders only with every option's figures").
+- **Fixed: a fictional fact reached the case through a label.** Item 3 lets label rows take the fictional value as
+  "names in the wording, not facts". Six of the seven labels are plant numbers; the seventh, `s3_alloc_basis` ("in
+  proportion to revenue"), is how the fictional company shares corporate costs, which §4.6 keeps out ("everything of
+  its shape except the facts"). Only the `plant_<n>_no` labels now take the fictional value; any other label has no
+  case value and its sentence drops (S3 loses one situation sentence in every case).
+- **Points 1 to 8:** accepted as Sonnet read them. 1 is the protective reading the protocol's "a scaled headcount"
+  supports. 2 (strict caps) makes every stand-in a recorded choice; the cost is one line in an S4 rows file. 3 now
+  carries the heads rule above for derived counts. 4: see the new OPEN on pay per head, since the extra rounding can
+  widen the band. 6 is the rule's own cost, now somewhat larger for S3 (above). 7 and 8 are fine as built.
+- **Logged, not fixed:** pay per head is not checked in a case scenario (KNOWN-GAPS OPEN 2026-10-16), since which
+  rows pair is a small design call; settle it before the first S1 or S3 render. The template words themselves (S3's
+  "automating welding and material handling as at the larger plants") still describe the fictional company's options
+  wherever their sentence keeps its figures; that is §4.6.1 item 1 as patched, and the reader's neutrality read is the
+  backstop it names.

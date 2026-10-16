@@ -7,6 +7,38 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-16, about 2:30 PM (STEP 8b BUILT AND REVIEWED, UNCOMMITTED)
+>
+> **Measured:** `make check` green, **2326 tests**; `hc protocol check: ok`. Last commit `fd84ee9`. **Uncommitted:**
+> step 8b, `hc case scenario render` and `check`, built (Sonnet) and **reviewed (Opus), three fixes applied**
+> (search-half doc §11, "Stage C step 8b, the Opus review"): a headcount can no longer be stated unscaled; a cap set to
+> the total is no longer printed in the text as if a source stated it; and only the plant numbers take the fictional
+> label value (S3's cost-sharing basis is a fictional fact and now drops). Sonnet's eight points: all accepted.
+> Nothing real was rendered; no real case's rows exist.
+>
+> **Next, in order:** (1) his commit `phase 5: hc case scenario render and check` and push; (2) step 9, the reader
+> command and its three briefs. **Before the first S1 or S3 render:** OPEN 2026-10-16, pay per head in a case
+> scenario. **At Stage D, S3:** OPEN 2026-10-16, S3 renders only with every option's figures. **Before any set-2
+> lock:** OPEN 2026-10-16, where a coarsened dossier lives. **His decision, at step 10:** OPEN 2026-10-16, criterion 5.
+>
+> *The 1:45 PM block below is superseded on what is next; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-16, about 1:45 PM (STEP 8b BUILT BY SONNET, UNCOMMITTED, AWAITING AN OPUS REVIEW)
+>
+> **Measured:** `make check` green, **2321 tests**; `hc protocol check: ok`. Last commit `fd84ee9` (`phase 5: hc case
+> lock & §4.6.1 patch`). **Uncommitted:** step 8b: `hc case scenario render <label>` and `check <label>`
+> (`casebuild/scenario.py`, `cmd_case_scenario`, `CaseAppendix.scenario_figures_path`, an optional `header` on
+> `toml_text`, `scenario_check_passes` now the real check), `tests/test_casebuild_scenario.py`, and search-half doc §11
+> "Stage C step 8b" with eight points for review. **`hc case lock` now works once the check passes.** Nothing real was
+> rendered; no real case's rows exist.
+>
+> **Next, in order:** (1) the Opus review of 8b, ideally in a fresh chat (points 1, 2 and 6 matter most: the headcount
+> reading, the strict cap rule that bites S4, and S3 being whole-or-refused); (2) his commit `phase 5: hc case
+> scenario` and push; (3) step 9, the reader command and its three briefs. **Before any set-2 lock:** OPEN 2026-10-16,
+> where a coarsened dossier lives. **His decision, at step 10:** OPEN 2026-10-16, criterion 5.
+>
+> *The 1:30 PM block below is superseded on what is next; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-16, about 1:30 PM (STEP 8a BUILT AND REVIEWED, UNCOMMITTED)
 >
 > **Measured:** `make check` green, **2250 tests**; `hc protocol check: ok`. Last commit `3ab62bf`. **Uncommitted:** the
@@ -1222,6 +1254,28 @@ case by its type and a neutral label. The names live only in the private longlis
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
 
 ---
+
+## OPEN 2026-10-16 — pay per head in a case scenario (before the first S1 or S3 render)
+
+Protocol §12.6 asks that, wherever a total pay figure and a headcount are both stated, pay per head after rounding
+stay within 3.5% of its unscaled value; the dossier builder runs `scale.check_pay_per_head` on every such line. **The
+scenario render (step 8b) does not.** S3's first sentence states both (the plant's headcount and its payroll), and S1
+states roles and payroll. The render also rounds a scaled dollar figure to the fictional row's step after the three
+significant figures (§11, 8b point 4), so a `usd_m` payroll under $10 million can move by up to about 1% more than
+the 3.1% the scale module's argument allows, and a small plant can fail the band. **Settle before the first S1 or S3
+render:** which pairs of rows the check covers (by sentence, as the dossier does by line, is the obvious reading), and
+record the result in `scenario-render.json`; a failure is a reported deviation for him, as in the dossier.
+
+## OPEN 2026-10-16 — S3 renders only with every option's figures (at Stage D)
+
+By §4.6.1 item 6 as written, any S3 option sentence with no case figure strips every figure from all three options,
+and the retool text is made only of sentences with figures, so the render refuses (criterion 4). Since the 8b review, a
+cap set to the total (`s3_retool_positions`, `s3_buyer_positions`) also counts as no figure, because printing the total
+there would state a number no source gives. **So an S3 case needs, from pre-cut-off documents, the retool capital cost
+and payback, the share of positions kept, the sale multiple and the buyer's share and years, as well as the close
+figures.** Pre-cut-off filings rarely give these for one plant, so S3 may yield few cases or none. This is the cost
+§4.6.1 accepted when it declined figure-free wordings; it is recorded here so a run of S3 rejections at Stage D is
+expected, not a surprise. If S3 yields none, that is his to weigh then (the protocol's minimum per type governs).
 
 ## OPEN 2026-10-16 — where a coarsened dossier lives (before any probe set 2)
 

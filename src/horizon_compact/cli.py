@@ -47,6 +47,12 @@ from horizon_compact.casebuild.foreshadow import (
 from horizon_compact.casebuild.frozen import FrozenInputsError, frozen_inputs, git_in
 from horizon_compact.casebuild.handfile import HandFileError, load_hand_boundaries
 from horizon_compact.casebuild.options import OptionsError
+from horizon_compact.casebuild.scenario import (
+    ScenarioRefused,
+    check_scenario,
+    format_failures,
+    render_case_scenario,
+)
 from horizon_compact.casebuild.search import (
     CRITERIA,
     ISO_DATE,
@@ -1103,6 +1109,29 @@ def cmd_case_lock(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_case_scenario(args: argparse.Namespace) -> int:
+    """Render a case's scenario once from its shape's template and its rows, or check it by re-rendering
+    (search-half doc §4.6.1). Output names criteria, row ids and counts, never a figure."""
+    case = open_case(args.label)
+    root = default_repo_root()
+    if args.scenario_action == "render":
+        done = render_case_scenario(case, root)
+        print(
+            f"{args.label}: scenario.toml and scenario-render.json written; {done.dropped} sentence(s) "
+            f"dropped, {done.rules_omitted} rule(s) omitted, {done.caps_to_total} cap(s) set to the total"
+        )
+        print("next: `hc case scenario check`, then the reader's neutrality read")
+        return CLEAN_EXIT
+    failures = check_scenario(case, root)
+    if failures:
+        for line in format_failures(failures):
+            print(line, file=sys.stderr)
+        print(f"scenario check: {len(failures)} failure(s)")
+        return CHECK_FAILED_EXIT
+    print("scenario check: ok")
+    return CLEAN_EXIT
+
+
 def _today() -> date:
     """The local date; a function so the tests can set it."""
     return date.today()
@@ -1419,6 +1448,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_log(args)
         if args.action == "lock":
             return cmd_case_lock(args)
+        if args.action == "scenario":
+            return cmd_case_scenario(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (
         AppendixError,
@@ -1439,6 +1470,7 @@ def cmd_case(args: argparse.Namespace) -> int:
         AnthropicKeyError,
         SplitRefused,
         CaseLockError,
+        ScenarioRefused,
     ) as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return REFUSED_EXIT
@@ -1912,6 +1944,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="YYYY-MM-DD: the day before first disclosure, as the selection log recorded it",
     )
     build.add_argument("--shape", choices=("S1", "S2", "S3", "S4"), required=True)
+    scenario = case_actions.add_parser(
+        "scenario",
+        help="The case's scenario (search-half doc §4.6.1): render it once from the shape's template and the "
+        "case's scenario-figures.toml, or check it by re-rendering and comparing byte for byte.",
+    )
+    scenario_actions = scenario.add_subparsers(dest="scenario_action", required=True)
+    for name, text in (
+        ("render", "Write scenario.toml and scenario-render.json, each once"),
+        ("check", "Re-render in memory, compare byte for byte, re-check every source"),
+    ):
+        scenario_actions.add_parser(name, help=text).add_argument(
+            "label", help="the candidate's neutral id, such as closure-01"
+        )
     assemble = case_actions.add_parser(
         "assemble",
         help="Write the case's dossier once every flag has a decision in reviewed-flags.json",
