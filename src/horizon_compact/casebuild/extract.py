@@ -134,7 +134,11 @@ def run_extraction(
         text_request = to_text_request(request, route, max_tokens=max_tokens)
         decision = provider.decide_text(text_request)
         if decision.status != "ok":
-            raise ExtractionError(f"section {request.section}: the provider call failed")
+            error = decision.error or {}
+            raise ExtractionError(
+                f"section {request.section}: the provider call failed "
+                f"({error.get('code', 'unknown')}: {error.get('message', '')[:300]})"
+            )
         if decision.stop_reason == "max_tokens":
             raise ExtractionError(
                 f"section {request.section}: the reply was cut off at the token limit"

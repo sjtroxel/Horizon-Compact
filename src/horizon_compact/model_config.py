@@ -7,9 +7,14 @@ IMPLEMENTATION doc section 5.1). A test pins that.
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+# The role of the one model that builds a real case's dossier text (Phase 5 search half, section 4.5). It is
+# not an experiment model: ``ModelsFile`` keeps it out of ``models``, so no sweep, probe, awareness check or
+# lock can name it, and only ``hc case build`` reads it.
+EXTRACTION_ROLE = "extraction"
 
 
 class _Strict(BaseModel):
@@ -42,13 +47,18 @@ class ModelConfig(_Strict):
     # (Phase 4 code half section 4.8). Needed to run in the container; optional on the laptop.
     openrouter_provider: str | None = None
     # An Anthropic route's thinking setting: "off" sends ``thinking: {type: disabled}`` (Phase 3.5 section 23
-    # decision C). Left out, the model runs at its own default. Refused for any other route.
-    thinking: Literal["off"] | None = None
+    # decision C). "between_tools" sends ``thinking: {type: between_tools}``, the lowest setting on a model
+    # that refuses ``disabled`` (Claude Sonnet 5.5), for the extraction model only. Left out, the model runs
+    # at its own default. Refused for any other route.
+    thinking: Literal["off", "between_tools"] | None = None
     # An OpenRouter route's reasoning level, sent as ``reasoning: {effort: ...}`` on every request. For a
     # model whose reasoning cannot be turned off (``gpt-oss-120b``), so the level is pre-registered rather
     # than left to OpenRouter's default (Phase 3.5 section 25). Left out, nothing is sent. Refused for any
     # other route.
     reasoning_effort: Literal["low", "medium", "high"] | None = None
+    # The output allowance of every call to an extraction model, fixed in its entry so it is recorded with the
+    # model and not chosen at the command line. Required for the extraction role, refused for any other.
+    max_tokens: int | None = Field(default=None, gt=0)
 
     @model_validator(mode="after")
     def _route_has_what_it_needs(self) -> ModelConfig:
@@ -69,9 +79,55 @@ class ModelConfig(_Strict):
             raise ValueError("thinking is for an anthropic route")
         if self.reasoning_effort is not None and self.route != "openrouter":
             raise ValueError("reasoning_effort is for an openrouter route")
+        if self.role == EXTRACTION_ROLE:
+            if self.route != "anthropic" or self.thinking is None or self.max_tokens is None:
+                raise ValueError(
+                    "an extraction model is on the anthropic route, with thinking off "
+                    '("off" or "between_tools") and a max_tokens, all fixed in its entry'
+                )
+        elif self.max_tokens is not None:
+            raise ValueError("max_tokens is for an extraction model")
+        elif self.thinking == "between_tools":
+            raise ValueError('thinking = "between_tools" is for an extraction model')
         return self
 
 
 class ModelsFile(_Strict):
+    """``models.toml``. **The extraction model is kept out of ``models``.** Every sweep plan, run, probe,
+    awareness check, cost estimate, lock and gate reads ``models``, so an entry with role ``extraction``
+    is, to all of them, an unknown model: it cannot be planned, probed or locked, with no per-path check
+    to forget. Only ``extraction()`` reaches it."""
+
     pace_fraction: float = Field(gt=0, le=1)
     models: dict[str, ModelConfig]
+    extraction_models: dict[str, ModelConfig] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _set_the_extraction_model_apart(cls, data: Any) -> Any:
+        if not isinstance(data, dict) or not isinstance(data.get("models"), dict):
+            return data
+        if "extraction_models" in data:
+            raise ValueError(
+                "extraction_models is not a models.toml key; give the entry role = 'extraction'"
+            )
+        models: dict[str, Any] = {}
+        extraction: dict[str, Any] = {}
+        for key, entry in data["models"].items():
+            is_extraction = isinstance(entry, dict) and entry.get("role") == EXTRACTION_ROLE
+            (extraction if is_extraction else models)[key] = entry
+        return {**data, "models": models, "extraction_models": extraction}
+
+    @model_validator(mode="after")
+    def _one_extraction_model_at_most(self) -> ModelsFile:
+        if len(self.extraction_models) > 1:
+            raise ValueError(
+                f"at most one extraction model, found {', '.join(sorted(self.extraction_models))}"
+            )
+        return self
+
+    def extraction(self) -> tuple[str, ModelConfig]:
+        """The extraction model's key and entry."""
+        for key, config in self.extraction_models.items():
+            return key, config
+        raise ValueError("models.toml has no extraction model")

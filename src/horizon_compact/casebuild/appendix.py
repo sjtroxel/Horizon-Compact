@@ -129,6 +129,16 @@ class CaseAppendix:
         return self.directory / "scenario.toml"
 
     @property
+    def terms_path(self) -> Path:
+        """The case's private term list (`term: Name => role` lines), written by hand before the build."""
+        return self.directory / "terms.txt"
+
+    @property
+    def hand_boundaries_path(self) -> Path:
+        """Item boundaries for a filing the splitter refuses, written by hand; absent when none is needed."""
+        return self.directory / "hand-boundaries.json"
+
+    @property
     def sections_path(self) -> Path:
         return self.directory / "sections.json"
 

@@ -336,10 +336,14 @@ def build_document_set(client: EdgarClient, cik: str, cutoff: date) -> DocumentS
 
 
 def write_sources(case: CaseAppendix, docset: DocumentSet) -> None:
-    """The builder's source list (scope doc DoD 3), written once into the case's appendix directory."""
+    """The builder's source list (scope doc DoD 3), written once into the case's appendix directory. A second
+    call with the identical list (a rerun from the cache) writes nothing; a different list is refused."""
     payload = {
         "cik": docset.cik,
         "cutoff": docset.cutoff.isoformat(),
         "sources": docset.source_records(),
     }
-    case.write_once(case.sources_path, json.dumps(payload, indent=2).encode("utf-8"))
+    data = json.dumps(payload, indent=2).encode("utf-8")
+    if case.sources_path.is_file() and case.sources_path.read_bytes() == data:
+        return  # a rerun of the same build, read from the cache: the same list, nothing to write
+    case.write_once(case.sources_path, data)

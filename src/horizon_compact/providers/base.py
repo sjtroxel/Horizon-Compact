@@ -55,6 +55,9 @@ class ModelRoute:
     pinned_provider: str | None = None
     # Anthropic only: the request carries ``thinking: {type: disabled}`` (the model's config says it is off).
     thinking_off: bool = False
+    # Anthropic only: the request carries ``thinking: {type: between_tools}``, the lowest setting on a model
+    # that refuses ``disabled`` (Claude Sonnet 5.5; the extraction model, search-half doc §4.5).
+    thinking_between_tools: bool = False
     # OpenRouter only: the request carries ``reasoning: {effort: <this>}`` (the model's config sets it).
     reasoning_effort: str | None = None
 

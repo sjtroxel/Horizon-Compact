@@ -14,7 +14,7 @@ import signal
 import subprocess
 import sys
 from collections.abc import Callable, Sequence
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from types import FrameType
 from typing import Any
@@ -25,8 +25,18 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 import horizon_compact
 from horizon_compact.casebuild.appendix import AppendixError, CaseAppendix, open_case
+from horizon_compact.casebuild.assemble import BuildError, assemble_case, prepare_case
+from horizon_compact.casebuild.cutoff import CutoffError
+from horizon_compact.casebuild.documents import DocumentsError, build_document_set, write_sources
 from horizon_compact.casebuild.edgar import EdgarClient, EdgarError, UrllibTransport
 from horizon_compact.casebuild.edgar import user_agent as sec_user_agent
+from horizon_compact.casebuild.extract import ExtractionError, build_requests
+from horizon_compact.casebuild.extraction_model import (
+    ExtractionModelError,
+    entry_sha256,
+    extraction_route,
+    load_extraction_model,
+)
 from horizon_compact.casebuild.foreshadow import (
     ForeshadowError,
     find_hits,
@@ -34,6 +44,9 @@ from horizon_compact.casebuild.foreshadow import (
     parse_terms,
     write_hits,
 )
+from horizon_compact.casebuild.frozen import FrozenInputsError, frozen_inputs, git_in
+from horizon_compact.casebuild.handfile import HandFileError, load_hand_boundaries
+from horizon_compact.casebuild.options import OptionsError
 from horizon_compact.casebuild.search import (
     CRITERIA,
     ISO_DATE,
@@ -51,6 +64,9 @@ from horizon_compact.casebuild.search import (
     write_candidates,
     write_log_version,
 )
+from horizon_compact.casebuild.sections import build_section_inputs
+from horizon_compact.casebuild.splitter import SplitRefused
+from horizon_compact.casebuild.terms import CaseTerm, CaseTermsError, parse_case_terms
 from horizon_compact.dossier.check import default_repo_root, run_checks
 from horizon_compact.dossier.figures import FigureError, load_figures
 from horizon_compact.dossier.render import (
@@ -108,7 +124,7 @@ from horizon_compact.providers.anthropic import (
 )
 from horizon_compact.providers.anthropic import read_key as read_anthropic_key
 from horizon_compact.providers.anthropic import ssm_key_fetcher as anthropic_ssm_key_fetcher
-from horizon_compact.providers.base import ModelRoute, Provider
+from horizon_compact.providers.base import ModelRoute, Provider, TextProvider
 from horizon_compact.providers.bedrock import REGION, BedrockConverseProvider, make_runtime_client
 from horizon_compact.providers.ollama import DEFAULT_URL, OllamaProvider
 from horizon_compact.providers.openrouter import (
@@ -1225,14 +1241,175 @@ def cmd_case_log(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def _extraction_provider() -> TextProvider:
+    """Anthropic's API with the prepaid-credit key, from ``ANTHROPIC_API_KEY`` or a hidden prompt; a function
+    so the tests can set it. Never reached before every refusal that needs no network or key."""
+    return AnthropicProvider(read_anthropic_key(os.environ))
+
+
+def _case_terms(case: CaseAppendix) -> tuple[CaseTerm, ...]:
+    try:
+        return parse_case_terms(case.terms_path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise CaseTermsError(
+            f"the case's term list {case.terms_path.name} cannot be read ({type(exc).__name__}): "
+            "write it in the case's folder before the build"
+        ) from exc
+
+
+def _build_candidate(search: CaseAppendix, label: str, cutoff: date) -> str:
+    """The CIK of ``label``, from the search's candidate list and never the command line, after checking the
+    selection log: criteria 1-4 passed (search-half doc §4.1 step 1), and the cut-off is the day before the
+    first disclosure the log recorded (protocol §12.6)."""
+    try:
+        records = json.loads((search.directory / "candidates.json").read_text(encoding="utf-8"))[
+            "list"
+        ]
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise SearchError(
+            f"candidates.json cannot be read ({type(exc).__name__}): has the search run?"
+        ) from exc
+    found = next((r for r in records if r.get("id") == label), None)
+    if found is None:
+        raise SearchError(f"{label} is not a candidate in the search's list")
+    ciks = [str(c) for c in found.get("ciks", [])]
+    if len(ciks) != 1:
+        raise SearchError(f"{label} has {len(ciks)} CIKs in the list; a case needs exactly one")
+    row = load_newest_log(search).rows.get(label)
+    if row is None:
+        raise LogError(f"{label} is not in the selection log")
+    # Protocol §12.4's criteria 1-4 and the first-disclosure check before them: every criterion but the
+    # probe (criterion 5, ``not_recognizable``), which needs the dossier this command builds.
+    unpassed = [c for c in CRITERIA[:-1] if c not in row.results or row.results[c].result != "pass"]
+    if unpassed:
+        raise LogError(f"{label} has not passed {', '.join(unpassed)} in the selection log")
+    assert row.disclosed is not None  # a passed first_disclosure always carries its date
+    expected = row.disclosed - timedelta(days=1)
+    if cutoff != expected:
+        raise SearchError(
+            f"the cut-off is the day before first disclosure (protocol §12.6): the log gives "
+            f"{expected.isoformat()} for {label}, not {cutoff.isoformat()}"
+        )
+    return ciks[0]
+
+
+def cmd_case_build(args: argparse.Namespace) -> int:
+    """Build a case's sections once (search-half doc §4.5): every refusal that needs no network comes first,
+    then the filings (cached), then the key, then the extraction, then the write. The seed is drawn by
+    ``scale.new_seed`` inside ``prepare_case``; nothing here can supply one."""
+    case = open_case(args.label)
+    search = open_case("search")
+    cik = _build_candidate(search, args.label, args.cutoff)
+    terms = _case_terms(case)
+    hand, hand_sha = load_hand_boundaries(case.hand_boundaries_path)
+    model_key, model = load_extraction_model()
+    assert model.max_tokens is not None  # an extraction entry always has one (ModelConfig checks)
+    provenance = {
+        **frozen_inputs(git_in(default_repo_root())),
+        "extraction_model": model_key,
+        "extraction_entry_sha256": entry_sha256(model_key, model),
+        "hand_boundaries_sha256": hand_sha,
+    }
+    for path in (case.sections_path, case.flags_template_path, case.build_path):
+        if path.exists():
+            raise BuildError(
+                f"{path.name} already exists: this case was prepared; clear its folder by hand to start over"
+            )
+
+    client = EdgarClient(appendix=case, transport=UrllibTransport(), user_agent=sec_user_agent())
+    docset = build_document_set(client, cik, args.cutoff)
+    try:
+        inputs = build_section_inputs(
+            docset, shape=args.shape, hand=hand
+        )  # before any key or model call
+    except SplitRefused as exc:
+        print(
+            f"needs hand boundaries: {exc}\n"
+            f"Write {case.hand_boundaries_path.name} in the case's folder (accession number -> item key -> "
+            "[start, end] offsets in the filing's extracted text), then run the same command again; the "
+            "filings are cached.",
+            file=sys.stderr,
+        )
+        return REFUSED_EXIT
+    write_sources(case, docset)
+    requests = build_requests(inputs)
+    print(
+        f"{args.label}: {args.shape}, cut-off {args.cutoff.isoformat()}, "
+        f"{len(docset.source_records())} source documents, {len(requests)} extraction requests "
+        f"to {model_key}"
+    )
+    provider = _extraction_provider()
+    prepared = prepare_case(
+        case,
+        docset,
+        shape=args.shape,
+        terms=terms,
+        provider=provider,
+        route=extraction_route(model_key, model),
+        hand=hand,
+        max_tokens=model.max_tokens,
+        provenance=provenance,
+    )
+    replies = prepared.record["extraction"]["replies"].values()
+    tokens_in = sum(r["usage"]["input_tokens"] for r in replies)
+    tokens_out = sum(r["usage"]["output_tokens"] for r in replies)
+    cost = (tokens_in * model.prices.input + tokens_out * model.prices.output) / 1_000_000
+    print(
+        f"extraction: {tokens_in:,} input and {tokens_out:,} output tokens, about ${cost:.2f} of credit"
+    )
+    print(
+        f"sections: {', '.join(str(n) for n in sorted(prepared.sections))}; flags to review: {len(prepared.flags)}"
+    )
+    print("seed, factor and every record are in build.json")
+    print(
+        f"next: fill in {case.flags_template_path.name}, save it as {case.reviewed_flags_path.name}, "
+        f"then `hc case assemble {args.label}`"
+    )
+    return CLEAN_EXIT
+
+
+def cmd_case_assemble(args: argparse.Namespace) -> int:
+    """Write the dossier once every flag has a current decision (search-half doc §4.5)."""
+    case = open_case(args.label)
+    assembled = assemble_case(case, terms=_case_terms(case))
+    print(
+        f"{args.label}: dossier.toml and assembly.json written; "
+        f"{len(assembled.record['decisions'])} decisions applied; "
+        f"dossier sha256 {assembled.dossier_sha256[:16]}"
+    )
+    return CLEAN_EXIT
+
+
 def cmd_case(args: argparse.Namespace) -> int:
     try:
+        if args.action == "build":
+            return cmd_case_build(args)
+        if args.action == "assemble":
+            return cmd_case_assemble(args)
         if args.action == "search":
             return cmd_case_search(args)
         if args.action == "log":
             return cmd_case_log(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
-    except (AppendixError, ForeshadowError, CaseError, SearchError, EdgarError, LogError) as exc:
+    except (
+        AppendixError,
+        ForeshadowError,
+        CaseError,
+        SearchError,
+        EdgarError,
+        LogError,
+        BuildError,
+        DocumentsError,
+        CutoffError,
+        ExtractionError,
+        ExtractionModelError,
+        CaseTermsError,
+        OptionsError,
+        HandFileError,
+        FrozenInputsError,
+        AnthropicKeyError,
+        SplitRefused,
+    ) as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return REFUSED_EXIT
 
@@ -1678,6 +1855,24 @@ def build_parser() -> argparse.ArgumentParser:
         "--date", type=date.fromisoformat, required=True, help="today's date, YYYY-MM-DD"
     )
     search.add_argument("--deviation", help="the reason, if the search runs after the rule date")
+    build = case_actions.add_parser(
+        "build",
+        help="Build a case's sections once from its candidate's pre-cut-off filings: fetches the SEC, calls "
+        "the extraction model, writes the appendix. The CIK comes from the search's list; the seed is drawn.",
+    )
+    build.add_argument("label", help="the candidate's neutral id, such as closure-01")
+    build.add_argument(
+        "--cutoff",
+        type=date.fromisoformat,
+        required=True,
+        help="YYYY-MM-DD: the day before first disclosure, as the selection log recorded it",
+    )
+    build.add_argument("--shape", choices=("S1", "S2", "S3", "S4"), required=True)
+    assemble = case_actions.add_parser(
+        "assemble",
+        help="Write the case's dossier once every flag has a decision in reviewed-flags.json",
+    )
+    assemble.add_argument("label", help="the candidate's neutral id, such as closure-01")
     log = case_actions.add_parser(
         "log",
         help="The selection log (protocol §12.4) in the appendix: show, record a criterion, record the "

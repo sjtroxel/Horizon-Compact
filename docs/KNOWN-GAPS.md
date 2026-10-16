@@ -7,7 +7,43 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-16, about 9:10 AM (THE SEARCH HAS RUN, on the rule date; Stage C next)
+> ## START HERE — where things stand, 2026-10-16, about 11:45 AM (STAGE C STEP 7 BUILT AND REVIEWED, UNCOMMITTED)
+>
+> **Measured:** `make check` green, **2218 tests**; `hc protocol check: ok`. Last pushed commit `222c2e2` (`phase 5:
+> search record and hc case log`). **Uncommitted:** step 7 (the extraction entry, `hc case build`, `hc case
+> assemble`), built by Sonnet and **reviewed by Opus, fixes applied** (search-half doc §11, "the Opus review"). The
+> two that mattered: the build's criteria check skipped criterion 4 (`maps_to_shape`), and the entry's `thinking =
+> "off"` would have been a 400 on Sonnet 5.5's first call (now `"between_tools"`, read live). Nothing real was
+> fetched and no model called.
+>
+> **Next, in order:**
+> 1. **His commit** `phase 5: hc case build`, then **his push** (touches `src/`, so Deploy runs; CI and Deploy green).
+> 2. **Only after that push** may the first real document be fetched (§12.6, enforced by `frozen_inputs`). The
+>    first `hc case build` is his command; Stage D starts there.
+> 3. **Before the first rejection on criterion 3, 4 or 5:** the disputed-rejection fix (OPEN 2026-10-16 below).
+>
+> *The 11:00 AM block below is superseded on what is next; it stays as the record.*
+
+> ## START HERE — where things stood, 2026-10-16, about 11:00 AM (STAGE C STEP 7 BUILT BY SONNET, UNCOMMITTED, AWAITING AN OPUS REVIEW)
+>
+> **Measured:** `make check` green, **2214 tests**; `hc protocol check: ok`. Last pushed commit `222c2e2` (`phase 5:
+> search record and hc case log`, his, pushed). **Uncommitted:** step 7, listed below, built by Sonnet in one session,
+> **not yet reviewed**. Nothing real was fetched and no model called; the first real fetch must wait for his push.
+>
+> **First task of a fresh session: the Opus review of step 7** (search-half doc §11, "Stage C step 7", the seven points
+> for review). Read the diff (`git status`; new files `casebuild/extraction_model.py`, `frozen.py`, `handfile.py`,
+> `tests/test_extraction_model.py`, `tests/test_casebuild_frozen.py`; changed `models.toml`, `model_config.py`,
+> `assemble.py`, `documents.py`, `appendix.py`, `cli.py`, `tests/test_case_cli.py`, `tests/test_casebuild_documents.py`).
+> What to look hardest at: the tripwire (`ModelsFile` keeps the extraction entry out of `models`, because
+> `experiment.py` is frozen), the order of refusals in `cmd_case_build` (nothing fetched and no key read before every
+> local refusal), `frozen_inputs` (the committed-and-pushed proof of §12.6), and whether the seed truly cannot be
+> supplied. **Then:** his commit `phase 5: hc case build`, then his push (touches `src/`, so Deploy runs; CI and Deploy
+> green). **Only after that push** may the first real document be fetched (§12.6); the first `hc case build` is his
+> command, and Stage D starts there.
+>
+> *The 9:10 AM block below is superseded on what is next; it stays as the record of the search.*
+
+> ## START HERE — where things stood, 2026-10-16, about 9:10 AM (THE SEARCH HAS RUN, on the rule date; Stage C next)
 >
 > **Measured:** last pushed commit `4a0d3f3` (`hc case search`), CI and Deploy green on it. Last night's four steps
 > landed (commit, push, `~/horizon-compact-appendix`, `hc.appendixDir`). **Not committed (his):** this block, the
@@ -1119,6 +1155,19 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN 2026-10-16 — a rejection the reader disputes still stands in the selection log
+
+Found in the Opus review of step 7. Protocol §12.4: "a rejection the reader disputes does not stand: the candidate
+goes on to the next criterion, and the disagreement is logged with both reasons." In `casebuild/search.py`,
+`record` refuses any result after a failure, and `record_read(..., agrees=False, resolution=...)` only stores the
+resolution, so the failure stays and the candidate can go no further (`test_casebuild_search.py`'s read test shows
+it). Nothing has hit it: no candidate has a rejection on criterion 3, 4 or 5 yet. **Closes when:** a disputed
+rejection lets the candidate go on to the next criterion with both reasons kept, `passed`, `failed` and
+`selection` read it that way, and the public view shows it; built and reviewed before the first rejection on
+criterion 3, 4 or 5 is recorded.
 
 ---
 

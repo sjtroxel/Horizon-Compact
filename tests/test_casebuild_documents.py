@@ -143,8 +143,13 @@ def test_write_sources_writes_once_into_the_case(tmp_path: Path) -> None:
     assert payload["cutoff"] == "2026-06-15"
     assert payload["cik"] == CANARY_CIK
     assert payload["sources"] == docset.source_records()
-    with pytest.raises(Exception, match="write-once"):
-        write_sources(case, docset)
+    before = case.sources_path.read_bytes()
+    write_sources(case, docset)  # the same list again (a rerun from the cache): nothing to write
+    assert case.sources_path.read_bytes() == before
+    other = build_document_set(client, CANARY_CIK, date(2026, 6, 14))
+    with pytest.raises(Exception, match="write-once"):  # a different list is still refused
+        write_sources(case, other)
+    assert case.sources_path.read_bytes() == before
 
 
 def test_latest_periodic_is_the_later_of_the_two(tmp_path: Path) -> None:

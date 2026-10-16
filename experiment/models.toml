@@ -120,3 +120,32 @@ input = 0.10
 output = 0.50
 cache_read = 0.01
 cache_write_5m = 0.125
+
+# Claude Sonnet 5.5 through Anthropic's own API: the extraction model for Phase 5's real cases, the one that
+# summarizes pre-cut-off filings into a dossier's sections (search-half IMPLEMENTATION doc section 8 decision 2,
+# his, 2026-10-15). It is NOT an experiment model: `ModelsFile` keeps the role out of `models`, so no sweep,
+# probe, awareness check or lock can name it, and only `hc case build` reads it. Same route as the main
+# model, so it is paid from the prepaid Console credit through the `horizon-compact` workspace's key. `model_id`
+# and prices read live 2026-10-16 from Anthropic's models overview and pricing pages: `claude-sonnet-5-5`, $2 per
+# million input tokens, $10 output, $2.50 for a 5-minute cache write, $0.10 for a cache read, one rate across the
+# whole 1M-token context. Its training data ends June 2026 (same page), before the fallback month and the window.
+# Thinking is off: `thinking = "between_tools"` sends `thinking: {type: between_tools}`, the lowest setting on this
+# model, because Sonnet 5.5 refuses `{type: disabled}` with a 400 (read live 2026-10-16, Anthropic's Sonnet 5.5
+# migration guide: with no tools the model does not think and the reply is text only; accepted at the default
+# effort, `high`). `max_tokens` is the allowance of every extraction call,
+# fixed here (the section summaries are short; a reply cut off at it is an error, never a partial section).
+# `requests_per_minute` is unused by the builder (calls run one at a time) and kept because the file requires it.
+
+[models.sonnet-5-5-extraction]
+model_id = "claude-sonnet-5-5"
+route = "anthropic"
+thinking = "between_tools"
+max_tokens = 4096
+requests_per_minute = 30
+role = "extraction"
+
+[models.sonnet-5-5-extraction.prices]
+input = 2.00
+output = 10.00
+cache_read = 0.10
+cache_write_5m = 2.50

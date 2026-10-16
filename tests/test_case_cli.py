@@ -8,13 +8,36 @@ import hashlib
 import json
 from datetime import date, timedelta
 from pathlib import Path
+from typing import Any
 
 import pytest
 
-from edgar_helpers import USER_AGENT, FakeTransport
+from edgar_helpers import (
+    CUTOFF_FILINGS,
+    FACTS_URL,
+    SUBMISSIONS_URL,
+    USER_AGENT,
+    FakeTransport,
+    archive_url,
+    doc_name,
+    filing_table,
+    world,
+)
 from horizon_compact import cli
+from horizon_compact.casebuild import assemble as assemble_module
+from horizon_compact.casebuild.appendix import CaseAppendix
 from horizon_compact.casebuild.edgar import EdgarClient
-from horizon_compact.casebuild.search import FALLBACK_START, QUERIES, RULE_DATE, search_url
+from horizon_compact.casebuild.extract import instructions_sha256
+from horizon_compact.casebuild.search import (
+    CRITERIA,
+    FALLBACK_START,
+    QUERIES,
+    RULE_DATE,
+    Row,
+    SelectionLog,
+    search_url,
+    write_log_version,
+)
 from horizon_compact.cli import CHECK_FAILED_EXIT, CLEAN_EXIT, REFUSED_EXIT, main
 from horizon_compact.protocol.cases import (
     CaseContent,
@@ -22,6 +45,9 @@ from horizon_compact.protocol.cases import (
     content_hashes,
     parse_case,
 )
+from test_casebuild_assemble import COUNTS, PLAIN, Scripted, fill_in
+from test_casebuild_extract import FACTS, FakeTextProvider, ok
+from test_casebuild_frozen import fake_git
 
 DOSSIER = b'title = "t"\ntext = """x"""\n'
 SCENARIO = b'title = "s"\ntext = """y"""\n'
@@ -464,3 +490,239 @@ def test_candidate_terms_catch_the_name_tickers_and_numbers_not_ordinary_words()
     short = candidate_terms({"names": ["QX INC  (CIK 0000000042)"]})
     assert any(term.pattern.search("filed by QX") for term in short)
     assert not any(term.pattern.search("a qx b") for term in short)
+
+
+# --- hc case build and hc case assemble (search-half IMPLEMENTATION doc §4.5) ---------------------------
+
+BUILD_CUTOFF = date(2026, 6, 15)
+
+
+class _Providers:
+    """The extraction provider the build asks for: ``made`` holds each one given (none before a refusal)."""
+
+    def __init__(self, provider: Any) -> None:
+        self.provider = provider
+        self.made: list[Any] = []
+
+    def __call__(self) -> Any:
+        self.made.append(self.provider)
+        return self.provider
+
+
+def _build_setup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    provider: Any = None,
+    extra: dict[str, Any] | None = None,
+    passes: int = 5,
+    disclosed: date = date(2026, 6, 16),
+    ciks: tuple[str, ...] = ("0009999999",),
+    remotes: str = "  origin/main\n",
+    terms: bool = True,
+) -> tuple[Path, FakeTransport, _Providers]:
+    """A search folder with one candidate that passed ``passes`` criteria, a case folder with its term list, a
+    fake SEC and a fake extraction provider. Fictional canaries throughout; nothing real is read or called."""
+    _, transport = world(tmp_path / "unused", {FACTS_URL: FACTS, **(extra or {})})
+    app = tmp_path / "appendix"
+    search = CaseAppendix(root=app, label="search")
+    record = {
+        "list": [{"id": "closure-01", "ciks": list(ciks), "names": ["Fernwick Canary Holdings"]}]
+    }
+    search.write_once(search.directory / "candidates.json", json.dumps(record).encode())
+    log = SelectionLog(
+        {"closure-01": Row("closure-01", "closure", "window", "0009999999-26-000099")}
+    )
+    log.record("closure-01", "first_disclosure", "pass", "r", disclosed=disclosed)
+    for criterion in CRITERIA[1:passes]:
+        log.record("closure-01", criterion, "pass", "r")
+    write_log_version(search, log)
+    if terms:
+        (app / "closure-01").mkdir(exist_ok=True)
+        (app / "closure-01" / "terms.txt").write_text(
+            "term: Fernwick Canary Holdings => the Company\n", encoding="utf-8"
+        )
+    providers = _Providers(provider or Scripted(PLAIN))
+    monkeypatch.setenv("HC_APPENDIX_DIR", str(app))
+    monkeypatch.setenv("HC_SEC_USER_AGENT", USER_AGENT)
+    monkeypatch.setattr(cli, "UrllibTransport", lambda: transport)
+    monkeypatch.setattr(
+        cli, "EdgarClient", functools.partial(EdgarClient, clock=lambda: 0.0, sleep=lambda s: None)
+    )
+    monkeypatch.setattr(cli, "git_in", lambda repo: fake_git(remotes=remotes))
+    monkeypatch.setattr(cli, "_extraction_provider", providers)
+    return app, transport, providers
+
+
+def _build(*extra: str, cutoff: date = BUILD_CUTOFF, shape: str = "S3") -> int:
+    return main(
+        ["case", "build", "closure-01", "--cutoff", cutoff.isoformat(), "--shape", shape, *extra]
+    )
+
+
+def test_build_writes_the_case_from_the_candidates_cik_and_records_where_it_came_from(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    app, transport, providers = _build_setup(tmp_path, monkeypatch)
+    assert _build() == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "Fernwick" not in out and "0009999999" not in out and "the Company" not in out
+    folder = app / "closure-01"
+    for name in ("sources.json", "sections.json", "build.json", "reviewed-flags.template.json"):
+        assert (folder / name).is_file(), name
+    assert transport.requests[0][0] == SUBMISSIONS_URL  # the CIK came from candidates.json
+    build = json.loads((folder / "build.json").read_text())
+    provenance = build["provenance"]
+    assert provenance["extraction_inputs_commit"] == "a" * 40
+    assert provenance["instructions_sha256"] == instructions_sha256()
+    assert provenance["extraction_model"] == "sonnet-5-5-extraction"
+    assert provenance["extraction_entry_sha256"] and provenance["hand_boundaries_sha256"] is None
+    assert build["extraction"]["instructions_sha256"] == instructions_sha256()
+    assert build["extraction"]["max_tokens"] == 4096
+    assert isinstance(build["seed"], int) and build["shape"] == "S3"
+    sent = providers.provider.requests
+    assert {r.route.model_id for r in sent} == {"claude-sonnet-5-5"}
+    assert all(
+        r.route.thinking_between_tools and not r.route.thinking_off and r.max_tokens == 4096
+        for r in sent
+    )
+    assert "about $" in out and "hc case assemble closure-01" in out
+
+
+def test_build_cannot_be_given_a_seed_or_a_cik_and_never_passes_one_on(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _build_setup(tmp_path, monkeypatch)
+    for flag in ("--seed", "--cik", "--model", "--max-tokens"):
+        with pytest.raises(SystemExit):
+            _build(flag, "1")
+    seen: dict[str, Any] = {}
+    real = assemble_module.prepare_case
+
+    def spy(*args: Any, **kwargs: Any) -> Any:
+        seen.update(kwargs)
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(cli, "prepare_case", spy)
+    assert _build() == CLEAN_EXIT
+    assert "new_seed" not in seen  # the default, scale.new_seed, is what ran
+    assert seen["max_tokens"] == 4096
+
+
+@pytest.mark.parametrize(
+    ("setup", "words"),
+    [
+        ({"passes": 4}, "has not passed maps_to_shape"),
+        ({"passes": 3}, "has not passed real_decision, maps_to_shape"),
+        (
+            {"passes": 1},
+            "has not passed public_and_filing, inside_window, real_decision, maps_to_shape",
+        ),
+        ({"terms": False}, "term list"),
+        ({"remotes": ""}, "not on any remote branch"),
+        ({"ciks": ("0009999999", "0008888888")}, "exactly one"),
+    ],
+)
+def test_build_refuses_before_any_fetch_or_key(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    setup: dict[str, Any],
+    words: str,
+) -> None:
+    app, transport, providers = _build_setup(tmp_path, monkeypatch, **setup)
+    assert _build() == REFUSED_EXIT
+    assert words in capsys.readouterr().err
+    assert transport.requests == [] and providers.made == []
+    assert not (app / "closure-01" / "sources.json").exists()
+
+
+def test_build_refuses_a_cutoff_that_is_not_the_day_before_first_disclosure_and_an_unknown_label(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, transport, providers = _build_setup(tmp_path, monkeypatch)
+    assert _build(cutoff=date(2026, 6, 16)) == REFUSED_EXIT
+    assert "day before first disclosure" in capsys.readouterr().err
+    assert (
+        main(["case", "build", "closure-09", "--cutoff", "2026-06-15", "--shape", "S3"])
+        == REFUSED_EXIT
+    )
+    assert "not a candidate" in capsys.readouterr().err
+    assert transport.requests == [] and providers.made == []
+
+
+def test_build_stops_for_hand_boundaries_before_the_key_and_writes_nothing_but_the_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    name = doc_name(filing_table(CUTOFF_FILINGS), 1)  # the annual report's file
+    unsplittable = {archive_url(1, name): b"<p>one paragraph, no items</p>"}
+    app, _, providers = _build_setup(tmp_path, monkeypatch, extra=unsplittable)
+    assert _build() == REFUSED_EXIT
+    err = capsys.readouterr().err
+    assert "needs hand boundaries" in err and "hand-boundaries.json" in err
+    assert providers.made == []
+    assert not (app / "closure-01" / "sources.json").exists()
+    assert (app / "closure-01" / "cache").is_dir()  # the filings are cached for the rerun
+
+
+def test_build_refuses_a_malformed_hand_boundaries_file_before_any_fetch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    app, transport, _ = _build_setup(tmp_path, monkeypatch)
+    (app / "closure-01" / "hand-boundaries.json").write_text("[]", encoding="utf-8")
+    assert _build() == REFUSED_EXIT
+    assert "hand-boundaries.json" in capsys.readouterr().err and transport.requests == []
+
+
+def test_a_failed_extraction_writes_no_sections_and_a_rerun_reads_the_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    app, transport, providers = _build_setup(
+        tmp_path, monkeypatch, provider=FakeTextProvider(ok("cut off", stop="max_tokens"))
+    )
+    assert _build() == REFUSED_EXIT
+    assert "cut off at the token limit" in capsys.readouterr().err
+    folder = app / "closure-01"
+    assert (folder / "sources.json").is_file() and not (folder / "sections.json").exists()
+    fetched = len(transport.requests)
+    providers.provider = Scripted(PLAIN)
+    assert _build() == CLEAN_EXIT
+    assert len(transport.requests) == fetched  # nothing fetched twice
+    assert (folder / "sections.json").is_file()
+
+
+def test_build_refuses_a_case_that_was_already_prepared_before_any_fetch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, transport, _ = _build_setup(tmp_path, monkeypatch)
+    assert _build() == CLEAN_EXIT
+    capsys.readouterr()
+    fetched = len(transport.requests)
+    assert _build() == REFUSED_EXIT
+    assert "already exists" in capsys.readouterr().err and len(transport.requests) == fetched
+
+
+def test_assemble_needs_every_flag_decided_then_writes_the_dossier_and_prints_no_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    app, _, _ = _build_setup(tmp_path, monkeypatch, provider=Scripted(COUNTS))
+    assert _build() == CLEAN_EXIT
+    case = CaseAppendix(root=app, label="closure-01")
+    assert json.loads(case.build_path.read_text())["flags"]  # the reply's country count is a flag
+    capsys.readouterr()
+    assert main(["case", "assemble", "closure-01"]) == REFUSED_EXIT
+    assert "no decision" in capsys.readouterr().err
+    assert not case.dossier_path.exists()
+    fill_in(case)
+    assert main(["case", "assemble", "closure-01"]) == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "Fernwick" not in out and "dossier.toml" in out
+    assert case.dossier_path.is_file() and case.assembly_path.is_file()
+
+
+def test_assemble_refuses_without_a_term_list_or_a_built_case(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _build_setup(tmp_path, monkeypatch, terms=False)
+    assert main(["case", "assemble", "closure-01"]) == REFUSED_EXIT
+    assert "term list" in capsys.readouterr().err

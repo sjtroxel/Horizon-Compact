@@ -126,10 +126,12 @@ def prepare_case(
     option_figures: Mapping[str, Sequence[OptionFigure]] | None = None,
     hand: HandBoundaries | None = None,
     new_seed: Callable[[], int] = scale.new_seed,
+    max_tokens: int = extract.DEFAULT_MAX_TOKENS,
+    provenance: Mapping[str, Any] | None = None,
 ) -> PreparedCase:
     inputs = build_section_inputs(docset, shape=shape, hand=hand)
     requests = extract.build_requests(inputs)
-    extracted = extract.run_extraction(provider, route, requests)
+    extracted = extract.run_extraction(provider, route, requests, max_tokens=max_tokens)
     if not inputs.figures.year_ends:
         raise BuildError(
             "no fiscal year has an admitted figure, so there is no calendar to date the case by"
@@ -185,8 +187,10 @@ def prepare_case(
         "sections_sha256": _sha256(sections_bytes),
         "sections": section_records,
         "section_inputs": inputs.record,
+        "provenance": dict(provenance or {}),
         "extraction": {
             **extract.request_record(requests),
+            "max_tokens": max_tokens,
             "replies": {
                 str(n): {
                     "model_id": e.model_id,

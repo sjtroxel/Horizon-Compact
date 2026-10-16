@@ -128,6 +128,26 @@ def test_a_text_request_offers_no_tool_and_no_tool_choice() -> None:
     assert provider(server).text_request_body(text) == body
 
 
+def test_a_between_tools_route_sends_between_tools_and_records_it() -> None:
+    server = FakeAnthropic(
+        lambda body: ok(
+            message(content=[{"type": "text", "text": "A summary."}], stop_reason="end_turn")
+        )
+    )
+    route = ModelRoute("x", MODEL, "anthropic", invoke_id=MODEL, thinking_between_tools=True)
+    result = provider(server).decide_text(TextRequest(route, "sys", "usr", 300))
+    assert server.bodies[0]["thinking"] == {"type": "between_tools"}
+    assert result.provenance.thinking == "off: thinking {type: between_tools} sent"
+
+
+def test_a_route_with_both_thinking_settings_is_refused() -> None:
+    route = ModelRoute(
+        "x", MODEL, "anthropic", invoke_id=MODEL, thinking_off=True, thinking_between_tools=True
+    )
+    with pytest.raises(ValueError, match="one thinking setting"):
+        provider(FakeAnthropic()).text_request_body(TextRequest(route, "sys", "usr", 300))
+
+
 def test_the_runners_cache_flag_never_becomes_a_cache_point() -> None:
     """The runner marks every request cache_system=True; this route ignores it (decision F)."""
     server = FakeAnthropic()

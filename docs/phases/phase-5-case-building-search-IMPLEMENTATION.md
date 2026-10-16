@@ -516,3 +516,76 @@ fixed:
 Ten tests added (seven refusals, the missing term file, `candidate_terms` including a short name); every test sets
 `HC_NAME_GUARD_TERMS` to a fictional file, so none reads the real one through git config. 2153 tests, `make check`
 green.
+
+**Stage C step 7, the extraction entry, `hc case build` and `hc case assemble` (2026-10-16, Sonnet built; for Opus's
+review in a fresh chat, then his commit and push).** Nothing was fetched and no model was called: every test uses a
+fake SEC and a fake provider. 2214 tests, `make check` green, `hc protocol check: ok` (no locked identity moved).
+- **The entry:** `[models.sonnet-5-5-extraction]` in `experiment/models.toml`: `claude-sonnet-5-5`, route `anthropic`,
+  `thinking = "off"`, `max_tokens = 4096`, role `extraction`; $2 input, $10 output, $2.50 cache write, $0.10 cache
+  read per million tokens, one rate across the whole context *(live 2026-10-16, Anthropic's models overview and
+  pricing pages; training data ends June 2026, same page)*. `ModelConfig` gained `max_tokens` (extraction role only;
+  that role needs route `anthropic`, thinking off and a `max_tokens`).
+- **The tripwire is structural, not a list of checks.** `experiment.py` is frozen at `prereg-v1`, so `Experiment.model`
+  could not be edited. Instead `ModelsFile` keeps the entry **out of `models`** (in `extraction_models`), so every
+  sweep plan, run, probe, awareness check, cost estimate, lock and gate sees it as an unknown model, and a future
+  path cannot forget a check. `tests/test_extraction_model.py` proves each: every experiment's `model()`,
+  `build_plan` (every experiment, official or not), the thinking sub-study on the off-subject placeholder,
+  `check_probe_model`, `build_lock`, the gate's `check_model`, and `hc sweep plan` and `run`. Only
+  `casebuild/extraction_model.py` reads the entry; at most one is allowed.
+- **`hc case build <label> --cutoff D --shape S`:** refusals first, none needing the network or the key, in this
+  order: the CIK from `candidates.json` by label (exactly one; not on the command line); the selection log (criteria
+  1-4 passed, and `--cutoff` equal to the day before the logged first-disclosure date, protocol §12.6); the case's
+  `terms.txt`; `hand-boundaries.json` if present; the extraction entry; **the committed-and-pushed proof**
+  (`casebuild/frozen.py`: `extract.py` and `models.toml` clean, and the commit that last changed them on a remote
+  branch, else refused); an already-prepared folder. Then the filings (cached), a dry run of `build_section_inputs`
+  (a `SplitRefused` prints "needs hand boundaries" and stops before `sources.json` and before the key), then
+  `write_sources`, the key, and `prepare_case`, which draws the seed itself (the command has no seed argument and does
+  not pass one; a test spies on it). `build.json` gains `provenance` (that commit, the instructions hash, the entry's
+  key and hash, the hand file's hash) and `extraction.max_tokens`. It prints counts, tokens and about what the credit
+  paid, never a name.
+- **`hc case assemble <label>`** reads `terms.txt` and runs `assemble_case`.
+- **Points for review:**
+  1. `write_sources` now accepts an identical second call as a no-op (so a rerun after a hand-split stop or a failed
+     extraction, read from the cache, does not trip write-once); a different list is still refused. The existing test
+     was updated to say so.
+  2. `prepare_case` gained `max_tokens` and `provenance` parameters (defaults keep every earlier call as it was).
+  3. **The cut-off check against the log is added to §4.5** (not stated there): the cut-off must equal the logged
+     first-disclosure date minus one day. It guards a typo from admitting a filing on or after disclosure.
+  4. **Not built, not in §4.5:** option figures for section 7 (the command passes none, so every option is described
+     without figures alike, protocol §12.6's default), and a command to print a filing's extracted text for choosing
+     hand-boundary offsets. Either may be needed on the first real case.
+  5. **Unverified until the first call:** that `claude-sonnet-5-5` accepts `thinking: {type: disabled}` (its page lists
+     thinking as adaptive; Haiku 5.5 accepts it). A 400 would be an `ExtractionError` with no sections written.
+  6. `requests_per_minute = 30` in the entry is unused by the builder (calls run one at a time); the file requires it.
+  7. The term list is `terms.txt` and the hand file `hand-boundaries.json` in the case's folder (new `CaseAppendix`
+     paths); `hand-boundaries.json` is `{accession: {item key: [start, end]}}`, validated strictly in `handfile.py`.
+
+**Stage C step 7, the Opus review (2026-10-16, about 11:45 AM).** Read the whole diff against §4.1, §4.5, protocol
+§12.4 and §12.6. The tripwire, the order of refusals, `frozen_inputs` and the seed hold as built: `ModelsFile` is
+the only reader of `models.toml`'s entries (the lock and gate drop its file hash and compare identities only), so
+the extraction entry is unknown to every experiment path; every refusal in `cmd_case_build` runs before the
+`EdgarClient` is made and before the key is read; `frozen_inputs` checks both files clean and their last commit on
+a remote-tracking branch; and `prepare_case` gets no seed. Points 1, 2, 3, 6 and 7 accepted as built. Fixed:
+1. **The build's criteria check skipped criterion 4.** It required `CRITERIA[:4]` (the first-disclosure check and
+   §12.4's criteria 1-3), so a candidate that had not passed `maps_to_shape` could be built. It now requires every
+   criterion but the probe (`CRITERIA[:-1]`), as §4.1 step 1 says; the test setup and refusal cases follow.
+2. **Point 5 is settled, and the entry as built would have failed its first call.** Anthropic's Sonnet 5.5
+   migration guide (read live 2026-10-16): `thinking: {type: "disabled"}` returns a 400 on this model; thinking off
+   is `{type: "between_tools"}` (no extended thinking, a text-only reply when no tool is offered, accepted at the
+   default effort). The entry now says `thinking = "between_tools"`; `ModelRoute` gained `thinking_between_tools`;
+   the Anthropic provider sends it and records `off: thinking {type: between_tools} sent`; a route with both
+   settings is refused; `"between_tools"` is refused on every role but extraction, so no locked identity and no
+   official request changes (Haiku 5.5's `disabled` body is byte-identical; `hc protocol check: ok`). Decision 2
+   (thinking off) is kept as decided. The prices were re-read on the live pricing page and are right ($0.10 cache
+   read; the bundled reference's $0.20 is stale).
+3. A candidate missing from the log was a `KeyError` traceback; now a refusal.
+4. An extraction call that fails now names the error's code and message (scrubbed of the key by the provider),
+   so a first-call rejection says why.
+5. Two comments claimed `Experiment.model` and `build_lock` refuse the role; they now say `ModelsFile` keeps it out.
+
+**Found outside step 7, for him (KNOWN-GAPS OPEN 2026-10-16):** `SelectionLog.record` refuses anything after a
+failure, and `record_read` with `agrees=False` only stores the resolution, so a rejection the reader disputes
+still stands. Protocol §12.4 says the opposite ("a rejection the reader disputes does not stand: the candidate goes
+on to the next criterion"). Harmless until the first rejection on criterion 3, 4 or 5; fix before then.
+
+Four tests added and the affected ones updated (2218 tests), `make check` green, `hc protocol check: ok`.

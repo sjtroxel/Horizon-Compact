@@ -80,6 +80,7 @@ SSM_PARAMETER = "/horizon-compact/anthropic-key"  # the container's source; a te
 MIN_KEY_LENGTH = 20
 HOSTED_REGION = "hosted by Anthropic"
 THINKING_OFF = "off: thinking {type: disabled} sent"
+THINKING_BETWEEN_TOOLS = "off: thinking {type: between_tools} sent"
 THINKING_DEFAULT = "not set (the model's default)"
 # The error names the classifier already knows (sweep/classify.py).
 _CONNECTION_ERROR = "EndpointConnectionError"
@@ -215,8 +216,12 @@ class AnthropicProvider:
             "system": system,
             "messages": [{"role": "user", "content": user}],
         }
+        if route.thinking_off and route.thinking_between_tools:
+            raise ValueError("a route sends one thinking setting, not two")
         if route.thinking_off:
             body["thinking"] = {"type": "disabled"}
+        elif route.thinking_between_tools:
+            body["thinking"] = {"type": "between_tools"}
         return body
 
     def request_body(self, request: DecisionRequest) -> dict[str, Any]:
@@ -337,6 +342,8 @@ class AnthropicProvider:
                 if thinking_study
                 else THINKING_OFF
                 if route.thinking_off
+                else THINKING_BETWEEN_TOOLS
+                if route.thinking_between_tools
                 else THINKING_DEFAULT
             ),
             effort=THINKING_STUDY_EFFORT_NOTE
