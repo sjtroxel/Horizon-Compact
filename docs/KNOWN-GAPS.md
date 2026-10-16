@@ -7,7 +7,31 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-16, about 11:45 AM (STAGE C STEP 7 BUILT AND REVIEWED, UNCOMMITTED)
+> ## START HERE — where things stand, 2026-10-16, about 12:05 PM (DISPUTED-REJECTION FIX BUILT AND REVIEWED, UNCOMMITTED)
+>
+> **Measured:** `make check` green, **2230 tests**; `hc protocol check: ok`. Step 7 is committed and pushed (`a31f8a0`).
+> **Uncommitted:** the disputed-rejection fix, built (Sonnet) and **reviewed (Opus), one fix applied** (search-half doc
+> §11). Nothing real was fetched.
+>
+> **Next, in order:** (1) his commit `phase 5: disputed rejections do not stand` and push; (2) Stage C step 8 (`hc
+> case scenario check`, `hc case lock`); Stage D's first `hc case build` is his command whenever he chooses. **His
+> decision, at step 10:** OPEN 2026-10-16, criterion 5's dispute against the gate.
+>
+> *The 12:15 PM block below (its time was written ahead of the clock) is superseded; it stays as the record.*
+
+> ## START HERE — where things stood, 2026-10-16, about 12:15 PM (DISPUTED-REJECTION FIX BUILT, UNCOMMITTED, AWAITING AN OPUS REVIEW)
+>
+> **Measured:** `make check` green, **2229 tests**; `hc protocol check: ok`. Step 7 is committed (`a31f8a0`, `phase 5: hc
+> case build`). **Uncommitted:** the disputed-rejection fix (BUILT entry below; search-half doc §11), built by Sonnet,
+> **not yet reviewed**. Nothing real was fetched.
+>
+> **Next, in order:** (1) the Opus review of that fix; (2) his commit (`phase 5: disputed rejections stand no more`) and
+> push; (3) Stage C step 8 (`hc case scenario check`, `hc case lock`); (4) the first real `hc case build` is his
+> command, after the step-7 push is green (§12.6).
+>
+> *The 11:45 AM block below is superseded on what is next; it stays as the record.*
+
+> ## START HERE — where things stood, 2026-10-16, about 11:45 AM (STAGE C STEP 7 BUILT AND REVIEWED, UNCOMMITTED)
 >
 > **Measured:** `make check` green, **2218 tests**; `hc protocol check: ok`. Last pushed commit `222c2e2` (`phase 5:
 > search record and hc case log`). **Uncommitted:** step 7 (the extraction entry, `hc case build`, `hc case
@@ -1158,7 +1182,20 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
-## OPEN 2026-10-16 — a rejection the reader disputes still stands in the selection log
+## OPEN 2026-10-16 — a disputed probe failure (criterion 5) passes the log but not the gate
+
+Found in the Opus review of the disputed-rejection fix. Protocol §12.4 has the independent reader read every
+rejection on criterion 5, and a disputed one does not stand, so the log now counts the probe as met. Protocol §12.10's
+gate check (3) separately needs every recognition probe in the counting set to have passed on every model, read from
+the probe records, and §12.8 says the case fails if any call names it, "checked ... by one human read". The two can
+disagree: a disputed probe failure passes the log and is refused at the gate. **His call, at step 10
+(`probe-verdict`):** whether a dispute on criterion 5 can change a probe's verdict (and so the gate), or whether
+criterion 5 is decided by the probe records alone and the reader's dispute only logged. Nothing reaches this before
+a probe has run. **Closes when:** he has decided, and step 10 is built to match.
+
+---
+
+## BUILT 2026-10-16, REVIEWED, AWAITING HIS COMMIT — a rejection the reader disputes still stood in the selection log
 
 Found in the Opus review of step 7. Protocol §12.4: "a rejection the reader disputes does not stand: the candidate
 goes on to the next criterion, and the disagreement is logged with both reasons." In `casebuild/search.py`,
@@ -1168,6 +1205,8 @@ it). Nothing has hit it: no candidate has a rejection on criterion 3, 4 or 5 yet
 rejection lets the candidate go on to the next criterion with both reasons kept, `passed`, `failed` and
 `selection` read it that way, and the public view shows it; built and reviewed before the first rejection on
 criterion 3, 4 or 5 is recorded.
+
+**Built 2026-10-16 (Sonnet) and reviewed (Opus), one fix applied** (an unread rejection on 3, 4 or 5 no longer counts as finished; search-half doc §11). Closes when his commit lands.
 
 ---
 

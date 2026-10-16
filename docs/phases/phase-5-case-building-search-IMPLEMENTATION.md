@@ -589,3 +589,48 @@ still stands. Protocol §12.4 says the opposite ("a rejection the reader dispute
 on to the next criterion"). Harmless until the first rejection on criterion 3, 4 or 5; fix before then.
 
 Four tests added and the affected ones updated (2218 tests), `make check` green, `hc protocol check: ok`.
+
+**The disputed-rejection fix (2026-10-16, Sonnet built; for Opus's review in this chat, then his commit and push).**
+Closes the KNOWN-GAPS OPEN of 2026-10-16. Protocol §12.4: a rejection the independent reader disputes does not
+stand, and the candidate goes on to the next criterion with both reasons logged. 2229 tests (up from 2218),
+`make check` green, `hc protocol check: ok`. All in `casebuild/search.py`, plus `cli.py` (status line and the
+build's criteria check) and tests. No model called, nothing fetched.
+- **`Row.disputed(c)` and `Row.met(c)`** are the one place the rule lives: a fail with a read that does not agree is
+  disputed; a criterion is met if passed or disputed. `Row.failed` is the first fail that is not disputed, and
+  `Row.passed` is every criterion met, so `record` (which stops at a standing failure), `finished`, `selection`,
+  `problems` and `_window_short` all read it without change. A disputed fail on the last criterion
+  (`not_recognizable`) counts as passing it.
+- **Nothing is rewritten.** The fail, its reason and the read with his resolution stay in the saved log. The public
+  view marks the criterion `"disputed": true` (only where it is), carries no resolution text, and is otherwise
+  unchanged. The log version stays 1: an older file without disputes loads and saves identically.
+- **`record_read`** now checks that the criterion's recorded result is a fail (it used to check `row.failed`, which
+  no longer names a disputed one). **Point for review (added by me, not in the spec):** a read cannot flip once a
+  later criterion is recorded, because that would leave results after a standing failure. A read may still change
+  while the rejected criterion is the last one recorded.
+- **`from_text` applies each read right after its own result**, so the results that follow a disputed rejection
+  load; a read for a criterion with no recorded fail is still refused.
+- **`hc case build`'s check** uses `row.met`, so a disputed rejection on 3 or 4 counts as passed there; a rejection
+  the reader agreed with still refuses. **`hc case log` status** shows the read for any rejection on 3, 4 or 5
+  ("FAIL (disputed, does not stand)", "read: DISAGREES").
+- **Tests:** dispute then continue, agree then stand, a standing fail after a disputed one, the last criterion,
+  the order by disclosure date, a read that cannot flip, the round trip and two hand-edits, the public view; and
+  `hc case build` accepting a disputed rejection on 3 or 4 and refusing one that stands.
+
+**The disputed-rejection fix, the Opus review (2026-10-16, about 12:05 PM, in the same chat).** `Row.disputed` and
+`Row.met` carry the rule in one place; the reload order in `from_text`, the unchanged log version, the public view
+(no resolution text) and the build's check are right. **The flip rule is accepted:** a read that changed after
+later criteria were recorded would leave results after a standing failure. Fixed:
+1. **An unread rejection on 3, 4 or 5 counted as finished.** Before the fix that was harmless, because a read changed
+   nothing. Now a dispute reopens the candidate, so `selection` could call a type complete, and `_window_short`
+   could open the fallback month, while a read that could still change the order was missing. `Row.awaiting_read`
+   names such a rejection, and `Row.finished` is false until the read is in; the selection's `waiting` line says
+   which read it waits for. This is §4.1 step 1 ("a rejection on 3 or 4 goes to the reader before the next
+   candidate") made structural. One test added; two of the new tests that asserted the old behavior were corrected.
+2. The status line's loop had been split over three lines by the formatter around a long comment; the comment moved.
+
+**For him, not built (KNOWN-GAPS OPEN 2026-10-16, criterion 5):** a dispute on criterion 5 now lets the log count the
+probe as passed, but protocol §12.10's gate check (3) needs "every recognition probe in the set that counts passed on
+every model", read from the probe records. So a disputed probe failure would pass the log and still be refused at
+the gate. Which governs is his call at step 10 (`probe-verdict`); nothing reaches it before a probe has run.
+
+2230 tests, `make check` green, `hc protocol check: ok`.

@@ -1143,13 +1143,21 @@ def _log_status(row: Row) -> str:
         if criterion not in row.results:
             continue
         result = row.results[criterion]
-        word = "pass" if result.result == "pass" else "FAIL"
-        parts.append(f"{criterion} {word}" + (f" {result.disclosed}" if result.disclosed else ""))
-    if row.failed in READ_REQUIRED:
-        read = row.reads.get(row.failed)
-        parts.append(
-            "read: " + ("NOT YET" if read is None else "agrees" if read.agrees else "DISAGREES")
+        word = (
+            "pass"
+            if result.result == "pass"
+            else "FAIL (disputed, does not stand)"
+            if row.disputed(criterion)
+            else "FAIL"
         )
+        parts.append(f"{criterion} {word}" + (f" {result.disclosed}" if result.disclosed else ""))
+    # a rejection on 3, 4 or 5, whether it stands or the reader disputed it
+    for criterion in READ_REQUIRED:
+        if criterion in row.results and row.results[criterion].result == "fail":
+            read = row.reads.get(criterion)
+            parts.append(
+                "read: " + ("NOT YET" if read is None else "agrees" if read.agrees else "DISAGREES")
+            )
     next_criterion = next((c for c in CRITERIA if c not in row.results), None)
     if row.failed:
         parts.append("finished: rejected")
@@ -1280,7 +1288,7 @@ def _build_candidate(search: CaseAppendix, label: str, cutoff: date) -> str:
         raise LogError(f"{label} is not in the selection log")
     # Protocol §12.4's criteria 1-4 and the first-disclosure check before them: every criterion but the
     # probe (criterion 5, ``not_recognizable``), which needs the dossier this command builds.
-    unpassed = [c for c in CRITERIA[:-1] if c not in row.results or row.results[c].result != "pass"]
+    unpassed = [c for c in CRITERIA[:-1] if not row.met(c)]
     if unpassed:
         raise LogError(f"{label} has not passed {', '.join(unpassed)} in the selection log")
     assert row.disclosed is not None  # a passed first_disclosure always carries its date

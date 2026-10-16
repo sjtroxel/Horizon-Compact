@@ -406,20 +406,49 @@ class Row:
     results: dict[str, Result] = field(default_factory=dict)
     reads: dict[str, Read] = field(default_factory=dict)
 
+    def disputed(self, criterion: str) -> bool:
+        """A rejection the independent reader disputes does not stand (§12.4): the candidate goes on to the
+        next criterion. The fail and its reason stay in ``results``, beside the read and his resolution."""
+        result = self.results.get(criterion)
+        read = self.reads.get(criterion)
+        return (
+            result is not None and result.result == "fail" and read is not None and not read.agrees
+        )
+
+    def met(self, criterion: str) -> bool:
+        """The criterion is passed, or its rejection was disputed and so does not stand."""
+        result = self.results.get(criterion)
+        return result is not None and (result.result == "pass" or self.disputed(criterion))
+
     @property
     def failed(self) -> str | None:
+        """The first rejection that stands: a fail the reader has not disputed."""
         return next(
-            (c for c in CRITERIA if c in self.results and self.results[c].result == "fail"), None
+            (
+                c
+                for c in CRITERIA
+                if c in self.results and self.results[c].result == "fail" and not self.disputed(c)
+            ),
+            None,
         )
 
     @property
     def passed(self) -> bool:
-        """Every criterion passed. Not the same as being a case: only the first k in order are (§12.4)."""
-        return all(c in self.results and self.results[c].result == "pass" for c in CRITERIA)
+        """Every criterion met (passed, or a rejection disputed). Not the same as being a case: only the
+        first k in order are (§12.4)."""
+        return all(self.met(c) for c in CRITERIA)
+
+    @property
+    def awaiting_read(self) -> str | None:
+        """A rejection on criterion 3, 4 or 5 with no independent read yet. A dispute would let the candidate
+        go on, so until the read is in, its rejection is not final."""
+        failed = self.failed
+        return failed if failed in READ_REQUIRED and failed not in self.reads else None
 
     @property
     def finished(self) -> bool:
-        return self.passed or self.failed is not None
+        """Every criterion met, or a rejection that stands and is final (read, where it must be)."""
+        return self.passed or (self.failed is not None and self.awaiting_read is None)
 
     @property
     def disclosed(self) -> date | None:
@@ -518,14 +547,28 @@ class SelectionLog:
         self, candidate_id: str, criterion: str, *, agrees: bool, resolution: str | None = None
     ) -> None:
         """The independent reader's read of a rejection on criterion 3, 4 or 5. A disagreement is resolved by
-        him and logged with the reason."""
+        him and logged with the reason, and the rejection then does not stand (§12.4): the candidate goes on
+        to the next criterion. A read cannot be changed once a later criterion has been recorded."""
         row = self._row(candidate_id)
         if criterion not in READ_REQUIRED:
             raise LogError(f"only a rejection on {', '.join(READ_REQUIRED)} is read")
-        if row.failed != criterion:
+        result = row.results.get(criterion)
+        if result is None or result.result != "fail":
             raise LogError(f"{candidate_id} did not fail {criterion}")
         if not agrees and not (resolution and resolution.strip()):
             raise LogError("a disagreement is resolved by him and logged with the reason")
+        later = CRITERIA[CRITERIA.index(criterion) + 1 :]
+        previous = row.reads.get(criterion)
+        if (
+            previous is not None
+            and previous.agrees != agrees
+            and any(c in row.results for c in later)
+        ):
+            raise LogError(
+                f"{candidate_id}: {criterion} was read as "
+                f"{'agreed' if previous.agrees else 'disputed'} and later criteria are recorded; "
+                "a read cannot change now"
+            )
         row.reads[criterion] = Read(agrees, resolution)
 
     def selection(self, case_type: str) -> Selection:
@@ -554,7 +597,12 @@ class SelectionLog:
                 if len(cases) >= k:
                     break
                 if not row.finished:
-                    waiting.append(f"{row.id}: not finished, and it comes before any later case")
+                    waiting.append(
+                        f"{row.id}: its rejection on {row.awaiting_read} awaits the independent read, "
+                        "and it comes before any later case"
+                        if row.awaiting_read
+                        else f"{row.id}: not finished, and it comes before any later case"
+                    )
                     break
                 if row.passed:
                     cases.append(row.id)
@@ -612,6 +660,7 @@ class SelectionLog:
             log = cls({r["id"]: Row(r["id"], r["type"], r["pool"], r["accession"]) for r in saved})
             for pool in POOLS:
                 for r in (r for r in saved if r["pool"] == pool):
+                    reads = dict(r["reads"])
                     for criterion, v in r["results"].items():
                         log.record(
                             r["id"],
@@ -623,9 +672,21 @@ class SelectionLog:
                             if v.get("disclosed")
                             else None,
                         )
-                    for criterion, v in r["reads"].items():
+                        # a disputed rejection lets the next result follow, so its read is applied now
+                        if criterion in reads:
+                            read = reads.pop(criterion)
+                            log.record_read(
+                                r["id"],
+                                criterion,
+                                agrees=read["agrees"],
+                                resolution=read.get("resolution"),
+                            )
+                    for criterion, read in reads.items():  # a read with no result to read: refused
                         log.record_read(
-                            r["id"], criterion, agrees=v["agrees"], resolution=v.get("resolution")
+                            r["id"],
+                            criterion,
+                            agrees=read["agrees"],
+                            resolution=read.get("resolution"),
                         )
             return log
         except (ValueError, KeyError, TypeError, AttributeError) as exc:
@@ -653,7 +714,11 @@ class SelectionLog:
                         "passed": r.passed,
                         "case": r.id in chosen.cases,
                         "criteria": {
-                            c: {"result": r.results[c].result, "reason": r.results[c].public_reason}
+                            c: {
+                                "result": r.results[c].result,
+                                "reason": r.results[c].public_reason,
+                                **({"disputed": True} if r.disputed(c) else {}),
+                            }
                             for c in CRITERIA
                             if c in r.results
                         },

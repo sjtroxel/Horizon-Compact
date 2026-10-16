@@ -568,6 +568,149 @@ def test_a_rejection_on_criterion_3_4_or_5_needs_an_independent_read_and_a_disag
         log.record_read("closure-02", "first_disclosure", agrees=True)
 
 
+def fail_at(log: SelectionLog, candidate_id: str, criterion: str, day: int = 1) -> None:
+    """Passes every criterion before ``criterion`` and fails it, unread."""
+    log.record(
+        candidate_id, "first_disclosure", "pass", "first said here", disclosed=D.replace(day=day)
+    )
+    for earlier in CRITERIA[1 : CRITERIA.index(criterion)]:
+        log.record(candidate_id, earlier, "pass", f"{earlier} ok")
+    log.record(candidate_id, criterion, "fail", f"{criterion} fails")
+
+
+def dispute(log: SelectionLog, candidate_id: str, criterion: str) -> None:
+    log.record_read(candidate_id, criterion, agrees=False, resolution="he finds it holds")
+
+
+def test_a_rejection_the_reader_disputes_does_not_stand_and_the_candidate_goes_on() -> None:
+    log = log_of("closure-01", "closure-02")
+    fail_at(log, "closure-01", "real_decision")
+    row = log.rows["closure-01"]
+    assert row.failed == "real_decision" and not row.passed
+    assert not row.finished  # unread, so not final: a dispute would let it go on
+    with pytest.raises(LogError, match="nothing follows a failure"):
+        log.record("closure-01", "maps_to_shape", "pass", "ok")
+    dispute(log, "closure-01", "real_decision")
+    assert row.failed is None and row.disputed("real_decision") and row.met("real_decision")
+    assert not row.finished and not row.passed  # four criteria still to go
+    assert row.results["real_decision"].result == "fail"  # the fail and its reason are kept
+    assert row.results["real_decision"].reason == "real_decision fails"
+    assert row.reads["real_decision"].resolution == "he finds it holds"
+    for criterion in CRITERIA[CRITERIA.index("real_decision") + 1 :]:
+        log.record("closure-01", criterion, "pass", f"{criterion} ok")
+    assert row.passed and row.finished and row.failed is None
+    assert log.selection("closure").waiting  # closure-02 is still undated
+    assert log.problems() == []
+
+
+def test_a_rejection_the_reader_agrees_with_still_stands() -> None:
+    log = log_of("closure-01")
+    fail_at(log, "closure-01", "maps_to_shape")
+    log.record_read("closure-01", "maps_to_shape", agrees=True)
+    row = log.rows["closure-01"]
+    assert row.failed == "maps_to_shape" and not row.disputed("maps_to_shape")
+    with pytest.raises(LogError, match="nothing follows a failure"):
+        log.record("closure-01", "not_recognizable", "pass", "ok")
+
+
+def test_a_disputed_rejection_can_be_followed_by_a_rejection_that_stands() -> None:
+    log = log_of("closure-01")
+    fail_at(log, "closure-01", "real_decision")
+    dispute(log, "closure-01", "real_decision")
+    log.record("closure-01", "maps_to_shape", "fail", "no shape fits")
+    row = log.rows["closure-01"]
+    assert row.failed == "maps_to_shape" and not row.passed and not row.finished  # unread
+    assert log.problems() == [
+        "closure-01: its rejection on maps_to_shape has not been read by the independent reader"
+    ]
+
+
+def test_a_disputed_rejection_on_the_last_criterion_counts_as_passing_it() -> None:
+    log = log_of("closure-01")
+    fail_at(log, "closure-01", "not_recognizable")
+    row = log.rows["closure-01"]
+    assert row.failed == "not_recognizable" and not row.passed
+    dispute(log, "closure-01", "not_recognizable")
+    assert row.failed is None and row.passed and row.finished
+    assert log.selection("closure").cases == ("closure-01",)
+
+
+def test_a_disputed_candidate_takes_its_place_in_the_order_of_first_disclosure() -> None:
+    log = log_of("closure-01", "closure-02", "closure-03")
+    fail_at(log, "closure-01", "real_decision", day=2)
+    dispute(log, "closure-01", "real_decision")
+    for criterion in CRITERIA[CRITERIA.index("real_decision") + 1 :]:
+        log.record("closure-01", criterion, "pass", "ok")
+    take(log, "closure-02", day=5)
+    take(log, "closure-03", day=3)
+    assert log.selection("closure").cases == ("closure-01", "closure-03")
+
+
+def test_an_unread_rejection_on_3_4_or_5_holds_the_selection_and_the_fallback_open() -> None:
+    log = log_of("ai-01", "ai-02", "ai-f01")  # k = 1
+    fail_at(log, "ai-01", "maps_to_shape", day=2)
+    take(log, "ai-02", day=5)
+    row = log.rows["ai-01"]
+    assert row.awaiting_read == "maps_to_shape" and not row.finished
+    chosen = log.selection("ai")
+    assert chosen.cases == () and not chosen.complete  # a dispute could still make ai-01 the case
+    assert chosen.waiting == (
+        "ai-01: its rejection on maps_to_shape awaits the independent read, "
+        "and it comes before any later case",
+    )
+    with pytest.raises(LogError, match="fallback candidate"):  # the window is not known to be short
+        log.record("ai-f01", "first_disclosure", "pass", "ok", disclosed=D)
+    log.record_read("ai-01", "maps_to_shape", agrees=True)
+    assert row.finished and log.selection("ai").cases == ("ai-02",)
+
+
+def test_a_read_cannot_change_once_a_later_criterion_is_recorded() -> None:
+    log = log_of("closure-01")
+    fail_at(log, "closure-01", "real_decision")
+    log.record_read("closure-01", "real_decision", agrees=True)
+    dispute(log, "closure-01", "real_decision")  # no later criterion yet: a changed read is allowed
+    log.record("closure-01", "maps_to_shape", "pass", "ok")
+    dispute(log, "closure-01", "real_decision")  # the same read again changes nothing
+    with pytest.raises(LogError, match="a read cannot change now"):
+        log.record_read("closure-01", "real_decision", agrees=True)
+
+
+def test_a_disputed_log_round_trips_and_a_hand_edit_cannot_dispute_without_a_resolution() -> None:
+    log = log_of("closure-01")
+    fail_at(log, "closure-01", "real_decision")
+    dispute(log, "closure-01", "real_decision")
+    for criterion in CRITERIA[CRITERIA.index("real_decision") + 1 :]:
+        log.record("closure-01", criterion, "pass", "ok")
+    again = SelectionLog.from_text(log.to_text())
+    assert again.to_text() == log.to_text()
+    assert again.rows["closure-01"].passed and again.rows["closure-01"].disputed("real_decision")
+    saved = json.loads(log.to_text())
+    del saved["rows"][0]["reads"]["real_decision"]["resolution"]
+    with pytest.raises(LogError, match="resolved by him"):
+        SelectionLog.from_text(json.dumps(saved))
+    saved = json.loads(log.to_text())
+    saved["rows"][0]["reads"]["first_disclosure"] = {"agrees": False, "resolution": "x"}
+    with pytest.raises(LogError, match="only a rejection"):
+        SelectionLog.from_text(json.dumps(saved))
+
+
+def test_the_public_view_marks_a_disputed_rejection_and_still_carries_no_name() -> None:
+    log = log_of("closure-01", "closure-02")
+    fail_at(log, "closure-01", "real_decision")
+    dispute(log, "closure-01", "real_decision")
+    fail_at(log, "closure-02", "maps_to_shape", day=2)
+    log.record_read("closure-02", "maps_to_shape", agrees=True)
+    rows = {r["id"]: r for r in log.public_view()["closure"]["rows"]}
+    assert rows["closure-01"]["criteria"]["real_decision"] == {
+        "result": "fail",
+        "reason": None,
+        "disputed": True,
+    }
+    assert rows["closure-01"]["independent_read"] == {"real_decision": {"agrees": False}}
+    assert "disputed" not in rows["closure-02"]["criteria"]["maps_to_shape"]
+    assert "he finds it holds" not in json.dumps(log.public_view())  # the resolution is private
+
+
 def test_the_log_round_trips_through_its_text() -> None:
     log = log_of("closure-01", "closure-02", "closure-f01", "ai-01")
     take(log, "closure-01", day=4)

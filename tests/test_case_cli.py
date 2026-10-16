@@ -516,6 +516,8 @@ def _build_setup(
     provider: Any = None,
     extra: dict[str, Any] | None = None,
     passes: int = 5,
+    disputed: str | None = None,
+    agreed: str | None = None,
     disclosed: date = date(2026, 6, 16),
     ciks: tuple[str, ...] = ("0009999999",),
     remotes: str = "  origin/main\n",
@@ -535,7 +537,15 @@ def _build_setup(
     )
     log.record("closure-01", "first_disclosure", "pass", "r", disclosed=disclosed)
     for criterion in CRITERIA[1:passes]:
-        log.record("closure-01", criterion, "pass", "r")
+        if criterion == agreed:  # rejected, and the independent reader agrees: nothing follows
+            log.record("closure-01", criterion, "fail", "r")
+            log.record_read("closure-01", criterion, agrees=True)
+            break
+        if criterion == disputed:  # rejected, and the independent reader disputes it
+            log.record("closure-01", criterion, "fail", "r")
+            log.record_read("closure-01", criterion, agrees=False, resolution="he finds it holds")
+        else:
+            log.record("closure-01", criterion, "pass", "r")
     write_log_version(search, log)
     if terms:
         (app / "closure-01").mkdir(exist_ok=True)
@@ -587,6 +597,23 @@ def test_build_writes_the_case_from_the_candidates_cik_and_records_where_it_came
         for r in sent
     )
     assert "about $" in out and "hc case assemble closure-01" in out
+
+
+@pytest.mark.parametrize("criterion", ["real_decision", "maps_to_shape"])
+def test_build_accepts_a_candidate_whose_rejection_the_reader_disputed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, criterion: str
+) -> None:
+    _build_setup(tmp_path, monkeypatch, disputed=criterion)
+    assert _build() == CLEAN_EXIT
+
+
+def test_build_still_refuses_a_rejection_that_stands(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, transport, providers = _build_setup(tmp_path, monkeypatch, agreed="real_decision")
+    assert _build() == REFUSED_EXIT
+    assert "has not passed real_decision" in capsys.readouterr().err
+    assert transport.requests == [] and providers.made == []
 
 
 def test_build_cannot_be_given_a_seed_or_a_cik_and_never_passes_one_on(
