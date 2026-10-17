@@ -4,7 +4,7 @@
 > about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** **Patched 2026-10-16 (his): §4.6.1, the case scenario
 > is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** **Patched
 > 2026-10-17 (his), after the independent reader's read: §4.6.2, the total in criterion 4 and a search hit
-> that announces no decision.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -363,6 +363,80 @@ about $0.006 each. **Build work before criterion 4** (Stage D step 11a): the bri
 in `material.py` for `maps_to_shape`; `hc case documents`; tests. **The brief changes after its first read**
 (closure type, `real_decision`; that text is untouched): logged in §11 as a change to the instrument, with this
 reason.
+
+#### 4.6.3 Patch 2026-10-17 (his, about 11:55 AM CDT; drafted by Opus): the headcount floor at criterion 4 is fixed
+
+*ADOPTED 2026-10-17 (his, about 12:15 PM CDT), after the independent reader's read (below): its changes 2 to 4
+taken; change 1 answered as a stated interpretation, his decision.* Found in the Opus review of step 11a (§11), before any S1 or S3 total was looked for (`KNOWN-GAPS.md`, OPEN
+2026-10-17, the headcount floor). Judged on its own terms, not by which candidates it admits: no headcount total of
+any candidate has been read.
+
+**The fault.** §4.6.1 item 5 and §4.6.2 A.1 fail criterion 4 on a heads total "under 100 after scaling". The factor
+is drawn by `hc case build`, which refuses until criterion 4 is met, so for a stated total from 63 to 166 the result
+depends on a draw that has not happened, and criterion 4 cannot be recorded in the log's order.
+
+**The rule.**
+
+1. **Part (ii) of criterion 4, for a headcount total (S1 `s1_roles`, S3 `hc_p6`), passes at 167 or more, as stated
+   or derived (§4.6.2 A.1), unscaled.** 167 is the least whole number that every factor in protocol §12.6's range
+   scales to 100 or more: the range's low end is 0.6, the render compares the scaled value before rounding
+   (`scale.py`), and 167 x 0.6 = 100.2 while 166 x 0.6 = 99.6. If that range were ever changed, the floor is 100
+   divided by its low end, rounded up; it is not changed for any other reason.
+2. **This replaces "100 or more after scaling" in §4.6.2 A.1 and "a total under 100 fails criterion 4" in §4.6.1 item
+   5, for criterion 4.** The rest of item 5 stands: any heads figure under 100 after scaling reads "fewer than 100",
+   and a cap under 100 after scaling equals the total. The render's refusal of a total under 100 after scaling stays
+   as a backstop; with the floor, it cannot fire on a case that passed criterion 4.
+3. **How a stated total is read, for every shape** (it was open for all four): a figure given as "about",
+   "approximately", "roughly", "more than", "over" or "at least" a number is that number; **a range is taken at its
+   low end** (a figure the source states, and the one the floor is safe on); a figure given only as an upper bound
+   ("up to", "as many as", "fewer than") states no total. The number so read is the total row's unscaled value.
+4. **The reader is told the floor, and nothing about the rejection.** The rejection read starts blind (§4.9;
+   `material.py` sends no reason and no result), so the floor goes in the brief, where it applies to every read
+   alike, and the reader applies it. **`total-search.txt` carries no note of why the case was rejected**; the 11a
+   "too-small note" (A.4, §11) is dropped. §4.6.2 A.4's last sentence ("A rejection for a stated total under 100
+   after scaling is read the same way ...") is replaced by this item.
+5. **The brief's `maps_to_shape` paragraph changes in three places** (the rest as §4.6.2 adopted it):
+   - after "S3: the number of employees at the facility named.", add: **"For S1 and S3 the total must be 167 or
+     more."**
+   - after "... or an expected fall in revenue alone is not it.", add: **"A figure given as about, approximately,
+     more than or at least a number is that number; a range is taken at its low end; a figure given only as up to
+     or fewer than a number states no total."**
+   - **remove** "If the material says a stated total was rejected as too small after the study's scaling, judge
+     only whether that figure is the total."
+   - "quote in your reason the sentence that states the total" becomes **"quote in your reason the sentence that
+     states the total or, if the total is worked out from several figures, the sentences that state them"**.
+   Logged in §11 as a change to the instrument. No read has used the changed sentences: closure-02's read was on
+   criterion 3, and no criterion 4 read has been made.
+
+**Why not the others.** *Drawing the factor at `hc case documents`* keeps §4.6.1's words, but makes a case's admission
+depend on a random draw. The factor exists to keep a case from being identified by its figures, not to choose cases;
+under it, two candidates with the same stated total could be admitted and rejected by chance. It also moves the draw
+out of the build, whose code says nothing before it can supply one. *Recording part (ii) on the stated figure and
+leaving the floor to the render* logs criterion 4 as passed for a case the render then refuses, the fault §4.6.2 A
+was made to remove.
+
+**The protocol, read (the reader's change 1, answered; his decision 2026-10-17).** Protocol §12.4 says "Each case's size
+beside the fictional company's (revenue and headcount, scaled) is reported, and never used to choose." The reader
+reads the floor as using size to choose, and asks that the patch be reported as a deviation. **Answered as a stated
+interpretation, not a deviation:** that sentence is about the company's size (its revenue and headcount, set beside
+the fictional company's), and it forbids choosing cases by how big the company is. The floor is on the decision's
+total, the figure the scenario is about, and it follows from §12.6's own rule that a scaled headcount under 100 is
+stated as "fewer than 100": a scenario whose decision is a number of people needs that number, and the template
+states it as one. The floor was already in force (§4.6.1 item 5, which the reader saw in the §4.6.2 read without
+raising this); this patch only moves it to the figure as stated. The interpretation, the reader's objection in its
+words and this answer are given on the methods page beside the rule, so a reader of the results can judge it.
+
+*The independent read (2026-10-17, Gemini 3.1 Pro, $0.170; `evidence/phase-5/patch-4.6.3-review-raw.md`):* **adopt
+with four changes.** It confirmed 167 against the range and the code, and the reasons for declining the alternatives.
+(1) Report the floor as a deviation from §12.4's "never used to choose": answered above as a stated interpretation (his). (2)
+The brief's "judge only whether that figure is the total" steers the reader and does not tell it the floor, so a
+reader finding 150 would pass and wrongly dispute: taken (items 4 and 5). (3) A derived total has no one sentence to
+quote: taken (item 5). (4) Ranges and approximations: taken (item 3).
+
+**What it costs.** Totals from 100 to 166 are rejected even where a high draw would have scaled them past 100 (and
+totals from 63 to 99 that only a high draw would have admitted). A total given only as an upper bound is rejected on
+every shape. No code: the brief's paragraph and its test change; `scenario.py`, `scale.py` and `material.py` are
+untouched.
 
 ### 4.7 The rubric
 
@@ -1288,3 +1362,14 @@ protocol check: ok`.
   the order the log requires. It touches S1 and S3 only (S2 and S4 totals are dollars). The independent read did
   not raise it. Logged as an OPEN in `KNOWN-GAPS.md`, to settle before the total search of any S1 or S3
   candidate. The 11a note that the too-small line "must carry no figure and no factor" waits on that decision.
+
+**Stage D, §4.6.3 adopted (2026-10-17, about 12:15 PM CDT; Opus drafted, his decision).** The headcount floor OPEN
+from the 11a review is settled by option (a): a heads total passes criterion 4 part (ii) at 167 or more as stated.
+The independent read (Gemini 3.1 Pro, $0.170, `evidence/phase-5/patch-4.6.3-review-raw.md`) asked for four changes;
+2 to 4 are taken and 1 is answered as a stated interpretation (§4.6.3). **A change to the instrument:** the reader's
+brief (`experiment/readers/rejection.txt`, `maps_to_shape`) gains the floor and the rule for approximate figures,
+ranges and upper bounds, loses the "judge only whether that figure is the total" sentence, and lets a derived total
+be quoted from several sentences. No read has used the changed text. The 11a too-small note is dropped:
+`total-search.txt` carries no note of why a case was rejected, as the read is blind (§4.9). Its test changed with it;
+no other code changed. The commit's whitespace hook stripped trailing spaces from five lines of the raw file's prose
+copy of the reply; no word changed, and the full response as returned (its JSON block) is byte-exact.

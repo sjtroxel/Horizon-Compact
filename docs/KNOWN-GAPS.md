@@ -7,6 +7,20 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-17, about 12:20 PM (§4.6.3 ADOPTED; HIS COMMIT AND PUSH LAND IT)
+>
+> **The headcount floor is settled** (search-half doc §4.6.3, his, after the reader's read, $0.170): a heads total
+> passes criterion 4 at **167 or more as stated**; the brief gains the floor and a rule for approximate figures,
+> ranges and upper bounds. **Uncommitted:** the patch, the brief and its test, the read's raw reply, §11's entry,
+> this file, ROADMAP. `0fd4ac5` (§4.6.2, step 11a) is pushed.
+>
+> **Next, in order:** (1) `make check`, then his commit and push (the reader refuses to run on an unpushed brief);
+> (2) **criterion 4 down closure-01 to 05, in order**, by §4.6.2 A as amended by §4.6.3: `total-search.txt` carries
+> no note of why a case was rejected; (3) the retool records, then ai. Reader spend so far: about $0.0064 on reads,
+> plus $0.126 and $0.170 for the two patch reads.
+>
+> *The 5:30 AM block below is superseded; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-17, about 5:30 AM, HANDOFF (STEP 11a BUILT AND REVIEWED; HIS COMMIT AND PUSH LAND IT)
 >
 > **Measured:** `make check` green, **2508 tests**; `hc protocol check: ok`. Last commit `b35dc02` (pushed).
@@ -1413,7 +1427,14 @@ case by its type and a neutral label. The names live only in the private longlis
 
 ---
 
-## OPEN 2026-10-17 — the headcount floor in criterion 4 needs a factor not yet drawn (decide before any S1 or S3 total search)
+## CLOSED 2026-10-17, his decision (a), search-half doc §4.6.3 (was OPEN, same day) — the headcount floor in criterion 4 needs a factor not yet drawn (decide before any S1 or S3 total search)
+
+*Closed 2026-10-17, about 12:15 PM CDT:* option (a), a floor of 167 on the total as stated, adopted as §4.6.3 after
+the independent reader's read ($0.170). The read's changes 2 to 4 are taken (the floor and a rule for approximate
+figures, ranges and upper bounds go in the brief; the "judge only" sentence and the 11a too-small note are dropped,
+since the read is blind). Its change 1, a deviation from protocol §12.4's "never used to choose", is answered as a
+stated interpretation (his): that sentence is about the company's size, and the floor follows from §12.6's "fewer
+than 100". The entry below stays as the record.
 
 Found in the Opus review of step 11a (search-half doc §11). §4.6.1 item 5 and §4.6.2 A.1 fail criterion 4 on a heads
 total **under 100 after scaling**. The factor is drawn by `hc case build`, which refuses until criterion 4 is met.

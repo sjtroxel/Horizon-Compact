@@ -284,9 +284,12 @@ def test_the_brief_asks_for_the_total_as_well_as_the_shape() -> None:
         "the fall in operating income the company expected before acting",
         "a savings or cost-reduction target",
         "quote in your reason the sentence that states the total",
-        "rejected as too small after the study's scaling",
+        "For S1 and S3 the total must be 167 or more",
+        "a range is taken at its low end",
+        "if the total is worked out from several figures, the sentences that state them",
     ):
         assert words in shape, words
+    assert "judge only whether that figure is the total" not in shape
 
 
 @pytest.mark.parametrize("bad", ["first_disclosure", "nonsense"])
