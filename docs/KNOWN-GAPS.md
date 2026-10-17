@@ -7,6 +7,49 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-17, about 5:30 AM, HANDOFF (STEP 11a BUILT AND REVIEWED; HIS COMMIT AND PUSH LAND IT)
+>
+> **Measured:** `make check` green, **2508 tests**; `hc protocol check: ok`. Last commit `b35dc02` (pushed).
+> **Uncommitted:** search-half doc §4.6.2 (adopted 2026-10-17 after the reader's read, raw reply in
+> `docs/phases/evidence/phase-5/patch-4.6.2-review-raw.md`) and step 11a, its build: the brief's new `maps_to_shape`
+> paragraph, `total-search.txt` in the reader's material, `hc case documents`. **Reviewed (Opus), no code changed**
+> (§11, "Stage D step 11a, the Opus review"). The brief changed after its first read; logged in §11 as a change to
+> the instrument.
+>
+> **Next, in order:** (1) his commit and push; (2) **criterion 4 down closure-01 to 05, in order**, by §4.6.2 A:
+> the shape, then the total from the first-disclosure document or, if absent, `hc case documents <id>` and the
+> paragraph search by A.3, `total-search.txt` saved before the result, the reader on any rejection; (3) the retool
+> records, then ai, with no-decision hits failing criterion 3 by §4.6.2 B. **Before the total search of any S1 or
+> S3 candidate:** OPEN 2026-10-17, the headcount floor (new; closure-01 is S2 and is not affected). Run the reader
+> with the key in `OPENROUTER_API_KEY` (OPEN 2026-10-17, the key prompt). Reader spend so far: about $0.0064 on
+> reads, plus $0.126 for the patch's read.
+>
+> *The 4:25 AM block below is superseded; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-17, about 4:25 AM, HANDOFF (STAGE D STEP 11 STARTED; STOPPED AT CRITERION 4)
+>
+> **Stage C is done:** `b35dc02` pushed, CI and Deploy green (run 38976497523). **Stage D, step 11, closure type**
+> (the selection log is in the appendix, version 46; nothing of it is tracked):
+>
+> - **First-disclosure check done for all 29 closure window candidates** (filing text, EDGAR full-text search on the
+>   filer's CIK from 2025-01-01, a web search). 28 pass with a date; **closure-18 fails** (three restructurings
+>   committed and reported in aggregate before the window; his decision). His decisions on three judgment dates:
+>   closure-16 and closure-22 pass at their filing dates (an earlier, smaller decision at the same filer is separate);
+>   **closure-29 dated to the earnings call** that named the action as under consideration, not its later filing.
+>   The order is fixed; the 7 fallback candidates stay undated until a shortfall calls for them.
+> - **closure-01 to 05** (disclosed 08-04 and 08-05): criteria 2, window and 3 recorded. closure-02 was rejected on
+>   criterion 3; **the reader disputed** (Gemini 3.1 Pro, $0.0064, attempt 3), the rejection does not stand, his
+>   resolution logged. **All five now wait at criterion 4.**
+>
+> **First move next session (Opus, fresh chat):** settle the two OPEN 2026-10-17 rules together (the scenario total
+> in criterion 4; a search hit that announces no decision), as one dated patch, **read by the reader before it is
+> adopted** (his 2026-10-17: he takes Claude's recommendation, so the outside read is the check), before any
+> criterion 4 and before any retool or ai record. Then criterion 4 down closure-01 to 05 in order. Reader spend so far: about $0.0064.
+> **Run the reader with the key in `OPENROUTER_API_KEY`** (OPEN 2026-10-17, the key prompt); the hidden prompt
+> rejected a working key twice.
+>
+> *The 5:35 PM block below is superseded; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-16, about 5:35 PM, HANDOFF (STAGE C COMMITTED; HIS PUSH AND THE DEPLOY CLOSE IT)
 >
 > **Measured at handoff:** `make check` green, **2497 tests**; `hc protocol check: ok`. **Committed, not yet pushed
@@ -1369,6 +1412,92 @@ case by its type and a neutral label. The names live only in the private longlis
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
 
 ---
+
+## OPEN 2026-10-17 — the headcount floor in criterion 4 needs a factor not yet drawn (decide before any S1 or S3 total search)
+
+Found in the Opus review of step 11a (search-half doc §11). §4.6.1 item 5 and §4.6.2 A.1 fail criterion 4 on a heads
+total **under 100 after scaling**. The factor is drawn by `hc case build`, which refuses until criterion 4 is met.
+The factor lies in [0.6, 0.9] or [1.1, 1.6], so a stated total of **167 or more** always scales to 100 or more and
+**62 or fewer** never does; **from 63 to 166 the result depends on a draw that has not happened**, and criterion 4
+cannot be recorded in the log's order. S1 and S3 only (S2 and S4 totals are dollars). The independent read of
+§4.6.2 did not raise it.
+
+**Options (Claude's recommendation (a); his decision, as one dated patch, read by the reader before adoption as
+§4.6.2 was):**
+- **(a)** A fixed floor at criterion 4: a stated heads total passes part (ii) at **167 or more** (the least every
+  factor in §4.8's range scales to 100 or more). Admission no longer depends on the draw; a rejection under the
+  floor is arithmetic on the figure as stated, which the material can name, since no factor exists yet. No code.
+  Cost: drops totals of 100 to 166 that a high enough draw would have admitted.
+- **(b)** Draw the factor earlier: `hc case documents` draws the seed, write-once and chosen by nobody, and the
+  build reads it, so §4.6.1 item 5 holds as written. Keeps the rule; changes the build's draw (now inside
+  `prepare_case`, "nothing here can supply one"); a case's admission depends on its draw.
+- **(c)** Record part (ii) on the stated figure and leave the floor to the render: the log says criterion 4
+  passed for a case the render refuses, the fault §4.6.2 A was made to remove.
+
+**Settle it before any headcount is looked for,** so the rule is not chosen by what it admits. closure-01 is S2 and
+is not affected. The 11a note that the too-small line in `total-search.txt` "must carry no figure and no factor"
+waits on this decision.
+
+## OPEN 2026-10-17 — the scenario total in criterion 4 is not in the reader's brief (decide before any criterion 4)
+
+**DECIDED 2026-10-17 (his, about 4:54 AM CDT): search-half doc §4.6.2, read by the independent reader before
+adoption. Build work (step 11a) before any criterion 4. Kept below as the record.**
+
+Search-half doc §4.6 rule 4 fails criterion 4 when neither the first-disclosure document nor a pre-cut-off document
+gives the scenario's total (§4.6.1 item 5 adds: a heads total under 100). **The reader's brief
+(`experiment/readers/rejection.txt`) defines `maps_to_shape` by shape alone.** So a rejection for a missing total
+goes to the reader, which sees a clear shape and disputes; by protocol §12.4 the rejection then does not stand, the
+candidate goes on, is built, and the render refuses it. The log would say criterion 4 passed for a case that cannot
+be rendered.
+
+**It is not rare.** closure-01 (S2) states charges only, which rule 1 excludes, with no savings figure and no
+headcount in its Item 2.05; its savings figure was given on the earnings call, not in the document. closure-04 and
+closure-05 (S3) name sites but not their headcounts. Many biotech filings state a percentage cut only. It may decide
+whether a type falls short.
+
+**Options (Claude's recommendation (a); his decision, rested, with Opus):**
+- **(a)** A dated patch to search-half doc §4.9 and the brief, before any criterion 4 read exists: criterion 4 is
+  recorded as two parts, **the shape** (a judgment, read by the reader as now) and **the total present** (a lookup
+  the render enforces anyway: recorded with the locators searched, not read). Cost: §12.4's "every rejection on 4 is
+  read" narrows to its judgment part, stated on the methods page.
+- **(b)** The total rule added to the brief, the reader given the excerpt. Keeps every rejection read, but the reader
+  cannot see the pre-cut-off documents a total may come from.
+- **(c)** Leave it: the dispute carries the candidate to a render refusal, late, and the log misstates criterion 4.
+
+Also to settle with it: **what the S2 total is for a case** (the template's total is `s2_shortfall`, a dollar
+shortfall; rule 1's "size" examples are a facility's headcount, the roles affected, a program's annual cost).
+
+## OPEN 2026-10-17 — a search hit that announces no decision (decide with the total, before any retool or ai record)
+
+**DECIDED 2026-10-17 (his, about 4:54 AM CDT): search-half doc §4.6.2, read by the independent reader before
+adoption. Build work (step 11a) before any criterion 4. Kept below as the record.**
+
+The retool queries (§12.3, channel 2) are phrase matches, mostly in earnings releases. **Of retool-01 to 22, most
+announce no decision at all:** the phrase sits in risk-factor or forward-looking boilerplate (02, 03, 04, 05, 16),
+capital-spending commentary (06, 07, 08, 15), a merger agreement's covenant (10), another company's plans (21) or an
+executive retention memo (22); two are expansions the filing calls "previously announced" (01, 19), which the
+first-disclosure check fails as written. Only a few look like a decision announced in that filing. The ai pool is
+likely the same. **No doc says how to log a hit with no decision**, and the log's order (first disclosure, with a
+date, before criterion 3) has no date to give one.
+
+**Options (Claude's recommendation (b); to be drafted in the fresh chat with the total and read by the reader before
+adoption):**
+- **(a)** Fail it at the first-disclosure check, "no decision to date". Cheap, but a judgment that removes most of a
+  type's list never reaches the reader, which §12.4 exists to prevent.
+- **(b)** Record it as a **criterion 3** failure ("not a real decision"), so every such removal is read (about
+  $0.006 a read). Needs two clarifications: the date such a row carries (the filing date, as the only dated mention
+  of anything) and its excerpt (the passage holding the matched phrase, whole paragraph, since nothing is announced).
+
+**Nothing of the retool type is recorded yet**; retool-01 to 22 are fetched into the appendix cache only.
+
+## OPEN 2026-10-17 — the hidden key prompt rejected a working OpenRouter key
+
+`hc case reader closure-02` failed twice with HTTP 401 "User not found" from a key typed at the `getpass` prompt
+(both attempts recorded, no spend). The same key, read by bash's `read -rs`, passed OpenRouter's key endpoint and
+then the read itself, through `OPENROUTER_API_KEY`. The key passed the code's shape check both times, so the prompt
+received something well-formed but wrong; cause not found. **Until it is:** set the key in the environment for the
+one command. The Anthropic prompt uses the same mechanism. **Before the first probe launch:** confirm the key the
+container reads from SSM is a working one.
 
 ## OPEN 2026-10-16 — pay per head in a case scenario (before the first S1 or S3 render)
 

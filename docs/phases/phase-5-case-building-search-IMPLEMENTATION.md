@@ -2,7 +2,9 @@
 
 > **IMPLEMENTATION doc, search half. Written 2026-10-15 (Opus), immediately before the search. APPROVED 2026-10-15 (his,
 > about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** **Patched 2026-10-16 (his): §4.6.1, the case scenario
-> is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** **Patched
+> 2026-10-17 (his), after the independent reader's read: §4.6.2, the total in criterion 4 and a search hit
+> that announces no decision.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -254,6 +256,113 @@ ones are: the shape's own template, rows, a render, and a check that re-renders 
 the payroll). The total still stands in the menu heading and the instruction, and the reader's neutrality read of
 every scenario is the backstop. **The alternative,** figure-free wordings of every sentence written for all four
 shapes now, was declined: it is prose chosen after the candidate list exists.
+
+#### 4.6.2 Patch 2026-10-17 (his, about 4:54 AM CDT; drafted by Opus): the total in criterion 4, and a search hit that announces no decision
+
+*ADOPTED 2026-10-17 (his), after the independent reader's read (below) and with its two changes to B answered.* Found at Stage D step 11 (`KNOWN-GAPS.md`, both OPEN 2026-10-17 entries on rules),
+before any criterion 4 result and before any retool or ai row was recorded. Each rule is judged on its own terms,
+not by which candidates it admits.
+
+**A. The total is part of criterion 4, and every rejection on criterion 4 is still read.** The fault: §4.6 rule 4
+and §4.6.1 item 5 fail criterion 4 on a missing or too-small total, but the reader's brief defines `maps_to_shape`
+by shape alone, so the reader disputes, the rejection does not stand (§12.4), and the render refuses a case the log
+says passed.
+
+1. **Criterion 4 is checked in two parts, in order,** recorded as one result whose reason says which part failed:
+   **(i) the shape**, by §12.5's rule on the first-disclosure document; **(ii) the total**: the figure the shape's
+   template names as its `total` (S1 `s1_roles`, S2 `s2_shortfall`, S3 `hc_p6`, S4 `s4_annual`), stated for the case
+   under §4.6 rule 1 or 2, or derived from case rows by the template's own formulas (§4.6.1 item 4), and, for a
+   headcount, 100 or more after scaling (§4.6.1 item 5).
+2. **Each total is the quantity the template's text says it is, and nothing near it:**
+   - **S1:** the number of roles whose work the document says AI or automation software takes over.
+   - **S3:** the number of employees at the facility named.
+   - **S4:** the program's stated annual cost.
+   - **S2:** **the fall in operating income the company expected before acting, from lower revenue,** as a dollar
+     figure, in operating income as reported (the measure `op_income_fy0` is). The template says so in sentences
+     with no placeholder, so they are in every S2 scenario: "A downturn in the industries the Company's customers
+     work in is cutting orders", and "Before any decision, operating income would therefore fall by" the total.
+     **Not** a savings or cost-reduction target: that is the size of the company's response, which rule 1 keeps
+     out, and as the total it would build the company's choice into the problem (the line "accepting lower
+     operating income" would be zero for the company by construction, and the scenario would state a fall no
+     source states). **Not** a charge (rule 1), an adjusted measure, a percentage, or an expected fall in revenue
+     alone, unless the template's formulas derive the total from it with case rows.
+   A figure that is not the template's quantity is not the total, however close.
+3. **Where it is looked for, by rule:** the first-disclosure document first; if it is not there, **every document
+   of the §12.6 set for the case's cut-off**, fetched before criterion 4 is recorded by a fetch with no extraction
+   and no key (`hc case documents <id>`, new, refused until the criteria before 4 are met; it writes `sources.json`
+   exactly as the build would, so the build reuses it). In each document, every paragraph holding the subject as
+   the first-disclosure document names it (the facility's name or place; the program's name; for S1 and S2, the
+   action's own words), and, for S2, every paragraph holding "operating income" together with "expect",
+   "anticipate", "outlook", "guidance" or "forecast".
+4. **A rejection on either part goes to the reader** (§12.4 unchanged). Its material is the first-disclosure excerpt
+   as now, and, for a rejection on the total, **`total-search.txt`**: every paragraph item 3's search found, each
+   under a line naming its document by form and filing date, then the list of every document searched and the
+   terms used. Both are placed by rule and saved before the result is recorded. A rejection for a stated total
+   under 100 after scaling is read the same way: the material says so, and the reader judges only whether that
+   figure is the total (the arithmetic is not a judgment).
+5. **The brief's `maps_to_shape` gains the total** (the text below). A "pass" quotes, in its reason, the sentence
+   that states the total. A pass disputes the rejection (§12.4): the candidate goes on, the quoted figure becomes
+   the total row with its source, and his resolution is logged beside it.
+6. **What no one reads:** a total in a part of a document no search term reached. The limit is stated on the
+   methods page with the terms.
+
+**The brief's new `maps_to_shape` text** (replacing the present paragraph; the other two criteria unchanged):
+
+> maps_to_shape: Two parts, and both must be met. First, the shape: the excerpt maps onto one of four decision
+> shapes. Apply them in this order; the first that matches wins. 1. S1: a workforce change the document attributes
+> to AI or automation software. 2. S3: a facility named for closure or sale, with or without new capacity elsewhere
+> (on retool when new or converted capacity is named). 3. S4: a multi-year program of stated annual cost, funded or
+> declined. 4. S2: a restructuring with workforce or cost reductions and no facility named. An excerpt that matches
+> none of the four fails this criterion. Second, the total: the material states, for that shape, the one figure the
+> decision is about. S1: the number of roles whose work the document says AI or automation software takes over. S3:
+> the number of employees at the facility named. S4: the program's annual cost. S2: the fall in operating income the
+> company expected before acting, from lower revenue, as a dollar figure; a savings or cost-reduction target, a
+> charge, an adjusted measure, a percentage or an expected fall in revenue alone is not it. The material for the
+> total is the excerpt and, if you are given one, a search of the company's earlier filings. If the material says a
+> stated total was rejected as too small after the study's scaling, judge only whether that figure is the total.
+> "pass" means both parts are met: give the shape, and quote in your reason the sentence that states the total.
+> "fail" means either part is not met; say which.
+
+**B. A search hit that announces no decision** (a risk factor, forward-looking boilerplate, capital-spending
+commentary, a contract's covenant, another company's plans) **is recorded like any candidate and fails criterion 3,
+read.**
+
+1. **The first-disclosure check is done as §4.3 says, on the passage's subject** (what the matched passage is
+   about, in its own words, whether or not it reads as a decision), so that the date stands if the reader later
+   disputes criterion 3. An earlier mention before the window fails it, as now (this is where "previously
+   announced" falls). With none, the earliest dated mention is the filing itself, and its date is the disclosure
+   date, **exactly as for any candidate whose own filing is its earliest mention** (§12.2 dates by first public
+   disclosure; it does not say a first disclosure cannot fall on a filing date). The reason says the passage
+   announces no decision in Claude's reading, which criterion 3 then records.
+2. **Criteria 1 and 2 as now; criterion 3 fails,** "no decision announced", and is read like any criterion 3
+   rejection. **The brief is unchanged:** `real_decision` already requires that "the excerpt describes a real
+   decision with real alternatives, made by the company".
+3. **The excerpt is Stage D step 11's unit:** the whole item of the current report, or the whole exhibit, that holds
+   the matched phrase, never a paragraph picked from it. Over the 200,000-character limit, it is cut at paragraph
+   boundaries, in rings: every paragraph that holds the matched phrase; then, for every match at once, the one
+   paragraph before and the one after; then the second before and after; and so on, stopping before the first ring
+   that would pass the limit (a ring is added whole or not at all). Kept paragraphs are sent in document order, a
+   line `[...]` marking each gap.
+
+*The independent read (2026-10-17, Gemini 3.1 Pro, $0.126; `evidence/phase-5/patch-4.6.2-review-raw.md`):* **A,
+adopt as written. B, adopt with two changes, both answered:** (1) "dated by the filing date" read as contradicting
+§12.2's "never its filing date": answered by rewording B.1, not by a deviation, since the date is the first-disclosure
+check's result like any other and that check now runs on the passage's subject; (2) the cut rule at the limit was
+not mechanical with several matches: replaced by the ring rule in B.3.
+
+*Declined:* for A, recording the total as a lookup the reader does not read (`KNOWN-GAPS.md`'s option (a)): it
+narrows §12.4's "every rejection on criterion 3, 4 or 5 is read", a sentence of the tagged protocol, so it would be
+a reported deviation, and the part that decides most cases (whether a stated figure is the total) is a judgment.
+Leaving it (option (c)) logs criterion 4 as passed for cases that cannot be rendered. For B, failing the hit at the
+first-disclosure check: a judgment that removes most of a type's list would never reach the reader.
+
+**What it costs.** A: an S2 case needs a stated expected fall in operating income, which many restructurings do not
+give; the closure type may fall short, and a shortfall is reported (§12.1), never filled. A total rejection's read
+carries more material (likely a few cents). B: one read per no-decision hit, likely tens across retool and ai, at
+about $0.006 each. **Build work before criterion 4** (Stage D step 11a): the brief's paragraph; `total-search.txt`
+in `material.py` for `maps_to_shape`; `hc case documents`; tests. **The brief changes after its first read**
+(closure type, `real_decision`; that text is untouched): logged in §11 as a change to the instrument, with this
+reason.
 
 ### 4.7 The rubric
 
@@ -1123,3 +1232,59 @@ green. No AWS call was made from here; the apply is his.
   the model's request quota).
 - **Not proved until the first case:** the task role's grant in use, `LastModified` on a `cases/` call object, and
   the three unverified points of 10a point 15. All are the first case's probe, Stage D.
+
+**Stage D step 11a, the build for §4.6.2 (2026-10-17, about 5:10 AM CDT; Sonnet built; for Opus's review in a fresh
+chat, then his commit and push).** No document was fetched and no read was made: every test uses a fake SEC and fake
+replies. 2508 tests (11 added), `make check` green, `hc protocol check: ok`.
+- **The brief changed, and it is a change to the instrument.** `experiment/readers/rejection.txt`: the
+  `maps_to_shape` paragraph is replaced by §4.6.2's text (two parts, the shape and the total, the S2 definition,
+  the quoted sentence on a pass, the too-small note). The shape list, the order, the `real_decision` and
+  `not_recognizable` paragraphs and the reply format are untouched. **Reason:** the brief judged the shape alone, so
+  a reader would dispute a rejection for a missing total (§4.6.2). The only read made before it, closure-02's on
+  `real_decision`, used text that did not change; no read of `maps_to_shape` exists. The brief's sha256 in every
+  later request record is the new one.
+- **`total-search.txt`** (`CaseAppendix.total_search_path`; `material.rejection_material`): sent as a second block,
+  "Search of the company's earlier filings", on a `maps_to_shape` read when the file exists, and on no other read.
+  An empty or over-long file is refused, not dropped. It is hand-placed, as the excerpt is, and its hash goes into
+  the request record's `material_sha256`, so a changed search is a changed material (the existing one-read-per-
+  material rule). **Not enforced in code:** that it was saved before the result was recorded (the same as the
+  excerpt; the order of work in §4.6.2 A.4 and Stage D step 11). The too-small note (A.4) is a line he or Opus
+  writes at the top of the file; it must carry no figure and no factor.
+- **`hc case documents <id>`:** fetches the candidate's §12.6 document set and writes `sources.json`, with no key
+  and no extraction. The CIK comes from the search's list and the cut-off from the log (the day before the recorded
+  first disclosure), neither typed. Refused, before any fetch, until `first_disclosure`, `public_and_filing`,
+  `inside_window` and `real_decision` are met (a disputed rejection counts as met, as in `hc case build`). It prints
+  counts only. `sources.json` is the builder's own list: a later `hc case build` rewrites nothing (tested). The
+  shared lookup is `_candidate_cik_and_row`; `hc case build`'s checks are unchanged.
+- **Not built, by §4.6.2:** the paragraph search itself stays by hand from the cache, by the rule in A.3; nothing
+  in code finds the paragraphs. **For the review:** (1) the brief's reply format still says a `maps_to_shape` "fail"
+  gives shape "none", and `_shape_problem` enforces it, so a failure on the total alone reads as "none" with its
+  reason saying which part; (2) B.3's ring rule for the excerpt cut is not built (nothing cuts an excerpt in code,
+  and none will exceed the limit until a very long filing does); (3) nothing in code checks that a pass quotes the
+  total's sentence.
+
+**Stage D step 11a, the Opus review (2026-10-17, about 5:25 AM CDT).** Read against §4.6.2 as adopted, not
+against the 11a notes. **No code changed:** the build matches the patch. 2508 tests, `make check` green, `hc
+protocol check: ok`.
+- **Checked:** the brief's new `maps_to_shape` paragraph equals §4.6.2's text word for word (compared with the
+  line breaks removed), and nothing else in the brief changed. `rejection_material` adds the search block only to
+  a `maps_to_shape` read, and its hash goes into `material_sha256`. `hc case documents` refuses, before any fetch,
+  until the four checks before criterion 4 are met (a disputed rejection counts, as in the build); it takes the CIK
+  from the search's list and the cut-off from the log, writes `sources.json` with `write_sources` (an identical
+  list is a no-op, a different one is refused), and makes no model call. `hc case build`'s gate is unchanged. `hc
+  case lock` checks the scenario and rubric reads only, so the brief's new sha256 does not touch closure-02's
+  `real_decision` read.
+- **The three open points, answered.** (1) A `maps_to_shape` "fail" giving shape "none" is kept: §4.6.2 replaced
+  the criterion's paragraph only, the reply format was not part of what the reader read, and a fail agrees with
+  the rejection, so its shape is never used; the reason says which part failed. A reply that names a shape on a
+  fail is unusable and costs an attempt, as before. (2) The ring rule is applied by hand when an excerpt is cut, as
+  the excerpt is placed by hand; code refuses any part over 200,000 characters, which is the backstop. The same
+  limit applies to `total-search.txt`, for which §4.6.2 gives no cut rule; none is expected to come near it. (3) A
+  pass's quoted sentence is checked by him when he logs the resolution (A.5), not by code.
+- **Found, not fixed (a rule, his): the headcount floor cannot be checked when criterion 4 is recorded.** §4.6.1
+  item 5 and §4.6.2 A.1 fail a heads total under 100 *after scaling*, but the factor is drawn by `hc case build`,
+  which refuses until criterion 4 is met. With the factor in [0.6, 0.9] or [1.1, 1.6], a stated total of 167 or
+  more always scales to 100 or more and one of 62 or fewer never does; between, criterion 4 cannot be decided in
+  the order the log requires. It touches S1 and S3 only (S2 and S4 totals are dollars). The independent read did
+  not raise it. Logged as an OPEN in `KNOWN-GAPS.md`, to settle before the total search of any S1 or S3
+  candidate. The 11a note that the too-small line "must carry no figure and no factor" waits on that decision.

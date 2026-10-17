@@ -149,6 +149,15 @@ class CaseAppendix:
         (§4.9): the part of the first-disclosure document the criterion turns on. Private."""
         return self.directory / "first-disclosure-excerpt.txt"
 
+    @property
+    def total_search_path(self) -> Path:
+        """The search of the case's earlier filings for the scenario's total (§4.6.2 A.3, item 4): every
+        paragraph the rule found, each under a line naming its document by form and filing date, then the
+        documents searched and the terms. Placed by hand for the independent reader of a ``maps_to_shape``
+        rejection and saved before the result is recorded. Absent when the first-disclosure document is
+        all the reader is given. Private."""
+        return self.directory / "total-search.txt"
+
     def probe_reads_path(self, probe_set: int) -> Path:
         """Every recognition-probe answer of one set and what he read in it (protocol §12.8); written by
         ``hc case probe-verdict``. Private: it holds the model's answers."""

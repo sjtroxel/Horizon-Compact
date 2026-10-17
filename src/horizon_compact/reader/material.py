@@ -6,7 +6,9 @@ case's name could be added: a builder reads named files of the case's folder and
 this module imports nothing that holds a result (``tests/test_architecture.py`` checks the imports).
 
 * ``rejection``: the criterion and the candidate's first-disclosure excerpt, placed by hand in the case's
-  folder. Not the drafter's reason, not the recorded result: an independent read starts blind.
+  folder. Not the drafter's reason, not the recorded result: an independent read starts blind. A
+  ``maps_to_shape`` read is also given the search of the case's earlier filings for the scenario's total
+  (``total-search.txt``, §4.6.2 A.3) when the case has one.
 * ``scenario``: the shape's template, the rendered scenario, what the render dropped and set, and a table of
   where each figure came from. Not the unscaled values, the scaling factor or an accession number (the table
   numbers the filings 1, 2, ... in order of first use); the factor and the hashes are removed from the render
@@ -159,7 +161,15 @@ def rejection_material(
             f"{criterion!r} is not a criterion the reader reads: {', '.join(READ_CRITERIA)}"
         )
     excerpt = _read_text(case.reader_excerpt_path, "the first-disclosure excerpt")
-    return _assemble("rejection", criterion, [("Excerpt", excerpt)])
+    blocks = [("Excerpt", excerpt)]
+    if criterion == "maps_to_shape" and case.total_search_path.exists():
+        blocks.append(
+            (
+                "Search of the company's earlier filings",
+                _read_text(case.total_search_path, "the search of earlier filings"),
+            )
+        )
+    return _assemble("rejection", criterion, blocks)
 
 
 def _provenance_table(rows: dict[str, CaseRow], set_to_total: set[str]) -> str:

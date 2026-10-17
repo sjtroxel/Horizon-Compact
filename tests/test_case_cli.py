@@ -761,6 +761,74 @@ def test_build_refuses_a_case_that_was_already_prepared_before_any_fetch(
     assert "already exists" in capsys.readouterr().err and len(transport.requests) == fetched
 
 
+# --- hc case documents (search-half IMPLEMENTATION doc §4.6.2 A.3) ----------------------------------------
+
+
+def _documents() -> int:
+    return main(["case", "documents", "closure-01"])
+
+
+def test_documents_fetches_the_filings_and_writes_sources_with_no_key_and_no_extraction(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    app, transport, providers = _build_setup(tmp_path, monkeypatch, passes=4)
+    assert _documents() == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "Fernwick" not in out and "0009999999" not in out and "the Company" not in out
+    assert f"cut-off {BUILD_CUTOFF.isoformat()}" in out and "total-search.txt" in out
+    folder = app / "closure-01"
+    sources = json.loads((folder / "sources.json").read_text())
+    assert sources["cutoff"] == BUILD_CUTOFF.isoformat() and sources["sources"]
+    assert transport.requests[0][0] == SUBMISSIONS_URL  # the CIK came from candidates.json
+    assert providers.made == []
+    for name in ("sections.json", "build.json", "reviewed-flags.template.json"):
+        assert not (folder / name).exists(), name
+
+
+def test_the_build_after_documents_reads_the_same_sources_from_the_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app, _, _ = _build_setup(tmp_path, monkeypatch)
+    assert _documents() == CLEAN_EXIT
+    before = (app / "closure-01" / "sources.json").read_bytes()
+    assert _build() == CLEAN_EXIT
+    assert (app / "closure-01" / "sources.json").read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    ("setup", "words"),
+    [
+        ({"passes": 3}, "has not passed real_decision"),
+        ({"passes": 1}, "has not passed public_and_filing, inside_window, real_decision"),
+        ({"agreed": "real_decision"}, "has not passed real_decision"),
+        ({"ciks": ("0009999999", "0008888888")}, "exactly one"),
+    ],
+)
+def test_documents_refuses_before_any_fetch_until_the_criteria_before_4_are_met(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    setup: dict[str, Any],
+    words: str,
+) -> None:
+    app, transport, _ = _build_setup(tmp_path, monkeypatch, **setup)
+    assert _documents() == REFUSED_EXIT
+    assert words in capsys.readouterr().err
+    assert transport.requests == []
+    assert not (app / "closure-01" / "sources.json").exists()
+
+
+def test_documents_takes_the_cutoff_from_the_log_and_refuses_an_unknown_label(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, transport, _ = _build_setup(tmp_path, monkeypatch, disclosed=date(2026, 7, 2))
+    with pytest.raises(SystemExit):
+        main(["case", "documents", "closure-01", "--cutoff", "2026-06-15"])
+    assert main(["case", "documents", "closure-09"]) == REFUSED_EXIT
+    assert "not a candidate" in capsys.readouterr().err
+    assert transport.requests == []
+
+
 def test_assemble_needs_every_flag_decided_then_writes_the_dossier_and_prints_no_name(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

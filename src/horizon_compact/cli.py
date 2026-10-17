@@ -1680,10 +1680,8 @@ def _case_terms(case: CaseAppendix) -> tuple[CaseTerm, ...]:
         ) from exc
 
 
-def _build_candidate(search: CaseAppendix, label: str, cutoff: date) -> str:
-    """The CIK of ``label``, from the search's candidate list and never the command line, after checking the
-    selection log: criteria 1-4 passed (search-half doc §4.1 step 1), and the cut-off is the day before the
-    first disclosure the log recorded (protocol §12.6)."""
+def _candidate_cik_and_row(search: CaseAppendix, label: str) -> tuple[str, Row]:
+    """The CIK of ``label``, from the search's candidate list and never the command line, and its log row."""
     try:
         records = json.loads((search.directory / "candidates.json").read_text(encoding="utf-8"))[
             "list"
@@ -1701,6 +1699,13 @@ def _build_candidate(search: CaseAppendix, label: str, cutoff: date) -> str:
     row = load_newest_log(search).rows.get(label)
     if row is None:
         raise LogError(f"{label} is not in the selection log")
+    return ciks[0], row
+
+
+def _build_candidate(search: CaseAppendix, label: str, cutoff: date) -> str:
+    """The CIK of ``label``, after checking the selection log: criteria 1-4 passed (search-half doc §4.1
+    step 1), and the cut-off is the day before the first disclosure the log recorded (protocol §12.6)."""
+    cik, row = _candidate_cik_and_row(search, label)
     # Protocol §12.4's criteria 1-4 and the first-disclosure check before them: every criterion but the
     # probe (criterion 5, ``not_recognizable``), which needs the dossier this command builds.
     unpassed = [c for c in CRITERIA[:-1] if not row.met(c)]
@@ -1713,7 +1718,7 @@ def _build_candidate(search: CaseAppendix, label: str, cutoff: date) -> str:
             f"the cut-off is the day before first disclosure (protocol §12.6): the log gives "
             f"{expected.isoformat()} for {label}, not {cutoff.isoformat()}"
         )
-    return ciks[0]
+    return cik
 
 
 def cmd_case_build(args: argparse.Namespace) -> int:
@@ -1791,6 +1796,35 @@ def cmd_case_build(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_case_documents(args: argparse.Namespace) -> int:
+    """Fetch a candidate's pre-cut-off filings and write ``sources.json``, with no extraction and no key
+    (search-half doc §4.6.2 A.3), so the scenario's total can be looked for in them before criterion 4 is
+    recorded. The cut-off is the log's (the day before first disclosure), never typed; the build later reuses
+    the same list from the cache. Prints counts only."""
+    case = open_case(args.label)
+    search = open_case("search")
+    cik, row = _candidate_cik_and_row(search, args.label)
+    unpassed = [c for c in CRITERIA[: CRITERIA.index("maps_to_shape")] if not row.met(c)]
+    if unpassed:
+        raise LogError(
+            f"{args.label} has not passed {', '.join(unpassed)} in the selection log: the documents "
+            "are fetched for criterion 4, after the criteria before it"
+        )
+    assert row.disclosed is not None  # a passed first_disclosure always carries its date
+    cutoff = row.disclosed - timedelta(days=1)
+    client = EdgarClient(appendix=case, transport=UrllibTransport(), user_agent=sec_user_agent())
+    docset = build_document_set(client, cik, cutoff)
+    write_sources(case, docset)
+    print(
+        f"{args.label}: cut-off {cutoff.isoformat()}, {len(docset.source_records())} source "
+        f"documents in sources.json; the filings are cached in the case's folder"
+    )
+    print(
+        "next: search them by the rule (§4.6.2 A.3), save total-search.txt, then record criterion 4"
+    )
+    return CLEAN_EXIT
+
+
 def cmd_case_assemble(args: argparse.Namespace) -> int:
     """Write the dossier once every flag has a current decision (search-half doc §4.5)."""
     case = open_case(args.label)
@@ -1809,6 +1843,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_build(args)
         if args.action == "assemble":
             return cmd_case_assemble(args)
+        if args.action == "documents":
+            return cmd_case_documents(args)
         if args.action == "search":
             return cmd_case_search(args)
         if args.action == "log":
@@ -2329,6 +2365,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="YYYY-MM-DD: the day before first disclosure, as the selection log recorded it",
     )
     build.add_argument("--shape", choices=("S1", "S2", "S3", "S4"), required=True)
+    documents = case_actions.add_parser(
+        "documents",
+        help="Fetch a candidate's pre-cut-off filings and write sources.json, with no extraction and no key "
+        "(search-half doc §4.6.2 A.3): for the search for a scenario's total before criterion 4.",
+    )
+    documents.add_argument("label", help="the candidate's neutral id, such as closure-01")
     scenario = case_actions.add_parser(
         "scenario",
         help="The case's scenario (search-half doc §4.6.1): render it once from the shape's template and the "

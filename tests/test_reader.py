@@ -244,6 +244,51 @@ def test_a_rejection_read_sends_the_criterion_and_the_excerpt_and_nothing_else(
     assert "drafter's reason" not in sent.user and list(sent.parts) == ["Excerpt"]
 
 
+def test_a_shape_read_is_also_given_the_search_of_earlier_filings_when_the_case_has_one(
+    tmp_path: Path,
+) -> None:
+    case = rejected_candidate(tmp_path, "maps_to_shape")
+    alone = material.rejection_material(case, "maps_to_shape")
+    assert list(alone.parts) == ["Excerpt"]
+    case.total_search_path.write_text("EARLIER-FILING-CANARY: 10-Q, 2026-05-01\n", encoding="utf-8")
+    sent = material.rejection_material(case, "maps_to_shape")
+    assert list(sent.parts) == ["Excerpt", "Search of the company's earlier filings"]
+    assert sent.user == (
+        "Criterion to read: maps_to_shape\n\n[Excerpt]\n"
+        f"{CANARY} will close the plant after a court order.\n[end of Excerpt]\n\n"
+        "[Search of the company's earlier filings]\n"
+        "EARLIER-FILING-CANARY: 10-Q, 2026-05-01\n[end of Search of the company's earlier filings]"
+    )
+    assert sent.parts["Excerpt"] == alone.parts["Excerpt"]
+
+
+def test_the_search_of_earlier_filings_goes_to_a_shape_read_and_no_other(tmp_path: Path) -> None:
+    case = rejected_candidate(tmp_path, "maps_to_shape")
+    case.total_search_path.write_text("EARLIER-FILING-CANARY\n", encoding="utf-8")
+    sent = material.rejection_material(case, "real_decision")
+    assert list(sent.parts) == ["Excerpt"] and "EARLIER-FILING-CANARY" not in sent.user
+
+
+def test_an_empty_search_of_earlier_filings_is_refused_not_dropped(tmp_path: Path) -> None:
+    case = rejected_candidate(tmp_path, "maps_to_shape")
+    case.total_search_path.write_text(" \n", encoding="utf-8")
+    with pytest.raises(MaterialError, match="the search of earlier filings is empty"):
+        material.rejection_material(case, "maps_to_shape")
+
+
+def test_the_brief_asks_for_the_total_as_well_as_the_shape() -> None:
+    text = (ROOT / "experiment/readers/rejection.txt").read_text(encoding="utf-8")
+    shape = text[text.index("maps_to_shape:") : text.index("not_recognizable: You")]
+    for words in (
+        "Two parts, and both must be met",
+        "the fall in operating income the company expected before acting",
+        "a savings or cost-reduction target",
+        "quote in your reason the sentence that states the total",
+        "rejected as too small after the study's scaling",
+    ):
+        assert words in shape, words
+
+
 @pytest.mark.parametrize("bad", ["first_disclosure", "nonsense"])
 def test_a_rejection_read_is_for_criteria_3_4_and_5_only(tmp_path: Path, bad: str) -> None:
     with pytest.raises(MaterialError, match="is not a criterion the reader reads"):

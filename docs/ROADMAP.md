@@ -95,7 +95,20 @@ before its build. When a later finding changes a scope doc (Phase 2 can change t
 guard exists as soon as possible. After Phase 0, the scope docs for Phases 0.5 through 7 are written in order,
 then Phase 0.5's IMPLEMENTATION doc.
 
-### Where the build actually is — 2026-10-16, about 5:35 PM (Phase 5 search half: Stage A and the search done, Stage C built)
+### Where the build actually is — 2026-10-17, about 5:30 AM (Phase 5 search half: Stage C done, Stage D step 11 under way)
+
+**Measured at handoff:** `make check` green, **2508 tests**; `hc protocol check: ok`.
+
+- **Stage C is done** (`b35dc02`, CI and Deploy green).
+- **Stage D, step 11, closure type:** the first-disclosure check is done for all 29 window candidates, and
+  closure-01 to 05 are recorded through criterion 3 (the selection log is in the appendix, untracked).
+- **Search-half doc §4.6.2 adopted 2026-10-17** (the total in criterion 4; a search hit that announces no
+  decision), after an independent read; its build, step 11a, built and reviewed, uncommitted at handoff.
+- **Next:** criterion 4 down closure-01 to 05, then the retool and ai records. A new rule question (the headcount
+  floor needs a factor not yet drawn) is his before any S1 or S3 total (`KNOWN-GAPS.md` START HERE and OPEN).
+- **Still open from earlier phases:** Phase 1's DoD 7 and close-out (C6); Phase 1.5 not started.
+
+### Where the build was — 2026-10-16, about 5:35 PM (Phase 5 search half: Stage A and the search done, Stage C built) *(superseded by the block above; kept as the day's record)*
 
 **Measured at handoff:** `make check` green, **2497 tests**; `hc protocol check: ok`.
 
