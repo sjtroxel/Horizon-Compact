@@ -4,7 +4,7 @@
 > about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** **Patched 2026-10-16 (his): §4.6.1, the case scenario
 > is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** **Patched
 > 2026-10-17 (his), after the independent reader's read: §4.6.2, the total in criterion 4 and a search hit
-> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -437,6 +437,72 @@ quote: taken (item 5). (4) Ranges and approximations: taken (item 3).
 totals from 63 to 99 that only a high draw would have admitted). A total given only as an upper bound is rejected on
 every shape. No code: the brief's paragraph and its test change; `scenario.py`, `scale.py` and `material.py` are
 untouched.
+
+#### 4.6.4 Patch 2026-10-17 (his, about 4:55 PM CDT; drafted by Opus): a candidate's type is decided by §12.1, not by the search that found it
+
+*ADOPTED 2026-10-17 (his, about 5:15 PM CDT), after the independent reader's read (below): its changes 1 to 4 taken;
+the draft's move of a candidate to another list is dropped.* Found at Stage D step 11, at closure-16: the first
+closure candidate whose first-disclosure document names a facility for closure **and** moves its production to a
+facility the company is building. **Written after closure-16's criterion 4 total was seen** (it would pass on the
+closure list): the rule was chosen knowing what it does to that one candidate, which is why it was read before
+adoption and judged on its own terms. It rejects that candidate; no other recorded row is changed by it (below).
+
+**The gap.** Protocol §12.1 defines the types: "a closure with production moved to a new facility the company is
+building counts as retool", and the ai type is "an AI-attributed workforce change". §12.3 finds candidates by three
+query channels, one per type, and the selection log gives each candidate the type of the channel that found it. No
+rule said what happens when the two disagree. §12.5's S3 line says the same from the other side ("on retool when new
+or converted capacity is named").
+
+**The rule.**
+
+1. **§12.1's definitions decide a candidate's type, on its first-disclosure document; a candidate whose type is not
+   its list's fails criterion 4 on that list** (part (i), with the shape, read off the same document). A stated
+   interpretation of §12.1 and §12.5, not a deviation: the channels of §12.3 are how candidates are found, the
+   definitions are what the types are. The type of each shape:
+   - **S1** (a workforce change the document attributes to AI or automation software): **ai**;
+   - **S3**: **retool** when the named facility's production moves to capacity the company is building or
+     converting; **closure** otherwise (a closure or sale whose production stops, or moves to capacity that is
+     neither new nor converted);
+   - **S2**: **closure**;
+   - **S4**: no type is read; it keeps its list's.
+2. **No candidate moves to another list.** It fails on its own and is finished there. Each list stays what its own
+   channel returned, so no list's candidates depend on how far another list's checking went (the reader's change 1:
+   a candidate checked only because the candidates before it on its first list failed would otherwise enter a second
+   list by that accident, and a late arrival with an earlier date could displace a case already built).
+3. **The read stays blind** (§4.9): the material does not name the list. The reader gives, with a `maps_to_shape`
+   pass or cannot_tell on S1, S2 or S3, the type the excerpt shows (`"type"` in its reply); the log compares it
+   with the row's type. **A pass whose type is not the row's agrees with the rejection** (the candidate fails on
+   that list either way); any other reading counts as before. A reply saved before this patch carries no type and
+   is read as it was.
+4. **The brief's `maps_to_shape` paragraph gains, after "An excerpt that matches none of the four fails this
+   criterion.":** "With the shape, give the type of decision the excerpt describes: "ai" for S1; for S3, "retool"
+   when the facility's production moves to capacity the company is building or converting, and "closure"
+   otherwise; "closure" for S2; null for S4." The reply format gains `"type"`. Logged in §11 as a change to the
+   instrument. No read so far is affected: no earlier criterion 4 rejection rested on type.
+
+**Rows already recorded.** Every closure row checked before this patch was read again for the test (closure-01 to 15
+and closure-29): none moves production to capacity being built or converted, and none attributes a workforce change
+to AI; every one is S2 or S3 closure. The two S3 rows concentrate production at existing plants or transfer
+equipment. No recorded result changes. No retool or ai row has been recorded. On the ai list, an S2 (a workforce cut
+not attributed to AI) now fails as closure: that follows from the same definition and is stated here so it is not
+found later.
+
+**Why not the others** (his choice of three, 2026-10-17, then the reader's change 1). *Moving the candidate to its
+type's list* (the draft) breaks §12.4's order, as item 2 says. *Keeping it on the closure list* reads §12.5's "with
+or without new capacity elsewhere" over §12.1's plain words, and is the reading that admits the one candidate already
+seen to pass.
+
+*The independent read (2026-10-17, Gemini 3.1 Pro, $0.188; `evidence/phase-5/patch-4.6.4-review-raw.md`):* **adopt
+with changes.** It judged §12.1 deciding the type a stated interpretation, the extensions to ai and to closure
+justified by §12.1 and §12.5, and criterion 4 part (i) the right place. (1) Drop the move, which breaks §12.4's
+order: taken (item 2). (2) Do not tell the reader the type: taken (item 3). (3) Have the reader give the type and
+the code compare it: taken (items 3 and 4). (4) "Building or converting", not the draft's "under construction or
+planned": taken (item 1). (5) The move's pool date: moot.
+
+**What it costs.** A candidate the protocol places on another type is lost to both lists unless that list's own
+channel found it. Code: the reply's `type` (checked against the shape), the log's agreement for a typed pass, the
+saved read's `type`; the brief's paragraph and its test. The reader's inputs change, so they are committed and pushed
+before the next read.
 
 ### 4.7 The rubric
 
@@ -1373,3 +1439,31 @@ be quoted from several sentences. No read has used the changed text. The 11a too
 `total-search.txt` carries no note of why a case was rejected, as the read is blind (§4.9). Its test changed with it;
 no other code changed. The commit's whitespace hook stripped trailing spaces from five lines of the raw file's prose
 copy of the reply; no word changed, and the full response as returned (its JSON block) is byte-exact.
+
+**Stage D step 11, a fault in the cut-off check (2026-10-17, about 12:55 PM CDT; Opus fixed, his decision).**
+`hc case documents` refused closure-09 because one filing a decade before the cut-off had an acceptance date (US
+Eastern) a day after its filing date; the SEC's data shows it, and the SEC grants filing-date adjustments, so it is
+real. `cutoff.check_consistent` refused any such disagreement, in any filing of the company's history, even one
+that could not change admission (a test asserted it). **Fixed, his decision:** a disagreement is refused only when
+the filing and acceptance dates fall on opposite sides of the cut-off; otherwise the filing date decides, as for
+any filing. `cutoff.py` and three tests changed (one replaced, two added). No earlier case is affected: every
+earlier fetch passed the old check, so none held a disagreeing filing. The S2 and S3 pattern so far (closure-01 to
+09, every one rejected on the total) is the cost §4.6.2 named; no rule changed for it.
+
+**Stage D step 11, closure-10 to 15 and §4.6.4 adopted (2026-10-17, about 5:20 PM CDT; Opus drafted and built,
+his decisions).** closure-10 to 13 and 15 fail criterion 4 on the S2 total, every one read and agreed. closure-14:
+its shares trade only over the counter after a delisting, and criterion 1's "publicly traded" is read to include
+that (his decision, so the rejection that follows is read); it fails criterion 3 on an insolvency proceeding stated
+in another item of the same report than the one the excerpt rule sends, so the reader, given that item alone,
+disputed, the rejection does not stand (as closure-02's did, on the same cause), and it fails criterion 4 (S2, no
+figure). **The excerpt unit (§4.6.2 B.3) can keep a criterion 3 reason out of the reader's sight** when the reason
+is in another item of the report; it has changed no outcome so far, and is noted for the methods page. closure-16
+raised the type rule: **§4.6.4, adopted after the reader's read** (Gemini 3.1 Pro, $0.188,
+`evidence/phase-5/patch-4.6.4-review-raw.md`); the draft's move between lists was dropped at the reader's change 1.
+**A change to the instrument:** the brief's `maps_to_shape` paragraph and reply format gain the decision's type; no
+read has used them. Code: `RejectionReply.type` checked against the shape (`read.py`), `read_agrees` and the saved
+read's `type` (`search.py`), the reader's printout (`cli.py`); tests added for each. A hand check of the S2 search
+(alternate wordings of operating income, by grep) was found to have covered one document of nine for closure-13,
+from an output file truncated by each call; redone over every document for closure-13 and 15, it found nothing that
+counts, and the A.3 search itself (its own parser) was not affected. Two trailing spaces in the prose copy of the
+§4.6.4 reply were stripped before the commit, for the whitespace hook; the JSON block is byte-exact.

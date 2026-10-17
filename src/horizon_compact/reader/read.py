@@ -72,6 +72,7 @@ class RejectionReply(_Reply):
     criterion: str
     reading: Literal["pass", "fail", "cannot_tell"]
     shape: str | None = None
+    type: str | None = None
     reason: str
     alternative: str | None = None
 
@@ -164,13 +165,24 @@ def parse_reply(
 
 
 _SHAPES = ("S1", "S2", "S3", "S4")
+# The type each shape's decision is, by protocol §12.1 (search-half doc §4.6.4): S3 is closure or retool by
+# where the facility's production goes; S4 and "none" carry no type.
+_SHAPE_TYPES: dict[str, tuple[str | None, ...]] = {
+    "S1": ("ai",),
+    "S2": ("closure",),
+    "S3": ("closure", "retool"),
+    "S4": (None,),
+    "none": (None,),
+}
 
 
 def _shape_problem(reply: RejectionReply) -> str | None:
     """The shape fits the criterion and the reading: none on ``real_decision``; on ``maps_to_shape`` one of
-    the four on a pass, "none" on a fail, either on cannot_tell."""
+    the four on a pass, "none" on a fail, either on cannot_tell. The type fits the shape (§4.6.4)."""
     if reply.criterion in ("real_decision", materials.PROBE_CRITERION):
-        return None if reply.shape is None else f"the reply names a shape on {reply.criterion}"
+        if reply.shape is not None:
+            return f"the reply names a shape on {reply.criterion}"
+        return None if reply.type is None else f"the reply names a type on {reply.criterion}"
     allowed = {
         "pass": _SHAPES,
         "fail": ("none",),
@@ -178,6 +190,8 @@ def _shape_problem(reply: RejectionReply) -> str | None:
     }[reply.reading]
     if reply.shape not in allowed:
         return f"the reply's shape does not fit a {reply.reading} on maps_to_shape"
+    if reply.type not in _SHAPE_TYPES[reply.shape]:
+        return f"the reply's type does not fit its shape {reply.shape}"
     return None
 
 
@@ -214,6 +228,7 @@ class Attempt:
     usable: bool
     material: dict[str, str] | None
     reading: str | None
+    type: str | None = None
 
 
 def _load(path: Path) -> dict[str, Any] | None:
@@ -251,6 +266,9 @@ def attempts_on_record(case: CaseAppendix, stem_: str) -> list[Attempt]:
                 material=parts if isinstance(parts, dict) else None,
                 reading=str(parsed["reading"])
                 if isinstance(parsed, dict) and "reading" in parsed
+                else None,
+                type=str(parsed["type"])
+                if isinstance(parsed, dict) and parsed.get("type") is not None
                 else None,
             )
         )
@@ -576,7 +594,7 @@ def rejection_reply_on_record(case: CaseAppendix, criterion: str) -> ReaderReply
     attempt, path = found_reads[0]
     if attempt.reading not in ("pass", "fail", "cannot_tell"):
         raise ReaderError(f"{path.name} cannot be read back: look at it before logging")
-    return ReaderReply(path.name, _file_sha256(path), attempt.reading)
+    return ReaderReply(path.name, _file_sha256(path), attempt.reading, attempt.type)
 
 
 # A scenario or rubric reading that needs his written resolution before the lock.

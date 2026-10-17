@@ -399,11 +399,19 @@ class ReaderReply:
     """The reader's reply a read is logged from: the reply file's name in the candidate's folder, its sha256
     and the reading it holds. The log takes its verdict from the reading, never from a word typed beside it:
     "pass" disputes the rejection; "fail" agrees; "cannot_tell" is not a dispute, so the rejection stands
-    (search-half doc §11, the step 9 review, decision 8)."""
+    (search-half doc §11, the step 9 review, decision 8). ``type`` is the reader's type for the decision on a
+    ``maps_to_shape`` read (§4.6.4), or None."""
 
     reply: str
     reply_sha256: str
     reading: str
+    type: str | None = None
+
+
+def read_agrees(reading: str, decision_type: str | None, row_type: str) -> bool:
+    """Whether a read agrees with a rejection. "pass" disputes it, unless the reader's type for the decision
+    is not the row's: the candidate then fails on its list either way (search-half doc §4.6.4)."""
+    return reading != "pass" or (decision_type is not None and decision_type != row_type)
 
 
 @dataclass
@@ -413,6 +421,7 @@ class Read:
     reply: str | None = None
     reply_sha256: str | None = None
     reading: str | None = None
+    type: str | None = None
 
 
 @dataclass
@@ -581,7 +590,9 @@ class SelectionLog:
             raise LogError(f"a read's reading is one of {', '.join(READINGS)}")
         if not (reply.reply.strip() and re.fullmatch(r"[0-9a-f]{64}", reply.reply_sha256)):
             raise LogError("a read names the reader's reply file and its sha256")
-        agrees = reply.reading != "pass"
+        if reply.type is not None and criterion != "maps_to_shape":
+            raise LogError(f"a read of {criterion} carries no type")
+        agrees = read_agrees(reply.reading, reply.type, row.type)
         result = row.results.get(criterion)
         if result is None or result.result != "fail":
             raise LogError(f"{candidate_id} did not fail {criterion}")
@@ -600,7 +611,7 @@ class SelectionLog:
                 "a read cannot change now"
             )
         row.reads[criterion] = Read(
-            agrees, resolution, reply.reply, reply.reply_sha256, reply.reading
+            agrees, resolution, reply.reply, reply.reply_sha256, reply.reading, reply.type
         )
 
     def selection(self, case_type: str) -> Selection:
@@ -710,14 +721,14 @@ class SelectionLog:
                             log.record_read(
                                 r["id"],
                                 criterion,
-                                reply=_saved_reply(read),
+                                reply=_saved_reply(read, r["type"]),
                                 resolution=read.get("resolution"),
                             )
                     for criterion, read in reads.items():  # a read with no result to read: refused
                         log.record_read(
                             r["id"],
                             criterion,
-                            reply=_saved_reply(read),
+                            reply=_saved_reply(read, r["type"]),
                             resolution=read.get("resolution"),
                         )
             return log
@@ -764,10 +775,17 @@ class SelectionLog:
         return view
 
 
-def _saved_reply(read: dict[str, Any]) -> ReaderReply:
-    """A saved read's reply, checked against its saved verdict: a hand edit of either is refused."""
-    reply = ReaderReply(str(read["reply"]), str(read["reply_sha256"]), str(read["reading"]))
-    if read["agrees"] is not (reply.reading != "pass"):
+def _saved_reply(read: dict[str, Any], row_type: str) -> ReaderReply:
+    """A saved read's reply, checked against its saved verdict: a hand edit of either is refused. A read saved
+    before §4.6.4 has no type."""
+    saved_type = read.get("type")
+    reply = ReaderReply(
+        str(read["reply"]),
+        str(read["reply_sha256"]),
+        str(read["reading"]),
+        None if saved_type is None else str(saved_type),
+    )
+    if read["agrees"] is not read_agrees(reply.reading, reply.type, row_type):
         raise LogError("a saved read's verdict differs from its reading")
     return reply
 

@@ -287,6 +287,8 @@ def test_the_brief_asks_for_the_total_as_well_as_the_shape() -> None:
         "For S1 and S3 the total must be 167 or more",
         "a range is taken at its low end",
         "if the total is worked out from several figures, the sentences that state them",
+        'With the shape, give the type of decision the excerpt describes: "ai" for S1',
+        '"retool" when the facility\'s production moves to capacity the company is building or converting',
     ):
         assert words in shape, words
     assert "judge only whether that figure is the total" not in shape
@@ -442,7 +444,13 @@ def test_a_reader_who_passes_what_was_rejected_prints_the_dispute_to_log(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     rejected_candidate(tmp_path, "maps_to_shape")
-    passing = {**REJECT_FAIL, "criterion": "maps_to_shape", "reading": "pass", "shape": "S3"}
+    passing = {
+        **REJECT_FAIL,
+        "criterion": "maps_to_shape",
+        "reading": "pass",
+        "shape": "S3",
+        "type": "closure",
+    }
     code, _ = run_reader(
         monkeypatch, Replies(says(passing)), ID, "rejection", "--criterion", "maps_to_shape"
     )
@@ -450,6 +458,30 @@ def test_a_reader_who_passes_what_was_rejected_prints_the_dispute_to_log(
     assert code == CLEAN_EXIT
     assert "DISPUTES: the rejection does not stand" in out
     assert 'hc case log closure read closure-1 maps_to_shape --resolution "..."' in out
+
+
+def test_a_pass_of_another_type_agrees_that_the_candidate_fails_on_its_list(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Search-half doc §4.6.4: the reader is not told the list; a retool decision fails on the closure
+    list."""
+    rejected_candidate(tmp_path, "maps_to_shape")
+    retool = {
+        **REJECT_FAIL,
+        "criterion": "maps_to_shape",
+        "reading": "pass",
+        "shape": "S3",
+        "type": "retool",
+    }
+    code, _ = run_reader(
+        monkeypatch, Replies(says(retool)), ID, "rejection", "--criterion", "maps_to_shape"
+    )
+    out = capsys.readouterr().out
+    assert code == CLEAN_EXIT
+    assert "reader's type: retool" in out
+    assert "agrees: a retool decision fails on the closure list" in out
+    assert "DISPUTES" not in out and "--resolution" not in out
+    assert "to log it: hc case log closure read closure-1 maps_to_shape\n" in out
 
 
 def test_a_reader_who_cannot_tell_lets_the_rejection_stand(
@@ -806,11 +838,55 @@ def test_a_key_that_cannot_be_read_leaves_no_record(
 def test_a_rejection_replys_shape_must_fit_its_criterion_and_reading(
     criterion: str, reading: str, shape: str | None, usable: bool
 ) -> None:
-    reply = {**REJECT_FAIL, "criterion": criterion, "reading": reading, "shape": shape}
+    fitting_type = {"S1": "ai", "S2": "closure", "S3": "closure"}.get(shape or "")
+    reply = {
+        **REJECT_FAIL,
+        "criterion": criterion,
+        "reading": reading,
+        "shape": shape,
+        "type": fitting_type if criterion == "maps_to_shape" else None,
+    }
     parsed, problem = parse_reply("rejection", criterion, json.dumps(reply))
     assert (parsed is not None) is usable, problem
     if not usable:
         assert problem and "shape" in problem
+
+
+@pytest.mark.parametrize(
+    ("criterion", "reading", "shape", "decision_type", "usable"),
+    [
+        ("maps_to_shape", "pass", "S1", "ai", True),
+        ("maps_to_shape", "pass", "S1", "closure", False),
+        ("maps_to_shape", "pass", "S2", "closure", True),
+        ("maps_to_shape", "pass", "S2", "retool", False),
+        ("maps_to_shape", "pass", "S3", "closure", True),
+        ("maps_to_shape", "pass", "S3", "retool", True),
+        ("maps_to_shape", "pass", "S3", None, False),
+        ("maps_to_shape", "pass", "S3", "invest", False),
+        ("maps_to_shape", "pass", "S4", None, True),
+        ("maps_to_shape", "pass", "S4", "retool", False),
+        ("maps_to_shape", "fail", "none", None, True),
+        ("maps_to_shape", "fail", "none", "closure", False),
+        ("maps_to_shape", "cannot_tell", "S3", "retool", True),
+        ("maps_to_shape", "cannot_tell", "none", None, True),
+        ("real_decision", "fail", None, "closure", False),
+    ],
+)
+def test_a_shape_replys_type_must_fit_its_shape(
+    criterion: str, reading: str, shape: str | None, decision_type: str | None, usable: bool
+) -> None:
+    """Search-half doc §4.6.4: S1 is ai, S2 closure, S3 closure or retool, S4 and none carry no type."""
+    reply = {
+        **REJECT_FAIL,
+        "criterion": criterion,
+        "reading": reading,
+        "shape": shape,
+        "type": decision_type,
+    }
+    parsed, problem = parse_reply("rejection", criterion, json.dumps(reply))
+    assert (parsed is not None) is usable, problem
+    if not usable:
+        assert problem and "type" in problem
 
 
 def test_a_rubric_reply_with_no_lines_is_not_a_reading() -> None:

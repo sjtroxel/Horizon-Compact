@@ -6,9 +6,11 @@ cut-off is out even though it amends an earlier year. Every document and every t
 nothing reaches extraction or the figures without it.
 
 The acceptance time is not a second rule. A filing accepted after the day's close is dated the next business
-day, so its filing date already excludes it. The filter only checks that the two agree, with the acceptance
-time (UTC in the SEC's data) converted to US Eastern first so a late-evening acceptance is not read a day
-late, and refuses a filing where they do not.
+day, so its filing date already excludes it. The filter checks that the two agree, with the acceptance time
+(UTC in the SEC's data) converted to US Eastern first so a late-evening acceptance is not read a day late.
+*(Amended 2026-10-17, his decision.)* An acceptance date after the filing date is real data (the SEC grants
+filing-date adjustments), so a disagreement is refused **only when the two dates fall on opposite sides of the
+cut-off**, the one case where it could change admission; otherwise the filing date decides, as for any filing.
 """
 
 from __future__ import annotations
@@ -77,19 +79,20 @@ def stamp_from_fact(fact: Mapping[str, Any]) -> FilingStamp:
     )
 
 
-def check_consistent(stamp: FilingStamp) -> None:
-    """The acceptance date in US Eastern must be on or before the filing date."""
+def check_consistent(stamp: FilingStamp, cutoff: date) -> None:
+    """An acceptance date in US Eastern after the filing date must not straddle ``cutoff``."""
     if stamp.accepted is None:
         return
     accepted_day = stamp.accepted.astimezone(EASTERN).date()
-    if accepted_day > stamp.filed:
+    if stamp.filed < cutoff <= accepted_day:
         raise CutoffError(
             f"filing {stamp.label or '(unlabelled)'}: accepted {accepted_day} (US Eastern), "
-            f"after its filing date {stamp.filed}"
+            f"after its filing date {stamp.filed}, on the other side of the cut-off {cutoff}"
         )
 
 
 def admit(stamp: FilingStamp, cutoff: date) -> bool:
-    """True if the document or figure was filed strictly before ``cutoff``. Raises if its dates disagree."""
-    check_consistent(stamp)
+    """True if the document or figure was filed strictly before ``cutoff``. Raises if its filing and
+    acceptance dates fall on opposite sides of it."""
+    check_consistent(stamp, cutoff)
     return stamp.filed < cutoff

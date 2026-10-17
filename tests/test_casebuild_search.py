@@ -620,6 +620,42 @@ def test_a_rejection_the_reader_agrees_with_still_stands() -> None:
         log.record("closure-01", "not_recognizable", "pass", "ok")
 
 
+def test_a_shape_pass_of_another_type_agrees_and_one_of_the_rows_type_disputes() -> None:
+    """Search-half doc §4.6.4: the reader, not told the list, gives the decision's type; a pass of another
+    type means the candidate fails on its list either way, so the rejection stands."""
+    log = log_of("closure-01", "closure-02")
+    fail_at(log, "closure-01", "maps_to_shape")
+    retool = ReaderReply("reader-rejection-x-1-reply.json", "d" * 64, "pass", "retool")
+    log.record_read("closure-01", "maps_to_shape", reply=retool)
+    row = log.rows["closure-01"]
+    assert row.reads["maps_to_shape"].agrees and row.reads["maps_to_shape"].type == "retool"
+    assert row.failed == "maps_to_shape" and row.finished
+    fail_at(log, "closure-02", "maps_to_shape", day=2)
+    closure = ReaderReply("reader-rejection-x-1-reply.json", "e" * 64, "pass", "closure")
+    with pytest.raises(LogError, match="resolved by him"):
+        log.record_read("closure-02", "maps_to_shape", reply=closure)
+    log.record_read("closure-02", "maps_to_shape", reply=closure, resolution="he takes the read")
+    assert log.rows["closure-02"].disputed("maps_to_shape")
+    again = SelectionLog.from_text(log.to_text())
+    assert again.rows["closure-01"].reads["maps_to_shape"].agrees
+    assert again.rows["closure-02"].disputed("maps_to_shape")
+
+
+def test_a_type_is_read_only_on_the_shape_criterion_and_a_saved_read_without_one_loads() -> None:
+    log = log_of("closure-01")
+    fail_at(log, "closure-01", "real_decision")
+    typed = ReaderReply("reader-rejection-x-1-reply.json", "f" * 64, "fail", "closure")
+    with pytest.raises(LogError, match="carries no type"):
+        log.record_read("closure-01", "real_decision", reply=typed)
+    log.record_read("closure-01", "real_decision", reply=AGREED)
+    saved = json.loads(log.to_text())
+    del saved["rows"][0]["reads"]["real_decision"]["type"]  # as written before §4.6.4
+    assert SelectionLog.from_text(json.dumps(saved)).rows["closure-01"].failed == "real_decision"
+    saved["rows"][0]["reads"]["real_decision"].update(reading="pass", type="retool")
+    with pytest.raises(LogError, match="carries no type"):
+        SelectionLog.from_text(json.dumps(saved))  # a typed pass on real_decision is refused
+
+
 def test_a_disputed_rejection_can_be_followed_by_a_rejection_that_stands() -> None:
     log = log_of("closure-01")
     fail_at(log, "closure-01", "real_decision")

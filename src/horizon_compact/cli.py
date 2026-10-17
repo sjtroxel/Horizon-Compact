@@ -67,6 +67,7 @@ from horizon_compact.casebuild.search import (
     SelectionLog,
     candidate_terms,
     load_newest_log,
+    read_agrees,
     run_search,
     write_candidates,
     write_log_version,
@@ -1216,15 +1217,29 @@ def _print_reader_outcome(label: str, done: ReadOutcome) -> None:
     print(f"  reader's reading: {done.reading}")
     parsed = done.parsed or {}
     if done.kind == "rejection":
+        decision_type = parsed.get("type")
+        other_type = (
+            done.reading == "pass"
+            and done.candidate_type is not None
+            and read_agrees("pass", decision_type, done.candidate_type)
+        )
+        if decision_type is not None:
+            print(f"  reader's type: {decision_type}")
         meaning = {
             "fail": "agrees: the rejection stands",
             "pass": "DISPUTES: the rejection does not stand (protocol §12.4); log your reason with it",
             "cannot_tell": "could not tell: not a dispute, so the rejection stands (decision 8)",
         }[str(done.reading)]
+        if other_type:
+            meaning = (
+                f"agrees: a {decision_type} decision fails on the {done.candidate_type} list, "
+                "so the rejection stands (search-half doc §4.6.4)"
+            )
+        disputes = done.reading == "pass" and not other_type
         print(f"  {meaning}")
         print(
             f"  to log it: hc case log {done.candidate_type or '<type>'} read {label} {done.criterion}"
-            + (' --resolution "..."' if done.reading == "pass" else "")
+            + (' --resolution "..."' if disputes else "")
         )
         if done.criterion == PROBE_CRITERION:
             print(

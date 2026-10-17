@@ -70,17 +70,24 @@ def test_standard_time_is_handled_too() -> None:
     assert admit(FilingStamp(filed=date(2026, 1, 14), accepted=accepted), date(2026, 2, 1)) is True
 
 
-def test_a_filing_whose_acceptance_date_is_after_its_filing_date_is_refused() -> None:
-    accepted = parse_acceptance("2026-05-09T15:00:00.000Z")
-    stamp = FilingStamp(filed=date(2026, 5, 8), accepted=accepted, label="0009999999-26-000099")
+def test_an_acceptance_after_the_filing_date_that_straddles_the_cutoff_is_refused() -> None:
+    accepted = parse_acceptance("2026-06-15T15:00:00.000Z")  # accepted on the cut-off day
+    stamp = FilingStamp(filed=date(2026, 6, 14), accepted=accepted, label="0009999999-26-000099")
     with pytest.raises(CutoffError, match="0009999999-26-000099"):
         admit(stamp, CUTOFF)
 
 
-def test_the_consistency_check_runs_even_when_the_filing_is_out_anyway() -> None:
+def test_an_acceptance_after_the_filing_date_both_before_the_cutoff_is_admitted() -> None:
+    """A filing-date adjustment years before the cut-off cannot change admission (2026-10-17, his)."""
+    accepted = parse_acceptance("2016-03-08T14:04:21.000Z")
+    assert admit(FilingStamp(filed=date(2016, 3, 7), accepted=accepted), CUTOFF) is True
+
+
+def test_an_acceptance_after_the_filing_date_both_on_or_after_the_cutoff_is_not_admitted() -> None:
     accepted = parse_acceptance("2026-07-02T15:00:00.000Z")
-    with pytest.raises(CutoffError):
-        admit(FilingStamp(filed=date(2026, 7, 1), accepted=accepted), CUTOFF)
+    assert admit(FilingStamp(filed=date(2026, 7, 1), accepted=accepted), CUTOFF) is False
+    accepted = parse_acceptance("2026-06-16T15:00:00.000Z")
+    assert admit(FilingStamp(filed=date(2026, 6, 15), accepted=accepted), CUTOFF) is False
 
 
 def test_a_filing_accepted_after_the_close_and_dated_next_day_is_consistent() -> None:

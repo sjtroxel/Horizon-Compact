@@ -7,6 +7,60 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-17, about 5:35 PM, HANDOFF (§4.6.4 ADOPTED AND BUILT; HIS ONE COMMIT AND PUSH LAND IT)
+>
+> **Measured at handoff:** `make check` green, **2527 tests**; `hc protocol check: ok`. Last commit `24475b1`
+> (pushed). **Uncommitted, all to land in his one commit** (his choice, 2026-10-17: commit after the handoff, reads
+> next session): search-half doc §4.6.4 and its build (`read.py`, `search.py`, `cli.py`, the brief
+> `experiment/readers/rejection.txt`, tests), the cut-off fix (`cutoff.py`, its tests), §11's entries, the raw reply
+> `docs/phases/evidence/phase-5/patch-4.6.4-review-raw.md`, this file, ROADMAP. **Check `git log -1` first:** if the
+> commit `phase 5: §4.6.4 type at criterion 4, cut-off straddle fix` is not there and pushed, land it before
+> anything else; **the reader refuses to run on an uncommitted or unpushed brief.**
+>
+> **Closure, criterion 4:** closure-01 to 16 and closure-29 rejected; **no closure case yet** (k = 2). Every read is
+> logged except two, **closure-14 and closure-16 on `maps_to_shape`**, and the log holds the selection on
+> closure-14's. closure-14's criterion 3 rejection was disputed (does not stand), as closure-02's was; the same cause
+> (a reason in another item of the 8-K than the one the excerpt rule sends) is noted for the methods page.
+> closure-16 fails as retool under §4.6.4 (it would have passed the total on the closure list); its read gets the
+> A.3 search of the first-disclosure document, so a reading of S3 closure would dispute.
+>
+> **First move next session:** `bash scratch/read-batch.sh closure-14:maps_to_shape closure-16:maps_to_shape`
+> (one key prompt, two `y`), then `hc case log closure read <id> maps_to_shape` for each (a dispute needs
+> `--resolution`). Done = both reads logged, `hc case log closure show` shows no `open:` line. **Then** closure-17
+> onward, in order (S3 left: closure-19, 24, 26); the 7 fallback candidates only if the window yields fewer than 2.
+> **His decision, if closure-16 is disputed:** whether the reader's S3 closure reading stands as the resolution (the
+> case then goes on to criterion 5 on the closure list), stated with his reason.
+>
+> *The 5:25 PM block below is superseded; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-17, about 5:25 PM (§4.6.4 ADOPTED AND BUILT; HIS COMMIT AND PUSH LAND IT)
+>
+> **Closure, criterion 4:** closure-01 to 15 and closure-29 rejected, **no closure case yet** (k = 2). Every read is
+> logged and agreed except two: closure-14's criterion 3 rejection was disputed (does not stand; it then failed
+> criterion 4, **read pending**), as closure-02's was. **closure-16 is recorded, read pending**: it would pass the
+> total, but its production moves to capacity the company is building, so under **search-half doc §4.6.4** (a
+> candidate's type is §12.1's, tested at criterion 4; no move between lists; adopted after the reader's read,
+> $0.188) it fails criterion 4 on the closure list as retool. Its read gets the A.3 search of the first-disclosure
+> document, so the reader can judge both parts; a reading of S3 closure would dispute. **Uncommitted:** §4.6.4 and its build (the reader's
+> reply gains `type`; the log's `read_agrees`; the brief), the cut-off fix, §11's entries, the raw reply, this file,
+> ROADMAP. `make check` green, **2527 tests**. **The reader refuses to run until the brief is pushed.**
+>
+> **Next, in order:** (1) his commit and push; (2) read closure-14 and closure-16 on `maps_to_shape`; (3)
+> closure-17 onward, in
+> order (S3 candidates left: closure-19, 24, 26). Reads run with `bash scratch/read-batch.sh <id>:<criterion> ...`.
+>
+> *The 1:00 PM block below is superseded; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-17, about 1:00 PM (CLOSURE CRITERION 4 UNDER WAY; CUT-OFF FIX UNCOMMITTED)
+>
+> `24475b1` (§4.6.3) is pushed. **Closure, criterion 4:** closure-01 to 09 each rejected on the total (S2: no stated
+> fall in operating income; S3: no headcount at the named site, or one only as "up to"); reads logged and agreed
+> through closure-07, closure-08 and 09 read pending. **Uncommitted:** the cut-off fix (`cutoff.py`, its tests,
+> search-half doc §11, this file; CLOSED 2026-10-17 below). Reads run with `bash scratch/read-batch.sh
+> <id>:<criterion> ...` (one key prompt). Next: closure-10 onward, in order; k = 2.
+>
+> *The 12:20 PM block below is superseded; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-17, about 12:20 PM (§4.6.3 ADOPTED; HIS COMMIT AND PUSH LAND IT)
 >
 > **The headcount floor is settled** (search-half doc §4.6.3, his, after the reader's read, $0.170): a heads total
@@ -1426,6 +1480,23 @@ case by its type and a neutral label. The names live only in the private longlis
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
 
 ---
+
+## CLOSED 2026-10-17, his decision, search-half doc §4.6.4 (found and settled the same day) — a candidate whose type is not its search channel's
+
+Found at closure-16 (Stage D step 11): a closure-channel candidate whose production moves to capacity the company is
+building, which protocol §12.1 says "counts as retool". No rule said what the selection log does when the channel's
+type and §12.1's definition disagree. **Settled by §4.6.4** (his, after the reader's read): §12.1's definitions
+decide the type, tested at criterion 4 part (i); a candidate of another type fails on its list and does not move
+(the draft's move broke §12.4's order, the reader's change 1). The read stays blind: the reader gives the decision's
+type, the log compares it with the row's. Written after the candidate was seen to pass the total on its list, which
+§4.6.4 states. No recorded row changes.
+
+## CLOSED 2026-10-17, his decision, fixed the same day — the cut-off check refused a whole fetch over a filing-date adjustment
+
+Found at closure-09's `hc case documents`: one filing, years before the cut-off, accepted (US Eastern) a day after
+its filing date, which is real SEC data (a filing-date adjustment). `cutoff.check_consistent` refused any such
+disagreement anywhere in the company's history. Fixed (his decision): it refuses only when the two dates straddle
+the cut-off; otherwise the filing date decides. Search-half doc §11 has the note. No earlier case is affected.
 
 ## CLOSED 2026-10-17, his decision (a), search-half doc §4.6.3 (was OPEN, same day) — the headcount floor in criterion 4 needs a factor not yet drawn (decide before any S1 or S3 total search)
 
