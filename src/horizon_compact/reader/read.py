@@ -178,14 +178,15 @@ _SHAPE_TYPES: dict[str, tuple[str | None, ...]] = {
 
 def _shape_problem(reply: RejectionReply) -> str | None:
     """The shape fits the criterion and the reading: none on ``real_decision``; on ``maps_to_shape`` one of
-    the four on a pass, "none" on a fail, either on cannot_tell. The type fits the shape (§4.6.4)."""
+    the four on a pass, either on a fail or cannot_tell (a fail on the total alone names the shape that
+    matches, his decision 2026-10-18). The type fits the shape (§4.6.4)."""
     if reply.criterion in ("real_decision", materials.PROBE_CRITERION):
         if reply.shape is not None:
             return f"the reply names a shape on {reply.criterion}"
         return None if reply.type is None else f"the reply names a type on {reply.criterion}"
     allowed = {
         "pass": _SHAPES,
-        "fail": ("none",),
+        "fail": (*_SHAPES, "none"),
         "cannot_tell": (*_SHAPES, "none"),
     }[reply.reading]
     if reply.shape not in allowed:

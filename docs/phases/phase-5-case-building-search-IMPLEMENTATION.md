@@ -1467,3 +1467,35 @@ read's `type` (`search.py`), the reader's printout (`cli.py`); tests added for e
 from an output file truncated by each call; redone over every document for closure-13 and 15, it found nothing that
 counts, and the A.3 search itself (its own parser) was not affected. Two trailing spaces in the prose copy of the
 §4.6.4 reply were stripped before the commit, for the whitespace hook; the JSON block is byte-exact.
+
+**Stage D step 11, the closure window finished, and the fail-shape rule changed (2026-10-18, about 12:35 PM CDT;
+Opus, his decisions).** closure-14 and 16's `maps_to_shape` reads logged, both agreeing (closure-14 on its third
+attempt: the first named a type on a fail, the second was a call refused for a mistyped key). closure-17 and 19 to
+28 taken through criteria 2 to 4: every one fails criterion 4, every read agrees. S2 on the total (17, 20, 21, 22,
+23, 25, 26, 28); S3 under the floor or with no figure (19, about 120; 24, about 85 across two sites; 27, no
+headcount at the facility named). closure-28's shares trade over the counter (EDGAR's submissions record), read as
+publicly traded as closure-14 was; its criterion 3 pass is a judgment (the lessors' taking back of the aircraft was
+forced, the reduction in force that followed was chosen, and the excerpt shows the alternative of retraining).
+**The closure window yields no case (0 of k = 2); the fallback pool opens next (§12.2).**
+
+**Three slips, on record because the log is write-once.** (1) The excerpts of closure-17 and 19 to 28 were saved
+after their criterion 3 and 4 results were recorded, not before, as Stage D step 11 requires. Each is the whole
+Item 2.05, cut by rule at the next item heading (at a period-led heading run into a paragraph, for 17 and 25) or
+at an unnumbered heading (forward-looking statements, signature); none was chosen, so the order could not shape
+it, but the order was broken. (2) closure-27's recorded reason calls it S2: the tool used to read the filings
+matched "Item" case-sensitively and missed the filer's "ITEM 2.05", so the release alone was read. Item 2.05 names
+a facility to be exited at its lease's end, so it is S3 (closure); the A.3 search was redone for the facility's
+name, which no earlier filing holds, so it fails on the total either way, and the reader read it on the right
+excerpt and search. (3) closure-17's recorded reason counts nine 8-Ks and seven EX-99; there are ten and six (18
+documents, as stated).
+
+**A change to the instrument, his decision after closure-22's second unusable reply.** The reply format said a
+`maps_to_shape` fail gives shape "none", kept at the step 11a review at the cost of an attempt per slip. Four of
+the day's sixteen `maps_to_shape` replies named the matching shape on a fail on the total alone (closure-14's
+first, closure-22's first two, closure-23's first), each with the right reading, and closure-22 was one unusable
+reply from the three-attempt limit, after which nothing logs its read. **Now a fail gives the shape that matches,
+or "none"**, its type fitting the shape (§4.6.4): the brief's reply-format sentence and `_shape_problem`
+(`read.py`), with tests. No outcome can change: a fail agrees with the rejection whatever its shape. Replies
+already on record keep the verdict they were given; closure-22's third attempt is read under the change. Also
+fixed: `hc case log ... read` printed "(disputes)" over a §4.6.4 read that agrees (the record was right; only the
+label used the old rule), with a test.

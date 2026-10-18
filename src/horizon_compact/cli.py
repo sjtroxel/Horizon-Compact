@@ -1671,7 +1671,7 @@ def cmd_case_log(args: argparse.Namespace) -> int:
     else:
         reply = rejection_reply_on_record(open_case(args.id), args.criterion)
         log.record_read(args.id, args.criterion, reply=reply, resolution=args.resolution)
-        verdict = "disputes" if reply.reading == "pass" else "agrees"
+        verdict = "agrees" if read_agrees(reply.reading, reply.type, row.type) else "disputes"
         what = f"read of {args.criterion}: {reply.reading} ({verdict}), from {reply.reply}"
     name = write_log_version(case, log)
     print(f"{args.id}: {what}; wrote {name}")

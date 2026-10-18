@@ -349,13 +349,16 @@ def test_log_refuses_an_id_of_another_type(
     assert not (folder / "selection-log-2.json").exists()
 
 
-def _reply_on_disk(folder: Path, reading: str) -> None:
+def _reply_on_disk(
+    folder: Path, reading: str, criterion: str = "real_decision", decision_type: str | None = None
+) -> None:
     """A usable reader reply in closure-01's folder, as `hc case reader` writes it."""
     case = folder.parent / "closure-01"
     case.mkdir(exist_ok=True)
-    stem = case / "reader-rejection-real_decision-1"
+    stem = case / f"reader-rejection-{criterion}-1"
     Path(f"{stem}-request.json").write_text(json.dumps({"material_sha256": {}}), encoding="utf-8")
-    reply = {"usable": True, "parsed": {"reading": reading}, "estimated_usd": "0.01"}
+    parsed = {"reading": reading, "type": decision_type}
+    reply = {"usable": True, "parsed": parsed, "estimated_usd": "0.01"}
     Path(f"{stem}-reply.json").write_text(json.dumps(reply), encoding="utf-8")
 
 
@@ -383,11 +386,31 @@ def test_log_read_takes_its_verdict_from_the_readers_reply_and_needs_a_resolutio
     words = ["closure", "read", "closure-01", "real_decision"]
     assert _log(*words, "--resolution", "his call, and why") == CLEAN_EXIT
     out = capsys.readouterr().out
+    assert "real_decision: pass (disputes)" in out
     assert "read: DISAGREES" in out and "wrote selection-log-6.json" in out
     assert "from reader-rejection-real_decision-1-reply.json" in out
     saved = json.loads((folder / "selection-log-6.json").read_text())["rows"]
     read = next(r for r in saved if r["id"] == "closure-01")["reads"]["real_decision"]
     assert read["reading"] == "pass" and read["agrees"] is False and len(read["reply_sha256"]) == 64
+
+
+def test_log_read_of_a_pass_of_another_type_says_it_agrees(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # A pass whose decision is retool, on the closure list, agrees with the rejection (search-half doc
+    # §4.6.4): the line he reads says so, as the record does.
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    assert _log("closure", "record", "closure-01", "first_disclosure", "pass", "--reason", "r",
+                "--disclosed", "2026-08-18") == CLEAN_EXIT  # fmt: skip
+    for criterion in ("public_and_filing", "inside_window", "real_decision"):
+        assert _log("closure", "record", "closure-01", criterion, "pass", "--reason", "r") == 0
+    assert _log("closure", "record", "closure-01", "maps_to_shape", "fail", "--reason", "r") == 0
+    capsys.readouterr()
+    _reply_on_disk(folder, "pass", "maps_to_shape", "retool")
+    assert _log("closure", "read", "closure-01", "maps_to_shape") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "maps_to_shape: pass (agrees)" in out and "disputes" not in out
+    assert "read: agrees" in out and "finished: rejected" in out
 
 
 def test_log_read_of_a_reader_who_could_not_tell_lets_the_rejection_stand(

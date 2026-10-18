@@ -7,6 +7,25 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-18, about 12:35 PM (CLOSURE WINDOW DONE, 0 OF 2; FAIL-SHAPE RULE CHANGED)
+>
+> **Measured:** `make check` green, **2532 tests**. Last commit `794853a` (pushed). **Uncommitted, for his one
+> commit:** the log-read label fix (`cli.py`, its test), the fail-shape change (the brief
+> `experiment/readers/rejection.txt`, `read.py`, tests), search-half doc §11's entry, this file, ROADMAP. **The
+> reader refuses to run on an unpushed brief**, so commit and push come before closure-22's read.
+>
+> **Closure:** every window candidate (closure-01 to 29) is finished and rejected; **no closure case** (k = 2). All
+> reads logged except **closure-22** (two unusable replies, one attempt left, now under the changed rule). Search-half
+> doc §11 (2026-10-18) records the day, three slips (excerpts saved after the results; closure-27's reason names S2
+> where its Item 2.05 makes it S3, outcome unchanged; a miscount in closure-17's reason) and his decision.
+>
+> **Next:** (1) his commit and push; (2) `bash scratch/read-batch.sh closure-22:maps_to_shape`, then
+> `hc case log closure read closure-22 maps_to_shape`; (3) the 7 fallback candidates (closure-f01 to f07), criterion
+> 1 first, **excerpt saved before any result is recorded**. S2 has failed on the total for every closure candidate so
+> far; a shortfall is reported (§12.1), never filled.
+>
+> *The 2026-10-17 5:35 PM block below is superseded; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-17, about 5:35 PM, HANDOFF (§4.6.4 ADOPTED AND BUILT; HIS ONE COMMIT AND PUSH LAND IT)
 >
 > **Measured at handoff:** `make check` green, **2527 tests**; `hc protocol check: ok`. Last commit `24475b1`
