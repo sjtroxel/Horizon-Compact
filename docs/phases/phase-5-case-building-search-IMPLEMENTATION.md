@@ -1499,3 +1499,119 @@ or "none"**, its type fitting the shape (§4.6.4): the brief's reply-format sent
 already on record keep the verdict they were given; closure-22's third attempt is read under the change. Also
 fixed: `hc case log ... read` printed "(disputes)" over a §4.6.4 read that agrees (the record was right; only the
 label used the old rule), with a test.
+
+**Stage D step 11, the closure fallback pool, and the closure selection complete (2026-10-18, about 12:55 PM CDT;
+Opus, his reads).** The seven fallback candidates (closure-f01 to f07) were checked, **each excerpt saved before
+any result was recorded**. f04 fails criterion 1: an S3 closure of one named plant (about 1,750 job reductions,
+which would have passed the total), but the company publicly said on 2026-05-12, before the fallback month, that
+it was in discussions to close the facility; the earlier plan at the same plant (about 300 job reductions, Q4
+2025) was judged a different decision. f01 passes criterion 1 (its "previously discussed" call names three other
+footprint projects and no plant in Mexico; the transcript was read) and fails criterion 4 as S3 with no headcount
+at the site. f02, f03, f05, f06 and f07 fail criterion 4 on the S2 total. f02 is quoted over the counter now, but
+its 8-K cover of the decision date lists it on an exchange, and criterion 2 is read as of the decision. Every read
+agrees, each on its first attempt (no format failure under the changed rule). **The log reports "selection
+complete; shortfall 2": the closure type has no case** (§12.1: a shortfall is reported, never filled).
+
+**What decided it.** Of 36 closure candidates, every S2 that reached criterion 4 failed on the total: no filing
+stated the fall in operating income the company expected before acting, as a dollar figure (§4.6.2 A); the S3
+candidates failed on a headcount at the site under 167 or absent. The one candidate with a usable total (f04)
+was disclosed before the fallback month. This is a property of the rule against real filings, reported as such;
+nothing here changes it.
+
+**The excerpt cut, made mechanical.** The rule (the whole Item 2.05, ended at the next item heading or an
+unnumbered heading) is applied by a scratch script (`scratch/c4/excerpt.py`, not tracked) that also breaks before
+a heading run into the paragraph before it, strips table-cell marks and treats a thin space as a space. Re-run
+over the eleven window excerpts saved earlier the same day, it reproduces each in content (two differ only in a
+thin space and a page-number cell's marks); the saved files were not changed.
+
+**Stage D step 11, the retool window finished (2026-10-18, about 2:40 PM CDT; Opus, his reads and decisions).**
+All 44 window candidates (retool-01 to 44) were dated first. **32 fail the first-disclosure check:** the matched
+passage's subject was public before the window, almost always as the same forward-looking list, capital-spending
+sentence or project announcement in an earlier filing, found by EDGAR full-text search on the passage's own words
+and read in context (§4.6.2 B.1). His three calls (2026-10-18, on Claude's recommendation): fail those 32 unread at
+the first-disclosure check, as B.1 provides; date retool-09 at its own presentation and retool-21 at the
+customer's board approval it refers to, each with the alternative reading in its reason; and record retool-40, a
+later filing of retool-34's decision, as dated with retool-34 (KNOWN-GAPS OPEN 2026-10-18). **The 12 that pass**
+were taken through criteria 1 to 4: four are real decisions to expand existing plants (19, 34, 40, 42) and fail
+criterion 4 part (i), no shape (no facility of the company's named for closure or sale, no annual program cost
+stated); eight were rejected on criterion 3 as passages announcing no decision (09, 10, 15, 17, 20, 21, 33, 36).
+**The reader disputed all eight** on the whole excerpt, which in each shows some real decision (a merger, an
+acquisition, an offering, a machine purchase, a ten-year investment total, a listing restructuring, technology
+choices); his resolution for each: the rejection judged only the matched passage's subject, so per §12.4 it does
+not stand and the candidate went on to criterion 4. All eight then failed criterion 4 part (i), no shape, and
+every one of those reads agrees, each on its first attempt (retool-20's reason records the reading of a total over
+ten years as an annual cost, rejected because S4 requires a stated one). Reader spend for the window's 21 reads,
+about $0.53. **The retool window yields no case (0 of k = 2); the fallback pool (retool-f01 to f18) opens next
+(§12.2).**
+
+**Two slips, on record because the log is write-once.** (1) The first-disclosure results of the 12 passing
+candidates were recorded before their excerpts were saved, not after, as Stage D step 11 requires. Each excerpt was
+then cut by rule before any criterion 1 to 4 result (below); none was chosen, so the order could not shape it, but
+it was broken. (2) The eight criterion 3 rejections rested on a reading of B (criterion 3 judged on the matched
+passage's subject) that the brief does not hold: the brief judges the whole excerpt. Every one was disputed and
+none stood, so no outcome rests on the slip; on the fallback pool, criterion 3 is judged on the whole excerpt, as
+the brief does.
+
+**The excerpt for a hit outside Item 2.05, made mechanical** (`scratch/c4/excerpt_doc.py`, not tracked): B.3's
+unit, the whole exhibit or the whole item of the current report that holds the matched phrase, parsed as the Item
+2.05 script parses; where more than one document of the filing holds it (retool-34), **the first in the filing's
+own order**; over 200,000 characters (retool-10, a merger agreement), B.3's rings around every paragraph holding
+the phrase, each ring whole, `[...]` marking each gap.
+
+**Stage D step 11, the retool fallback pool, and the retool selection complete (2026-10-18, about 3:25 PM CDT;
+Opus, his reads).** The 18 fallback candidates (retool-f01 to f18) were checked, **each excerpt saved before any
+result was recorded**, and criterion 3 judged on the whole excerpt, as the brief does. **15 fail the first-disclosure
+check**, the passage's subject public before July 2026 (forward-looking lists and slides repeated from earlier
+filings; capacity work announced earlier in the year; a new plant in filings since 2025). retool-f07 and f08 are one
+deck filed by both parties to a combination (the gap of KNOWN-GAPS OPEN 2026-10-18); both fail on the expansion
+work announced in February, so the gap did not arise. **Three pass** (f10, an acquisition; f13, a capital raise
+reported with quarterly results; f14, the company's agreement to be sold, after a strategic review announced in
+April, judged an earlier, different step as at closure-13), and all three fail criterion 4 part (i), no shape.
+Every read agrees, each on its first attempt (three reads, about $0.05). **The log reports "selection complete;
+shortfall 2": the retool type has no case** (§12.1).
+
+**What decided it.** Of 62 retool candidates, 47 failed the first-disclosure check: the channel's phrases ("capacity
+expansion", "expand production") match boilerplate and running commentary far more often than an announcement, and
+that text is repeated from filing to filing. Of the 15 that reached criterion 4, none named a facility of the
+company's for closure or sale with production moving to new or converted capacity (S3 on retool), and none stated a
+program's annual cost (S4); the real decisions found were expansions of existing plants, acquisitions, sales and
+financings. This is a property of the rule and the channel against real filings, reported as such; nothing here
+changes either. Two of the three types now have no case (closure, retool); with ai at k = 1, v1 has at most one
+case, below §12.1's "at least three, at least one invest or retool". The definition of done here (§9, DoD 1: "or a
+shortfall by type") and the Phase 5.5 scope doc ("unless Phase 5 reported" one) already provide for that outcome;
+what it means for Phase 5.5 and the write-up is his (KNOWN-GAPS OPEN 2026-10-18).
+
+**Stage D step 11, the ai type, and the ai selection complete (2026-10-19, about 3:45 AM CDT; Sonnet, his reads).**
+All 76 candidates (50 window, 26 fallback) were checked under the rules as they stood, **every excerpt saved before
+any result was recorded** (the retool slip not repeated), criterion 3 judged on the whole excerpt, full-text search
+only for the contract-wording matches and a web search for every filing that announces an action. **The log
+reports "selection complete; shortfall 1": the ai type has no case** (§12.1), so **no type has a case under the
+pre-registered rule**. This is the record the exploratory relaxation (KNOWN-GAPS START HERE, 2026-10-19) rests on.
+
+**The window (50).** 21 fail the first-disclosure check (forward-looking lists, non-GAAP definitions and covenants
+repeated from earlier filings; one AI-framed workforce cut disclosed in July, before the window).
+The 29 that pass are 20 transaction agreements whose workforce wording is a covenant, representation or definition,
+and nine filings that announce a cost or workforce action. Every one fails criterion 4 part (i): no filing
+attributes a workforce change to AI or automation software with a usable total. One (ai-39, a product-data
+release naming a cut announced the day before only in its forward-looking statements) was rejected at criterion 3;
+**the reader disputed it and his decision (2026-10-19) was that the rejection does not stand**, as at retool-09 and
+retool-21, so it went on to criterion 4, where the reader agreed it fails. All other reads agree. The closest
+candidates: ai-07 and ai-20 (one decision filed twice), a cut whose sibling exhibit credits AI-assisted tooling but
+whose Item 2.05 excerpt does not, and which is under the 167 floor; and ai-41, a cut at a company whose product is
+AI, not attributed to it.
+
+**The fallback pool (26).** 12 fail the first-disclosure check; three (f06 to f08, student-loan trust notices)
+fail criterion 2, no publicly traded stock; the 11 that pass criteria 1 to 3 (ten transaction agreements or deal
+slides and one 2% reduction in force inside a cost program) fail criterion 4 part (i), every read agreeing. One
+automation-linked cut (f17) fails first disclosure: announced in January 2026.
+
+**Slips.** (1) The first run of the recording script was refused at the first fallback (the log requires every
+window read before a fallback), so the window rows were written and the fallbacks later; nothing was lost. (2)
+Two fallback reads failed with AccessDeniedException (0 tokens, no cost) and were retried, both succeeded. (3) The
+fallback reads were estimated at about $0.30 and cost about $0.9: the agreement excerpts, cut to 200,000
+characters, cost about $0.09 each, not the $0.02 of the short ones. The reader's spend, every case in the
+appendix, is about $3.83 (about $2.7 of it the ai type).
+
+**Boundary of the web check.** The web search was run for the 14 filings that announce an action; for the contract
+wording the full-text search alone was used, so the first-disclosure date of those is the filing or the signing
+date, not a searched date. It cannot change an outcome (each is inside the window or fails criterion 4 anyway).

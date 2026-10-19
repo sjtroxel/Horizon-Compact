@@ -7,6 +7,146 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-19, about 3:50 AM (AI SELECTION COMPLETE: NO CASE, SHORTFALL 1; NEXT: THE RELAXATION PATCH)
+>
+> **Step 1 of the plan below is done.** `hc case log ai show` reports "selection complete; shortfall 1": 76
+> candidates (50 window, 26 fallback) all rejected, every read agreed except ai-39's criterion 3 rejection, which
+> the reader disputed and he decided does not stand (it then failed criterion 4, read agreed). **No type has a case
+> under the pre-registered rule**, so the exploratory label rests on a full record for all three. Search-half doc §11
+> (2026-10-19) holds it, with three slips (a script order, two failed reads retried, the fallback read cost
+> estimated at about $0.30 and about $0.9 actual; reader spend, every case, about $3.83).
+>
+> **Measured:** last commit `5529ff4`; no code changed today; `make check` green at about 3:55 AM, 2532 tests.
+> **Uncommitted, docs only:** §11, this file, ROADMAP (and the 10/18 docs); his commit closes it.
+>
+> **Open, his (not Claude's):** whether the patch includes an S1 relaxation at all (finding (c) below), and adopting
+> the patch, rested. The patch is drafted first; nothing is applied before he adopts it.
+>
+> **Findings that bear on step 2:** (a) **ai-15** (an AI-framed workforce cut, per press coverage) was disclosed in
+> mid-July, before the window opens, so it fails first disclosure; the window start is not a lever (it guards
+> against training data). (b) **ai-07/ai-20**: AI is credited
+> in the exhibit, not in the Item 2.05 excerpt the rule selects, and the cut is under the 167 floor. (c) The
+> usable S1 total is the missing ingredient: no filing in the pool states an AI-attributed cut of at least 167.
+> The patch should say whether an S1 relaxation is wanted at all.
+>
+> **Next:** step 2, the §4.6.5 relaxation patch (Opus), read by the independent reader, his adoption rested. The
+> plan below stands.
+>
+> *The 3:00 AM block below is superseded on step 1 only; it stays as the plan.*
+
+> ## START HERE — where things stand, 2026-10-19, about 3:00 AM (PLAN CHANGED: RELAX THE CRITERIA, EXPLORATORY CASES)
+>
+> **His decision (2026-10-18, about 4:14 PM; confirmed 2026-10-19, about 2:41 AM): do not close v1 on the shortfall.
+> Relax the case criteria in logged steps until v1 has 3 to 5 cases.** This replaces the close-out plan in the 3:25 PM
+> block below. Conditions, agreed: every step logged (what changed, why, what it let in); every case it admits is
+> labeled **exploratory, selected after the pre-registered rule found none**, everywhere it appears; Phase 4 stays
+> the headline result. **Never relaxed:** the window's protection against training data (any date change is checked
+> against the v1 models' cutoffs, live), the recognition probe, the rule that the scenario never states the company's
+> actual choice, and the exploratory label.
+>
+> **The plan, in order.**
+> 1. **ai selection under the current rules** (Sonnet), recorded in full, so the claim "after the rule found none"
+>    holds for all three types. A triage (2026-10-19, Opus, scratchpad only, nothing recorded) found no filing among
+>    the 76 that attributes a workforce cut to AI with a usable S1 total: the search matched documents holding both
+>    phrases anywhere (merger-agreement covenants, forward-looking lists). Closest: ai-07 (65 roles, AI given as
+>    part of the reason, roles taken over by AI not stated; ai-20 is a later filing of it); ai-f17 (an automation
+>    network program running since 2025, fails first disclosure); ai-41 is closure-21's filing (AI is the
+>    company's product, not the cause). The triage is not the record: each row gets its own reason, in the 12:55 PM
+>    block's order. All 76 filings' text is already cached under `scratch/c4/text/ai-*`.
+> 2. **The relaxation patch** (Opus), §4.6.5 of the search-half doc, the steps ordered by how little validity each
+>    costs, read by the independent reader before adoption, his decision rested. Candidates from the record:
+>    (a) **closure-16** to the retool list (passed every criterion; rejected only because §4.6.4 moves no candidate
+>    between lists); (b) **closure-f04** (total passed, about 1,750; failed only first disclosure, a May statement
+>    against the July fallback month; admissible only if May 2026 is after every v1 model's cutoff, checked live);
+>    (c) a **lower S3 headcount floor** (his reason, 2026-10-19: a smaller site can be a perfectly good decision; the
+>    floor is §12.6's "fewer than 100" anonymity rule over the 0.6 factor, and the recognition probe guards the same
+>    risk) (closure-19 about 120; closure-24 about 85 across two sites; closure-07 an
+>    upper bound only); (d) an **S2 total from a stated savings target or charges** (seven S2 candidates state one;
+>    changes what the S2 template says, the largest step); (e) an **expand-an-existing-plant shape** (retool-19, 34,
+>    42; 40 is 34 refiled; a new template, last resort). The write-once log has no way to reopen a rejected
+>    candidate: the patch must say how a relaxation is recorded (a new exploratory record, not an edit of the old).
+> 3. **Apply the steps one at a time; stop at 3 to 5 cases.** Each admitted candidate still goes through build,
+>    scenario check, recognition probe and the rest; some will fail there.
+>
+> *The 3:25 PM block below is superseded on the plan; its measured state stands.*
+
+> ## START HERE — where things stand, 2026-10-18, about 3:25 PM (RETOOL SELECTION COMPLETE: NO CASE, SHORTFALL 2)
+>
+> **Measured:** last commit `5529ff4` (pushed); no code changed since; `make check` green at 3:38 PM (handoff), 2532 tests.
+> **Uncommitted, docs only:** search-half doc §11 (closure fallback, retool window, retool fallback entries), this
+> file, ROADMAP.
+>
+> **Retool is done, no case.** Window (44) and fallback pool (18) all rejected, every read logged and agreed; `hc
+> case log retool show` reports "selection complete; shortfall 2". 47 of 62 failed the first-disclosure check
+> (boilerplate repeated from earlier filings); the 15 that reached criterion 4 matched no shape (expansions of
+> existing plants, acquisitions, sales, financings). §11 (3:25 PM) holds it.
+>
+> **Closure and retool both have no case, so v1 has at most one (ai, k = 1)** (OPEN 2026-10-18, below). The
+> definition of done provides for a shortfall; what it means for Phase 5.5 and the write-up is his.
+>
+> **His plan for the close-out (2026-10-18, about 3:37 PM; a leaning, confirm it with him first):** (1) the ai
+> selection; (2) close v1: the search-half DoD audit with the shortfall reported by type, ROADMAP and this file
+> closed out, and what happens to Phases 5.5 to 6.5 (his call); (3) a README, his prose (Claude interviews, outlines,
+> critiques). Then the project ends and a new one starts. Do not open Phase 5.5 work.
+>
+> **Next:** the **ai** type (S1), Stage D step 11, in the 2:40 PM block's order (excerpt first; criterion 3 judged
+> on the whole excerpt). Its channel's queries pair "artificial intelligence" or "automation" with workforce
+> reductions, so the earlier-mention check and §4.6.4's type test (an S2 cut not attributed to AI fails as
+> closure) will decide most.
+>
+> *The 2:40 PM block below is superseded; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-18, about 2:40 PM (RETOOL WINDOW DONE: 0 OF 2; FALLBACK POOL NEXT)
+>
+> **Measured:** last commit `5529ff4` (pushed); no code changed since, so its `make check` (2532 tests) stands.
+> **Uncommitted, docs only:** search-half doc §11 (closure fallback entry, retool window entry), this file, ROADMAP.
+>
+> **Retool window done, no case.** 44 candidates: 32 fail the first-disclosure check (the matched passage's
+> subject public before the window); the 12 that pass all fail criterion 4 part (i), no shape (four expansions of
+> existing plants; eight criterion 3 rejections that the reader disputed, so they went on to criterion 4). Every
+> read logged and agreed, 21 reads, about $0.53. §11 (2026-10-18, 2:40 PM) holds it, with two slips and the
+> excerpt rule for a non-2.05 hit. **Criterion 3 is judged on the whole excerpt, as the brief does** (the slip).
+>
+> **Next:** the 18 retool fallbacks (retool-f01 to f18, July 2026): `disc.py doc`, then `hits.py <id>` to find the
+> matched passage, then **the excerpt first** (`excerpt_doc.py <accession> <document> exhibit|item:<n.nn>
+> "<phrase>" <case folder>/first-disclosure-excerpt.txt`; the first document in filing order that holds the phrase),
+> then first disclosure (`disc.py fts`, `ctxc.sh <id> <accession> <file> <regex>` for an earlier hit's context, a
+> web search), criteria 1 to 4 (the fallback reason names the fallback month, July 2026), reads, log. Then **ai**.
+> The record scripts of the window are `scratch/c4/retool_fd.py`, `retool_c123.py`, `retool_disputes.py`; the
+> read wrappers `scratch/rt.sh`, `rt2.sh`.
+>
+> *The 12:55 PM block below is superseded; it stays as the record.*
+
+> ## START HERE — where things stand, 2026-10-18, about 12:55 PM (CLOSURE SELECTION COMPLETE: NO CASE, SHORTFALL 2)
+>
+> **Measured:** `make check` green, **2532 tests**. Last commit `5529ff4` (pushed). **Uncommitted:** search-half
+> doc §11's fallback entry, this file, ROADMAP (docs only).
+>
+> **Closure is done.** Window (29) and fallback pool (7) all rejected, every read logged and agreed; `hc case log
+> closure show` reports "selection complete; shortfall 2". Every S2 failed on the operating-income total; the S3s
+> failed on a site headcount under 167 or absent; the one candidate with a usable total (closure-f04) was disclosed
+> before the fallback month. Search-half doc §11 (2026-10-18, 12:55 PM) holds it. A shortfall is reported, never
+> filled (§12.1); what it means for the write-up is his.
+>
+> **Next:** Stage D step 11 for **retool** (44 window candidates; S3 with production moving to capacity being built
+> or converted, so the site-headcount total and its 167 floor decide most), then **ai** (S1). Tools: `scratch/c4/`
+> (excerpt.py, search.py, altoi.py, filing.py, disc.py, ctx.py, pre4.sh; pre4's window reason names the window).
+> **Excerpt saved before any result is recorded.**
+>
+> **The order per candidate, as run on 2026-10-18** (Claude runs every step but the reads, which need his key):
+> (1) `python3 -I scratch/c4/disc.py doc <id>` (filing text; also caches it); (2) `excerpt.py <accession> <case
+> folder>/first-disclosure-excerpt.txt`, the whole Item 2.05 (check its end and any item heading inside it); (3)
+> criterion 1: `disc.py fts <id> '"<phrase>"'` on the action's own words, a web search, the filing's own
+> "previously" lines (a different, earlier decision does not count: closure-13 precedent); (4) criteria 2-3:
+> `bash scratch/c4/pre4.sh` (window), by hand for a fallback (its reason names the fallback month); criterion 2 by the
+> 8-K cover at the decision date, OTC counted as publicly traded (closure-14); (5) `hc case documents <id>`, then
+> `search.py <case folder> <out> "<terms>" S2|S3` (S3: the facility's name; S2: the action's words; avoid terms like
+> "consolidate" that match boilerplate) and `altoi.py` for other operating-income wordings; (6) copy the search to
+> `total-search.txt`, record criterion 4 with document counts **taken from the search file, not by eye**; (7) he
+> runs `bash scratch/read-batch.sh <id>:maps_to_shape ...`; (8) Claude logs each with `hc case log <type> read`.
+>
+> *The 12:35 PM block below is superseded; it stays as the record.*
+
 > ## START HERE — where things stand, 2026-10-18, about 12:35 PM (CLOSURE WINDOW DONE, 0 OF 2; FAIL-SHAPE RULE CHANGED)
 >
 > **Measured:** `make check` green, **2532 tests**. Last commit `794853a` (pushed). **Uncommitted, for his one
@@ -1499,6 +1639,27 @@ case by its type and a neutral label. The names live only in the private longlis
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
 
 ---
+
+## OPEN 2026-10-18 — two of three types short: v1 has at most one real case (his, before Phase 5.5 is scoped further)
+
+Closure (k = 2) and retool (k = 2) both ended in "selection complete; shortfall 2"; the ai type (k = 1) is not yet
+checked. Protocol §12.1 says "At most five cases, at least three, at least one invest or retool", and also that a
+shortfall is "reported, never filled by judgment". The search-half doc's definition of done (§9, DoD 1) reads "at
+least three cases, one invest or retool, or a shortfall by type", and the Phase 5.5 scope doc runs "at least three
+cases ... unless Phase 5 reported" a shortfall, so the outcome is provided for and nothing is breached. What is
+open is his: what Phase 5.5 runs with zero or one case, and how the write-up reports the selection rule's yield
+(the rule and the channels against real filings, not a fault in the cases). Not settled by changing any rule after
+seeing which candidates it rejects.
+
+## OPEN 2026-10-18 — one decision filed twice, as two candidates on one list (decide before either could become a case)
+
+Found at the retool window: retool-40 (a presentation filed 10/2) describes the same decision as retool-34 (the
+announcement of 9/14), and the search found both, as two filings. §12.3 counts a filing found twice once, but no
+rule says what happens when two filings carry one decision. **His call 2026-10-18:** retool-40 dated 9/14 with
+retool-34 and recorded like it; both failed criterion 4, so nothing turned on it. A rule is needed before a
+decision filed twice could pass criterion 4 (the obvious one: the later filing fails the first-disclosure check as
+the earlier candidate's decision, and is finished; its own excerpt unused). The ai list's channel, with repeated
+press releases, is where it is most likely to recur.
 
 ## CLOSED 2026-10-17, his decision, search-half doc §4.6.4 (found and settled the same day) — a candidate whose type is not its search channel's
 
