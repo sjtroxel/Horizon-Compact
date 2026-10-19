@@ -7,6 +7,66 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-19, about 1:15 PM, HANDOFF (§4.6.5 ADOPTED; THE EXPLORATORY BUILD PLAN AWAITS HIS APPROVAL)
+>
+> **Measured at handoff:** last commit `2b4549f` (pushed); no code changed today; `make check` green, 2532 tests (run
+> at handoff). **Uncommitted, docs only, for his one commit:** the search-half doc (§4.6.5, dated notes on §4.6.3 and
+> §4.6.4, a §11 entry), the read's raw reply (`evidence/phase-5/patch-4.6.5-review-raw.md`), the new plan
+> (`phase-5-case-building-exploratory-IMPLEMENTATION.md`), the scope doc's dated note, ROADMAP and this file. The read's
+> scripts (`scratch/review-patch-465.sh`, `scratch/send-patch-review-465.py`) stay in the ignored `scratch/`, as the
+> earlier ones did.
+>
+> **Decided today (his):** §4.6.5 adopted about 12:50 PM, after the reader's read ($0.24; changes 1 to 5 and 8
+> taken, 6, 7, 9 and 10 answered), on his condition that they help reach a legitimate five cases or close to it.
+> **His 10/18 condition that the window's protection is never relaxed is replaced, for §4.6.5 steps 3 and 4 only, by
+> the knowledge probe.** No S1 relaxation. The reader's change 3 narrowed step 1: an S3 total is always the plant's
+> headcount (from the filings or a public report), never a count of jobs cut, an upper bound or a sum over plants.
+>
+> **The place to look:** `docs/phases/phase-5-case-building-exploratory-IMPLEMENTATION.md` (the one-page plan at its
+> top; five stages; three decisions in §6).
+>
+> **First move next session:** `git log -1`. If it is not `phase 5: §4.6.5 adopted, exploratory build plan`, his commit
+> (`git add docs && git commit -m "phase 5: §4.6.5 adopted, exploratory build plan"`), then his push. Then his approval
+> of the plan; done when its status line reads APPROVED with his three decisions. Then stage 1, step 1.
+>
+> **Open, his (not Claude's):** (1) **the plan's three decisions** (§6): `hc case xlog` or a flag on `hc case log`;
+> whether to open step 3 early if fewer than five rows pass criterion 4 (the pool's search is free, its probe costs
+> cents, and building ahead changes nothing about selection); Sonnet building with Opus reviewing, or Opus throughout
+> (much heavier on his usage). (2) **What §11 keeps from here on:** its 2026-10-18 entries give some candidates' stated
+> headcounts in this public repo, and with a label a full-text search could find the company, which matters now that
+> those rows may become cases; past commits stay public. (3) **His one OpenRouter top-up** (balance under $1 on
+> 2026-10-19; the $5 minimum, about $5.80 with the card fee, per third-party sources), due at stage 3's first scenario
+> read, not before.
+>
+> **Owed, not started:** the build (stage 1 first); a dated note in the Phase 5.5 scope doc for exploratory cases,
+> before its IMPLEMENTATION doc is written; the coarsened dossier's home (OPEN 2026-10-16), before any second probe set.
+>
+> *The 12:30 PM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-19, about 12:30 PM (§4.6.5 DECIDED IN PRINCIPLE; THE READER'S READ NEXT)
+>
+> **His decision (about 12:05 PM): adopt §4.6.5, steps 3 and 4 included** (the knowledge probe replaces the window's
+> protection there), **and add every further relaxation that holds up.** It becomes final after the independent
+> reader's read and his answers to its changes, as for §4.6.2 to §4.6.4; nothing is applied before then. Last commit
+> `2b4549f` (pushed); the patch, ROADMAP and this block are uncommitted, docs only.
+>
+> **The patch, as revised the same morning** (search-half doc §4.6.5): step 0, the figure-free S3 form (no S3 case
+> can render without it, OPEN 2026-10-16); step 1, looser S3 rules (floor 50, a total from a public report such as a
+> WARN notice, an upper bound read as its number, several facilities as one plant, and a case read on its choice
+> alone when its number is not a stated site headcount); step 2, the ten pre-registered S3 rows re-read and one new
+> in-window channel for plant closures announced outside Item 2.05; steps 3 and 4, the pre-cut-off pool through the
+> knowledge probe; step 5, a second search on 2027-01-04. Steps 3 to 5 open only if needed. **Step 2 is now the main
+> route:** four rows pass criterion 4 on the record's own figures, up to five more on public reports, all inside the
+> window. Three is within reach; five is possible; not measured.
+>
+> **Next, his:** `bash scratch/review-patch-465.sh` (the reader's read, about $0.20 to $0.40 of OpenRouter cash), then
+> his answers to its changes. **Flag, separate from the patch:** §11 (2026-10-18) already gives some candidates' stated
+> headcounts in this public repo, and with a label a full-text search could find the company; that matters now that
+> those rows may become cases. His call on what §11 keeps from here on (past commits stay public).
+>
+> *The 3:50 AM and 3:00 AM blocks below are superseded on the plan; their record stands. An earlier draft of this
+> block, uncommitted, was stamped "about 1:00 PM" in error: it was written before noon.*
+
 > ## START HERE — where things stand, 2026-10-19, about 3:50 AM (AI SELECTION COMPLETE: NO CASE, SHORTFALL 1; NEXT: THE RELAXATION PATCH)
 >
 > **Step 1 of the plan below is done.** `hc case log ai show` reports "selection complete; shortfall 1": 76
@@ -42,7 +102,8 @@ case by its type and a neutral label. The names live only in the private longlis
 > labeled **exploratory, selected after the pre-registered rule found none**, everywhere it appears; Phase 4 stays
 > the headline result. **Never relaxed:** the window's protection against training data (any date change is checked
 > against the v1 models' cutoffs, live), the recognition probe, the rule that the scenario never states the company's
-> actual choice, and the exploratory label.
+> actual choice, and the exploratory label. *[Annotated 2026-10-19, about 1:15 PM: the window's protection is
+> replaced for §4.6.5 steps 3 and 4 by the knowledge probe, his decision; it is kept everywhere else.]*
 >
 > **The plan, in order.**
 > 1. **ai selection under the current rules** (Sonnet), recorded in full, so the claim "after the rule found none"
@@ -1651,6 +1712,12 @@ open is his: what Phase 5.5 runs with zero or one case, and how the write-up rep
 (the rule and the channels against real filings, not a fault in the cases). Not settled by changing any rule after
 seeing which candidates it rejects.
 
+*Dated note, 2026-10-19 (his):* the ai type is now checked too (shortfall 1), so no type has a case under the
+pre-registered rule. His decision: exploratory cases in a separate record (search-half doc §4.6.5, adopted
+2026-10-19; build plan `phase-5-case-building-exploratory-IMPLEMENTATION.md`), every case labeled, the pre-registered
+result reported first. Open until the exploratory selection is complete and the Phase 5.5 scope doc has a dated note
+for exploratory cases.
+
 ## OPEN 2026-10-18 — one decision filed twice, as two candidates on one list (decide before either could become a case)
 
 Found at the retool window: retool-40 (a presentation filed 10/2) describes the same decision as retool-34 (the
@@ -1782,6 +1849,10 @@ the 3.1% the scale module's argument allows, and a small plant can fail the band
 render:** which pairs of rows the check covers (by sentence, as the dossier does by line, is the obvious reading), and
 record the result in `scenario-render.json`; a failure is a reported deviation for him, as in the dossier.
 
+*Dated note, 2026-10-19:* settled for S3 by search-half doc §4.6.5 step 0 item 3 (the check on each kept sentence that
+states a heads row and a total-pay row, recorded in `scenario-render.json`); closes when the exploratory part's stage
+1 builds it. S1 is not relaxed, so no S1 render is in view.
+
 ## OPEN 2026-10-16 — S3 renders only with every option's figures (at Stage D)
 
 By §4.6.1 item 6 as written, any S3 option sentence with no case figure strips every figure from all three options,
@@ -1792,6 +1863,10 @@ and payback, the share of positions kept, the sale multiple and the buyer's shar
 figures.** Pre-cut-off filings rarely give these for one plant, so S3 may yield few cases or none. This is the cost
 §4.6.1 accepted when it declined figure-free wordings; it is recorded here so a run of S3 rejections at Stage D is
 expected, not a surprise. If S3 yields none, that is his to weigh then (the protocol's minimum per type governs).
+
+*Dated note, 2026-10-19:* answered for the exploratory record by search-half doc §4.6.5 step 0, the figure-free S3
+form (protocol §12.6: "every option is described without figures alike"); closes when the exploratory part's stage 1
+builds it.
 
 ## OPEN 2026-10-16 — where a coarsened dossier lives (before any probe set 2)
 

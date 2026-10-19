@@ -10,6 +10,12 @@
 > `case-runs`** (`docs/phases/phase-5.5-case-runs.md`) runs them, matches them and publishes the results. The six
 > decisions were made on this doc, before the split, and are recorded here; findings 1-7 cover both halves.
 >
+> **Dated note, 2026-10-19 (his): an exploratory part.** The search found no case of any type under the
+> pre-registered rule. His decision: relax the rule in logged steps, in a separate exploratory record, every case
+> labeled exploratory, the pre-registered result reported first. The rules are the search-half doc's §4.6.5 (adopted
+> 2026-10-19, after the independent reader's read); their build has its own IMPLEMENTATION doc,
+> `phase-5-case-building-exploratory-IMPLEMENTATION.md`.
+>
 > **Amended 2026-10-10 (his): split by code and search.** The dossier builder (decision 3: fetch by date with the
 > cut-off enforced in code, sections by the template's fixed list, the scaling draw of protocol §12.6) is built
 > first, tested on synthetic filings only, from its own IMPLEMENTATION doc

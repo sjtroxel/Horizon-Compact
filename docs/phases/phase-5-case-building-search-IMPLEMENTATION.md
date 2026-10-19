@@ -4,7 +4,7 @@
 > about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** **Patched 2026-10-16 (his): §4.6.1, the case scenario
 > is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** **Patched
 > 2026-10-17 (his), after the independent reader's read: §4.6.2, the total in criterion 4 and a search hit
-> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** **Patched 2026-10-19 (his), after the reader's read: §4.6.5, exploratory cases after the pre-registered rule found none; their build is planned in `phase-5-case-building-exploratory-IMPLEMENTATION.md`.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -367,7 +367,9 @@ reason.
 #### 4.6.3 Patch 2026-10-17 (his, about 11:55 AM CDT; drafted by Opus): the headcount floor at criterion 4 is fixed
 
 *ADOPTED 2026-10-17 (his, about 12:15 PM CDT), after the independent reader's read (below): its changes 2 to 4
-taken; change 1 answered as a stated interpretation, his decision.* Found in the Opus review of step 11a (§11), before any S1 or S3 total was looked for (`KNOWN-GAPS.md`, OPEN
+taken; change 1 answered as a stated interpretation, his decision.* *Dated note, 2026-10-19: in the exploratory record
+only, §4.6.5 step 1 sets the S3 floor at 50, states a scaled S3 total under 100 as a number, and takes an S3 total
+only as the plant's headcount; the pre-registered record keeps this patch as written.* Found in the Opus review of step 11a (§11), before any S1 or S3 total was looked for (`KNOWN-GAPS.md`, OPEN
 2026-10-17, the headcount floor). Judged on its own terms, not by which candidates it admits: no headcount total of
 any candidate has been read.
 
@@ -441,7 +443,8 @@ untouched.
 #### 4.6.4 Patch 2026-10-17 (his, about 4:55 PM CDT; drafted by Opus): a candidate's type is decided by §12.1, not by the search that found it
 
 *ADOPTED 2026-10-17 (his, about 5:15 PM CDT), after the independent reader's read (below): its changes 1 to 4 taken;
-the draft's move of a candidate to another list is dropped.* Found at Stage D step 11, at closure-16: the first
+the draft's move of a candidate to another list is dropped.* *Dated note, 2026-10-19: in the exploratory record only,
+§4.6.5 step 1 item 1 sets item 2 below aside (one list per type); the pre-registered record keeps it.* Found at Stage D step 11, at closure-16: the first
 closure candidate whose first-disclosure document names a facility for closure **and** moves its production to a
 facility the company is building. **Written after closure-16's criterion 4 total was seen** (it would pass on the
 closure list): the rule was chosen knowing what it does to that one candidate, which is why it was read before
@@ -503,6 +506,300 @@ planned": taken (item 1). (5) The move's pool date: moot.
 channel found it. Code: the reply's `type` (checked against the shape), the log's agreement for a typed pass, the
 saved read's `type`; the brief's paragraph and its test. The reader's inputs change, so they are committed and pushed
 before the next read.
+
+#### 4.6.5 Patch 2026-10-19 (his, about 12:50 PM CDT, after the independent reader's read; drafted by Opus): exploratory cases, after the pre-registered rule found none
+
+*ADOPTED 2026-10-19 (his, about 12:50 PM CDT), after the independent reader's read (below): its changes 1 to 5 and 8
+taken, 6, 7, 9 and 10 answered. His decision in principle came first (about 12:05 PM: adopt, steps 3 and 4 included,
+with the window's protection replaced by the knowledge probe for those steps, and with every further relaxation that
+holds up), and he took the read's changes on the condition that they help reach a legitimate five cases or close to
+it. **The build is planned step by step in `phase-5-case-building-exploratory-IMPLEMENTATION.md`.*** The
+pre-registered rule found no case in any type (§11, 2026-10-18 and 2026-10-19). His decision (2026-10-18, about 4:14
+PM; confirmed 2026-10-19): do not close v1 on the shortfall; relax the rule in logged steps until v1 has three to five
+cases, each labeled exploratory. **This patch is written after the record of every rejected candidate was seen**, so
+steps 1 and 2 are written knowing which candidates they admit, as §4.6.4 was; step 3's pool was sized, by counts only,
+before its rule was written (E). It is judged as an exploratory rule, not as a reading of the protocol.
+
+**A. What does not change.**
+
+1. **The pre-registered selection stands as recorded:** `selection-log-633.json` (sha256 `ae329e10...`), "selection
+   complete" for every type, shortfalls 2 (closure), 2 (retool), 1 (ai). No row of it is edited or written again, and
+   it is reported first, as the rule's result (§12.1: a shortfall is "reported, never filled by judgment").
+2. **Phase 4 stays the headline result.** The cases are readings (§12), never in the family of 16.
+3. **His conditions (2026-10-18), kept:** every step logged with what changed, why and what it let in; the
+   recognition probe (§12.8); the rule that a scenario never states the company's choice; the exploratory label.
+   **The fourth, the window's protection against training data, is kept in steps 1, 2 and 5 and replaced in steps 3
+   and 4 by a knowledge probe (step 3 item 4): his decision, 2026-10-19.**
+4. **Everything after criterion 4 is unchanged** for every case: the build and his flag review, the scenario check,
+   the rubric and its read, the foreshadowing and neutrality checks, `case.lock` pushed before the first probe, the
+   probe and its coarsening, the gate (§12.10).
+
+**B. The exploratory record.**
+
+1. **A separate log:** `search/exploratory-log-<n>.json` and its public view, written once per version as the
+   selection log is (§4.3), by the same code with each step's criteria and lists.
+2. **A pre-registered row that step 2 re-reads is carried:** its results before criterion 4, with the log version and
+   sha256 they came from; criterion 4 is recorded again under the exploratory rules, with its reason, and read if it
+   fails. Its label stays its candidate id (§4.2).
+3. **The label, everywhere a case appears** (the public selection view, the freeze's case list, Phase 5.5's report,
+   the explorer, the methods page): "exploratory: selected by §4.6.5 step N, after the pre-registered rule found
+   none". Steps 3 and 4 add: "first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and
+   after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and
+   the extraction model found no recall". `case.lock` is unchanged (hashes only); the label lives in the log and the
+   freeze's list.
+4. **Every command that reads the selection log for a label** (`hc case documents`, `build`, `scenario check`,
+   `reader`, `lock`, `probe`) reads the exploratory log for an exploratory row.
+
+**C. The steps, in order.**
+
+**Step 0 (a prerequisite, not a relaxation of selection): the figure-free S3 form.** The fault (`KNOWN-GAPS.md`, OPEN
+2026-10-16, "S3 renders only with every option's figures"): by §4.6.1 item 6, an S3 case without a pre-cut-off figure
+for every option drops every option sentence that holds one; the retool and sell texts are made only of such
+sentences, so they are left empty and the render refuses. **No S3 case can render today, and every candidate the
+steps below admit is S3 or S1.** Protocol §12.6 provides for exactly this case: "Where an option has no pre-cut-off
+figures, every option is described without figures alike."
+
+1. **When equal treatment applies to an S3 case, each option's text is one figure-free sentence**, from a new file,
+   `experiment/case-forms/s3.toml`, outside `experiment/company/`, so the tag's content hash and Phase 4's rendered S3
+   are unchanged and `hc scenarios check` still passes:
+   - close: "Close the plant." (the template's first sentence without "and move its product family to the other
+     plants", which a real company that drops the product would make false; the reader's change 2);
+   - retool: "Retool the plant and keep running it." (new: the template's "automating welding and material handling
+     as at the larger plants" describes the fictional plant only);
+   - sell: "Sell the plant, with its product family, to a buyer that will keep running it." (the template's first
+     sentence without its figure clause).
+2. In that form the situation's "The figures for every option are management's estimates." is dropped, since it
+   would be false, and so are the close text's other sentences, so that each option is one sentence.
+3. **The pay-per-head check** (`KNOWN-GAPS.md`, OPEN 2026-10-16): where a kept sentence states both a heads row and a
+   total-pay row, the render runs `scale.check_pay_per_head` on the pair and records the result in
+   `scenario-render.json`. A failure is a build error under §12.6.
+4. **S3's text is about a plant that makes a product family**, so in this record a decision about a facility that
+   makes no product (a laboratory, an office, a store, or a warehouse or distribution center on its own) fails
+   criterion 4 part (i): the text would misdescribe it.
+
+*Cost:* three sentences of shape-level text, cut from the template's own or, for retool, new, written before any step
+3 candidate is read; the reader reads them with this patch and again in every case's scenario read (§4.9). A
+figure-free scenario can leave a case "not enough disclosed" at the matcher (§12.7). That is a reading's outcome, and
+it is reported.
+
+**Step 1: the S3 rules of this record.** They apply to every S3 candidate of steps 2 to 5.
+
+1. **The type, with no list restriction.** One list per type; a candidate goes on the list of the type that §12.1 and
+   §4.6.4 item 1 give it at criterion 4. §4.6.4 item 2 ("no candidate moves") does not apply here, because neither of
+   its concerns can arise: every pre-registered row was checked, so none reaches a second list by the accident of how
+   far its first list was checked, and every row of step 2 is recorded at criterion 4 before any exploratory case is
+   built, so no later arrival can displace one.
+2. **The floor: an S3 total of 50 or more, as stated, unscaled**, replacing §4.6.3's 167 for S3. S1 keeps 167 (his
+   decision, 2026-10-19: S1 is not relaxed). A scaled S3 total under 100 is stated as a number to the nearest 5, with
+   the caps set equal to it; every other heads figure under 100 still reads "fewer than 100". His reason: a smaller
+   site can be a perfectly good decision. 50 is below every S3 number in the pre-registered record and was chosen
+   knowing them. **A reported deviation from §12.6's "fewer than 100":** that rule guards against a small site being
+   identified by its exact headcount; the scaled, rounded figure is not the real one, and the recognition probe and
+   §12.11's re-identification check guard the same risk.
+3. **Where the total may come from, the first of these that gives one:** the first-disclosure document; the
+   pre-cut-off documents (§4.6.2 A.3); then, new, **a public report dated from the first disclosure to 60 days after
+   it:** a government notice of the layoffs or the closing for the facility (a WARN notice, in the United States),
+   the company's own later release or filing, or a news report that attributes the number to the company, a union or
+   a government office, the earliest such report found. The search is the first-disclosure check's web search (§4.3
+   (b)) on the facility's name or place, and the source is logged in the private appendix. **A reported deviation
+   from §12.6** ("only documents dated before the cut-off"), extending §4.6 rule 1, which already takes the
+   decision's size from the first-disclosure document: a report dated after the cut-off may supply the plant's
+   headcount, and nothing else (the reader's change 4).
+4. **The total is the number of employees at the facility, as a source states it.** A number of jobs or positions
+   cut, eliminated or affected is not the total, and neither is a number given only as an upper bound ("up to"):
+   each is the size of the company's own choice, and as the plant's size it would build that choice into the scenario
+   (the reader's change 3). "About" a number is that number and a range is its low end (§4.6.3 item 3).
+5. **A decision that names more than one facility has no S3 total:** S3's scenario is one plant, and a sum would put
+   the company's chosen set of plants into it as one (the reader's change 3).
+6. **Lines are read only where post-event filings state them** (§12.7, as for every case). A case with none observable
+   is read on its choice alone, which S3's k* of 1 allows: the frozen matcher counts the choice as one dimension and n
+   observable lines as max(n - 1, 0) (`analysis/matcher.py`), so a choice-only reading has one.
+7. **The brief's `maps_to_shape` paragraph, for this record,** changes in four places, logged in §11 as a change to
+   the instrument (no pending read uses the old text):
+   - after the S3 shape rule, add: "Here the facility must be one that makes products; a decision about a
+     laboratory, an office, a store, or a warehouse or distribution center on its own matches no shape."
+   - "S3: the number of employees at the facility named." becomes "S3: the number of employees at the facility named,
+     as a source states it; a number of jobs or positions cut, eliminated or affected is not it, and a decision that
+     names more than one facility has no S3 total."
+   - "For S1 and S3 the total must be 167 or more." becomes "For S1 the total must be 167 or more; for S3, 50 or
+     more."
+   - "The material for the total is the excerpt and, if you are given one, a search of the company's earlier
+     filings." gains, before its full stop: "and, for S3, any public report you are given (a government notice, the
+     company's later release or a news report); judge from the whole report whether its number is the number of
+     employees at the facility named" (the reader's change 5).
+
+*Cost:* an S3 case may now rest on a plant's headcount from a report dated after the cut-off, a declared deviation,
+and a case with no observable lines is read on its choice alone.
+
+**Step 2: the pre-registered S3 rows, re-read, and one new in-window channel.**
+
+1. **Every pre-registered row read as S3 at criterion 4 is carried** (B.2), and its criterion 4 is recorded again
+   under steps 0 and 1, on the list of its type: closure-04, 05, 07, 09, 16, 19, 24 and 29, closure-f01, and
+   closure-27 (S3 by §11's correction of 2026-10-18). What the record already shows: closure-16's first-disclosure
+   document states the number of roles at the facility, and its type is retool by §12.1; closure-19's number is a
+   workforce reduction and closure-07's an upper bound of positions eliminated, so neither is the plant's headcount
+   (item 4), and both, with closure-09, closure-29 and closure-f01, depend on item 3's reports for one; closure-05 and
+   closure-24 each name two facilities (item 5); closure-04's facility makes no product (step 0 item 4); closure-27's
+   facility is read by rule. *Not re-read:* the S2 rows on any list (S2's text states a downturn and an expected fall
+   that no source gives, F) and the S1 rows (S1 is not relaxed).
+2. **A new in-window channel, for plant closures announced outside Item 2.05:** 8-K, `items` with 7.01 or 8.01,
+   `sics` 2000-3999, the search's filing dates (2026-07-01 to 2026-10-15, the fallback month held apart as §12.2
+   holds it), not already a candidate, with any of these phrases, each its own query: "close the facility",
+   "closure of the facility", "close its facility", "plant closure", "close the plant", "closure of the plant",
+   "cease production", "consolidate production", "closing the facility", "closure of its". Every hit is a new row,
+   checked from the first criterion, on the list of its type at criterion 4. Over the window it returns 8 filings
+   (counts only, E); the fallback month was not run.
+
+*Cost:* rows the order rule excluded come in after their results were known, which is what the label is for; the
+channel was written after the pre-registered ones found nothing.
+
+**Step 3: a pre-cut-off pool, admitted through a knowledge probe.**
+
+1. **The pool:** channel 1 of §12.3 as written (`"Item 2.05"`, 8-K, `items` with 2.05, `sics` 2000-3999) and step 2's
+   channel, filing dates **2025-07-01 to 2026-06-30**, the twelve months before the fallback month. One search,
+   recorded as §4.4's was (`search/pre-candidates.json`, write-once). Channels 2 and 3 are not run: in the window, 47
+   of 62 retool candidates failed the first-disclosure check on text repeated from earlier filings, and no ai
+   candidate had a usable S1. Their checking costs the most and yielded nothing.
+2. **One list per type, typed at criterion 4** (step 1 item 1). Ids `pre-01` on, in order of **filing date, newest
+   first**, then accession number. A decision near the models' cut-off is the least likely to be in their training
+   data, and the order is mechanical, so no one picks it. Candidates are dated when reached; §12.4's order of first
+   disclosure would need all of them dated first.
+3. **The criteria, in order:** first disclosure (an earlier mention before 2025-07-01 fails; the date found sets the
+   cut-off, §12.6), publicly traded, inside the pool, real decision, maps to shape (§4.6.2 to §4.6.4, with steps 0
+   and 1), **not known** (item 4), not recognizable (§12.8). Every rejection on the last four is read (§12.4).
+4. **The knowledge probe** (`not_known`, after criterion 4 and before the build). Each of v1's two official models,
+   `haiku-5-5` (main) and `gpt-oss-openrouter` (second family), and the extraction model `sonnet-5-5-extraction`,
+   gets three calls, with no system text, a reply never retried (an API error is), and this message, word for word:
+   - S3: "What do you know about {company}'s {facility} in {place}? If you know nothing about it, say unknown."
+   - S1 or S2: "What do you know about the workforce reduction {company} announced in {month} {year}? If you know
+     nothing about it, say unknown."
+
+   {company} is the filer's name as the first-disclosure document gives it; {facility} and {place} are that
+   document's own words for the facility and its town; {month} {year} is the first-disclosure date. **An answer fails
+   if it states, or guesses, that the facility was or would be closed or sold or its production moved, or that the
+   reduction happened, or if it gives a figure of the decision.** "unknown", or an answer about the company or the
+   facility that does not state the decision, passes. The candidate fails if any call fails. He reads every answer
+   that is not "unknown"; the reader reads every failure (with a brief like criterion 5's: the definition and the
+   flagged answers, never the dossier), and a dispute is settled as for criterion 5 (§4.9). **The extraction model is
+   probed because it writes the dossier:** a model that knows the outcome could carry it into the text in ways the
+   foreshadowing check does not catch.
+5. **Where it runs:** on the laptop, `hc case knowledge-probe <label>`, refused unless the label's row stands at
+   `not_known`. The request and every reply are written once in the case's appendix folder with the usual provenance,
+   and a second run for the label is refused. It is the only path that sends an official model a real company's name
+   outside the container, and only with this message. *Why not the container:* that would need a deploy and a
+   committed, salted hash per batch, for a screen whose failures only remove candidates.
+6. **The closure list's rows that failed only the first-disclosure check**, where the earlier mention that failed
+   them is dated inside the pool's range, join the pool's list as if filed on that date: closure-f04, and closure-18
+   if its earlier mention falls inside.
+
+**Step 4: the pool extended.** The pool extends to filing dates **2024-07-01 to 2025-06-30**, under step 3's rules,
+with ids continuing and newest first. 2024-07-01 is the day after the earlier of the two official models' training
+cut-offs (gpt-oss-120b's, 2024-06-30, OpenRouter's model listing, *live 2026-10-19*), so every case it admits is still
+outside one official model's training data. Nothing earlier is admitted.
+
+**Step 5: a second search, with the window's protection kept.** The three channels of §12.3 and step 2's channel,
+run once by rule on **2027-01-04** over filing dates 2026-10-16 to 2027-01-03, every candidate under steps 0 and 1. No
+knowledge probe: every decision in it falls after every model's cut-off. Ids `late-01` on, by first disclosure. It
+comes last because it cannot run before January, not because it is weaker.
+
+**D. The order, the counts and the stop.**
+
+1. **One order for every exploratory candidate, across types** (the reader's change 8): step 2's rows by first
+   disclosure, the window's before the fallback month's (§12.2); then step 3's list in its order; then step 4's; then
+   step 5's by first disclosure.
+2. **Per type, the cases are the first k in that order that pass every criterion** (closure 2, retool 2, ai 1).
+3. **A type that cannot reach k is short, and its slots go to the next candidates in the same order that pass, of any
+   type.** This fills a shortfall by a rule fixed here, never by judgment. §12.1's "at least one invest or retool"
+   either holds or is reported.
+4. **The order binds the checking too:** a candidate is not selected while one before it in the order is unfinished,
+   as the selection log's `waiting` already holds a type's selection open, so the pace at which candidates are worked
+   cannot choose a case.
+5. **At most five. Checking stops when five cases are selected;** later candidates are never checked. Building ahead
+   is allowed, as §4.1 says.
+6. **Steps 3, 4 and 5 open in turn,** each when every candidate of the steps before it is finished and fewer than five
+   cases exist. He may open step 3 early, to build ahead; that changes nothing about which candidates are cases, since
+   item 1's order decides.
+
+**E. What was seen before this was written.**
+
+- Every pre-registered candidate's record, names included.
+- For the options not taken (F): XBRL figures for the 25 closure-list S2 candidates; the Item 2.05 text of the 24
+  non-manufacturing Item 2.05 filings in the window.
+- For step 2's channel: its count over the window (8 filings) and a mechanical scan of their text (6 hold a closure
+  phrase near a facility word; the only headcounts in them are company-wide). No filing was read and no name seen.
+- For step 3: the pool's size by month (142 channel 1 filings, 6 to 17 a month) and the same scan (32 hold a closure
+  phrase; 13 of those state 167 or more people; about 6 of the 13 plausibly a site's headcount, the rest company-wide
+  totals). Counts only: no filing of the pool was read and no name seen. Step 3's twelve months were chosen with that
+  count known.
+- No public report (step 1 item 3) has been looked up for any candidate, so no number from one is known.
+
+**F. Considered and not taken.**
+
+- **A count of jobs cut, an upper bound, or a sum over facilities as the S3 total** (in this patch's first form,
+  removed at the reader's change 3): each makes the scenario's plant the size of the company's chosen cut or chosen
+  set of plants, which builds part of the company's choice into the scenario.
+- **Any change to the S2 total, a realized fall in operating income included** (the reader's change 9 asked for the
+  realized fall; declined). S2's fixed text says that "a downturn ... is cutting orders" and that management
+  *expects* revenue and operating income to fall. Nearly every real S2 candidate cut costs while revenue held or grew
+  (about 11 of the 25 had no product revenue at all), so no rule about the total can make that text true. The best a
+  realized fall could admit is one filer (closure-12 and closure-20 are two of its decisions), whose decision, ending a
+  product line, maps onto S2's lines too thinly to be read: S2 needs two observable dimensions (k* = 2, protocol
+  §11.4).
+- **A stated total program cost as the S4 total** (retool-34 and retool-42). S4's fixed first sentence says the
+  engineering center designed a program to develop a new family of machines for customers the Company does not serve,
+  which would then be stated for a plant expansion, and a multi-year total would be offered as one year's money. An S4
+  case also needs two observable dimensions (k* = 2), which a plant expansion's filings rarely give beyond its choice.
+  Making S4 fit is a new shape: new prose, written after the candidates were seen.
+- **An S1 relaxation.** His decision, 2026-10-19. S1's text says that AI tools can take over the work of the roles in
+  question, which a cut only partly credited to AI would make false.
+- **The non-manufacturing Item 2.05 filings** (24 in the window): S3's text is about a plant, and their workforce cuts
+  have no S2 total.
+- **A second coarsening after a second probe failure:** it relaxes §12.8's "a second failure drops the case", and a
+  dossier coarsened twice keeps little of the company it describes.
+- **Leaving the extraction model out of the knowledge probe:** the dossier would then be written by a model that may
+  know the ending.
+- **Letting a guess pass the knowledge probe:** a correct guess and a memory cannot be told apart.
+- **Admitting forced wind-downs (criterion 3):** a decision with no alternative cannot be matched to an objective.
+- **Cases from the private longlist:** selection by hand, which D exists to exclude.
+
+**G. What it costs.**
+
+- **Build:** planned step by step in `phase-5-case-building-exploratory-IMPLEMENTATION.md` (Sonnet building, Opus
+  reviewing): stage 1, the code (about a day); stage 2, step 2's rows (about a day, then each passing row's build,
+  rubric and probe); stage 3, the pool and the knowledge probe, built only when step 3 opens. The coarsened dossier's
+  home (`KNOWN-GAPS.md`, OPEN 2026-10-16) must still be settled before any second probe set.
+- **Money:** the reader's candidate reads cost $3.92 measured through 2026-10-19 and this patch's read $0.24; his
+  OpenRouter balance was under $1 that day. A criterion 4 rejection read on a short excerpt costs 1 to 3 cents; the
+  first cash that the balance does not cover is the first case's scenario and rubric reads (about 10 cents each), and
+  from here to the end of Phase 5.5 about $2 to $2.50 of OpenRouter in all, one top-up. Builds, Haiku 5.5's probes
+  and runs, and the knowledge probe's Sonnet calls draw on the prepaid Anthropic credit (about $15.95 at the last
+  reading); Fargate on AWS credits. The projection (§6) is updated before the first exploratory build.
+- **Validity, by step:** step 0 is the protocol's own rule with three sentences of new or shortened text; step 1 lowers
+  the S3 floor (a reported anonymity deviation) and takes a plant's headcount from public reports (a reported
+  deviation from §12.6); step 2 brings back rows the order rule excluded and adds a channel written late; steps 3 and
+  4 trade the window's guarantee for a probe that can miss partial knowledge; step 5 costs only time. Each is labeled.
+- **Expected yield, not measured:** step 2 holds one row expected to pass criterion 4 on the record's own figures
+  (closure-16) and up to five more if public reports give their plants' headcounts (closure-07, 09, 19, 29 and f01),
+  plus the channel's rows. Each can still fail the build (never yet run on a real filing), the scenario check or the
+  recognition probe. **Three from step 2 alone depends on those reports; five is likely to need step 3. Neither is
+  measured.**
+- **What the cases can show, a limit to report:** every S3 candidate in the record is a decision in which the company
+  closed a plant, and many will be read on their choice alone. The readings will ask, case by case, which objectives
+  choose to close; none will show a decision to invest. The write-up says so.
+
+*The independent read (2026-10-19, Gemini 3.1 Pro, $0.241; `evidence/phase-5/patch-4.6.5-review-raw.md`):* **adopt
+with ten changes.** (1) Name the models in the label and say whose cut-off bounds the pool: taken (B.3). (2) The close
+text says the product family moves, which a real closure may not do: taken (step 0, "Close the plant."). (3) A count of
+jobs cut, an upper bound or a sum over facilities as the plant's size builds the company's choice into the scenario:
+taken in the stronger form, removed rather than stated (step 1 items 4 and 5; F). (4) The post-cut-off report is a
+deviation from §12.6: taken (step 1 item 3). (5) "From which only the number is taken" steers the reader: taken,
+reworded so the reader judges from the whole report (step 1 item 7). (6) and (7) Probe every official model and bound
+the pool by the earliest official cut-off: answered, not changed in substance; v1's official set is two models, both
+probed, and step 4's boundary is already the earlier of their cut-offs, which the text now says. (8) One order across
+types: taken (D). (9) The realized fall for S2: declined (F). (10) A choice-only S3 reading has no dimension under
+§12.7: declined; the frozen matcher counts it as one (step 1 item 6). The read's other points (step 2's rules were
+written knowing what they admit; zero-shot recall can miss associative knowledge; a laptop run is less verifiable than
+the container) are limits the patch and the label state, not changed.
 
 ### 4.7 The rubric
 
@@ -1615,3 +1912,21 @@ appendix, is about $3.83 (about $2.7 of it the ai type).
 **Boundary of the web check.** The web search was run for the 14 filings that announce an action; for the contract
 wording the full-text search alone was used, so the first-disclosure date of those is the filing or the signing
 date, not a searched date. It cannot change an outcome (each is inside the window or fails criterion 4 anyway).
+
+**§4.6.5, drafted, read and adopted (2026-10-19, Opus at max effort; his decisions).** Drafted from about 11:40 AM
+CDT, after the measurements §4.6.5 E lists (XBRL figures for the 25 closure-list S2 candidates; the Item 2.05 text of
+the window's 24 non-manufacturing filings; counts and a mechanical scan of the pre-cut-off pool, 142 filings, and of
+the new channel, 8 filings, no filing read; gpt-oss-120b's training cut-off from OpenRouter's listing, live). His
+decision in principle about 12:05 PM asked for every further relaxation that holds up, so step 1's S3 rules, step 2's
+re-read and channel, and step 5 were added before the read; the reader read that version (Gemini 3.1 Pro, $0.241,
+`evidence/phase-5/patch-4.6.5-review-raw.md`) and asked for ten changes, answered as §4.6.5's read paragraph says. He
+adopted it about 12:50 PM, on the condition that the changes help reach a legitimate five cases or close to it. Its
+build is planned in `phase-5-case-building-exploratory-IMPLEMENTATION.md`, written the same day.
+
+**Three slips, on record.** (1) An early draft was stamped "about 1:00 PM" though written before noon; fixed before
+any commit. (2) **The reader's spend passed his $5 OpenRouter cap without being flagged:** the candidate reads total
+**$3.92**, measured from the 139 reply files in the appendix (104 billed), against the projection's $1 (worst $2), most
+of it the ai type's agreement excerpts at about $0.09 each; with the patch reads, about $4.65 since 2026-10-15. The
+2026-10-19 entry above estimated $3.83. He has removed the cap and watches the balance; the exploratory plan's §4 now
+has the spend totaled after every batch of paid calls and said against his balance. (3) Four trailing spaces were
+stripped from the prose copy of the read's reply, for the whitespace hook; the JSON block is byte-exact.
