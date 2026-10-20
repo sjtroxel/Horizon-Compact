@@ -50,7 +50,8 @@ from horizon_compact.casebuild.cutoff import (
     parse_acceptance,
     parse_date,
 )
-from horizon_compact.casebuild.search import LogError, load_newest_log
+from horizon_compact.casebuild.exploratory import row_for
+from horizon_compact.casebuild.search import LogError
 from horizon_compact.dossier.figures import (
     FigureError,
     FigureRow,
@@ -360,10 +361,9 @@ def source_failures(inputs: Inputs, case: CaseAppendix) -> list[Failure]:
 
 def _disclosure_failures(inputs: Inputs, case: CaseAppendix) -> list[Failure]:
     try:
-        log = load_newest_log(CaseAppendix(case.root, SEARCH_LABEL))
+        row = row_for(CaseAppendix(case.root, SEARCH_LABEL), case.label)
     except LogError as exc:
         return [Failure(FIRST, f"the selection log cannot be read: {exc}")]
-    row = log.rows.get(case.label)
     if row is None or row.disclosed is None:
         return [Failure(FIRST, "the selection log has no first-disclosure date for the case")]
     if row.disclosed - timedelta(days=1) != inputs.cutoff:

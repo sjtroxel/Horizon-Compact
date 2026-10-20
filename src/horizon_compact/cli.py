@@ -31,6 +31,18 @@ from horizon_compact.casebuild.cutoff import CutoffError
 from horizon_compact.casebuild.documents import DocumentsError, build_document_set, write_sources
 from horizon_compact.casebuild.edgar import EdgarClient, EdgarError, UrllibTransport
 from horizon_compact.casebuild.edgar import user_agent as sec_user_agent
+from horizon_compact.casebuild.exploratory import (
+    AT_MOST,
+    KNOWLEDGE,
+    ExploratoryLog,
+    candidate_records,
+    exploratory_started,
+    load_newest_exploratory,
+    newest_selection_log_name,
+    read_source_log,
+    row_for,
+    write_exploratory_version,
+)
 from horizon_compact.casebuild.extract import ExtractionError, build_requests
 from horizon_compact.casebuild.extraction_model import (
     ExtractionModelError,
@@ -1202,6 +1214,17 @@ def _confirm_reader_spend(preview: Preview, *, yes: bool) -> bool:
     return answer.strip().lower() == "y"
 
 
+def _log_command(label: str, case_type: str | None) -> str:
+    """The command that logs ``label``'s results: `hc case xlog` when the exploratory log has the label (it is
+    then the row of record, §4.6.5 B.4), else `hc case log <type>`."""
+    try:
+        if label in load_newest_exploratory(open_case("search")).rows:
+            return "hc case xlog"
+    except (LogError, CaseError):
+        pass
+    return f"hc case log {case_type or '<type>'}"
+
+
 def _print_reader_outcome(label: str, done: ReadOutcome) -> None:
     """Counts, the reading and the file names, never a name, a figure or an excerpt."""
     print(
@@ -1238,7 +1261,7 @@ def _print_reader_outcome(label: str, done: ReadOutcome) -> None:
         disputes = done.reading == "pass" and not other_type
         print(f"  {meaning}")
         print(
-            f"  to log it: hc case log {done.candidate_type or '<type>'} read {label} {done.criterion}"
+            f"  to log it: {_log_command(label, done.candidate_type)} read {label} {done.criterion}"
             + (' --resolution "..."' if disputes else "")
         )
         if done.criterion == PROBE_CRITERION:
@@ -1491,10 +1514,11 @@ def cmd_case_probe_verdict(args: argparse.Namespace) -> int:
     print(
         f"{args.label} set {probe_set}: {outcome}; wrote {done.written} verdict(s) of {done.calls}"
     )
+    logger = _log_command(args.label, None)
     if done.flagged and done.disputed:
         print(
-            f"next, in the log: hc case log <type> record {args.label} {PROBE_CRITERION} fail --reason "
-            f'"..." and then hc case log <type> read {args.label} {PROBE_CRITERION} --resolution "..."'
+            f"next, in the log: {logger} record {args.label} {PROBE_CRITERION} fail --reason "
+            f'"..." and then {logger} read {args.label} {PROBE_CRITERION} --resolution "..."'
             " (the reader's dispute lets the candidate go on)"
         )
     elif done.flagged:
@@ -1549,18 +1573,12 @@ def cmd_case_search(args: argparse.Namespace) -> int:
 
 def _log_candidates(case: CaseAppendix) -> dict[str, dict[str, Any]]:
     """The private candidate list by id, for ``show``; empty if the search folder has none."""
-    path = case.directory / "candidates.json"
-    if not path.exists():
-        return {}
-    try:
-        return {c["id"]: c for c in json.loads(path.read_text(encoding="utf-8"))["list"]}
-    except (OSError, ValueError, KeyError, TypeError) as exc:
-        raise LogError(f"candidates.json cannot be read: {type(exc).__name__}") from exc
+    return candidate_records(case) or {}
 
 
 def _log_status(row: Row) -> str:
     parts = []
-    for criterion in CRITERIA:
+    for criterion in row.criteria:
         if criterion not in row.results:
             continue
         result = row.results[criterion]
@@ -1573,7 +1591,7 @@ def _log_status(row: Row) -> str:
         )
         parts.append(f"{criterion} {word}" + (f" {result.disclosed}" if result.disclosed else ""))
     # a rejection on 3, 4 or 5, whether it stands or the reader disputed it
-    for criterion in READ_REQUIRED:
+    for criterion in row.read_required:
         if criterion in row.results and row.results[criterion].result == "fail":
             read = row.reads.get(criterion)
             parts.append(
@@ -1588,7 +1606,7 @@ def _log_status(row: Row) -> str:
                     else "DISAGREES"
                 )
             )
-    next_criterion = next((c for c in CRITERIA if c not in row.results), None)
+    next_criterion = next((c for c in row.criteria if c not in row.results), None)
     if row.failed:
         parts.append("finished: rejected")
     elif next_criterion is None:
@@ -1651,6 +1669,11 @@ def cmd_case_log(args: argparse.Namespace) -> int:
         view = {args.type: log.public_view()[args.type]}
         print(json.dumps(view, indent=2, ensure_ascii=False))
         return CLEAN_EXIT
+    if exploratory_started(case):
+        raise LogError(
+            "the pre-registered selection log is closed (§4.6.5 A.1): no row of it is edited or "
+            "written again; record exploratory results with `hc case xlog`"
+        )
     row = log.rows.get(args.id)
     if row is None:
         raise LogError(f"no candidate {args.id!r} in the log")
@@ -1679,6 +1702,72 @@ def cmd_case_log(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def _xlog_show(case: CaseAppendix, log: ExploratoryLog) -> None:
+    """For his terminal only: the private candidate details beside the exploratory log's state."""
+    details = _log_candidates(case)
+    chosen = log.selection()
+    print(
+        f"exploratory log (at most {AT_MOST} cases): cases {', '.join(chosen.cases) or 'none yet'}"
+    )
+    if chosen.filled:
+        print(f"  filled a short type's slot: {', '.join(chosen.filled)}")
+    for row in log.ordered():
+        found = details.get(row.id, {})
+        names = "; ".join(found.get("names", [])) or "(no name on file)"
+        source = f" carried from {row.source[0]}" if row.source else ""
+        print(f"  {row.id} step {row.step} {row.type}{source} {row.accession} {names}")
+        print(f"      {_log_status(row)}")
+    for line in chosen.waiting:
+        print(f"  waiting: {line}")
+    if chosen.complete:
+        short = ", ".join(f"{t} {n}" for t, n in chosen.short_types.items()) or "none"
+        print(
+            f"  selection complete; shortfall {chosen.shortfall} (own slots short before the fill: {short})"
+        )
+    for line in log.problems():
+        print(f"  open: {line}")
+
+
+def cmd_case_xlog(args: argparse.Namespace) -> int:
+    """The exploratory log (search-half doc §4.6.5, B) from the terminal: `show` and `public` read the newest
+    version; `carry`, `record` and `read` apply exactly one change and write the next, never an earlier one.
+    The pre-registered selection log is only read, never written."""
+    case = open_case("search")
+    log = load_newest_exploratory(case)
+    if args.xlog_action == "show":
+        _xlog_show(case, log)
+        return CLEAN_EXIT
+    if args.xlog_action == "public":
+        print(json.dumps(log.public_view(), indent=2, ensure_ascii=False))
+        return CLEAN_EXIT
+    if args.xlog_action == "carry":
+        name = newest_selection_log_name(case)
+        log.carry(args.id, read_source_log(case, name), name)
+        what = f"carried from {name}"
+    elif args.xlog_action == "record":
+        if args.public_reason is not None:
+            _check_public_reason(args.public_reason, _log_candidates(case))
+        log.record(
+            args.id,
+            args.criterion,
+            args.result,
+            args.reason,
+            public_reason=args.public_reason,
+            disclosed=args.disclosed,
+            case_type=args.list,
+        )
+        what = f"{args.criterion} {args.result}"
+    else:
+        reply = rejection_reply_on_record(open_case(args.id), args.criterion)
+        log.record_read(args.id, args.criterion, reply=reply, resolution=args.resolution)
+        verdict = "agrees" if reply.reading != "pass" else "disputes"
+        what = f"read of {args.criterion}: {reply.reading} ({verdict}), from {reply.reply}"
+    name = write_exploratory_version(case, log)
+    print(f"{args.id}: {what}; wrote {name}")
+    print(f"  {_log_status(log.rows[args.id])}")
+    return CLEAN_EXIT
+
+
 def _extraction_provider() -> TextProvider:
     """Anthropic's API with the prepaid-credit key, from ``ANTHROPIC_API_KEY`` or a hidden prompt; a function
     so the tests can set it. Never reached before every refusal that needs no network or key."""
@@ -1696,22 +1785,18 @@ def _case_terms(case: CaseAppendix) -> tuple[CaseTerm, ...]:
 
 
 def _candidate_cik_and_row(search: CaseAppendix, label: str) -> tuple[str, Row]:
-    """The CIK of ``label``, from the search's candidate list and never the command line, and its log row."""
-    try:
-        records = json.loads((search.directory / "candidates.json").read_text(encoding="utf-8"))[
-            "list"
-        ]
-    except (OSError, ValueError, KeyError, TypeError) as exc:
-        raise SearchError(
-            f"candidates.json cannot be read ({type(exc).__name__}): has the search run?"
-        ) from exc
-    found = next((r for r in records if r.get("id") == label), None)
+    """The CIK of ``label``, from the search's candidate lists and never the command line, and its row: the
+    exploratory log's when it has one for the label, else the pre-registered log's (§4.6.5 B.4)."""
+    records = candidate_records(search)
+    if records is None:
+        raise SearchError("candidates.json is not there: has the search run?")
+    found = records.get(label)
     if found is None:
         raise SearchError(f"{label} is not a candidate in the search's list")
     ciks = [str(c) for c in found.get("ciks", [])]
     if len(ciks) != 1:
         raise SearchError(f"{label} has {len(ciks)} CIKs in the list; a case needs exactly one")
-    row = load_newest_log(search).rows.get(label)
+    row = row_for(search, label)
     if row is None:
         raise LogError(f"{label} is not in the selection log")
     return ciks[0], row
@@ -1721,9 +1806,10 @@ def _build_candidate(search: CaseAppendix, label: str, cutoff: date) -> str:
     """The CIK of ``label``, after checking the selection log: criteria 1-4 passed (search-half doc §4.1
     step 1), and the cut-off is the day before the first disclosure the log recorded (protocol §12.6)."""
     cik, row = _candidate_cik_and_row(search, label)
-    # Protocol §12.4's criteria 1-4 and the first-disclosure check before them: every criterion but the
-    # probe (criterion 5, ``not_recognizable``), which needs the dossier this command builds.
-    unpassed = [c for c in CRITERIA[:-1] if not row.met(c)]
+    # Protocol §12.4's criteria 1-4 and the first-disclosure check before them (and a pool row's not_known,
+    # §4.6.5): every criterion but the probe (criterion 5, ``not_recognizable``), which needs the dossier
+    # this command builds.
+    unpassed = [c for c in row.criteria[:-1] if not row.met(c)]
     if unpassed:
         raise LogError(f"{label} has not passed {', '.join(unpassed)} in the selection log")
     assert row.disclosed is not None  # a passed first_disclosure always carries its date
@@ -1819,7 +1905,7 @@ def cmd_case_documents(args: argparse.Namespace) -> int:
     case = open_case(args.label)
     search = open_case("search")
     cik, row = _candidate_cik_and_row(search, args.label)
-    unpassed = [c for c in CRITERIA[: CRITERIA.index("maps_to_shape")] if not row.met(c)]
+    unpassed = [c for c in row.criteria[: row.criteria.index("maps_to_shape")] if not row.met(c)]
     if unpassed:
         raise LogError(
             f"{args.label} has not passed {', '.join(unpassed)} in the selection log: the documents "
@@ -1864,6 +1950,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_search(args)
         if args.action == "log":
             return cmd_case_log(args)
+        if args.action == "xlog":
+            return cmd_case_xlog(args)
         if args.action == "lock":
             return cmd_case_lock(args)
         if args.action == "scenario":
@@ -2505,6 +2593,50 @@ def build_parser() -> argparse.ArgumentParser:
     read.add_argument("id", help="the candidate's neutral id, such as closure-01")
     read.add_argument("criterion", choices=READ_REQUIRED)
     read.add_argument(
+        "--resolution",
+        help="required when the reader disputes the rejection: his reason, logged with it",
+    )
+
+    xlog = case_actions.add_parser(
+        "xlog",
+        help="The exploratory log (search-half doc §4.6.5) in the appendix, separate from the selection "
+        "log: show, carry a pre-registered row, record a criterion, record the independent reader's read, "
+        "or print the public view. Each change writes the next version.",
+    )
+    xlog_actions = xlog.add_subparsers(dest="xlog_action", required=True)
+    xlog_actions.add_parser(
+        "show", help="Candidates and their state, with names: for the terminal only"
+    )
+    xlog_actions.add_parser("public", help="The public view, with no name; writes nothing")
+    xcarry = xlog_actions.add_parser(
+        "carry", help="Carry a pre-registered row, with its results before criterion 4 (B.2)"
+    )
+    xcarry.add_argument("id", help="the candidate's neutral id, such as closure-04")
+    xrecord = xlog_actions.add_parser(
+        "record", help="The next criterion for a candidate, with its reason"
+    )
+    xrecord.add_argument("id", help="the candidate's neutral id, such as closure-04")
+    xrecord.add_argument("criterion", choices=(*CRITERIA[:5], KNOWLEDGE, CRITERIA[5]))
+    xrecord.add_argument("result", choices=("pass", "fail"))
+    xrecord.add_argument("--reason", required=True, help="private: it may name the company")
+    xrecord.add_argument(
+        "--public-reason",
+        help="optional, goes in the public view: no name, date, figure or place that identifies",
+    )
+    xrecord.add_argument(
+        "--disclosed",
+        type=date.fromisoformat,
+        help="YYYY-MM-DD; with a passed first_disclosure, and only then",
+    )
+    xrecord.add_argument(
+        "--list",
+        choices=TYPES,
+        help="the list the candidate goes on (§12.1, §4.6.4 item 1); with maps_to_shape, and only then",
+    )
+    xread = xlog_actions.add_parser("read", help="The independent reader's read of a rejection")
+    xread.add_argument("id", help="the candidate's neutral id, such as closure-04")
+    xread.add_argument("criterion", choices=READ_REQUIRED)
+    xread.add_argument(
         "--resolution",
         help="required when the reader disputes the rejection: his reason, logged with it",
     )

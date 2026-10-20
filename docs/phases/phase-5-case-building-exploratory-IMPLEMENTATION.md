@@ -56,9 +56,9 @@ built. The rules are §4.6.5 of the search-half doc. Where things stand today is
    Written once per version as `search/exploratory-log-<n>.json`, with `exploratory-public-<n>.json`, whose rows carry
    their step and §4.6.5 B.3's label. **Tests:** a carried row keeps its results and refuses an edit of them; the
    order across types; the fill; the stop; a hand-edited file refused, as `SelectionLog.from_text` refuses one.
-2. **`hc case xlog`** (`cli.py`): `show`, `carry <id>`, `record <id> <criterion> pass|fail --reason ...`,
+2. **[done 2026-10-20, Sonnet built, Opus reviewed, three fixes applied] `hc case xlog`** (`cli.py`): `show`, `carry <id>`, `record <id> <criterion> pass|fail --reason ...`,
    `read <id> <criterion>` and `public`, in the shape of `hc case log`. **Tests** as for `hc case log`.
-3. **One answer to "which row is this label's"** (B.4): `hc case documents`, `build`, `scenario render` and `check`,
+3. **[done 2026-10-20, Sonnet built, Opus reviewed, two fixes applied] One answer to "which row is this label's"** (B.4): `hc case documents`, `build`, `scenario render` and `check`,
    `reader`, `lock`, `probe` and `probe-verdict` read the exploratory row when the exploratory log has one for the
    label, else the pre-registered row, and read a candidate's details from `candidates.json` or the new channel's
    candidate file. **Tests:** each command finds an exploratory row; a carried row is never read from the old log once
@@ -213,3 +213,49 @@ new log (a disputed rejection turned into one that stands); a read of a carried 
 stage 4:* step 3 item 6's rows (closure-f04, and closure-18 if its date falls inside), which failed the first-disclosure
 check and join the pool "as if filed on that date", fit neither `carry` (it needs every criterion before criterion 4
 met) nor the pool's order (by id); they need their own event when stage 4 is built.
+
+**Step 2 (2026-10-20, Sonnet built; Opus reviewed, high effort).** `hc case xlog` with `show`, `carry <id>`,
+`record <id> <criterion> pass|fail --reason [--public-reason] [--disclosed] [--list]`, `read <id> <criterion>
+[--resolution]` and `public`, in `cli.py`; 12 tests in `tests/test_case_cli.py` (`make check` green, 2574). Choices the
+plan did not fix: (1) **no type argument**, since the log runs across types; the list a row goes on is `--list` on its
+`maps_to_shape` record; (2) **`carry` reads the highest-numbered `selection-log-<n>.json`**, the pre-registered
+record's last version, and names it in the event; (3) `read` offers `real_decision`, `maps_to_shape` and
+`not_recognizable` only: the `not_known` read is stage 4's (it needs a reader brief and material that do not exist),
+though `record` accepts `not_known`; (4) `_log_status` now takes a row's own criteria (the same text for every
+pre-registered row); (5) the verdict line says "agrees" for any reading but "pass", as the exploratory log decides it.
+Not built, as in step 1: adding rows from a candidate file.
+
+*The review (Opus) found two faults, both reproduced by a failing test first and fixed:* (a) **`xlog read` would log
+the pre-registered record's read as the read of the new rejection.** Every step 2 row was rejected at criterion 4 and
+read under the old rules, and that reply is still the newest one in its folder. A carried row now keeps the names of
+every reply the old record logged for it, and none of them is accepted as a read here. (b) **`hc case log` could still
+write the pre-registered log:** a criterion 4 read can be replaced while no later criterion is recorded, so a read meant
+for the exploratory log, sent through `hc case log` by mistake, would have rewritten the old one. `hc case log record`
+and `read` now refuse once any `exploratory-log-<n>.json` exists (§4.6.5 A.1); `show` and `public` still work. Also:
+`ordered()` made public, since the CLI calls it. *For later steps:* step 3 must make `hc case reader` find an
+exploratory rejection (today it reads the pre-registered log, so no new read can be made yet); step 6 must widen the
+public-reason check to the press channel's candidate names (today it checks `candidates.json` only).
+
+**Step 3 (2026-10-20, Sonnet built; Opus reviewed, high effort).** `row_for(search, label)` and `candidate_records(search)` in
+`casebuild/exploratory.py`; `make check` green, 2585 tests (8 new, in `tests/test_case_cli.py`). The exploratory log's
+row is the row of record when it has the label, else the pre-registered log's; a carried row is never read from the old
+log. Callers moved: `hc case documents` and `build` (`_candidate_cik_and_row`, which now checks `row.criteria`, so a
+pool row's `not_known` is required before the build and `not_recognizable` stays the probe's), the scenario check's
+first-disclosure date (`_disclosure_failures`), and the reader's `rejection_ready` and `probe_read_ready`. Candidate
+details come from `candidates.json` and, when it exists, `press-candidates.json` (assumed the same `{"list": [...]}`
+shape; step 6 fixes it); the public-reason check in `hc case log` and `xlog` reads both, which closes the step 2
+note about widening it. `reader`'s hint lines and `probe-verdict`'s now say `hc case xlog` for an exploratory label
+(`_log_command`). `scenario render`, `lock`, `probe` and `upload` never read the log, so they needed no change.
+*Not done:* the `not_known` read (stage 4); the `xlog read` of a probe failure's reply is as step 2 left it.
+
+*The review (Opus) found two faults, both reproduced by a failing test first and fixed:* (a) **`hc case reader` would
+pay for a read that could never be logged.** For a label the exploratory log lacks, `row_for` gives the pre-registered
+row, and `rejection_ready` and `probe_read_ready` accepted its unread rejection, though `hc case log read` refuses
+once the old log is closed. Both now refuse a pre-registered row once an exploratory log exists, and say to carry it
+first (`exploratory_started`, which `hc case log` now uses too). (b) **`candidate_records` let an id in both
+candidate lists take the press channel's record silently**, so the CIK the build fetches could come from the wrong
+file; an id in both is now refused. *Tests added for what the step claimed but did not test:* a pool row is refused
+at the build until `not_known` is recorded, and the scenario check finds a row that only the exploratory log holds
+(the earlier test used a carried row, whose date is the old log's, so it would have passed on the old code). 2589
+tests. *Left as is:* §4.6.5 B.4 names `lock` and `probe`, but neither reads a row today, so there was nothing to
+move; whether `probe` should check that a label has passed criterion 4 is a question for stage 3, not this step.

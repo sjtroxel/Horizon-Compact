@@ -40,6 +40,7 @@ from horizon_compact.casebuild.search import (
     Result,
     Row,
     SelectionLog,
+    load_newest_log,
 )
 
 EXPLORATORY_VERSION = 1
@@ -72,6 +73,8 @@ class ExploratoryRow(Row):
 
     step: str = "2"
     source: tuple[str, str] | None = None
+    # the reply files the pre-registered record logged reads from for this row: never a read here
+    prior_replies: frozenset[str] = frozenset()
 
     @property
     def probed(self) -> bool:
@@ -132,7 +135,7 @@ class ExploratoryLog:
             return (rank, pool, date.min, 0, row.id)
         return (rank, pool, row.disclosed or date.max, 0, row.id)
 
-    def _ordered(self) -> list[ExploratoryRow]:
+    def ordered(self) -> list[ExploratoryRow]:
         return sorted(self.rows.values(), key=self._key)
 
     @staticmethod
@@ -152,7 +155,7 @@ class ExploratoryLog:
         """D.2: per type the first k that pass, in order. D.3: slots of a type that cannot reach k go to the
         next candidates in the same order that pass, of any type. D.4: nothing is selected while an earlier
         candidate that could take the place is unfinished. D.5: five at most, which the slots add up to."""
-        ordered = self._ordered()
+        ordered = self.ordered()
         own: dict[str, list[str]] = {t: [] for t in TYPES}
         held: dict[str, str] = {}
         for row in ordered:
@@ -346,6 +349,7 @@ class ExploratoryLog:
             reads={c: copy.copy(old.reads[c]) for c in CARRIED if c in old.reads},
             step="2",
             source=(name, str(event["log_sha256"])),
+            prior_replies=frozenset(r.reply for r in old.reads.values() if r.reply),
         )
 
     def _apply_result(self, event: dict[str, Any]) -> None:
@@ -397,6 +401,11 @@ class ExploratoryLog:
             raise LogError("a read names the reader's reply file and its sha256")
         if reply_type is not None and (criterion != "maps_to_shape" or reply_type not in TYPES):
             raise LogError(f"a read of {criterion} carries no type, and a type is one of the lists")
+        if event["reply"] in row.prior_replies:
+            raise LogError(
+                f"{event['reply']} is the pre-registered record's read of an earlier rejection; "
+                f"this rejection needs its own read"
+            )
         if row.source is not None and criterion in CARRIED:
             raise LogError(
                 f"{row.id}'s {criterion} is carried from {row.source[0]}; it is not read here"
@@ -502,7 +511,7 @@ class ExploratoryLog:
                         c: {"agrees": read.agrees} for c, read in sorted(r.reads.items())
                     },
                 }
-                for r in self._ordered()
+                for r in self.ordered()
                 if r.results
             ],
         }
@@ -531,6 +540,58 @@ def load_newest_exploratory(case: CaseAppendix) -> ExploratoryLog:
             f"cannot read {name} or its sources: {exc.strerror or type(exc).__name__}"
         ) from exc
     return ExploratoryLog.from_text(text, sources)
+
+
+# the search's list, then step 2's channel
+CANDIDATE_FILES = ("candidates.json", "press-candidates.json")
+
+
+def exploratory_started(case: CaseAppendix) -> bool:
+    """An exploratory log has been written, so the pre-registered log is closed (§4.6.5 A.1)."""
+    return any(case.directory.glob("exploratory-log-*.json"))
+
+
+def row_for(search: CaseAppendix, label: str) -> Row | None:
+    """The one answer to "which row is this label's" (§4.6.5 B.4): the exploratory log's row when it has one,
+    else the pre-registered log's. A carried row is therefore never read from the old log."""
+    row = load_newest_exploratory(search).rows.get(label)
+    if row is not None:
+        return row
+    return load_newest_log(search).rows.get(label)
+
+
+def candidate_records(search: CaseAppendix) -> dict[str, dict[str, Any]] | None:
+    """Every candidate's private record by id, from the search's list and the press channel's list when it
+    exists; None if no candidate file is there. An id is in one file only."""
+    found: dict[str, dict[str, Any]] = {}
+    present = False
+    for name in CANDIDATE_FILES:
+        path = search.directory / name
+        if not path.exists():
+            continue
+        present = True
+        try:
+            records = {c["id"]: c for c in json.loads(path.read_text(encoding="utf-8"))["list"]}
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise LogError(f"{name} cannot be read: {type(exc).__name__}") from exc
+        both = sorted(found.keys() & records.keys())
+        if both:
+            raise LogError(f"{', '.join(both)} is in more than one candidate list")
+        found.update(records)
+    return found if present else None
+
+
+def newest_selection_log_name(case: CaseAppendix) -> str:
+    """The name of the highest-numbered ``selection-log-<n>.json``: the pre-registered record's last version,
+    which a row is carried from (§4.6.5 B.2)."""
+    numbers = [
+        int(m.group(1))
+        for path in case.directory.glob("selection-log-*.json")
+        if (m := re.fullmatch(r"selection-log-(\d+)\.json", path.name))
+    ]
+    if not numbers:
+        raise LogError("there is no selection log yet: the search has not run")
+    return f"selection-log-{max(numbers)}.json"
 
 
 def read_source_log(case: CaseAppendix, name: str) -> str:

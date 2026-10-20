@@ -206,10 +206,36 @@ def test_a_carried_rejection_the_reader_disputed_carries_with_its_read() -> None
     assert log.rows["closure-07"].disputed("real_decision")
     assert log.rows["closure-07"].reads["real_decision"].resolution == "his call, and why"
     with pytest.raises(LogError, match=r"is carried from selection-log-1\.json"):
-        log.record_read(
-            "closure-07", "real_decision", reply=AGREED
-        )  # the dispute cannot be undone here
+        log.record_read(  # the dispute cannot be undone here, even by a new read
+            "closure-07",
+            "real_decision",
+            reply=ReaderReply("reader-x-2-reply.json", "e" * 64, "fail"),
+        )
     assert log.rows["closure-07"].disputed("real_decision") and len(log.events) == 1
+
+
+def test_a_reply_the_pre_registered_record_logged_is_never_a_read_here() -> None:
+    """A carried row was rejected at criterion 4 under the old rules and read; that reply is still in its
+    folder, and is a read of a different rejection."""
+    old = SelectionLog(
+        {"closure-04": Row("closure-04", "closure", "window", "0001111111-26-000004")}
+    )
+    old.record("closure-04", "first_disclosure", "pass", "r", disclosed=D)
+    for criterion in CRITERIA[1:4]:
+        old.record("closure-04", criterion, "pass", "r")
+    old.record("closure-04", "maps_to_shape", "fail", "under 167")
+    old.record_read("closure-04", "maps_to_shape", reply=AGREED)
+    log = ExploratoryLog()
+    log.carry("closure-04", old.to_text(), SOURCE)
+    assert log.rows["closure-04"].prior_replies == {AGREED.reply}
+    log.record("closure-04", "maps_to_shape", "fail", "two facilities")
+    with pytest.raises(LogError, match="pre-registered record's read of an earlier rejection"):
+        log.record_read("closure-04", "maps_to_shape", reply=AGREED)
+    fresh = ReaderReply("reader-x-2-reply.json", "f" * 64, "fail")
+    log.record_read("closure-04", "maps_to_shape", reply=fresh)
+    assert log.rows["closure-04"].finished and log.rows["closure-04"].failed == "maps_to_shape"
+    again = ExploratoryLog.from_text(log.to_text(), {SOURCE: old.to_text()})
+    assert again.rows["closure-04"].prior_replies == {AGREED.reply}
 
 
 def test_a_saved_log_replays_only_with_the_exact_source_it_carried_from() -> None:
@@ -251,7 +277,7 @@ def test_one_order_across_types_the_window_before_the_fallback_then_the_pool_the
     take(log, "closure-f01", 4)
     take(log, "retool-01", 20)
     take(log, "closure-01", 25)
-    assert [r.id for r in log._ordered()] == [
+    assert [r.id for r in log.ordered()] == [
         "retool-01",  # step 2 by first disclosure, whatever the type: the 20th comes before the 25th
         "closure-01",
         "closure-f01",  # the fallback month after the window, though disclosed earlier

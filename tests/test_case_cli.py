@@ -8,6 +8,7 @@ import hashlib
 import json
 from datetime import date, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -27,12 +28,23 @@ from horizon_compact import cli
 from horizon_compact.casebuild import assemble as assemble_module
 from horizon_compact.casebuild.appendix import CaseAppendix
 from horizon_compact.casebuild.edgar import EdgarClient
+from horizon_compact.casebuild.exploratory import (
+    ExploratoryLog,
+    ExploratoryRow,
+    candidate_records,
+    newest_selection_log_name,
+    read_source_log,
+    row_for,
+    write_exploratory_version,
+)
 from horizon_compact.casebuild.extract import instructions_sha256
+from horizon_compact.casebuild.scenario import _disclosure_failures
 from horizon_compact.casebuild.search import (
     CRITERIA,
     FALLBACK_START,
     QUERIES,
     RULE_DATE,
+    LogError,
     Row,
     SelectionLog,
     search_url,
@@ -45,6 +57,7 @@ from horizon_compact.protocol.cases import (
     content_hashes,
     parse_case,
 )
+from horizon_compact.reader.read import ReaderError, probe_read_ready, rejection_ready
 from test_casebuild_assemble import COUNTS, PLAIN, Scripted, fill_in
 from test_casebuild_extract import FACTS, FakeTextProvider, ok
 from test_casebuild_frozen import fake_git
@@ -876,3 +889,416 @@ def test_assemble_refuses_without_a_term_list_or_a_built_case(
     _build_setup(tmp_path, monkeypatch, terms=False)
     assert main(["case", "assemble", "closure-01"]) == REFUSED_EXIT
     assert "term list" in capsys.readouterr().err
+
+
+# --- hc case xlog (exploratory IMPLEMENTATION doc, stage 1 step 2; §4.6.5) -------------------------
+
+
+def _xlog(*words: str) -> int:
+    return main(["case", "xlog", *words])
+
+
+def _through_real_decision() -> None:
+    """closure-01 in the pre-registered log, met through the criterion before the shape."""
+    assert _log("closure", "record", "closure-01", "first_disclosure", "pass", "--reason", "r",
+                "--disclosed", "2026-08-18") == CLEAN_EXIT  # fmt: skip
+    for criterion in ("public_and_filing", "inside_window", "real_decision"):
+        assert _log("closure", "record", "closure-01", criterion, "pass", "--reason", "r") == 0
+
+
+def _xlog_setup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> Path:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _through_real_decision()
+    capsys.readouterr()
+    return folder
+
+
+def test_xlog_carry_writes_the_exploratory_log_and_never_touches_the_selection_log(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    before = {p.name: p.read_bytes() for p in folder.glob("selection-*.json")}
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "carried from selection-log-5.json; wrote exploratory-log-1.json" in out
+    assert "next: maps_to_shape" in out
+    assert (folder / "exploratory-public-1.json").is_file()
+    assert {p.name: p.read_bytes() for p in folder.glob("selection-*.json")} == before
+
+
+def test_xlog_record_settles_the_list_at_the_shape_and_writes_the_next_version(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    words = ["record", "closure-01", "maps_to_shape", "pass", "--reason", "S3 under 4.6.5"]
+    assert _xlog(*words, "--list", "retool") == CLEAN_EXIT
+    assert "wrote exploratory-log-2.json" in capsys.readouterr().out
+    assert _xlog("record", "closure-01", "not_recognizable", "pass", "--reason", "r") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "wrote exploratory-log-3.json" in out and "finished: passed all" in out
+    assert _xlog("public") == CLEAN_EXIT
+    view = json.loads(capsys.readouterr().out)
+    row = next(r for r in view["rows"] if r["id"] == "closure-01")
+    assert row["type"] == "retool" and row["carried"] and row["case"]
+    assert row["label"].startswith("exploratory: selected by §4.6.5 step 2")
+    assert not (folder / "exploratory-log-4.json").exists()
+
+
+def test_xlog_loads_the_newest_version_by_number_not_by_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    text = (folder / "exploratory-log-1.json").read_text()
+    for n in range(2, 11):
+        (folder / f"exploratory-log-{n}.json").write_text(text)
+    capsys.readouterr()
+    assert _xlog("record", "closure-01", "maps_to_shape", "pass", "--reason", "r") == CLEAN_EXIT
+    assert "wrote exploratory-log-11.json" in capsys.readouterr().out
+
+
+def test_xlog_refuses_what_the_log_refuses_and_writes_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    capsys.readouterr()
+    before = sorted(p.name for p in folder.iterdir())
+    refused = [
+        ["carry", "closure-01"],  # already carried
+        ["carry", "closure-f01"],  # never got to criterion 4 in the pre-registered log
+        ["carry", "closure-99"],  # no such row
+        # out of order: the next criterion is maps_to_shape
+        ["record", "closure-01", "real_decision", "pass", "--reason", "r"],
+        # a list on a criterion other than maps_to_shape
+        ["record", "closure-01", "not_recognizable", "pass", "--reason", "r", "--list", "retool"],
+        # a blank reason
+        ["record", "closure-01", "maps_to_shape", "pass", "--reason", "  "],
+        # a read of a criterion that was not rejected, and of one that is carried
+        ["read", "closure-01", "maps_to_shape"],
+        ["read", "closure-01", "real_decision"],
+        # no such row
+        ["record", "closure-99", "maps_to_shape", "pass", "--reason", "r"],
+    ]
+    for words in refused:
+        assert _xlog(*words) == REFUSED_EXIT, words
+        assert capsys.readouterr().err.startswith("refused:"), words
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_xlog_read_takes_its_verdict_from_the_readers_reply(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    assert _xlog("record", "closure-01", "maps_to_shape", "fail", "--reason", "no shape") == 0
+    capsys.readouterr()
+    assert _xlog("read", "closure-01", "maps_to_shape") == REFUSED_EXIT
+    assert "no usable read" in capsys.readouterr().err
+    _reply_on_disk(folder, "pass", "maps_to_shape", "retool")
+    assert _xlog("read", "closure-01", "maps_to_shape") == REFUSED_EXIT
+    assert "resolved by him" in capsys.readouterr().err
+    words = ["read", "closure-01", "maps_to_shape", "--resolution", "it is a retool"]
+    assert _xlog(*words) == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "maps_to_shape: pass (disputes)" in out and "read: DISAGREES" in out
+    assert _xlog("public") == CLEAN_EXIT
+    row = next(r for r in json.loads(capsys.readouterr().out)["rows"] if r["id"] == "closure-01")
+    assert (
+        row["type"] == "retool"
+    )  # a dispute that names a type sets the list; no list to fail on here
+
+
+def test_xlog_public_has_no_name_and_writes_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    secret = "the Canary Cages Inc filing was not first"
+    words = ["record", "closure-01", "maps_to_shape", "fail", "--reason", secret]
+    assert _xlog(*words, "--public-reason", "matches no shape") == CLEAN_EXIT
+    capsys.readouterr()
+    before = sorted(p.name for p in folder.iterdir())
+    assert _xlog("public") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    for private in ("Canary", "0009999999", "2026-08", secret, "3990", "ciks", "selection-log"):
+        assert private not in out, private
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_xlog_show_prints_names_steps_and_the_selection_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    assert _xlog("show") == CLEAN_EXIT  # an empty log shows, and nothing is written
+    assert "cases none yet" in capsys.readouterr().out
+    assert not list(folder.glob("exploratory-*"))
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    capsys.readouterr()
+    assert _xlog("show") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "closure-01 step 2 closure carried from selection-log-5.json" in out
+    assert "Canary Cages Inc" in out and "next: maps_to_shape" in out
+    assert "waiting: closure-01: not finished" in out
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        "Canary Cages said so first",  # a name
+        "a Zarnothic report came first",  # a term from the name guard's list
+        "an earlier mention on 2026-07-02",  # a date
+        "   ",  # blank
+    ],
+)
+def test_xlog_refuses_a_public_reason_that_identifies_and_writes_nothing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    reason: str,
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    capsys.readouterr()
+    before = sorted(p.name for p in folder.iterdir())
+    words = ["record", "closure-01", "maps_to_shape", "fail", "--reason", "r"]
+    assert _xlog(*words, "--public-reason", reason) == REFUSED_EXIT
+    err = capsys.readouterr().err
+    assert err.startswith("refused:") and "Canary" not in err and "Zarnothic" not in err
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_xlog_refuses_before_the_search_has_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("HC_APPENDIX_DIR", str(tmp_path))
+    assert _xlog("carry", "closure-01") == REFUSED_EXIT
+    assert "the search has not run" in capsys.readouterr().err
+
+
+def _rejected_on_the_shape_in_the_pre_registered_log(folder: Path) -> None:
+    """closure-01's criterion 4 rejected and read in the pre-registered log, as every step 2 row was."""
+    assert _log("closure", "record", "closure-01", "maps_to_shape", "fail", "--reason", "r") == 0
+    _reply_on_disk(folder, "fail", "maps_to_shape")
+    assert _log("closure", "read", "closure-01", "maps_to_shape") == CLEAN_EXIT
+
+
+def test_xlog_read_refuses_the_pre_registered_records_read_of_an_earlier_rejection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    _rejected_on_the_shape_in_the_pre_registered_log(folder)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    assert _xlog("record", "closure-01", "maps_to_shape", "fail", "--reason", "still none") == 0
+    capsys.readouterr()
+    before = sorted(p.name for p in folder.iterdir())
+    assert _xlog("read", "closure-01", "maps_to_shape") == REFUSED_EXIT
+    assert "pre-registered record's read" in capsys.readouterr().err
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_the_selection_log_is_closed_to_changes_once_the_exploratory_log_exists(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # §4.6.5 A.1: no row of the pre-registered record is edited or written again. A read of the
+    # exploratory rejection, logged through `hc case log` by mistake, would replace the old read.
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    _rejected_on_the_shape_in_the_pre_registered_log(folder)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    capsys.readouterr()
+    newest = sorted(folder.glob("selection-log-*.json"))
+    for words in (
+        ["closure", "read", "closure-01", "maps_to_shape"],
+        ["closure", "record", "closure-f01", "first_disclosure", "fail", "--reason", "r"],
+    ):
+        assert _log(*words) == REFUSED_EXIT, words
+        assert "closed (§4.6.5 A.1)" in capsys.readouterr().err
+    assert sorted(folder.glob("selection-log-*.json")) == newest
+    assert _log("closure", "show") == CLEAN_EXIT  # reading it is still allowed
+
+
+# --- one answer to "which row is this label's" (exploratory IMPLEMENTATION doc, step 3; §4.6.5 B.4) -------
+
+
+def _explore_closure_01(app: Path, *, shape: str | None = None) -> CaseAppendix:
+    """closure-01 carried into the exploratory log; ``shape`` (pass or fail) is its maps_to_shape there."""
+    search = CaseAppendix(root=app, label="search")
+    name = newest_selection_log_name(search)
+    log = ExploratoryLog()
+    log.carry("closure-01", read_source_log(search, name), name)
+    if shape is not None:
+        log.record("closure-01", "maps_to_shape", shape, "r", case_type="closure")
+    write_exploratory_version(search, log)
+    return search
+
+
+def test_the_exploratory_row_is_the_row_of_record_when_the_label_has_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app, _, _ = _build_setup(
+        tmp_path, monkeypatch
+    )  # the pre-registered row has passed maps_to_shape
+    search = _explore_closure_01(app, shape="fail")
+    row = row_for(search, "closure-01")
+    assert isinstance(row, ExploratoryRow) and row.source is not None
+    assert row.results["maps_to_shape"].result == "fail"
+    assert row_for(search, "closure-09") is None
+
+
+def test_the_pre_registered_row_is_read_when_the_exploratory_log_lacks_the_label(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app, _, _ = _build_setup(tmp_path, monkeypatch)
+    search = CaseAppendix(root=app, label="search")
+    row = row_for(search, "closure-01")  # no exploratory log at all
+    assert row is not None and not isinstance(row, ExploratoryRow)
+    log = ExploratoryLog()
+    log.add("closure-02", "closure", "2", "window", "0009999999-26-000098")
+    write_exploratory_version(search, log)
+    row = row_for(search, "closure-01")  # an exploratory log that does not hold it
+    assert row is not None and not isinstance(row, ExploratoryRow)
+
+
+def test_build_and_documents_read_the_exploratory_row_not_the_old_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    app, transport, providers = _build_setup(tmp_path, monkeypatch)
+    _explore_closure_01(app, shape="fail")
+    assert _build() == REFUSED_EXIT
+    assert "has not passed maps_to_shape" in capsys.readouterr().err
+    assert transport.requests == [] and providers.made == []
+
+
+def test_documents_and_build_go_ahead_on_an_exploratory_row_that_has_passed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app, _, _ = _build_setup(tmp_path, monkeypatch, passes=4)
+    _explore_closure_01(app)  # carried, criterion 4 not yet recorded: documents is for exactly this
+    assert _documents() == CLEAN_EXIT
+    assert (app / "closure-01" / "sources.json").is_file()
+    assert _build() == REFUSED_EXIT  # but the build needs the shape too
+
+
+def test_the_reader_finds_an_exploratory_rejection_and_not_the_old_logs_pass(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app, _, _ = _build_setup(tmp_path, monkeypatch)  # old log: maps_to_shape passed
+    search = _explore_closure_01(app, shape="fail")
+    assert rejection_ready(search, "closure-01", "maps_to_shape") == "closure"
+    assert probe_read_ready(search, "closure-01") == "closure"
+
+
+def test_the_scenario_check_takes_the_first_disclosure_date_from_the_exploratory_row(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app, _, _ = _build_setup(tmp_path, monkeypatch, disclosed=date(2026, 6, 16))
+    _explore_closure_01(app)
+    case = CaseAppendix(root=app, label="closure-01")
+    inputs = SimpleNamespace(cutoff=date(2026, 6, 15))
+    assert _disclosure_failures(inputs, case) == []  # type: ignore[arg-type]
+    inputs = SimpleNamespace(cutoff=date(2026, 6, 1))
+    assert _disclosure_failures(inputs, case)  # type: ignore[arg-type]
+
+
+def test_candidate_records_join_the_press_channels_list_and_say_nothing_when_there_is_none(
+    tmp_path: Path,
+) -> None:
+    search = CaseAppendix(root=tmp_path, label="search")
+    assert candidate_records(search) is None
+    search.write_once(search.directory / "candidates.json", b'{"list": [{"id": "closure-01"}]}')
+    assert set(candidate_records(search) or {}) == {"closure-01"}
+    search.write_once(search.directory / "press-candidates.json", b'{"list": [{"id": "press-01"}]}')
+    assert set(candidate_records(search) or {}) == {"closure-01", "press-01"}
+
+
+def test_the_log_command_named_for_a_label_follows_the_row_of_record(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app, _, _ = _build_setup(tmp_path, monkeypatch)
+    assert cli._log_command("closure-01", "closure") == "hc case log closure"
+    _explore_closure_01(app)
+    assert cli._log_command("closure-01", "closure") == "hc case xlog"
+    assert cli._log_command("closure-09", None) == "hc case log <type>"
+
+
+def _pool_closure_30(app: Path, *, known: bool = False) -> CaseAppendix:
+    """closure-30, a step 3 pool row in the exploratory log only, its details in the press channel's list;
+    first disclosed 2026-07-01, a date the pre-registered log holds for no row."""
+    search = CaseAppendix(root=app, label="search")
+    record = {
+        "list": [
+            {"id": "closure-30", "ciks": ["0009999999"], "names": ["Fernwick Canary Holdings"]}
+        ]
+    }
+    search.write_once(search.directory / "press-candidates.json", json.dumps(record).encode())
+    log = ExploratoryLog()
+    log.add("closure-30", "closure", "3", "pre", "0009999999-26-000097")
+    log.record("closure-30", "first_disclosure", "pass", "r", disclosed=date(2026, 7, 1))
+    for criterion in ("public_and_filing", "inside_window", "real_decision"):
+        log.record("closure-30", criterion, "pass", "r")
+    log.record("closure-30", "maps_to_shape", "pass", "r", case_type="closure")
+    if known:
+        log.record("closure-30", "not_known", "pass", "r")
+    write_exploratory_version(search, log)
+    (app / "closure-30").mkdir(exist_ok=True)
+    (app / "closure-30" / "terms.txt").write_text(
+        "term: Fernwick Canary Holdings => the Company\n", encoding="utf-8"
+    )
+    return search
+
+
+def test_a_pool_row_needs_not_known_before_the_build(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    app, transport, providers = _build_setup(tmp_path, monkeypatch)
+    _pool_closure_30(app)
+    argv = ["case", "build", "closure-30", "--cutoff", "2026-06-30", "--shape", "S3"]
+    assert main(argv) == REFUSED_EXIT
+    assert "has not passed not_known" in capsys.readouterr().err
+    assert transport.requests == [] and providers.made == []
+
+
+def test_the_scenario_check_finds_a_row_only_the_exploratory_log_holds(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app, _, _ = _build_setup(tmp_path, monkeypatch)
+    _pool_closure_30(app, known=True)
+    case = CaseAppendix(root=app, label="closure-30")
+    inputs = SimpleNamespace(cutoff=date(2026, 6, 30))
+    assert _disclosure_failures(inputs, case) == []  # type: ignore[arg-type]
+
+
+def test_the_reader_refuses_a_pre_registered_row_once_the_old_log_is_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A rejection in the closed log could be read, at a cost, but never logged (§4.6.5 A.1)."""
+    app, _, _ = _build_setup(tmp_path, monkeypatch, passes=4)
+    search = CaseAppendix(root=app, label="search")
+    log = SelectionLog.from_text(
+        (search.directory / newest_selection_log_name(search)).read_text(encoding="utf-8")
+    )
+    log.record("closure-01", "maps_to_shape", "fail", "r")
+    write_log_version(search, log)
+    assert rejection_ready(search, "closure-01", "maps_to_shape") == "closure"
+    started = ExploratoryLog()
+    started.add("closure-02", "closure", "2", "window", "0009999999-26-000098")
+    write_exploratory_version(search, started)
+    with pytest.raises(ReaderError, match="closed"):
+        rejection_ready(search, "closure-01", "maps_to_shape")
+    with pytest.raises(ReaderError, match="closed"):
+        probe_read_ready(search, "closure-01")
+
+
+def test_candidate_records_refuse_an_id_in_both_lists(tmp_path: Path) -> None:
+    search = CaseAppendix(root=tmp_path, label="search")
+    search.write_once(search.directory / "candidates.json", b'{"list": [{"id": "closure-01"}]}')
+    search.write_once(
+        search.directory / "press-candidates.json", b'{"list": [{"id": "closure-01"}]}'
+    )
+    with pytest.raises(LogError, match="closure-01"):
+        candidate_records(search)

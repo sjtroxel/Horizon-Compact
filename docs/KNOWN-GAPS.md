@@ -7,7 +7,32 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-20, about 8:40 AM (THE EXPLORATORY BUILD PLAN APPROVED; STAGE 1 NEXT)
+> ## START HERE — where things stand, 2026-10-20, about 11:55 AM (STAGE 1 STEPS 1-3 BUILT AND REVIEWED; STEP 4 NEXT)
+>
+> **Measured:** last commit `b8a9df0` (step 1, pushed). `make check` green, 2589 tests. **Uncommitted:** steps 2 and 3
+> with their review fixes (step 3's review: the reader now refuses a row of the closed pre-registered log, and an id in
+> both candidate lists is refused; plan §9). **Next, his:** one commit for steps 2 and 3 (`git add -A && git commit -m
+> "phase 5: exploratory xlog, one row of record"`), then his push. **Then stage 1, step 4** (the S3 case form), Sonnet
+> at medium effort, then an Opus review at high effort. Read the plan's §9 notes for steps 1 to 3 first.
+>
+> *The 11:05 AM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-20, about 11:05 AM (STAGE 1 STEPS 1-2 BUILT AND REVIEWED; STEP 3 NEXT)
+>
+> **Measured:** last commit `b8a9df0` (step 1, pushed). `make check` green, 2577 tests. **Uncommitted, five files:**
+> step 2 (`hc case xlog`) and its review fixes: the plan, `casebuild/exploratory.py`, `cli.py`, `tests/test_case_cli.py`,
+> `tests/test_casebuild_exploratory.py`. **His choice: commit them together with step 3**, not before.
+>
+> **Next: stage 1, step 3** (plan §3: one answer to "which row is this label's", B.4), Sonnet at medium effort, then an
+> Opus review at high effort. Read the plan's §9 notes for steps 1 and 2 first. Two things step 3 must carry: (a) `hc
+> case reader` must find an exploratory rejection (`reader/read.py` `rejection_ready` and `probe_read_ready` read the
+> pre-registered log today, so no new read can be made yet); (b) `hc case log record` and `read` now refuse once an
+> exploratory log exists (§4.6.5 A.1), so every other command that reads a row must take the exploratory one when it
+> exists. When step 3 is done: one commit for steps 2 and 3, his.
+>
+> *The 8:40 AM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-20, about 8:40 AM (THE EXPLORATORY BUILD PLAN APPROVED; STAGE 1 NEXT)
 >
 > **Measured:** last commit `1f8c7e5` (pushed). **Decided this morning (his):** the exploratory plan
 > (`phase-5-case-building-exploratory-IMPLEMENTATION.md`) approved, all three §6 decisions as recommended: `hc case

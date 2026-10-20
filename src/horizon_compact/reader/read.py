@@ -38,8 +38,9 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from horizon_compact.casebuild.appendix import CaseAppendix
+from horizon_compact.casebuild.exploratory import ExploratoryRow, exploratory_started, row_for
 from horizon_compact.casebuild.frozen import Git
-from horizon_compact.casebuild.search import LogError, ReaderReply, load_newest_log
+from horizon_compact.casebuild.search import LogError, ReaderReply, Row
 from horizon_compact.model_config import ModelConfig
 from horizon_compact.providers.base import (
     RawDecision,
@@ -358,12 +359,25 @@ class ReadOutcome:
     probe_set: int | None = None
 
 
-def rejection_ready(search: CaseAppendix, candidate: str, criterion: str) -> str:
-    """The candidate's type, after checking the log holds a rejection on ``criterion`` with no read yet."""
+def _row_of_record(search: CaseAppendix, candidate: str) -> Row | None:
+    """The candidate's row (§4.6.5 B.4). A row of the pre-registered log is refused once that log is closed
+    (§4.6.5 A.1): a read of it could be paid for but never logged."""
     try:
-        row = load_newest_log(search).rows.get(candidate)
+        row = row_for(search, candidate)
+        closed = exploratory_started(search)
     except LogError as exc:
         raise ReaderError(f"the selection log cannot be read: {exc}") from exc
+    if row is not None and closed and not isinstance(row, ExploratoryRow):
+        raise ReaderError(
+            f"{candidate} is in the pre-registered log, which is closed (§4.6.5 A.1); carry it with "
+            "`hc case xlog carry` first"
+        )
+    return row
+
+
+def rejection_ready(search: CaseAppendix, candidate: str, criterion: str) -> str:
+    """The candidate's type, after checking the log holds a rejection on ``criterion`` with no read yet."""
+    row = _row_of_record(search, candidate)
     if row is None:
         raise ReaderError(f"no candidate {candidate!r} in the log")
     result = row.results.get(criterion)
@@ -380,10 +394,7 @@ def probe_read_ready(search: CaseAppendix, candidate: str) -> str | None:
     """A criterion 5 read comes before the log's result (a first-set failure is not yet a rejection: it is
     coarsened unless the reader disputes it), so the log need not hold a fail. It must not already hold a
     read. Returns the candidate's type when the log has the candidate, else None."""
-    try:
-        row = load_newest_log(search).rows.get(candidate)
-    except LogError as exc:
-        raise ReaderError(f"the selection log cannot be read: {exc}") from exc
+    row = _row_of_record(search, candidate)
     if row is None:
         return None
     if materials.PROBE_CRITERION in row.reads:
