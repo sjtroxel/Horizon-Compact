@@ -18,6 +18,7 @@ from horizon_compact.casebuild.scale import (
     round_significant,
     scale_dollars,
     scale_heads,
+    scale_total_heads,
 )
 
 SEEDS = range(20_000)
@@ -153,3 +154,17 @@ def test_a_correct_build_never_fails_the_check() -> None:
         if not check.passed:
             failures.append((seed, check.change))
     assert failures == []
+
+
+@pytest.mark.parametrize(
+    ("heads", "factor", "expected"), [(60, 1.0, 60), (52, 0.9, 45), (50, 0.6, 30), (122, 0.9, 110)]
+)
+def test_an_s3_total_scales_to_the_nearest_5_and_is_a_number_under_100(
+    heads: int, factor: float, expected: int
+) -> None:
+    assert scale_total_heads(heads, factor) == expected
+
+
+@pytest.mark.parametrize(("heads", "factor"), [(1200, 1.25), (150, 0.9), (400, 1.1), (100, 1.0)])
+def test_an_s3_total_from_100_up_is_scale_heads_own(heads: int, factor: float) -> None:
+    assert scale_total_heads(heads, factor) == scale_heads(heads, factor).value

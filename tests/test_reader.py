@@ -328,9 +328,11 @@ def test_a_scenario_read_hides_the_factor_the_hashes_the_values_and_the_accessio
     raw = json.loads(case.scenario_render_path.read_text(encoding="utf-8"))
     sent = material.scenario_material(case, ROOT)
     assert ACCESSION not in sent.user
-    for private in ("factor", "build_sha256", "rows_sha256"):
+    # pay_per_head holds pay per head before scaling, a value the reader is never sent
+    for private in ("factor", "build_sha256", "rows_sha256", "pay_per_head"):
         assert private in raw and f'"{private}"' not in sent.user
     assert raw["rows_sha256"] not in sent.user and raw["build_sha256"] not in sent.user
+    assert raw["pay_per_head"][0]["per_head_before"] not in sent.user
     table = sent.user.split("[Figure sources]")[1]
     assert "filing 1" in table and "the first-disclosure document" in table
     assert "value" not in table and "1200" not in table.replace(",", "")

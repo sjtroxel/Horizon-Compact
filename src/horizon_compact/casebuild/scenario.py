@@ -31,7 +31,7 @@ import hashlib
 import json
 import re
 import tomllib
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from decimal import Decimal
@@ -79,6 +79,13 @@ from horizon_compact.scenarios.render import (
 RENDER_VERSION = 1
 SEARCH_LABEL = "search"
 SMALL = Decimal(scale.SMALL_GROUP)
+# The figure-free form of S3 (search-half doc §4.6.5 step 0), outside experiment/company/ so Phase 4's S3 and
+# the tag's content hash are unchanged; the S3 floor of this record (step 1 item 2), as stated and unscaled;
+# and the S3 rows that are a total pay figure, which the pay-per-head check (step 0 item 3) pairs with a
+# headcount.
+S3_FORM_PATH = "experiment/case-forms/s3.toml"
+S3_FLOOR = Decimal(50)
+S3_TOTAL_PAY = frozenset({"payroll_p6", "s3_retool_payroll", "s3_sell_payroll"})
 
 CRITERION_4 = "criterion 4 (maps_to_shape)"
 ROWS = "rows file"
@@ -202,6 +209,36 @@ def parse_rows(data: bytes) -> dict[str, CaseRow]:
     return dict(parsed.rows)
 
 
+class S3Form(_Strict):
+    """``experiment/case-forms/s3.toml``: one figure-free sentence per option, and the situation sentences
+    that would be false without the figures (§4.6.5 step 0 items 1 and 2)."""
+
+    drop_from_situation: tuple[str, ...]
+    options: dict[str, str]
+
+    @model_validator(mode="after")
+    def _whole(self) -> S3Form:
+        if set(self.options) != {"close", "retool", "sell"}:
+            raise ValueError("options are close, retool and sell, each once")
+        for key, text in self.options.items():
+            if "{" in text or "}" in text:
+                raise ValueError(f"option {key} holds a placeholder: the form states no figure")
+            if len(re.split(r"(?<=[.?!])\s+", text.strip())) != 1:
+                raise ValueError(f"option {key} is not one sentence")
+        if not self.drop_from_situation:
+            raise ValueError("drop_from_situation names at least one sentence")
+        return self
+
+
+def parse_s3_form(data: bytes) -> S3Form:
+    try:
+        return S3Form.model_validate(tomllib.loads(data.decode("utf-8")))
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError, ValidationError) as exc:
+        raise ScenarioRefused(
+            RENDER, f"{S3_FORM_PATH} is invalid ({type(exc).__name__}): {exc}"
+        ) from exc
+
+
 # --- everything the render and the check read ------------------------------------------------------------
 
 
@@ -217,10 +254,19 @@ class Inputs:
     sources: dict[str, Any]  # sources.json
     source: ScenarioSource
     fictional: FigureSet
+    form: S3Form | None = None  # S3 only, and only if the file is there
+    form_sha256: str | None = None
 
 
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def _read_bytes(path: Path) -> bytes:
+    try:
+        return path.read_bytes()
+    except OSError as exc:
+        raise ScenarioRefused(RENDER, f"{path.name} cannot be read ({type(exc).__name__})") from exc
 
 
 def _read_json(path: Path, what: str, criterion: str) -> tuple[Any, bytes]:
@@ -262,6 +308,12 @@ def load_inputs(case: CaseAppendix, repo_root: Path) -> Inputs:
         raise ScenarioRefused(
             RENDER, f"the shape's template or figures cannot be read: {exc}"
         ) from exc
+    form: S3Form | None = None
+    form_sha256: str | None = None
+    form_path = repo_root / S3_FORM_PATH
+    if shape == "S3" and form_path.exists():
+        form_bytes = _read_bytes(form_path)
+        form, form_sha256 = parse_s3_form(form_bytes), _sha256(form_bytes)
     inputs = Inputs(
         label=case.label,
         shape=shape,
@@ -273,6 +325,8 @@ def load_inputs(case: CaseAppendix, repo_root: Path) -> Inputs:
         sources=sources if isinstance(sources, dict) else {},
         source=source,
         fictional=fictional,
+        form=form,
+        form_sha256=form_sha256,
     )
     _check_rows_against_shape(inputs)
     return inputs
@@ -385,9 +439,15 @@ class _Values:
     stand_ins: set[str] = field(default_factory=set)
 
 
-def _scaled(row: CaseRow, fictional: FigureRow, factor: float) -> Decimal | str:
+def _scaled(
+    row: CaseRow, fictional: FigureRow, factor: float, *, as_number: bool = False
+) -> Decimal | str:
+    """``as_number``: an S3 case's total, stated as a number to the nearest 5 even under 100 (§4.6.5 step 1
+    item 2)."""
     assert row.value is not None
     value = Decimal(str(row.value))
+    if row.scale == "heads" and as_number:
+        return Decimal(scale.scale_total_heads(int(value), factor))
     if row.scale == "heads":
         heads = scale.scale_heads(int(value), factor)
         return Decimal(heads.value) if heads.value is not None else scale.FEWER_THAN
@@ -432,11 +492,36 @@ def _derive(inputs: Inputs, values: _Values, skip: set[str]) -> None:
             value = round_half_up(value, step)
             if row.unit == "count" and refs & values.heads:
                 values.heads.add(key)
-                shown: Decimal | str = scale.FEWER_THAN if value < SMALL else value
+                # an S3 total under 100 is a number (its step is a multiple of 5): §4.6.5 step 1 item 2
+                small = value < SMALL and not _is_s3_total(inputs, key)
+                shown: Decimal | str = scale.FEWER_THAN if small else value
             else:
                 shown = value
             values.resolved[key] = Resolved(key, row, shown)
             values.derived.append(key)
+
+
+def _is_s3_total(inputs: Inputs, key: str) -> bool:
+    return inputs.shape == "S3" and key == inputs.source.total
+
+
+def _unscaled(inputs: Inputs, key: str) -> Decimal | None:
+    """The figure as the case states it, before scaling and rounding: a case row's value, or a derived row's
+    formula over those; None if the case has no way to state it."""
+    row = inputs.rows.get(key)
+    if row is not None and not row.equals_total:
+        return Decimal(str(row.value))
+    formula = inputs.fictional.rows[key].formula if key in inputs.fictional.rows else None
+    if row is not None or formula is None:
+        return None
+    refs = inputs.fictional.references[key]
+    found = {ref: _unscaled(inputs, ref) for ref in refs}
+    if any(value is None for value in found.values()):
+        return None
+    try:
+        return evaluate_formula(formula, lambda ref: _required(found[ref]))
+    except FigureError:
+        return None
 
 
 def _required(value: Decimal | None) -> Decimal:
@@ -457,7 +542,7 @@ def case_values(inputs: Inputs) -> _Values:
             continue
         fic = fictional.rows[key]
         try:
-            shown = _scaled(row, fic, inputs.factor)
+            shown = _scaled(row, fic, inputs.factor, as_number=_is_s3_total(inputs, key))
         except FigureError as exc:
             raise ScenarioRefused(ROWS, f"row {key}: {exc}") from exc
         values.resolved[key] = Resolved(key, fic, shown)
@@ -473,7 +558,12 @@ def case_values(inputs: Inputs) -> _Values:
         )
     if isinstance(total.value, str):
         raise ScenarioRefused(CRITERION_4, "the total is under 100 after scaling")
-    if source.unit == "people" and total.value < SMALL:
+    if inputs.shape == "S3":
+        # §4.6.5 step 1 item 2: the floor is 50 as stated, and a smaller scaled total is a number
+        stated = _unscaled(inputs, source.total)
+        if stated is None or stated < S3_FLOOR:
+            raise ScenarioRefused(CRITERION_4, f"the total is under {S3_FLOOR} as stated")
+    elif source.unit == "people" and total.value < SMALL:
         raise ScenarioRefused(CRITERION_4, "the total is under 100 after scaling")
     if source.unit == "people" and source.total not in values.heads:
         raise ScenarioRefused(ROWS, f"the total ({source.total}) is not stated as a headcount")
@@ -529,21 +619,30 @@ def _placeholders(sentence: str) -> set[str]:
         return set()  # a malformed placeholder: the fill refuses it, naming the field
 
 
-def drop_sentences(text: str, available: set[str], *, all_placeholders: bool) -> tuple[str, int]:
-    """``text`` without the sentences that name a row the case lacks (or, with ``all_placeholders``, any row
-    at all). A sentence ends at ``.``, ``?`` or ``!`` followed by a space, a line break or the end of the
-    field; a paragraph left empty goes with its sentences. Returns the kept text and the number dropped."""
-    dropped = 0
-    paragraphs: list[str] = []
+def _sentences(text: str) -> list[list[tuple[str, str]]]:
+    """``text`` as paragraphs of (sentence, the gap after it). A sentence ends at ``.``, ``?`` or ``!``
+    followed by a space, a line break or the end of the field."""
+    out = []
     for paragraph in re.split(r"\n[ \t]*\n", text.strip()):
         parts = re.split(r"(?<=[.?!])(\s+)", paragraph.strip())
-        sentences = [
-            (parts[i], parts[i + 1] if i + 1 < len(parts) else "") for i in range(0, len(parts), 2)
-        ]
+        out.append(
+            [
+                (parts[i], parts[i + 1] if i + 1 < len(parts) else "")
+                for i in range(0, len(parts), 2)
+            ]
+        )
+    return out
+
+
+def without_sentences(text: str, drop: Callable[[str], bool]) -> tuple[str, int]:
+    """``text`` without the sentences ``drop`` picks; a paragraph left empty goes with its sentences. Returns
+    the kept text and the number dropped."""
+    dropped = 0
+    paragraphs: list[str] = []
+    for sentences in _sentences(text):
         kept = ""
         for sentence, gap in sentences:
-            names = _placeholders(sentence)
-            if names and (all_placeholders or not names <= available):
+            if drop(sentence):
                 dropped += 1
                 continue
             kept += sentence + gap
@@ -552,10 +651,22 @@ def drop_sentences(text: str, available: set[str], *, all_placeholders: bool) ->
     return "\n\n".join(paragraphs), dropped
 
 
+def drop_sentences(text: str, available: set[str], *, all_placeholders: bool) -> tuple[str, int]:
+    """``text`` without the sentences that name a row the case lacks (or, with ``all_placeholders``, any row
+    at all). Returns the kept text and the number dropped."""
+
+    def drop(sentence: str) -> bool:
+        names = _placeholders(sentence)
+        return bool(names) and (all_placeholders or not names <= available)
+
+    return without_sentences(text, drop)
+
+
 @dataclass
 class _Drops:
     by_field: dict[str, int] = field(default_factory=dict)
     equal_treatment: bool = False
+    case_form: bool = False  # S3's figure-free form took the place of the options' sentences
 
     def add(self, where: str, count: int) -> None:
         if count:
@@ -588,7 +699,7 @@ def _group(texts: list[tuple[str, str]], available: set[str], drops: _Drops) -> 
 
 
 def _dropped_source(
-    source: ScenarioSource, values: _Values
+    source: ScenarioSource, values: _Values, inputs: Inputs
 ) -> tuple[ScenarioSource, _Drops, list[str]]:
     available = set(values.resolved) - values.stand_ins
     drops = _Drops()
@@ -615,7 +726,13 @@ def _dropped_source(
     choice: SourceChoice | None = source.choice
     levers = list(source.levers)
     if choice is not None:
-        kept = _group([(f"option {o.key}", o.text) for o in choice.options], available, drops)
+        texts = [(f"option {o.key}", o.text) for o in choice.options]
+        if inputs.shape == "S3" and any(
+            drop_sentences(text, available, all_placeholders=False)[1] for _where, text in texts
+        ):
+            kept = _form_options(inputs, update, drops, [o.key for o in choice.options])
+        else:
+            kept = _group(texts, available, drops)
         options = []
         for option in choice.options:
             text = kept[f"option {option.key}"]
@@ -656,6 +773,28 @@ def _dropped_source(
     )
 
 
+def _form_options(
+    inputs: Inputs, update: dict[str, Any], drops: _Drops, keys: list[str]
+) -> dict[str, str]:
+    """Equal treatment on an S3 case (§4.6.5 step 0): each option is the form's one figure-free sentence, and
+    the form's sentences leave the situation (``update['situation']``, changed in place)."""
+    form = inputs.form
+    if form is None:
+        raise ScenarioRefused(
+            RENDER, f"{S3_FORM_PATH} is not there: an S3 case with missing figures needs it"
+        )
+    if set(keys) != set(form.options):
+        raise ScenarioRefused(RENDER, "the S3 template's options are not the form's")
+    gone = set(form.drop_from_situation)
+    update["situation"], count = without_sentences(update["situation"], lambda s: s in gone)
+    if count != len(gone):
+        raise ScenarioRefused(RENDER, "a sentence the S3 form drops is not in the situation")
+    drops.add("situation", count)
+    drops.equal_treatment = True
+    drops.case_form = True
+    return {f"option {key}": text for key, text in form.options.items()}
+
+
 def _with_note(lever: SourceLever, drops: _Drops, available: set[str]) -> SourceLever:
     if not lever.note:
         return lever
@@ -676,6 +815,83 @@ class Rendered:
     caps_to_total: int
 
 
+def _kept_texts(source: ScenarioSource) -> list[tuple[str, str]]:
+    """Every text the scenario prints, by field, after the drops."""
+    texts = [
+        ("role", source.role),
+        ("currency_note", source.currency_note),
+        ("situation", source.situation),
+        ("menu_heading", source.menu_heading),
+        ("options_heading", source.options_heading),
+        ("instruction", source.instruction),
+    ]
+    if source.choice is not None:
+        texts += [(f"option {o.key}", o.text) for o in source.choice.options]
+    for lever in source.levers:
+        texts += [
+            (f"lever {lever.key} detail", lever.detail),
+            (f"lever {lever.key} note", lever.note),
+        ]
+    return [(where, text) for where, text in texts if text]
+
+
+def _pay_per_head(
+    inputs: Inputs, values: _Values, source: ScenarioSource
+) -> list[dict[str, object]]:
+    """§12.6 and §4.6.5 step 0 item 3: on each kept sentence of an S3 scenario that states a headcount and a
+    total pay figure, pay per head after scaling and rounding stays within 3.5% of its unscaled value.
+    One of each to a sentence, as the dossier's line is; a failure is a build error, which names rows and
+    never a value."""
+    shown = set(values.resolved) - values.stand_ins
+    records: list[dict[str, object]] = []
+    for where, text in _kept_texts(source):
+        for sentences in _sentences(text):
+            for sentence, _gap in sentences:
+                names = _placeholders(sentence) & shown
+                pay, heads = sorted(names & S3_TOTAL_PAY), sorted(names & values.heads)
+                if not pay or not heads:
+                    continue
+                if len(pay) != 1 or len(heads) != 1:
+                    raise ScenarioRefused(
+                        RENDER,
+                        f"{where}: a sentence states {len(heads)} headcounts and {len(pay)} total pay "
+                        "figures; the pay-per-head check needs one of each",
+                    )
+                pay_row, heads_row = pay[0], heads[0]
+                pay_before, heads_before = _unscaled(inputs, pay_row), _unscaled(inputs, heads_row)
+                pay_after, heads_after = _number(values, pay_row), _number(values, heads_row)
+                if (
+                    pay_before is None
+                    or pay_after is None
+                    or heads_before is None
+                    or heads_before < 1
+                ):
+                    raise ScenarioRefused(
+                        RENDER,
+                        f"{where}: pay per head cannot be checked for {pay_row} and {heads_row}",
+                    )
+                check = scale.check_pay_per_head(
+                    scale.PayFigure(
+                        line=len(records) + 1,
+                        pay_before=pay_before,
+                        pay_after=pay_after,
+                        heads_before=int(heads_before.to_integral_value()),
+                        heads_after=int(heads_after) if heads_after is not None else None,
+                    )
+                )
+                if not check.passed:
+                    raise ScenarioRefused(
+                        RENDER,
+                        f"{where}: pay per head for {pay_row} and {heads_row} moved more than 3.5%: "
+                        "a build error (protocol §12.6), fixed in the builder and the case rebuilt with "
+                        "the factor unchanged; if none is found, the case fails criterion 4",
+                    )
+                records.append(
+                    {"field": where, "heads": heads_row, "pay": pay_row, **check.record()}
+                )
+    return records
+
+
 def _closure(used: set[str], references: Mapping[str, frozenset[str]]) -> set[str]:
     found: set[str] = set()
     pending = list(used)
@@ -694,7 +910,7 @@ def render_in_memory(case: CaseAppendix, repo_root: Path) -> Rendered:
         first = failures[0]
         raise ScenarioRefused(first.criterion, first.message)
     values = case_values(inputs)
-    source, drops, rules_omitted = _dropped_source(inputs.source, values)
+    source, drops, rules_omitted = _dropped_source(inputs.source, values, inputs)
     fs = FigureSet(
         sources={},
         rows=inputs.fictional.rows,
@@ -720,6 +936,12 @@ def render_in_memory(case: CaseAppendix, repo_root: Path) -> Rendered:
         "rules_omitted": rules_omitted,
         "caps_set_to_total": sorted(values.caps_to_total, key=lambda c: c["row"]),
     }
+    if (
+        inputs.shape == "S3"
+    ):  # keys only an S3 case's record has, so no other shape's record changes
+        record["pay_per_head"] = _pay_per_head(inputs, values, source)
+        if drops.case_form:
+            record["case_form"] = {"file": S3_FORM_PATH, "sha256": inputs.form_sha256}
     return Rendered(
         scenario_text=toml_text(
             rendered.data, f"{inputs.shape.lower()}{SOURCE_SUFFIX}", header=_HEADER

@@ -11,8 +11,8 @@ this module imports nothing that holds a result (``tests/test_architecture.py`` 
   (``total-search.txt``, §4.6.2 A.3) when the case has one.
 * ``scenario``: the shape's template, the rendered scenario, what the render dropped and set, and a table of
   where each figure came from. Not the unscaled values, the scaling factor or an accession number (the table
-  numbers the filings 1, 2, ... in order of first use); the factor and the hashes are removed from the render
-  record.
+  numbers the filings 1, 2, ... in order of first use); the factor, the hashes and the pay-per-head check are
+  removed from the render record.
   A scenario that does not pass ``hc case scenario check`` is not sent.
 * ``rubric``: the rubric file, whole, with its excerpts.
 """
@@ -37,8 +37,9 @@ from horizon_compact.experiment import SOURCE_SUFFIX
 from horizon_compact.scenarios.render import SCENARIOS_DIR
 
 MAX_PART_CHARS = 200_000
-# The render record's fields that are private (the scaling factor, protocol §12.6) or only a checksum.
-_PRIVATE_RECORD_FIELDS = ("factor", "build_sha256", "rows_sha256")
+# The render record's fields that are private (the scaling factor, protocol §12.6; S3's pay-per-head check,
+# which holds pay per head before scaling) or only a checksum.
+_PRIVATE_RECORD_FIELDS = ("factor", "build_sha256", "rows_sha256", "pay_per_head")
 REJECTION_CRITERIA = ("real_decision", "maps_to_shape")
 # Criterion 5 (protocol §12.4, §12.8): a probe failure is read from the flagged answers, not an excerpt.
 PROBE_CRITERION = "not_recognizable"

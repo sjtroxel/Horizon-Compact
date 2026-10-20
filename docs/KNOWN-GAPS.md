@@ -7,7 +7,19 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-20, about 11:55 AM (STAGE 1 STEPS 1-3 BUILT AND REVIEWED; STEP 4 NEXT)
+> ## START HERE — where things stand, 2026-10-20, about 12:55 PM (STAGE 1 STEPS 1-4 BUILT AND REVIEWED; STEP 5 NEXT)
+>
+> **Measured:** last commit `4d6fca0` (steps 2 and 3). `make check` green, 2611 tests; `hc scenarios check` ok, so
+> Phase 4's S3 and the tag's hash are unchanged. **Uncommitted:** step 4 (the S3 case form) with its review's three
+> fixes (plan §9: the reader no longer sees pay per head before scaling; a test that failed for the wrong reason; the
+> refusal's wording). **Next, his:** one commit (`git add -A && git commit -m "phase 5: S3 case form, pay per head"`),
+> then his push. **Then stage 1, step 5** (the brief and the reader's material), Sonnet at medium effort, then an Opus
+> review at high effort. **Open, his:** whether a correct small-S3 build that fails the pay check (now possible, plan §9
+> step 4) needs a code change now; recommended: no, §12.6's fix-and-rebuild path covers it if it fires.
+>
+> *The 11:55 AM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-20, about 11:55 AM (STAGE 1 STEPS 1-3 BUILT AND REVIEWED; STEP 4 NEXT)
 >
 > **Measured:** last commit `b8a9df0` (step 1, pushed). `make check` green, 2589 tests. **Uncommitted:** steps 2 and 3
 > with their review fixes (step 3's review: the reader now refuses a row of the closed pre-registered log, and an id in

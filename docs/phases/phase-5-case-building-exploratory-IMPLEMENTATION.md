@@ -63,7 +63,7 @@ built. The rules are §4.6.5 of the search-half doc. Where things stand today is
    label, else the pre-registered row, and read a candidate's details from `candidates.json` or the new channel's
    candidate file. **Tests:** each command finds an exploratory row; a carried row is never read from the old log once
    it is carried.
-4. **The S3 case form** (step 0): `experiment/case-forms/s3.toml` holds the three option sentences and the situation
+4. **[done 2026-10-20, Sonnet built, Opus reviewed, three fixes applied] The S3 case form** (step 0): `experiment/case-forms/s3.toml` holds the three option sentences and the situation
    sentence to drop; `casebuild/scenario.py` uses it when equal treatment applies to an S3 case; the pay-per-head
    check on each kept sentence that states a heads row and a total-pay row (step 0 item 3); a scaled exploratory S3
    total under 100 stated as a number (step 1 item 2). **Tests:** `hc scenarios check` still passes, so Phase 4's S3
@@ -259,3 +259,49 @@ at the build until `not_known` is recorded, and the scenario check finds a row t
 (the earlier test used a carried row, whose date is the old log's, so it would have passed on the old code). 2589
 tests. *Left as is:* §4.6.5 B.4 names `lock` and `probe`, but neither reads a row today, so there was nothing to
 move; whether `probe` should check that a label has passed criterion 4 is a question for stage 3, not this step.
+
+**Step 4 (2026-10-20, Sonnet built, Opus reviewed).** `experiment/case-forms/s3.toml` (the three option
+sentences as the search-half doc gives them, and the one situation sentence to drop), read by `casebuild/scenario.py`
+(`S3Form`, `parse_s3_form`); `make check` green, 2611 tests (22 new). `experiment/company/` is untouched, so `hc
+scenarios check` and the tag's hash are as they were. What it does: (1) **the form applies when any S3 option sentence
+names a figure the case lacks** (the same trigger as equal treatment), replaces all three option texts, and takes "The
+figures for every option are management's estimates." out of the situation; the render refuses if the file is missing
+or a sentence to drop is not in the template. A full S3 case renders as before. (2) **The S3 floor and a small total:**
+an S3 total is stated as a number to the nearest 5 even under 100 (`scale.scale_total_heads`; a derived total keeps its
+row's step), and the render refuses a total under 50 as stated, unscaled (`_unscaled`, a case row's value or its
+formula over case values). Other shapes keep "under 100 after scaling". (3) **The pay-per-head check**
+(`_pay_per_head`): on each kept S3 sentence holding exactly one headcount and one total-pay row, it runs
+`scale.check_pay_per_head` and records the result as `pay_per_head` in `scenario-render.json`; a failure refuses the
+render and writes nothing, naming rows and never a value. `scenario-render.json` gains `pay_per_head` for S3 and
+`case_form` (file and sha256) only when the form was used, so no other shape's record changes.
+
+*Choices the plan did not fix:* the total-pay rows are an explicit S3 set (`payroll_p6`, `s3_retool_payroll`,
+`s3_sell_payroll`), not a pattern; a sentence holding more than one headcount or more than one pay row refuses (no
+fixed S3 sentence does); `drop_sentences` is now built on a public `without_sentences(text, predicate)`; the shared
+test fixture states the `oews_wage_*` rows unscaled with `per` (a per-head wage is a ratio, `CaseRow`'s own rule), or
+every S3 render would fail the new check.
+
+*Two things for the review and for him:* (a) a payroll derived from the headcount was said never to fail the check;
+**the review found it can** (below). (b) **Rounding to the nearest 5 alone moves a headcount by more than 3.5% under
+about 70 people**, so a small S3 case that states its own payroll can fail the check on rounding, not on any fault;
+the plan says a failure is a build error, so it refuses. *Tests for "a scaled total of 60 reads 60"* run at 60
+(factor 1.0), 52 (1.1, reads 55) and 50 (1.0); the cap rows under 100 are set to the total by the existing rule,
+unchanged.
+
+*Opus review (2026-10-20, high effort), three fixes applied:* (1) **the reader was sent an unscaled value:**
+`pay_per_head` holds pay per head before scaling, and `reader/material.py` passed every render-record field but the
+factor and the hashes; it is now private as they are (test extended). (2) **The stated-payroll test failed for the
+wrong reason:** it gave `payroll_p6` as 2.86 in a `usd_m` row, whose values are in dollars, so the scaled payroll
+rounded to zero and pay per head moved 100%; now $2,860,000, which fails at about 5%. (3) **The refusal said "his to
+decide"**; protocol §12.6 makes a failure a build error (fixed in the builder and the case rebuilt with the factor
+unchanged, or, if none is found, criterion 4 fails), and the message now says so. *Found, not changed (his call):*
+**a correct build can now fail the check, derived payroll or stated.** A derived payroll is the rounded headcount
+times the wage, then rounded to a `usd_m` row's $100,000 step, which moves a payroll under about $1.43 million by more
+than 3.5%; a sweep found it at a stated total of 54, factor 0.6 (stated 30) and a $45,000 wage. It needs a small
+plant, a low factor and a low wage together (5 of 1,470 renders over totals 50 to 119, factors 0.6 to 1.1 and wages
+$36,000 to $45,000; none at the fixture's wages). §12.6's premise that a correct build always passes was argued for
+headcounts of 100 or more; step 1 item 2 states smaller ones. The recommendation is to leave the code: the refusal is
+loud, and if it fires, §12.6's own path (fix the builder, rebuild, factor unchanged) recovers the case. *Left as is:*
+when the form replaces the options, their dropped sentences are not counted in `sentences_dropped` (the record's
+`case_form` says the options were replaced); the floor's refusal says "under 50 as stated" also when the total
+cannot be stated unscaled at all, which no S3 row set reaches today.

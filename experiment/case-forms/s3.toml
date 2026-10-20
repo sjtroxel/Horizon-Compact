@@ -1,0 +1,13 @@
+# The figure-free form of S3 for a case (search-half doc §4.6.5 step 0; protocol §12.6: "where an option has
+# no pre-cut-off figures, every option is described without figures alike"). `hc case scenario render` uses it
+# when equal treatment applies to an S3 case, that is, when any option sentence of experiment/company/scenarios/
+# s3.source.toml names a figure the case lacks. Each option is then one sentence, and the sentences below are
+# taken out of the situation. Nothing in experiment/company/ changes, so Phase 4's S3 and the tag's content
+# hash are as they were. No digit and no {placeholder} appears here.
+
+drop_from_situation = ["The figures for every option are management's estimates."]
+
+[options]
+close = "Close the plant."
+retool = "Retool the plant and keep running it."
+sell = "Sell the plant, with its product family, to a buyer that will keep running it."

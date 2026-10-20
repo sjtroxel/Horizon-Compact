@@ -84,6 +84,14 @@ def scale_heads(heads: int, factor: float) -> ScaledHeads:
     return ScaledHeads(text=f"{nearest_five:,}", value=nearest_five)
 
 
+def scale_total_heads(heads: int, factor: float) -> int:
+    """An S3 case's total headcount, scaled to the nearest 5 and stated as a number even under 100
+    (search-half doc §4.6.5 step 1 item 2). From 100 up it is ``scale_heads``'s; below, ``scale_heads`` says
+    "fewer than 100" and this does not."""
+    scaled = Decimal(heads) * Decimal(repr(factor))
+    return int((scaled / 5).to_integral_value(rounding=ROUND_HALF_UP)) * 5
+
+
 @dataclass(frozen=True)
 class PayFigure:
     """A total pay figure and a headcount stated on one line, before and after scaling."""

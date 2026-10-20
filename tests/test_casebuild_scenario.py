@@ -27,11 +27,14 @@ from horizon_compact.casebuild.scenario import (
     CUTOFF,
     FIRST,
     ROWS,
+    S3_FORM_PATH,
     ScenarioRefused,
     check_scenario,
     drop_sentences,
+    parse_s3_form,
     render_case_scenario,
     render_in_memory,
+    without_sentences,
 )
 from horizon_compact.casebuild.search import Row, SelectionLog, write_log_version
 from horizon_compact.cli import CHECK_FAILED_EXIT, CLEAN_EXIT, REFUSED_EXIT, main
@@ -56,6 +59,7 @@ TOTALS: dict[str, tuple[str, str, float]] = {
 }
 
 FIC = load_scenario_figures(ROOT)
+FORM = parse_s3_form((ROOT / S3_FORM_PATH).read_bytes())
 
 
 # --- a case on disk --------------------------------------------------------------------------------------
@@ -124,6 +128,10 @@ def full_rows(shape: str, template: Path | None = None) -> dict[str, dict[str, A
             "accession": ACCESSION,
             "locator": "canary locator",
         }
+    # a per-head pay figure is a ratio of two scaled quantities, so a case states it unscaled (CaseRow's rule)
+    for key in rows:
+        if key.startswith("oews_wage_"):
+            rows[key].update(scale="none", per="employee")
     rows[total_id] = {
         "value": total_value,
         "unit": FIC.rows[total_id].unit,
@@ -328,14 +336,6 @@ def test_equal_treatment_drops_every_sentence_with_a_figure_from_every_lever_det
     assert check_scenario(case, ROOT) == []
 
 
-def test_equal_treatment_that_empties_an_option_text_is_a_refusal(tmp_path: Path) -> None:
-    """S3: the sale's proceeds are missing, so every option drops its figures and the retool text is empty."""
-    case = make_case(tmp_path, "S3", without(full_rows("S3"), "s3_sale_multiple"))
-    with pytest.raises(ScenarioRefused, match="option retool is empty"):
-        render_case_scenario(case, ROOT)
-    assert not case.scenario_path.exists() and not case.scenario_render_path.exists()
-
-
 # --- caps ------------------------------------------------------------------------------------------------
 
 
@@ -424,10 +424,12 @@ def test_a_figure_derived_from_a_cap_set_to_the_total_is_not_printed(tmp_path: P
     rows = full_rows("S3")
     rows["s3_retool_positions"] = {"equals_total": True}
     case = make_case(tmp_path, "S3", rows)
-    # "needs <total> of its <total> positions" would be a figure no source gives; its sentence drops, equal
-    # treatment takes every figure from every option, and the retool text, all figures, empties
-    with pytest.raises(ScenarioRefused, match=r"option retool is empty"):
-        render_in_memory(case, ROOT)
+    # "needs <total> of its <total> positions" would be a figure no source gives; its sentence drops, and
+    # equal treatment gives every option the form's figure-free sentence
+    render_case_scenario(case, ROOT)
+    options = {o["key"]: o["text"] for o in scenario_data(case)["choice"]["options"]}
+    assert options == FORM.options
+    assert render_record(case)["equal_treatment_applied"] is True
 
 
 def test_a_headcount_is_never_stated_unscaled(tmp_path: Path) -> None:
@@ -482,7 +484,7 @@ def test_a_rule_whose_numbers_have_no_rows_is_omitted_with_its_sentences(tmp_pat
 
 @pytest.mark.parametrize(
     ("shape", "value", "factor"),
-    [("S3", 50, 1.0), ("S3", 120, 0.7), ("S1", 95, 1.0)],
+    [("S1", 95, 1.0), ("S1", 130, 0.7)],
 )
 def test_a_total_under_100_after_scaling_fails_criterion_4(
     tmp_path: Path, shape: str, value: int, factor: float
@@ -748,9 +750,7 @@ def test_the_render_command_refuses_with_the_criterion_and_writes_nothing(
     rows["hc_p6"]["value"] = 40
     case = make_case(tmp_path, "S3", rows)
     assert main(["case", "scenario", "render", LABEL]) == REFUSED_EXIT
-    assert (
-        f"refused: {CRITERION_4}: the total is under 100 after scaling" in capsys.readouterr().err
-    )
+    assert f"refused: {CRITERION_4}: the total is under 50 as stated" in capsys.readouterr().err
     assert not case.scenario_path.exists()
 
 
@@ -847,3 +847,152 @@ def test_a_sentence_ends_at_a_stop_followed_by_a_space_a_line_break_or_the_end(
 def test_all_placeholders_mode_drops_every_sentence_with_a_figure() -> None:
     kept, dropped = drop_sentences("Plain. With {a}. Also plain.", {"a"}, all_placeholders=True)
     assert (kept, dropped) == ("Plain. Also plain.", 1)
+
+
+# --- S3's figure-free form (search-half doc §4.6.5 step 0), the S3 floor and the pay-per-head check ------
+
+
+def _s3_options(case: CaseAppendix) -> dict[str, str]:
+    return {o["key"]: o["text"] for o in scenario_data(case)["choice"]["options"]}
+
+
+def test_a_full_s3_case_keeps_the_templates_options_and_records_no_form(tmp_path: Path) -> None:
+    case = make_case(tmp_path, "S3")
+    render_case_scenario(case, ROOT)
+    assert _s3_options(case) != FORM.options
+    record = render_record(case)
+    assert "case_form" not in record and record["equal_treatment_applied"] is False
+    assert "management's estimates" in scenario_data(case)["scenario"]
+
+
+def test_an_s3_case_missing_a_figure_gets_one_figure_free_sentence_per_option(
+    tmp_path: Path,
+) -> None:
+    case = make_case(tmp_path, "S3", without(full_rows("S3"), "s3_sale_multiple"))
+    render_case_scenario(case, ROOT)
+    assert _s3_options(case) == FORM.options
+    data = scenario_data(case)
+    assert all(not re.search(r"\d|\$", text) for text in _s3_options(case).values())
+    assert "management's estimates" not in data["scenario"]
+    assert "Every option can be paid for from" in data["scenario"]
+    record = render_record(case)
+    assert record["equal_treatment_applied"] is True
+    assert record["case_form"]["file"] == S3_FORM_PATH and len(record["case_form"]["sha256"]) == 64
+    assert record["sentences_dropped"]["situation"] >= 1
+    assert check_scenario(case, ROOT) == []
+
+
+def test_the_form_does_not_touch_the_other_shapes(tmp_path: Path) -> None:
+    case = make_case(tmp_path, "S1", without(full_rows("S1"), "oews_wage_office"))
+    render_case_scenario(case, ROOT)
+    assert "case_form" not in render_record(case) and "pay_per_head" not in render_record(case)
+
+
+def test_an_s3_case_missing_a_figure_is_refused_if_the_form_is_not_there(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = make_case(tmp_path, "S3", without(full_rows("S3"), "s3_sale_multiple"))
+    monkeypatch.setattr("horizon_compact.casebuild.scenario.S3_FORM_PATH", "experiment/none.toml")
+    with pytest.raises(ScenarioRefused, match="is not there"):
+        render_case_scenario(case, ROOT)
+    assert not case.scenario_path.exists()
+
+
+def test_the_check_fails_when_the_form_changes_after_the_render(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = make_case(tmp_path, "S3", without(full_rows("S3"), "s3_sale_multiple"))
+    render_case_scenario(case, ROOT)
+    other = tmp_path / "repo"
+    shutil.copytree(ROOT / "experiment" / "company", other / "experiment" / "company")
+    (other / "experiment" / "case-forms").mkdir()
+    form = (ROOT / S3_FORM_PATH).read_text(encoding="utf-8")
+    (other / S3_FORM_PATH).write_text(
+        form.replace("Close the plant.", "Shut the plant."), encoding="utf-8"
+    )
+    assert check_scenario(case, other) != []
+
+
+@pytest.mark.parametrize(
+    "edit",
+    [
+        lambda s: s.replace('close = "Close the plant."', 'close = "Close the {plant}."'),
+        lambda s: s.replace('close = "Close the plant."', 'close = "Close the plant. Move it."'),
+        lambda s: s.replace('close = "Close the plant."\n', ""),
+        lambda s: s.replace("drop_from_situation = [", "drop_from_situation = [] # ["),
+    ],
+)
+def test_the_form_file_is_checked(edit: Any) -> None:
+    text = (ROOT / S3_FORM_PATH).read_text(encoding="utf-8")
+    parse_s3_form(text.encode())
+    with pytest.raises(ScenarioRefused, match="invalid"):
+        parse_s3_form(edit(text).encode())
+
+
+def test_without_sentences_takes_a_whole_sentence_and_its_gap() -> None:
+    text = "One. Two here. Three.\n\nFour."
+    assert without_sentences(text, lambda s: s == "Two here.") == ("One. Three.\n\nFour.", 1)
+    assert without_sentences(text, lambda s: s == "Four.") == ("One. Two here. Three.", 1)
+
+
+@pytest.mark.parametrize(
+    ("stated", "factor", "shown"), [(60, 1.0, 60), (52, 1.1, 55), (50, 1.0, 50)]
+)
+def test_an_s3_total_under_100_after_scaling_is_a_number_to_the_nearest_5(
+    tmp_path: Path, stated: int, factor: float, shown: int
+) -> None:
+    rows = full_rows("S3")
+    rows["hc_p6"]["value"] = stated
+    case = make_case(tmp_path, "S3", rows, factor=factor)
+    render_case_scenario(case, ROOT)
+    data = scenario_data(case)
+    assert data["total"] == shown and f"{shown} employees" in data["scenario"]
+    # the caps with a count of their own under 100 are set to it and never printed
+    assert {c["row"] for c in render_record(case)["caps_set_to_total"]}
+    assert "fewer than 100" not in data["scenario"].replace("fewer than 100 in", "")
+    assert check_scenario(case, ROOT) == []
+
+
+def test_an_s3_total_under_50_as_stated_fails_criterion_4(tmp_path: Path) -> None:
+    rows = full_rows("S3")
+    rows["hc_p6"]["value"] = 45
+    with pytest.raises(ScenarioRefused, match="under 50 as stated") as caught:
+        render_in_memory(make_case(tmp_path, "S3", rows, factor=1.6), ROOT)
+    assert caught.value.criterion == CRITERION_4
+
+
+def test_a_small_s3_total_can_fail_the_pay_per_head_check(tmp_path: Path) -> None:
+    """52 people scaled by 0.9 is 46.8, stated as 45, beside a stated payroll of $2.86 million, which
+    scales to $2.57 million and is stated as $2.6 million (a usd_m row's step): pay per head moves about 5%.
+    Rounding to 5 alone moves the headcount by more than 3.5% under about 70 people. (A usd_m row's value is
+    in dollars.)"""
+    rows = full_rows("S3")
+    rows["hc_p6"]["value"] = 52
+    rows["payroll_p6"] = {**rows["hc_p6"], "value": 2_860_000, "unit": "usd_m", "scale": "dollars"}
+    rows["payroll_p6"].update(source="pre_cutoff", accession=ACCESSION)
+    case = make_case(tmp_path, "S3", rows, factor=0.9)
+    with pytest.raises(
+        ScenarioRefused, match="pay per head for payroll_p6 and hc_p6 moved"
+    ) as caught:
+        render_case_scenario(case, ROOT)
+    assert not re.search(
+        r"\d{2,}", caught.value.message.replace("12.6", "")
+    )  # row ids, never a figure
+    assert not case.scenario_path.exists()
+
+
+def test_pay_per_head_is_recorded_and_a_mis_scaled_wage_fails_it(tmp_path: Path) -> None:
+    case = make_case(tmp_path, "S3")
+    render_case_scenario(case, ROOT)
+    entries = render_record(case)["pay_per_head"]
+    assert [(e["field"], e["heads"], e["pay"], e["passed"]) for e in entries] == [
+        ("situation", "hc_p6", "payroll_p6", True)
+    ]
+    # a per-head wage scaled like a total moves pay per head by the whole factor
+    rows = full_rows("S3")
+    for key in rows:
+        if key.startswith("oews_wage_"):
+            rows[key].update(scale="dollars")
+            rows[key].pop("per", None)
+    with pytest.raises(ScenarioRefused, match=r"moved more than 3\.5%"):
+        render_in_memory(make_case(tmp_path / "wrong", "S3", rows), ROOT)
