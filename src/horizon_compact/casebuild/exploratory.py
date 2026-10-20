@@ -30,6 +30,7 @@ from typing import Any
 from horizon_compact.casebuild.appendix import CaseAppendix
 from horizon_compact.casebuild.search import (
     CRITERIA,
+    PRESS_CANDIDATES,
     READ_REQUIRED,
     READINGS,
     TYPES,
@@ -543,7 +544,7 @@ def load_newest_exploratory(case: CaseAppendix) -> ExploratoryLog:
 
 
 # the search's list, then step 2's channel
-CANDIDATE_FILES = ("candidates.json", "press-candidates.json")
+CANDIDATE_FILES = ("candidates.json", PRESS_CANDIDATES)
 
 
 def exploratory_started(case: CaseAppendix) -> bool:

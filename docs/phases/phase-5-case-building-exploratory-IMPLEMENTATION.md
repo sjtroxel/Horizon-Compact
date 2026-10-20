@@ -69,18 +69,19 @@ built. The rules are §4.6.5 of the search-half doc. Where things stand today is
    total under 100 stated as a number (step 1 item 2). **Tests:** `hc scenarios check` still passes, so Phase 4's S3
    is unchanged byte for byte; a case with no option figures renders the three sentences; the situation sentence is
    dropped; a scaled total of 60 reads 60; the pay-per-head check passes and fails as it should.
-5. **The brief and the reader's material** (step 1 item 7): the four changes to `experiment/readers/rejection.txt`;
+5. **[done 2026-10-20, Sonnet built, Opus reviewed, two fixes applied] The brief and the reader's material** (step 1 item 7): the four changes to `experiment/readers/rejection.txt`;
    `reader/material.py` sends, with an S3 total rejection, the public report saved as `total-report.txt` (the report's
    text under a line naming its source and date, saved by rule before the result is recorded, as `total-search.txt`
    is). **Tests:** the brief's text; the material with and without a report. Logged in the search-half doc's §11 as a
    change to the instrument.
-6. **The new channel** (step 2 item 2): its ten phrases as data, each its own query (`Query(4, ...)`, `items` 7.01 or
+6. **[done 2026-10-20, Sonnet built, Opus reviewed, one rule added] The new channel** (step 2 item 2): its ten phrases as data, each its own query (`Query(4, ...)`, `items` 7.01 or
    8.01, `sics` 2000-3999); `hc case search --channel press`, run once, writing `search/press-candidates.json`
    (write-once; ids `press-01` on, `press-f01` on for the fallback month), leaving out any filing already a
    candidate; rows typed at criterion 4. **Tests** on fake replies, as for the search.
 
 **His, to close stage 1:** `make check`, then one commit (`phase 5: exploratory record, S3 case form, press
-channel`) and a push. The reader's inputs change, so they are pushed before the next read.
+channel`) and a push. *(2026-10-20: steps 1 to 4 were committed as they were reviewed, so the closing commit holds
+steps 5 and 6 only: `phase 5: reader brief, press channel`.)* The reader's inputs change, so they are pushed before the next read.
 
 ### Stage 2: step 2's rows (Opus with him; reads cost a few cents)
 
@@ -91,7 +92,9 @@ channel`) and a push. The reader's inputs change, so they are pushed before the 
    and the report is saved in the case's private folder before the result is recorded. A rejection goes to the reader
    (1 to 3 cents a read).
 8. **Run the channel** (his one command, `hc case search --channel press`) and take its rows through criteria 1 to 4
-   in order, by the search half's §4.3 and Stage D methods.
+   in order, by the search half's §4.3 and Stage D methods. *(2026-10-20)* At criterion 1, a row the command lists
+   under `same_filer_as` is read against those earlier candidates: the same decision fails as "already a candidate:
+   <id>" (search-half doc §11, 2026-10-20).
 9. **Count the rows that pass criterion 4.** Five or more: stage 4 stays closed. Fewer: decision 2.
 
 ### Stage 3: each passing row to a case (as many sessions as it takes)
@@ -305,3 +308,55 @@ loud, and if it fires, §12.6's own path (fix the builder, rebuild, factor uncha
 when the form replaces the options, their dropped sentences are not counted in `sentences_dropped` (the record's
 `case_form` says the options were replaced); the floor's refusal says "under 50 as stated" also when the total
 cannot be stated unscaled at all, which no S3 row set reaches today.
+
+**Step 5 (2026-10-20, Sonnet built, Opus reviewed).** `experiment/readers/rejection.txt`: the four changes of
+§4.6.5 step 1 item 7, in the `maps_to_shape` paragraph and nowhere else, word for word as the item gives them (the
+product-making facility sentence after the S3 shape rule; the S3 total "as a source states it", with jobs cut and
+several facilities excluded; "For S1 the total must be 167 or more; for S3, 50 or more"; the public report added to
+the total's material). `CaseAppendix.total_report_path` (`total-report.txt`, hand-placed, private) and
+`material.rejection_material`: a `maps_to_shape` read is sent it as a third block, "Public report of the facility's
+headcount", after the search of earlier filings, when the file exists; no other read is sent it; an empty or over-long
+file is refused, not dropped; its hash goes into `material_sha256` with the other parts. `make check` green, 2614 tests
+(3 new, 1 changed), `hc protocol check` ok. No read was made. **Not enforced in code, as for the search and the
+excerpt:** that the report was saved before the result was recorded, and that its first line names its source and date
+(his or Opus's, per stage 2 step 7). **The brief's sha256 changes**, so it is pushed before the next read (the stage 1
+commit says so); the search-half doc's §11 logs the change to the instrument.
+
+*Opus review (2026-10-20), two fixes:* (1) **A carried row could not be read again.** Each of the ten rows stage 2
+carries already has the pre-registered record's `maps_to_shape` read in its folder, and a rejection's once-only rule
+counted every attempt there, so `hc case reader` refused the read B.2 asks for ("was read already"); and the reply
+lookup returned the oldest reply, which the exploratory log rightly refuses. Now the replies the carried row's
+pre-registered reads name (`prior_replies`, `read.earlier_record_replies`) are passed over by both; the new read's
+number follows theirs (`-2`), so their files are never written again. A test makes the old read, carries the row,
+rejects it again, makes the new read and checks it alone is logged and made once. (2) **The report's block was named
+"Public report of the facility's headcount"**, which tells the reader the thing the brief asks it to judge (whether
+the report's number is the plant's headcount, step 1 item 4). It is now "Public report", the brief's own words.
+`make check` green after both.
+
+**Step 6 (2026-10-20, Sonnet built; Opus review pending).** `casebuild/search.py`: `PRESS_PHRASES` (the ten, in
+§4.6.5's order, as data) and `PRESS_QUERIES` (`Query(4, "closure", ...)`, `items` 7.01 or 8.01, `sics` 2000-3999); they
+are **not** in `QUERIES`, so protocol §12.3's table and the test that compares it are untouched. `run_search` gained
+`id_prefix` (ids `press-01`, `press-f01` for the fallback month; refused for queries of more than one type) and
+`exclude` (accession numbers already candidates, left out and counted as "already a candidate" in the query's
+`dropped`); with neither, it behaves as before (a test says so). `write_candidates` takes the file's name.
+`cli.py`: `hc case search --channel press --date <today>`, run once. It refuses without `candidates.json` (it leaves
+out those filings), a second run, a `--deviation`, and a day that is not today; it uses the search's own dates
+(2026-07-01 to 2026-10-15, the fallback month held apart). It writes `search/press-candidates.json` (write-once,
+`channel` and `step` in its record) and **adds each hit to the exploratory log as a step 2 row, typed `closure`**,
+as the next `exploratory-log-<n>.json`, so no separate "add" command is needed; the list is settled at criterion 4
+as for every row. Counts only are printed. With no hits it writes its file and no log version. `make check` green,
+2626 tests (11 new). **Not decided here:** the press rows' initial type is `closure`, the list the
+phrases point at; a row that reads as a retool is moved at criterion 4 by `hc case xlog record ... --list retool`.
+**His, stage 2 step 8:** one command, `hc case search --channel press --date <that day>`, after the commit and push
+that close stage 1. The channel reads the SEC, never a model: no cash.
+
+*Opus review (2026-10-20), no fault in the code; one gap, closed by a rule (his):* **"one decision is one case" was
+checked by filing only.** The channel leaves out a filing already a candidate by accession number, and the log's
+duplicate check compares accession numbers, so a decision announced in two separate filings would come in twice
+when the press filing is the earlier one. Now `press-candidates.json` records each row's earlier candidates from the
+same filer (`same_filer_as`, by CIK; private) and the command prints how many; at criterion 1 a row that is the same
+decision fails as "already a candidate: <id>" (search-half doc §11, 2026-10-20; stage 2 step 8). It flags, it does
+not leave out: a different decision of the same company is an ordinary row. One test added. Both of Sonnet's choices
+stand: rows start as `closure`, which is safe because a row whose list is not settled holds every open type (step 1's
+review); and every SEC request finishes before either file is written, so only a local write can split the candidate
+file from the log version.

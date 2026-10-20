@@ -1930,3 +1930,25 @@ of it the ai type's agreement excerpts at about $0.09 each; with the patch reads
 2026-10-19 entry above estimated $3.83. He has removed the cap and watches the balance; the exploratory plan's §4 now
 has the spend totaled after every batch of paid calls and said against his balance. (3) Four trailing spaces were
 stripped from the prose copy of the read's reply, for the whitespace hook; the JSON block is byte-exact.
+
+**The brief changed again, a change to the instrument (2026-10-20, Sonnet built the exploratory part's step 5; for
+Opus's review).** `experiment/readers/rejection.txt`, the `maps_to_shape` paragraph, the four changes §4.6.5 step 1
+item 7 lists, nothing else. **Reason:** the S3 rules of the exploratory record (a product-making facility, the
+plant's headcount as a source states it, a floor of 50, a public report as material). **No pending read uses the old
+text** (no `maps_to_shape` read is pending). The brief's sha256 in every later request record is the new one.
+`total-report.txt` (`CaseAppendix.total_report_path`; `material.rejection_material`) is sent as a third block on a
+`maps_to_shape` read when the file exists, and on no other read. Opus's review renamed that block "Public report" (it had
+said "of the facility's headcount", which is the reader's to judge), and let a carried row's rejection be read again
+past the pre-registered read in its folder (the exploratory plan's §9, step 5).
+
+**A rule for the press channel's rows, one decision judged once (2026-10-20, his, on Opus's review of the
+exploratory part's step 6).** The channel leaves out a filing already a candidate by its accession number, and the
+log's "one decision is one case" check compares accession numbers too. A decision announced in two filings (a press
+release under Item 7.01 or 8.01, then an Item 2.05 8-K, filed apart) would come in twice. A later press filing fails
+criterion 1 on the earlier one already; an earlier one would not. **Rule:** a press row that is the same decision as a
+candidate already listed fails criterion 1, with the reason "already a candidate: <id>"; the decision is judged once,
+on the earlier row. A different decision of the same company is checked as any row. To make the reading possible,
+`press-candidates.json` records, privately, each press row's earlier candidates from the same filer
+(`same_filer_as`, by CIK), and the command prints only how many there are. **His condition:** nothing here may cost
+a case the record could otherwise have. It does not: the decision is judged either way, on the same facts, and what
+the rule removes is the second count of it, which would not be a second case.

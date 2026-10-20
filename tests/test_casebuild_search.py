@@ -17,6 +17,9 @@ from horizon_compact.casebuild.search import (
     CRITERIA,
     EFTS_URL,
     FALLBACK_START,
+    PRESS_ID,
+    PRESS_PHRASES,
+    PRESS_QUERIES,
     QUERIES,
     WINDOW_START,
     K,
@@ -56,6 +59,7 @@ def raw_hit(
     form: str = "8-K",
     name: str = "Canary Cages Inc",
     document: str = "main.htm",
+    cik: str = "0009999999",
 ) -> dict[str, Any]:
     return {
         "_id": f"{adsh}:{document}",
@@ -65,7 +69,7 @@ def raw_hit(
             "file_date": filed,
             "items": ["2.05", "9.01"] if items is None else items,
             "sics": ["3990"] if sics is None else sics,
-            "ciks": ["0009999999"],
+            "ciks": [cik],
             "display_names": [name],
         },
     }
@@ -128,6 +132,39 @@ def test_the_filters_are_the_protocols() -> None:
     assert "2.05" in rows[1] and "2000-3999" in rows[1]
     assert "7.01" in rows[2] and "8.01" in rows[2]
     assert "any `items`" in rows[3]
+
+
+SEARCH_HALF = ROOT / "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md"
+
+
+def test_the_press_channel_is_step_2s_ten_phrases_one_query_each() -> None:
+    """Search-half doc §4.6.5 step 2 item 2, word for word and in order."""
+    assert PRESS_PHRASES == (
+        "close the facility",
+        "closure of the facility",
+        "close its facility",
+        "plant closure",
+        "close the plant",
+        "closure of the plant",
+        "cease production",
+        "consolidate production",
+        "closing the facility",
+        "closure of its",
+    )
+    doc = SEARCH_HALF.read_text(encoding="utf-8")
+    item = doc.split("2. **A new in-window channel, for plant closures")[1].split(
+        "Over the window"
+    )[0]
+    assert re.findall(r'"([^"]+)"', item.split("each its own query:")[1]) == list(PRESS_PHRASES)
+    assert [q.text for q in PRESS_QUERIES] == [f'"{phrase}"' for phrase in PRESS_PHRASES]
+    for query in PRESS_QUERIES:
+        assert (query.channel, query.type) == (4, "closure")
+        assert (query.items_any, query.sic_range) == (("7.01", "8.01"), (2000, 3999))
+
+
+def test_the_protocols_queries_do_not_hold_the_press_channel() -> None:
+    assert not {q.text for q in PRESS_QUERIES} & {q.text for q in QUERIES}
+    assert {q.channel for q in QUERIES} == {1, 2, 3}
 
 
 def test_the_dates_are_the_protocols() -> None:
@@ -351,6 +388,68 @@ def test_a_filing_in_two_types_is_a_candidate_in_each_and_channel_3_labels_the_c
     assert ai == {same: "other", "0009999999-26-000070": "other"}
     closure = result.pool("closure", "window")[0]
     assert closure.company_type == "manufacturing"
+
+
+def press_replies(by_query: dict[str, list[dict[str, Any]]]) -> dict[str, bytes]:
+    return {
+        search_url(q, FALLBACK_START, END, 0): page(
+            by_query.get(q.text, []), len(by_query.get(q.text, []))
+        )
+        for q in PRESS_QUERIES
+    }
+
+
+def test_the_press_search_names_its_rows_by_channel_leaves_out_what_is_already_a_candidate(
+    tmp_path: Path,
+) -> None:
+    seven = ["7.01", "9.01"]
+    already = "0009999999-26-000030"
+    window = raw_hit("0009999999-26-000040", "2026-09-02", items=seven)
+    replies = press_replies(
+        {
+            '"plant closure"': [
+                window,
+                raw_hit(already, "2026-08-20", items=seven),  # a pre-registered candidate
+                raw_hit("0009999999-26-000050", "2026-09-03", items=seven, sics=["6021"]),
+                raw_hit("0009999999-26-000010", "2026-07-15", items=seven),  # fallback month
+            ],
+            '"close the plant"': [window],  # the same filing, found by a second phrase
+            '"cease production"': [raw_hit("0009999999-26-000060", "2026-10-01", items=["8.01"])],
+        }
+    )
+    client, transport = client_for(tmp_path, replies)
+    result = run_search(
+        client,
+        SEARCH_DATE,
+        queries=PRESS_QUERIES,
+        id_prefix=PRESS_ID,
+        exclude=frozenset({already}),
+    )
+    assert len(transport.requests) == len(PRESS_QUERIES)
+    assert [(c.id, c.type, c.pool) for c in result.candidates] == [
+        ("press-f01", "closure", "fallback"),
+        ("press-01", "closure", "window"),
+        ("press-02", "closure", "window"),
+    ]
+    by_accession = {c.hit.accession: c for c in result.candidates}
+    assert by_accession["0009999999-26-000040"].found_by == ('"plant closure"', '"close the plant"')
+    assert result.record["candidates"] == {"press/window": 2, "press/fallback": 1}
+    plant = next(q for q in result.record["queries"] if q["query"] == '"plant closure"')
+    assert plant["dropped"] == {"already a candidate": 1, "no sic in 2000-3999": 1}
+
+
+def test_an_id_prefix_is_for_queries_of_one_type(tmp_path: Path) -> None:
+    client, _ = client_for(tmp_path, {})
+    with pytest.raises(SearchError, match="one type"):
+        run_search(client, SEARCH_DATE, queries=QUERIES, id_prefix="mixed")
+
+
+def test_the_protocols_search_names_its_rows_by_type_as_before(tmp_path: Path) -> None:
+    result, _, _ = a_search(tmp_path)
+    assert {c.id.rsplit("-", 1)[0] for c in result.candidates} == {"closure", "retool", "ai"}
+    assert set(result.record["candidates"]) == {
+        f"{t}/{pool}" for t in ("closure", "retool", "ai") for pool in ("window", "fallback")
+    }
 
 
 def test_a_search_with_misordered_dates_is_refused(tmp_path: Path) -> None:

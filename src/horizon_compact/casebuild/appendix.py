@@ -158,6 +158,15 @@ class CaseAppendix:
         all the reader is given. Private."""
         return self.directory / "total-search.txt"
 
+    @property
+    def total_report_path(self) -> Path:
+        """The public report that gives an S3 candidate's plant headcount (search-half doc §4.6.5 step 1
+        item 3): the report's text under a line naming its source and date, dated from the first disclosure
+        to 60 days after it. Placed by hand for the independent reader of a ``maps_to_shape`` rejection and
+        saved before the result is recorded, as ``total-search.txt`` is. Absent when the filings give the
+        total. Private."""
+        return self.directory / "total-report.txt"
+
     def probe_reads_path(self, probe_set: int) -> Path:
         """Every recognition-probe answer of one set and what he read in it (protocol §12.8); written by
         ``hc case probe-verdict``. Private: it holds the model's answers."""

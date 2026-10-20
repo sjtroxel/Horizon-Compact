@@ -14,6 +14,12 @@ import pytest
 
 from horizon_compact import cli
 from horizon_compact.casebuild.appendix import CaseAppendix
+from horizon_compact.casebuild.exploratory import (
+    ExploratoryLog,
+    newest_selection_log_name,
+    read_source_log,
+    write_exploratory_version,
+)
 from horizon_compact.casebuild.frozen import FrozenInputsError
 from horizon_compact.casebuild.scenario import render_case_scenario
 from horizon_compact.casebuild.search import Row, SelectionLog, write_log_version
@@ -30,7 +36,12 @@ from horizon_compact.reader.briefs import (
     load_brief,
 )
 from horizon_compact.reader.material import MaterialError
-from horizon_compact.reader.read import json_object, parse_reply
+from horizon_compact.reader.read import (
+    earlier_record_replies,
+    json_object,
+    parse_reply,
+    rejection_reply_on_record,
+)
 from test_casebuild_extract import PROVENANCE, ok
 from test_casebuild_frozen import COMMIT, fake_git
 from test_casebuild_scenario import ACCESSION, DISCLOSED, FACTOR, LABEL, make_case
@@ -284,7 +295,7 @@ def test_the_brief_asks_for_the_total_as_well_as_the_shape() -> None:
         "the fall in operating income the company expected before acting",
         "a savings or cost-reduction target",
         "quote in your reason the sentence that states the total",
-        "For S1 and S3 the total must be 167 or more",
+        "For S1 the total must be 167 or more; for S3, 50 or more",
         "a range is taken at its low end",
         "if the total is worked out from several figures, the sentences that state them",
         'With the shape, give the type of decision the excerpt describes: "ai" for S1',
@@ -292,6 +303,60 @@ def test_the_brief_asks_for_the_total_as_well_as_the_shape() -> None:
     ):
         assert words in shape, words
     assert "judge only whether that figure is the total" not in shape
+
+
+def test_the_brief_carries_the_s3_rules_of_the_exploratory_record() -> None:
+    """Search-half doc §4.6.5 step 1 item 7: the four changes to the `maps_to_shape` paragraph."""
+    text = (ROOT / "experiment/readers/rejection.txt").read_text(encoding="utf-8")
+    shape = text[text.index("maps_to_shape:") : text.index("not_recognizable: You")]
+    for words in (
+        "Here the facility must be one that makes products; a decision about a laboratory, an office, "
+        "a store, or a warehouse or distribution center on its own matches no shape.",
+        "S3: the number of employees at the facility named, as a source states it; a number of jobs or "
+        "positions cut, eliminated or affected is not it, and a decision that names more than one "
+        "facility has no S3 total.",
+        "For S1 the total must be 167 or more; for S3, 50 or more.",
+        "a search of the company's earlier filings and, for S3, any public report you are given "
+        "(a government notice, the company's later release or a news report); judge from the whole "
+        "report whether its number is the number of employees at the facility named.",
+    ):
+        assert words in shape, words
+    assert "For S1 and S3 the total must be 167 or more" not in shape
+
+
+def test_a_shape_read_is_also_given_the_public_report_when_the_case_has_one(tmp_path: Path) -> None:
+    case = rejected_candidate(tmp_path, "maps_to_shape")
+    case.total_search_path.write_text("EARLIER-FILING-CANARY\n", encoding="utf-8")
+    case.total_report_path.write_text(
+        "REPORT-CANARY: a state notice, 2026-05-20\n", encoding="utf-8"
+    )
+    sent = material.rejection_material(case, "maps_to_shape")
+    assert list(sent.parts) == [
+        "Excerpt",
+        "Search of the company's earlier filings",
+        "Public report",
+    ]
+    assert sent.user.endswith(
+        "[Public report]\nREPORT-CANARY: a state notice, 2026-05-20\n[end of Public report]"
+    )
+    # The block's name says what the material is, not that its number is the headcount: that is the read.
+    assert "headcount" not in sent.user
+    alone = material.rejection_material(
+        rejected_candidate(tmp_path / "b", "maps_to_shape"), "maps_to_shape"
+    )
+    assert list(alone.parts) == ["Excerpt"]
+
+
+def test_the_public_report_goes_to_a_shape_read_and_no_other_and_is_never_dropped(
+    tmp_path: Path,
+) -> None:
+    case = rejected_candidate(tmp_path, "maps_to_shape")
+    case.total_report_path.write_text("REPORT-CANARY\n", encoding="utf-8")
+    sent = material.rejection_material(case, "real_decision")
+    assert list(sent.parts) == ["Excerpt"] and "REPORT-CANARY" not in sent.user
+    case.total_report_path.write_text(" \n", encoding="utf-8")
+    with pytest.raises(MaterialError, match="the public report is empty"):
+        material.rejection_material(case, "maps_to_shape")
 
 
 @pytest.mark.parametrize("bad", ["first_disclosure", "nonsense"])
@@ -626,6 +691,40 @@ def test_a_usable_read_is_made_once(
     assert run_reader(monkeypatch, Replies(says(REJECT_FAIL)), *reject)[0] == CLEAN_EXIT
     capsys.readouterr()
     _refused(monkeypatch, capsys, case, reject, "was read already")
+
+
+def test_a_carried_row_rejected_again_gets_its_own_read_after_the_pre_registered_one(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """§4.6.5 B.2: a row carried into the exploratory log and rejected again at criterion 4 is read again,
+    though its folder still holds the pre-registered record's read of the earlier rejection. That read never
+    counts against the new one, never stands in for it, and its files are never written again."""
+    case = rejected_candidate(tmp_path, "maps_to_shape")
+    shape = ID, "rejection", "--criterion", "maps_to_shape"
+    fail = {**REJECT_FAIL, "criterion": "maps_to_shape", "shape": "S3", "type": "closure"}
+    assert run_reader(monkeypatch, Replies(says(fail)), *shape)[0] == CLEAN_EXIT
+    search = CaseAppendix(case.root, "search")
+    old = SelectionLog.from_text(
+        (search.directory / newest_selection_log_name(search)).read_text(encoding="utf-8")
+    )
+    first = rejection_reply_on_record(case, "maps_to_shape")
+    old.record_read(ID, "maps_to_shape", reply=first)
+    source = write_log_version(search, old)
+    log = ExploratoryLog()
+    log.carry(ID, read_source_log(search, source), source)
+    log.record(ID, "maps_to_shape", "fail", "a number of jobs cut, not the plant's headcount")
+    write_exploratory_version(search, log)
+    before = (case.directory / first.reply).read_bytes()
+    capsys.readouterr()
+    assert run_reader(monkeypatch, Replies(says(fail)), *shape)[0] == CLEAN_EXIT
+    assert (case.directory / "reader-rejection-maps_to_shape-2-reply.json").is_file()
+    assert (case.directory / first.reply).read_bytes() == before
+    earlier = earlier_record_replies(search, ID)
+    assert earlier == {first.reply}
+    again = rejection_reply_on_record(case, "maps_to_shape", earlier)
+    assert again.reply == "reader-rejection-maps_to_shape-2-reply.json"
+    # The new read is the one made once.
+    _refused(monkeypatch, capsys, case, shape, "was read already")
 
 
 def test_an_unusable_reply_is_recorded_and_a_later_attempt_is_allowed(

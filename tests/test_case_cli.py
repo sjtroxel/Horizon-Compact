@@ -32,6 +32,7 @@ from horizon_compact.casebuild.exploratory import (
     ExploratoryLog,
     ExploratoryRow,
     candidate_records,
+    load_newest_exploratory,
     newest_selection_log_name,
     read_source_log,
     row_for,
@@ -42,6 +43,7 @@ from horizon_compact.casebuild.scenario import _disclosure_failures
 from horizon_compact.casebuild.search import (
     CRITERIA,
     FALLBACK_START,
+    PRESS_QUERIES,
     QUERIES,
     RULE_DATE,
     LogError,
@@ -249,6 +251,180 @@ def test_a_late_search_needs_a_reason_and_keeps_the_rule_dates_window(
     assert record["run_on"] == late.isoformat() and record["deviation"] == "the SEC was down"
 
 
+# --- hc case search --channel press (exploratory IMPLEMENTATION doc, stage 1 step 6) ---------------------
+
+
+def _press_transport(
+    monkeypatch: pytest.MonkeyPatch, by_query: dict[str, list[dict[str, Any]]]
+) -> FakeTransport:
+    """Every press query answered: ``by_query`` maps a query's text to its hits, the others find nothing."""
+    from test_casebuild_search import page
+
+    end = RULE_DATE - timedelta(days=1)
+    replies = {
+        search_url(q, FALLBACK_START, end, 0): page(
+            by_query.get(q.text, []), len(by_query.get(q.text, []))
+        )
+        for q in PRESS_QUERIES
+    }
+    transport = FakeTransport(replies)
+    monkeypatch.setattr(cli, "UrllibTransport", lambda: transport)
+    return transport
+
+
+def _press_hits() -> dict[str, list[dict[str, Any]]]:
+    from test_casebuild_search import raw_hit
+
+    seven = ["7.01"]
+    return {
+        '"plant closure"': [
+            raw_hit("0009999999-26-000030", "2026-08-20", items=seven),  # closure-01's filing
+            raw_hit("0009999999-26-000040", "2026-09-02", items=seven),
+            raw_hit("0009999999-26-000010", "2026-07-15", items=seven),  # closure-f01's filing
+            raw_hit("0009999999-26-000020", "2026-07-22", items=seven),
+        ],
+        '"cease production"': [raw_hit("0009999999-26-000050", "2026-09-03", items=["2.05"])],
+    }
+
+
+def test_press_search_adds_exploratory_rows_and_leaves_out_filings_already_candidates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    before = sorted(p.name for p in folder.iterdir())
+    transport = _press_transport(monkeypatch, _press_hits())
+    assert main(["case", "search", "--channel", "press", "--date", RULE_DATE.isoformat()]) == 0
+    out = capsys.readouterr().out
+    assert "Canary" not in out and "0009999999" not in out
+    assert "press/window: 1 candidates" in out and "press/fallback: 1 candidates" in out
+    assert "2 already a candidate" in out  # closure-01's filing and closure-f01's
+    assert len(transport.requests) == len(PRESS_QUERIES)
+    record = json.loads((folder / "press-candidates.json").read_text())
+    assert record["channel"] == "press" and record["step"] == "2"
+    assert record["end"] == "2026-10-15" and record["run_on"] == "2026-10-16"
+    assert [(c["id"], c["type"], c["pool"]) for c in record["list"]] == [
+        ("press-f01", "closure", "fallback"),
+        ("press-01", "closure", "window"),
+    ]
+    assert [c["accession"] for c in record["list"]] == [
+        "0009999999-26-000020",
+        "0009999999-26-000040",
+    ]
+    added = sorted({p.name for p in folder.iterdir()} - set(before))
+    assert added == [
+        "exploratory-log-1.json",
+        "exploratory-public-1.json",
+        "press-candidates.json",
+    ]
+    log = load_newest_exploratory(CaseAppendix(root=tmp_path, label="search"))
+    assert {(r.id, r.step, r.pool, r.type) for r in log.rows.values()} == {
+        ("press-01", "2", "window", "closure"),
+        ("press-f01", "2", "fallback", "closure"),
+    }
+    # the pre-registered record is untouched, and the new rows are found as candidates
+    assert not (folder / "selection-log-2.json").exists()
+    records = candidate_records(CaseAppendix(root=tmp_path, label="search"))
+    assert records is not None and {"closure-01", "press-01", "press-f01"} <= records.keys()
+    public = json.dumps(log.public_view())
+    assert "0009999999" not in public and "Canary" not in public
+
+
+def test_press_search_rows_start_at_the_first_criterion_and_settle_the_list_at_criterion_4(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _log_setup(tmp_path, monkeypatch, capsys)
+    _press_transport(monkeypatch, _press_hits())
+    assert main(["case", "search", "--channel", "press", "--date", RULE_DATE.isoformat()]) == 0
+    capsys.readouterr()
+    assert _xlog("record", "press-01", "maps_to_shape", "pass", "--reason", "r") == REFUSED_EXIT
+    assert "first_disclosure" in capsys.readouterr().err
+    assert (
+        _xlog("record", "press-01", "first_disclosure", "pass", "--reason", "r",
+              "--disclosed", "2026-09-01") == CLEAN_EXIT
+    )  # fmt: skip
+    for criterion in ("public_and_filing", "inside_window", "real_decision"):
+        assert _xlog("record", "press-01", criterion, "pass", "--reason", "r") == CLEAN_EXIT
+    words = ["record", "press-01", "maps_to_shape", "pass", "--reason", "r", "--list", "retool"]
+    assert _xlog(*words) == CLEAN_EXIT
+
+
+def test_press_search_runs_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _press_transport(monkeypatch, _press_hits())
+    words = ["case", "search", "--channel", "press", "--date", RULE_DATE.isoformat()]
+    assert main(words) == CLEAN_EXIT
+    capsys.readouterr()
+    transport = _press_transport(monkeypatch, _press_hits())
+    before = sorted(p.name for p in folder.iterdir())
+    assert main(words) == REFUSED_EXIT
+    assert "already run" in capsys.readouterr().err
+    assert transport.requests == [] and sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_press_search_needs_the_search_to_have_run_and_refuses_a_deviation_or_another_day(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder, transport = _search_setup(tmp_path, monkeypatch, RULE_DATE)
+    words = ["case", "search", "--channel", "press", "--date", RULE_DATE.isoformat()]
+    assert main(words) == REFUSED_EXIT
+    assert "has not run" in capsys.readouterr().err
+    assert main([*words, "--deviation", "a reason"]) == REFUSED_EXIT
+    assert "pre-registered search" in capsys.readouterr().err
+    assert main(["case", "search", "--channel", "press", "--date", "2026-10-17"]) == REFUSED_EXIT
+    assert "is not today" in capsys.readouterr().err
+    assert transport.requests == [] and not folder.exists()
+
+
+def test_press_search_names_earlier_candidates_from_the_same_filer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A second filing of a decision already listed has another accession number, so it is not left out; the
+    record names the earlier candidates of the same company for criterion 1, and the screen counts them."""
+    from test_casebuild_search import raw_hit
+
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    hits = _press_hits()
+    hits['"close the plant"'] = [
+        raw_hit("0009999999-26-000070", "2026-09-10", items=["8.01"], cik="0008888888")
+    ]
+    _press_transport(monkeypatch, hits)
+    assert main(["case", "search", "--channel", "press", "--date", RULE_DATE.isoformat()]) == 0
+    out = capsys.readouterr().out
+    assert "2 share a filer with an earlier candidate" in out and "0008888888" not in out
+    record = json.loads((folder / "press-candidates.json").read_text())
+    ids = {c["accession"]: c["id"] for c in record["list"]}
+    other = ids["0009999999-26-000070"]
+    assert other not in record["same_filer_as"]  # another company: checked as any row
+    earlier = json.loads((folder / "candidates.json").read_text())["list"]
+    same = sorted(c["id"] for c in earlier if "0009999999" in c["ciks"])
+    assert same and record["same_filer_as"] == {
+        ids["0009999999-26-000020"]: same,
+        ids["0009999999-26-000040"]: same,
+    }
+
+
+def test_press_search_with_no_hits_writes_its_file_and_no_exploratory_log(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _press_transport(monkeypatch, {})
+    assert main(["case", "search", "--channel", "press", "--date", RULE_DATE.isoformat()]) == 0
+    assert "(no rows)" in capsys.readouterr().out
+    assert json.loads((folder / "press-candidates.json").read_text())["list"] == []
+    assert not list(folder.glob("exploratory-log-*.json"))
+
+
+def test_press_search_does_not_change_the_pre_registered_search(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder, transport = _search_setup(tmp_path, monkeypatch, RULE_DATE)
+    assert main(["case", "search", "--date", RULE_DATE.isoformat()]) == CLEAN_EXIT
+    assert len(transport.requests) == len(QUERIES)  # none of the press queries
+    assert not (folder / "press-candidates.json").exists()
+
+
 def test_the_rule_date_is_the_day_after_the_results_commit() -> None:
     assert date(2026, 10, 16) == RULE_DATE
 
@@ -363,12 +539,16 @@ def test_log_refuses_an_id_of_another_type(
 
 
 def _reply_on_disk(
-    folder: Path, reading: str, criterion: str = "real_decision", decision_type: str | None = None
+    folder: Path,
+    reading: str,
+    criterion: str = "real_decision",
+    decision_type: str | None = None,
+    attempt: int = 1,
 ) -> None:
     """A usable reader reply in closure-01's folder, as `hc case reader` writes it."""
     case = folder.parent / "closure-01"
     case.mkdir(exist_ok=True)
-    stem = case / f"reader-rejection-{criterion}-1"
+    stem = case / f"reader-rejection-{criterion}-{attempt}"
     Path(f"{stem}-request.json").write_text(json.dumps({"material_sha256": {}}), encoding="utf-8")
     parsed = {"reading": reading, "type": decision_type}
     reply = {"usable": True, "parsed": parsed, "estimated_usd": "0.01"}
@@ -1088,7 +1268,7 @@ def _rejected_on_the_shape_in_the_pre_registered_log(folder: Path) -> None:
     assert _log("closure", "read", "closure-01", "maps_to_shape") == CLEAN_EXIT
 
 
-def test_xlog_read_refuses_the_pre_registered_records_read_of_an_earlier_rejection(
+def test_xlog_read_passes_over_the_pre_registered_records_read_and_takes_the_new_one(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     folder = _xlog_setup(tmp_path, monkeypatch, capsys)
@@ -1097,9 +1277,13 @@ def test_xlog_read_refuses_the_pre_registered_records_read_of_an_earlier_rejecti
     assert _xlog("record", "closure-01", "maps_to_shape", "fail", "--reason", "still none") == 0
     capsys.readouterr()
     before = sorted(p.name for p in folder.iterdir())
+    # The old reply is passed over, so there is no read of this rejection yet.
     assert _xlog("read", "closure-01", "maps_to_shape") == REFUSED_EXIT
-    assert "pre-registered record's read" in capsys.readouterr().err
+    assert "no usable read" in capsys.readouterr().err
     assert sorted(p.name for p in folder.iterdir()) == before
+    _reply_on_disk(folder, "fail", "maps_to_shape", attempt=2)
+    assert _xlog("read", "closure-01", "maps_to_shape") == CLEAN_EXIT
+    assert "from reader-rejection-maps_to_shape-2-reply.json" in capsys.readouterr().out
 
 
 def test_the_selection_log_is_closed_to_changes_once_the_exploratory_log_exists(

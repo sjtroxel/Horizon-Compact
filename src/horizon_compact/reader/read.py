@@ -285,14 +285,23 @@ def _same_material(kind: str, attempts: list[Attempt], parts: dict[str, str]) ->
     return [a for a in attempts if a.material is None or a.material == parts]
 
 
-def _check_attempts(kind: str, name: str, attempts: list[Attempt], parts: dict[str, str]) -> int:
-    """The next attempt's number, after the once-only rule's refusals."""
+def _check_attempts(
+    kind: str,
+    name: str,
+    attempts: list[Attempt],
+    parts: dict[str, str],
+    earlier: frozenset[str] = frozenset(),
+) -> int:
+    """The next attempt's number, after the once-only rule's refusals. ``earlier`` names replies of the
+    pre-registered record's reads of a carried row: the rule does not count them, but the number follows
+    them, so no file of theirs is written again."""
     if any(a.has_request and not a.has_reply for a in attempts):
         raise ReaderError(
             f"{name} has a request record with no reply record (a call that never returned): look in the "
             "case's folder before reading again"
         )
-    same = _same_material(kind, attempts, parts)
+    counted = [a for a in attempts if _reply_name(name, a.number) not in earlier]
+    same = _same_material(kind, counted, parts)
     if any(a.usable for a in same):
         what = "" if kind == "rejection" else ", as it stands,"
         raise ReaderError(f"{name}{what} was read already: a read is made once")
@@ -390,6 +399,14 @@ def rejection_ready(search: CaseAppendix, candidate: str, criterion: str) -> str
     return row.type
 
 
+def earlier_record_replies(search: CaseAppendix, candidate: str) -> frozenset[str]:
+    """The reply files of the pre-registered record's reads of a carried row (§4.6.5 B.2). They are still in
+    the case's folder and are reads of a different rejection: criterion 4 is recorded again under the
+    exploratory rules and needs its own read."""
+    row = _row_of_record(search, candidate)
+    return row.prior_replies if isinstance(row, ExploratoryRow) else frozenset()
+
+
 def probe_read_ready(search: CaseAppendix, candidate: str) -> str | None:
     """A criterion 5 read comes before the log's result (a first-set failure is not yet a rejection: it is
     coarsened unless the reader disputes it), so the log need not hold a fail. It must not already hold a
@@ -428,18 +445,20 @@ def run_read(
     brief: Brief = load_brief(repo_root, kind)
     name = stem(kind, criterion, probe_set)
     candidate_type: str | None = None
+    earlier: frozenset[str] = frozenset()
     if kind == "rejection":
         assert criterion is not None
         if criterion == materials.PROBE_CRITERION:
             candidate_type = probe_read_ready(search, case.label)
         else:
             candidate_type = rejection_ready(search, case.label, criterion)
+            earlier = earlier_record_replies(search, case.label)
         material = materials.rejection_material(case, criterion, probe_set)
     elif kind == "scenario":
         material = materials.scenario_material(case, repo_root)
     else:
         material = materials.rubric_material(case)
-    attempt = _check_attempts(kind, name, attempts_on_record(case, name), material.parts)
+    attempt = _check_attempts(kind, name, attempts_on_record(case, name), material.parts, earlier)
     request = TextRequest(
         route=reader_route(key, config),
         system=brief.text,
@@ -576,11 +595,14 @@ def reply_material(reply_path: Path) -> dict[str, str] | None:
     return parts if isinstance(parts, dict) else None
 
 
-def rejection_reply_on_record(case: CaseAppendix, criterion: str) -> ReaderReply:
+def rejection_reply_on_record(
+    case: CaseAppendix, criterion: str, earlier: frozenset[str] = frozenset()
+) -> ReaderReply:
     """The usable reply ``hc case log ... read`` logs a rejection's read from: its file, sha256 and
     reading. Refused when no usable read exists, so a read cannot be logged that was never made. For
     criterion 5 it is the reply for the newest probe set with flagged answers: the log holds the candidate's
-    final probe outcome, and an earlier set's reply never stands in for a later set not yet read."""
+    final probe outcome, and an earlier set's reply never stands in for a later set not yet read. A reply
+    named in ``earlier`` (``earlier_record_replies``) is never the one returned."""
     if criterion not in materials.READ_CRITERIA:
         raise ReaderError(f"{criterion!r} is not a criterion the reader reads")
     if criterion == materials.PROBE_CRITERION:
@@ -598,7 +620,7 @@ def rejection_reply_on_record(case: CaseAppendix, criterion: str) -> ReaderReply
             f"{case.label} has no usable read of its {criterion} rejection: run `hc case reader` first"
         )
     name = stem("rejection", criterion)
-    found_reads = _usable_reads(case, name)
+    found_reads = [(a, p) for a, p in _usable_reads(case, name) if p.name not in earlier]
     if not found_reads:
         raise ReaderError(
             f"{case.label} has no usable read of its {criterion} rejection: run `hc case reader` first"

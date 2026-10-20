@@ -7,7 +7,30 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-20, about 12:55 PM (STAGE 1 STEPS 1-4 BUILT AND REVIEWED; STEP 5 NEXT)
+> ## START HERE — where things stand, 2026-10-20, about 3:15 PM, HANDOFF (STAGE 1 BUILT AND REVIEWED; STAGE 2 NEXT)
+>
+> **Measured:** last commit `c42dab0` (step 4, pushed). `make check` green, 2627 tests. **Uncommitted, for his one
+> commit closing stage 1:** step 5 (the brief's four changes, the public-report material, a carried row's rejection
+> readable again) and step 6 (the press channel), each with its Opus review applied: `experiment/readers/rejection.txt`,
+> `casebuild/appendix.py`, `exploratory.py`, `search.py`, `cli.py`, `reader/material.py`, `reader/read.py`, three test
+> files, both phase-5 IMPLEMENTATION docs, ROADMAP and this file. His commands, one at a time: `git add -A`, then `git
+> commit -m "phase 5: reader brief, press channel"`, then `git push`. **The push comes before stage 2's first reader
+> call**, because the brief's sha256 changed.
+>
+> **Step 6's review added one rule (his, search-half doc §11, 2026-10-20):** a press row that is the same decision as a
+> candidate already listed fails criterion 1 as "already a candidate: <id>". `press-candidates.json` names each press
+> row's earlier candidates from the same filer (`same_filer_as`), and the command prints only their count.
+>
+> **Next: stage 2** (plan §3, steps 7 to 9), Opus with him, reads at 1 to 3 cents each: carry the ten S3 rows (`hc case
+> xlog carry`), record each one's criterion 4 under step 1, with the public-report search first where the filings give
+> no plant headcount, and the report saved before the result is recorded; then his one command, `hc case search
+> --channel press --date <that day>`, and its rows through criteria 1 to 4. **Open, his:** the one OpenRouter top-up,
+> due at stage 3's first scenario read, not before (plan §4); and, from step 4, whether a correct small-S3 build that
+> fails the pay check needs a code change now (recommended: no; §12.6's fix-and-rebuild path covers it).
+>
+> *The 12:55 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-20, about 12:55 PM (STAGE 1 STEPS 1-4 BUILT AND REVIEWED; STEP 5 NEXT)
 >
 > **Measured:** last commit `4d6fca0` (steps 2 and 3). `make check` green, 2611 tests; `hc scenarios check` ok, so
 > Phase 4's S3 and the tag's hash are unchanged. **Uncommitted:** step 4 (the S3 case form) with its review's three

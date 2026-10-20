@@ -69,6 +69,9 @@ from horizon_compact.casebuild.scenario import (
 from horizon_compact.casebuild.search import (
     CRITERIA,
     ISO_DATE,
+    PRESS_CANDIDATES,
+    PRESS_ID,
+    PRESS_QUERIES,
     READ_REQUIRED,
     RULE_DATE,
     TYPES,
@@ -81,6 +84,7 @@ from horizon_compact.casebuild.search import (
     load_newest_log,
     read_agrees,
     run_search,
+    same_filer,
     write_candidates,
     write_log_version,
 )
@@ -1534,8 +1538,73 @@ def _today() -> date:
     return date.today()
 
 
+def cmd_case_search_press(args: argparse.Namespace) -> int:
+    """Step 2's channel (search-half doc §4.6.5 step 2 item 2), once: plant closures announced outside
+    Item 2.05, over the search's own dates. Writes ``press-candidates.json`` and adds each hit to the
+    exploratory log as a step 2 row (criteria from the first; the list is settled at criterion 4). Prints
+    counts only."""
+    today = _today()
+    if args.date != today:
+        raise SearchError(f"--date {args.date.isoformat()} is not today ({today.isoformat()})")
+    if today < RULE_DATE:
+        raise SearchError(f"the press channel runs after {RULE_DATE.isoformat()}, not before")
+    if args.deviation:
+        raise SearchError(
+            "--deviation is for the pre-registered search; the press channel has none"
+        )
+    case = open_case("search")
+    if (case.directory / PRESS_CANDIDATES).exists():
+        raise SearchError(
+            f"the press channel has already run: {PRESS_CANDIDATES} exists, and it runs once"
+        )
+    already = candidate_records(case)
+    if already is None:
+        raise SearchError(
+            "candidates.json is not there: the search has not run, and this channel leaves out its filings"
+        )
+    log = load_newest_exploratory(case)
+    client = EdgarClient(appendix=case, transport=UrllibTransport(), user_agent=sec_user_agent())
+    result = run_search(
+        client,
+        RULE_DATE,
+        queries=PRESS_QUERIES,
+        id_prefix=PRESS_ID,
+        exclude=frozenset(str(c["accession"]) for c in already.values()),
+    )
+    shared = same_filer(result.candidates, already)
+    record = {
+        **result.record,
+        "run_on": today.isoformat(),
+        "channel": PRESS_ID,
+        "step": "2",
+        "same_filer_as": shared,
+    }
+    write_candidates(case, dataclasses.replace(result, record=record), PRESS_CANDIDATES)
+    for candidate in result.candidates:
+        log.add(candidate.id, candidate.type, "2", candidate.pool, candidate.hit.accession)
+    log_name = write_exploratory_version(case, log) if result.candidates else None
+    print(f"press channel: window to {result.end.isoformat()}, run on {today.isoformat()}")
+    for query in record["queries"]:
+        dropped = ", ".join(f"{n} {why}" for why, n in sorted(query["dropped"].items())) or "none"
+        print(
+            f"  {query['query']}: {query['total']} documents, "
+            f"{query['pages']} pages, {query['filings_kept']} filings kept; dropped: {dropped}"
+        )
+    for key, count in record["candidates"].items():
+        print(f"  {key}: {count} candidates")
+    print(
+        f"  {len(shared)} share a filer with an earlier candidate (same_filer_as): at criterion 1, one "
+        "that is the same decision fails as already a candidate"
+    )
+    wrote = f"{PRESS_CANDIDATES} and {log_name}" if log_name else f"{PRESS_CANDIDATES} (no rows)"
+    print(f"written: {wrote} in the appendix's search folder")
+    return CLEAN_EXIT
+
+
 def cmd_case_search(args: argparse.Namespace) -> int:
     """The search of protocol §12.3, once (search-half IMPLEMENTATION doc §4.4). Prints counts only."""
+    if args.channel == "press":
+        return cmd_case_search_press(args)
     today = _today()
     if args.date != today:
         raise SearchError(f"--date {args.date.isoformat()} is not today ({today.isoformat()})")
@@ -1758,7 +1827,9 @@ def cmd_case_xlog(args: argparse.Namespace) -> int:
         )
         what = f"{args.criterion} {args.result}"
     else:
-        reply = rejection_reply_on_record(open_case(args.id), args.criterion)
+        row = log.rows.get(args.id)
+        earlier = row.prior_replies if row is not None else frozenset()
+        reply = rejection_reply_on_record(open_case(args.id), args.criterion, earlier)
         log.record_read(args.id, args.criterion, reply=reply, resolution=args.resolution)
         verdict = "agrees" if reply.reading != "pass" else "disputes"
         what = f"read of {args.criterion}: {reply.reading} ({verdict}), from {reply.reply}"
@@ -2455,6 +2526,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--date", type=date.fromisoformat, required=True, help="today's date, YYYY-MM-DD"
     )
     search.add_argument("--deviation", help="the reason, if the search runs after the rule date")
+    search.add_argument(
+        "--channel",
+        choices=("press",),
+        default=None,
+        help="press: step 2's channel for plant closures outside Item 2.05 (search-half doc §4.6.5), run "
+        "once after the search; its hits join the exploratory log. Omit for the pre-registered search.",
+    )
     build = case_actions.add_parser(
         "build",
         help="Build a case's sections once from its candidate's pre-cut-off filings: fetches the SEC, calls "

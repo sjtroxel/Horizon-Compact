@@ -8,7 +8,9 @@ this module imports nothing that holds a result (``tests/test_architecture.py`` 
 * ``rejection``: the criterion and the candidate's first-disclosure excerpt, placed by hand in the case's
   folder. Not the drafter's reason, not the recorded result: an independent read starts blind. A
   ``maps_to_shape`` read is also given the search of the case's earlier filings for the scenario's total
-  (``total-search.txt``, §4.6.2 A.3) when the case has one.
+  (``total-search.txt``, §4.6.2 A.3) and, for an S3 total, the public report about the plant
+  (``total-report.txt``, §4.6.5 step 1 item 3) when the case has them. The report's block is named only
+  "Public report": whether its number is the plant's headcount is the reader's to judge.
 * ``scenario``: the shape's template, the rendered scenario, what the render dropped and set, and a table of
   where each figure came from. Not the unscaled values, the scaling factor or an accession number (the table
   numbers the filings 1, 2, ... in order of first use); the factor, the hashes and the pay-per-head check are
@@ -168,6 +170,13 @@ def rejection_material(
             (
                 "Search of the company's earlier filings",
                 _read_text(case.total_search_path, "the search of earlier filings"),
+            )
+        )
+    if criterion == "maps_to_shape" and case.total_report_path.exists():
+        blocks.append(
+            (
+                "Public report",
+                _read_text(case.total_report_path, "the public report"),
             )
         )
     return _assemble("rejection", criterion, blocks)

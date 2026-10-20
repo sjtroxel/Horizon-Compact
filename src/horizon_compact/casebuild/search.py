@@ -97,6 +97,27 @@ def _queries() -> tuple[Query, ...]:
 
 QUERIES = _queries()
 
+# Step 2's channel (search-half doc §4.6.5 step 2 item 2): plant closures announced outside Item 2.05, one
+# query per phrase, as data. Not in QUERIES: protocol §12.3's table stays as written, and a test compares it.
+# Every hit is typed ``closure`` here and the list is settled at criterion 4 (step 1 item 1).
+PRESS_PHRASES = (
+    "close the facility",
+    "closure of the facility",
+    "close its facility",
+    "plant closure",
+    "close the plant",
+    "closure of the plant",
+    "cease production",
+    "consolidate production",
+    "closing the facility",
+    "closure of its",
+)
+PRESS_QUERIES = tuple(
+    Query(4, "closure", f'"{phrase}"', ("7.01", "8.01"), MANUFACTURING) for phrase in PRESS_PHRASES
+)
+PRESS_ID = "press"  # ids press-01 on, press-f01 on for the fallback month
+PRESS_CANDIDATES = "press-candidates.json"
+
 
 # --- one query, every page ----------------------------------------------------------------------------------
 
@@ -283,13 +304,20 @@ def run_search(
     queries: Sequence[Query] = QUERIES,
     window_start: date = WINDOW_START,
     fallback_start: date = FALLBACK_START,
+    id_prefix: str | None = None,
+    exclude: frozenset[str] = frozenset(),
 ) -> SearchResult:
     """Run every query, read every page, filter in code, union by accession number within a type, and hold the
-    fallback month's hits apart. ``search_date`` is the day of the search; dates run to the day before."""
+    fallback month's hits apart. ``search_date`` is the day of the search; dates run to the day before.
+    ``id_prefix`` names the ids by the channel instead of the type (step 2's ``press-01``), for queries of one
+    type; ``exclude`` is the accession numbers already candidates, left out and counted as dropped."""
     if not fallback_start < window_start < search_date:
         raise SearchError(
             "the dates must run fallback start, window start, search date, in that order"
         )
+    kinds = TYPES if id_prefix is None else tuple(dict.fromkeys(q.type for q in queries))
+    if id_prefix is not None and len(kinds) != 1:
+        raise SearchError("an id prefix is for queries of one type")
     end = search_date - timedelta(days=1)
     found: dict[tuple[str, str], tuple[Hit, list[str]]] = {}
     per_query: list[dict[str, Any]] = []
@@ -299,6 +327,8 @@ def run_search(
         kept: set[str] = set()
         for hit in hits:
             reason = filter_reason(query, hit, fallback_start, end)
+            if reason is None and hit.accession in exclude:
+                reason = "already a candidate"
             if reason is not None:
                 dropped[reason] = dropped.get(reason, 0) + 1
                 continue
@@ -310,7 +340,7 @@ def run_search(
             {**record, "documents_read": len(hits), "filings_kept": len(kept), "dropped": dropped}
         )
     candidates: list[Candidate] = []
-    for case_type in TYPES:
+    for case_type in kinds:
         ordered = sorted(
             ((hit, queries_) for (kind, _), (hit, queries_) in found.items() if kind == case_type),
             key=lambda pair: (pair[0].file_date, pair[0].accession),
@@ -322,7 +352,7 @@ def run_search(
             number = f"{counts[pool]:02d}"
             candidates.append(
                 Candidate(
-                    id=f"{case_type}-{'f' if pool == 'fallback' else ''}{number}",
+                    id=f"{id_prefix or case_type}-{'f' if pool == 'fallback' else ''}{number}",
                     type=case_type,
                     pool=pool,
                     hit=hit,
@@ -337,10 +367,10 @@ def run_search(
         "window_start": window_start.isoformat(),
         "queries": per_query,
         "candidates": {
-            f"{case_type}/{pool}": sum(
+            f"{id_prefix or case_type}/{pool}": sum(
                 1 for c in candidates if (c.type, c.pool) == (case_type, pool)
             )
-            for case_type in TYPES
+            for case_type in kinds
             for pool in POOLS
         },
         "order": "filing date, then accession number; first-disclosure dating is a person's, per candidate",
@@ -348,11 +378,30 @@ def run_search(
     return SearchResult(search_date, fallback_start, end, tuple(candidates), summary)
 
 
-def write_candidates(case: CaseAppendix, result: SearchResult) -> None:
-    """``candidates.json`` in the appendix, once: names and accession numbers, private."""
+def same_filer(
+    candidates: Sequence[Candidate], earlier: Mapping[str, Mapping[str, Any]]
+) -> dict[str, list[str]]:
+    """Each new candidate's earlier candidates from the same company (a shared CIK), by id; a candidate with
+    none is left out. One decision can come in a second filing, which leaving out an accession number does
+    not catch; whether it is the same decision is a person's reading at criterion 1 (search-half doc §11,
+    2026-10-20)."""
+    found: dict[str, list[str]] = {}
+    for candidate in candidates:
+        ciks = set(candidate.hit.ciks)
+        ids = sorted(i for i, c in earlier.items() if ciks & {str(k) for k in c.get("ciks", [])})
+        if ids:
+            found[candidate.id] = ids
+    return found
+
+
+def write_candidates(
+    case: CaseAppendix, result: SearchResult, name: str = "candidates.json"
+) -> None:
+    """``candidates.json`` (or the press channel's ``press-candidates.json``) in the appendix, once: names and
+    accession numbers, private."""
     record = {**result.record, "list": [c.record() for c in result.candidates]}
     case.write_once(
-        case.directory / "candidates.json",
+        case.directory / name,
         (json.dumps(record, indent=2, ensure_ascii=False) + "\n").encode("utf-8"),
     )
 
