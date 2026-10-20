@@ -7,7 +7,21 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-19, about 1:15 PM, HANDOFF (§4.6.5 ADOPTED; THE EXPLORATORY BUILD PLAN AWAITS HIS APPROVAL)
+> ## START HERE — where things stand, 2026-10-20, about 8:40 AM (THE EXPLORATORY BUILD PLAN APPROVED; STAGE 1 NEXT)
+>
+> **Measured:** last commit `1f8c7e5` (pushed). **Decided this morning (his):** the exploratory plan
+> (`phase-5-case-building-exploratory-IMPLEMENTATION.md`) approved, all three §6 decisions as recommended: `hc case
+> xlog`; step 3 opens early if fewer than five rows pass criterion 4 in stage 2; Sonnet builds stage 1, Opus reviews
+> each diff. §11's 2026-10-18 entries stay as written. **Uncommitted, docs only:** the plan's status and §6, ROADMAP,
+> this block.
+>
+> **Next:** his commit (`git add docs && git commit -m "phase 5: exploratory plan approved"`), his push, then stage 1,
+> step 1, in a Sonnet session. Stage 1 spends nothing. **Still open, his:** the one OpenRouter top-up, due at stage 3's
+> first scenario read, not before (plan §4).
+>
+> *The 1:15 PM block below is superseded on what is next; its record stands.*
+>
+> ## START HERE — where things stood, 2026-10-19, about 1:15 PM, HANDOFF (§4.6.5 ADOPTED; THE EXPLORATORY BUILD PLAN AWAITS HIS APPROVAL)
 >
 > **Measured at handoff:** last commit `2b4549f` (pushed); no code changed today; `make check` green, 2532 tests (run
 > at handoff). **Uncommitted, docs only, for his one commit:** the search-half doc (§4.6.5, dated notes on §4.6.3 and

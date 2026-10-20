@@ -433,6 +433,16 @@ class Row:
     results: dict[str, Result] = field(default_factory=dict)
     reads: dict[str, Read] = field(default_factory=dict)
 
+    @property
+    def criteria(self) -> tuple[str, ...]:
+        """The criteria in the order this row meets them; the exploratory record adds one for some rows."""
+        return CRITERIA
+
+    @property
+    def read_required(self) -> tuple[str, ...]:
+        """The criteria whose rejection the independent reader must read."""
+        return READ_REQUIRED
+
     def disputed(self, criterion: str) -> bool:
         """A rejection the independent reader disputes does not stand (§12.4): the candidate goes on to the
         next criterion. The fail and its reason stay in ``results``, beside the read and his resolution."""
@@ -453,7 +463,7 @@ class Row:
         return next(
             (
                 c
-                for c in CRITERIA
+                for c in self.criteria
                 if c in self.results and self.results[c].result == "fail" and not self.disputed(c)
             ),
             None,
@@ -463,14 +473,14 @@ class Row:
     def passed(self) -> bool:
         """Every criterion met (passed, or a rejection disputed). Not the same as being a case: only the
         first k in order are (§12.4)."""
-        return all(self.met(c) for c in CRITERIA)
+        return all(self.met(c) for c in self.criteria)
 
     @property
     def awaiting_read(self) -> str | None:
         """A rejection on criterion 3, 4 or 5 with no independent read yet. A dispute would let the candidate
         go on, so until the read is in, its rejection is not final."""
         failed = self.failed
-        return failed if failed in READ_REQUIRED and failed not in self.reads else None
+        return failed if failed in self.read_required and failed not in self.reads else None
 
     @property
     def finished(self) -> bool:

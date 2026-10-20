@@ -1,8 +1,8 @@
 # Phase 5 — Case Building, exploratory part: IMPLEMENTATION (v0.5)
 
 > **IMPLEMENTATION doc, exploratory part. Written 2026-10-19 (Opus, about 1:00 PM CDT), immediately after the
-> search-half doc's §4.6.5 was adopted (his, about 12:50 PM, after the independent reader's read). DRAFT: awaiting his
-> approval, with the three decisions in §6.** This doc is the build plan for §4.6.5; the rules themselves are in
+> search-half doc's §4.6.5 was adopted (his, about 12:50 PM, after the independent reader's read). APPROVED 2026-10-20
+> (his, about 8:35 AM), all three decisions in §6 as recommended.** This doc is the build plan for §4.6.5; the rules themselves are in
 > §4.6.5 and are pointed to here, not restated. Sources: the search-half doc (`phase-5-case-building-search-IMPLEMENTATION.md`)
 > §4.1, §4.3, §4.6 to §4.6.5, §4.8, §4.9 and Stage D; the code as read 2026-10-19 (`casebuild/search.py`,
 > `casebuild/scenario.py`, `reader/material.py`, `cli.py`, `analysis/matcher.py`); `KNOWN-GAPS.md`'s OPEN entries of
@@ -48,7 +48,7 @@ built. The rules are §4.6.5 of the search-half doc. Where things stand today is
 
 ### Stage 1: the code (Sonnet builds, Opus reviews each diff; no model call, no cash)
 
-1. **The exploratory log** (`casebuild/exploratory.py`, new, reusing `search.py`'s `Row`, `Result` and `Read`;
+1. **[done 2026-10-20, Sonnet built, Opus reviewed, two fixes applied] The exploratory log** (`casebuild/exploratory.py`, new, reusing `search.py`'s `Row`, `Result` and `Read`;
    `search.py`'s pre-registered log unchanged). Rows carried from `selection-log-633.json` by id, each with that file's
    name and sha256 (§4.6.5 B.2); criteria per row (a carried or in-window row: §12.4's, as now; a pool row: `not_known`
    added after `maps_to_shape`); **one order across types** (D.1); per type the first k that pass, the fill of a short
@@ -163,6 +163,9 @@ which no one compared against his cap at the time; this rule is why.
      for routine implementation, at medium effort; Opus does the judgment steps of stages 2 and 3 with him.
    - (b) Opus throughout: more careful on routine code, and much heavier on his usage limits.
 
+**Decided 2026-10-20 (his): 1(a), 2(a), 3(a).** §11's 2026-10-18 entries stay as written (his, the same morning);
+past commits are public either way.
+
 ## 7. Definition of done
 
 | # | Done when | Proof |
@@ -186,4 +189,27 @@ which no one compared against his cap at the time; this rule is why.
 
 ## 9. As built
 
-Nothing yet.
+**Step 1 (2026-10-20, Sonnet built; Opus reviewed, high effort).** `casebuild/exploratory.py` and `tests/test_casebuild_exploratory.py`
+(30 tests after the review; `make check` green, 2562). `search.py` changed by two read-only properties on `Row` (`criteria`,
+`read_required`) that the new row type overrides; the pre-registered log behaves as before. Choices the plan did not
+fix, for the review: (1) the file is an **event list** replayed through the code that took each change, with the
+step's `not_known` criterion only on step 3 and 4 rows; (2) a **carried row stores no results**, only the source log's
+name and sha256, and the replay reads them from that file (a changed source is refused); (3) **the list a row is on is
+settled at `maps_to_shape`** (`case_type` on that record), and a disputed `maps_to_shape` read that names a type sets it
+(there is no list to fail on in this record, so the selection log's "a pass of another type agrees" does not apply);
+(4) **selection** holds a type open at its first unfinished row before its k-th case, fills a short type's slots from
+the first passing unselected rows in order, and waits at the first unfinished row if any type is open or the fill meets
+one; (5) **checking stops** by refusing a result for a row ordered after the fifth case, so a step 3 row checked ahead
+is allowed until five exist. Not built: any way to `add` rows from a candidate file (press, pool, late), which needs
+step 6 and stage 4's files; step 2 (`hc case xlog`) is next.
+
+*The review (Opus) found two faults, both fixed, with tests:* (a) **a complete selection could change.** An unfinished
+row held open only its provisional type, but its list is settled only at `maps_to_shape`, so a row added as closure
+that turned out a retool could displace a retool case already reported complete (reproduced, D.4). Now a row whose
+list is not settled holds every type not yet full; once settled, only its own. A consequence, which D.3 already says:
+a type is not short while any unchecked row could still be of it, so opening step 3 early (decision 2) delays the
+fill until its rows are checked, without changing which rows are cases. (b) **A carried read could be changed** in the
+new log (a disputed rejection turned into one that stands); a read of a carried criterion is now refused. *Open, for
+stage 4:* step 3 item 6's rows (closure-f04, and closure-18 if its date falls inside), which failed the first-disclosure
+check and join the pool "as if filed on that date", fit neither `carry` (it needs every criterion before criterion 4
+met) nor the pool's order (by id); they need their own event when stage 4 is built.
