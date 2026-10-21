@@ -16,6 +16,8 @@ from typing import Any
 from horizon_compact.casebuild.frozen import FrozenInputsError, Git
 
 KINDS = ("rejection", "scenario", "rubric")
+# A rejection on this criterion is read with its own brief (step 3 item 4); the three above are unchanged.
+CRITERION_BRIEFS = {"not_known": "knowledge"}
 BRIEFS_DIR = "experiment/readers"
 FROZEN_PATHS = (BRIEFS_DIR, "experiment/models.toml", "src/horizon_compact/reader")
 
@@ -32,19 +34,20 @@ class Brief:
     sha256: str
 
 
-def load_brief(root: Path, kind: str) -> Brief:
+def load_brief(root: Path, kind: str, criterion: str | None = None) -> Brief:
     if kind not in KINDS:
         raise BriefError(f"{kind!r} is not a kind of read: {', '.join(KINDS)}")
-    path = root / BRIEFS_DIR / f"{kind}.txt"
+    name = CRITERION_BRIEFS.get(criterion or "", kind) if kind == "rejection" else kind
+    path = root / BRIEFS_DIR / f"{name}.txt"
     try:
         data = path.read_bytes()
         text = data.decode("utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         raise BriefError(
-            f"the {kind} brief cannot be read: {path.name} ({type(exc).__name__})"
+            f"the {name} brief cannot be read: {path.name} ({type(exc).__name__})"
         ) from exc
     if not text.strip():
-        raise BriefError(f"the {kind} brief is empty: {path.name}")
+        raise BriefError(f"the {name} brief is empty: {path.name}")
     return Brief(kind=kind, name=path.name, text=text, sha256=hashlib.sha256(data).hexdigest())
 
 

@@ -4,7 +4,7 @@
 > about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** **Patched 2026-10-16 (his): §4.6.1, the case scenario
 > is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** **Patched
 > 2026-10-17 (his), after the independent reader's read: §4.6.2, the total in criterion 4 and a search hit
-> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** **Patched 2026-10-19 (his), after the reader's read: §4.6.5, exploratory cases after the pre-registered rule found none; their build is planned in `phase-5-case-building-exploratory-IMPLEMENTATION.md`.** **Patched 2026-10-21 (his), with no independent read: §4.6.6, a correct small S3 build passes the pay-per-head check.** **Patched 2026-10-21 (his), on Opus's review of the exploratory part's 3b: §4.6.5 step 3 item 4, reasoning is read as the answer and the build asks the probe's question.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** **Patched 2026-10-19 (his), after the reader's read: §4.6.5, exploratory cases after the pre-registered rule found none; their build is planned in `phase-5-case-building-exploratory-IMPLEMENTATION.md`.** **Patched 2026-10-21 (his), with no independent read: §4.6.6, a correct small S3 build passes the pay-per-head check.** **Patched 2026-10-21 (his), on Opus's review of the exploratory part's 3b: §4.6.5 step 3 item 4, reasoning is read as the answer and the build asks the probe's question; later the same day, a reply that is not an answer is read for what it holds, and an empty one is replaced.; and, on the review of 3c, the reduction question's own words are not a reply's, and a call empty three times fails by rule.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -691,6 +691,27 @@ channel was written after the pre-registered ones found nothing.
    reasoning of every such reply, an "unknown" one included. (b) **The build asks the probe's question.** A probed
    row is built only as a shape its probe asked about: S3 as S3, S1 or S2 as S1 or S2 (one message), never S4
    (none); `hc case build` reads the shape from the probe's request records and refuses any other (§11).*
+   *Dated note, 2026-10-21, later the same day (his, on Opus's advice, before any probe was run): (c) **a reply
+   that is not an answer.** A call that ends cut off, filtered, stopped otherwise or empty is judged on what it
+   holds: if it holds answer text or reasoning, he reads it like any other reply, and it fails only if what it
+   holds states or guesses the decision or gives a figure of it (criterion 5's rule, §12.8, under which a
+   cut-off answer is read as it stands). A reply that holds **no answer text and no reasoning** is not a
+   measurement: the probe makes a **replacement call** at once, with the same message, recorded beside the empty
+   reply, at most two per call; the call fails only if all three replies are empty. The replacement is decided by
+   the code on that test alone, never by a reading, so it cannot hide a failure: an empty reply has nothing in it
+   that fails. Every other reply is still never retried. The probe's token allowance is **16,000**, so that a
+   reasoning model is rarely cut off (worst case for the nine calls about $0.51; the spend is the tokens used).*
+   *Dated note, 2026-10-21, later the same day (his, on Opus's review of part 3c, before any probe was run or any
+   reply read): (d) **the reduction question's own words.** The S1 or S2 message says that the company announced a
+   workforce reduction in that month, so a reply or a reasoning that only repeats this, or takes it as given, has
+   not stated the decision. A reply fails if it says it knows of the reduction, or gives or guesses any detail of
+   it that the question does not give, such as its size, the sites or units it touched, its cause or its day. The
+   same words go to him and to the reader. (e) **A call empty three times fails by rule.** It is not read and not
+   disputed: there is nothing in it to read, and note (c) has the code decide it, so a written resolution would
+   put a judgment back where (c) took it out. The candidate fails on `not_known` with no independent read, logged
+   as `hc case xlog record <id> not_known fail --empty`, which is refused unless his saved reads count such a
+   call; no reply of that candidate goes to the reader. The worst case with every replacement made is about
+   $1.54.*
 5. **Where it runs:** on the laptop, `hc case knowledge-probe <label>`, refused unless the label's row stands at
    `not_known`. The request and every reply are written once in the case's appendix folder with the usual provenance,
    and a second run for the label is refused. It is the only path that sends an official model a real company's name
@@ -2060,3 +2081,36 @@ hand-placed inputs file and the build's by `--shape`, with nothing tying them, s
 question could be built as S2, whose decision the probe never asked about. `hc case build` now refuses a pool row
 whose shape is asked a different question from the one in its probe's request records (S1 and S2 share one; S4
 has none). It reads the request records only, never a reply.
+
+**A knowledge-probe reply that is not an answer (2026-10-21, later the same day, his, on Opus's advice; written
+before any probe was run).** Item 4 said a reply is never retried and that a candidate fails if any call fails, but
+not what a call is whose reply ends cut off, filtered, stopped otherwise or empty. Three ways were weighed: fail
+the call (safe, but it costs a candidate on a fault of the call, not of the model's knowledge); read it like any
+other reply (criterion 5's rule); ignore it (a candidate could then pass on fewer than nine calls). **Adopted:**
+a reply that holds answer text or reasoning is read like any other, as criterion 5 reads a cut-off answer; a reply
+that holds neither is replaced by a new call, at most twice per call, and the call fails if all three are empty.
+**Why the replacement is not shopping:** it is decided by the code on whether the reply holds anything, never by
+reading it, and an empty reply has nothing in it that fails, so a replacement cannot hide a failure. The token
+allowance goes from 4,000 to 16,000 (a setting of the build, not of item 4's text): Haiku 5.5 runs with thinking
+off and Sonnet 5.5 does not think with no tools offered, so only `gpt-oss-120b`'s reasoning could be cut off, and
+the higher allowance makes that rare. **What remains:** a reply cut off before it would have stated the decision
+is read as a pass, the risk criterion 5 already accepts.
+
+**The knowledge probe's reader brief (2026-10-21, built in part 3c; before any read).** A rejection on `not_known`
+is read with its own brief, `experiment/readers/knowledge.txt`, not a fourth criterion in `rejection.txt` (which,
+with `scenario.txt` and `rubric.txt`, is unchanged, so no earlier read's brief hash moves). The reader is shown
+item 4's failure definition for the probed shape, the question asked and the failing replies (reasoning included,
+empty replies marked), never the dossier and never which model answered; a "pass" disputes the failure as for
+criterion 5 and needs his written resolution. The brief is committed and pushed before its first read. *(Superseded
+in part, the same day, by the next entry: an empty call is no longer sent to the reader; it fails by rule.)*
+
+**Part 3c's review: the reduction question's words, and a call empty three times (2026-10-21, later the same day,
+his, on Opus's review; before any probe was run).** Three findings in the brief and the definition, all adopted
+as recommended. (1) The S1 or S2 message itself says a reduction was announced, so on the definition's words a
+reply, or gpt-oss's reasoning, that only restates the question "states that the reduction happened"; item 4's
+dated note (d) says repeating the question is not stating the decision, and claiming to know of it or giving any
+detail beyond it is. (2) As built, a call empty three times went to the reader, whose brief had it read "pass", so
+every such failure was a dispute that his resolution decided with nothing to read; under note (e) it fails by
+rule, with no read and no dispute. (3) The brief's closing sentence named "a workforce reduction" for every
+shape, wider than the S3 definition; it now says "the decision the definition names". The brief had not been
+read, so no read's hash moves.

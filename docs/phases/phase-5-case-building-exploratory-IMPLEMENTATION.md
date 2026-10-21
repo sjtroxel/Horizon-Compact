@@ -501,3 +501,80 @@ those among "for him to read"; 3c reads the reasoning from `raw_response`. (b) `
 `caseprobe/knowledge.py`, called by `hc case build` after its log check and before any fetch or key, compares the
 question asked (S1 and S2 share one, so a slip between them in the inputs file costs nothing; S4 is refused).
 `make check` green.
+
+**Part 3c: what it builds (2026-10-21, Opus, for the Sonnet build; nothing built yet).** From the search-half doc's
+step 3 item 4 and its three dated notes of this date. **First, the change to 3b that note (c) needs:** the
+knowledge probe's token allowance 16,000 (its own constant, not the container probe's `PROBE_MAX_TOKENS`); a reply
+with no answer text and no reasoning gets a replacement call at once, recorded beside it (`-replacement-<k>`
+files with the same provenance), at most two per call, the replacement's reply standing for the call; after
+three empty replies the call fails, and 3c's read counts it so with nothing to
+ask him. **Then 3c:** (1) **his read**, a command on the
+model of `hc case probe-verdict`'s first step: every reply that is not exactly "unknown" or that carries reasoning
+is shown with its status and its reasoning (taken from `raw_response`), he answers y or n to whether it states or
+guesses the decision or gives a figure of it, and the reads are saved write-once (`knowledge-reads.json`, with each
+reply's sha256), so a re-run never asks again; no failure means the command prints the `hc case xlog record <id>
+not_known pass` to run, a failure writes the flagged replies (`knowledge-flagged.json`) and prints the `record ...
+fail` and the reader command; (2) **the reader**, `hc case reader <id> rejection --criterion not_known`, with a
+new brief used for that criterion only (the three existing briefs unchanged), committed and pushed before its first
+read; the reader is shown item 4's failure definition for the probed shape, the question that was asked, and the
+flagged replies with their reasoning, never the dossier and never which model answered; (3) **the log**:
+`rejection_reply_on_record` and `hc case xlog read` accept `not_known`, so a reader's "pass" disputes the failure
+and his written resolution clears it, as for criterion 5. Nothing printed holds a name, an answer or a reasoning.
+Sonnet builds at medium effort; a fresh Opus chat at high effort reviews, reading the new brief word for word.
+
+**Part 3c built (2026-10-21, Sonnet at medium effort; Opus review pending in a fresh chat).** *(Reviewed and changed
+the same day: see the review note and the decisions note below; EMPTY replies no longer reach the reader.)* From the note above
+and the search-half doc's item 4 with its three dated notes. **The change to 3b (note (c)):** `knowledge.py` has its
+own `MAX_TOKENS = 16_000` (it no longer takes the container probe's constant); a reply with no answer text and no
+reasoning (`holds_nothing`) is replaced at once, at most twice per call, as `knowledge-probe-<model>-<n>-replacement-<k>-
+request.json` / `-reply.json` (and `-error-<j>`), each carrying `replacement` in its fields; the last reply stands for
+the call; a call empty three times has `CallResult.empty` and `to_read` False. The cost of a call adds its
+replacements; the command prints replacements and empty-three-times calls. **His read:** `hc case knowledge-verdict
+<label>` (`caseprobe/knowledge_read.py`): the standing reply of each of nine calls; an empty call fails with no read;
+exactly "unknown" with no reasoning passes with no read; every other reply is shown on his terminal (question,
+definition, answer, reasoning from `raw_response`) and he answers y or n, one stray word asked again up to three
+times, then nothing saved; reads saved write-once in `knowledge-reads.json` with each reply's sha256 (a re-run asks
+nothing; changed replies are refused); no failing call prints the `xlog record ... pass` to run; otherwise it writes
+`knowledge-flagged.json` (shape, the question, the failing replies with their reasoning, empty ones marked) and
+prints `xlog record ... fail`, the reader command and `xlog read`. Refused unless the row stands at `not_known`
+with no result. **The reader:** `hc case reader <id> rejection --criterion not_known`; new brief
+`experiment/readers/knowledge.txt`, loaded for that criterion only (`load_brief(root, kind, criterion)`; the three
+existing briefs untouched); material `Definition` (item 4's failure definition for the probed shape, with note (a)'s
+reasoning clause), `Question asked`, `Flagged replies` (numbered, no model named, EMPTY marked, a cut-off reply
+marked); reply format as criterion 5's (shape and type null). **The log:** `rejection_reply_on_record` takes
+`not_known` (it is in `READ_CRITERIA`) and `hc case xlog read` offers it, so a reader's "pass" disputes the failure
+and needs his resolution, as for criterion 5. `make check` green, 2741 tests (34 new). **Before its first read** the
+brief and `reader/` must be committed and pushed (the frozen-inputs check refuses otherwise). **For the reviewer:**
+(1) read `knowledge.txt` word for word: does it let the reader judge "states or guesses" without being told the
+decision, and is its handling of EMPTY and of a cut-off reply right? (2) an EMPTY-only failure goes to the reader
+marked, who reads "pass", which disputes it and so needs his written resolution: is that the right way to let him
+decide a call that returned nothing, or should an empty failure never be disputable? (3) the `Question asked`
+block shows the reader the company's name and the facility (as criterion 3 and 4 excerpts already do); the reader
+never sees which model answered or the dossier. (4) his terminal shows the full reasoning of a reply (up to
+16,000 tokens of gpt-oss); is that readable enough? (5) `knowledge_verdict` writes `knowledge-reads.json` before
+any failing set is flagged, so a crash between them is finished by a re-run.
+
+**Part 3c reviewed (2026-10-21, a fresh Opus chat at high effort; the brief read word for word).** Two faults,
+fixed: (1) a run stopped by API errors in the last call's replacement left every call with a reply, so the
+verdict took the empty first reply as the call's and failed it as empty three times; `load_replies` now refuses any
+request with no reply (one test). (2) The spend warning's ceiling counted nine calls, not their replacements;
+it now counts both (about $0.51 before, about $1.54 now, nearly all of it Sonnet; one test). `make check` green,
+2743 tests. **The five questions:** (3) the company and facility in `Question asked`: as built, the reader already
+sees names in criteria 3 to 5. (4) the full reasoning on his terminal: as built; a reasoning model's reply to this
+question is short in practice, and the ceiling is the allowance. (5) the write order: as built, a re-run after a
+crash between the two files writes the flagged one from the saved reads. **Open, his, before the first read:**
+(a) for S1 or S2 the question itself says a reduction was announced, so a reply or a reasoning that only repeats
+the question "states that the reduction happened" on the definition's words; (b) a call empty three times goes to
+the reader, whose brief tells it to read "pass", so every such failure is a dispute that his written resolution
+decides, with nothing in the reply to decide on; (c) the brief's closing sentence names a workforce reduction for
+every shape, wider than the S3 definition. Recommendations are in START HERE.
+
+**Part 3c's three decisions, built (2026-10-21, his at about 5:00 PM, all as recommended; Opus, the review's chat).**
+Item 4's dated notes (d) and (e). (a) `KNOWLEDGE_DEFINITIONS["reduction"]` carries note (d)'s words, and the brief
+says that what the question itself says is not something a reply states. (b) A call empty three times fails by
+rule: `hc case knowledge-verdict` ends at `failed_empty` and writes no `knowledge-flagged.json` (an empty call beside
+a read failure included); the flagged file and the material no longer hold an empty reply; `hc case xlog record <id>
+not_known fail --empty` logs it, refused unless his saved reads count an empty call, and a fail without `--empty`
+is refused when they do; the row's `not_known` then leaves `read_required`, so it awaits no read, and both `hc case
+reader` and the log refuse one. (c) The brief's closing sentence says "the decision the definition names", and its
+EMPTY sentences are gone. `make check` green.

@@ -34,6 +34,7 @@ from horizon_compact.casebuild.edgar import user_agent as sec_user_agent
 from horizon_compact.casebuild.exploratory import (
     AT_MOST,
     KNOWLEDGE,
+    POOL_READ_REQUIRED,
     ExploratoryLog,
     candidate_records,
     exploratory_started,
@@ -105,6 +106,7 @@ from horizon_compact.caseprobe.knowledge import (
     run_knowledge_probe,
 )
 from horizon_compact.caseprobe.knowledge import Preview as KnowledgePreview
+from horizon_compact.caseprobe.knowledge_read import knowledge_verdict, saved_empty_calls
 from horizon_compact.caseprobe.run import ProbeRefused, check_probe_launch, run_case_probe
 from horizon_compact.caseprobe.upload import UploadError, upload_case
 from horizon_compact.caseprobe.verdict import VerdictError, probe_verdict
@@ -1358,7 +1360,10 @@ def _confirm_knowledge_spend(preview: KnowledgePreview, *, yes: bool) -> bool:
             f"knowledge probe: {m.model_id} ({m.key}), {m.calls} calls, at most about "
             f"${m.worst_case_usd:.2f} of your own {credit} credit (usually far less)"
         )
-    print(f"the most the nine calls can cost: about ${preview.worst_case_usd:.2f}")
+    print(
+        f"the most the nine calls can cost, every empty reply replaced: about "
+        f"${preview.worst_case_usd:.2f}"
+    )
     if yes:
         return True
     try:
@@ -1377,6 +1382,16 @@ def _print_knowledge_outcome(label: str, done: KnowledgeOutcome) -> None:
             f"  {key}: {len(mine)} calls, {sum(r.unknown for r in mine)} answered exactly "
             f"'unknown', {sum(r.reasoning for r in mine)} with reasoning, "
             f"{sum(r.to_read for r in mine)} for him to read (the answer or its reasoning)"
+            + (
+                f"; {sum(r.replacements for r in mine)} empty replies replaced"
+                if any(r.replacements for r in mine)
+                else ""
+            )
+            + (
+                f"; {sum(r.empty for r in mine)} calls empty three times (they fail)"
+                if any(r.empty for r in mine)
+                else ""
+            )
             + (f"; not a reply: {', '.join(odd)}" if odd else "")
         )
     print(
@@ -1400,6 +1415,44 @@ def cmd_case_knowledge_probe(args: argparse.Namespace) -> int:
         make_provider=_knowledge_provider,
     )
     _print_knowledge_outcome(args.label, done)
+    return CLEAN_EXIT
+
+
+def cmd_case_knowledge_verdict(args: argparse.Namespace) -> int:
+    """His read of the knowledge probe's replies (search-half doc §4.6.5 step 3 item 4). Shows him each reply
+    that is not exactly "unknown", with its reasoning, on this terminal only; prints counts and the
+    commands to
+    run next, and writes no log."""
+
+    def ask(prompt: str) -> str:
+        try:
+            return input(prompt)
+        except EOFError as exc:
+            # Never read as "does not state it": the reads are saved write-once.
+            raise KnowledgeError(
+                "the input ended before every reply was read: nothing was saved"
+            ) from exc
+
+    case = open_case(args.label)
+    done = knowledge_verdict(case, open_case("search"), ask=ask, show=print)
+    print(
+        f"{args.label}: {done.calls} calls; {done.read_by_him} replies read by him; "
+        f"{done.empty} empty three times; {done.failing} call(s) fail"
+    )
+    logger = _log_command(args.label, None)
+    if done.stage == "passed":
+        print(f'next, in the log: {logger} record {args.label} {KNOWLEDGE} pass --reason "..."')
+    elif done.stage == "failed_empty":
+        print(
+            f'next, in the log: {logger} record {args.label} {KNOWLEDGE} fail --empty --reason "..." '
+            "(a call empty three times fails by rule: no independent read, no dispute)"
+        )
+    else:
+        print(
+            f'next: {logger} record {args.label} {KNOWLEDGE} fail --reason "...", then hc case reader '
+            f"{args.label} rejection --criterion {KNOWLEDGE}, then {logger} read {args.label} "
+            f"{KNOWLEDGE}" + ' (with --resolution "..." if the reader disputes)'
+        )
     return CLEAN_EXIT
 
 
@@ -1998,6 +2051,14 @@ def cmd_case_xlog(args: argparse.Namespace) -> int:
     elif args.xlog_action == "record":
         if args.public_reason is not None:
             _check_public_reason(args.public_reason, _log_candidates(case))
+        if args.criterion == KNOWLEDGE and args.result == "fail":
+            # an empty-three-times failure is never read, so the flag must match his saved reads (note (e))
+            empty = saved_empty_calls(open_case(args.id))
+            if bool(empty) != args.empty:
+                raise LogError(
+                    f"{args.id}'s saved reads count {empty} call(s) empty three times: "
+                    + ("record the failure with --empty" if empty else "--empty does not apply")
+                )
         log.record(
             args.id,
             args.criterion,
@@ -2006,8 +2067,11 @@ def cmd_case_xlog(args: argparse.Namespace) -> int:
             public_reason=args.public_reason,
             disclosed=args.disclosed,
             case_type=args.list,
+            empty=args.empty,
         )
-        what = f"{args.criterion} {args.result}"
+        what = f"{args.criterion} {args.result}" + (
+            " (empty three times, by rule)" if args.empty else ""
+        )
     else:
         row = log.rows.get(args.id)
         earlier = row.prior_replies if row is not None else frozenset()
@@ -2216,6 +2280,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_reader(args)
         if args.action == "knowledge-probe":
             return cmd_case_knowledge_probe(args)
+        if args.action == "knowledge-verdict":
+            return cmd_case_knowledge_verdict(args)
         if args.action == "upload":
             return cmd_case_upload(args)
         if args.action == "probe":
@@ -2777,9 +2843,10 @@ def build_parser() -> argparse.ArgumentParser:
     reader.add_argument("kind", choices=("rejection", "scenario", "rubric"))
     reader.add_argument(
         "--criterion",
-        choices=("real_decision", "maps_to_shape", PROBE_CRITERION),
-        help="for a rejection: the criterion whose rejection is read; not_recognizable reads a probe "
-        "failure from the flagged answers (never the dossier)",
+        choices=("real_decision", "maps_to_shape", KNOWLEDGE, PROBE_CRITERION),
+        help="for a rejection: the criterion whose rejection is read; not_known reads a knowledge-probe "
+        "failure and not_recognizable a recognition-probe failure, each from its flagged replies "
+        "(never the dossier)",
     )
     reader.add_argument(
         "--set",
@@ -2797,6 +2864,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     knowledge.add_argument("label", help="the pool candidate's neutral id, such as pre-01")
     knowledge.add_argument("--yes", action="store_true", help="skip the spend question")
+    kverdict = case_actions.add_parser(
+        "knowledge-verdict",
+        help="His read of the knowledge probe's replies (step 3 item 4): each reply that is not exactly "
+        "'unknown' is shown with its reasoning on this terminal and he answers y or n. Saves his reads "
+        "write-once, writes the failing replies for the independent reader, and prints the next commands; "
+        "logs nothing.",
+    )
+    kverdict.add_argument("label", help="the pool candidate's neutral id, such as pre-01")
     resolve = case_actions.add_parser(
         "resolve",
         help="His written resolution of a 'concerns' or 'disagrees' reading of the case's current scenario "
@@ -2922,9 +2997,15 @@ def build_parser() -> argparse.ArgumentParser:
         choices=TYPES,
         help="the list the candidate goes on (§12.1, §4.6.4 item 1); with maps_to_shape, and only then",
     )
+    xrecord.add_argument(
+        "--empty",
+        action="store_true",
+        help="with a pool row's not_known fail, and only when his saved reads count a call empty three "
+        "times: it fails by rule, with no independent read and no dispute",
+    )
     xread = xlog_actions.add_parser("read", help="The independent reader's read of a rejection")
     xread.add_argument("id", help="the candidate's neutral id, such as closure-04")
-    xread.add_argument("criterion", choices=READ_REQUIRED)
+    xread.add_argument("criterion", choices=POOL_READ_REQUIRED)
     xread.add_argument(
         "--resolution",
         help="required when the reader disputes the rejection: his reason, logged with it",

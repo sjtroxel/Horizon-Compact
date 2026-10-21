@@ -26,6 +26,8 @@ from horizon_compact.casebuild.search import Row, SelectionLog, write_log_versio
 from horizon_compact.caseprobe.knowledge import (
     CALLS,
     MAX_API_ERRORS,
+    MAX_REPLACEMENTS,
+    MAX_TOKENS,
     MESSAGE_FACILITY,
     MESSAGE_REDUCTION,
     Inputs,
@@ -41,6 +43,7 @@ from horizon_compact.caseprobe.knowledge import (
 from horizon_compact.cli import CLEAN_EXIT, REFUSED_EXIT, main
 from horizon_compact.dossier.check import default_repo_root
 from horizon_compact.providers.base import RawDecision, TextRequest, text_prompt_sha256
+from horizon_compact.sweep.spend import estimate_input_tokens_text, worst_case_attempt_usd
 from test_casebuild_extract import PROVENANCE, ok
 
 ROOT = default_repo_root()
@@ -139,18 +142,13 @@ class Replies:
         return {"messages": [request.user]}
 
     def decide_text(self, request: TextRequest) -> RawDecision:
-        key = request.route.key
-        if not self.requests or self.requests[-1].route.key != key:
-            self.seen[key] = 0
         self.requests.append(request)
-        call = self.seen[key] + 1
-        stem = f"knowledge-probe-{key}-{call}"
-        assert (self.case.directory / f"{stem}-request.json").exists()
-        assert not (self.case.directory / f"{stem}-reply.json").exists()
-        reply = self.script.pop(0) if self.script else ok("unknown")
-        if reply.status != "api_error":
-            self.seen[key] = call
-        return reply
+        # the request record of this very attempt is on disk and its reply record is not
+        folder = self.case.directory
+        assert (
+            len(list(folder.glob("*-request.json"))) == len(list(folder.glob("*-reply.json"))) + 1
+        )
+        return self.script.pop(0) if self.script else ok("unknown")
 
 
 def git(args: Sequence[str]) -> str:
@@ -302,7 +300,9 @@ def test_three_calls_to_each_model_with_no_system_text_and_the_one_message(tmp_p
     provider, made = Replies(case), list[str]()
     outcome = run(case, provider, made=made)
     assert [r.route.key for r in provider.requests] == [k for k in KEYS for _ in range(CALLS)]
-    assert {(r.system, r.user, r.max_tokens) for r in provider.requests} == {("", S3_MESSAGE, 4000)}
+    assert {(r.system, r.user, r.max_tokens) for r in provider.requests} == {
+        ("", S3_MESSAGE, 16_000)
+    }
     assert made == ["anthropic", "openrouter"]  # one provider per route, made once
     assert len(outcome.results) == 9 and all(r.unknown for r in outcome.results)
     assert outcome.api_errors == 0 and outcome.cost_usd > 0
@@ -327,6 +327,7 @@ def test_each_call_leaves_a_request_record_and_a_reply_record_with_provenance(
     assert reply["status"] == "replied" and reply["usage"]["input_tokens"] == 10
     assert reply["provenance"]["model_id"] == "fake-model" and reply["cost_usd"] > 0
     assert reply["label"] == LABEL and reply["call"] == 1 and reply["shape"] == "S3"
+    assert reply["replacement"] == 0 and reply["max_tokens"] == 16_000
 
 
 def test_an_s1_probe_asks_about_the_reduction_in_the_first_disclosures_month(
@@ -341,10 +342,16 @@ def test_an_s1_probe_asks_about_the_reduction_in_the_first_disclosures_month(
 def test_a_reply_is_never_retried_whatever_it_says(tmp_path: Path) -> None:
     case = world(tmp_path)
     cut_off = ok("Fernwick closed it", stop="max_tokens")
-    provider = Replies(case, cut_off, ok(""), ok("unknown", stop="content_filtered"))
+    provider = Replies(
+        case, cut_off, ok("Fernwick", stop="stop_sequence"), ok("unknown", stop="content_filtered")
+    )
     outcome = run(case, provider)
-    assert len(provider.requests) == 9  # no call repeated
-    assert [r.status for r in outcome.results[:3]] == ["truncated", "no_text", "content_filtered"]
+    assert len(provider.requests) == 9  # no call repeated: each holds something
+    assert [r.status for r in outcome.results[:3]] == [
+        "truncated",
+        "unexpected_stop",
+        "content_filtered",
+    ]
     assert [r.unknown for r in outcome.results[:3]] == [False, False, False]
     assert load(case, "knowledge-probe-haiku-5-5-1-reply.json")["status"] == "truncated"
 
@@ -621,3 +628,94 @@ def test_the_build_refuses_another_question_before_any_fetch_or_key(
     assert "probed as S3; a build as S1" in err and COMPANY not in err
     assert build("S3") == REFUSED_EXIT  # past the shape check, stopped by the missing term list
     assert "term list" in capsys.readouterr().err
+
+
+# --- a reply that holds nothing is replaced (item 4, dated note (c), 2026-10-21) ------------------------
+
+
+def nothing(stop: str = "end_turn") -> RawDecision:
+    return ok(stop=stop)  # no text block at all
+
+
+def test_an_empty_reply_is_replaced_at_once_and_the_replacement_stands_for_the_call(
+    tmp_path: Path,
+) -> None:
+    case = world(tmp_path)
+    provider = Replies(case, nothing())
+    outcome = run(case, provider)
+    first = outcome.results[0]
+    assert first.replacements == 1 and first.unknown and not first.empty and not first.to_read
+    assert len(provider.requests) == 10  # nine calls and one replacement, the same message each
+    assert {(r.system, r.user) for r in provider.requests} == {("", S3_MESSAGE)}
+    files = probe_files(case)
+    for suffix in ("request", "reply"):
+        assert f"knowledge-probe-haiku-5-5-1-{suffix}.json" in files
+        assert f"knowledge-probe-haiku-5-5-1-replacement-1-{suffix}.json" in files
+    assert load(case, "knowledge-probe-haiku-5-5-1-reply.json")["status"] == "no_text"
+    assert load(case, "knowledge-probe-haiku-5-5-1-replacement-1-reply.json")["replacement"] == 1
+    assert len(files) == 20
+
+
+def test_three_empty_replies_fail_the_call_with_nothing_to_read_and_a_fourth_is_never_made(
+    tmp_path: Path,
+) -> None:
+    case = world(tmp_path)
+    provider = Replies(case, nothing(), nothing("max_tokens"), nothing("content_filtered"))
+    outcome = run(case, provider)
+    first = outcome.results[0]
+    assert first.empty and first.replacements == 2 and not first.to_read and not first.unknown
+    assert first.status == "content_filtered"  # the last reply stands for the call
+    assert len(provider.requests) == 11
+    assert (case.directory / "knowledge-probe-haiku-5-5-1-replacement-2-reply.json").is_file()
+    assert not (case.directory / "knowledge-probe-haiku-5-5-1-replacement-3-request.json").exists()
+
+
+@pytest.mark.parametrize(
+    "reply",
+    [
+        ok("Larkspur Works may have", stop="max_tokens"),  # cut off, but it holds text
+        dataclasses.replace(nothing("max_tokens"), reasoning_block_count=1),  # reasoning, no text
+        ok("I know nothing about it."),  # an answer that is not "unknown"
+    ],
+)
+def test_a_reply_that_holds_something_is_never_replaced_it_is_his_to_read(
+    tmp_path: Path, reply: RawDecision
+) -> None:
+    case = world(tmp_path)
+    provider = Replies(case, reply)
+    outcome = run(case, provider)
+    assert len(provider.requests) == 9
+    assert outcome.results[0].replacements == 0 and outcome.results[0].to_read
+    assert not outcome.results[0].empty
+
+
+def test_a_replacements_api_error_is_retried_and_kept_beside_it(tmp_path: Path) -> None:
+    case = world(tmp_path)
+    provider = Replies(case, nothing(), api_error(), ok("unknown"))
+    outcome = run(case, provider)
+    assert outcome.api_errors == 1 and outcome.results[0].replacements == 1
+    assert (case.directory / "knowledge-probe-haiku-5-5-1-replacement-1-error-1.json").is_file()
+
+
+def test_the_spend_warning_counts_every_replacement_a_call_can_make(tmp_path: Path) -> None:
+    case = world(tmp_path)
+    previews: list[Any] = []
+
+    def keep(preview: Any) -> bool:
+        previews.append(preview)
+        return True
+
+    run(case, Replies(case), confirm=keep)
+    models = {m.key: m for m in probe_models(ROOT / "experiment")}
+    message = build_message(load_inputs(case), pool_log().rows[LABEL].disclosed)
+    tokens = estimate_input_tokens_text("", message)
+    for planned in previews[0].models:
+        one = worst_case_attempt_usd(tokens, MAX_TOKENS, models[planned.key].config.prices)
+        assert planned.worst_case_usd == round(CALLS * (1 + MAX_REPLACEMENTS) * one, 6)
+
+
+def test_the_cost_of_a_call_adds_its_replacements(tmp_path: Path) -> None:
+    case = world(tmp_path)
+    outcome = run(case, Replies(case, nothing(), nothing()))
+    plain = run(world(tmp_path / "other"), Replies(world(tmp_path / "other")))
+    assert outcome.results[0].cost_usd > plain.results[0].cost_usd

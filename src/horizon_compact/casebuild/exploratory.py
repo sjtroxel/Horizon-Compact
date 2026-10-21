@@ -77,6 +77,9 @@ class ExploratoryRow(Row):
     source: tuple[str, str] | None = None
     # the reply files the pre-registered record logged reads from for this row: never a read here
     prior_replies: frozenset[str] = frozenset()
+    # a not_known failure on a call empty three times: it fails by rule, so it is never read and never
+    # disputed (search-half doc step 3 item 4, dated note (e))
+    empty_fail: bool = False
 
     @property
     def probed(self) -> bool:
@@ -88,7 +91,9 @@ class ExploratoryRow(Row):
 
     @property
     def read_required(self) -> tuple[str, ...]:
-        return POOL_READ_REQUIRED if self.probed else READ_REQUIRED
+        if not self.probed:
+            return READ_REQUIRED
+        return tuple(c for c in POOL_READ_REQUIRED if not (self.empty_fail and c == KNOWLEDGE))
 
     @property
     def label(self) -> str:
@@ -249,21 +254,22 @@ class ExploratoryLog:
         public_reason: str | None = None,
         disclosed: date | None = None,
         case_type: str | None = None,
+        empty: bool = False,
     ) -> None:
         """The next criterion for a row, as the selection log takes it. ``case_type`` is allowed on
-        ``maps_to_shape`` only: the list the row is on is settled there."""
-        self._take(
-            {
-                "event": "result",
-                "id": row_id,
-                "criterion": criterion,
-                "result": result,
-                "reason": reason,
-                "public_reason": public_reason,
-                "disclosed": disclosed.isoformat() if disclosed else None,
-                "case_type": case_type,
-            }
-        )
+        ``maps_to_shape`` only: the list the row is on is settled there. ``empty`` is allowed on a pool row's
+        ``not_known`` failure only, when a call came back empty three times: that failure is never read."""
+        event: dict[str, Any] = {
+            "event": "result",
+            "id": row_id,
+            "criterion": criterion,
+            "result": result,
+            "reason": reason,
+            "public_reason": public_reason,
+            "disclosed": disclosed.isoformat() if disclosed else None,
+            "case_type": case_type,
+        }
+        self._take({**event, "empty": True} if empty else event)
 
     def record_read(
         self,
@@ -380,10 +386,16 @@ class ExploratoryLog:
         case_type = event["case_type"]
         if case_type is not None and (criterion != "maps_to_shape" or case_type not in TYPES):
             raise LogError(f"a list is one of {', '.join(TYPES)}, and is settled at maps_to_shape")
+        empty = bool(event.get("empty"))
+        if empty and not (row.probed and criterion == KNOWLEDGE and result == "fail"):
+            raise LogError(
+                f"only a pool row's {KNOWLEDGE} failure is recorded as a call empty three times"
+            )
         if self._after_the_fifth(row):
             raise LogError(
                 f"{row.id} comes after the fifth case: checking stops at five (§4.6.5 D.5)"
             )
+        row.empty_fail = empty
         row.results[criterion] = Result(
             result, reason, event["public_reason"], disclosed.isoformat() if disclosed else None
         )

@@ -8,8 +8,12 @@ confirmation of the spend, the keys, and then for each call **the request record
 the call, and the reply record. A request with no reply is a call that never returned.
 
 **A reply is the measurement, so it is never retried** (a retry would raise the pass rate by hiding a
-failure); an API error is retried with backoff, each kept as its own record, and too many stop the run. A
-second run for the label is refused, so a run that stopped part-way is his to look at, not to repeat.
+failure); an API error is retried with backoff, each kept as its own record, and too many stop the run. **One
+exception, decided by the code and never by a reading:** a reply that holds no answer text and no reasoning is
+not a measurement, and is replaced by a new call at once (``-replacement-<k>``), at most ``MAX_REPLACEMENTS``
+times; the last reply stands for the call. An empty reply has nothing in it that fails, so a replacement
+cannot hide a failure. A second run for the label is refused, so a run that stopped part-way is his to
+look at, not to repeat.
 
 This module only asks and records. It never writes the log and never decides: whether an answer fails, his
 read of every answer that is not "unknown", the reader's read of a failure and the log's ``not_known`` result
@@ -41,7 +45,7 @@ from horizon_compact.casebuild.appendix import CaseAppendix
 from horizon_compact.casebuild.exploratory import KNOWLEDGE, ExploratoryRow, row_for
 from horizon_compact.casebuild.extraction_model import entry_sha256, extraction_route
 from horizon_compact.casebuild.frozen import Git
-from horizon_compact.caseprobe.layout import PROBE_MAX_TOKENS, PROBE_ROLES
+from horizon_compact.caseprobe.layout import PROBE_ROLES
 from horizon_compact.caseprobe.run import check_probe_model, probe_route
 from horizon_compact.experiment import MODELS_FILE
 from horizon_compact.model_config import ModelConfig, ModelsFile
@@ -62,7 +66,10 @@ from horizon_compact.sweep.spend import (
 
 RECORD_VERSION = 1
 CALLS = 3  # per model (item 4)
-MAX_TOKENS = PROBE_MAX_TOKENS  # room for an answer, a reasoning model's reasoning included
+# Room for an answer, a reasoning model's reasoning included: this probe's own allowance (item 4's dated note
+# (c), 2026-10-21), not the container probe's. Only the tokens used are paid for.
+MAX_TOKENS = 16_000
+MAX_REPLACEMENTS = 2  # per call, for a reply that holds nothing at all (item 4's dated note (c))
 MAX_API_ERRORS = 5  # per call, then the run stops
 SHAPES = ("S1", "S2", "S3")
 RECORD_PREFIX = "knowledge-probe-"
@@ -255,11 +262,16 @@ class CallResult:
     unknown: bool  # exactly "unknown"
     reasoning: bool  # the reply carries reasoning, which he reads as the answer (item 4, note of 2026-10-21)
     cost_usd: float
+    empty: bool = (
+        False  # the call's last reply holds no answer text and no reasoning: the call fails
+    )
+    replacements: int = 0  # replacement calls made for this call (empty replies replaced)
 
     @property
     def to_read(self) -> bool:
-        """His to read in 3c: every answer that is not "unknown", and every reply with reasoning."""
-        return not self.unknown or self.reasoning
+        """His to read in 3c: every answer that is not "unknown", and every reply with reasoning. A call
+        whose every reply was empty has nothing to read: it fails without a read."""
+        return not self.empty and (not self.unknown or self.reasoning)
 
 
 @dataclass(frozen=True)
@@ -276,6 +288,12 @@ def is_unknown(answer: str) -> bool:
     """The answer is the one word asked for. Case, quotes and a closing full stop are ignored; anything else
     is an answer he reads."""
     return answer.strip().strip("\"'`*").strip().rstrip(".").strip().lower() == "unknown"
+
+
+def holds_nothing(raw: RawDecision) -> bool:
+    """No answer text and no reasoning: not a measurement (item 4's dated note (c)). A reply with either is
+    read as it stands, a cut-off one included."""
+    return not any(t.strip() for t in raw.text_blocks) and raw.reasoning_block_count == 0
 
 
 def reply_status(raw: RawDecision) -> str:
@@ -332,7 +350,13 @@ def run_knowledge_probe(
                 m.config.model_id,
                 m.route.route_kind,
                 CALLS,
-                round(CALLS * worst_case_attempt_usd(tokens, MAX_TOKENS, m.config.prices), 6),
+                # every call's reply empty and replaced twice: the most the replacements can add
+                round(
+                    CALLS
+                    * (1 + MAX_REPLACEMENTS)
+                    * worst_case_attempt_usd(tokens, MAX_TOKENS, m.config.prices),
+                    6,
+                ),
             )
             for m in models
         )
@@ -353,79 +377,93 @@ def run_knowledge_probe(
         provider = providers[model.route.route_kind]
         request = TextRequest(route=model.route, system="", user=message, max_tokens=MAX_TOKENS)
         for call in range(1, CALLS + 1):
-            stem = _stem(model.key, call)
-            fields: dict[str, Any] = {
-                "record_version": RECORD_VERSION,
-                "label": case.label,
-                "model_key": model.key,
-                "entry_sha256": entry_sha256(model.key, model.config),
-                "call": call,
-                "shape": inputs.shape,
-                "inputs_sha256": inputs.sha256,
-                "prompt_sha256": text_prompt_sha256(request),
-                "max_tokens": MAX_TOKENS,
-                "git_sha": sha,
-                "git_dirty": dirty,
-            }
-            case.write_once(
-                case.directory / f"{stem}-request.json",
-                _dump(
-                    {
-                        **fields,
-                        "kind": "knowledge-probe-request",
-                        "system": request.system,
-                        "user": request.user,
-                        "request": _jsonable(provider.text_request_body(request)),
-                    }
-                ),
-            )
-            errors = 0
+            call_cost = 0.0
+            replacements = 0
             while True:
-                raw = provider.decide_text(request)
-                cost = attempt_cost_usd(raw.usage, model.config.prices)
-                if raw.status != "api_error":
-                    break
-                errors += 1
-                api_errors += 1
-                code = (raw.error or {}).get("code", "unknown")
+                # attempt 0 is the call, the rest its replacements; each is recorded in full
+                stem = _stem(model.key, call) + (
+                    f"-replacement-{replacements}" if replacements else ""
+                )
+                fields: dict[str, Any] = {
+                    "record_version": RECORD_VERSION,
+                    "label": case.label,
+                    "model_key": model.key,
+                    "entry_sha256": entry_sha256(model.key, model.config),
+                    "call": call,
+                    "replacement": replacements,
+                    "shape": inputs.shape,
+                    "inputs_sha256": inputs.sha256,
+                    "prompt_sha256": text_prompt_sha256(request),
+                    "max_tokens": MAX_TOKENS,
+                    "git_sha": sha,
+                    "git_dirty": dirty,
+                }
                 case.write_once(
-                    case.directory / f"{stem}-error-{errors}.json",
+                    case.directory / f"{stem}-request.json",
                     _dump(
                         {
                             **fields,
-                            "kind": "knowledge-probe-api-error",
-                            "error": raw.error,
-                            "usage": dataclasses.asdict(raw.usage),
-                            "cost_usd": cost,
+                            "kind": "knowledge-probe-request",
+                            "system": request.system,
+                            "user": request.user,
+                            "request": _jsonable(provider.text_request_body(request)),
                         }
                     ),
                 )
-                if classify_error(raw).stop_session or errors >= MAX_API_ERRORS:
-                    raise KnowledgeError(
-                        f"stopped at {model.key} call {call} on an API error ({code}) after "
-                        f"{len(results)} finished calls; look in the case's folder, a second run is refused"
+                errors = 0
+                while True:
+                    raw = provider.decide_text(request)
+                    cost = attempt_cost_usd(raw.usage, model.config.prices)
+                    call_cost += cost
+                    if raw.status != "api_error":
+                        break
+                    errors += 1
+                    api_errors += 1
+                    code = (raw.error or {}).get("code", "unknown")
+                    case.write_once(
+                        case.directory / f"{stem}-error-{errors}.json",
+                        _dump(
+                            {
+                                **fields,
+                                "kind": "knowledge-probe-api-error",
+                                "error": raw.error,
+                                "usage": dataclasses.asdict(raw.usage),
+                                "cost_usd": cost,
+                            }
+                        ),
                     )
-                sleep(backoff_seconds(errors - 1, rng))
-            answer = "\n".join(t for t in raw.text_blocks if t.strip()).strip()
-            status = reply_status(raw)
-            case.write_once(
-                case.directory / f"{stem}-reply.json",
-                _dump(
-                    {
-                        **fields,
-                        "kind": "knowledge-probe-reply",
-                        "status": status,
-                        "stop_reason": raw.stop_reason,
-                        "answer": answer,
-                        "text_blocks": raw.text_blocks,
-                        "reasoning_block_count": raw.reasoning_block_count,
-                        "usage": dataclasses.asdict(raw.usage),
-                        "cost_usd": cost,
-                        "provenance": _jsonable(dataclasses.asdict(raw.provenance)),
-                        "raw_response": _jsonable(raw.raw_response),
-                    }
-                ),
-            )
+                    if classify_error(raw).stop_session or errors >= MAX_API_ERRORS:
+                        raise KnowledgeError(
+                            f"stopped at {model.key} call {call} on an API error ({code}) after "
+                            f"{len(results)} finished calls; look in the case's folder, a second run "
+                            "is refused"
+                        )
+                    sleep(backoff_seconds(errors - 1, rng))
+                answer = "\n".join(t for t in raw.text_blocks if t.strip()).strip()
+                status = reply_status(raw)
+                case.write_once(
+                    case.directory / f"{stem}-reply.json",
+                    _dump(
+                        {
+                            **fields,
+                            "kind": "knowledge-probe-reply",
+                            "status": status,
+                            "stop_reason": raw.stop_reason,
+                            "answer": answer,
+                            "text_blocks": raw.text_blocks,
+                            "reasoning_block_count": raw.reasoning_block_count,
+                            "usage": dataclasses.asdict(raw.usage),
+                            "cost_usd": cost,
+                            "provenance": _jsonable(dataclasses.asdict(raw.provenance)),
+                            "raw_response": _jsonable(raw.raw_response),
+                        }
+                    ),
+                )
+                # Decided on whether the reply holds anything, never on a reading of it.
+                if holds_nothing(raw) and replacements < MAX_REPLACEMENTS:
+                    replacements += 1
+                    continue
+                break
             results.append(
                 CallResult(
                     model.key,
@@ -433,7 +471,9 @@ def run_knowledge_probe(
                     status,
                     status == "replied" and is_unknown(answer),
                     raw.reasoning_block_count > 0,
-                    cost,
+                    round(call_cost, 6),
+                    empty=holds_nothing(raw),
+                    replacements=replacements,
                 )
             )
     return KnowledgeOutcome(tuple(results), api_errors)

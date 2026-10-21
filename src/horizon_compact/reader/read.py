@@ -38,7 +38,12 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from horizon_compact.casebuild.appendix import CaseAppendix
-from horizon_compact.casebuild.exploratory import ExploratoryRow, exploratory_started, row_for
+from horizon_compact.casebuild.exploratory import (
+    KNOWLEDGE,
+    ExploratoryRow,
+    exploratory_started,
+    row_for,
+)
 from horizon_compact.casebuild.frozen import Git
 from horizon_compact.casebuild.search import LogError, ReaderReply, Row
 from horizon_compact.model_config import ModelConfig
@@ -181,7 +186,11 @@ def _shape_problem(reply: RejectionReply) -> str | None:
     """The shape fits the criterion and the reading: none on ``real_decision``; on ``maps_to_shape`` one of
     the four on a pass, either on a fail or cannot_tell (a fail on the total alone names the shape that
     matches, his decision 2026-10-18). The type fits the shape (§4.6.4)."""
-    if reply.criterion in ("real_decision", materials.PROBE_CRITERION):
+    if reply.criterion in (
+        "real_decision",
+        materials.PROBE_CRITERION,
+        materials.KNOWLEDGE_CRITERION,
+    ):
         if reply.shape is not None:
             return f"the reply names a shape on {reply.criterion}"
         return None if reply.type is None else f"the reply names a type on {reply.criterion}"
@@ -394,6 +403,11 @@ def rejection_ready(search: CaseAppendix, candidate: str, criterion: str) -> str
         raise ReaderError(
             f"{candidate} has no rejection on {criterion} in the log: nothing to read"
         )
+    if isinstance(row, ExploratoryRow) and row.empty_fail and criterion == KNOWLEDGE:
+        raise ReaderError(
+            f"{candidate}'s {criterion} rejection is a call empty three times: it fails by rule and is "
+            "never read"
+        )
     if criterion in row.reads:
         raise ReaderError(f"{candidate}'s rejection on {criterion} already has a read in the log")
     return row.type
@@ -442,7 +456,7 @@ def run_read(
     frozen = frozen_reader_inputs(git)
     key, config = load_reader_model(repo_root / "experiment")
     assert config.max_tokens is not None  # a reader entry always has one (ModelConfig checks)
-    brief: Brief = load_brief(repo_root, kind)
+    brief: Brief = load_brief(repo_root, kind, criterion)
     name = stem(kind, criterion, probe_set)
     candidate_type: str | None = None
     earlier: frozenset[str] = frozenset()

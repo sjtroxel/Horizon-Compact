@@ -174,6 +174,18 @@ class CaseAppendix:
         words. Placed by hand, so no name is typed on a command line. Private."""
         return self.directory / "knowledge-inputs.toml"
 
+    @property
+    def knowledge_reads_path(self) -> Path:
+        """Every reply of the knowledge probe and what he read in it (search-half doc §4.6.5 step 3 item 4);
+        written by ``hc case knowledge-verdict``, write-once. Private: it holds the model's replies."""
+        return self.directory / "knowledge-reads.json"
+
+    @property
+    def knowledge_flagged_path(self) -> Path:
+        """The shape, the question asked and only the replies that fail, for the independent reader of a
+        ``not_known`` rejection (§12.9): the one channel from the knowledge probe to the reader. Private."""
+        return self.directory / "knowledge-flagged.json"
+
     def probe_reads_path(self, probe_set: int) -> Path:
         """Every recognition-probe answer of one set and what he read in it (protocol §12.8); written by
         ``hc case probe-verdict``. Private: it holds the model's answers."""

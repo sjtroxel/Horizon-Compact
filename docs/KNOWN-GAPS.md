@@ -7,14 +7,79 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-21, about 4:05 PM (PART 3b REVIEWED, BOTH DECISIONS BUILT; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-10-21, about 5:25 PM, HANDOFF (PART 3c DONE; HIS COMMIT TONIGHT; REAL CANDIDATES TOMORROW)
+>
+> **Measured at handoff:** last commit `c7ee105` (pushed); `make check` green, **2748 tests**. **Uncommitted:** part 3c
+> with its review and his three decisions (block below), 15 files, for his one commit and push tonight. **Stage 4
+> step 3's code is done** (3a pool search, 3b probe, 3c verdict and reader brief). **Tomorrow, first move:** check
+> `git log -1` shows the 3c commit and that it is pushed; then stage 3 on closure-07 (build, scenario, rubric, lock,
+> recognition probe; Opus with him; the top-up comes due at its first scenario read), and beside it the pool's
+> criteria 1 to 4 from `pre-01`. **Expect fixes:** stage 3's build and probe have never run on a real case. **Yield
+> is not measured.** Open, his: the OpenRouter top-up when stage 3's first paid read is reached.
+>
+> *The block below (stamped 5:20 PM, ahead of the clock: written about 5:10 PM) is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 5:10 PM (PART 3c REVIEWED; HIS THREE DECISIONS BUILT; HIS COMMIT NEXT)
+>
+> **His decisions (about 5:00 PM, all three as recommended), built in the review's chat:** item 4's dated notes
+> (d) (the reduction question's own words are not a reply's) and (e) (a call empty three times fails by rule: no
+> read, no dispute, logged with `xlog record <id> not_known fail --empty`), and the brief's closing sentence.
+> `make check` green. **Uncommitted:** all of 3c, the change to 3b, the review's two fixes, these decisions and
+> their docs. **Next:** his `git add -A`, commit, push (before the first `not_known` read); then he places
+> `knowledge-inputs.toml` for a real candidate and runs the probe.
+>
+> *The 4:40 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 4:40 PM (PART 3c OPUS-REVIEWED; THREE DECISIONS OF HIS NEXT)
+>
+> **Review (fresh Opus chat, high; the brief read word for word):** two faults fixed: a run stopped in the last
+> call's replacement was read as a call empty three times (now refused), and the spend warning left out the
+> replacements (ceiling about $1.54, not $0.51). `make check` green, 2743. **Uncommitted:** everything the block
+> below lists, with the fixes. **His, before the first `not_known` read** (the exploratory plan's review note):
+> (a) **S1/S2 echo.** The question says a reduction was announced, so a reply that only repeats it "states that the
+> reduction happened" on the definition's words. Rec: a dated note (d) to item 4: repeating or taking as given what
+> the question says is not stating the decision; claiming to know of it, or any detail, figure or guess beyond the
+> question, fails. The same words go to him and the reader. (b) **A call empty three times.** As built it always
+> reaches the reader as a "pass", so his written resolution decides it with nothing to read. Rec: it fails by rule,
+> with no read and no dispute (note (c) says it fails, decided by the code): empty replies are left out of the
+> flagged file, and the log takes an empty-only fail with no read. Rare at 16,000 tokens, so it costs almost
+> nothing. (c) **The brief's closing sentence** lists "a workforce reduction" for every shape. Rec: "the decision
+> the definition names". **Then:** the changes, Sonnet; one commit and push before the first read.
+>
+> *The block below (its stamp, 5:00 PM, was ahead of the clock; it was written about 4:15 PM) is superseded on
+> what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 4:15 PM (PART 3c BUILT; OPUS REVIEW NEXT)
+>
+> **Measured:** last commit `c7ee105` (3b, pushed). **Uncommitted:** item 4's note (c) and the §11 entries
+> (docs), the change to 3b (16,000 tokens, replacement calls), 3c: `hc case knowledge-verdict`
+> (`caseprobe/knowledge_read.py`), the reader's new brief `experiment/readers/knowledge.txt` and its material,
+> `rejection_reply_on_record` and `hc case xlog read` taking `not_known`. `make check` green, 2741. **Nothing
+> was sent to any model.** **Next:** a fresh Opus chat (high) reviews 3c and the change to 3b, reading the
+> brief word for word (the exploratory plan's as-built note lists five questions); then his commit and push,
+> which must come before the first `not_known` read (the reader's inputs must be pushed). Then the probe can be
+> run for a real candidate: he places `knowledge-inputs.toml` in its folder and runs it.
+>
+> *The 4:10 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 4:10 PM (A THIRD ITEM 4 NOTE ADOPTED; 3c NEXT, SONNET)
+>
+> **His decision (about 4:04 PM, on Opus's advice, before any probe ran):** search-half doc item 4's dated note
+> (c) and §11: a knowledge-probe reply that is not an answer is read for what it holds (criterion 5's rule); one
+> with no answer text and no reasoning is replaced by a new call, at most two per call; the allowance is 16,000
+> tokens. Docs only, uncommitted. **Next:** 3c in a Sonnet chat (medium), from the exploratory plan's note "Part
+> 3c: what it builds", which starts with the change to 3b that note (c) needs; then a fresh Opus review (high).
+>
+> *The 3:55 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 3:55 PM (PART 3b REVIEWED, BOTH DECISIONS BUILT, PUSHED; 3c NEXT)
 >
 > **Review (fresh Opus chat, high):** one fault, fixed: an empty system text is now left out of the request, not
 > sent empty (both providers' text bodies; two tests). The three review questions settled as built; see the
 > exploratory plan's review note. **His two decisions (about 3:45 PM), built the same chat:** gpt-oss's reasoning
 > is read as the answer, and `hc case build` builds a pool row only as a shape its probe asked about (search-half
-> doc item 4's dated note, §11). `make check` green, 2706. **Uncommitted:** all of 3b, the pool-run notes.
-> **Next:** his commit and push, before any probe runs (so its records say `git_dirty: false`); then 3c.
+> doc item 4's dated note, §11). `make check` green, 2706. **Committed and pushed:** `c7ee105` (all of 3b, the pool-run
+> notes), before any probe ran. **Next:** 3c (Sonnet builds, a fresh Opus chat reviews).
 >
 > *The 3:10 PM block below is superseded on what is next.*
 >

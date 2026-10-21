@@ -45,7 +45,35 @@ _PRIVATE_RECORD_FIELDS = ("factor", "build_sha256", "rows_sha256", "pay_per_head
 REJECTION_CRITERIA = ("real_decision", "maps_to_shape")
 # Criterion 5 (protocol §12.4, §12.8): a probe failure is read from the flagged answers, not an excerpt.
 PROBE_CRITERION = "not_recognizable"
-READ_CRITERIA = (*REJECTION_CRITERIA, PROBE_CRITERION)
+# Step 3 item 4 (search-half doc §4.6.5): a knowledge-probe failure is read from the flagged replies.
+KNOWLEDGE_CRITERION = "not_known"
+READ_CRITERIA = (*REJECTION_CRITERIA, KNOWLEDGE_CRITERION, PROBE_CRITERION)
+# Item 4's definition of a reply that fails, word for word per message, with the dated notes of 2026-10-21:
+# (a) the reasoning counts as part of the reply; (d) the reduction question's own words are not a reply's. The
+# only definitions the reader of a knowledge failure is given.
+_REASONING_CLAUSE = (
+    " Reasoning shown with a reply counts as part of it: reasoning that states or guesses the decision, "
+    "or gives a figure of it, fails the reply whatever its answer says."
+)
+KNOWLEDGE_DEFINITIONS = {
+    "facility": (
+        "A reply fails if it states, or guesses, that the facility was or would be closed or sold or its "
+        "production moved, or if it gives a figure of the decision. A reply that says unknown, or that is "
+        "about the company or the facility but does not state the decision, passes."
+        + _REASONING_CLAUSE
+    ),
+    "reduction": (
+        "A reply fails if it states, or guesses, that the reduction happened, or if it gives a figure of "
+        "the decision. A reply that says unknown, or that is about the company but does not state the "
+        "decision, passes. The question itself says that the company announced a workforce reduction in "
+        "that month: a reply that only repeats this, or takes it as given, has not stated the decision. A "
+        "reply fails if it says it knows of the reduction, or gives or guesses any detail of it that the "
+        "question does not give, such as its size, the sites or units it touched, its cause or its day."
+        + _REASONING_CLAUSE
+    ),
+}
+# Which of item 4's two messages a shape is asked (S4 has none).
+KNOWLEDGE_QUESTIONS = {"S1": "reduction", "S2": "reduction", "S3": "facility"}
 # Protocol §12.8's definition, word for word: the only definition the reader of a probe failure is given.
 NAMES_THE_COMPANY = (
     "A call names the company if its answer contains the company's name or a former name, its ticker, "
@@ -150,9 +178,76 @@ def probe_rejection_material(case: CaseAppendix, probe_set: int) -> Material:
     )
 
 
+def flagged_replies_text(replies: list[dict[str, object]]) -> str:
+    """The failing replies as the reader sees them, numbered, with no model named; the one place the block is
+    made, so a read can be proved to have been given exactly these replies. A call empty three times is never
+    among them: it fails by rule and is not read (item 4's dated note (e))."""
+    blocks: list[str] = []
+    for n, reply in enumerate(replies, start=1):
+        status = str(reply.get("status", ""))
+        ended = {
+            "truncated": "cut off at the length limit",
+            "content_filtered": "stopped by a content filter",
+            "unexpected_stop": "ended in an unusual way",
+            "no_text": "ended with no answer text",
+        }.get(status)
+        answer = str(reply.get("answer") or "").strip() or "(no answer text)"
+        reasoning = [str(r).strip() for r in reply.get("reasoning") or [] if str(r).strip()]  # type: ignore[attr-defined]
+        blocks.append(
+            f"Reply {n}:"
+            + (f" [{ended}]" if ended else "")
+            + f"\nAnswer: {answer}\nReasoning: "
+            + ("\n".join(reasoning) if reasoning else "(none shown)")
+        )
+    return "\n\n".join(blocks)
+
+
+def _flagged_knowledge(case: CaseAppendix) -> tuple[str, str, list[dict[str, object]]]:
+    path = case.knowledge_flagged_path
+    try:
+        record = json.loads(_read_text(path, "the flagged knowledge-probe replies"))
+    except ValueError as exc:
+        raise MaterialError(f"{path.name} is not valid JSON") from exc
+    shape = record.get("shape") if isinstance(record, dict) else None
+    question = record.get("question") if isinstance(record, dict) else None
+    replies = record.get("replies") if isinstance(record, dict) else None
+    if (
+        shape not in KNOWLEDGE_QUESTIONS
+        or not isinstance(question, str)
+        or not question.strip()
+        or not isinstance(replies, list)
+        or not replies
+        or not all(isinstance(r, dict) and not r.get("empty") for r in replies)
+    ):
+        raise MaterialError(
+            f"{path.name} does not hold the flagged replies of a knowledge probe: "
+            "run `hc case knowledge-verdict` first"
+        )
+    return str(shape), question, replies
+
+
+def knowledge_rejection_material(case: CaseAppendix) -> Material:
+    """A ``not_known`` read: item 4's definition for the probed shape, the question that was asked and the
+    failing replies, and nothing else. Not the dossier, not a result, not which model answered."""
+    shape, question, replies = _flagged_knowledge(case)
+    return _assemble(
+        "rejection",
+        KNOWLEDGE_CRITERION,
+        [
+            ("Definition", KNOWLEDGE_DEFINITIONS[KNOWLEDGE_QUESTIONS[shape]]),
+            ("Question asked", question),
+            ("Flagged replies", flagged_replies_text(replies)),
+        ],
+    )
+
+
 def rejection_material(
     case: CaseAppendix, criterion: str, probe_set: int | None = None
 ) -> Material:
+    if criterion == KNOWLEDGE_CRITERION:
+        if probe_set is not None:
+            raise MaterialError("only a probe read names a probe set")
+        return knowledge_rejection_material(case)
     if criterion == PROBE_CRITERION:
         if probe_set is None:
             raise MaterialError("a probe read names its probe set")
