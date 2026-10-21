@@ -442,3 +442,62 @@ as its earlier candidate, which under the rule of 2026-10-20 would point criteri
 the source row is now left out. Also fixed: the summary counts the list as `closure/pre` (was `pre/pre`), and
 `--join` refuses a row not on the closure list (item 6). The rule for a joined row and a pool row that are one
 decision is the search-half doc's §11 entry of this date. `make check` green.
+
+**Stage 4 step 3, part 3a: the pool searched (2026-10-21, once, by him).** `hc case search --pool pre --date
+2026-10-21 --join closure-f04=2026-05-12 --join closure-18=2026-05-12`. The dates are the earlier mentions that
+failed each row, read from the pre-registered log's reasons with him: closure-f04's, the company's public statement
+of 2026-05-12; closure-18's, the first-quarter results 8-K of the same day, which reported its restructuring in
+aggregate (its 8-K names several sites, so step 1 item 5 may leave it no S3 total; criterion 1 or 4 judges it).
+**Result, counts only:** 172 candidates, `pre-01` to `pre-172` (2026-06-29 back to 2025-07-01, 7 to 23 a month):
+129 from channel 1 (5 of them also found by a press phrase), 41 by press phrases alone, and the 2 joined, `pre-18`
+(closure-18) and `pre-20` (closure-f04). 30 share a filer with an earlier candidate; neither joined row is flagged
+against its own source (the review's fix), and no pool row is the 2026-05-12 mention of either, so §11's rule (b)
+is not needed. Channel 1's 129 is below §4.6.5 E's sizing count of 142, made before the patch with its own
+filters; every query was read to its last page, so the recorded run is the pool. Written: `pre-candidates.json`,
+`exploratory-log-40.json`.
+
+**Stage 4 step 3, part 3b: the knowledge probe built (2026-10-21, Sonnet at medium effort, in the same chat as
+3a's review; Opus review pending in a fresh chat).** `hc case knowledge-probe <label> [--yes]`, in
+`caseprobe/knowledge.py` (not `casebuild/`: `tests/test_architecture` keeps probe answers out of the case builder).
+Refused, before any byte leaves the machine, unless the label's row is a step 3 or 4 row that met every
+criterion before `not_known` and has no result on it; then the inputs file, no earlier probe record, and the
+models; then the spend question; then the keys; then, for each of nine calls, the request record, the call and
+the reply record. **The message is filled from `knowledge-inputs.toml`, placed by hand in the case's folder**
+(`shape`, `company`, and for S3 `facility` and `place`, in the first-disclosure document's own words): no name is
+typed on a command line or printed, so a pasted session cannot carry one. S1 and S2 take the month and year from
+the row's first-disclosure date; S4 has no message in item 4 and is not offered. **Models** are chosen by role,
+exactly one `main` and one `second_family` plus the extraction model: `haiku-5-5`, `gpt-oss-openrouter`,
+`sonnet-5-5-extraction` today; a models.toml that changes the set is refused. Three calls each, no system text,
+4,000 tokens, the one message word for word (a test compares both templates with this doc's own text). **A reply
+is never retried, whatever its status** (truncated, empty and filtered replies are recorded as such); an API error
+is kept as its own record and retried with backoff, five at most per call, a fatal code stops. Records, write-once,
+in the label's folder: `knowledge-probe-<model>-<n>-request.json`, `-reply.json`, `-error-<k>.json`, each with the
+entry's and the prompt's sha256, the inputs file's sha256, the git commit and whether `src` or `experiment` had
+uncommitted changes (recorded, not refused). A second run for the label is refused, including after a run that
+stopped part-way. The command prints counts only (per model, how many answers were exactly "unknown") and logs
+nothing: 3c holds his read of every other answer, the reader's brief and the log's `not_known` result.
+**For the reviewer:** (1) the part-way rule, a stopped run is never resumed (the case probe resumes; item 5 says a
+second run is refused, and a resume could shop for replies); (2) a dirty `src` is recorded, not refused, unlike the
+reader's frozen-inputs check; (3) no pacing beyond the API-error backoff (nine calls). `make check` green, 2697
+tests (47 new).
+
+**Part 3b reviewed (2026-10-21, a fresh Opus chat, high effort).** One fault, fixed: the probe sent its "no system
+text" as an empty one (`"system": ""` to Anthropic, an empty system message to OpenRouter), a request shape no call
+had sent before; a 400 on it would have stopped the first run at its first call, and a stopped run is never resumed.
+Both providers' text bodies now leave out an empty system text (the decision bodies are unchanged, and every
+earlier text call sends one); two provider tests. `make check` green, 2699. **The three questions:** (1) the
+part-way rule stands as built. A later rule to continue a stopped run (never repeat a call with a reply; make again
+a call with none, as an API error is) could be adopted even after partial replies are seen, because one failed call
+fails the candidate: continuing can add failures but never remove one, so it cannot shop. Decided only if a run
+stops. (2) a dirty `src` recorded, not refused: accepted, since the request record holds the message and the whole
+body sent. (3) no pacing: accepted. **For 3c, his:** (a) `gpt-oss-120b`'s reasoning cannot be turned off and its
+text is kept in each reply's `raw_response`: does reasoning that states or guesses the decision fail the call,
+when the answer is "unknown"? Recommended yes (a dated patch to item 4), which means reading its reasoning on all
+three calls; (b) the probe's shape comes from the inputs file and the build's from `--shape`, with nothing tying
+them: recommended, a probed row's build refused when its shape differs from the shape in its probe records.
+**Both adopted (his, about 3:45 PM) and built the same chat (Opus):** the search-half doc's item 4 has a dated
+note and §11 an entry. (a) each call's result records whether its reply carried reasoning, and the command counts
+those among "for him to read"; 3c reads the reasoning from `raw_response`. (b) `check_build_shape` in
+`caseprobe/knowledge.py`, called by `hc case build` after its log check and before any fetch or key, compares the
+question asked (S1 and S2 share one, so a slip between them in the inputs file costs nothing; S4 is refused).
+`make check` green.

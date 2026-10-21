@@ -145,6 +145,16 @@ def test_text_without_a_tool_call_is_end_turn_and_the_classifier_calls_it_no_too
     assert classify(result, experiment().scenario).status == "no_tool_call"
 
 
+def test_a_text_request_with_no_system_text_sends_no_system_message() -> None:
+    body = OpenRouterProvider(KEY, DEAD_URL).text_request_body(TextRequest(ROUTE, "", "usr", 300))
+    assert body["messages"] == [{"role": "user", "content": "usr"}]
+    with_system = TextRequest(ROUTE, "sys", "usr", 300)
+    assert OpenRouterProvider(KEY, DEAD_URL).text_request_body(with_system)["messages"][0] == {
+        "role": "system",
+        "content": "sys",
+    }
+
+
 def test_finish_reason_length_is_a_truncation() -> None:
     reply = completion(tool_calls=[], finish_reason="length", content="")
     with FakeOpenRouter(lambda body: (200, reply)) as server:

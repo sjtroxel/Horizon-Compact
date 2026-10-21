@@ -7,7 +7,41 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-21, about 1:45 PM (STAGE 4 STEP 3, PART 3a BUILT AND OPUS-REVIEWED; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-10-21, about 4:05 PM (PART 3b REVIEWED, BOTH DECISIONS BUILT; HIS COMMIT NEXT)
+>
+> **Review (fresh Opus chat, high):** one fault, fixed: an empty system text is now left out of the request, not
+> sent empty (both providers' text bodies; two tests). The three review questions settled as built; see the
+> exploratory plan's review note. **His two decisions (about 3:45 PM), built the same chat:** gpt-oss's reasoning
+> is read as the answer, and `hc case build` builds a pool row only as a shape its probe asked about (search-half
+> doc item 4's dated note, §11). `make check` green, 2706. **Uncommitted:** all of 3b, the pool-run notes.
+> **Next:** his commit and push, before any probe runs (so its records say `git_dirty: false`); then 3c.
+>
+> *The 3:10 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 3:10 PM (STAGE 4 STEP 3, PART 3b BUILT; OPUS REVIEW NEXT)
+>
+> **Measured:** last commit `af9254a` (3a, pushed). **Uncommitted:** the pool run's doc notes (2:25 PM block below),
+> and part 3b: `caseprobe/knowledge.py`, `hc case knowledge-probe`, `CaseAppendix.knowledge_inputs_path`,
+> `tests/test_knowledge_probe.py`, the exploratory plan's as-built note. `make check` green, 2697. **Nothing was
+> sent to any model:** the probe is not run for any real candidate until he places a candidate's inputs file and
+> runs it. **Next:** a fresh Opus chat (high) reviews 3b only (the plan's three review questions are in its
+> as-built note); then 3c (his read of every answer that is not "unknown", the reader's brief, the log's
+> `not_known` result). Pool checking from `pre-01` and stage 3 are as the 2:25 PM block says.
+>
+> *The 2:25 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 2:25 PM (THE POOL IS SEARCHED: 172 CANDIDATES; 3b NEXT)
+>
+> **Measured:** last commit `af9254a` (3a with its review, pushed). **Uncommitted, docs only:** the pool's run in the
+> exploratory plan's as-built notes, this block. **The pool** (once, 2026-10-21, SEC only): 172 candidates, `pre-01`
+> to `pre-172`, newest first; closure-18 joined as `pre-18` and closure-f04 as `pre-20`, both on 2026-05-12, the
+> earlier mentions their reasons record. **Next:** 3b (`hc case knowledge-probe`), Sonnet builds, Opus reviews.
+> Checking the pool's rows from `pre-01` on, criteria 1 to 4, needs no probe and can run beside it (Opus with him;
+> each rejection read on criteria 3 or 4 costs 1 to 3 cents). Stage 3 (closure-07, then closure-19) is still open.
+>
+> *The 1:45 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 1:45 PM (STAGE 4 STEP 3, PART 3a BUILT AND OPUS-REVIEWED; HIS COMMIT NEXT)
 >
 > **Review (fresh Opus chat, high):** one fault, fixed (a joined row's `same_filer_as` named its own source row);
 > the summary key is `closure/pre`; `--join` refuses a row not on the closure list. **A rule, his, written before

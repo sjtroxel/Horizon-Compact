@@ -98,6 +98,13 @@ from horizon_compact.casebuild.search import (
 from horizon_compact.casebuild.sections import build_section_inputs
 from horizon_compact.casebuild.splitter import SplitRefused
 from horizon_compact.casebuild.terms import CaseTerm, CaseTermsError, parse_case_terms
+from horizon_compact.caseprobe.knowledge import (
+    KnowledgeError,
+    KnowledgeOutcome,
+    check_build_shape,
+    run_knowledge_probe,
+)
+from horizon_compact.caseprobe.knowledge import Preview as KnowledgePreview
 from horizon_compact.caseprobe.run import ProbeRefused, check_probe_launch, run_case_probe
 from horizon_compact.caseprobe.upload import UploadError, upload_case
 from horizon_compact.caseprobe.verdict import VerdictError, probe_verdict
@@ -1331,6 +1338,71 @@ def cmd_case_reader(args: argparse.Namespace) -> int:
     return CLEAN_EXIT if done.usable else CHECK_FAILED_EXIT
 
 
+def _knowledge_provider(route_kind: str) -> TextProvider:
+    """The key of the route a probe model is on, from the environment or a hidden prompt; a function so the
+    tests can set it. Asked for last, after every refusal and the spend warning."""
+    try:
+        if route_kind == "openrouter":
+            return OpenRouterProvider(read_key(os.environ))
+        return AnthropicProvider(read_anthropic_key(os.environ))
+    except (OpenRouterKeyError, AnthropicKeyError) as exc:
+        raise KnowledgeError(str(exc)) from exc
+
+
+def _confirm_knowledge_spend(preview: KnowledgePreview, *, yes: bool) -> bool:
+    """The probe's calls are paid from his own credit on each route. Print the most they can cost, per model,
+    and ask; anything but ``y`` sends nothing. Nothing printed holds the name or the message."""
+    for m in preview.models:
+        credit = "OpenRouter" if m.route_kind == "openrouter" else "Anthropic API"
+        print(
+            f"knowledge probe: {m.model_id} ({m.key}), {m.calls} calls, at most about "
+            f"${m.worst_case_usd:.2f} of your own {credit} credit (usually far less)"
+        )
+    print(f"the most the nine calls can cost: about ${preview.worst_case_usd:.2f}")
+    if yes:
+        return True
+    try:
+        answer = input("Continue? [y/N] ")
+    except EOFError:
+        answer = ""
+    return answer.strip().lower() == "y"
+
+
+def _print_knowledge_outcome(label: str, done: KnowledgeOutcome) -> None:
+    """Counts only: no name, no message and no answer."""
+    for key in dict.fromkeys(r.model_key for r in done.results):
+        mine = [r for r in done.results if r.model_key == key]
+        odd = sorted({r.status for r in mine if r.status != "replied"})
+        print(
+            f"  {key}: {len(mine)} calls, {sum(r.unknown for r in mine)} answered exactly "
+            f"'unknown', {sum(r.reasoning for r in mine)} with reasoning, "
+            f"{sum(r.to_read for r in mine)} for him to read (the answer or its reasoning)"
+            + (f"; not a reply: {', '.join(odd)}" if odd else "")
+        )
+    print(
+        f"{label}: {len(done.results)} calls recorded, {done.api_errors} API errors retried; "
+        f"estimated cost about ${done.cost_usd:.4f}. Nothing is logged: his read of every answer that "
+        "is not 'unknown' comes next (the verdict, part 3c)"
+    )
+
+
+def cmd_case_knowledge_probe(args: argparse.Namespace) -> int:
+    """Step 3's knowledge probe (search-half doc §4.6.5 step 3 item 4). Records requests and replies in the
+    case's folder, logs nothing, and prints counts only."""
+    case = open_case(args.label)
+    root = default_repo_root()
+    done = run_knowledge_probe(
+        case,
+        search=open_case("search"),
+        repo_root=root,
+        git=git_in(root),
+        confirm=lambda preview: _confirm_knowledge_spend(preview, yes=args.yes),
+        make_provider=_knowledge_provider,
+    )
+    _print_knowledge_outcome(args.label, done)
+    return CLEAN_EXIT
+
+
 def _lock_probe_set(root: Path, label: str) -> int:
     """The probe set the committed ``case.lock`` is for: the default of every probe command."""
     return read_case(root, label).probe_set
@@ -2010,6 +2082,9 @@ def cmd_case_build(args: argparse.Namespace) -> int:
     case = open_case(args.label)
     search = open_case("search")
     cik = _build_candidate(search, args.label, args.cutoff)
+    check_build_shape(
+        search, case, args.shape
+    )  # a pool row: only a shape its knowledge probe asked about
     terms = _case_terms(case)
     hand, hand_sha = load_hand_boundaries(case.hand_boundaries_path)
     model_key, model = load_extraction_model()
@@ -2139,6 +2214,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_scenario(args)
         if args.action == "reader":
             return cmd_case_reader(args)
+        if args.action == "knowledge-probe":
+            return cmd_case_knowledge_probe(args)
         if args.action == "upload":
             return cmd_case_upload(args)
         if args.action == "probe":
@@ -2169,6 +2246,7 @@ def cmd_case(args: argparse.Namespace) -> int:
         CaseLockError,
         ScenarioRefused,
         ReaderError,
+        KnowledgeError,
         ReaderModelError,
         MaterialError,
         BriefError,
@@ -2710,6 +2788,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="for not_recognizable: the probe set read (default: the set the committed case.lock is for)",
     )
     reader.add_argument("--yes", action="store_true", help="skip the spend question")
+    knowledge = case_actions.add_parser(
+        "knowledge-probe",
+        help="Step 3's knowledge probe (search-half doc §4.6.5 step 3 item 4): three calls to each official "
+        "model and the extraction model with one message about the candidate's decision. The message is "
+        "filled from knowledge-inputs.toml in the case's folder. Sends a real company's name to the models; "
+        "costs his own credit. Writes the requests and replies into the case's folder; logs nothing.",
+    )
+    knowledge.add_argument("label", help="the pool candidate's neutral id, such as pre-01")
+    knowledge.add_argument("--yes", action="store_true", help="skip the spend question")
     resolve = case_actions.add_parser(
         "resolve",
         help="His written resolution of a 'concerns' or 'disagrees' reading of the case's current scenario "

@@ -128,6 +128,17 @@ def test_a_text_request_offers_no_tool_and_no_tool_choice() -> None:
     assert provider(server).text_request_body(text) == body
 
 
+def test_a_text_request_with_no_system_text_sends_no_system_field() -> None:
+    server = FakeAnthropic(
+        lambda body: ok(
+            message(content=[{"type": "text", "text": "unknown"}], stop_reason="end_turn")
+        )
+    )
+    provider(server).decide_text(TextRequest(ROUTE, "", "usr", 300))
+    assert "system" not in server.bodies[0]
+    assert server.bodies[0]["messages"] == [{"role": "user", "content": "usr"}]
+
+
 def test_a_between_tools_route_sends_between_tools_and_records_it() -> None:
     server = FakeAnthropic(
         lambda body: ok(

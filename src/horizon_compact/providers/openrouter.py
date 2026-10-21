@@ -246,12 +246,11 @@ class OpenRouterProvider:
 
     @staticmethod
     def _text_body(request: TextRequest) -> dict[str, Any]:
+        # no system text is no system message, not an empty one (the knowledge probe's call)
+        system = [{"role": "system", "content": request.system}] if request.system else []
         return {
             "model": request.route.invoke_id,
-            "messages": [
-                {"role": "system", "content": request.system},
-                {"role": "user", "content": request.user},
-            ],
+            "messages": [*system, {"role": "user", "content": request.user}],
             "max_tokens": request.max_tokens,
             "usage": {"include": True},
         }

@@ -167,6 +167,13 @@ class CaseAppendix:
         total. Private."""
         return self.directory / "total-report.txt"
 
+    @property
+    def knowledge_inputs_path(self) -> Path:
+        """What the knowledge probe's message is filled from (search-half doc §4.6.5 step 3 item 4): the
+        shape, the filer's name and, for S3, the facility and its town, in the first-disclosure document's own
+        words. Placed by hand, so no name is typed on a command line. Private."""
+        return self.directory / "knowledge-inputs.toml"
+
     def probe_reads_path(self, probe_set: int) -> Path:
         """Every recognition-probe answer of one set and what he read in it (protocol §12.8); written by
         ``hc case probe-verdict``. Private: it holds the model's answers."""

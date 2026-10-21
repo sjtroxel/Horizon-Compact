@@ -210,12 +210,10 @@ class AnthropicProvider:
 
     @staticmethod
     def _base_body(route: ModelRoute, system: str, user: str, max_tokens: int) -> dict[str, Any]:
-        body: dict[str, Any] = {
-            "model": route.invoke_id,
-            "max_tokens": max_tokens,
-            "system": system,
-            "messages": [{"role": "user", "content": user}],
-        }
+        body: dict[str, Any] = {"model": route.invoke_id, "max_tokens": max_tokens}
+        if system:  # no system text is no field, not an empty one (the knowledge probe's call)
+            body["system"] = system
+        body["messages"] = [{"role": "user", "content": user}]
         if route.thinking_off and route.thinking_between_tools:
             raise ValueError("a route sends one thinking setting, not two")
         if route.thinking_off:

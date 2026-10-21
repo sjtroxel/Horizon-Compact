@@ -4,7 +4,7 @@
 > about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** **Patched 2026-10-16 (his): §4.6.1, the case scenario
 > is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** **Patched
 > 2026-10-17 (his), after the independent reader's read: §4.6.2, the total in criterion 4 and a search hit
-> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** **Patched 2026-10-19 (his), after the reader's read: §4.6.5, exploratory cases after the pre-registered rule found none; their build is planned in `phase-5-case-building-exploratory-IMPLEMENTATION.md`.** **Patched 2026-10-21 (his), with no independent read: §4.6.6, a correct small S3 build passes the pay-per-head check.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** **Patched 2026-10-19 (his), after the reader's read: §4.6.5, exploratory cases after the pre-registered rule found none; their build is planned in `phase-5-case-building-exploratory-IMPLEMENTATION.md`.** **Patched 2026-10-21 (his), with no independent read: §4.6.6, a correct small S3 build passes the pay-per-head check.** **Patched 2026-10-21 (his), on Opus's review of the exploratory part's 3b: §4.6.5 step 3 item 4, reasoning is read as the answer and the build asks the probe's question.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -684,7 +684,13 @@ channel was written after the pre-registered ones found nothing.
    that is not "unknown"; the reader reads every failure (with a brief like criterion 5's: the definition and the
    flagged answers, never the dossier), and a dispute is settled as for criterion 5 (§4.9). **The extraction model is
    probed because it writes the dossier:** a model that knows the outcome could carry it into the text in ways the
-   foreshadowing check does not catch.
+   foreshadowing check does not catch. *Dated note, 2026-10-21 (his, on Opus's review of the exploratory part's
+   3b, before any probe was run): (a) **reasoning is read as the answer.** A reply that carries the model's
+   reasoning (`gpt-oss-120b`'s cannot be turned off, and is kept whole in the reply record) fails the call if
+   the reasoning states or guesses the decision or gives a figure of it, whatever the answer says; he reads the
+   reasoning of every such reply, an "unknown" one included. (b) **The build asks the probe's question.** A probed
+   row is built only as a shape its probe asked about: S3 as S3, S1 or S2 as S1 or S2 (one message), never S4
+   (none); `hc case build` reads the shape from the probe's request records and refuses any other (§11).*
 5. **Where it runs:** on the laptop, `hc case knowledge-probe <label>`, refused unless the label's row stands at
    `not_known`. The request and every reply are written once in the case's appendix folder with the usual provenance,
    and a second run for the label is refused. It is the only path that sends an official model a real company's name
@@ -2043,3 +2049,14 @@ the decision was never judged. A pool row that is its decision is checked as any
 **the one with the lower id stands**, and the other fails criterion 1 as "already a candidate: pre-NN". The order is
 mechanical, so no one picks which. In code, a joined row's `same_filer_as` leaves out its own source row, which is
 the same filing, not an earlier candidate.
+
+**The knowledge probe's reasoning and the build's shape (2026-10-21, his, on Opus's review of the exploratory
+part's 3b; written before any probe was run).** Two changes to step 3 item 4, recorded in a dated note there.
+**(a)** `gpt-oss-120b` cannot answer without reasoning, and its reasoning comes back with the reply. Item 4 judged
+the answer only, so a model that recalled the decision in its reasoning and then said "unknown" would have
+passed. Its reasoning now counts as part of the answer, so he reads every reply that carries reasoning, an "unknown"
+one included; the command's counts say how many. **(b)** The probe's message was chosen by the shape in the
+hand-placed inputs file and the build's by `--shape`, with nothing tying them, so a row probed with the facility
+question could be built as S2, whose decision the probe never asked about. `hc case build` now refuses a pool row
+whose shape is asked a different question from the one in its probe's request records (S1 and S2 share one; S4
+has none). It reads the request records only, never a reply.
