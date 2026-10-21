@@ -10,7 +10,10 @@ scaled headcount under 100 is stated as "fewer than 100", not rounded.
 **The check.** Wherever a total pay figure and a headcount are both stated, pay per head after rounding stays
 within 3.5% of its unscaled value. A failure is a reported deviation for him to decide; the factor is not
 redrawn. (Rounding a headcount of 100 or more down by 2.5% raises pay per head by 2.6%, three significant
-digits move a dollar figure by at most 0.5%: together at most 3.1%, so a correct build always passes.)
+digits move a dollar figure by at most 0.5%: together at most 3.1%, so a correct build always passes.
+An S3 case in the exploratory record states a total under 100 to the nearest whole person and a total-pay
+figure to three significant digits only (search-half doc §4.6.6), which keeps that guarantee down to a
+scaled total of 30: at most 1.7% for the headcount and 0.5% for the dollars.)
 """
 
 from __future__ import annotations
@@ -85,10 +88,13 @@ def scale_heads(heads: int, factor: float) -> ScaledHeads:
 
 
 def scale_total_heads(heads: int, factor: float) -> int:
-    """An S3 case's total headcount, scaled to the nearest 5 and stated as a number even under 100
-    (search-half doc §4.6.5 step 1 item 2). From 100 up it is ``scale_heads``'s; below, ``scale_heads`` says
-    "fewer than 100" and this does not."""
+    """An S3 case's total headcount, stated as a number even under 100 (search-half doc §4.6.5 step 1 item 2).
+    From 100 up it is ``scale_heads``'s, to the nearest 5; below 100, where ``scale_heads`` says "fewer than
+    100" and this does not, it is to the nearest whole person (§4.6.6 B.1), so rounding moves pay per head by
+    at most 1.7% at the S3 floor's smallest scaled total (30)."""
     scaled = Decimal(heads) * Decimal(repr(factor))
+    if scaled < SMALL_GROUP:
+        return int(scaled.to_integral_value(rounding=ROUND_HALF_UP))
     return int((scaled / 5).to_integral_value(rounding=ROUND_HALF_UP)) * 5
 
 

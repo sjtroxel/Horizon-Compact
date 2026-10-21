@@ -11,7 +11,8 @@ value of each figure the case can state, with a scale and a source. The render
 * drops a sentence whole when it holds a placeholder with no row, and, if any option text (or, for S1, any
   lever's detail) drops one, drops every sentence with a placeholder from all of them (equal treatment);
 * states a heads figure under 100 as "fewer than 100", refuses a total under 100 (criterion 4), and gives a
-  cap under 100 the value of the total;
+  cap under 100 the value of the total (an S3 total is the exception: a number, to the nearest whole person
+  under 100, and an S3 total-pay figure is rounded to three significant digits and no further, §4.6.6);
 * never prints a cap set to the total, or a figure derived from one, outside the menu heading's sum of caps:
   no source states it, so its sentences are dropped like any other with no row;
 * takes the fictional value only for the label rows that are names (the plant numbers);
@@ -86,6 +87,7 @@ SMALL = Decimal(scale.SMALL_GROUP)
 S3_FORM_PATH = "experiment/case-forms/s3.toml"
 S3_FLOOR = Decimal(50)
 S3_TOTAL_PAY = frozenset({"payroll_p6", "s3_retool_payroll", "s3_sell_payroll"})
+_MILLION = Decimal(1_000_000)
 
 CRITERION_4 = "criterion 4 (maps_to_shape)"
 ROWS = "rows file"
@@ -439,11 +441,43 @@ class _Values:
     stand_ins: set[str] = field(default_factory=set)
 
 
+@dataclass(frozen=True)
+class _PayResolved(Resolved):
+    """An S3 total-pay figure (§4.6.6 B.2): its value is rounded to three significant digits and no further,
+    so it reads in millions with the digits it has ("$1.08 million", "$0.946 million", "$14.3 million"), at
+    least one decimal. Only the case's copy reads this way; ``format_value`` and the fictional rows are
+    untouched."""
+
+    @property
+    def shown(self) -> str:
+        assert isinstance(self.value, Decimal)
+        millions = format(abs(self.value) / _MILLION, ",f")
+        whole, _, decimals = millions.partition(".")
+        sign = "-" if self.value < 0 else ""
+        return f"{sign}${whole}.{decimals.rstrip('0') or '0'} million"
+
+
+def _is_s3_pay(inputs: Inputs, key: str) -> bool:
+    return inputs.shape == "S3" and key in S3_TOTAL_PAY
+
+
+def _resolved(inputs: Inputs, key: str, row: FigureRow, shown: Decimal | str) -> Resolved:
+    if _is_s3_pay(inputs, key) and isinstance(shown, Decimal):
+        return _PayResolved(key, row, shown)
+    return Resolved(key, row, shown)
+
+
 def _scaled(
-    row: CaseRow, fictional: FigureRow, factor: float, *, as_number: bool = False
+    row: CaseRow,
+    fictional: FigureRow,
+    factor: float,
+    *,
+    as_number: bool = False,
+    to_step: bool = True,
 ) -> Decimal | str:
-    """``as_number``: an S3 case's total, stated as a number to the nearest 5 even under 100 (§4.6.5 step 1
-    item 2)."""
+    """``as_number``: an S3 case's total, stated as a number even under 100: to the nearest whole person
+    there (§4.6.5 step 1 item 2, §4.6.6 B.1). ``to_step`` false: a dollar figure stops at three significant
+    digits instead of going on to the fictional row's step (an S3 total-pay figure, §4.6.6 B.2)."""
     assert row.value is not None
     value = Decimal(str(row.value))
     if row.scale == "heads" and as_number:
@@ -453,6 +487,8 @@ def _scaled(
         return Decimal(heads.value) if heads.value is not None else scale.FEWER_THAN
     if row.scale == "dollars":
         value = scale.scale_dollars(value, factor)
+        if not to_step:
+            return value
     step = step_for(fictional)
     assert step is not None
     return round_half_up(value, step)
@@ -489,7 +525,10 @@ def _derive(inputs: Inputs, values: _Values, skip: set[str]) -> None:
                 continue  # a division by zero on the case's numbers: the row cannot be filled
             step = step_for(row)
             assert step is not None
-            value = round_half_up(value, step)
+            if _is_s3_pay(inputs, key):  # three significant digits and no step (§4.6.6 B.2)
+                value = scale.round_significant(value)
+            else:
+                value = round_half_up(value, step)
             if row.unit == "count" and refs & values.heads:
                 values.heads.add(key)
                 # an S3 total under 100 is a number (its step is a multiple of 5): §4.6.5 step 1 item 2
@@ -497,7 +536,7 @@ def _derive(inputs: Inputs, values: _Values, skip: set[str]) -> None:
                 shown: Decimal | str = scale.FEWER_THAN if small else value
             else:
                 shown = value
-            values.resolved[key] = Resolved(key, row, shown)
+            values.resolved[key] = _resolved(inputs, key, row, shown)
             values.derived.append(key)
 
 
@@ -542,10 +581,16 @@ def case_values(inputs: Inputs) -> _Values:
             continue
         fic = fictional.rows[key]
         try:
-            shown = _scaled(row, fic, inputs.factor, as_number=_is_s3_total(inputs, key))
+            shown = _scaled(
+                row,
+                fic,
+                inputs.factor,
+                as_number=_is_s3_total(inputs, key),
+                to_step=not _is_s3_pay(inputs, key),
+            )
         except FigureError as exc:
             raise ScenarioRefused(ROWS, f"row {key}: {exc}") from exc
-        values.resolved[key] = Resolved(key, fic, shown)
+        values.resolved[key] = _resolved(inputs, key, fic, shown)
         if row.scale == "heads":
             values.heads.add(key)
     _derive(inputs, values, equals_total)

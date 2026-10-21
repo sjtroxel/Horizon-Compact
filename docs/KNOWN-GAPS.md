@@ -7,7 +7,27 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-21, about 10:15 AM (STAGE 2 DONE: TWO ROWS PASS; STAGE 4 OPENS)
+> ## START HERE — where things stand, 2026-10-21, about 12:40 PM (§4.6.6 BUILT BY SONNET AND OPUS-REVIEWED; HIS COMMIT NEXT)
+>
+> **Measured:** last commit `5c64ed8` (stage 2, pushed). **Uncommitted:** the code below; in docs, the search-half doc's §4.6.6
+> (new) with dated notes at §4.6.5 step 0 item 3 and step 1 item 2 and the status line; the exploratory plan's stage 3
+> prerequisite; this block.
+>
+> **§4.6.6, drafted by Opus:** a correct small S3 build can fail the pay-per-head check two ways (a total under 100
+> rounded to 5; a total-pay figure rounded to the fictional row's $100,000 step), and §12.6 drops such a case. The
+> change: an S3 total under 100 to the nearest whole person; an S3 total-pay figure to three significant digits with
+> no step. A sweep of 2,683,692 renders each way: thousands fail now, none after. **Adopted by him about 11:56 AM,
+> with no independent read** (as recommended; about $0.24 saved).
+>
+> **Built 2026-10-21 (Sonnet, medium):** `scale.py`, `scenario.py`, tests; `make check` green, 2642; `hc scenarios check`
+> unchanged. **Uncommitted:** that code, the docs. **Reviewed** the same day (a fresh Opus chat, high effort): no code fault.
+> **Then, in this order:** (1) his commit and push; (2) stage 4's step
+> 3 (Sonnet builds, Opus reviews), which can run beside (3); (3) stage 3 for closure-07, then closure-19 (Opus with
+> him). The open question on the reader's brief (item 3's attribution condition) stands.
+>
+> *The 10:15 AM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 10:15 AM (STAGE 2 DONE: TWO ROWS PASS; STAGE 4 OPENS)
 >
 > **Measured:** last commit `e6dbaaa` (stage 1, pushed). **Uncommitted, docs only:** the exploratory plan (steps 7 to
 > 9 done, stage 2's as-built note in §9), the search-half doc's §11 entry, ROADMAP and this file. His commands, one at

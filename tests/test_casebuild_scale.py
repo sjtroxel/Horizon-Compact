@@ -157,9 +157,18 @@ def test_a_correct_build_never_fails_the_check() -> None:
 
 
 @pytest.mark.parametrize(
-    ("heads", "factor", "expected"), [(60, 1.0, 60), (52, 0.9, 45), (50, 0.6, 30), (122, 0.9, 110)]
+    ("heads", "factor", "expected"),
+    [
+        (60, 1.0, 60),
+        (52, 0.9, 47),
+        (50, 0.6, 30),
+        (54, 0.6, 32),
+        (66, 1.5, 99),
+        (67, 1.5, 100),
+        (122, 0.9, 110),
+    ],
 )
-def test_an_s3_total_scales_to_the_nearest_5_and_is_a_number_under_100(
+def test_an_s3_total_is_a_number_to_the_nearest_person_under_100_and_to_5_from_100_up(
     heads: int, factor: float, expected: int
 ) -> None:
     assert scale_total_heads(heads, factor) == expected
@@ -168,3 +177,22 @@ def test_an_s3_total_scales_to_the_nearest_5_and_is_a_number_under_100(
 @pytest.mark.parametrize(("heads", "factor"), [(1200, 1.25), (150, 0.9), (400, 1.1), (100, 1.0)])
 def test_an_s3_total_from_100_up_is_scale_heads_own(heads: int, factor: float) -> None:
     assert scale_total_heads(heads, factor) == scale_heads(heads, factor).value
+
+
+def test_an_s3_correct_build_never_fails_the_check_down_to_the_floor() -> None:
+    """§4.6.6 C: a total to the nearest person under 100 and a total-pay figure to three significant digits
+    only, a payroll derived from the headcount or stated, over the S3 floor's range, on a coarse grid."""
+    factors = [0.6 + 0.05 * i for i in range(7)] + [1.1 + 0.1 * i for i in range(6)]
+    failures = []
+    for stated in range(50, 301, 7):
+        for factor in factors:
+            heads = scale_total_heads(stated, factor)
+            for wage in range(25_000, 90_001, 5_000):
+                before = Decimal(stated * wage)
+                derived = round_significant(Decimal(heads * wage))
+                stated_pay = scale_dollars(before, factor)
+                for after in (derived, stated_pay):
+                    check = check_pay_per_head(PayFigure(1, before, after, stated, heads))
+                    if not check.passed:
+                        failures.append((stated, factor, wage, check.change))
+    assert failures == []

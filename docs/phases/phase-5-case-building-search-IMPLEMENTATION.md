@@ -4,7 +4,7 @@
 > about 3:50 PM CDT), all seven decisions in §8 as recommended, (a).** **Stage A built 2026-10-15; Stage B, the search, run 2026-10-16 on the rule date with no deviation (§11).** **Patched 2026-10-16 (his): §4.6.1, the case scenario
 > is rendered from the shape's template and checked by re-render; Stage C step 8 split into 8a and 8b.** **Patched
 > 2026-10-17 (his), after the independent reader's read: §4.6.2, the total in criterion 4 and a search hit
-> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** **Patched 2026-10-19 (his), after the reader's read: §4.6.5, exploratory cases after the pre-registered rule found none; their build is planned in `phase-5-case-building-exploratory-IMPLEMENTATION.md`.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
+> that announces no decision.** **Patched 2026-10-17 (his), after the reader's read: §4.6.3, the headcount floor at criterion 4 is 167 as stated.** **Patched 2026-10-17 (his), after the reader's read: §4.6.4, a candidate's type is decided by §12.1 at criterion 4, with no move between lists.** **Patched 2026-10-19 (his), after the reader's read: §4.6.5, exploratory cases after the pre-registered rule found none; their build is planned in `phase-5-case-building-exploratory-IMPLEMENTATION.md`.** **Patched 2026-10-21 (his), with no independent read: §4.6.6, a correct small S3 build passes the pay-per-head check.** Sources: the Phase 5 scope doc (`docs/phases/phase-5-case-building.md`, its
 > six decisions and dated notes), the code-half doc (`phase-5-case-building-code-IMPLEMENTATION.md`, all of it, as
 > built), the Phase 5.5 scope doc, the protocol as tagged (`experiment/protocol/protocol-v1.md` §12, all of it, §14),
 > `planning/07` §10, Phase 3.5 IMPLEMENTATION doc §16 step 6 and §24.2, the Phase 4 run log §6.9, `KNOWN-GAPS.md`'s
@@ -572,7 +572,8 @@ figures, every option is described without figures alike."
    would be false, and so are the close text's other sentences, so that each option is one sentence.
 3. **The pay-per-head check** (`KNOWN-GAPS.md`, OPEN 2026-10-16): where a kept sentence states both a heads row and a
    total-pay row, the render runs `scale.check_pay_per_head` on the pair and records the result in
-   `scenario-render.json`. A failure is a build error under §12.6.
+   `scenario-render.json`. A failure is a build error under §12.6. *Dated note, 2026-10-21: a correct small build can
+   fail it as this patch first wrote the rounding; §4.6.6 (adopted the same day) restores §12.6's bound.*
 4. **S3's text is about a plant that makes a product family**, so in this record a decision about a facility that
    makes no product (a laboratory, an office, a store, or a warehouse or distribution center on its own) fails
    criterion 4 part (i): the text would misdescribe it.
@@ -595,7 +596,8 @@ it is reported.
    site can be a perfectly good decision. 50 is below every S3 number in the pre-registered record and was chosen
    knowing them. **A reported deviation from §12.6's "fewer than 100":** that rule guards against a small site being
    identified by its exact headcount; the scaled, rounded figure is not the real one, and the recognition probe and
-   §12.11's re-identification check guard the same risk.
+   §12.11's re-identification check guard the same risk. *Dated note, 2026-10-21: §4.6.6 (adopted the same day)
+   states such a total to the nearest whole person instead of 5.*
 3. **Where the total may come from, the first of these that gives one:** the first-disclosure document; the
    pre-cut-off documents (§4.6.2 A.3); then, new, **a public report dated from the first disclosure to 60 days after
    it:** a government notice of the layoffs or the closing for the facility (a WARN notice, in the United States),
@@ -800,6 +802,74 @@ types: taken (D). (9) The realized fall for S2: declined (F). (10) A choice-only
 §12.7: declined; the frozen matcher counts it as one (step 1 item 6). The read's other points (step 2's rules were
 written knowing what they admit; zero-shot recall can miss associative knowledge; a laptop run is less verifiable than
 the container) are limits the patch and the label state, not changed.
+
+#### 4.6.6 Patch 2026-10-21 (his, about 11:56 AM CDT, with no independent read; drafted by Opus): a correct small S3 build passes the pay-per-head check
+
+*ADOPTED 2026-10-21 (his, about 11:56 AM CDT), with no independent read, as recommended (below).* Found at the exploratory part's step 4 (its Opus review, 2026-10-20, "found, not
+changed"); his decision 2026-10-21 that it is fixed before stage 3's first `hc case build`, because protocol §12.6
+drops a case whose check fails with no error to find, so §12.6's fix-and-rebuild path does not recover a correct
+build. Written after the two rows that reach stage 3 were known (closure-07, a stated total of 65; closure-19, about
+150), as §4.6.4 and §4.6.5 were.
+
+**A. The fault.** §12.6 argues that "a correct build always passes" the check for headcounts of 100 or more rounded
+to 5 and dollars to three significant digits (at most 3.1%, inside the 3.5% band). This record states smaller
+numbers, and the render rounds dollars more coarsely than §12.6 says, in two places:
+
+1. **The headcount.** Step 1 item 2 states a scaled S3 total under 100 as a number to the nearest 5. At the floor (50
+   at a factor of 0.6, stated 30) that moves the headcount by up to 2.5 people, 8.3%. Where the payroll is a case row
+   of its own (a stated figure, scaled by the factor), pay per head moves by as much.
+2. **The payroll's step.** A total-pay row (`payroll_p6`, `s3_retool_payroll`, `s3_sell_payroll`) is a `usd_m` row,
+   so the render rounds it, after three significant digits, to the fictional row's step of $100,000 and writes it as
+   "$X.X million". That moves a payroll under about $1.43 million by more than 3.5%. A payroll derived from the
+   headcount (`payroll_p6 = hc_p6 * plant_avg_pay`) is computed from the rounded headcount, so only this step moves
+   its pay per head; a stated payroll takes both.
+
+Neither is a build error: the builder does what the rules say. **Measured** (2026-10-21, the repo's own `scale.py`
+functions; stated totals 50 to 300, 162 factors across both pieces, average pay $25,000 to $90,000 in $1,000 steps,
+2,683,692 renders each way): under the current rules, **2,191 derived-payroll renders fail (worst 6.7%) and 69,041
+stated-payroll renders fail (worst 12.2%)**. For the two rows: a total of 65 fails in 57 of 10,692 draws with a
+derived payroll and in 1,581 with a stated one; a total of 150 fails in none and in 15. Neither row's payroll source
+is settled before its build.
+
+**B. The change** (this record's S3 case scenarios only; every S3 case is now exploratory):
+
+1. **A scaled S3 total under 100 is stated to the nearest whole person**, replacing "to the nearest 5" in step 1
+   item 2. From 100 up it is rounded to 5, as §12.6. The caps set equal to it take the same number. Every other heads
+   figure under 100 still reads "fewer than 100".
+2. **A total-pay figure in an S3 case scenario is rounded to three significant digits** (§12.6's rule for dollars)
+   **and not then to the fictional row's step**, stated or derived, and reads in millions with the digits it has,
+   trailing zeros dropped down to one decimal ("$1.08 million", "$0.946 million", "$0.9 million", "$14.3 million").
+   Every other dollar figure keeps its row's step.
+
+**C. The bound after the change.** A derived payroll: three significant digits only, at most 0.5%. A stated payroll
+with a total under 100: half a person in 30 or more (at most 1.7%) and 0.5% for the dollars, together at most 2.2%;
+from 100 up, §12.6's own 3.1%. **So a correct build always passes again, and a failure means an error, which is
+§12.6's premise.** The same sweep under the changed rules: **no failure in either set** (worst 0.50% derived, 2.59%
+stated).
+
+**D. What does not change.** Protocol §12.6 (tagged) and its 3.5% band; a failure is still a build error, handled as
+§12.6 says. The dossier (`transform.py` states a heads figure under 100 as "fewer than 100", which the check skips,
+and rounds dollars to three significant digits with no step). Every other shape. `experiment/company/` and
+`dossier/figures.py`'s `format_value`, so `hc scenarios check`, Phase 4's rendered S3 and the tag's content hash are
+as they were. The pre-registered record (no case was built in it).
+
+**E. Why it is safe on identification.** The figure is scaled by a factor from [0.6, 0.9] or [1.1, 1.6] that nobody
+sees, so the real headcount lies anywhere in a range of more than 2 to 1 around the stated one; whether the stated
+number ends in 0 or 5 tells nothing more about it. Step 1 item 2's reported deviation already covers stating a small
+total as a number; the recognition probe and §12.11's check guard the same risk.
+
+**F. Code and tests** (a Sonnet build, an Opus review). `casebuild/scale.py`: `scale_total_heads` rounds under 100 to
+1, and the module docstring's bound is restated. `casebuild/scenario.py`: in an S3 case, the `S3_TOTAL_PAY` rows,
+case rows and derived alike, skip the fictional row's step, and their text keeps their significant digits, by a
+case-side format that leaves `format_value` alone. **Tests:** the sweep in C as a test (a coarser grid is enough),
+both payroll routes, no failure; step 4's found failure (a stated total of 54, factor 0.6, $45,000) now passes; a
+payroll the check must still refuse (a payroll row given the wrong value) still refuses; the existing tests at 60, 52
+and 50 updated (52 at 1.1 reads 57, not 55); a payroll of $946,000 reads "$0.946 million" and one of $900,000 "$0.9 million"; `hc scenarios check`
+passes unchanged. `scenario-render.json`'s `pay_per_head` records gain nothing new.
+
+*Cost:* no model call. **Recommended: no independent read**, as for §4.6.1: the change is arithmetic, restores a
+premise the tagged protocol states rather than relaxing selection, and its bound is tested; a read would cost about
+$0.24 of his OpenRouter credit. His call.
 
 ### 4.7 The rubric
 

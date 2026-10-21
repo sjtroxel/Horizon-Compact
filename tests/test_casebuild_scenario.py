@@ -29,6 +29,7 @@ from horizon_compact.casebuild.scenario import (
     ROWS,
     S3_FORM_PATH,
     ScenarioRefused,
+    _PayResolved,
     check_scenario,
     drop_sentences,
     parse_s3_form,
@@ -936,9 +937,9 @@ def test_without_sentences_takes_a_whole_sentence_and_its_gap() -> None:
 
 
 @pytest.mark.parametrize(
-    ("stated", "factor", "shown"), [(60, 1.0, 60), (52, 1.1, 55), (50, 1.0, 50)]
+    ("stated", "factor", "shown"), [(60, 1.0, 60), (52, 1.1, 57), (50, 1.0, 50), (50, 0.6, 30)]
 )
-def test_an_s3_total_under_100_after_scaling_is_a_number_to_the_nearest_5(
+def test_an_s3_total_under_100_after_scaling_is_a_number_to_the_nearest_person(
     tmp_path: Path, stated: int, factor: float, shown: int
 ) -> None:
     rows = full_rows("S3")
@@ -961,24 +962,84 @@ def test_an_s3_total_under_50_as_stated_fails_criterion_4(tmp_path: Path) -> Non
     assert caught.value.criterion == CRITERION_4
 
 
-def test_a_small_s3_total_can_fail_the_pay_per_head_check(tmp_path: Path) -> None:
-    """52 people scaled by 0.9 is 46.8, stated as 45, beside a stated payroll of $2.86 million, which
-    scales to $2.57 million and is stated as $2.6 million (a usd_m row's step): pay per head moves about 5%.
-    Rounding to 5 alone moves the headcount by more than 3.5% under about 70 people. (A usd_m row's value is
-    in dollars.)"""
+def _with_stated_payroll(rows: dict[str, dict[str, Any]], dollars: int) -> None:
+    rows["payroll_p6"] = {**rows["hc_p6"], "value": dollars, "unit": "usd_m", "scale": "dollars"}
+    rows["payroll_p6"].update(source="pre_cutoff", accession=ACCESSION)
+
+
+def _with_wage(rows: dict[str, dict[str, Any]], dollars: int) -> None:
+    rows["plant_avg_pay"] = {
+        "value": dollars,
+        "unit": "usd",
+        "scale": "none",
+        "per": "employee",
+        "source": "pre_cutoff",
+        "accession": ACCESSION,
+        "locator": "canary locator",
+    }
+
+
+def test_a_small_s3_total_with_a_stated_payroll_passes_the_check(tmp_path: Path) -> None:
+    """52 people scaled by 0.9 is 46.8, stated as 47, beside a stated payroll of $2.86 million, which scales
+    to $2.57 million and stays there (it was stated as 45 and $2.6 million, 5% off, before §4.6.6). (A usd_m
+    row's value is in dollars.)"""
     rows = full_rows("S3")
     rows["hc_p6"]["value"] = 52
-    rows["payroll_p6"] = {**rows["hc_p6"], "value": 2_860_000, "unit": "usd_m", "scale": "dollars"}
-    rows["payroll_p6"].update(source="pre_cutoff", accession=ACCESSION)
+    _with_stated_payroll(rows, 2_860_000)
     case = make_case(tmp_path, "S3", rows, factor=0.9)
-    with pytest.raises(
-        ScenarioRefused, match="pay per head for payroll_p6 and hc_p6 moved"
-    ) as caught:
-        render_case_scenario(case, ROOT)
-    assert not re.search(
-        r"\d{2,}", caught.value.message.replace("12.6", "")
-    )  # row ids, never a figure
-    assert not case.scenario_path.exists()
+    render_case_scenario(case, ROOT)
+    text = scenario_data(case)["scenario"]
+    assert "47 employees" in text and "a payroll of $2.57 million" in text
+    assert all(e["passed"] for e in render_record(case)["pay_per_head"])
+    assert check_scenario(case, ROOT) == []
+
+
+def test_a_small_s3_total_with_a_derived_payroll_passes_the_check(tmp_path: Path) -> None:
+    """Stated 54 at 0.6 is 32 people on a $45,000 wage: a payroll of $1.44 million (the case step 4's review
+    found failing, with a total of 30 and $1.4 million)."""
+    rows = without(full_rows("S3"), "payroll_p6")
+    rows["hc_p6"]["value"] = 54
+    _with_wage(rows, 45_000)
+    case = make_case(tmp_path, "S3", rows, factor=0.6)
+    render_case_scenario(case, ROOT)
+    text = scenario_data(case)["scenario"]
+    assert "32 employees" in text and "a payroll of $1.44 million" in text
+    assert all(e["passed"] for e in render_record(case)["pay_per_head"])
+    assert check_scenario(case, ROOT) == []
+
+
+def test_a_derived_s3_payroll_under_a_million_reads_with_all_its_digits(tmp_path: Path) -> None:
+    rows = full_rows("S3")
+    rows["hc_p6"]["value"] = 50
+    _with_wage(rows, 31_500)
+    case = make_case(tmp_path, "S3", rows, factor=0.6)
+    render_case_scenario(case, ROOT)
+    assert "a payroll of $0.945 million" in scenario_data(case)["scenario"]
+
+
+@pytest.mark.parametrize(
+    ("dollars", "reads"),
+    [
+        (1_080_000, "$1.08 million"),
+        (946_000, "$0.946 million"),
+        (900_000, "$0.9 million"),
+        (1_000_000, "$1.0 million"),
+        (14_300_000, "$14.3 million"),
+        (14_000_000, "$14.0 million"),
+        (1_230_000_000, "$1,230.0 million"),
+    ],
+)
+def test_an_s3_total_pay_figure_reads_in_millions_with_the_digits_it_has(
+    dollars: int, reads: str
+) -> None:
+    row = FIC.rows["payroll_p6"]
+    assert _PayResolved("payroll_p6", row, Decimal(dollars)).shown == reads
+
+
+def test_the_fictional_s3_payroll_still_reads_to_one_decimal() -> None:
+    """Phase 4's rendered S3 is as it was: only a case's copy of the row reads with more digits."""
+    assert FIC.resolved["payroll_p6"].shown.endswith(" million")
+    assert len(FIC.resolved["payroll_p6"].shown.split(".")[1].split(" ")[0]) == 1
 
 
 def test_pay_per_head_is_recorded_and_a_mis_scaled_wage_fails_it(tmp_path: Path) -> None:

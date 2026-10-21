@@ -99,6 +99,11 @@ steps 5 and 6 only: `phase 5: reader brief, press channel`.)* The reader's input
 
 ### Stage 3: each passing row to a case (as many sessions as it takes)
 
+*Before step 10 (2026-10-21):* **the pay-per-head fix,** the search-half doc's §4.6.6 (drafted by Opus, adopted by him
+2026-10-21, no independent read): a scaled S3 total under 100 to the nearest whole person, and an S3 total-pay figure to three
+significant digits with no $100,000 step. A Sonnet build (in the drafting session, his choice) and a fresh Opus chat's review (§4.6.6 F), his commit and
+push, then step 10.
+
 10. **For each passing row, in §4.6.5 D.1's order,** the search half's §4.1 steps 2 to 9, unchanged: his identifiers
     into the term file; `hc case build` (the Anthropic credit, about $0.32 a build); his flag review; the scenario
     render and check; the rubric and its read; the foreshadowing and neutrality checks; `hc case lock`, his commit and
@@ -400,3 +405,20 @@ sweep found failures. A dated patch and a small Sonnet build, before stage 3's f
 about $10.56 after them (his reading; $10.72 before, after a $10 top-up that morning). A first run of the batch sent
 nothing (the key was mistyped and refused before any call). Reader spend over every case in the appendix: about
 $4.08.
+
+**The pay-per-head fix (2026-10-21, Sonnet built in the drafting session at medium effort; reviewed by Opus in a
+fresh chat the same day, high effort: no code fault).** The search-half doc's §4.6.6 F, as written. `casebuild/scale.py`: `scale_total_heads` rounds a scaled
+total under 100 to the nearest whole person (from 100 up, to 5 as before); docstrings restate the bound.
+`casebuild/scenario.py`: an S3 total-pay figure (`payroll_p6`, `s3_retool_payroll`, `s3_sell_payroll`), stated or
+derived, is rounded to three significant digits and not then to the fictional row's step, and a case-side
+`_PayResolved` (a subclass of `Resolved`, so `format_value` and the fictional rows are untouched) reads it in
+millions with the digits it has, trailing zeros dropped to one decimal. `make check` green, 2642 tests (15 new);
+`hc scenarios check` unchanged (content hash `a31d1f1184a5`). *Tests:* the sweep of §4.6.6 C as a test on a coarse
+grid (fails on the old code); both payroll routes through the real render (a stated payroll at a total of 52, factor
+0.9; a derived one at a total of 54, factor 0.6, wage $45,000, step 4's found failure); the reading of seven payroll
+values; a derived payroll under a million; the fictional S3 payroll still reading to one decimal; the old tests at
+52 and 50 updated (52 at 1.1 reads 57). The mis-scaled-wage test still refuses. *Left as is, for the review:* a total
+*derived* from a formula (not a case row) under 100 keeps its row's step (hc_p6's is 10), so it reads in tens; no
+S3 case row set reaches it today, since the total is a case row from the first-disclosure document. *Review:* agreed
+to leave; the same row step also applies from 100 up, so §4.6.6 C's bound holds for a total that is a case row,
+which step 1 item 3 requires (the total is taken from a document).
