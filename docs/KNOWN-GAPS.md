@@ -7,7 +7,28 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-20, about 3:15 PM, HANDOFF (STAGE 1 BUILT AND REVIEWED; STAGE 2 NEXT)
+> ## START HERE — where things stand, 2026-10-21, about 10:15 AM (STAGE 2 DONE: TWO ROWS PASS; STAGE 4 OPENS)
+>
+> **Measured:** last commit `e6dbaaa` (stage 1, pushed). **Uncommitted, docs only:** the exploratory plan (steps 7 to
+> 9 done, stage 2's as-built note in §9), the search-half doc's §11 entry, ROADMAP and this file. His commands, one at
+> a time: `git add docs`, then `git commit -m "phase 5: exploratory stage 2, two rows pass"`, then `git push`.
+>
+> **Stage 2 result:** of the ten carried S3 rows, **closure-07 passes** criterion 4 (a state's WARN notice states the
+> plant's whole headcount, 65) and **closure-19 passes on the reader's dispute** (about 150, from a third-party site
+> profile; protocol §12.4); eight rejections stand, every one read. The press channel's nine rows all fail criterion 1.
+> Paid: about $0.16; his OpenRouter balance about $10.56. **Two of five**, so stage 4 opens now (decision 2(a)).
+>
+> **Next, in this order:** (1) **the pay-per-head fix** (his, 2026-10-21, reversing the 10/20 recommendation: §12.6
+> drops a case whose check fails with no error to find, and both rows are small): a dated patch, then a small Sonnet
+> build and Opus review, before stage 3's first `hc case build`. (2) **Stage 4's step 3** (the pre-cut-off pool and
+> the knowledge probe): Sonnet builds, Opus reviews, as stage 1. (3) **Stage 3** for closure-07, then closure-19
+> (Opus with him; the Anthropic credit for builds, his OpenRouter credit for scenario and rubric reads).
+> **Open, his:** whether the reader's brief gains step 1 item 3's attribution condition before stage 4's reads
+> (exploratory plan §9, stage 2).
+>
+> *The 3:15 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-20, about 3:15 PM, HANDOFF (STAGE 1 BUILT AND REVIEWED; STAGE 2 NEXT)
 >
 > **Measured:** last commit `c42dab0` (step 4, pushed). `make check` green, 2627 tests. **Uncommitted, for his one
 > commit closing stage 1:** step 5 (the brief's four changes, the public-report material, a carried row's rejection

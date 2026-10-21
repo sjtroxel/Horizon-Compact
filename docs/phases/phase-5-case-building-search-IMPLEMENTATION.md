@@ -1952,3 +1952,14 @@ on the earlier row. A different decision of the same company is checked as any r
 (`same_filer_as`, by CIK), and the command prints only how many there are. **His condition:** nothing here may cost
 a case the record could otherwise have. It does not: the decision is judged either way, on the same facts, and what
 the rule removes is the second count of it, which would not be a second case.
+
+**The exploratory part's stage 2 (2026-10-21, Opus with him).** The ten carried S3 rows were re-read under §4.6.5
+step 1 and the press channel was run once; the detail is in the exploratory plan's §9. Two rows pass criterion 4:
+closure-07, on a state's WARN notice that states the plant's whole headcount, and closure-19, on the reader's dispute
+(§12.4). **Paid batch, totaled against his balance as the exploratory plan's §4 requires:** nine rejection reads,
+about $0.16, from his OpenRouter credit of about $10.72 (after a $10 top-up that morning) to about $10.56. **A gap in
+the instrument, found by 19's dispute:** step 1 item 3 admits a public report's number only when the report
+attributes it to the company, a union or a government office, but step 1 item 7 did not put that condition in the
+brief, so the reader judged only whether the number is the plant's headcount. 19 is settled under §12.4 either way;
+whether the brief gains the condition before any further `maps_to_shape` read is his, and if so it is logged here as
+a change to the instrument before that read.

@@ -15,10 +15,10 @@
 
 | Stage | Steps | What happens | Who | Costs his cash? | Status |
 |---|---|---|---|---|---|
-| **1. The code** | 1-6 | the exploratory log and its command, the S3 case form, the brief, the new channel | Sonnet builds, Opus reviews; his commit | no | not started |
-| **2. Step 2's rows** | 7-9 | the ten pre-registered S3 rows re-read; the new channel run and checked; a count | Opus with him | a few cents (rejection reads) | not started |
+| **1. The code** | 1-6 | the exploratory log and its command, the S3 case form, the brief, the new channel | Sonnet builds, Opus reviews; his commit | no | **done 2026-10-20** |
+| **2. Step 2's rows** | 7-9 | the ten pre-registered S3 rows re-read; the new channel run and checked; a count | Opus with him | a few cents (rejection reads) | **done 2026-10-21: 2 rows pass** |
 | **3. Each passing row to a case** | 10 | build, scenario, rubric, lock, probe, as every case | Opus with him | yes, about 10 cents a read: **the one top-up comes due here** | not started |
-| **4. The reserve** | 11-13 | the pre-cut-off pool and the knowledge probe; the pool extended; a second search on 2027-01-04 | as stage 1, then 2 and 3 | cents | **opens only if needed** (§4.6.5 D.6) |
+| **4. The reserve** | 11-13 | the pre-cut-off pool and the knowledge probe; the pool extended; a second search on 2027-01-04 | as stage 1, then 2 and 3 | cents | **opened 2026-10-21** (decision 2(a)): step 3 first |
 | **5. The freeze** | 14 | the cases frozen with their labels | Opus with him; his commit | no | not started |
 
 **Where to look:** this doc is the plan, and each step gets a `[done]` marker and an as-built note (§9) as it is
@@ -85,17 +85,17 @@ steps 5 and 6 only: `phase 5: reader brief, press channel`.)* The reader's input
 
 ### Stage 2: step 2's rows (Opus with him; reads cost a few cents)
 
-7. **Carry the ten rows** (`hc case xlog carry` for closure-04, 05, 07, 09, 16, 19, 24, 27, 29 and f01) and record each
+7. **[done 2026-10-21, 07 passes, 19 passes on the reader's dispute, eight rejected] Carry the ten rows** (`hc case xlog carry` for closure-04, 05, 07, 09, 16, 19, 24, 27, 29 and f01) and record each
    one's criterion 4 under step 1. Where the filings give no headcount at the facility, the public-report search
    comes first (a WARN notice for a site in the United States, the company's later releases, news reports that
    attribute the number to the company, a union or a government office; dated up to 60 days after first disclosure),
    and the report is saved in the case's private folder before the result is recorded. A rejection goes to the reader
    (1 to 3 cents a read).
-8. **Run the channel** (his one command, `hc case search --channel press`) and take its rows through criteria 1 to 4
+8. **[done 2026-10-21, nine rows, all fail criterion 1] Run the channel** (his one command, `hc case search --channel press`) and take its rows through criteria 1 to 4
    in order, by the search half's §4.3 and Stage D methods. *(2026-10-20)* At criterion 1, a row the command lists
    under `same_filer_as` is read against those earlier candidates: the same decision fails as "already a candidate:
    <id>" (search-half doc §11, 2026-10-20).
-9. **Count the rows that pass criterion 4.** Five or more: stage 4 stays closed. Fewer: decision 2.
+9. **[done 2026-10-21: two, so decision 2(a) opens stage 4] Count the rows that pass criterion 4.** Five or more: stage 4 stays closed. Fewer: decision 2.
 
 ### Stage 3: each passing row to a case (as many sessions as it takes)
 
@@ -360,3 +360,43 @@ not leave out: a different decision of the same company is an ordinary row. One 
 stand: rows start as `closure`, which is safe because a row whose list is not settled holds every open type (step 1's
 review); and every SEC request finishes before either file is written, so only a local write can split the candidate
 file from the log version.
+
+**Stage 2 (2026-10-21, Opus with him; about $0.16 of his OpenRouter credit).** *Step 7.* The ten rows carried
+(`exploratory-log-1` to `-10`) and each one's criterion 4 recorded under step 1 (`-11` to `-20`), after a
+public-report search for every row whose filings gave no plant headcount. Each report used was saved as the row's
+`total-report.txt` before its result was recorded (07, 16, 19, 29; for 07 also the notice itself, privately).
+**closure-07 passes:** its filings give only an upper bound of positions eliminated (item 4), but the WARN notice the
+company filed with a US state on the first-disclosure day states the number as "all individuals employed by the
+Company at the Plant": 65, as a source states it, 50 or more. A government notice of the closing, inside the 60 days
+(item 3). **Eight rejections stand** after the reader's reads (`-21` to `-28`): 04 (a laboratory, step 0 item 4), 05
+and 24 (more than one facility, item 5), 09, 27 and f01 (no report in the 60 days states a headcount at the
+facility; several say the company gave none), 29 (the company's number is its employees in the country, including
+roles outside the plant), and 16 (only "positions affected", recorded as a fail by the letter of item 4, his
+decision, so that the reader judged it; the reader agreed). **closure-19 passes on the reader's dispute** (`-29`):
+the rejection rested on item 3's attribution rule (the only site number, about 150 in the plant's production, is from
+a chemical park's profile, relayed by a trade portal, not from the company, a union or a government office); the
+reader judged, as its brief asks, whether the number is the plant's headcount, and read it so. Under protocol §12.4
+a disputed rejection does not stand; his resolution is logged with it. **Found: the brief does not carry item 3's
+attribution condition** (step 1 item 7 changed only what the reader is told to judge). Open, his: whether the brief
+gains it before stage 4's reads (a change to the instrument, logged as such; 19 is settled either way). The
+write-up labels 19's headcount as from a third-party site profile.
+
+*Step 8.* His one command, `hc case search --channel press --date 2026-10-21`: 8 rows in the window and 1 in the
+fallback month (`-30`); one (press-08) shares a filer with two earlier candidates. **All nine fail criterion 1**
+(`-31` to `-39`; no read is due on criterion 1): six match only accounting definitions, contract boilerplate or cost
+lines of a restructuring announced earlier (one of them in 2024); press-02 and press-03 refer to closures the
+filing itself calls announced before; press-08 completes a plan its own 8-K says was first disclosed before the
+window (a different decision from the two earlier candidates of its filer, so not "already a candidate").
+
+*Step 9.* **Two rows pass criterion 4 (closure-07 and closure-19), both closure, both S3.** Fewer than five, so by
+decision 2(a) stage 4 opens now (step 3: the pre-cut-off pool and the knowledge probe, built by Sonnet and reviewed
+by Opus) while stage 3 takes the two rows to cases. **The pay-per-head check needs a fix before either build** (step
+4's "found, not changed", his decision 2026-10-21): a correct build can fail it at a small total, and protocol §12.6
+drops a case whose failure has no error to fix, so §12.6's fix-and-rebuild path does not recover it, contrary to the
+2026-10-20 recommendation. 07's total is 65 and 19's about 150 (90 at a factor of 0.6), both in the range where the
+sweep found failures. A dated patch and a small Sonnet build, before stage 3's first `hc case build`.
+
+*Paid calls:* nine reads, attempt 2 each, about $0.0086 to $0.0250 each, **about $0.16 in all**; his OpenRouter balance
+about $10.56 after them (his reading; $10.72 before, after a $10 top-up that morning). A first run of the batch sent
+nothing (the key was mistyped and refused before any call). Reader spend over every case in the appendix: about
+$4.08.
