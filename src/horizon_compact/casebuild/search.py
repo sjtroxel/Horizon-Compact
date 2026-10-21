@@ -34,7 +34,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, timedelta
 from typing import Any
 from urllib.parse import urlencode
@@ -117,6 +117,15 @@ PRESS_QUERIES = tuple(
 )
 PRESS_ID = "press"  # ids press-01 on, press-f01 on for the fallback month
 PRESS_CANDIDATES = "press-candidates.json"
+
+# Step 3's pool (search-half doc §4.6.5 step 3 item 1): channel 1 of §12.3 and step 2's channel over the
+# twelve months before the fallback month. Every hit is typed ``closure`` here and the list is settled at
+# criterion 4.
+PRE_START = date(2025, 7, 1)
+PRE_END = date(2026, 6, 30)
+PRE_ID = "pre"  # ids pre-01 on, newest filing first
+PRE_CANDIDATES = "pre-candidates.json"
+PRE_QUERIES = (QUERIES[0], *PRESS_QUERIES)
 
 
 # --- one query, every page ----------------------------------------------------------------------------------
@@ -264,8 +273,22 @@ class Candidate:
     hit: Hit
     company_type: str
     found_by: tuple[str, ...]  # the queries that found it
+    # A pre-registered row that failed only the first-disclosure check and joins the pool as if filed on the
+    # date of the earlier mention (step 3 item 6): ``hit.file_date`` is that date, this is the filing's own.
+    joined_from: str | None = None
+    actual_file_date: date | None = None
 
     def record(self) -> dict[str, Any]:
+        joined = (
+            {
+                "joined_from": self.joined_from,
+                "actual_file_date": self.actual_file_date.isoformat()
+                if self.actual_file_date
+                else None,
+            }
+            if self.joined_from
+            else {}
+        )
         return {
             "id": self.id,
             "type": self.type,
@@ -278,6 +301,7 @@ class Candidate:
             "sics": list(self.hit.sics),
             "company_type": self.company_type,
             "found_by": list(self.found_by),
+            **joined,
         }
 
 
@@ -376,6 +400,92 @@ def run_search(
         "order": "filing date, then accession number; first-disclosure dating is a person's, per candidate",
     }
     return SearchResult(search_date, fallback_start, end, tuple(candidates), summary)
+
+
+@dataclass(frozen=True)
+class Joiner:
+    """A pre-registered candidate that joins the pool (step 3 item 6): its own filing, counted on
+    ``counts_as``, the date of the earlier mention that failed it."""
+
+    source_id: str
+    hit: Hit
+    counts_as: date
+
+
+def run_pool_search(
+    client: EdgarClient,
+    search_date: date,
+    start: date,
+    end: date,
+    *,
+    queries: Sequence[Query] = PRE_QUERIES,
+    exclude: frozenset[str] = frozenset(),
+    joiners: Sequence[Joiner] = (),
+    first_number: int = 1,
+) -> SearchResult:
+    """Step 3's pool: every query over ``start`` to ``end``, filtered in code and joined by accession number
+    (a filing found by two queries is one candidate), plus the ``joiners`` counted on their own dates. Ids
+    ``pre-NN`` from ``first_number``, newest filing first, then accession number (step 3 item 2). Every
+    candidate is typed ``closure``; the list is settled at criterion 4."""
+    if not start <= end < search_date:
+        raise SearchError("the dates must run start, end, search date, in that order")
+    found: dict[str, tuple[Hit, list[str]]] = {}
+    per_query: list[dict[str, Any]] = []
+    for query in queries:
+        hits, record = read_query(client, query, start, end)
+        dropped: dict[str, int] = {}
+        kept: set[str] = set()
+        for hit in hits:
+            reason = filter_reason(query, hit, start, end)
+            if reason is None and hit.accession in exclude:
+                reason = "already a candidate"
+            if reason is not None:
+                dropped[reason] = dropped.get(reason, 0) + 1
+                continue
+            kept.add(hit.accession)
+            entry = found.setdefault(hit.accession, (hit, []))
+            if query.text not in entry[1]:
+                entry[1].append(query.text)
+        per_query.append(
+            {**record, "documents_read": len(hits), "filings_kept": len(kept), "dropped": dropped}
+        )
+    entries: list[tuple[Hit, tuple[str, ...], Joiner | None]] = [
+        (hit, tuple(found_by), None) for hit, found_by in found.values()
+    ]
+    taken = set(found)
+    for joiner in joiners:
+        if not start <= joiner.counts_as <= end:
+            raise SearchError(
+                f"{joiner.source_id}: the earlier mention is outside the pool's dates"
+            )
+        if joiner.hit.accession in taken:
+            raise SearchError(f"{joiner.source_id}: its filing is already a candidate")
+        taken.add(joiner.hit.accession)
+        entries.append((replace(joiner.hit, file_date=joiner.counts_as), (), joiner))
+    entries.sort(key=lambda entry: (-entry[0].file_date.toordinal(), entry[0].accession))
+    candidates = tuple(
+        Candidate(
+            id=f"{PRE_ID}-{first_number + index:02d}",
+            type="closure",
+            pool="pre",
+            hit=hit,
+            company_type=company_type(hit),
+            found_by=found_by,
+            joined_from=joiner.source_id if joiner else None,
+            actual_file_date=joiner.hit.file_date if joiner else None,
+        )
+        for index, (hit, found_by, joiner) in enumerate(entries)
+    )
+    summary = {
+        "search_date": search_date.isoformat(),
+        "start": start.isoformat(),
+        "end": end.isoformat(),
+        "queries": per_query,
+        "candidates": {"closure/pre": len(candidates)},
+        "joined": {c.id: c.joined_from for c in candidates if c.joined_from},
+        "order": "filing date, newest first, then accession number (search-half doc §4.6.5 step 3 item 2)",
+    }
+    return SearchResult(search_date, start, end, candidates, summary)
 
 
 def same_filer(

@@ -43,6 +43,9 @@ from horizon_compact.casebuild.scenario import _disclosure_failures
 from horizon_compact.casebuild.search import (
     CRITERIA,
     FALLBACK_START,
+    PRE_END,
+    PRE_QUERIES,
+    PRE_START,
     PRESS_QUERIES,
     QUERIES,
     RULE_DATE,
@@ -1486,3 +1489,213 @@ def test_candidate_records_refuse_an_id_in_both_lists(tmp_path: Path) -> None:
     )
     with pytest.raises(LogError, match="closure-01"):
         candidate_records(search)
+
+
+# --- step 3's pool (search-half doc §4.6.5 step 3 items 1, 2 and 6) ---------------------------------------
+
+
+def _pool_transport(
+    monkeypatch: pytest.MonkeyPatch, by_query: dict[str, list[dict[str, Any]]]
+) -> FakeTransport:
+    """Every pool query answered: ``by_query`` maps a query's text to its hits, the others find nothing."""
+    from test_casebuild_search import page
+
+    replies = {
+        search_url(q, PRE_START, PRE_END, 0): page(
+            by_query.get(q.text, []), len(by_query.get(q.text, []))
+        )
+        for q in PRE_QUERIES
+    }
+    transport = FakeTransport(replies)
+    monkeypatch.setattr(cli, "UrllibTransport", lambda: transport)
+    return transport
+
+
+def _pool_hits() -> dict[str, list[dict[str, Any]]]:
+    from test_casebuild_search import raw_hit
+
+    return {
+        '"Item 2.05"': [
+            raw_hit("0009999999-26-000102", "2026-03-10", items=["2.05"]),
+            raw_hit("0009999999-26-000101", "2026-03-10", items=["2.05"], cik="0008888888"),
+            raw_hit("0009999999-25-000200", "2025-08-04", items=["2.05"]),
+            raw_hit("0009999999-26-000300", "2026-05-20", items=["2.05"], sics=["5311"]),
+        ],
+        '"plant closure"': [
+            raw_hit(
+                "0009999999-26-000102", "2026-03-10", items=["7.01"]
+            ),  # also found by channel 1
+            raw_hit("0009999999-26-000400", "2026-06-12", items=["8.01"]),
+        ],
+    }
+
+
+POOL_WORDS = ["case", "search", "--pool", "pre", "--date", RULE_DATE.isoformat()]
+
+
+def test_pool_search_writes_its_file_and_exploratory_rows_and_prints_counts_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    before = sorted(p.name for p in folder.iterdir())
+    transport = _pool_transport(monkeypatch, _pool_hits())
+    assert main(POOL_WORDS) == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "Canary" not in out and "0009999999" not in out and "0008888888" not in out
+    assert "4 candidates, 0 of them joined" in out and "1 no sic in 2000-3999" in out
+    assert len(transport.requests) == len(PRE_QUERIES)
+    record = json.loads((folder / "pre-candidates.json").read_text())
+    assert record["step"] == "3" and record["run_on"] == "2026-10-16"
+    assert record["start"] == "2025-07-01" and record["end"] == "2026-06-30"
+    assert sorted(p.name for p in folder.iterdir() if p.name not in before) == [
+        "exploratory-log-1.json",
+        "exploratory-public-1.json",
+        "pre-candidates.json",
+    ]
+    assert not (folder / "selection-log-2.json").exists()
+
+
+def test_pool_search_numbers_every_filing_once_newest_first(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _pool_transport(monkeypatch, _pool_hits())
+    assert main(POOL_WORDS) == CLEAN_EXIT
+    listed = json.loads((folder / "pre-candidates.json").read_text())["list"]
+    assert [(c["id"], c["accession"]) for c in listed] == [
+        ("pre-01", "0009999999-26-000400"),
+        ("pre-02", "0009999999-26-000101"),
+        ("pre-03", "0009999999-26-000102"),
+        ("pre-04", "0009999999-25-000200"),
+    ]
+    assert {c["pool"] for c in listed} == {"pre"} and {c["type"] for c in listed} == {"closure"}
+    # a filing found by two queries is one candidate, and says so
+    both = next(c for c in listed if c["id"] == "pre-03")
+    assert both["found_by"] == ['"Item 2.05"', '"plant closure"']
+
+
+def test_pool_search_rows_are_probed_rows_with_the_knowledge_criterion_after_the_shape(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _log_setup(tmp_path, monkeypatch, capsys)
+    _pool_transport(monkeypatch, _pool_hits())
+    assert main(POOL_WORDS) == CLEAN_EXIT
+    log = load_newest_exploratory(CaseAppendix(root=tmp_path, label="search"))
+    assert {(r.id, r.step, r.pool, r.type) for r in log.rows.values()} == {
+        (f"pre-0{n}", "3", "pre", "closure") for n in (1, 2, 3, 4)
+    }
+    row = log.rows["pre-01"]
+    assert row.probed and row.criteria.index("not_known") == row.criteria.index("maps_to_shape") + 1
+    records = candidate_records(CaseAppendix(root=tmp_path, label="search"))
+    assert records is not None and {"closure-01", "pre-01", "pre-04"} <= records.keys()
+
+
+def test_pool_search_runs_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _pool_transport(monkeypatch, _pool_hits())
+    assert main(POOL_WORDS) == CLEAN_EXIT
+    capsys.readouterr()
+    transport = _pool_transport(monkeypatch, _pool_hits())
+    before = sorted(p.name for p in folder.iterdir())
+    assert main(POOL_WORDS) == REFUSED_EXIT
+    assert "already been searched" in capsys.readouterr().err
+    assert transport.requests == [] and sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_pool_search_refuses_what_it_should_before_any_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder, transport = _search_setup(tmp_path, monkeypatch, RULE_DATE)
+    assert main(POOL_WORDS) == REFUSED_EXIT  # the pre-registered search has not run
+    assert "has not run" in capsys.readouterr().err
+    assert main([*POOL_WORDS, "--deviation", "r"]) == REFUSED_EXIT
+    assert "the pool has none" in capsys.readouterr().err
+    assert main(["case", "search", "--pool", "pre", "--date", "2026-10-17"]) == REFUSED_EXIT
+    assert "is not today" in capsys.readouterr().err
+    assert main([*POOL_WORDS, "--channel", "press"]) == REFUSED_EXIT
+    assert "not given together" in capsys.readouterr().err
+    assert main(["case", "search", "--date", RULE_DATE.isoformat(), "--join", "x=2026-01-01"]) == (
+        REFUSED_EXIT
+    )
+    assert "--join is for --pool pre" in capsys.readouterr().err
+    assert transport.requests == [] and not folder.exists()
+
+
+def _fail_first_disclosure(row_id: str) -> None:
+    assert _log("closure", "record", row_id, "first_disclosure", "fail", "--reason", "earlier") == 0
+
+
+def test_a_joined_row_is_counted_on_the_date_of_its_earlier_mention(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _fail_first_disclosure("closure-01")  # filed 2026-08-20
+    capsys.readouterr()
+    _pool_transport(monkeypatch, _pool_hits())
+    assert main([*POOL_WORDS, "--join", "closure-01=2026-04-01"]) == CLEAN_EXIT
+    assert "5 candidates, 1 of them joined" in capsys.readouterr().out
+    record = json.loads((folder / "pre-candidates.json").read_text())
+    listed = record["list"]
+    # newest first by the counted date: June 12, April 1 (the joiner), March 10 twice, then 2025
+    assert [(c["id"], c["file_date"]) for c in listed] == [
+        ("pre-01", "2026-06-12"),
+        ("pre-02", "2026-04-01"),
+        ("pre-03", "2026-03-10"),
+        ("pre-04", "2026-03-10"),
+        ("pre-05", "2025-08-04"),
+    ]
+    joined = listed[1]
+    assert joined["joined_from"] == "closure-01" and joined["actual_file_date"] == "2026-08-20"
+    assert joined["accession"] == "0009999999-26-000030" and joined["found_by"] == []
+    assert all("joined_from" not in c for c in listed if c is not joined)
+    assert record["joined"] == {"pre-02": "closure-01"}
+    assert record["candidates"] == {"closure/pre": 5}
+    # the joined row is closure-01's own filing, so closure-01 is never flagged as its earlier candidate;
+    # another row from the same filer still is
+    both = ["closure-01", "closure-f01"]
+    assert record["same_filer_as"] == {
+        "pre-01": both,
+        "pre-02": ["closure-f01"],
+        "pre-04": both,
+        "pre-05": both,
+    }
+    log = load_newest_exploratory(CaseAppendix(root=tmp_path, label="search"))
+    assert log.rows["pre-02"].accession == "0009999999-26-000030" and log.rows["pre-02"].step == "3"
+
+
+def test_a_join_is_refused_unless_the_row_failed_first_disclosure_inside_the_pool(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _fail_first_disclosure("closure-01")
+    capsys.readouterr()
+    transport = _pool_transport(monkeypatch, _pool_hits())
+    for spec, why in [
+        ("closure-f01=2026-04-01", "did not fail the first-disclosure check"),
+        ("closure-77=2026-04-01", "not a candidate"),
+        ("closure-01=April", "needs ID=YYYY-MM-DD"),
+        ("closure-01", "needs ID=YYYY-MM-DD"),
+        ("closure-01=2025-06-30", "outside the pool's dates"),
+        ("closure-01=2026-07-01", "outside the pool's dates"),
+    ]:
+        assert main([*POOL_WORDS, "--join", spec]) == REFUSED_EXIT
+        assert why in capsys.readouterr().err
+    twice = [*POOL_WORDS, "--join", "closure-01=2026-04-01", "--join", "closure-01=2026-04-02"]
+    assert main(twice) == REFUSED_EXIT
+    assert "given twice" in capsys.readouterr().err
+    assert transport.requests == []  # every refusal came before the first request
+    assert not (folder / "pre-candidates.json").exists()
+    assert not list(folder.glob("exploratory-log-*.json"))
+
+
+def test_pool_search_with_no_hits_writes_its_file_and_no_exploratory_log(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _pool_transport(monkeypatch, {})
+    assert main(POOL_WORDS) == CLEAN_EXIT
+    assert "(no rows)" in capsys.readouterr().out
+    assert json.loads((folder / "pre-candidates.json").read_text())["list"] == []
+    assert not list(folder.glob("exploratory-log-*.json"))

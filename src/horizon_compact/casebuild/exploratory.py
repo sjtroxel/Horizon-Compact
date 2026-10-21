@@ -30,6 +30,7 @@ from typing import Any
 from horizon_compact.casebuild.appendix import CaseAppendix
 from horizon_compact.casebuild.search import (
     CRITERIA,
+    PRE_CANDIDATES,
     PRESS_CANDIDATES,
     READ_REQUIRED,
     READINGS,
@@ -544,7 +545,7 @@ def load_newest_exploratory(case: CaseAppendix) -> ExploratoryLog:
 
 
 # the search's list, then step 2's channel
-CANDIDATE_FILES = ("candidates.json", PRESS_CANDIDATES)
+CANDIDATE_FILES = ("candidates.json", PRESS_CANDIDATES, PRE_CANDIDATES)
 
 
 def exploratory_started(case: CaseAppendix) -> bool:
@@ -562,8 +563,8 @@ def row_for(search: CaseAppendix, label: str) -> Row | None:
 
 
 def candidate_records(search: CaseAppendix) -> dict[str, dict[str, Any]] | None:
-    """Every candidate's private record by id, from the search's list and the press channel's list when it
-    exists; None if no candidate file is there. An id is in one file only."""
+    """Every candidate's private record by id, from the search's list, the press channel's list and step 3's
+    pool when they exist; None if no candidate file is there. An id is in one file only."""
     found: dict[str, dict[str, Any]] = {}
     present = False
     for name in CANDIDATE_FILES:

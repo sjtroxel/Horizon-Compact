@@ -7,7 +7,32 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-21, about 12:40 PM (§4.6.6 BUILT BY SONNET AND OPUS-REVIEWED; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-10-21, about 1:45 PM (STAGE 4 STEP 3, PART 3a BUILT AND OPUS-REVIEWED; HIS COMMIT NEXT)
+>
+> **Review (fresh Opus chat, high):** one fault, fixed (a joined row's `same_filer_as` named its own source row);
+> the summary key is `closure/pre`; `--join` refuses a row not on the closure list. **A rule, his, written before
+> the pool is searched** (search-half doc §11, 2026-10-21): a pre-registered row that failed first disclosure does
+> not block a pool row as "already a candidate"; a joined row and a pool row that are one decision, the lower id
+> stands. **Uncommitted:** 3a with the fixes. **Then, in order:** his commit and push; the two earlier-mention
+> dates (his, read from the log's reasons); the pool search, once; then 3b.
+>
+> *The 1:50 PM block below (its time stamp was ahead of the clock) is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 1:15 PM (STAGE 4 STEP 3, PART 3a BUILT; OPUS REVIEW NEXT)
+>
+> **Measured:** last commit `bb0d305` (§4.6.6, pushed after its Opus review). **Uncommitted:** part 3a (code, tests,
+> the exploratory plan's as-built note, this block). `make check` green, 2650.
+>
+> **3a:** `hc case search --pool pre --date <today> [--join ID=YYYY-MM-DD]` (step 3 items 1, 2 and 6), see the
+> exploratory plan's as-built note. **Step 3 is three parts:** 3a (built), 3b `hc case knowledge-probe` and its
+> records, 3c the verdict (his read, the reader's new brief, the log's `not_known` result). Each is reviewed by Opus
+> in a fresh chat before the next is built. **His, before the pool is searched:** the earlier-mention dates for
+> closure-f04 and closure-18 (item 6), read from the log's reasons; nothing runs until he gives them. The search
+> itself reads the SEC only (no cash), once.
+>
+> *The 12:40 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 12:40 PM (§4.6.6 BUILT BY SONNET AND OPUS-REVIEWED; HIS COMMIT NEXT)
 >
 > **Measured:** last commit `5c64ed8` (stage 2, pushed). **Uncommitted:** the code below; in docs, the search-half doc's §4.6.6
 > (new) with dated notes at §4.6.5 step 0 item 3 and step 1 item 2 and the status line; the exploratory plan's stage 3

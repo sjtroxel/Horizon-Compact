@@ -68,13 +68,19 @@ from horizon_compact.casebuild.scenario import (
 )
 from horizon_compact.casebuild.search import (
     CRITERIA,
+    FORM,
     ISO_DATE,
+    PRE_CANDIDATES,
+    PRE_END,
+    PRE_START,
     PRESS_CANDIDATES,
     PRESS_ID,
     PRESS_QUERIES,
     READ_REQUIRED,
     RULE_DATE,
     TYPES,
+    Hit,
+    Joiner,
     K,
     LogError,
     Row,
@@ -83,6 +89,7 @@ from horizon_compact.casebuild.search import (
     candidate_terms,
     load_newest_log,
     read_agrees,
+    run_pool_search,
     run_search,
     same_filer,
     write_candidates,
@@ -1601,10 +1608,113 @@ def cmd_case_search_press(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def _joiners(
+    case: CaseAppendix, records: dict[str, dict[str, Any]], specs: Sequence[str]
+) -> list[Joiner]:
+    """Step 3 item 6: each ``ID=YYYY-MM-DD`` names a pre-registered row that failed only the first-disclosure
+    check and the date of the earlier mention that failed it (his reading, not the log's: the log keeps a
+    failed row's date in its reason, as text)."""
+    log = load_newest_log(case)
+    found: list[Joiner] = []
+    for spec in specs:
+        source_id, _, text = spec.partition("=")
+        if not ISO_DATE.fullmatch(text):
+            raise SearchError(f"--join {source_id or spec!r} needs ID=YYYY-MM-DD")
+        record, row = records.get(source_id), log.rows.get(source_id)
+        if record is None or row is None:
+            raise SearchError(f"--join {source_id}: not a candidate of the pre-registered search")
+        if row.type != "closure":
+            raise SearchError(f"--join {source_id}: it is not on the closure list")
+        if row.failed != "first_disclosure":
+            raise SearchError(f"--join {source_id}: it did not fail the first-disclosure check")
+        if any(j.source_id == source_id for j in found):
+            raise SearchError(f"--join {source_id} is given twice")
+        if not PRE_START <= date.fromisoformat(text) <= PRE_END:
+            raise SearchError(
+                f"--join {source_id}: the earlier mention is outside the pool's dates"
+            )
+        hit = Hit(
+            accession=str(record["accession"]),
+            ciks=tuple(str(c) for c in record["ciks"]),
+            names=tuple(str(n) for n in record["names"]),
+            form=FORM,
+            file_date=date.fromisoformat(str(record["file_date"])),
+            items=tuple(str(i) for i in record["items"]),
+            sics=tuple(int(s) for s in record["sics"]),
+        )
+        found.append(Joiner(source_id, hit, date.fromisoformat(text)))
+    return found
+
+
+def cmd_case_search_pool(args: argparse.Namespace) -> int:
+    """Step 3's pool (search-half doc §4.6.5 step 3 items 1, 2 and 6), once: channel 1 and step 2's channel
+    over 2025-07-01 to 2026-06-30, plus the rows named by ``--join``. Writes ``pre-candidates.json`` and adds
+    each candidate to the exploratory log as a step 3 row (criteria from the first; the list is settled at
+    criterion 4). Prints counts only."""
+    today = _today()
+    if args.date != today:
+        raise SearchError(f"--date {args.date.isoformat()} is not today ({today.isoformat()})")
+    if args.deviation:
+        raise SearchError("--deviation is for the pre-registered search; the pool has none")
+    case = open_case("search")
+    if (case.directory / PRE_CANDIDATES).exists():
+        raise SearchError(
+            f"the pool has already been searched: {PRE_CANDIDATES} exists, and it runs once"
+        )
+    already = candidate_records(case)
+    if already is None:
+        raise SearchError("candidates.json is not there: the search has not run")
+    log = load_newest_exploratory(case)
+    joiners = _joiners(case, already, args.join or [])
+    client = EdgarClient(appendix=case, transport=UrllibTransport(), user_agent=sec_user_agent())
+    result = run_pool_search(
+        client,
+        today,
+        PRE_START,
+        PRE_END,
+        exclude=frozenset(str(c["accession"]) for c in already.values()),
+        joiners=joiners,
+    )
+    # A joined row is its source row's own filing, so that row is left out of its same_filer_as: the flag
+    # points criterion 1 at a different decision, never at the one the row brings in.
+    sources = {c.id: c.joined_from for c in result.candidates if c.joined_from}
+    shared = {
+        candidate_id: kept
+        for candidate_id, ids in same_filer(result.candidates, already).items()
+        if (kept := [i for i in ids if i != sources.get(candidate_id)])
+    }
+    record = {**result.record, "run_on": today.isoformat(), "step": "3", "same_filer_as": shared}
+    write_candidates(case, dataclasses.replace(result, record=record), PRE_CANDIDATES)
+    for candidate in result.candidates:
+        log.add(candidate.id, candidate.type, "3", candidate.pool, candidate.hit.accession)
+    log_name = write_exploratory_version(case, log) if result.candidates else None
+    print(f"pool: {PRE_START.isoformat()} to {PRE_END.isoformat()}, run on {today.isoformat()}")
+    for query in record["queries"]:
+        dropped = ", ".join(f"{n} {why}" for why, n in sorted(query["dropped"].items())) or "none"
+        print(
+            f"  {query['query']}: {query['total']} documents, "
+            f"{query['pages']} pages, {query['filings_kept']} filings kept; dropped: {dropped}"
+        )
+    print(f"  {len(result.candidates)} candidates, {len(joiners)} of them joined (item 6)")
+    print(
+        f"  {len(shared)} share a filer with an earlier candidate (same_filer_as): at criterion 1, one "
+        "that is the same decision fails as already a candidate"
+    )
+    wrote = f"{PRE_CANDIDATES} and {log_name}" if log_name else f"{PRE_CANDIDATES} (no rows)"
+    print(f"written: {wrote} in the appendix's search folder")
+    return CLEAN_EXIT
+
+
 def cmd_case_search(args: argparse.Namespace) -> int:
     """The search of protocol §12.3, once (search-half IMPLEMENTATION doc §4.4). Prints counts only."""
+    if args.channel and args.pool:
+        raise SearchError("--channel and --pool are not given together")
+    if args.join and args.pool != "pre":
+        raise SearchError("--join is for --pool pre")
     if args.channel == "press":
         return cmd_case_search_press(args)
+    if args.pool == "pre":
+        return cmd_case_search_pool(args)
     today = _today()
     if args.date != today:
         raise SearchError(f"--date {args.date.isoformat()} is not today ({today.isoformat()})")
@@ -2532,6 +2642,20 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="press: step 2's channel for plant closures outside Item 2.05 (search-half doc §4.6.5), run "
         "once after the search; its hits join the exploratory log. Omit for the pre-registered search.",
+    )
+    search.add_argument(
+        "--pool",
+        choices=("pre",),
+        default=None,
+        help="pre: step 3's pool of filings dated 2025-07-01 to 2026-06-30 (search-half doc §4.6.5), run "
+        "once; its candidates join the exploratory log. Not with --channel.",
+    )
+    search.add_argument(
+        "--join",
+        action="append",
+        metavar="ID=YYYY-MM-DD",
+        help="with --pool pre: a pre-registered row that failed only the first-disclosure check joins the "
+        "pool, counted on the date of the earlier mention (step 3 item 6). May be repeated.",
     )
     build = case_actions.add_parser(
         "build",

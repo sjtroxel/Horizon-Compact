@@ -422,3 +422,23 @@ values; a derived payroll under a million; the fictional S3 payroll still readin
 S3 case row set reaches it today, since the total is a case row from the first-disclosure document. *Review:* agreed
 to leave; the same row step also applies from 100 up, so §4.6.6 C's bound holds for a total that is a case row,
 which step 1 item 3 requires (the total is taken from a document).
+
+**Stage 4 step 3, part 3a: the pool search (2026-10-21, Sonnet built at medium effort; reviewed by Opus in a fresh chat,
+high effort).** Step 11 is built in three parts, each reviewed before the next: 3a the pool and the item 6 join (this
+note), 3b `hc case knowledge-probe` and its records, 3c the verdict (his read, the reader's new brief, the log's
+`not_known` result). `hc case search --pool pre --date <today> [--join ID=YYYY-MM-DD ...]`: channel 1 and step 2's
+channel over 2025-07-01 to 2026-06-30 (`PRE_QUERIES`; the protocol's table and `PRESS_PHRASES` untouched), a filing
+found by two queries is one candidate, ids `pre-NN` newest filing first then accession number, every hit typed
+`closure` and settled at criterion 4, written once to `pre-candidates.json` (with `same_filer_as`, as the press
+channel's) and added to the exploratory log as step 3 rows in pool `pre`. `candidate_records` reads the new file, so
+`hc case build` finds a `pre-NN` row's CIK. **Item 6 is by argument, not by guess:** the log keeps a failed row's
+date only inside its reason text, so `--join` takes his reading of the earlier mention's date; the row must have
+failed the first-disclosure check in the pre-registered log, and a date outside the pool's range is refused before
+any request. A joined row is counted on that date for the order, with `joined_from` and `actual_file_date` in its
+record. Not built, on purpose: step 4's search (2024-07-01 to 2025-06-30, ids continuing) is `run_pool_search` with
+other dates and `first_number`, with no command yet (step 12). `make check` green, 2650 tests (8 new).
+*Review:* one fault, fixed: a joined row carries its source row's own filing, so `same_filer_as` named that row
+as its earlier candidate, which under the rule of 2026-10-20 would point criterion 1 at failing the row on itself;
+the source row is now left out. Also fixed: the summary counts the list as `closure/pre` (was `pre/pre`), and
+`--join` refuses a row not on the closure list (item 6). The rule for a joined row and a pool row that are one
+decision is the search-half doc's §11 entry of this date. `make check` green.

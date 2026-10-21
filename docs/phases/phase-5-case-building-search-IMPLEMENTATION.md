@@ -2033,3 +2033,13 @@ attributes it to the company, a union or a government office, but step 1 item 7 
 brief, so the reader judged only whether the number is the plant's headcount. 19 is settled under §12.4 either way;
 whether the brief gains the condition before any further `maps_to_shape` read is his, and if so it is logged here as
 a change to the instrument before that read.
+
+**The rule of one decision judged once, for step 3's pool (2026-10-21, his, on Opus's review of the exploratory
+part's step 3a; written before the pool is searched).** The press channel's rule of 2026-10-20 holds for every pool
+row, with two additions. **(a)** A pre-registered row that failed the first-disclosure check is not "already a
+candidate" for a pool row: it failed because the decision was disclosed earlier, which is what the pool reopens, so
+the decision was never judged. A pool row that is its decision is checked as any row. **(b)** A row joined under step
+3 item 6 and a row the pool found itself can be the same decision (the earlier mention may be a filing in the pool):
+**the one with the lower id stands**, and the other fails criterion 1 as "already a candidate: pre-NN". The order is
+mechanical, so no one picks which. In code, a joined row's `same_filer_as` leaves out its own source row, which is
+the same filing, not an earlier candidate.
