@@ -88,8 +88,11 @@ _RATIO_AFTER = re.compile(
     r"|/\s*(?:hr|hour)\b|(?:an?\s+)?(?:year|annum)\s+(?:on\s+average|per\s+(?:employee|worker)))",
     re.IGNORECASE,
 )
+# "per diluted share" and "per basic and diluted common share" too (closure-07's first build, 2026-10-22).
 _PER_SHARE_AFTER = re.compile(
-    r"^\s*(?:(?:per|an?|each)\s+(?:common\s+)?share\b|/\s*share\b)", re.IGNORECASE
+    r"^\s*(?:(?:per|an?|each)\s+(?:(?:basic|diluted|common|ordinary|and)\s+){0,4}share\b"
+    r"|/\s*(?:diluted\s+)?share\b)",
+    re.IGNORECASE,
 )
 _RATIO_BEFORE = re.compile(
     r"(?:(?:average|mean|median|typical)\s+(?:annual\s+|hourly\s+|base\s+|weekly\s+)?"
@@ -179,9 +182,14 @@ def transform(text: str, *, calendar: d.FiscalCalendar, factor: float) -> Transf
                 flag("date that is not a real date", match)
                 return whole
             count("date")
-            offset, quarter = calendar.locate(when)
-            if re.search(r"year\s+ended", whole, re.IGNORECASE):
+            if re.search(r"period\s+end", whole, re.IGNORECASE):
+                return calendar.label(when)  # a period of any length: the day itself
+            offset, quarter = calendar.locate_period_end(when)
+            if re.search(r"year\s+end", whole, re.IGNORECASE):
                 return calendar.year_label(offset)
+            stated = match.group("e_ordinal")
+            if stated is not None and d.quarter_number(stated) != quarter:
+                flag("quarter named does not match its end date: check it", match)
             return f"{calendar.year_label(offset)}, {d.quarter_word(quarter)} quarter"
         if kind == "date":
             when = date_in(whole)

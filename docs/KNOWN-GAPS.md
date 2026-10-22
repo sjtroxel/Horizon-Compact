@@ -7,7 +7,20 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-21, about 5:25 PM, HANDOFF (PART 3c DONE; HIS COMMIT TONIGHT; REAL CANDIDATES TOMORROW)
+> ## START HERE — where things stand, 2026-10-22, about 9:15 AM (CLOSURE-07 BUILT ONCE; THREE FIXES; REBUILD NEXT)
+>
+> **Measured:** last commit `947ba5c` (3c, pushed); `make check` green, **2768 tests**. **Stage 3 has started on
+> closure-07** (exploratory plan §9, the 2026-10-22 note): term list and guard terms in, the quarterly report cut by
+> hand, the first real build run (about $0.12 of Anthropic credit). Read in full, the dossier had three faults the
+> flag review cannot reach (an unflagged scaled per-share figure, a 52/53-week quarter labeled one late, a stray
+> ordinal), fixed in this chat (his decision) with tests. **Uncommitted:** `dates.py`, `transform.py`, their tests,
+> the plan's note, this block. **Next, his:** commit and push; delete closure-07's `build.json`, `sections.json` and
+> `reviewed-flags.template.json`; build again; then the flag review with Claude. The OpenRouter top-up is still due
+> at the first scenario read, after the lock's checks.
+>
+> *The 2026-10-21 5:25 PM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-21, about 5:25 PM, HANDOFF (PART 3c DONE; HIS COMMIT TONIGHT; REAL CANDIDATES TOMORROW)
 >
 > **Measured at handoff:** last commit `c7ee105` (pushed); `make check` green, **2748 tests**. **Uncommitted:** part 3c
 > with its review and his three decisions (block below), 15 files, for his one commit and push tonight. **Stage 4

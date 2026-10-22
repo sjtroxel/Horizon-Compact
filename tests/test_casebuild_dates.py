@@ -46,6 +46,30 @@ def test_a_leap_day_year_end_moves_with_the_calendar() -> None:
     assert leap.locate(date(2025, 3, 1)) == (2, 1)
 
 
+@pytest.mark.parametrize(
+    ("day", "expected"),
+    [
+        (date(2025, 12, 27), (1, 1)),
+        (date(2026, 3, 28), (1, 2)),  # a day past the month boundary, still Q2
+        (date(2026, 6, 27), (1, 3)),
+        (date(2026, 10, 3), (1, 4)),  # a 53-week year ends a week past the anchor
+        (date(2025, 9, 27), (0, 4)),
+    ],
+)
+def test_a_52_53_week_period_end_is_placed_in_the_period_it_ends(
+    day: date, expected: tuple[int, int]
+) -> None:
+    sep = FiscalCalendar(date(2025, 9, 27))
+    assert sep.locate_period_end(day) == expected
+    assert sep.locate(date(2026, 3, 28)) == (1, 3)  # by the day alone, the next quarter
+
+
+def test_a_december_period_end_is_unchanged() -> None:
+    assert DEC.locate_period_end(date(2025, 3, 31)) == (0, 1)
+    assert DEC.locate_period_end(date(2025, 12, 31)) == (0, 4)
+    assert JAN.locate_period_end(date(2026, 1, 31)) == (0, 4)
+
+
 def test_labels_name_the_year_relative_to_the_latest() -> None:
     assert JAN.year_label(0) == "fiscal year N"
     assert JAN.year_label(-1) == "fiscal year N-1"

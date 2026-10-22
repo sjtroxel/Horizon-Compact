@@ -89,6 +89,22 @@ def test_per_share_figures_and_share_counts_are_flagged_for_removal_and_not_scal
 
 
 @pytest.mark.parametrize(
+    "text",
+    [
+        "earned $1.35 per diluted share",
+        "earned $1.35 per basic share",
+        "earned $1.35 per basic and diluted share",
+        "earned $1.35 per diluted common share",
+        "earned $1.35/diluted share",
+    ],
+)
+def test_a_basic_or_diluted_per_share_figure_is_flagged_and_not_scaled(text: str) -> None:
+    result = run(text)
+    assert result.text == text
+    assert kinds(result) == ["per-share figure: remove it (§4.8)"]
+
+
+@pytest.mark.parametrize(
     ("text", "expected"),
     [
         ("We employ 1,240 people.", "We employ 1,490 people."),
@@ -163,6 +179,44 @@ def test_a_year_end_other_than_december_flags_the_year_reading_it_assumed() -> N
     assert result.text == "In fiscal year N-1 sales rose; in fiscal year N-2 they fell."
     assert len(result.flags) == 2
     assert all("convention assumed" in f.kind for f in result.flags)
+
+
+SEP = FiscalCalendar(date(2025, 9, 27))  # a 52/53-week year ending on a Saturday near 30 September
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("the first quarter ended December 27, 2025", "fiscal year N+1, first quarter"),
+        ("the second quarter ended March 28, 2026", "fiscal year N+1, second quarter"),
+        ("the third fiscal quarter ended June 27, 2026", "fiscal year N+1, third quarter"),
+        ("for the fiscal year ending October 3, 2026", "for fiscal year N+1"),
+        ("for the year ended September 27, 2025", "for fiscal year N"),
+        ("the quarter ended March 28, 2026", "fiscal year N+1, second quarter"),
+    ],
+)
+def test_a_period_end_of_a_52_53_week_year_is_placed_in_the_quarter_it_ends(
+    text: str, expected: str
+) -> None:
+    result = run(text, SEP)
+    assert result.text == expected
+    assert result.flags == []
+
+
+def test_the_stated_quarter_is_replaced_with_its_phrase_and_leaves_no_stray_ordinal() -> None:
+    result = run("results for the first quarter ended March 31, 2025 were filed", DEC)
+    assert result.text == "results for fiscal year N, first quarter were filed"
+
+
+def test_a_stated_quarter_that_its_end_date_contradicts_is_flagged() -> None:
+    result = run("the second quarter ended September 30, 2025", DEC)
+    assert result.text == "fiscal year N, third quarter"
+    assert kinds(result) == ["quarter named does not match its end date: check it"]
+
+
+def test_a_period_of_any_length_is_placed_by_its_day() -> None:
+    result = run("the period ended March 28, 2026", SEP)
+    assert result.text == "fiscal year N+1, third quarter"
 
 
 def test_a_full_date_is_exact_for_any_year_end_and_needs_no_flag() -> None:

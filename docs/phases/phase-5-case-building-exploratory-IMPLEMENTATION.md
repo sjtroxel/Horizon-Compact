@@ -578,3 +578,24 @@ not_known fail --empty` logs it, refused unless his saved reads count an empty c
 is refused when they do; the row's `not_known` then leaves `read_required`, so it awaits no read, and both `hc case
 reader` and the log refuse one. (c) The brief's closing sentence says "the decision the definition names", and its
 EMPTY sentences are gone. `make check` green.
+
+**Stage 3, step 10, closure-07's first build (2026-10-22, Opus with him; his decision to fix in this chat, no
+Sonnet build or separate review, as the fixes are three patterns).** Step 2: the case's term list written in the
+appendix (74 terms; tested on the eleven cached filings, nothing identifying left inside an item); six identifiers
+added by him to the guard's term file. Step 3: the splitter refused the quarterly report (a table of contents with
+each heading, title and page on its own line reads as body text), so Part I Item 2 was cut by hand
+(`hand-boundaries.json`, checked by him). The build then ran: 13 sources, 5 extraction requests, about $0.12 of
+Anthropic credit (the projection was $0.32), 21 flags. **Read in full before the flag review, the dossier had three
+faults the flags do not reach, and the review file can change only flagged text, so the build is redone:** (1) a
+per-share figure written "per diluted share" was not recognized, so it was scaled as dollars and not flagged
+(scaled earnings over it give the real share count); `_PER_SHARE_AFTER` now takes basic, diluted, common and
+ordinary. (2) A 52/53-week filer's quarter can end a day past the month-based boundary, so "the second quarter
+ended <date>" was labeled the third; a year or quarter end is now placed by `FiscalCalendar.locate_period_end`
+(half a quarter earlier), and a stated quarter its date contradicts is flagged. (3) "the first quarter ended
+<date>" left "first" in front of the label; the stated ordinal is now part of `ENDED`, which also takes "ending".
+The term list also gained two possessive forms it missed. Tests for each; `make check` green, 2768 tests. **Not
+fixable by rule, noted for the checks and the probe:** the extraction's region list in section 2 double-lists two
+regions (its total is right); "the a town facility" reads oddly; and section 1 carries the company's own
+description of its market position, which no term list removes: the recognition probe decides it, and the
+coarsening procedure (OPEN 2026-10-16) applies only if it fails. **Next:** his commit and push, the three build
+outputs deleted by hand (the folder rule for starting over), the build run again (a new seed), then the flag review.

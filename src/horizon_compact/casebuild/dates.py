@@ -39,7 +39,12 @@ DATE = (
     rf"|\d{{1,2}}/\d{{1,2}}/(?:19|20)?\d{{2}})"  # 3/31/2026
 )
 MONTH_DAY_WITHOUT_YEAR = rf"{_MONTH}\s+\d{{1,2}}(?:st|nd|rd|th)?\b(?!,?\s*{_YEAR})"
-ENDED = rf"(?:the\s+)?(?:fiscal\s+)?(?:year|quarter|period)\s+ended\s+{DATE}"
+# The stated ordinal is part of the phrase, so "the first quarter ended <date>" is replaced whole and no stray
+# "first" is left in front of the label (closure-07's first build, 2026-10-22).
+ENDED = (
+    rf"(?:the\s+)?(?:(?P<e_ordinal>first|second|third|fourth)\s+(?:fiscal\s+)?quarter"
+    rf"|(?:fiscal\s+)?(?:year|quarter|period))\s+(?:ended|ending)\s+{DATE}"
+)
 QUARTER = (
     rf"(?:(?:first|second|third|fourth)\s+(?:fiscal\s+)?quarter(?:\s+of)?(?:\s+fiscal(?:\s+year)?)?\s+{_YEAR}"
     rf"|Q[1-4]\s+(?:FY\s*)?{_YEAR})"
@@ -82,6 +87,16 @@ class FiscalCalendar:
         if day.day < first.day:
             months -= 1
         return offset, min(max(months // 3 + 1, 1), 4)
+
+    def locate_period_end(self, day: date) -> tuple[int, int]:
+        """(offset, quarter) of the year or quarter that ENDS on ``day``.
+
+        A 52/53-week filer's periods end on a weekday near the month-based boundary, a few days either side,
+        so its second quarter can end a day into the third by ``locate`` (closure-07's first build,
+        2026-10-22). A period's end is always at a quarter's end, so it is placed by a day half a quarter
+        earlier, which no such drift moves out of its quarter.
+        """
+        return self.locate(day - timedelta(days=45))
 
     def year_label(self, offset: int) -> str:
         if offset == 0:
@@ -130,6 +145,10 @@ def parse_date(text: str) -> date:
 
 def quarter_word(quarter: int) -> str:
     return _ORDINALS[quarter]
+
+
+def quarter_number(word: str) -> int:
+    return _ORDINAL_NUMBERS[word.lower()]
 
 
 def year_in(text: str) -> int:
