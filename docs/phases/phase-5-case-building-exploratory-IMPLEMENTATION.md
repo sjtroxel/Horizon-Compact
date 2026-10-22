@@ -636,3 +636,28 @@ two reads of a byte-identical scenario his resolution was filed against read 1's
 not have superseded an earlier "concerns". Fixed in `reader/read.py` (the newest read of the current scenario or
 rubric counts), with a test that fails on the old code. The misfiled resolution is removed from the case folder and
 recorded again against read 2.
+
+**closure-07 passes criterion 5 (2026-10-22).** `case.lock` committed (`0142a0a`), the content uploaded, one probe
+task per model (worst cases about $0.007 and $0.003). His read of the six answers: none names the company (one model
+declined three times, saying the profile may match a real company; the other named a different company three times).
+Recorded in the exploratory log (`-41`): **closure-07 finished, passed all**, the first exploratory case.
+
+**closure-19, stage 3 to the lock (2026-10-22).** Term list drafted from the 10-K's Items 1, 2 and 7, the 10-Q's Item
+2 and the current reports (some 300 terms: the company, its listed partnership, subsidiaries, acquired businesses,
+brands, executives, the founding family and directors, former employers, competitors, towns, an address and a phone
+number). First build (about $0.30): two names from current reports the first scan missed, a newly appointed
+executive and a litigant company, unflagged; the term list gained them and a fuller sweep of the remaining
+capitalized words (more brands, first names, the phone number, the street), and the outputs were deleted. Second
+build (about $0.31): 27 flags, no name. His flag review (Claude drafted): 12 kept (counts, physical capacities, one
+month-and-day twice on its line), 11 edited (two small dollar figures and two euro amounts the scaler leaves raw,
+replaced by scaled values; the headcount split, scaled to sum to the scaled total; five month-and-day dates to their
+fiscal quarter), 4 per-share figures removed. Scenario rows: the total from the 60-day public report accepted at
+criterion 4 (§4.6.5 step 1 item 3), cash and undrawn credit from the last quarterly report, three caps equal to the
+total; rendered and checked. **Scenario read 1** ("concerns", three, about $0.05): the figure-free option sentences,
+the dropped estimates sentence, and the total's post-disclosure source. All three follow adopted rules the reader's
+brief does not describe; his written resolution keeps the scenario. **Found: the scenario brief does not describe
+the figure-free S3 form or the 60-day source for the total.** Open, his: whether the brief gains them before the next
+case's read (a change to the instrument, logged as such). **Rubric read 1:** "agrees", five lines (about $0.03).
+Foreshadowing: 12 hits, each justified (the company's earlier closures, a general labor fact, the shape's wording);
+neutrality checklist passed. `hc case lock` written. Recognition risk noted before the probe: the dossier keeps the
+company's own claim to be among the world's largest producers in its industry, its capacity and its antitrust suits.

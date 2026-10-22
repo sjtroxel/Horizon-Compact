@@ -1,0 +1,6 @@
+case_version = 1
+label = "closure-19"
+probe_set = 1
+dossier_sha256 = "7a89991f1e2efb32ddbdde0d614163454ad287d0ccac76b47acc7ea2fc3d39cb"
+rubric_sha256 = "ba984303fe1610554cc231842f89bed2e14b8350b6702eac6cb576337a755cf7"
+scenario_sha256 = "3e572c8071dbb06f5937e18852ca34910794a7ef26c5f5f6d2afd0a24b4f4558"

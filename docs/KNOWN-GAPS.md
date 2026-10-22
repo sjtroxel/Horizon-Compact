@@ -7,7 +7,19 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-22, about noon (CLOSURE-07 LOCKED; THE PROBE NEXT)
+> ## START HERE — where things stand, 2026-10-22, about 1 PM (CLOSURE-07 PASSED; CLOSURE-19 LOCKED, ITS PROBE NEXT)
+>
+> **closure-07 passed the recognition probe (6 of 6) and is finished, passed all: the first exploratory case.**
+> closure-19 has passed stage 3's steps 2 to 7 (two builds, flag review, scenario, both reads with his resolution of
+> the scenario's three concerns, foreshadowing, checklist); `experiment/cases/closure-19/case.lock` committed with
+> this block. **Next:** `hc case upload closure-19`, the two probe launches, his verdict. A fail allows one
+> coarsening and a re-probe (protocol §12.8). Then stage 4's pool criteria 1-4 from pre-01, the only route left to a
+> retool or ai case. Open, his: whether the scenario brief gains the figure-free S3 form and the 60-day total source
+> (plan §9).
+>
+> *The noon block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-22, about noon (CLOSURE-07 LOCKED; THE PROBE NEXT)
 >
 > closure-07 has passed stage 3's steps 2 to 7: third build clean, flag review, scenario rendered and checked, the
 > rubric, both reads (scenario: two "concerns", the first fixed in the case's rows, the second kept by his written
