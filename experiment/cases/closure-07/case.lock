@@ -1,0 +1,6 @@
+case_version = 1
+label = "closure-07"
+probe_set = 1
+dossier_sha256 = "25ba504ae76424980aea33c88ebc216ca38b657dee3a4af699e57562b5cddae4"
+rubric_sha256 = "75c9e63c4f7dbb96f3b70770eef7ac298b2dab91bf2d3fbcd2dae792d927c0f1"
+scenario_sha256 = "a9fe131c476edac294ba4edea0961fafb3041e9401aff2cb32097614f5df5f9b"

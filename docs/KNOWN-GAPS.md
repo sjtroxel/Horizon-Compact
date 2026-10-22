@@ -7,7 +7,19 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-22, about 9:20 AM (CLOSURE-07 BUILT TWICE; A FOURTH FIX; THIRD BUILD NEXT)
+> ## START HERE — where things stand, 2026-10-22, about noon (CLOSURE-07 LOCKED; THE PROBE NEXT)
+>
+> closure-07 has passed stage 3's steps 2 to 7: third build clean, flag review, scenario rendered and checked, the
+> rubric, both reads (scenario: two "concerns", the first fixed in the case's rows, the second kept by his written
+> resolution; rubric: "agrees"), the foreshadowing check (15 hits, each justified in the private record) and the
+> neutrality checklist. `experiment/cases/closure-07/case.lock` committed with this block; CI's run on that commit is
+> the time the gate reads. The resolve fault found on the way is fixed (`16cc5ca`; plan §9). **Next:** `hc case
+> upload`, then the recognition probe (criterion 5, the step that can lose the case), then the verdict. Then closure-19,
+> and stage 4's pool criteria 1-4 from pre-01.
+>
+> *The 9:20 AM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-22, about 9:20 AM (CLOSURE-07 BUILT TWICE; A FOURTH FIX; THIRD BUILD NEXT)
 >
 > **Second build (after `e5c557e`):** the three fixes hold; one more unflagged per-share figure in new wording, so
 > a dollar figure under $100 with no unit is now flagged and left unscaled (plan §9). **Uncommitted:** `transform.py`,
