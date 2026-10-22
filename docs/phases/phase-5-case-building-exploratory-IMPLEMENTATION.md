@@ -661,3 +661,21 @@ case's read (a change to the instrument, logged as such). **Rubric read 1:** "ag
 Foreshadowing: 12 hits, each justified (the company's earlier closures, a general labor fact, the shape's wording);
 neutrality checklist passed. `hc case lock` written. Recognition risk noted before the probe: the dossier keeps the
 company's own claim to be among the world's largest producers in its industry, its capacity and its antitrust suits.
+
+**closure-19 fails probe set 1; coarsened once for set 2 (2026-10-22).** The content uploaded and one probe task per
+model (worst cases about $0.008 and $0.003). His read: **6 of 6 answers name the company**, both models, three times
+each. One model gave its reasons: the two segment names and their abbreviations, the company's self-description
+(nearly word for word from its annual report), its product chain and its headquarters region. The segment names are
+as identifying as a brand and should have been on the term list at build time; for later cases the term list takes
+the segment names and any self-description. The reader's read of the failure (about $0.01): agrees, the rejection
+stands. **His decision: coarsen once, as hard as the procedure allows.** The coarsening of §12.8 was not yet built
+(`KNOWN-GAPS.md`, OPEN 2026-10-16, now closed): the coarsened dossier is `set-2/dossier.toml` in the case's appendix
+folder, beside its record `set-2/coarsening.md` (each change, by the four rules of §12.8); the assembled
+`dossier.toml` stays as set 1 was probed on. `hc case lock --probe-set 2` reads the set-2 dossier and refuses without
+the record; `hc case upload` and `hc case hashes` read the dossier of the set they are given. Done by hand by Claude,
+all four rules applied, and two things beyond them, **an exploratory deviation logged here:** the product lines and
+the self-description generalized to "chemicals and plastics, and finished goods made partly from them" (they are
+none of the rule's four kinds, but they were what the answers cited), and the company's size claims, its capacity
+and its feedstock partnership dropped. The scenario and the rubric are unchanged, so no new read. Checks on the set-2
+dossier: no case term, no place name, the name guard clean, and the outcome-term hits the same kinds as set 1's,
+each already justified. **A second failure drops the case** (protocol §12.8).

@@ -150,9 +150,9 @@ def locked(
 ) -> tuple[Path, CaseAppendix]:
     repo = tmp_path / "repo"
     case = CaseAppendix(tmp_path / "appendix", LABEL)
-    case.directory.mkdir(parents=True, exist_ok=True)
+    case.dossier_path_for(probe_set).parent.mkdir(parents=True, exist_ok=True)
     for path, text in (
-        (case.dossier_path, dossier),
+        (case.dossier_path_for(probe_set), dossier),
         (case.scenario_path, SCENARIO),
         (case.rubric_path, RUBRIC),
     ):

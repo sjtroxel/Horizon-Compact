@@ -54,6 +54,14 @@ def _lock(repo: Path, *extra: str, label: str = "closure-1") -> int:
     return main(["case", "lock", label, "--root", str(repo), *extra])
 
 
+def _coarsen(appendix: Path, dossier: bytes = COARSE) -> None:
+    """Set 2's dossier and its record, where a coarsening writes them (protocol §12.8)."""
+    folder = appendix / "closure-1" / "set-2"
+    folder.mkdir(exist_ok=True)
+    (folder / "dossier.toml").write_bytes(dossier)
+    (folder / "coarsening.md").write_text("canary coarsening record\n", encoding="utf-8")
+
+
 def test_lock_writes_the_record_the_gate_reads_back_and_accepts(
     setup: tuple[Path, Path], capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -154,17 +162,32 @@ def test_probe_set_1_is_write_once(
 def test_probe_set_2_replaces_the_lock_after_a_coarsening(setup: tuple[Path, Path]) -> None:
     appendix, repo = setup
     _lock(repo)
-    (appendix / "closure-1" / "dossier.toml").write_bytes(COARSE)
+    _coarsen(appendix)
     assert _lock(repo, "--probe-set", "2") == CLEAN_EXIT
     record = parse_case((repo / LOCK).read_text(encoding="utf-8"), "closure-1")
     assert record.probe_set == 2
     assert check_case_content(record, CaseContent(COARSE, SCENARIO, RUBRIC)) == []
+    assert (appendix / "closure-1" / "dossier.toml").read_bytes() == DOSSIER
+
+
+def test_probe_set_2_refuses_a_coarsened_dossier_with_no_record(
+    setup: tuple[Path, Path], capsys: pytest.CaptureFixture[str]
+) -> None:
+    appendix, repo = setup
+    _lock(repo)
+    before = (repo / LOCK).read_text(encoding="utf-8")
+    _coarsen(appendix)
+    (appendix / "closure-1" / "set-2" / "coarsening.md").unlink()
+    assert _lock(repo, "--probe-set", "2") == REFUSED_EXIT
+    assert "the coarsening record does not exist" in capsys.readouterr().err
+    assert (repo / LOCK).read_text(encoding="utf-8") == before
 
 
 def test_probe_set_2_refuses_with_no_set_1(
     setup: tuple[Path, Path], capsys: pytest.CaptureFixture[str]
 ) -> None:
-    _, repo = setup
+    appendix, repo = setup
+    _coarsen(appendix)
     assert _lock(repo, "--probe-set", "2") == REFUSED_EXIT
     assert "no set 1 to coarsen from" in capsys.readouterr().err
     assert not (repo / LOCK).exists()
@@ -173,9 +196,10 @@ def test_probe_set_2_refuses_with_no_set_1(
 def test_probe_set_2_refuses_the_dossier_set_1_was_locked_on(
     setup: tuple[Path, Path], capsys: pytest.CaptureFixture[str]
 ) -> None:
-    _, repo = setup
+    appendix, repo = setup
     _lock(repo)
     before = (repo / LOCK).read_text(encoding="utf-8")
+    _coarsen(appendix, DOSSIER)
     assert _lock(repo, "--probe-set", "2") == REFUSED_EXIT
     assert "needs a coarsened dossier" in capsys.readouterr().err
     assert (repo / LOCK).read_text(encoding="utf-8") == before
@@ -187,7 +211,7 @@ def test_probe_set_2_refuses_a_changed_rubric(
     appendix, repo = setup
     _lock(repo)
     before = (repo / LOCK).read_text(encoding="utf-8")
-    (appendix / "closure-1" / "dossier.toml").write_bytes(COARSE)
+    _coarsen(appendix)
     (appendix / "closure-1" / "rubric.toml").write_bytes(RUBRIC + b"changed\n")
     assert _lock(repo, "--probe-set", "2") == REFUSED_EXIT
     assert "never the rubric" in capsys.readouterr().err
@@ -199,9 +223,9 @@ def test_a_case_is_locked_for_set_2_once(
 ) -> None:
     appendix, repo = setup
     _lock(repo)
-    (appendix / "closure-1" / "dossier.toml").write_bytes(COARSE)
+    _coarsen(appendix)
     _lock(repo, "--probe-set", "2")
-    (appendix / "closure-1" / "dossier.toml").write_bytes(COARSE + b"# again\n")
+    _coarsen(appendix, COARSE + b"# again\n")
     assert _lock(repo, "--probe-set", "2") == REFUSED_EXIT
     assert "re-probed once" in capsys.readouterr().err
 
@@ -209,7 +233,8 @@ def test_a_case_is_locked_for_set_2_once(
 def test_probe_set_2_refuses_an_unreadable_existing_lock(
     setup: tuple[Path, Path], capsys: pytest.CaptureFixture[str]
 ) -> None:
-    _, repo = setup
+    appendix, repo = setup
+    _coarsen(appendix)
     (repo / LOCK).parent.mkdir(parents=True)
     (repo / LOCK).write_text("not toml [", encoding="utf-8")
     assert _lock(repo, "--probe-set", "2") == REFUSED_EXIT

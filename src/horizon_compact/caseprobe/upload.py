@@ -53,9 +53,9 @@ def lock_pushed(git: Git, label: str) -> str:
     return commit
 
 
-def _files(case: CaseAppendix) -> dict[str, bytes]:
+def _files(case: CaseAppendix, probe_set: int) -> dict[str, bytes]:
     paths = {
-        "dossier.toml": case.dossier_path,
+        "dossier.toml": case.dossier_path_for(probe_set),
         "scenario.toml": case.scenario_path,
         "rubric.toml": case.rubric_path,
     }
@@ -84,7 +84,7 @@ def upload_case(
             f"{case_path(case.label)} is for probe set {record.probe_set}, not {probe_set}: lock the "
             "content of the set you are uploading first"
         )
-    files = _files(case)
+    files = _files(case, probe_set)
     mismatched = check_case_content(
         record, CaseContent(files["dossier.toml"], files["scenario.toml"], files["rubric.toml"])
     )

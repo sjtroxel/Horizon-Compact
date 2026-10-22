@@ -98,6 +98,8 @@ def test_hashes_prints_a_case_lock_the_gate_reads_back_and_accepts(
 def test_hashes_agree_with_the_function_the_gate_uses_and_with_sha256(
     appendix: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    (appendix / "closure-1" / "set-2").mkdir()
+    (appendix / "closure-1" / "set-2" / "dossier.toml").write_bytes(DOSSIER)
     main(
         ["case", "hashes", "closure-1", "--rubric", str(appendix / "rubric.md"), "--probe-set", "2"]
     )

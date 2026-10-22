@@ -12,9 +12,11 @@ atomic (a temporary file linked into place at set 1, so it never replaces one; r
 crash leaves no half lock.
 
 **Probe set 1 is write-once.** A second lock is allowed only as probe set 2 after a coarsening (protocol
-§12.8): the existing lock must be set 1, the rubric must hash the same (no model sees a case before its
-rubric, and the rubric does not change with coarsening) and the dossier must hash differently (a re-probe
-needs a coarsened dossier; the gate refuses a set 2 on a dossier set 1 was probed on). **What this cannot
+§12.8): the coarsened dossier is ``set-2/dossier.toml`` beside its record ``set-2/coarsening.md``
+(``dossier.toml`` stays as set 1 was probed on), the existing lock must be set 1, the rubric must hash the
+same (no model sees a case before its rubric, and the rubric does not change with coarsening) and the dossier
+must hash differently (a re-probe needs a coarsened dossier; the gate refuses a set 2 on a dossier set 1 was
+probed on). **What this cannot
 check:** that set 1 actually failed. That is read from the probe records, which exist at step 10; here it
 rests on him. The gate's ``check_case_probes`` refuses a re-probe whose first set passed.
 """
@@ -91,8 +93,10 @@ def lock_case(
         relative = case_path(case.label)
     except CaseError as exc:
         raise CaseLockError(str(exc)) from exc
+    if probe_set not in (1, 2):
+        raise CaseLockError(f"probe set {probe_set} is not 1 or 2")
     content = CaseContent(
-        dossier=_read(case.dossier_path, "the dossier"),
+        dossier=_read(case.dossier_path_for(probe_set), "the dossier"),
         scenario=_read(case.scenario_path, "the scenario"),
         rubric=_read(case.rubric_path, "the rubric"),
     )
@@ -103,13 +107,14 @@ def lock_case(
         if target.exists():
             raise CaseLockError(_EXISTS.format(relative=relative))
         _check_assembled(case, hashes["dossier_sha256"])
-    elif probe_set == 2:
+    else:
         if not target.is_file():
             raise CaseLockError(f"{relative} does not exist: there is no set 1 to coarsen from")
         try:
             earlier = parse_case(target.read_text(encoding="utf-8"), case.label)
         except (CaseError, OSError) as exc:
             raise CaseLockError(f"the existing lock cannot be read: {exc}") from exc
+        _read(case.coarsening_path(2), "the coarsening record")
         if earlier.probe_set != 1:
             raise CaseLockError(
                 f"{relative} is already probe set {earlier.probe_set}: a case is re-probed once"
@@ -123,8 +128,6 @@ def lock_case(
                 "the dossier is the one set 1 was locked on: a re-probe needs a coarsened dossier "
                 "(protocol §12.8)"
             )
-    else:
-        raise CaseLockError(f"probe set {probe_set} is not 1 or 2")
 
     scenario_check(case)
     reads_check(case)

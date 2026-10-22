@@ -124,6 +124,18 @@ class CaseAppendix:
     def dossier_path(self) -> Path:
         return self.directory / "dossier.toml"
 
+    def dossier_path_for(self, probe_set: int) -> Path:
+        """The dossier a probe set is locked and uploaded on: set 1's is the assembled ``dossier.toml``; a
+        later set's is the coarsened one under ``set-<n>/`` (protocol §12.8), written by hand beside its
+        record, since ``dossier.toml`` is write-once and set 1's evidence."""
+        if probe_set == 1:
+            return self.dossier_path
+        return self.directory / f"set-{probe_set}" / "dossier.toml"
+
+    def coarsening_path(self, probe_set: int) -> Path:
+        """What the coarsening for a later probe set changed and by which of §12.8's four rules; private."""
+        return self.directory / f"set-{probe_set}" / "coarsening.md"
+
     @property
     def scenario_path(self) -> Path:
         return self.directory / "scenario.toml"

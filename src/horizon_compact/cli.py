@@ -1145,7 +1145,7 @@ def cmd_case_hashes(args: argparse.Namespace) -> int:
     case = open_case(args.label)
     try:
         content = CaseContent(
-            dossier=case.dossier_path.read_bytes(),
+            dossier=case.dossier_path_for(args.probe_set).read_bytes(),
             scenario=case.scenario_path.read_bytes(),
             rubric=args.rubric.read_bytes(),
         )

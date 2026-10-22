@@ -7,7 +7,20 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-22, about 1 PM (CLOSURE-07 PASSED; CLOSURE-19 LOCKED, ITS PROBE NEXT)
+> ## START HERE — where things stand, 2026-10-22, about 3 PM (CLOSURE-19 FAILED SET 1; COARSENED, SET 2 LOCKED)
+>
+> closure-07 passed and is finished, the first exploratory case. **closure-19 failed probe set 1** (6 of 6 answers
+> named the company, on its segment names and self-description; the reader agrees). His decision: coarsen once, as
+> hard as protocol §12.8 allows, plus the product lines (an exploratory deviation, plan §9). The coarsened dossier's
+> home is built (OPEN 2026-10-16 below, closed): `set-2/` in the case's appendix folder, with a record of every
+> change; `case.lock` is now probe set 2, committed with this block. **Next:** after the Deploy run, `hc case upload
+> closure-19 --set 2`, the two probe launches, his verdict. A second fail drops the case. Then stage 4's pool
+> criteria 1-4 from pre-01. Open, his: whether the scenario brief gains the figure-free S3 form and the 60-day total
+> source (plan §9).
+>
+> *The 1 PM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-22, about 1 PM (CLOSURE-07 PASSED; CLOSURE-19 LOCKED, ITS PROBE NEXT)
 >
 > **closure-07 passed the recognition probe (6 of 6) and is finished, passed all: the first exploratory case.**
 > closure-19 has passed stage 3's steps 2 to 7 (two builds, flag review, scenario, both reads with his resolution of
@@ -2153,7 +2166,7 @@ expected, not a surprise. If S3 yields none, that is his to weigh then (the prot
 form (protocol §12.6: "every option is described without figures alike"); closes when the exploratory part's stage 1
 builds it.
 
-## OPEN 2026-10-16 — where a coarsened dossier lives (before any probe set 2)
+## CLOSED 2026-10-22, built with closure-19's set 2 — where a coarsened dossier lives (before any probe set 2)
 
 `hc case lock --probe-set 2` (step 8a) reads the coarsened dossier from the appendix's `dossier.toml`, but that file is
 written once by `hc case assemble` and no code ever rewrites it. So today a set-2 lock can only be reached by replacing
@@ -2163,6 +2176,13 @@ dossier is written (the S3 layout of §4.8 already has `set-<n>/`; the appendix 
 whether it may touch the scenario text as well as the dossier. **Settle it when coarsening is built (after step 10's
 probe), before any set-2 lock;** then point `lock_case`'s set-2 branch at that path and check it against that record.
 Nothing reaches set 2 before a probe has failed.
+
+*Closed 2026-10-22, when closure-19 failed set 1:* the coarsened dossier is `set-2/dossier.toml` in the case's
+appendix folder, beside `set-2/coarsening.md`, the record of each change by §12.8's four rules; `dossier.toml` stays
+as set 1 was probed on. `lock_case` at set 2 reads that dossier and refuses without the record; `upload_case` and
+`hc case hashes` read the dossier of the set they are given (`CaseAppendix.dossier_path_for`). The coarsening itself
+is done by hand, not by code. The scenario text is not touched (closure-19's has no proper noun and no figure beyond
+the total and liquidity).
 
 ## CLOSED 2026-10-16, his decision, built in step 10a (committed `9842054`, pushed) — a disputed probe failure (criterion 5) passed the log but not the gate
 
