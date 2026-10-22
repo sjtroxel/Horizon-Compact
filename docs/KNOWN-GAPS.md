@@ -7,7 +7,16 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-22, about 9:15 AM (CLOSURE-07 BUILT ONCE; THREE FIXES; REBUILD NEXT)
+> ## START HERE — where things stand, 2026-10-22, about 9:20 AM (CLOSURE-07 BUILT TWICE; A FOURTH FIX; THIRD BUILD NEXT)
+>
+> **Second build (after `e5c557e`):** the three fixes hold; one more unflagged per-share figure in new wording, so
+> a dollar figure under $100 with no unit is now flagged and left unscaled (plan §9). **Uncommitted:** `transform.py`,
+> its tests, the plan's note, this block. **Next, his:** commit and push; delete the three build outputs; build
+> again; then the flag review.
+>
+> *The 9:15 AM block below is superseded on what is next.*
+>
+> ## START HERE — where things stood, 2026-10-22, about 9:15 AM (CLOSURE-07 BUILT ONCE; THREE FIXES; REBUILD NEXT)
 >
 > **Measured:** last commit `947ba5c` (3c, pushed); `make check` green, **2768 tests**. **Stage 3 has started on
 > closure-07** (exploratory plan §9, the 2026-10-22 note): term list and guard terms in, the quarterly report cut by

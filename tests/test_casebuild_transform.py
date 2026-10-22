@@ -88,6 +88,19 @@ def test_per_share_figures_and_share_counts_are_flagged_for_removal_and_not_scal
     assert all("remove" in k for k in kinds(result))
 
 
+def test_a_small_dollar_figure_with_no_unit_is_flagged_and_not_scaled() -> None:
+    result = run("down from $19.7 million ($1.01), and $99 against $100")
+    assert result.text == "down from $23.6 million ($1.01), and $99 against $120"
+    assert [f.text for f in result.flags] == ["$1.01", "$99"]
+    assert all("under $100 with no unit" in k for k in kinds(result))
+
+
+def test_a_small_rate_is_still_a_ratio_and_not_flagged() -> None:
+    result = run("paid $25 an hour")
+    assert result.text == "paid $25 an hour"
+    assert result.flags == []
+
+
 @pytest.mark.parametrize(
     "text",
     [

@@ -88,6 +88,7 @@ _RATIO_AFTER = re.compile(
     r"|/\s*(?:hr|hour)\b|(?:an?\s+)?(?:year|annum)\s+(?:on\s+average|per\s+(?:employee|worker)))",
     re.IGNORECASE,
 )
+_SMALL_DOLLAR = Decimal(100)
 # "per diluted share" and "per basic and diluted common share" too (closure-07's first build, 2026-10-22).
 _PER_SHARE_AFTER = re.compile(
     r"^\s*(?:(?:per|an?|each)\s+(?:(?:basic|diluted|common|ordinary|and)\s+){0,4}share\b"
@@ -240,8 +241,16 @@ def transform(text: str, *, calendar: d.FiscalCalendar, factor: float) -> Transf
             count("dollar_ratio_unscaled")
             return whole
         number = Decimal(match.group("d_num").replace(",", ""))
-        scaled = scale_dollars(number, factor)
         unit = (match.group("d_unit") or "").lower()
+        if not unit and number < _SMALL_DOLLAR:
+            # A per-share figure the wording hides ("$19.7 million ($1.01)"): left unscaled, because a scaled
+            # one over scaled earnings gives the real share count (closure-07's second build, 2026-10-22).
+            flag(
+                "dollar figure under $100 with no unit: per share? remove it or keep it (§4.8)",
+                match,
+            )
+            return whole
+        scaled = scale_dollars(number, factor)
         start, end = match.span("d_num")
         out = whole[: start - match.start()] + format_number(scaled) + whole[end - match.start() :]
         count("dollar")

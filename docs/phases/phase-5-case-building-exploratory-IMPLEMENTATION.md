@@ -599,3 +599,12 @@ regions (its total is right); "the a town facility" reads oddly; and section 1 c
 description of its market position, which no term list removes: the recognition probe decides it, and the
 coarsening procedure (OPEN 2026-10-16) applies only if it fails. **Next:** his commit and push, the three build
 outputs deleted by hand (the folder rule for starting over), the build run again (a new seed), then the flag review.
+
+**closure-07's second build (2026-10-22, after `e5c557e`).** About $0.12, 21 flags; the three fixes hold (the
+diluted figure flagged and unscaled, the second quarter's results labeled the second quarter, no stray ordinal).
+**One new leak of the same kind:** this extraction wrote a prior-year per-share figure as "$19.7 million ($1.01)",
+with no "per share" after it, so it was scaled. Matching phrases cannot keep up with the extraction's wording, so
+the rule is now structural: a dollar figure under $100 with no unit is flagged and left unscaled (per share, or
+kept by him). Tests; `make check` green. The term list's roles were also lettered (subsidiaries A and B, towns A
+to M) so the text no longer reads "the a town facility". **Next:** his commit and push, the outputs deleted, a
+third build, then the flag review.
