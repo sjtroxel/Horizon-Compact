@@ -608,3 +608,31 @@ the rule is now structural: a dollar figure under $100 with no unit is flagged a
 kept by him). Tests; `make check` green. The term list's roles were also lettered (subsidiaries A and B, towns A
 to M) so the text no longer reads "the a town facility". **Next:** his commit and push, the outputs deleted, a
 third build, then the flag review.
+
+**closure-07, third build to the scenario (2026-10-22).** Third build (after `7b501b6`): about $0.12, 20 flags, no
+unflagged per-share figure. His flag review (Claude drafted, his reasons as worded): 13 fiscal-year flags kept (the
+filer's year ends in late September, so the assumption holds), 7 per-share figures removed (§4.8 of the code half);
+`hc case assemble` wrote the dossier. **Scenario (step 4):** rows for the total (the state notice filed on the
+first-disclosure date, the one first-disclosure row), cash and undrawn credit (the last quarterly report before the
+cut-off), and the three caps equal to the total; every other S3 figure has no source. Rendered (nine sentences
+dropped; the figure-free S3 form) and `hc case scenario check` passes. **A known gap, logged before any read:** the
+dropped first situation sentence was the only one introducing the plant, so the scenario never says which of the
+dossier's facilities "Plant 6" is (§4.6.1's "what this costs" foresaw the loss of context). His question (does
+leaving it risk the case?), answered from the code: a scenario read can only return "neutral" or "concerns", and
+"concerns" means fix and re-read or his written resolution, never a rejection; naming the plant's product line and
+region would instead raise the recognition risk at criterion 5, the step that can lose the case. Left as rendered;
+if the reader raises it, the fix is a clarity fix with the reader's concern as its logged reason.
+
+**closure-07, the reads (2026-10-22).** Scenario read 1 ("concerns", two figure-source concerns, about $0.02): the
+rows' locators quoted the unscaled values, so the reader set the scaled total and liquidity against unscaled sources.
+The material is built to show neither the unscaled values nor the factor (protocol §12.6); the locators defeated
+that. Fixed in the case's rows (a locator names where a figure is, never its value), rendered again (scenario.toml
+unchanged byte for byte), check passes. Read 2 ("concerns", about $0.04): the figure-free options are thin and the
+sell sentence says more than the close one. Those sentences are the shared S3 case form (§4.6.5 step 0), read when
+adopted, and close is short at that reader's own request; his written resolution keeps them. The Plant 6 gap above
+was not raised. Rubric read 1: "agrees", five lines, none disagreeing (about $0.02). **A fault found in the
+resolution:** `hc case resolve` and the lock's check took the *oldest* read of the scenario as it stands, so with
+two reads of a byte-identical scenario his resolution was filed against read 1's reply, and a neutral re-read would
+not have superseded an earlier "concerns". Fixed in `reader/read.py` (the newest read of the current scenario or
+rubric counts), with a test that fails on the old code. The misfiled resolution is removed from the case folder and
+recorded again against read 2.

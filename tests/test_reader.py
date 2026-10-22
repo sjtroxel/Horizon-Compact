@@ -1149,6 +1149,30 @@ def test_a_concerns_or_disagrees_reading_needs_his_resolution_before_the_lock(
     assert record["reading"] == "disagrees" and record["reply"] == "reader-rubric-1-reply.json"
 
 
+def test_a_re_read_of_an_unchanged_scenario_supersedes_the_earlier_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from horizon_compact.reader.read import reads_settled
+
+    case = rendered_case(tmp_path)
+    write_rubric(case)
+    _read_both(monkeypatch, SCENARIO_CONCERNS, RUBRIC_AGREES)
+    _edit_rows(case)  # a locator fixed: scenario.toml is byte for byte the one attempt 1 read
+    assert (
+        run_reader(monkeypatch, Replies(says(SCENARIO_NEUTRAL)), LABEL, "scenario")[0] == CLEAN_EXIT
+    )
+    reads_settled(case)  # attempt 2 is neutral: attempt 1's concerns need no resolution
+    _edit_rows(case)
+    assert (
+        run_reader(monkeypatch, Replies(says(SCENARIO_CONCERNS)), LABEL, "scenario")[0]
+        == CLEAN_EXIT
+    )
+    assert main(["case", "resolve", LABEL, "scenario", "--resolution", "kept: see why"]) == 0
+    record = json.loads((case.directory / "reader-scenario-3-resolution.json").read_text())
+    assert record["reply"] == "reader-scenario-3-reply.json"
+    reads_settled(case)
+
+
 def test_a_neutral_reading_has_nothing_to_resolve(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

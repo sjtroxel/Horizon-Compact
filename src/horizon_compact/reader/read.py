@@ -655,13 +655,14 @@ def _resolution_name(name: str, attempt: int) -> str:
 
 
 def _read_of_current(case: CaseAppendix, kind: str) -> tuple[Attempt, Path]:
-    """The usable read of the scenario or rubric exactly as it now stands in the case's folder."""
+    """The newest usable read of the scenario or rubric exactly as it now stands in the case's folder. Newest,
+    since a re-read of an unchanged scenario (its figure sources fixed, say) supersedes the earlier read."""
     path = case.scenario_path if kind == "scenario" else case.rubric_path
     try:
         current = _file_sha256(path)
     except OSError as exc:
         raise ReaderError(f"the {kind} cannot be read: {path.name}") from exc
-    for attempt, reply in _usable_reads(case, stem(kind, None)):
+    for attempt, reply in reversed(_usable_reads(case, stem(kind, None))):
         if attempt.material and attempt.material.get(_PART[kind]) == current:
             return attempt, reply
     raise ReaderError(
