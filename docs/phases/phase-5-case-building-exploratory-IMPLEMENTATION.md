@@ -692,3 +692,38 @@ abbreviations, its self-description sentence and any rank or size claim at build
 answers cited; the full coarsening stays the fallback after a failure. Two closure cases now fill closure's k = 2;
 by §4.6.5 D.1 and D.3, stage 4's pool rows come next in the order, and a third closure is a case only if retool or
 ai is short.
+
+**Stage 4 step 3: pool rows pre-01 to pre-11 (2026-10-23, Opus with him).** Checked in the order of §4.6.5 D.1 by
+the search half's §4.3 method (EDGAR full-text on the filer, a web search, the filing's own text), each rejection on
+criteria 3 to 5 read (about 9 cents in all, every read "agrees" but pre-11's). **pre-01** (a research site, no
+product: §4.6.5 step 1 item 4, the closure-04 precedent) and **pre-02** (S2, no stated operating-income fall: a
+company with no product revenue) fail criterion 4. **Batch 1, pre-03 to pre-10:** pre-03 fails criterion 3 (a cut
+inside a bankruptcy whose aim is the sale of substantially all assets: a forced wind-down); pre-07 and pre-08 fail
+criterion 1 (press-channel hits on "plant closure" as a past-charges line item and a non-GAAP definition, stated
+before the pool; the press-05 precedent); pre-04, 05, 06, 09 and 10 are S2 and fail its total (no stated
+operating-income fall in the first-disclosure document or the pre-cut-off filings searched, `total-search.txt`).
+**A scan of all 172 rows' text** (Item 2.05 and press releases, for retool, AI and closure wording; no record, no
+cost, and the order still binds, D.4): no ai row with an AI-attributed cut and a stated count; one possible retool row
+(pre-72, production moved to a recently opened plant: whether that is capacity "the company is building" is
+his, when the row is reached); about ten S3 closures.
+
+**pre-11, passed all (2026-10-23).** Criterion 4: S3 closure; the filings give no headcount, and the two public
+reports each miss one rule (the company's release: a number of employees *affected*, item 4; a trade report the
+same day: the same number *working* at the site, no source named, item 3). His decision (a): record the fail by the letter
+and keep the rejection brief unchanged, so every S3 row of this record is read by one brief, as closure-19 was; the
+reader disputed (log -97), the rejection does not stand, and the write-up labels the headcount as press-stated,
+matching the company's affected count. Knowledge probe: nine replies, none "unknown", none stating or guessing the
+decision (log -98). **An exploratory deviation, his decision (the closure-19 lesson applied before set 1):** the term
+list (370 terms) takes, at build time, the company's self-description and rank claims, its product line
+(generalized), the countries of its plants (to regions), its activist investors and lenders, and the
+dossier's plant counts (to "several", in the flag review); the one coarsening of §12.8 stays in reserve. Three builds
+(about $0.56): the first read in full showed a fiscal-year label the date code does not read ("FY25", a real-year
+leak) and customer categories that point to the product; the second, country adjectives the term list lacked; both
+fixed in the term list. Not fixable in the review file, noted: one report near a fiscal year's end is headed one quarter
+late (the build's calendar takes the prior year's month and day). Flag review 33 kept, 9
+edited, 5 removed. Scenario: the total scaled, liquidity from the last quarterly report, three caps equal to the
+total; read 1 "concerns" (the figure-free option sentences, as closure-19's), kept by his written resolution; rubric
+read "agrees" (choice close, observable; the four lines not). Foreshadowing: 17 hits, each justified. Lock committed
+and pushed; recognition probe set 1: **six of six answers do not name the company** (one names a private competitor;
+log -99). **pre-11 is finished, passed all; it fills a slot by D.3 only when every step 3 row is finished and retool
+or ai is short.**

@@ -7,6 +7,23 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
+> ## START HERE — where things stand, 2026-10-23, about 3 PM (PRE-11 PASSED ALL; POOL ROWS PRE-12 ON NEXT)
+>
+> **Measured:** `make check` green, 2772 tests; last commit `phase 5: pre-11 locked` (pushed, Deploy green). Stage 4
+> step 3 has started: **pool rows pre-01 to pre-11 are finished.** pre-01 to pre-10 are rejected (each rejection on
+> criteria 3 to 5 read by the reader, all "agrees"; pre-07 and pre-08 at criterion 1, which is not read). **pre-11
+> passed all** (exploratory log -99): an S3 closure, criterion 4 by the letter failed and disputed by the reader (the
+> brief left unchanged, his decision (a)), the knowledge probe passed 9 of 9, the build generalized at build time (his
+> decision, an exploratory deviation, plan §9), the recognition probe passed 6 of 6. **It is not yet a case:** the
+> selection lists closure-07 and closure-19 and holds the fill open (§4.6.5 D.3 and D.4) until every step 3 row is
+> finished; if retool and ai stay short, pre-11 is the first row to fill a slot. **Next:** pool rows from pre-12, in
+> batches (Claude prepares the criterion 1 checks, excerpts and total searches; his one script per batch for the
+> records and reads). A scan of all 172 rows' text (no record, plan §9) found one possible retool row (pre-72) and no
+> ai row. Open, his: whether the scenario brief gains the figure-free S3 form and the 60-day total source, and the
+> rejection brief item 3's attribution condition (both raised again by pre-11's reads, both kept unchanged so far).
+>
+> *The 2026-10-22 3:30 PM block below is superseded.*
+>
 > ## START HERE — where things stand, 2026-10-22, about 3:30 PM (TWO EXPLORATORY CASES: CLOSURE-07, CLOSURE-19)
 >
 > **Handoff, about 3:40 PM:** `make check` green, 2772 tests, at `b483d89` plus this commit (docs only). **Tomorrow's
