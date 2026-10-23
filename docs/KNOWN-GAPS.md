@@ -7,7 +7,23 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-22, about 3 PM (CLOSURE-19 FAILED SET 1; COARSENED, SET 2 LOCKED)
+> ## START HERE — where things stand, 2026-10-22, about 3:30 PM (TWO EXPLORATORY CASES: CLOSURE-07, CLOSURE-19)
+>
+> **Handoff, about 3:40 PM:** `make check` green, 2772 tests, at `b483d89` plus this commit (docs only). **Tomorrow's
+> first move:** `hc case xlog show` to confirm both cases finished, then `pre-01`'s criterion 1 (first disclosure),
+> reading its filing. A row is done when it fails with its reason or reaches the knowledge probe.
+>
+> **closure-19 passed probe set 2** (6 of 6 "unknown", after the coarsening) and is finished, passed all
+> (`exploratory-log-42`). With closure-07, **two exploratory cases**, both closure, which fills closure's k = 2. A
+> set needs at least three and at least one invest or retool, so **next is stage 4: the pool's rows from `pre-01`**,
+> criteria 1-4, then the knowledge probe (plan §3 item 11). A third closure is a case only if retool or ai is short
+> (§4.6.5 D.3). Open, his: whether every later case's term list takes its segment names, self-description and size
+> claims at build time (plan §9); whether the scenario brief gains the figure-free S3 form and the 60-day total
+> source (plan §9).
+>
+> *The 3 PM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-22, about 3 PM (CLOSURE-19 FAILED SET 1; COARSENED, SET 2 LOCKED)
 >
 > closure-07 passed and is finished, the first exploratory case. **closure-19 failed probe set 1** (6 of 6 answers
 > named the company, on its segment names and self-description; the reader agrees). His decision: coarsen once, as

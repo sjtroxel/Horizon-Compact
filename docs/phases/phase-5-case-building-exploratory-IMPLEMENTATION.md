@@ -679,3 +679,16 @@ none of the rule's four kinds, but they were what the answers cited), and the co
 and its feedstock partnership dropped. The scenario and the rubric are unchanged, so no new read. Checks on the set-2
 dossier: no case term, no place name, the name guard clean, and the outcome-term hits the same kinds as set 1's,
 each already justified. **A second failure drops the case** (protocol §12.8).
+
+**closure-19 passes criterion 5 on set 2 (2026-10-22).** Set 2 locked and pushed, the Deploy run green, the content
+uploaded as set 2, one probe task per model (worst cases about $0.007 and $0.002). His read: **no answer names the
+company**, all six "unknown". The set-1 failure's verdicts were written before set 2 (six), and the exploratory log
+took one result for the criterion, after set 2: `exploratory-log-42`, **closure-19 finished, passed all**, the second
+exploratory case. Found on the way: `hc case probe-verdict` and `hc case reader ... rejection` print "log it: hc case
+xlog read ..." after a set-1 failure, but the log refuses a read with no failure recorded, and recording one would
+end the row (nothing follows a failure); the verdict's own closing line says it right (log the failure only if set 2
+fails too). **Lesson for every later case, his to adopt:** the term list takes the company's segment names and their
+abbreviations, its self-description sentence and any rank or size claim at build time, since those are what set 1's
+answers cited; the full coarsening stays the fallback after a failure. Two closure cases now fill closure's k = 2;
+by §4.6.5 D.1 and D.3, stage 4's pool rows come next in the order, and a third closure is a case only if retool or
+ai is short.
