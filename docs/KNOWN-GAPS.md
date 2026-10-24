@@ -7,7 +7,23 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-23, about 3 PM (PRE-11 PASSED ALL; POOL ROWS PRE-12 ON NEXT)
+> ## START HERE — where things stand, 2026-10-24, about 8 AM (BATCH 2 FINISHED; PRE-25 TO STAGE 3; PRE-73 ON NEXT)
+>
+> **Measured:** `make check` green, 2772 tests; last commit `phase 5: pre-11 passed all`. **Pool rows pre-12 to
+> pre-72 (batch 2, 61 rows) are finished** (plan §9): 15 fail criterion 1, pre-43 criterion 3, 43 criterion 4, pre-20
+> the knowledge probe; 48 reads, 45 "agrees". Three disputes (pre-20, pre-25, pre-28), each logged with his
+> resolution; under protocol §12.4 none of those rejections stands, so the three went on: pre-28 then failed criterion
+> 4, pre-20 the knowledge probe, and **pre-25 passed the knowledge probe (9 of 9) and goes on to stage 3** (the build
+> and the recognition probe), as pre-11 did. **The only retool lead (pre-72) went on the closure list and failed
+> criterion 4; no retool or ai row has been found in pre-01 to pre-72.** **Lesson (Claude's fault, at pre-28):** a
+> criterion 3 rejection rests only on what the reader is shown (the excerpt). **Next, his order:** pre-25's stage 3,
+> and pool rows from pre-73 in a large batch. Open, his: whether the scenario brief gains the figure-free S3 form and
+> the 60-day total source, and the rejection brief item 3's attribution condition (both kept unchanged so far; batch
+> 2's disputes on pre-20 and pre-25 raised them again).
+>
+> *The 2026-10-23 3 PM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-23, about 3 PM (PRE-11 PASSED ALL; POOL ROWS PRE-12 ON NEXT)
 >
 > **Measured:** `make check` green, 2772 tests; last commit `phase 5: pre-11 locked` (pushed, Deploy green). Stage 4
 > step 3 has started: **pool rows pre-01 to pre-11 are finished.** pre-01 to pre-10 are rejected (each rejection on

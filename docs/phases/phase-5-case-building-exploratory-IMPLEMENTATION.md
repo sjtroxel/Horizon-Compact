@@ -727,3 +727,30 @@ read "agrees" (choice close, observable; the four lines not). Foreshadowing: 17 
 and pushed; recognition probe set 1: **six of six answers do not name the company** (one names a private competitor;
 log -99). **pre-11 is finished, passed all; it fills a slot by D.3 only when every step 3 row is finished and retool
 or ai is short.**
+
+**Stage 4 step 3: batch 2, pool rows pre-12 to pre-72 (2026-10-24, Opus with him).** Sixty-one rows, checked as
+batch 1 was, in two scripts of his (criteria 1 to 3 and the documents; then criterion 4 and the reads), and three
+more for the reads that needed more. **15 fail criterion 1:** each match is a cost line, a footnote, contract wording
+or a risk factor for a decision stated before the pool, or (pre-55) the same decision as an earlier row (the rule of
+one decision judged once, (b)). **pre-43 fails criterion 3** (the exit of a business whose products a new law will
+prohibit: compelled). **43 fail criterion 4:** 30 are S2 with no stated operating-income fall in the first-disclosure
+document or the pre-cut-off filings searched (`total-search.txt`), among them pre-66 (the release names AI as a means
+of the program, not the cause of the cut: S2, not S1, his call, the ai-07 precedent); 5 name more than one facility
+(item 5); 3 name one facility and no source states its headcount; 4 name one facility whose only number is of jobs cut
+or employees affected (item 4, his decision (a)), among them pre-72, the scan's one retool lead, on the closure list
+(its production goes to a plant already open, not to capacity being built: closure by §12.1, his call); pre-24
+matches no shape. **The reads:** 48 in all, about $0.97, 45 "agrees". **Three disputes, each logged with his
+resolution; under protocol §12.4 none of the three rejections stands:** pre-20 and pre-25 (S3 closures failed at
+criterion 4 by the letter: a headcount reported with no attribution item 3 accepts; a number of employees the closure
+may affect, item 4; the pre-11 pattern, the brief unchanged) and pre-28 (criterion 3). **Found at pre-28, Claude's
+fault:** the rejection rested on a statement in the same announcement but outside the excerpt the reader is given
+(the whole Item 2.05). A criterion 3 rejection should rest only on what the reader is shown. pre-28 then fails
+criterion 4 (S2, no total; "agrees"). **pre-69's first read was refused**, its `total-search.txt` over the length
+limit: the subject term was the product's name, which matched nearly every paragraph. It was re-cut with the action's
+own words, as the S2 subject rule says (no operating-income paragraph in either cut; the first cut kept beside it in
+the appendix), and read after one throttled attempt that produced no reading and cost nothing: "agrees". **Knowledge
+probes** (about a cent and a quarter each): **pre-20 fails**, on two gpt-oss replies (the same answer) that state a
+closure of the plant was announced in an earlier year and reversed, their reasoning stating it too; his read, by the
+letter of item 4 and its note on reasoning; the reader agrees. **pre-25 passes**, nine of nine. **pre-25 goes on to
+stage 3** (the build and the recognition probe), as pre-11 did. **After batch 2, no retool or ai row has been found in
+pre-01 to pre-72;** pre-73 to pre-172 remain.
