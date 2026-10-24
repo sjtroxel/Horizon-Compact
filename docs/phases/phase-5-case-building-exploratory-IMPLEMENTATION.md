@@ -754,3 +754,25 @@ closure of the plant was announced in an earlier year and reversed, their reason
 letter of item 4 and its note on reasoning; the reader agrees. **pre-25 passes**, nine of nine. **pre-25 goes on to
 stage 3** (the build and the recognition probe), as pre-11 did. **After batch 2, no retool or ai row has been found in
 pre-01 to pre-72;** pre-73 to pre-172 remain.
+
+**pre-25, stage 3 to the lock (2026-10-24, Opus with him).** Term list (about 1,100 terms) drafted from the 10-K's
+Items 1, 2 and 7, the 10-Q's Part I Item 2 and the current reports with their exhibits, taking at build time, by his
+pre-11 decision applied again (an exploratory deviation): the self-description and rank claims, the two segment names
+(to "Polymers" and "Chemicals"), the product lines (the chemicals and polymers to lettered names; the closing site's
+product and its end use generalized), the founding history, the plant countries (to regions), the competitors,
+partners, lenders and advisers, and, generated, a "the" form of every name whose replacement carries an article. The
+10-Q's Part I Item 2 cut by hand, as pre-11's was. **Three builds (about $1.37; the filings come to about 200,000
+tokens a build):** build 1, read in full, showed the notes' exact coupons, the dividend cut's exact size, the acquired
+business's description and doubled articles; build 2, the product's chemical name in the extraction's own words
+(beside the generalized product, it names it) and the dividend cut written in words; each fixed in the term list.
+Build 3 kept; noted, not fixable in the review file: the feedstock's short name left beside the generalized product.
+Flag review 26 kept, 20 edited (ten regional headcounts left unscaled under a scaled total, three euro amounts, seven
+month-and-day dates), 8 removed (per-share figures). Scenario: the total from the public report accepted at criterion
+4 on the reader's dispute (the company's count of the permanent employees the closure may affect; the temporary
+workers named beside them left out), liquidity from the last quarterly report, three caps equal to the total. Scenario
+read 1 "concerns" (the sell option's "with its product family", the case form's fixed sentence), kept by his written
+resolution. **Rubric read 1 "disagrees", Claude's fault:** every line agreed, but one line's note carried the
+company's stated reason for the closure, and a rubric records actions only; the reason was removed from the note and
+two excerpts, and read 2 "agrees" (choice close, observable; the four lines not). Foreshadowing: 7 hits, each
+justified (the company's earlier closures and exits of other sites, the shape's wording); neutrality checklist
+passed. Reads about $0.10. `hc case lock` written; next his commit and push, then the upload and probe set 1.

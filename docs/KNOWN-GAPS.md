@@ -7,7 +7,20 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-24, about 8 AM (BATCH 2 FINISHED; PRE-25 TO STAGE 3; PRE-73 ON NEXT)
+> ## START HERE — where things stand, 2026-10-24, about 11:40 AM (PRE-25 LOCKED; ITS PROBE NEXT)
+>
+> **Measured:** `make check` green, 2772 tests; last commit `phase 5: batch 2 finished, pre-25 to stage 3`. **pre-25
+> has passed stage 3's steps 2 to 7** (plan §9): the term list at build time (his pre-11 decision applied again),
+> three builds (about $1.37), flag review, scenario rendered and checked, scenario read 1 kept by his written
+> resolution, rubric read 2 "agrees" (read 1 disagreed on Claude's fault, a stated reason in one note),
+> foreshadowing justified, checklist passed; `experiment/cases/pre-25/case.lock` committed with this block.
+> **Next:** after the Deploy run, `hc case upload pre-25`, the two probe launches (set 1), his verdict, as for pre-11.
+> Then pool rows from pre-73 in a large batch. pre-25, like pre-11, fills a slot by D.3 only when every step 3 row is
+> finished and retool or ai is short. Open, his: as below.
+>
+> *The 8 AM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-24, about 8 AM (BATCH 2 FINISHED; PRE-25 TO STAGE 3; PRE-73 ON NEXT)
 >
 > **Measured:** `make check` green, 2772 tests; last commit `phase 5: pre-11 passed all`. **Pool rows pre-12 to
 > pre-72 (batch 2, 61 rows) are finished** (plan §9): 15 fail criterion 1, pre-43 criterion 3, 43 criterion 4, pre-20
