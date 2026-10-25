@@ -7,7 +7,39 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-24, about 11:40 AM (PRE-25 LOCKED; ITS PROBE NEXT)
+> ## START HERE — where things stand, 2026-10-25, about 9:40 AM (STEP 4'S SEARCH BUILT; THE FILL HELD TO STEP 5)
+>
+> **Measured:** `make check` green, 2787 tests; last commit `phase 5: pre-25 locked`; this block's commit carries
+> step 3's close (the 4:15 PM block below) and step 4's search. **Step 4's search is built** (Sonnet) **and reviewed**
+> (Opus, no fix to the code): `hc case search --pool pre --step 4 --date <today>`, filing dates 2024-07-01 to
+> 2025-06-30, ids from one past the highest `pre-NN` (expected pre-173), opening by D.6 (exploratory plan step 12).
+> **His decision, 2026-10-25, before any step 4 row was seen: the fill is held until step 5's search** (D.3's dated
+> note; the OPEN item of 2026-10-25). **pre-11 and pre-25 are "passed all, pending the fill", not cases**; they fill
+> only after step 5's search of 2027-01-04 (step 13, not built), and only as many as retool and ai leave short. So
+> **the case set cannot be final before 2027-01-04** unless five types' own cases are found first. **Cases: two**
+> (closure-07, closure-19). **Next:** his commit and push, then step 4's search, run once, on the laptop; then its
+> rows in batches as in step 3. Expect many knowledge-probe failures (the decisions fall before one model's cut-off).
+> Open, his: as below.
+>
+> *The 4:15 PM block below is superseded: pre-11 and pre-25 no longer fill if step 4 finds no retool or ai row.*
+>
+> ## START HERE — where things stood, 2026-10-24, about 4:15 PM (STEP 3 FINISHED; STEP 4'S SEARCH TO BUILD)
+>
+> **Measured:** `make check` green, 2772 tests; last commit `phase 5: pre-25 locked` (pushed, Deploy green).
+> **pre-25 passed all** (probe set 1, six of six; log -394). **Batch 3, pool rows pre-73 to pre-172, is finished, and
+> with it all of step 3** (plan §9): 26 fail criterion 1, 2 criterion 2, 1 criterion 3, 70 criterion 4 (the pool's
+> one ai lead, pre-90, fails its S1 total, his call), pre-124 the knowledge probe; 73 reads, 72 "agrees"; one dispute
+> (pre-75, Claude's fault: a criterion 3 rejection resting on text outside the excerpt, the pre-28 lesson missed
+> again), logged with his resolution. **Cases: two** (closure-07, closure-19). **pre-11 and pre-25 have passed all**
+> and fill two of retool's and ai's three short slots only if no retool or ai row passes in step 4 (D.1, D.3).
+> **Next:** step 4 opens (D.6: step 3 finished, fewer than five cases): `hc case search` over filing dates
+> 2024-07-01 to 2025-06-30, under step 3's rules, which is not yet built (the command knows step 3's range only):
+> a small Sonnet build and an Opus review, as for step 3, then its rows in batches. Expect many knowledge-probe
+> failures there (the decisions fall before the models' training cut-offs). Open, his: as below.
+>
+> *The 11:40 AM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-24, about 11:40 AM (PRE-25 LOCKED; ITS PROBE NEXT)
 >
 > **Measured:** `make check` green, 2772 tests; last commit `phase 5: batch 2 finished, pre-25 to stage 3`. **pre-25
 > has passed stage 3's steps 2 to 7** (plan §9): the term list at build time (his pre-11 decision applied again),
@@ -2058,6 +2090,25 @@ case by its type and a neutral label. The names live only in the private longlis
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN 2026-10-25 — pre-11 and pre-25 passed every criterion and are pending: they fill a short slot only after step 5's search (his decision, search-half doc §4.6.5 D.3, dated note)
+
+**pre-11 and pre-25 have passed all** (every criterion, the probes included; START HERE of 2026-10-24 and the plan
+§9). They are **not cases yet.** His decision, 2026-10-25, before any step 4 row was seen: retool and ai
+are exhausted to the full before either is given up on, so **a type is short only when no step left can give it a
+row**, which means after step 5's search (2027-01-04 by rule). Until step 5's search is recorded in the exploratory log
+(`ExploratoryLog.mark_searched`, called by step 13's search, not built), the fill is held: `hc case xlog show` lists
+them as "passed all, pending the fill", the public view's `pending` names them, the selection is not complete while a
+short type's slots are open, and the five at which checking stops (D.5) and below which step 4 opens (D.6) count each
+type's own cases only. **This supersedes the START HERE block of 2026-10-24, 4:15 PM, where pre-11 and pre-25 fill "only
+if no retool or ai row passes in step 4"**: step 4 finding none no longer fills them.
+
+Once step 5 has run, the fill is D.3 as written: the short slots go to the next rows that passed, in D.1's order, of
+any type. With retool and ai together finding none, one, two, or three cases in steps 4 and 5, pre-11 and pre-25 both
+fill, both fill, only pre-11 fills, or neither fills. D.5's cap of five is the protocol's (§12.1, "at most five") and
+is not lifted. Closes when step 5 has run and the selection is complete, or if he changes the rule.
 
 ---
 

@@ -10,6 +10,7 @@ import dataclasses
 import json
 import os
 import random
+import re
 import signal
 import subprocess
 import sys
@@ -79,6 +80,9 @@ from horizon_compact.casebuild.search import (
     PRESS_QUERIES,
     READ_REQUIRED,
     RULE_DATE,
+    STEP4_CANDIDATES,
+    STEP4_END,
+    STEP4_START,
     TYPES,
     Hit,
     Joiner,
@@ -1771,34 +1775,71 @@ def _joiners(
     return found
 
 
+def _step4_opens(log: ExploratoryLog) -> None:
+    """Step 4 opens by §4.6.5 D.6: every row of the steps before it finished, nothing open (a rejection
+    awaiting its read), and fewer than five cases. Cases are each type's own: a short type's fill is held
+    until step 5 has run (D.3, dated note 2026-10-25), so it does not count."""
+    unfinished = sorted(r.id for r in log.rows.values() if not r.finished)
+    if unfinished:
+        raise SearchError(
+            f"step 4 opens when every earlier row is finished (D.6): {len(unfinished)} are not"
+        )
+    if log.problems():
+        raise SearchError("step 4 opens when the exploratory log has nothing open (D.6)")
+    if len(log.selection().cases) >= AT_MOST:
+        raise SearchError(f"step 4 opens with fewer than {AT_MOST} cases (D.6)")
+    if log.step5_searched:
+        raise SearchError("step 5's search is recorded: step 4 can no longer open")
+
+
+# step -> the pool's first and last filing date and its candidate file (§4.6.5 steps 3 and 4)
+POOL_STEPS = {
+    "3": (PRE_START, PRE_END, PRE_CANDIDATES),
+    "4": (STEP4_START, STEP4_END, STEP4_CANDIDATES),
+}
+POOL_ID = re.compile(r"pre-(\d+)")
+
+
 def cmd_case_search_pool(args: argparse.Namespace) -> int:
-    """Step 3's pool (search-half doc §4.6.5 step 3 items 1, 2 and 6), once: channel 1 and step 2's channel
-    over 2025-07-01 to 2026-06-30, plus the rows named by ``--join``. Writes ``pre-candidates.json`` and adds
-    each candidate to the exploratory log as a step 3 row (criteria from the first; the list is settled at
-    criterion 4). Prints counts only."""
+    """Step 3's or step 4's pool (search-half doc §4.6.5 steps 3 and 4), once each: channel 1 and step 2's
+    channel over the step's dates, plus, for step 3 only, the rows named by ``--join`` (item 6). Writes the
+    step's candidate file and adds each candidate to the exploratory log as a row of that step (criteria
+    from the first; the list is settled at criterion 4). Step 4 opens by D.6 and its ids continue step 3's.
+    Prints counts only."""
+    step = args.step
+    start, end, filename = POOL_STEPS[step]
     today = _today()
     if args.date != today:
         raise SearchError(f"--date {args.date.isoformat()} is not today ({today.isoformat()})")
     if args.deviation:
         raise SearchError("--deviation is for the pre-registered search; the pool has none")
     case = open_case("search")
-    if (case.directory / PRE_CANDIDATES).exists():
+    if (case.directory / filename).exists():
         raise SearchError(
-            f"the pool has already been searched: {PRE_CANDIDATES} exists, and it runs once"
+            f"the pool has already been searched: {filename} exists, and it runs once"
         )
+    if step == "4" and not (case.directory / PRE_CANDIDATES).exists():
+        raise SearchError(f"step 3's pool has not been searched: {PRE_CANDIDATES} is not there")
     already = candidate_records(case)
     if already is None:
         raise SearchError("candidates.json is not there: the search has not run")
     log = load_newest_exploratory(case)
+    if step == "4":
+        _step4_opens(log)
     joiners = _joiners(case, already, args.join or [])
+    # step 4's ids continue step 3's, so the number is read from the lists, never assumed
+    first_number = 1 + max(
+        (int(m.group(1)) for i in already if (m := POOL_ID.fullmatch(i))), default=0
+    )
     client = EdgarClient(appendix=case, transport=UrllibTransport(), user_agent=sec_user_agent())
     result = run_pool_search(
         client,
         today,
-        PRE_START,
-        PRE_END,
+        start,
+        end,
         exclude=frozenset(str(c["accession"]) for c in already.values()),
         joiners=joiners,
+        first_number=first_number,
     )
     # A joined row is its source row's own filing, so that row is left out of its same_filer_as: the flag
     # points criterion 1 at a different decision, never at the one the row brings in.
@@ -1808,12 +1849,14 @@ def cmd_case_search_pool(args: argparse.Namespace) -> int:
         for candidate_id, ids in same_filer(result.candidates, already).items()
         if (kept := [i for i in ids if i != sources.get(candidate_id)])
     }
-    record = {**result.record, "run_on": today.isoformat(), "step": "3", "same_filer_as": shared}
-    write_candidates(case, dataclasses.replace(result, record=record), PRE_CANDIDATES)
+    record = {**result.record, "run_on": today.isoformat(), "step": step, "same_filer_as": shared}
+    write_candidates(case, dataclasses.replace(result, record=record), filename)
     for candidate in result.candidates:
-        log.add(candidate.id, candidate.type, "3", candidate.pool, candidate.hit.accession)
+        log.add(candidate.id, candidate.type, step, candidate.pool, candidate.hit.accession)
     log_name = write_exploratory_version(case, log) if result.candidates else None
-    print(f"pool: {PRE_START.isoformat()} to {PRE_END.isoformat()}, run on {today.isoformat()}")
+    print(
+        f"pool (step {step}): {start.isoformat()} to {end.isoformat()}, run on {today.isoformat()}"
+    )
     for query in record["queries"]:
         dropped = ", ".join(f"{n} {why}" for why, n in sorted(query["dropped"].items())) or "none"
         print(
@@ -1825,7 +1868,7 @@ def cmd_case_search_pool(args: argparse.Namespace) -> int:
         f"  {len(shared)} share a filer with an earlier candidate (same_filer_as): at criterion 1, one "
         "that is the same decision fails as already a candidate"
     )
-    wrote = f"{PRE_CANDIDATES} and {log_name}" if log_name else f"{PRE_CANDIDATES} (no rows)"
+    wrote = f"{filename} and {log_name}" if log_name else f"{filename} (no rows)"
     print(f"written: {wrote} in the appendix's search folder")
     return CLEAN_EXIT
 
@@ -1834,8 +1877,12 @@ def cmd_case_search(args: argparse.Namespace) -> int:
     """The search of protocol §12.3, once (search-half IMPLEMENTATION doc §4.4). Prints counts only."""
     if args.channel and args.pool:
         raise SearchError("--channel and --pool are not given together")
-    if args.join and args.pool != "pre":
-        raise SearchError("--join is for --pool pre")
+    if args.step and not args.pool:
+        raise SearchError("--step is for --pool")
+    if args.pool and args.step not in POOL_STEPS:
+        raise SearchError("--pool pre needs --step 3 or --step 4")
+    if args.join and not (args.pool == "pre" and args.step == "3"):
+        raise SearchError("--join is for --pool pre --step 3: step 4 has no joiners")
     if args.channel == "press":
         return cmd_case_search_press(args)
     if args.pool == "pre":
@@ -2015,6 +2062,8 @@ def _xlog_show(case: CaseAppendix, log: ExploratoryLog) -> None:
     )
     if chosen.filled:
         print(f"  filled a short type's slot: {', '.join(chosen.filled)}")
+    if chosen.pending:
+        print(f"  passed all, pending the fill (D.1 order): {', '.join(chosen.pending)}")
     for row in log.ordered():
         found = details.get(row.id, {})
         names = "; ".join(found.get("names", [])) or "(no name on file)"
@@ -2791,8 +2840,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--pool",
         choices=("pre",),
         default=None,
-        help="pre: step 3's pool of filings dated 2025-07-01 to 2026-06-30 (search-half doc §4.6.5), run "
-        "once; its candidates join the exploratory log. Not with --channel.",
+        help="pre: a pool of filings (search-half doc §4.6.5), run once per step, its dates by --step; its "
+        "candidates join the exploratory log. Not with --channel.",
+    )
+    search.add_argument(
+        "--step",
+        choices=tuple(POOL_STEPS),
+        default=None,
+        help="with --pool pre: 3 is filings dated 2025-07-01 to 2026-06-30, 4 is 2024-07-01 to 2025-06-30 "
+        "(ids continue step 3's; opens by D.6 and takes no --join).",
     )
     search.add_argument(
         "--join",

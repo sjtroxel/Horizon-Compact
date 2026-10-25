@@ -127,6 +127,12 @@ PRE_ID = "pre"  # ids pre-01 on, newest filing first
 PRE_CANDIDATES = "pre-candidates.json"
 PRE_QUERIES = (QUERIES[0], *PRESS_QUERIES)
 
+# Step 4's pool (§4.6.5 step 4): the same queries and rules over the year before step 3's. 2024-07-01 is the
+# day after the earlier official model's training cut-off. Ids continue step 3's, newest filing first.
+STEP4_START = date(2024, 7, 1)
+STEP4_END = date(2025, 6, 30)
+STEP4_CANDIDATES = "pre-step4-candidates.json"
+
 
 # --- one query, every page ----------------------------------------------------------------------------------
 

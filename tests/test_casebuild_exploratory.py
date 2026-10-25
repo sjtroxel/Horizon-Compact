@@ -14,6 +14,7 @@ import pytest
 from horizon_compact.casebuild.appendix import CaseAppendix
 from horizon_compact.casebuild.exploratory import (
     AT_MOST,
+    HELD_FILL,
     LABEL,
     POOL_CRITERIA,
     PROBE_LABEL,
@@ -285,8 +286,13 @@ def test_one_order_across_types_the_window_before_the_fallback_then_the_pool_the
         "pre-03",
         "late-01",
     ]
+    # the fill waits for step 5's search: until then only each type's own cases are cases
+    assert log.selection().cases == ("retool-01", "closure-01", "closure-f01")
+    assert log.selection().pending == ("pre-01", "pre-03", "late-01")
+    log.mark_searched()
     chosen = log.selection()
     assert chosen.cases == ("retool-01", "closure-01", "closure-f01", "pre-01", "pre-03")
+    assert chosen.pending == ()
 
 
 def test_the_first_k_per_type_are_the_cases_and_the_rest_fill_a_short_types_slots() -> None:
@@ -295,6 +301,7 @@ def test_the_first_k_per_type_are_the_cases_and_the_rest_fill_a_short_types_slot
     for n in range(1, 6):
         take(log, f"closure-{n:02d}", n)
     take(log, "retool-01", 6)
+    log.mark_searched()
     chosen = log.selection()
     # closure k = 2, retool k = 2 (one found), ai k = 1 (none): three slots short, one of them retool's second
     assert chosen.short_types == {"retool": 1, "ai": 1}
@@ -308,6 +315,7 @@ def test_a_shortfall_is_reported_when_no_candidate_is_left_to_fill_it() -> None:
     take(log, "closure-01", 1)
     take(log, "closure-02", 2)
     take(log, "retool-01", 3)
+    log.mark_searched()
     chosen = log.selection()
     assert chosen.cases == ("closure-01", "closure-02", "retool-01") and chosen.filled == ()
     assert chosen.complete and chosen.shortfall == 2
@@ -315,6 +323,7 @@ def test_a_shortfall_is_reported_when_no_candidate_is_left_to_fill_it() -> None:
     log2 = a_log(window("closure-01"), window("closure-02"))
     reject(log2, "closure-01")
     take(log2, "closure-02", 2)
+    log2.mark_searched()
     assert log2.selection().cases == ("closure-02",) and log2.selection().shortfall == 4
 
 
@@ -338,6 +347,8 @@ def test_the_selection_waits_while_an_earlier_candidate_is_unfinished() -> None:
     log.record("closure-01", "real_decision", "fail", "forced")
     assert "awaits the independent read" in log.selection().waiting[0]
     log.record_read("closure-01", "real_decision", reply=AGREED)
+    assert HELD_FILL in log.selection().waiting  # nothing earlier is open now: only step 5 is
+    log.mark_searched()
     assert log.selection().complete
 
 
@@ -354,6 +365,7 @@ def test_the_fill_waits_on_an_unfinished_candidate_of_a_full_type_that_comes_fir
     assert chosen.waiting[0].startswith("closure-03: not finished")
     for criterion in CRITERIA[1:]:
         log.record("closure-03", criterion, "pass", "r")
+    log.mark_searched()
     assert log.selection().filled == ("closure-03", "closure-04")
 
 
@@ -417,6 +429,7 @@ def test_an_unchecked_later_candidate_keeps_a_type_from_being_short() -> None:
     waiting = log.selection()
     assert not waiting.complete and waiting.filled == ()
     reject(log, "pre-01", 9)
+    log.mark_searched()
     done = log.selection()
     assert done.complete and done.filled == ("closure-03",) and done.shortfall == 2
 
@@ -430,10 +443,102 @@ def test_a_row_is_checked_ahead_of_an_earlier_one_but_not_past_the_fifth_case() 
     chosen = log.selection()
     assert not chosen.complete and chosen.cases == ()  # closure-01 comes first and is unfinished
     take(log, "closure-01", 4)
+    log.mark_searched()
     after = log.selection()
     # the order decides, not the checking pace: closure-01, then pre-01; pre-02 fills a short slot
     assert after.cases == ("closure-01", "pre-01", "pre-02") and after.filled == ("pre-02",)
     assert after.complete and after.shortfall == 2
+
+
+def test_the_fill_is_held_until_step_5_has_searched_and_pending_rows_are_not_cases() -> None:
+    """His decision, 2026-10-25: a type is short only when no step left can give it a row, so a passed row
+    that no type's own slots took waits, in D.1's order, and is not one of the five."""
+    log = a_log(
+        window("closure-01"),
+        window("closure-02"),
+        ("pre-01", "closure", "3", "pre"),
+        ("pre-02", "closure", "3", "pre"),
+    )
+    for n, row_id in enumerate(["closure-01", "closure-02", "pre-01", "pre-02"], start=1):
+        take(log, row_id, n)
+    held = log.selection()
+    assert held.cases == ("closure-01", "closure-02") and held.filled == ()
+    assert held.pending == ("pre-01", "pre-02") and not held.complete and held.shortfall == 0
+    assert HELD_FILL in held.waiting
+    assert (
+        log.public_view()["pending"] == ["pre-01", "pre-02"] and not log.public_view()["complete"]
+    )
+    log.mark_searched()
+    done = log.selection()
+    assert done.cases == ("closure-01", "closure-02", "pre-01", "pre-02")
+    assert done.filled == ("pre-01", "pre-02") and done.pending == ()
+    assert done.complete and done.shortfall == 1
+
+
+@pytest.mark.parametrize(
+    ("found", "filled"),
+    [
+        (
+            [],
+            ["pre-01", "pre-02"],
+        ),  # none found: three short slots, both pending rows fill, one open
+        (["retool-91"], ["pre-01", "pre-02"]),  # one found: two short slots, both fill
+        (["retool-91", "retool-92"], ["pre-01"]),  # two found: one short slot, the earlier row only
+        (["retool-91", "retool-92", "ai-91"], []),  # three found: no short slot, both stay out
+    ],
+)
+def test_step_5_decides_how_many_pending_rows_fill_by_how_many_retool_and_ai_were_found(
+    found: list[str], filled: list[str]
+) -> None:
+    log = a_log(
+        window("closure-01"),
+        window("closure-02"),
+        ("pre-01", "closure", "3", "pre"),
+        ("pre-02", "closure", "3", "pre"),
+        *[(row_id, row_id.split("-")[0], "4", "pre") for row_id in found],
+    )
+    for n, row_id in enumerate(["closure-01", "closure-02", "pre-01", "pre-02", *found], start=1):
+        take(log, row_id, n)
+    log.mark_searched()
+    chosen = log.selection()
+    assert list(chosen.filled) == filled
+    assert chosen.cases == tuple(
+        r.id for r in log.ordered() if r.id in {"closure-01", "closure-02", *found, *filled}
+    )
+    assert chosen.complete and len(chosen.cases) == 2 + len(found) + len(filled)
+
+
+def test_a_selection_with_five_own_cases_needs_no_step_5_search() -> None:
+    rows = ["closure-01", "closure-02", "retool-01", "retool-02", "ai-01"]
+    log = a_log(*[window(r) for r in rows])
+    for n, row_id in enumerate(rows, start=1):
+        take(log, row_id, n)
+    assert log.selection().complete and not log.step5_searched and log.selection().pending == ()
+
+
+def test_step_5s_search_is_recorded_once_and_brings_no_row_after_it() -> None:
+    log = a_log(window("closure-01"), ("late-01", "closure", "5", "late"))
+    log.mark_searched()
+    assert log.step5_searched
+    with pytest.raises(LogError, match="already recorded"):
+        log.mark_searched()
+    with pytest.raises(LogError, match="brings no row after that"):
+        log.add("late-02", "closure", "5", "late", "0009999999-26-000099")
+    log.add(
+        "pre-01", "closure", "3", "pre", "0009999999-26-000098"
+    )  # other steps are not held by it
+    again = ExploratoryLog.from_text(log.to_text())  # and a saved log replays the mark
+    assert again.step5_searched and again.selection() == log.selection()
+    events = json.loads(log.to_text())["events"]
+    forged = json.dumps(
+        {"exploratory_version": 1, "events": [*events, {"event": "searched", "step": "4"}]}
+    )
+    with pytest.raises(LogError, match="only step 5's search"):
+        ExploratoryLog.from_text(forged)
+    # a hand-edited file with the mark put before a step 5 row is refused on replay
+    early = [events[0], {"event": "searched", "step": "5"}, events[1]]
+    with pytest.raises(LogError, match="brings no row after that"):
+        ExploratoryLog.from_text(json.dumps({"exploratory_version": 1, "events": early}))
 
 
 # --- reads --------------------------------------------------------------------------------------------
@@ -605,6 +710,7 @@ def test_each_save_is_a_new_numbered_pair_and_the_newest_loads_with_its_source(
 
 def test_the_public_view_labels_every_case_and_carries_no_name_accession_or_date() -> None:
     log, _ = busy_log()
+    log.mark_searched()
     view = log.public_view()
     text = json.dumps(view)
     for private in ("0001111111", "0002222222", "0003333333", "2026-08", "first said here"):

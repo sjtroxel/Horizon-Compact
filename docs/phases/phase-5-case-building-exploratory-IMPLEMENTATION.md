@@ -776,3 +776,63 @@ company's stated reason for the closure, and a rubric records actions only; the 
 two excerpts, and read 2 "agrees" (choice close, observable; the four lines not). Foreshadowing: 7 hits, each
 justified (the company's earlier closures and exits of other sites, the shape's wording); neutrality checklist
 passed. Reads about $0.10. `hc case lock` written; next his commit and push, then the upload and probe set 1.
+
+**pre-25 passes probe set 1 (2026-10-24).** The lock committed and pushed, the Deploy run green, the content uploaded
+and one probe task per model: six of six answers do not name the company (gpt-oss "unknown" three times, recorded by
+the tool; Haiku three answers, his read, each saying the text names no company and fits many). Logged
+(`exploratory-log-394`): **pre-25 finished, passed all**, the second closure fill candidate beside pre-11.
+
+**Stage 4 step 3: batch 3, pool rows pre-73 to pre-172 (2026-10-24, Opus with him). Step 3 is finished.** One hundred
+rows, checked as batches 1 and 2 were, in four scripts of his. **26 fail criterion 1:** cost lines and prior-year
+comparisons for closures stated before the pool (10), merger-agreement representations and loan wording (8), filings
+that name no decision (3), three repeats of decisions already judged (the 2026-10-21 rule: the lower id stands, pre-25
+and pre-27), and two decisions stated before the pool (a plant exit whose consultation began in February 2025, and a
+company-wide cut announced to employees in a memo reported in June 2025). **2 fail criterion 2** (a filer with no
+stock on a US exchange; a stock moved from its exchange to the OTC market before the decision). **pre-111 fails
+criterion 3** (a cut compelled by a lender's foreclosure; "agrees"). **70 fail criterion 4:** 52 S2 with no stated
+operating-income fall in the first-disclosure document or the pre-cut-off filings searched (one by hand, two CIKs);
+10 name more than one facility (item 5); 3 name one facility and no source states its headcount; one names one
+facility whose only number is of people the closure affects (a state WARN notice, item 4; the reader agrees, unlike
+pre-11 and pre-25); one moves a research operation (the pre-01 precedent); two match no shape; and **pre-90, the
+pool's only ai lead:** its Item 2.05 frames the whole plan, cuts included, as AI adoption, so S1 by rule 1 (unlike
+pre-66, whose Item 2.05 named no AI; his call), and its total fails: the document states no number of roles whose
+work AI takes over, and S1 is not relaxed (his decision of 2026-10-19); the reader agrees. **pre-124 passed criterion
+4**, an S3 closure whose headcount the company stated in its last quarterly report before the cut-off, and **failed
+the knowledge probe**: one of the three extraction-model replies stated that the closure was decided (its date wrong,
+the pre-20 precedent), his read; the reader agrees. He asked whether a coarsening could let it pass: no (coarsening
+works on the dossier, after the build; the knowledge probe asks about the real names before any dossier exists), and
+leaving the extraction model out of the probe is a relaxation already rejected. **One dispute: pre-75**, a cut
+rejected at criterion 3 as made inside a bankruptcy whose aim was the sale of its businesses. **Claude's fault, the
+pre-28 lesson missed again:** the bankruptcy is named only in the filing's forward-looking statements, outside the
+Item 2.05 excerpt the reader is given, and the reader read the excerpt as a plain cost cut. Logged with his
+resolution, the rejection does not stand (§12.4); pre-75 then fails criterion 4 (S2, no total; "agrees"). **The
+reads:** 73, about $1.15, 72 "agrees". Every result was recorded through `hc case xlog`. **After step 3, no retool or
+ai row passes.** By D.6, with two cases and step 3 finished, **step 4 opens**: the same pool rules over filing dates
+2024-07-01 to 2025-06-30, whose search is not yet built (`hc case search --pool` knows step 3's range only). pre-11
+and pre-25 come before every step 4 row in D.1's order, so they fill two of the three short slots if retool and ai
+stay short.
+
+**Stage 4 step 4: the second pool (plan step 12), built 2026-10-25 (Sonnet, high effort); the Opus review is next, in
+a fresh chat.** `hc case search --pool pre --step 4 --date <today>` (`--step 3` or `4` is now required with `--pool`;
+`--step 3` is the old command): channel 1 and step 2's channel over 2024-07-01 to 2025-06-30 (`STEP4_START`,
+`STEP4_END`), once, written to `pre-step4-candidates.json` (read by `candidate_records` with the others). Its ids
+continue step 3's: the first number is one more than the highest `pre-NN` in the lists, read, never assumed. Every
+earlier candidate's accession number is left out and `same_filer_as` is checked against every earlier list. Rows go in
+the exploratory log as step `"4"`, pool `pre`, and sort after step 3's. **Step 4 opens by D.6, all checked before any
+request:** step 3's file exists; no row of the log is unfinished (a rejection awaiting its read counts); `problems()`
+is empty; fewer than five cases, **each type's own only**; and step 5's search is not yet recorded. `--join` is refused
+for step 4 (item 6's two rows joined step 3).
+
+**The held fill (his decision, 2026-10-25; the dated note under D.3 in the search-half doc).** `ExploratoryLog.selection()`
+no longer fills a short type's slots until step 5's search is recorded: the log has a new event, `searched` (step `"5"`
+only, once, refused if a step 5 row is added after it), written by `ExploratoryLog.mark_searched()`, **which step 13's
+search must call and which is not built**, so the selection stays incomplete, and pre-11 and pre-25 stay pending, until
+then. `ExploratorySelection` has a `pending` field (rows that passed, took no own slot, wait for the fill), shown by
+`hc case xlog show` ("passed all, pending the fill") and the public view. A selection with five own cases needs no
+step 5 search. The open item is in `KNOWN-GAPS.md` (2026-10-25). **Behavior that changed, for the reviewer:** every
+test that asserted a fill or `complete` without a step 5 search now calls `mark_searched()` first (seven in
+`test_casebuild_exploratory.py`, and the public view's), and the step 3 pool tests now pass `--step 3`.
+
+`make check` green, 2787 tests (15 new). **Not done:** step 13 (the search of 2027-01-04 and its `mark_searched` call);
+the START HERE block of 2026-10-24 said pre-11 and pre-25 fill "only if no retool or ai row passes in step 4"; rewritten
+after the Opus review (2026-10-25, no code fix).

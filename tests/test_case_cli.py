@@ -49,6 +49,8 @@ from horizon_compact.casebuild.search import (
     PRESS_QUERIES,
     QUERIES,
     RULE_DATE,
+    STEP4_END,
+    STEP4_START,
     LogError,
     Row,
     SelectionLog,
@@ -1532,7 +1534,7 @@ def _pool_hits() -> dict[str, list[dict[str, Any]]]:
     }
 
 
-POOL_WORDS = ["case", "search", "--pool", "pre", "--date", RULE_DATE.isoformat()]
+POOL_WORDS = ["case", "search", "--pool", "pre", "--step", "3", "--date", RULE_DATE.isoformat()]
 
 
 def test_pool_search_writes_its_file_and_exploratory_rows_and_prints_counts_only(
@@ -1614,7 +1616,10 @@ def test_pool_search_refuses_what_it_should_before_any_request(
     assert "has not run" in capsys.readouterr().err
     assert main([*POOL_WORDS, "--deviation", "r"]) == REFUSED_EXIT
     assert "the pool has none" in capsys.readouterr().err
-    assert main(["case", "search", "--pool", "pre", "--date", "2026-10-17"]) == REFUSED_EXIT
+    assert (
+        main(["case", "search", "--pool", "pre", "--step", "3", "--date", "2026-10-17"])
+        == REFUSED_EXIT
+    )
     assert "is not today" in capsys.readouterr().err
     assert main([*POOL_WORDS, "--channel", "press"]) == REFUSED_EXIT
     assert "not given together" in capsys.readouterr().err
@@ -1701,3 +1706,223 @@ def test_pool_search_with_no_hits_writes_its_file_and_no_exploratory_log(
     assert "(no rows)" in capsys.readouterr().out
     assert json.loads((folder / "pre-candidates.json").read_text())["list"] == []
     assert not list(folder.glob("exploratory-log-*.json"))
+
+
+# --- step 4's pool (search-half doc §4.6.5 step 4; D.6 opens it) -----------------------------------------
+
+STEP4_WORDS = ["case", "search", "--pool", "pre", "--step", "4", "--date", RULE_DATE.isoformat()]
+
+
+def _step4_transport(
+    monkeypatch: pytest.MonkeyPatch, by_query: dict[str, list[dict[str, Any]]]
+) -> FakeTransport:
+    """Every pool query answered over step 4's dates, as ``_pool_transport`` does for step 3's."""
+    from test_casebuild_search import page
+
+    replies = {
+        search_url(q, STEP4_START, STEP4_END, 0): page(
+            by_query.get(q.text, []), len(by_query.get(q.text, []))
+        )
+        for q in PRE_QUERIES
+    }
+    transport = FakeTransport(replies)
+    monkeypatch.setattr(cli, "UrllibTransport", lambda: transport)
+    return transport
+
+
+def _step4_hits() -> dict[str, list[dict[str, Any]]]:
+    from test_casebuild_search import raw_hit
+
+    return {
+        '"Item 2.05"': [
+            raw_hit("0009999999-25-000500", "2025-03-03", items=["2.05"]),
+            raw_hit("0009999999-24-000600", "2024-09-09", items=["2.05"]),
+            # step 3's pre-04 filing, dated inside step 4's range here: left out as already a candidate
+            raw_hit("0009999999-25-000200", "2025-05-05", items=["2.05"]),
+        ],
+        '"plant closure"': [raw_hit("0009999999-25-000500", "2025-03-03", items=["7.01"])],
+    }
+
+
+def _reject_every_unfinished_row(tmp_path: Path) -> None:
+    """Every row that has no result yet fails criterion 2: finished, so D.6 can see step 3 done."""
+    case = CaseAppendix(root=tmp_path, label="search")
+    log = load_newest_exploratory(case)
+    for n, row_id in enumerate(list(log.rows), start=1):
+        if not log.rows[row_id].results:
+            log.record(row_id, "first_disclosure", "pass", "r", disclosed=date(2026, 8, n))
+            log.record(row_id, "public_and_filing", "fail", "r")
+    write_exploratory_version(case, log)
+
+
+def _step3_finished(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> Path:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _pool_transport(monkeypatch, _pool_hits())
+    assert main(POOL_WORDS) == CLEAN_EXIT
+    capsys.readouterr()
+    _reject_every_unfinished_row(tmp_path)
+    return folder
+
+
+def test_step_4_searches_the_earlier_year_and_its_ids_continue_step_3s(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _step3_finished(tmp_path, monkeypatch, capsys)
+    step3 = (folder / "pre-candidates.json").read_bytes()
+    transport = _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == CLEAN_EXIT
+    out = capsys.readouterr().out
+    assert "Canary" not in out and "0009999999" not in out
+    assert "pool (step 4): 2024-07-01 to 2025-06-30" in out
+    assert "2 candidates, 0 of them joined" in out and "1 already a candidate" in out
+    assert len(transport.requests) == len(PRE_QUERIES)
+    record = json.loads((folder / "pre-step4-candidates.json").read_text())
+    assert record["step"] == "4" and record["start"] == "2024-07-01"
+    assert record["end"] == "2025-06-30" and record["run_on"] == "2026-10-16"
+    # step 3 ran pre-01 to pre-04: step 4's two filings are pre-05 and pre-06, newest first
+    assert [(c["id"], c["accession"]) for c in record["list"]] == [
+        ("pre-05", "0009999999-25-000500"),
+        ("pre-06", "0009999999-24-000600"),
+    ]
+    assert set(record["same_filer_as"]) == {"pre-05", "pre-06"}  # the fake filings share a filer
+    assert "pre-01" in record["same_filer_as"]["pre-05"]
+    assert (folder / "pre-candidates.json").read_bytes() == step3  # step 3's list is not touched
+    case = CaseAppendix(root=tmp_path, label="search")
+    log = load_newest_exploratory(case)
+    assert {(r.id, r.step, r.pool, r.type) for r in log.rows.values() if r.id > "pre-04"} == {
+        ("pre-05", "4", "pre", "closure"),
+        ("pre-06", "4", "pre", "closure"),
+    }
+    assert [r.id for r in log.ordered() if r.id.startswith("pre-")] == [
+        f"pre-0{n}" for n in range(1, 7)
+    ]  # step 4's rows sort after step 3's
+    assert log.rows["pre-05"].probed and "not_known" in log.rows["pre-05"].criteria
+    records = candidate_records(case)
+    assert records is not None and {"pre-01", "pre-04", "pre-05", "pre-06"} <= records.keys()
+
+
+def test_step_4_runs_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _step3_finished(tmp_path, monkeypatch, capsys)
+    _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == CLEAN_EXIT
+    capsys.readouterr()
+    transport = _step4_transport(monkeypatch, _step4_hits())
+    before = sorted(p.name for p in folder.iterdir())
+    assert main(STEP4_WORDS) == REFUSED_EXIT
+    assert "already been searched" in capsys.readouterr().err
+    assert transport.requests == [] and sorted(p.name for p in folder.iterdir()) == before
+
+
+def test_step_4_refuses_before_step_3_has_searched_and_takes_no_join_and_needs_its_step(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    transport = _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == REFUSED_EXIT
+    assert "step 3's pool has not been searched" in capsys.readouterr().err
+    assert main([*STEP4_WORDS, "--join", "closure-01=2025-01-01"]) == REFUSED_EXIT
+    assert "step 4 has no joiners" in capsys.readouterr().err
+    pool_only = ["case", "search", "--pool", "pre", "--date", RULE_DATE.isoformat()]
+    assert main(pool_only) == REFUSED_EXIT
+    assert "needs --step 3 or --step 4" in capsys.readouterr().err
+    step_only = ["case", "search", "--step", "4", "--date", RULE_DATE.isoformat()]
+    assert main(step_only) == REFUSED_EXIT
+    assert "--step is for --pool" in capsys.readouterr().err
+    assert transport.requests == [] and not (folder / "pre-step4-candidates.json").exists()
+
+
+def test_step_4_opens_only_when_every_earlier_row_is_finished(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _pool_transport(monkeypatch, _pool_hits())
+    assert main(POOL_WORDS) == CLEAN_EXIT  # step 3's four rows have no result yet
+    capsys.readouterr()
+    transport = _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == REFUSED_EXIT
+    assert "every earlier row is finished (D.6): 4 are not" in capsys.readouterr().err
+    assert transport.requests == [] and not (folder / "pre-step4-candidates.json").exists()
+
+
+def test_step_4_does_not_open_while_a_rejection_awaits_its_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _step3_finished(tmp_path, monkeypatch, capsys)
+    case = CaseAppendix(root=tmp_path, label="search")
+    log = load_newest_exploratory(case)
+    log.add("press-01", "closure", "2", "window", "0009999999-26-000700")
+    log.record("press-01", "first_disclosure", "pass", "r", disclosed=date(2026, 8, 9))
+    for criterion in ("public_and_filing", "inside_window"):
+        log.record("press-01", criterion, "pass", "r")
+    log.record("press-01", "real_decision", "fail", "r")  # its independent read is not logged yet
+    write_exploratory_version(case, log)
+    transport = _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == REFUSED_EXIT
+    assert "every earlier row is finished (D.6): 1 are not" in capsys.readouterr().err
+    assert transport.requests == [] and not (folder / "pre-step4-candidates.json").exists()
+
+
+def test_step_4_does_not_open_while_one_filing_is_taken_as_a_case_twice(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _step3_finished(tmp_path, monkeypatch, capsys)
+    case = CaseAppendix(root=tmp_path, label="search")
+    log = load_newest_exploratory(case)
+    for n, row_id in enumerate(["closure-91", "retool-91"], start=1):
+        log.add(row_id, row_id.split("-")[0], "2", "window", "0009999999-26-000700")
+        log.record(row_id, "first_disclosure", "pass", "r", disclosed=date(2026, 7, n))
+        for criterion in log.rows[row_id].criteria[1:]:
+            log.record(row_id, criterion, "pass", "r")
+    write_exploratory_version(case, log)
+    transport = _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == REFUSED_EXIT
+    assert "nothing open (D.6)" in capsys.readouterr().err
+    assert transport.requests == [] and not (folder / "pre-step4-candidates.json").exists()
+
+
+def test_step_4_does_not_open_at_five_cases_and_a_held_fill_is_not_a_case(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _step3_finished(tmp_path, monkeypatch, capsys)
+    case = CaseAppendix(root=tmp_path, label="search")
+    log = load_newest_exploratory(case)
+    own = ["closure-91", "closure-92", "retool-91", "retool-92", "ai-91"]
+    for n, row_id in enumerate(own, start=1):
+        log.add(row_id, row_id.split("-")[0], "2", "window", f"0009999999-26-0008{n:02d}")
+    for n, row_id in enumerate(own, start=1):
+        log.record(row_id, "first_disclosure", "pass", "r", disclosed=date(2026, 7, n))
+        for criterion in log.rows[row_id].criteria[1:]:
+            log.record(row_id, criterion, "pass", "r")
+    write_exploratory_version(case, log)
+    transport = _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == REFUSED_EXIT
+    assert "fewer than 5 cases (D.6)" in capsys.readouterr().err
+    assert transport.requests == [] and not (folder / "pre-step4-candidates.json").exists()
+
+
+def test_step_4_opens_with_four_cases_and_a_passed_row_pending_a_fill(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A row that passed everything but took no own slot is pending, not a case (D.3, dated note 2026-10-25):
+    it does not count toward the five that close step 4, though the fill would have made it a fifth."""
+    folder = _step3_finished(tmp_path, monkeypatch, capsys)
+    case = CaseAppendix(root=tmp_path, label="search")
+    log = load_newest_exploratory(case)
+    rows = ["closure-91", "closure-92", "retool-91", "retool-92", "closure-93"]
+    for n, row_id in enumerate(rows, start=1):
+        log.add(row_id, row_id.split("-")[0], "2", "window", f"0009999999-26-0008{n:02d}")
+    for n, row_id in enumerate(rows, start=1):
+        log.record(row_id, "first_disclosure", "pass", "r", disclosed=date(2026, 7, n))
+        for criterion in log.rows[row_id].criteria[1:]:
+            log.record(row_id, criterion, "pass", "r")
+    chosen = log.selection()
+    assert chosen.cases == ("closure-91", "closure-92", "retool-91", "retool-92")
+    assert chosen.pending == ("closure-93",) and chosen.filled == () and not chosen.complete
+    write_exploratory_version(case, log)
+    _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == CLEAN_EXIT
+    assert (folder / "pre-step4-candidates.json").is_file()

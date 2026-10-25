@@ -740,6 +740,13 @@ comes last because it cannot run before January, not because it is weaker.
 3. **A type that cannot reach k is short, and its slots go to the next candidates in the same order that pass, of any
    type.** This fills a shortfall by a rule fixed here, never by judgment. §12.1's "at least one invest or retool"
    either holds or is reported.
+   *Dated note, 2026-10-25 (his, before any step 4 row was seen): **when a type is short.** A type "cannot reach k"
+   only when no step left can give it a row, so the fill runs after step 5's search, not before. Until that search is
+   recorded in the log, a row that passed every criterion and took no own slot is **pending**, in D.1's order, and is
+   not a case: it does not count toward the five of D.5, nor toward the fewer-than-five that opens a step (D.6), and
+   the selection is not complete while a short type's slots are open. The order of D.1, the stop at five, and the
+   rule's other parts are unchanged. This does not change which candidates pass; it changes only when the fill is
+   read. His reason: retool and ai are to be exhausted before the passed rows of another type take their slots.*
 4. **The order binds the checking too:** a candidate is not selected while one before it in the order is unfinished,
    as the selection log's `waiting` already holds a type's selection open, so the pace at which candidates are worked
    cannot choose a case.

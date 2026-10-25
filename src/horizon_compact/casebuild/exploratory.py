@@ -14,6 +14,10 @@ type that pass with a short type's slots filled by the next passing candidates o
 the selection held open while an earlier candidate is unfinished (D.4), at most five cases and no
 checking after the fifth (D.5), and, for the pool of steps 3 and 4, a ``not_known`` criterion after
 ``maps_to_shape``.
+
+The fill is held until step 5's search has been recorded (his decision, 2026-10-25, dated note under D.3): a
+type is short only when no step left can give it a row. Until then a passed row that no type's own slots
+took is ``pending``, not a case, and the selection is not complete while a short type's slots are open.
 """
 
 from __future__ import annotations
@@ -34,6 +38,7 @@ from horizon_compact.casebuild.search import (
     PRESS_CANDIDATES,
     READ_REQUIRED,
     READINGS,
+    STEP4_CANDIDATES,
     TYPES,
     K,
     LogError,
@@ -58,6 +63,10 @@ PROBED_STEPS = ("3", "4")
 STEP_POOLS = {"2": ("window", "fallback"), "3": ("pre",), "4": ("pre",), "5": ("late",)}
 STEP_RANK = {"2": 0, "3": 1, "4": 2, "5": 3}  # §4.6.5 D.1
 SOURCE_LOG = re.compile(r"selection-log-\d+\.json")
+HELD_FILL = (
+    "a short type's slots are held until step 5's search has run (his decision, 2026-10-25): "
+    "a type is short only when no step left can give it a row"
+)
 
 LABEL = "exploratory: selected by §4.6.5 step {step}, after the pre-registered rule found none"
 PROBE_LABEL = (
@@ -105,12 +114,14 @@ class ExploratoryRow(Row):
 class ExploratorySelection:
     """The cases so far, in the order of D.1. ``filled`` are those that took a short type's slot (D.3);
     ``short_types`` is each type's slots left after its own candidates, before the fill; ``waiting``
-    names what must be finished before the selection can be read."""
+    names what must be finished before the selection can be read; ``pending`` are the rows that passed
+    every criterion, took no own slot and are held for the fill (empty once the fill has run)."""
 
     cases: tuple[str, ...]
     filled: tuple[str, ...]
     short_types: Mapping[str, int]
     waiting: tuple[str, ...]
+    pending: tuple[str, ...] = ()
 
     @property
     def complete(self) -> bool:
@@ -125,6 +136,8 @@ class ExploratorySelection:
 class ExploratoryLog:
     rows: dict[str, ExploratoryRow] = field(default_factory=dict)
     events: list[dict[str, Any]] = field(default_factory=list)
+    # step 5's search is recorded: no step can give a short type a row now
+    step5_searched: bool = False
 
     # --- the order -----------------------------------------------------------------------------------------
 
@@ -183,6 +196,8 @@ class ExploratoryLog:
             waiting.append(
                 "a short type's slots go to the next candidates, and a type is still open"
             )
+        elif slots and not self.step5_searched:
+            waiting.append(HELD_FILL)
         elif slots:
             for row in ordered:
                 if row.id in taken:
@@ -195,11 +210,16 @@ class ExploratoryLog:
                     if len(filled) == slots:
                         break
         chosen = taken | set(filled)
+        held_fill = bool(slots) and (bool(held) or not self.step5_searched)
+        pending = tuple(
+            r.id for r in ordered if held_fill and r.finished and r.passed and r.id not in chosen
+        )
         return ExploratorySelection(
             tuple(r.id for r in ordered if r.id in chosen),
             tuple(r.id for r in ordered if r.id in filled),
             short,
             tuple(waiting),
+            pending,
         )
 
     def _after_the_fifth(self, row: ExploratoryRow) -> bool:
@@ -243,6 +263,11 @@ class ExploratoryLog:
             {"event": "carry", "id": row_id, "log": source_name, "log_sha256": digest},
             {source_name: source_text},
         )
+
+    def mark_searched(self) -> None:
+        """Step 5's search has run, with rows or none: no step is left to give a short type a row, so the fill
+        (D.3) may run. Recorded once, and after every row the search brings in has been added."""
+        self._take({"event": "searched", "step": "5"})
 
     def record(
         self,
@@ -315,8 +340,19 @@ class ExploratoryLog:
             self._apply_result(event)
         elif kind == "read":
             self._apply_read(event)
+        elif kind == "searched":
+            self._apply_searched(event)
         else:
             raise LogError(f"{kind!r} is not an event of the exploratory log")
+
+    def _apply_searched(self, event: dict[str, Any]) -> None:
+        if event["step"] != "5":
+            raise LogError(
+                "only step 5's search is recorded as run: the others are known from their lists"
+            )
+        if self.step5_searched:
+            raise LogError("step 5's search is already recorded")
+        self.step5_searched = True
 
     def _apply_add(self, event: dict[str, Any]) -> None:
         row_id, case_type, step = str(event["id"]), event["type"], event["step"]
@@ -326,6 +362,8 @@ class ExploratoryLog:
             raise LogError(f"a type is one of {', '.join(TYPES)}")
         if step not in STEP_POOLS or event["pool"] not in STEP_POOLS[step]:
             raise LogError(f"step {step!r} with pool {event['pool']!r} is not one of §4.6.5's")
+        if step == "5" and self.step5_searched:
+            raise LogError(f"{row_id}: step 5's search is recorded, so it brings no row after that")
         if not str(event["accession"]).strip():
             raise LogError("a candidate has its accession number")
         self.rows[row_id] = ExploratoryRow(
@@ -499,6 +537,7 @@ class ExploratoryLog:
             "at_most": AT_MOST,
             "cases": list(chosen.cases),
             "filled": list(chosen.filled),
+            "pending": list(chosen.pending),
             "complete": chosen.complete,
             "shortfall": chosen.shortfall,
             "short_types": dict(chosen.short_types),
@@ -556,8 +595,8 @@ def load_newest_exploratory(case: CaseAppendix) -> ExploratoryLog:
     return ExploratoryLog.from_text(text, sources)
 
 
-# the search's list, then step 2's channel
-CANDIDATE_FILES = ("candidates.json", PRESS_CANDIDATES, PRE_CANDIDATES)
+# the search's list, step 2's channel, then the pools of steps 3 and 4
+CANDIDATE_FILES = ("candidates.json", PRESS_CANDIDATES, PRE_CANDIDATES, STEP4_CANDIDATES)
 
 
 def exploratory_started(case: CaseAppendix) -> bool:
