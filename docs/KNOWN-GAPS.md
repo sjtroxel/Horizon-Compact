@@ -7,7 +7,50 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-25, about 9:40 AM (STEP 4'S SEARCH BUILT; THE FILL HELD TO STEP 5)
+> ## START HERE — where things stand, 2026-10-25, about 2:50 PM (PRE-224 LOCKED; ITS PROBE NEXT)
+>
+> **Measured:** last commit `phase 5: step 3 finished, step 4 search built, fill held to step 5`; this block's
+> commit carries batch 4a (the 1:30 PM block below), the fill-hold note of 9:40 AM, plan §9's batch 4a and pre-224
+> paragraphs, the ROADMAP row and `experiment/cases/pre-224/case.lock`. **pre-224, stage 3 to the lock** (Opus with
+> him; plan §9): his decision, before the term list was drafted, **to generalize at the coarsest level at build
+> time** (an exploratory deviation: the company's industry is narrow enough that its product mix alone could name
+> it); term list about 1,000 terms; the 10-Q's Part I Item 2 cut by hand; **three builds (about $0.97)**, each read
+> in full, two leaks found by reading and fixed in the term list; flag review 27 kept, 2 edited, 10 removed;
+> scenario read 1 "concerns" (two, both adopted rules the brief does not describe, as at closure-19), kept by his
+> written resolution; rubric read 1 "agrees"; foreshadowing 16 hits, each justified; checklist passed; reads about
+> $0.08. **Next:** his commit and push; after the Deploy run is green, `bash scratch/pre-224-probe.sh` (upload and
+> one recognition-probe task per model, about a cent each), then `bash scratch/pre-224-verdict.sh` (his read of the
+> six answers). **A set-1 failure probably costs the case:** the coarsest level leaves a §12.8 coarsening little to
+> remove, and a second failure drops it; pre-233 is then next (stage 3 from its knowledge probe). Then batches 4b
+> and 4c. OpenRouter about $6.54. Open, his: as below.
+>
+> *The 1:30 PM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-25, about 1:30 PM (BATCH 4a FINISHED; PRE-224 TO STAGE 3)
+>
+> **Measured:** last commit `phase 5: step 3 finished, step 4 search built, fill held to step 5`; uncommitted: this
+> block and the fill-hold note of 9:40 AM (docs only). **Step 4's search ran** (2026-10-25): 248 candidates, pre-173
+> to pre-420. **Batch 4a, pre-173 to pre-255 (83 rows), is finished** except three rows: 11 fail criterion 1, 2
+> criterion 2, 1 criterion 3, 66 criterion 4 (about 55 S2 with no stated fall in operating income; 5 name more than
+> one facility; 5 single plants whose only number is of people cut or affected; one with no number; one whose
+> government-stated headcount, 49, is below the floor; one with no shape; pre-211, the batch's ai lead, S1 with no
+> total, the pre-90 reading). 67 reads, all "agrees" (about $1.41). **Three pass criterion 4, all closures:**
+> pre-224 (a plant's 300 employees, from a news report in the 60 days quoting the company's website, undated: his
+> yes), pre-233 (240, the company's own release), pre-251 (112, the unions). **Only one step 4 closure can fill a
+> slot** (pre-11 and pre-25 come first, three slots at most), so they are probed in D.1's order: **pre-224 passed
+> the knowledge probe** (nine of nine, his read; the log's `not_known`); pre-233 and pre-251 wait at `not_known`,
+> probed only if pre-224 fails. **Next:** pre-224's stage 3 (Opus with him): the term list at build time (the
+> company's self-description and rank claims, product lines generalized, plant countries as regions), builds, flag
+> review, scenario and rubric reads, foreshadowing, checklist, lock, his commit and push, upload, recognition probe;
+> follow pre-25's scripts (`scratch/pre-25-*.sh`). Then batches 4b (pre-256 to pre-338) and 4c (pre-339 to pre-420)
+> the same way (`scratch/xlog-batch4a*.sh`; generators and notes in that session's scratchpad). Also to write: plan
+> §9's batch 4a paragraph and the ROADMAP row. **Lessons:** an excerpt carries any item it incorporates by reference
+> (pre-233's Item 2.05 was one sentence); every row that is read needs an excerpt, a criterion 3 failure included
+> (pre-229, missed once). OpenRouter $6.62. Open, his: as below.
+>
+> *The 9:40 AM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-25, about 9:40 AM (STEP 4'S SEARCH BUILT; THE FILL HELD TO STEP 5)
 >
 > **Measured:** `make check` green, 2787 tests; last commit `phase 5: pre-25 locked`; this block's commit carries
 > step 3's close (the 4:15 PM block below) and step 4's search. **Step 4's search is built** (Sonnet) **and reviewed**
@@ -16,7 +59,10 @@ case by its type and a neutral label. The names live only in the private longlis
 > **His decision, 2026-10-25, before any step 4 row was seen: the fill is held until step 5's search** (D.3's dated
 > note; the OPEN item of 2026-10-25). **pre-11 and pre-25 are "passed all, pending the fill", not cases**; they fill
 > only after step 5's search of 2027-01-04 (step 13, not built), and only as many as retool and ai leave short. So
-> **the case set cannot be final before 2027-01-04** unless five types' own cases are found first. **Cases: two**
+> **the case set cannot be final before 2027-01-04** unless five own cases are found first. That is no idle wait:
+> a pending row may be built and run ahead (D.5, "building ahead is allowed"), since the rule, not its results,
+> decides whether it is a case (his, 9:40 AM: he wants closure, retool and ai each represented if one exists, and
+> keeps the hold for that reason). **Cases: two**
 > (closure-07, closure-19). **Next:** his commit and push, then step 4's search, run once, on the laptop; then its
 > rows in batches as in step 3. Expect many knowledge-probe failures (the decisions fall before one model's cut-off).
 > Open, his: as below.
@@ -2108,7 +2154,12 @@ if no retool or ai row passes in step 4"**: step 4 finding none no longer fills 
 Once step 5 has run, the fill is D.3 as written: the short slots go to the next rows that passed, in D.1's order, of
 any type. With retool and ai together finding none, one, two, or three cases in steps 4 and 5, pre-11 and pre-25 both
 fill, both fill, only pre-11 fills, or neither fills. D.5's cap of five is the protocol's (§12.1, "at most five") and
-is not lifted. Closes when step 5 has run and the selection is complete, or if he changes the rule.
+is not lifted. **Holding is not waiting:** a pending row may be built and run ahead (D.5, "building ahead is
+allowed"); the rule decides whether it is a case, and a run's result cannot change that, since the rule is fixed
+before any step 4 row is seen. He kept the hold (2026-10-25, about 9:40 AM, after considering a fill at step 4's
+end) because he wants closure, retool and ai each represented if one exists: a fill at step 4's end would make
+the fifth case before step 5 can look for the missing type. Closes when step 5 has run and the selection is
+complete, or if he changes the rule.
 
 ---
 

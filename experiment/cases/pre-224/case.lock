@@ -1,0 +1,6 @@
+case_version = 1
+label = "pre-224"
+probe_set = 1
+dossier_sha256 = "c00248bb031dae1d95a27db6cb6c34931342153024c39a41ac4856caedbae1ae"
+rubric_sha256 = "7370adb882f07836dcf83f513cbf70c781594fad5b6467ebe109761e8413a35a"
+scenario_sha256 = "4f9e55e38592cb79e29cb38d6b43f7f5fd90e94ac4c8d1f901bd5210e9611ea2"

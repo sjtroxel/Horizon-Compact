@@ -836,3 +836,45 @@ test that asserted a fill or `complete` without a step 5 search now calls `mark_
 `make check` green, 2787 tests (15 new). **Not done:** step 13 (the search of 2027-01-04 and its `mark_searched` call);
 the START HERE block of 2026-10-24 said pre-11 and pre-25 fill "only if no retool or ai row passes in step 4"; rewritten
 after the Opus review (2026-10-25, no code fix).
+
+**Stage 4 step 4: batch 4a, pool rows pre-173 to pre-255 (2026-10-25, Opus with him).** Step 4's search, run once:
+248 candidates, pre-173 to pre-420. Eighty-three rows checked as step 3's batches were (`scratch/xlog-batch4a*.sh`).
+**11 fail criterion 1, 2 criterion 2, 1 criterion 3, 66 criterion 4:** about 55 S2 with no stated fall in operating
+income; 5 name more than one facility; 5 single plants whose only number is of people cut or affected (item 4); one
+with no number; one whose government-stated headcount, 49, is below the floor; one with no shape; and pre-211, the
+batch's one ai lead, S1 with no total (the pre-90 reading). 67 reads, all "agrees" (about $1.41). **Three pass
+criterion 4, all S3 closures:** pre-224 (a plant's 300 employees, from a news report within the 60 days quoting the
+company's own website, the figure undated: his yes), pre-233 (240, the company's own release) and pre-251 (112, the
+unions). Only one step 4 closure can fill a slot (pre-11 and pre-25 come first in D.1's order), so they are probed in
+that order: **pre-224 passes the knowledge probe** (nine of nine, his read); pre-233 and pre-251 wait at
+`not_known`, probed only if pre-224 fails. **Lessons:** an excerpt carries any item it incorporates by reference
+(pre-233's Item 2.05 was one sentence pointing to another item); every row that is read needs an excerpt, a criterion
+3 failure included (pre-229, missed once).
+
+**pre-224, stage 3 to the lock (2026-10-25, Opus with him).** **His decision, before the term list was drafted: the
+coarsest generalization at build time**, an exploratory deviation beyond pre-11's and pre-25's. The company's industry
+is narrow (few listed makers), so even with every name replaced, its product mix and end markets could name it; he
+chose the coarsest of three levels offered, since a failure at a lighter level would end there anyway, accepting that
+it leaves a §12.8 coarsening little room (a second failure drops the case). The term list (about 1,000 terms) takes
+the self-description and rank claims; the four segment names (lettered); the product itself, its technologies
+(lettered A, B and C) and its end markets (merged into a few broad customer groups); the main raw material; a federal
+tax credit's section and law; a planned new plant and its grant; the founding history; competitors, acquired
+businesses, executives, directors and former employers (lettered); towns (lettered) and countries (to regions); and,
+generated, a "the" form of every name whose replacement carries an article. The 10-Q's Part I Item 2 cut by hand, as
+pre-11's and pre-25's were. **Three builds (about $0.97; about 140,000 tokens a build):** build 1, read in full, named
+the main raw material in the extraction's own words ("a ... index" for its price) and kept a dividend increase's exact
+size; build 2, a raw-material unit price the flag reaches only half of, and a trade phrase that points to the product;
+each fixed in the term list and tested on the source text before the next build. Build 3 kept; noted, not fixable in
+the review file and not identifying: a stray first name, a director's service branch, two awkward phrases left by the
+roles. Flag review 27 kept (16 fiscal-year flags, the convention checked against the filer's year-end; 9 facility counts, most occurring more than
+once on their line; two zeros), 2 edited (month-and-day dates to their fiscal quarter), 10 removed (per-share figures,
+EPS guidance, a share count). Scenario: the total from the public report accepted at criterion 4 (the plant's
+employees; the first-disclosure document's own number is a reduction, not the total), liquidity from the last
+quarterly report (cash and committed undrawn credit only), three caps equal to the total. Scenario read 1 "concerns"
+(the total's post-disclosure source; the case form's fixed option sentences: both adopted rules the brief does not
+describe, as at closure-19), kept by his written resolution. Rubric read 1 "agrees" (choice close, observable; the four
+lines not; the company's stated reason cut from every excerpt, the pre-25 lesson applied). Foreshadowing: 16 hits,
+each justified (the company's earlier closures and exit, the shape's wording, one word the term list put in place);
+neutrality checklist passed. Reads about $0.08. Post-cut-off filings for the rubric fetched read-only from EDGAR with
+his User-Agent (the first-disclosure 8-K, two 10-Ks, two 10-Qs). `hc case lock` written; next his commit and push,
+then the upload and probe set 1.
