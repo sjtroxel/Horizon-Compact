@@ -1052,6 +1052,10 @@ def test_the_command_runner_reports_a_failed_or_missing_program_without_its_outp
     assert command_runner("echo")(["hi"]).strip() == "hi"
 
 
+def test_the_command_runner_runs_in_the_directory_it_is_given(tmp_path: Path) -> None:
+    assert command_runner("pwd", cwd=tmp_path)([]).strip() == str(tmp_path)
+
+
 # --- the commands ---------------------------------------------------------------------------------
 
 

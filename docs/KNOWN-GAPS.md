@@ -21,9 +21,14 @@ case by its type and a neutral label. The names live only in the private longlis
 > **The selection is complete: five cases, all closure: closure-07, closure-19, pre-11, pre-25, pre-224**, the last
 > three filling the short retool and ai slots in D.1's order; `problems()` empty. Retool (2) and ai (1) are reported as
 > shortfalls of own cases; §12.1's "at least one invest or retool" as not held. **Step 5 (step 13) is dropped.**
-> **Next:** his commit; then stage 5, the freeze (exploratory plan step 14: the freeze commit lists every case with its
-> step and label, the measured cost against §4, the DoD audit of §7). OpenRouter about $3.65 by estimate (about $5.10
-> less this batch's reads); check the dashboard. Open, his: as below.
+> **Next:** stage 5, the freeze. **Its plan is written** (exploratory doc §3.1, 2026-10-26, about 1:40 PM: `hc case
+> freeze` runs the gate's content, order and probe checks on each case from the laptop and writes the name-free
+> evidence; then the cost, the audit, the review and his commit `phase 5: the freeze`); **APPROVED 2026-10-26 about
+> 1:41 PM (his), 1(a) and 2(a)**. **14a and 14b built (Sonnet, about 2:04 PM) and reviewed (Opus, about 3:15 PM, one
+> fix; exploratory doc §9), never yet run for real.** Next: his commit `phase 5: hc case freeze built` and push; then he
+> runs `hc case freeze --profile <profile>` with his AWS login and `gh`; Opus reads the three files (14e); then 14c
+> to 14e. OpenRouter about $3.65 by estimate (about $5.10 less this batch's reads); check the dashboard. Open, his:
+> as below.
 >
 > *The 7:10 PM block of 2026-10-25 below is superseded.*
 >

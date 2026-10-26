@@ -19,7 +19,7 @@ from collections.abc import Callable, Sequence
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from types import FrameType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import boto3
 import botocore
@@ -103,6 +103,13 @@ from horizon_compact.casebuild.search import (
 from horizon_compact.casebuild.sections import build_section_inputs
 from horizon_compact.casebuild.splitter import SplitRefused
 from horizon_compact.casebuild.terms import CaseTerm, CaseTermsError, parse_case_terms
+from horizon_compact.caseprobe.freeze import (
+    FreezeError,
+    FreezeReaders,
+    build_freeze,
+    write_freeze,
+)
+from horizon_compact.caseprobe.github import command_runner, read_ci_runs
 from horizon_compact.caseprobe.knowledge import (
     KnowledgeError,
     KnowledgeOutcome,
@@ -112,6 +119,7 @@ from horizon_compact.caseprobe.knowledge import (
 from horizon_compact.caseprobe.knowledge import Preview as KnowledgePreview
 from horizon_compact.caseprobe.knowledge_read import knowledge_verdict, saved_empty_calls
 from horizon_compact.caseprobe.run import ProbeRefused, check_probe_launch, run_case_probe
+from horizon_compact.caseprobe.s3reader import read_probe_records
 from horizon_compact.caseprobe.upload import UploadError, upload_case
 from horizon_compact.caseprobe.verdict import VerdictError, probe_verdict
 from horizon_compact.dossier.check import default_repo_root, run_checks
@@ -255,6 +263,9 @@ from horizon_compact.sweep.spend import DEVELOPMENT_CAP_USD
 from horizon_compact.sweep.store import LocalStore, S3Store, Store
 from horizon_compact.sweep.tokens import tokens_report
 from horizon_compact.sweep.warning import SpendEstimate, format_warning, sweep_estimate
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
 
 EVIDENCE_RELATIVE = Path("docs/phases/evidence/phase-0.5/smoke")
 # "Dirty" means code or docs differ from the commit, not that earlier evidence records are uncommitted.
@@ -1465,9 +1476,8 @@ def _lock_probe_set(root: Path, label: str) -> int:
     return read_case(root, label).probe_set
 
 
-def _case_bucket_store(args: argparse.Namespace) -> Store:
-    """The results bucket from the laptop, under a named profile (no default). A function so the tests can
-    set it. The ``cases/`` prefix is private: the dev user holds ``s3:*`` on the bucket already."""
+def _case_s3(args: argparse.Namespace) -> tuple[S3Client, str]:
+    """The S3 client and results bucket from the laptop, under a named profile (no default)."""
     if not args.profile:
         raise SweepRefusal("on a laptop, --profile is required and has no default")
     bucket = args.bucket or os.environ.get(RESULTS_BUCKET_ENV)
@@ -1476,7 +1486,14 @@ def _case_bucket_store(args: argparse.Namespace) -> Store:
     session = boto3.Session(
         profile_name=args.profile, region_name=os.environ.get(REGION_ENV, REGION)
     )
-    return S3Store(session.client("s3"), bucket)
+    return session.client("s3"), bucket
+
+
+def _case_bucket_store(args: argparse.Namespace) -> Store:
+    """The results bucket from the laptop, under a named profile (no default). A function so the tests can
+    set it. The ``cases/`` prefix is private: the dev user holds ``s3:*`` on the bucket already."""
+    client, bucket = _case_s3(args)
+    return S3Store(client, bucket)
 
 
 def cmd_case_upload(args: argparse.Namespace) -> int:
@@ -1666,6 +1683,57 @@ def cmd_case_probe_verdict(args: argparse.Namespace) -> int:
             "the failure stands: coarsen the dossier once and lock it as set 2 (protocol §12.8). Log "
             f"{PROBE_CRITERION} as failed (record, then read) only if set 2 fails too, which drops the case"
         )
+    return CLEAN_EXIT
+
+
+def _freeze_world(args: argparse.Namespace, root: Path) -> FreezeReaders:
+    """The freeze's readers: the results bucket under a named profile, and ``gh`` and ``git`` run in the
+    repository. ``gh``'s run listing is the same for every case, so it is fetched once. A function so the
+    tests can set it."""
+    client, bucket = _case_s3(args)
+    listings: dict[tuple[str, ...], str] = {}
+    gh_run = command_runner("gh", cwd=root)
+
+    def gh(arguments: Sequence[str]) -> str:
+        key = tuple(arguments)
+        if key not in listings:
+            listings[key] = gh_run(arguments)
+        return listings[key]
+
+    git_run = command_runner("git", cwd=root)
+    return FreezeReaders(
+        store=S3Store(client, bucket),
+        probes=lambda label: read_probe_records(client, bucket, label),
+        runs=lambda label: read_ci_runs(label, gh=gh, git=git_run),
+        git=git_in(root),
+    )
+
+
+def cmd_case_freeze(args: argparse.Namespace) -> int:
+    """Check every selected case as the gate would and write the freeze's name-free evidence (exploratory
+    IMPLEMENTATION doc §3.1, steps 14a and 14b). Reads only; writes three files or none."""
+    root = default_repo_root()
+    try:
+        term_file = load_configured_term_file()
+    except GuardError as exc:
+        raise FreezeError([f"the name check before writing needs the term file: {exc}"]) from exc
+    readers = _freeze_world(args, root)
+    frozen = build_freeze(
+        open_case("search"),
+        root,
+        readers,
+        term_file,
+        progress=lambda line: print(line, file=sys.stderr, flush=True),
+    )
+    written = write_freeze(root, frozen)
+    print(f"freeze: {len(frozen.cases)} case(s), every check passed, in D.1's order:")
+    for label in frozen.cases:
+        print(f"  {label}: order admitted: {frozen.admitted[label]}")
+    for path in written:
+        print(f"wrote {path.relative_to(root).as_posix()}")
+    print(
+        "next: Claude reads all three files in full for a description that could identify a company"
+    )
     return CLEAN_EXIT
 
 
@@ -2353,6 +2421,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_probe_verdict(args)
         if args.action == "resolve":
             return cmd_case_resolve(args)
+        if args.action == "freeze":
+            return cmd_case_freeze(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (
         AppendixError,
@@ -2382,6 +2452,7 @@ def cmd_case(args: argparse.Namespace) -> int:
         UploadError,
         ProbeRefused,
         VerdictError,
+        FreezeError,
         SweepRefusal,
     ) as exc:
         print(f"refused: {exc}", file=sys.stderr)
@@ -2991,6 +3062,16 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--bucket", help=f"the results bucket (else {RESULTS_BUCKET_ENV})")
     for sub in (upload, verdict):
         sub.add_argument("--profile", help="the AWS profile (no default)")
+    freeze = case_actions.add_parser(
+        "freeze",
+        help="Stage 5 (exploratory doc §3.1, 14a and 14b): check every selected case as the gate would (the "
+        "pushed case.lock, the content, the order of CI and the probes, the probes themselves, the reads), "
+        "that no case decision has run, and write the public selection views and freeze.json into "
+        "docs/phases/evidence/phase-5/. Reads only; refuses with every reason and writes nothing on any "
+        "failure; write-once. Laptop, named profile, gh.",
+    )
+    freeze.add_argument("--profile", help="the AWS profile (no default)")
+    freeze.add_argument("--bucket", help=f"the results bucket (else {RESULTS_BUCKET_ENV})")
     assemble = case_actions.add_parser(
         "assemble",
         help="Write the case's dossier once every flag has a decision in reviewed-flags.json",

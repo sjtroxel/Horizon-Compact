@@ -2,7 +2,8 @@
 
 > **IMPLEMENTATION doc, exploratory part. Written 2026-10-19 (Opus, about 1:00 PM CDT), immediately after the
 > search-half doc's §4.6.5 was adopted (his, about 12:50 PM, after the independent reader's read). APPROVED 2026-10-20
-> (his, about 8:35 AM), all three decisions in §6 as recommended.** This doc is the build plan for §4.6.5; the rules themselves are in
+> (his, about 8:35 AM), all three decisions in §6 as recommended.** **Step 14's plan (§3.1) written 2026-10-26 (Opus, about
+1:40 PM), after the selection completed; APPROVED the same day (his, about 1:41 PM), both decisions as recommended.** This doc is the build plan for §4.6.5; the rules themselves are in
 > §4.6.5 and are pointed to here, not restated. Sources: the search-half doc (`phase-5-case-building-search-IMPLEMENTATION.md`)
 > §4.1, §4.3, §4.6 to §4.6.5, §4.8, §4.9 and Stage D; the code as read 2026-10-19 (`casebuild/search.py`,
 > `casebuild/scenario.py`, `reader/material.py`, `cli.py`, `analysis/matcher.py`); `KNOWN-GAPS.md`'s OPEN entries of
@@ -19,7 +20,7 @@
 | **2. Step 2's rows** | 7-9 | the ten pre-registered S3 rows re-read; the new channel run and checked; a count | Opus with him | a few cents (rejection reads) | **done 2026-10-21: 2 rows pass** |
 | **3. Each passing row to a case** | 10 | build, scenario, rubric, lock, probe, as every case | Opus with him | yes, about 10 cents a read: **the one top-up comes due here** | **done 2026-10-25**: closure-07, closure-19, pre-11, pre-25 and pre-224 built and probed |
 | **4. The reserve** | 11-13 | the pre-cut-off pool and the knowledge probe; the pool extended; a second search on 2027-01-04 | as stage 1, then 2 and 3 | cents | **done 2026-10-26**: steps 3 and 4 finished; **step 13 dropped** (the hold lifted, his decision 2026-10-26) |
-| **5. The freeze** | 14 | the cases frozen with their labels | Opus with him; his commit | no | not started |
+| **5. The freeze** | 14 | the cases frozen with their labels | Sonnet builds `hc case freeze`, Opus reviews; Opus with him for the rest; his commit | no (a few S3 and GitHub reads) | **planned and approved 2026-10-26** (§3.1); 14a and 14b to build |
 
 **Where to look:** this doc is the plan, and each step gets a `[done]` marker and an as-built note (§9) as it is
 built. The rules are §4.6.5 of the search-half doc. Where things stand today is `KNOWN-GAPS.md`'s START HERE.
@@ -130,7 +131,70 @@ push, then step 10.
 
 14. **The search half's Stage E, for the exploratory record:** its `problems()` empty and its selection closed; the
     freeze commit lists every case with its step and label; the measured cost against §4; the DoD audit (§7);
-    ROADMAP and START HERE.
+    ROADMAP and START HERE. **Planned in full in §3.1** (2026-10-26).
+
+### 3.1 Step 14, the freeze, in full (written 2026-10-26, after the selection completed)
+
+**What exists.** All five `case.lock` files are committed (`experiment/cases/<label>/case.lock`). The gate's checks
+exist and are tested on fakes: `check_case_content`, `check_case_probes` and `check_case_order`
+(`protocol/cases.py`), with the real readers `read_probe_records` (`caseprobe/s3reader.py`) and `read_ci_runs`
+(`caseprobe/github.py`). **Nothing runs them from the laptop on a frozen case**: the search half's step 10a left that
+unbuilt on purpose (its point 14). No public selection view is committed yet. The freeze (search half §4.11) is one
+commit holding the evidence that each case was locked before any model saw it.
+
+**14a. `hc case freeze` (Sonnet builds, Opus reviews; no model call). [built and reviewed 2026-10-26; as-built in §9]** On the laptop, with his AWS login and `gh`.
+Reads only; writes only the files of 14b; refuses with every reason and writes nothing if any check fails.
+1. **The selections.** The newest exploratory log: `selection().complete`, `problems()` empty. The newest
+   pre-registered selection log: complete, `problems()` empty. Either open: refused.
+2. **Per case, in D.1's order,** every check the gate makes before a run that can be made now:
+   - check 1: the private content in the case's appendix folder (`dossier.toml`, `scenario.toml`, `rubric.toml`)
+     hashes to its committed `case.lock`;
+   - check 2: `check_case_order` on `read_ci_runs` and `read_probe_records` (the rubric in CI before the first probe;
+     the counting content in CI before its set's first probe; closure-19 is the one case with a set 2);
+   - check 3: `check_case_probes` against the official models in `protocol.lock`.
+3. **No case decision has run** (search half DoD 6): no object under any case's sweep prefix. The prefix is the one
+   Phase 3.5 §8's case mode writes under; the builder confirms it from the code and names it in the as-built note.
+4. **Write-once:** refused if `freeze.json` already exists.
+
+**14b. What it writes, in `docs/phases/evidence/phase-5/`. [built 2026-10-26, with 14a]** Generated, never typed by hand, so no excerpt or name
+can slip in:
+- `selection-public.json`: the pre-registered log's public view, as `hc case log` prints it.
+- `exploratory-public.json`: the exploratory log's public view (`ExploratoryLog.public_view()`).
+- `freeze.json`: the source log versions and their sha256; **the cases**, in D.1's order, each with its step, type,
+  label text (`LABEL`, and `PROBE_LABEL` for steps 3 and 4), its `case.lock` hashes and probe set; **probe results**
+  by case, set and model (calls, calls passed; no answer text); **the order findings** (`OrderFinding.as_record()`:
+  CI run ids and times, probe keys and times; all neutral); **the reader's outcomes by kind** as counts (rejection
+  reads agreeing or disputing, from both logs; each case's scenario and rubric reads by reading, from the appendix);
+  the shortfall by type; and the hold's release (its date; the reason is in the private log and the dated note).
+- **Before writing**, every string it would write is checked against the private term file by the name guard's own
+  matcher; a hit refuses. The guard runs again on the commit.
+
+**14c. The measured cost (Opus with him).** The command prints totals by pot from the appendix's reply files
+(`estimated_usd`: builds, reads, knowledge probes) and the S3 probe records. He reads three balances (Anthropic
+console, OpenRouter, the AWS bill). `cost.md` in the evidence folder sets both against `projection.md`, the $60
+re-plan point and the $80 ceiling, by hand, numbers only.
+
+**14d. The audit (Opus with him).** Each row of the search half's DoD (§9) and this doc's (§7) with its proof, or
+reported as not met (row 1's "one invest or retool" is not met: reported, as §12.1 allows). **Every OPEN item in
+`KNOWN-GAPS.md`** (eleven stand today, dated 2026-10-09 to 2026-10-18) is checked: one that bears on Phase 5 is
+closed with its reason or carried to Phase 5.5 by name, his call on each; the rest are left as they stand.
+
+**14e. Review before the commit.** Opus reads both public views and `freeze.json` in full for a description detailed
+enough to identify a company (the guard cannot catch that, rule zero). Then `make check`, ROADMAP, START HERE, this
+doc's as-built note, and **his commit: `phase 5: the freeze`**. From that commit on, a case changes only by the
+protocol's rules (coarsening, replacement), each change logged (Phase 5 scope, Delivers 9).
+
+**If a check fails.** Nothing is written. A content or probe failure is investigated before anything else; an order
+failure (for example, a GitHub run expired, which fails closed) is reported with its reasons and is his call. No
+case is swapped by hand: replacement follows the protocol.
+
+**Decisions for him.**
+1. **The build model.** (a) **Recommended: Sonnet builds 14a and 14b, Opus reviews the diff** (decision 3(a) of §6).
+   (b) Opus throughout.
+2. **The term-file check in the command (14b, last point).** (a) **Recommended: include it**, so a hit stops the
+   command before a file exists rather than at the commit. (b) Rely on the commit hook alone.
+
+**Decided 2026-10-26, about 1:41 PM (his): 1(a), 2(a).**
 
 ## 4. Money
 
@@ -934,3 +998,36 @@ closure-07, closure-19, pre-11, pre-25 and pre-224**, the last three filling the
 order; nothing waiting, `problems()` empty. Retool and ai are reported as shortfalls of own cases, and §12.1's "at
 least one invest or retool" as not held. Decided after every step 4 row was seen, so it is reported as a change made
 with its effect known.
+
+**Stage 5 steps 14a and 14b: `hc case freeze` (2026-10-26, Sonnet built; Opus reviewed, one fix).** `caseprobe/freeze.py`
+(not `casebuild/`: the architecture tests bar that package from the reader and the probe, and this module reads
+both), `cmd_case_freeze` and `_freeze_world` in `cli.py`, and `tests/test_caseprobe_freeze.py` (43 tests); `make
+check` green, 2835. Never run for real. Two changes elsewhere: `command_runner` takes an optional `cwd` (so `gh`'s
+`{owner}/{repo}` and `git show` answer for the repository whatever directory the command starts in), and `cli.py`'s
+S3 client and bucket come from `_case_s3`, which `_case_bucket_store` now calls. Run as `hc case freeze --profile
+<profile>`; it checks both logs complete with `problems()` empty, then for each case in D.1's order the committed,
+pushed `case.lock`; the appendix's three files, and the same three as stored under `cases/<label>/set-<n>/`, hashing
+to it; `check_case_order` on `read_ci_runs` and `read_probe_records`; `check_case_probes` against the models in
+`protocol.lock`; and `reads_settled` on the scenario and rubric. Every reason is collected and the command refuses with
+all of them; the three files are written all or none, write-once, after the name guard's matcher has run over every
+string (a hit names the file and line, never the term). **The case sweep prefix (14a item 3) is not in the code.**
+Phase 5.5 has not wired case sweeps; the only mechanism is `sweep_prefix(experiment, sweep_id, role)`, which gives
+`<role>/<experiment>/<sweep_id>/`, and no case experiment folder exists (case content is private). So the check
+lists `development/`, `pilot/` and `official/` and takes as a case decision any object outside the repository's own
+experiment folders (those with `dossier.toml` and `objectives.toml`: today `company`, `placeholder`, `shapes` and `s4shape`) or whose key names a
+case label. That fails closed: any other object there refuses the freeze, naming only its experiment segment.
+*Choices the plan did not fix:* (1) the stored-content check and the `lock_pushed` check, added to check 1 because
+they are what the container's gate and `hc case upload` rely on; (2) the rejection-read counts are two tallies, the
+pre-registered log's and the exploratory log's, and the exploratory tally leaves out a carried row's reads before
+criterion 4 (copies of the first, counted there); (3) `freeze.json` records each case's scenario and rubric reading
+and whether he wrote a resolution, never its text; (4) the hold's release is its date alone; (5) `gh`'s run listing is
+fetched once for all five cases, and each run's record is read by `git show` per case, as `read_ci_runs` does.
+*Checked live before handing back, booleans only:* the pre-registered log is complete for all three types with no
+problems, and the exploratory log is complete with no problems, the hold released, and cases closure-07, closure-19,
+pre-11, pre-25, pre-224 (the last three filled). *Not checked, since nothing ran against AWS or GitHub:* whether an
+expired or deleted CI run drops out of the listing (search-half doc §4.10), and whether `gh` is authenticated.
+*Opus review, 2026-10-26:* the prefix reading confirmed (no code fixes a case sweep's prefix; every writer in
+the code writes under `<role>/<experiment>/`, and the probes and content under `cases/`, which the check does not
+list). One fix: the stored-content read was outside any S3 error handling, so an expired login gave a traceback
+instead of a refusal; it is now a reason like the others, with a test (44 tests; `make check` green, 2836). Not built, and not in 14a or
+14b: 14c's totals by pot, which §3.1 says "the command prints"; done at 14c instead.

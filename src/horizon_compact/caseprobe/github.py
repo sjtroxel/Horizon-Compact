@@ -18,6 +18,7 @@ import json
 import subprocess
 from collections.abc import Callable, Sequence
 from datetime import datetime
+from pathlib import Path
 
 from horizon_compact.protocol.cases import CiRun, case_path
 
@@ -38,10 +39,13 @@ class GithubReadError(Exception):
     """GitHub or git did not answer, or answered in a shape this reader does not know."""
 
 
-def command_runner(program: str) -> Runner:
+def command_runner(program: str, cwd: Path | None = None) -> Runner:
+    """``program`` run in ``cwd`` (the process's own directory if None), so ``gh``'s ``{owner}/{repo}`` and
+    ``git show`` answer for the repository whatever directory the command was started in."""
+
     def run(args: Sequence[str]) -> str:
         try:
-            result = subprocess.run([program, *args], capture_output=True, check=False)
+            result = subprocess.run([program, *args], capture_output=True, check=False, cwd=cwd)
         except OSError as exc:
             raise GithubReadError(f"{program} cannot run: {type(exc).__name__}") from exc
         if result.returncode != 0:
