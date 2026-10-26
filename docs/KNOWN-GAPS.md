@@ -7,7 +7,45 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-25, about 2:50 PM (PRE-224 LOCKED; ITS PROBE NEXT)
+> ## START HERE — where things stand, 2026-10-25, about 7:10 PM (BATCH 4b FINISHED; BATCH 4c NEXT)
+>
+> **Measured:** last commit `phase 5: batch 4a finished, pre-224 locked` (`6e3dc92`); this block's commit carries
+> batch 4b and the pre-224 pass (the 4:50 PM block below). **Batch 4b, pre-256 to pre-338 (83 rows), is finished**
+> (`exploratory-log-1710`; scripts `scratch/xlog-batch4b.sh`, `4b2`, `4b3`): 14 fail criterion 1, 2 criterion 2,
+> 1 criterion 3, 66 criterion 4; **none passes criterion 4**, and no row is an ai lead. 67 reads, all "agree" (about
+> $1.43; one throttled call, pre-289, read again). **D.1 checked before the batch** (`ExploratoryLog.ordered()` on the
+> live log): no row of pre-256 to pre-420 sorts ahead of pre-224 (step 4 sorts by id), so only a retool or ai row can
+> change the case set. **The one retool-shaped row, pre-338** (a plant closed as production moves to the company's
+> newer plant): typed closure (that plant is built and producing, not capacity being built or converted); it fails on the
+> total under either type (no source in the 60 days states the plant's headcount). **Near miss, closure, pre-260:** the
+> site's headcount is stated in the window only by legislators, and a government statement of it came after the
+> window; failed by the letter, the reader agrees. **Cases: two** (closure-07, closure-19); pending the fill: pre-11,
+> pre-25, pre-224. **Next:** batch 4c (pre-339 to pre-420) in a fresh chat, as 4b was; the scripts are its template.
+> **Method notes:** the total search uses the action's own words (4a's phrases), never the bare word "restructuring",
+> which pulled whole annual-report sections into the reads and doubled their estimated cost; a filer with two CIKs
+> (pre-272) is searched by hand, as pre-170 was. OpenRouter about $5.10. Open, his: as below.
+>
+> *The 4:50 PM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-25, about 4:50 PM (PRE-224 PASSED ALL; BATCH 4b NEXT)
+>
+> **Measured:** last commit `phase 5: batch 4a finished, pre-224 locked` (`6e3dc92`, pushed, CI and Deploy green).
+> **pre-224 passes probe set 1:** none of the six answers names the company (gpt-oss "unknown" twice, recorded by the
+> tool; its third answer and Haiku's three, his read, each say the text names no company and none guesses); logged
+> (`exploratory-log-1291`): **pre-224 finished, passed all**, the third closure candidate beside pre-11 and pre-25,
+> pending the fill like them. **pre-233 and pre-251 cannot become cases** (read from `selection()`): closure's own
+> slots are full, at most three slots can be short (retool two, ai one), pre-11, pre-25 and pre-224 come first in
+> D.1's order and take them all, and an unfinished closure row holds nothing while closure is full. So probing them
+> changes no case; Claude recommended leaving them at `not_known`; his call. **Cases: two** (closure-07,
+> closure-19); passed all, pending the fill: pre-11, pre-25, pre-224. **His decision, about 4:50 PM, asked whether
+to lift the hold now that five closures have passed all: keep it** (the reason of 9:40 AM stands; the three pending
+closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-256 to pre-338), then
+> 4c (pre-339 to pre-420), as batch 4a was; only a retool or ai row can now change the case set. OpenRouter about
+> $6.53. Open, his: as below.
+>
+> *The 2:50 PM block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-25, about 2:50 PM (PRE-224 LOCKED; ITS PROBE NEXT)
 >
 > **Measured:** last commit `phase 5: step 3 finished, step 4 search built, fill held to step 5`; this block's
 > commit carries batch 4a (the 1:30 PM block below), the fill-hold note of 9:40 AM, plan §9's batch 4a and pre-224

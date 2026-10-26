@@ -878,3 +878,32 @@ each justified (the company's earlier closures and exit, the shape's wording, on
 neutrality checklist passed. Reads about $0.08. Post-cut-off filings for the rubric fetched read-only from EDGAR with
 his User-Agent (the first-disclosure 8-K, two 10-Ks, two 10-Qs). `hc case lock` written; next his commit and push,
 then the upload and probe set 1.
+
+**pre-224 passes probe set 1 (2026-10-25).** The lock committed and pushed (`6e3dc92`), the Deploy run green, the
+content uploaded and one probe task per model: six of six answers do not name the company (gpt-oss "unknown" twice,
+recorded by the tool; its third answer and Haiku's three, his read, each saying the text names no company, none
+guessing). Logged (`exploratory-log-1291`): **pre-224 finished, passed all**, the third closure fill candidate beside
+pre-11 and pre-25. pre-233 and pre-251, held at `not_known` behind it, cannot become cases: closure's own slots are
+full and the at most three short slots go to pre-11, pre-25 and pre-224 first (D.1, D.3, read from
+`ExploratoryLog.selection()`).
+
+**Stage 4 step 4: batch 4b, pool rows pre-256 to pre-338 (2026-10-25, Opus with him).** Before the batch, D.1 was
+checked on the live log: no row of pre-256 to pre-420 sorts ahead of pre-224 (step 4's rows sort by id), so closure
+rows in 4b and 4c cannot change the case set; only a retool or ai row can. Eighty-three rows, checked as batch 4a's
+were (`scratch/xlog-batch4b*.sh`). **14 fail criterion 1:** contract, financing or technical-report wording (5), cost
+lines or updates for closures stated before the pool (7, one a closure decided 2024-04-11), a spin-off's description of
+2023 measures (2 rows, one text), and one repeat (pre-283, the same plan as pre-280, the lower id, which stands).
+**2 fail criterion 2** (covers listing no exchange). **pre-300 fails criterion 3:** its own excerpt states an
+assignment of assets to creditors and a dissolution after "no viable strategic alternatives"; the other wind-downs
+(pre-263, 290, 327, 328) pass it, their excerpts stating no compulsion (the pre-28 lesson). **66 fail criterion 4,
+none passes:** 53 S2 with no stated fall in operating income (non-product sites, a lab, offices, a distribution
+center, read as S2 by the pre-177 precedent; pre-272, two CIKs, searched by hand as pre-170 was); 2 name more than one
+facility; and 11 single-facility S3 rows whose only number is of people affected or cut, an upper bound, or under the
+floor of 50, or none. **pre-338**, the batch's one row whose production moves to a newer plant, is typed closure (that plant
+is built and producing, not capacity being built or converted) and fails on the total under either type. **pre-260**,
+a closure: the site's headcount is stated within the 60 days only by legislators, and a government statement of it
+came after the window; failed by the letter. 67 reads, all "agrees" (about $1.43; pre-289's first
+call failed at the API, OpenRouter 429, and was made again). Excerpts carry what their item incorporates (pre-323,
+pre-325). **Method:** the total search uses the action's own words, as batch 4a's did; a first draft added the bare
+word "restructuring" to every search, which pulled whole annual-report sections into the reads (estimated $3.10), and
+was cut before any read. No retool or ai row passes; the case set is unchanged.
