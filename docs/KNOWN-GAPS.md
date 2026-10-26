@@ -25,9 +25,14 @@ case by its type and a neutral label. The names live only in the private longlis
 > freeze` runs the gate's content, order and probe checks on each case from the laptop and writes the name-free
 > evidence; then the cost, the audit, the review and his commit `phase 5: the freeze`); **APPROVED 2026-10-26 about
 > 1:41 PM (his), 1(a) and 2(a)**. **14a and 14b built (Sonnet, about 2:04 PM) and reviewed (Opus, about 3:15 PM, one
-> fix; exploratory doc §9), never yet run for real.** Next: his commit `phase 5: hc case freeze built` and push; then he
-> runs `hc case freeze --profile <profile>` with his AWS login and `gh`; Opus reads the three files (14e); then 14c
-> to 14e. OpenRouter about $3.65 by estimate (about $5.10 less this batch's reads); check the dashboard. Open, his:
+> fix; exploratory doc §9); committed and pushed (`b5ffcc3`).** **First run, about 4:09 PM: every check passed, three
+> files written, NOT committed:** Opus's full read (14e) found 80 public reasons that are shell variable names (batches
+> 3a and 3b) and two too specific (closure-28, pre-43). **Plan 14a.1 (exploratory doc §3.1) APPROVED about 4:12 PM
+> (his), all as recommended:** an "amend public reason" change to both logs. **Built (Sonnet, about 4:29 PM) and
+> reviewed (Opus, about 5:30 PM, no defect, docstrings fixed; exploratory doc §9).** **Next:** his commit (naming
+> paths, not `-A`: the three evidence files stay out); then Opus with him applies the amendments, deletes the three
+> files and reruns the freeze; then 14c to 14e.
+> OpenRouter about $3.65 by estimate (about $5.10 less this batch's reads); check the dashboard. Open, his:
 > as below.
 >
 > *The 7:10 PM block of 2026-10-25 below is superseded.*

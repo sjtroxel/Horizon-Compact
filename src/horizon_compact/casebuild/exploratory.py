@@ -15,6 +15,10 @@ the selection held open while an earlier candidate is unfinished (D.4), at most 
 checking after the fifth (D.5), and, for the pool of steps 3 and 4, a ``not_known`` criterion after
 ``maps_to_shape``.
 
+A public reason can be amended after it is recorded (an ``amended`` event, plan 14a.1): only its text
+changes, the old text, the date and why stay in this private log, and the public view marks the criterion
+with the date.
+
 The fill is held until step 5's search has been recorded (his decision, 2026-10-25, dated note under D.3): a
 type is short only when no step left can give it a row. Until then a passed row that no type's own slots
 took is ``pending``, not a case, and the selection is not complete while a short type's slots are open.
@@ -49,6 +53,7 @@ from horizon_compact.casebuild.search import (
     Result,
     Row,
     SelectionLog,
+    amended_mark,
     load_newest_log,
 )
 
@@ -283,6 +288,22 @@ class ExploratoryLog:
         never after step 5's search, when the fill runs anyway."""
         self._take({"event": "released", "on": on.isoformat(), "reason": reason})
 
+    def amend_public(
+        self, row_id: str, criterion: str, public_reason: str, on: date, why: str
+    ) -> None:
+        """Replace the public reason of a criterion that has a result, as the selection log does. A carried
+        row's carried criteria are the pre-registered log's and are amended there, not here."""
+        self._take(
+            {
+                "event": "amended",
+                "id": row_id,
+                "criterion": criterion,
+                "public_reason": public_reason,
+                "on": on.isoformat(),
+                "why": why,
+            }
+        )
+
     def record(
         self,
         row_id: str,
@@ -358,6 +379,8 @@ class ExploratoryLog:
             self._apply_searched(event)
         elif kind == "released":
             self._apply_released(event)
+        elif kind == "amended":
+            self._apply_amended(event)
         else:
             raise LogError(f"{kind!r} is not an event of the exploratory log")
 
@@ -371,6 +394,20 @@ class ExploratoryLog:
         if self.fill_released:
             raise LogError("the hold on the fill is lifted: step 5 does not run")
         self.step5_searched = True
+
+    def _apply_amended(self, event: dict[str, Any]) -> None:
+        row = self._row(str(event["id"]))
+        criterion = event["criterion"]
+        on = date.fromisoformat(event["on"])
+        if row.source is not None and criterion in CARRIED:
+            raise LogError(
+                f"{row.id}'s {criterion} is carried from {row.source[0]}; amend it in the "
+                "pre-registered log"
+            )
+        result = row.results.get(criterion)
+        if result is None:
+            raise LogError(f"{row.id} has no result for {criterion}")
+        result.amend_public(str(event["public_reason"]), on, str(event["why"]))
 
     def _apply_released(self, event: dict[str, Any]) -> None:
         date.fromisoformat(event["on"])
@@ -560,7 +597,8 @@ class ExploratoryLog:
             raise LogError(f"the exploratory log cannot be read: {type(exc).__name__}") from exc
 
     def public_view(self) -> dict[str, Any]:
-        """No name, accession number, date or industry code. A row is its neutral id, its step and each
+        """No name, accession number, date or industry code; the one date is an amended criterion's
+        ``amended_on``, the day the project changed its text. A row is its neutral id, its step and each
         criterion's result; a reason appears only where a ``public_reason`` was written. Every case carries
         its label (§4.6.5 B.3)."""
         chosen = self.selection()
@@ -589,6 +627,7 @@ class ExploratoryLog:
                             "result": r.results[c].result,
                             "reason": r.results[c].public_reason,
                             **({"disputed": True} if r.disputed(c) else {}),
+                            **amended_mark(r.results[c]),
                         }
                         for c in r.criteria
                         if c in r.results

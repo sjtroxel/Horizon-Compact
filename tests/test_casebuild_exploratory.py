@@ -788,3 +788,122 @@ def test_a_public_reason_appears_only_where_one_was_written() -> None:
     row = log.public_view()["rows"][0]
     assert row["criteria"]["first_disclosure"]["reason"] == "an earlier public mention"
     assert "private words" not in json.dumps(log.public_view())
+
+
+# --- amending a public reason (plan 14a.1) ------------------------------------------------------------
+
+
+def amendable() -> tuple[ExploratoryLog, str]:
+    """busy_log, with a stand-in public reason on the carried row's own criterion and on a rejection."""
+    log, text = busy_log()
+    log.add("press-02", "closure", "2", "window", "0003333333-26-000002")
+    log.record("press-02", "first_disclosure", "fail", "private words", public_reason="$VARIABLE")
+    return log, text
+
+
+def test_an_amended_public_reason_changes_the_public_text_and_nothing_else() -> None:
+    log, _ = amendable()
+    row = log.rows["press-02"]
+    snapshot = (row.results["first_disclosure"].result, row.results["first_disclosure"].reason)
+    chosen = log.selection()
+    log.amend_public("press-02", "first_disclosure", "an earlier public mention", day(9), "why")
+    assert (row.results["first_disclosure"].result, row.results["first_disclosure"].reason) == (
+        snapshot
+    )
+    assert log.selection() == chosen and row.failed == "first_disclosure"
+    by_id = {r["id"]: r for r in log.public_view()["rows"]}
+    assert by_id["press-02"]["criteria"]["first_disclosure"] == {
+        "result": "fail",
+        "reason": "an earlier public mention",
+        "amended_on": "2026-08-09",
+    }
+    assert "amended_on" not in json.dumps(by_id["press-01"])
+    public = json.dumps(log.public_view())
+    assert "$VARIABLE" not in public and "why" not in public and "private words" not in public
+
+
+def test_an_amendment_survives_a_save_and_a_reload_as_an_event() -> None:
+    log, text = amendable()
+    log.amend_public("press-02", "first_disclosure", "first wording", day(9), "a variable name")
+    log.amend_public("press-02", "first_disclosure", "second wording", day(10), "tidier")
+    saved = json.loads(log.to_text())["events"]
+    assert [e["event"] for e in saved][-2:] == ["amended", "amended"]
+    assert saved[-2]["why"] == "a variable name" and saved[-2]["on"] == "2026-08-09"
+    again = ExploratoryLog.from_text(log.to_text(), {SOURCE: text})
+    assert again.to_text() == log.to_text() and again.public_view() == log.public_view()
+    result = again.rows["press-02"].results["first_disclosure"]
+    assert result.public_reason == "second wording" and result.amended_on == "2026-08-10"
+    assert [(a["replaced"], a["why"]) for a in result.amendments] == [
+        ("$VARIABLE", "a variable name"),
+        ("first wording", "tidier"),
+    ]
+
+
+def test_a_log_with_no_amendment_is_saved_and_replayed_as_it_was() -> None:
+    log, text = busy_log()
+    assert "amended" not in log.to_text() and "amend" not in json.dumps(log.public_view())
+    assert ExploratoryLog.from_text(log.to_text(), {SOURCE: text}).to_text() == log.to_text()
+
+
+def test_an_amendment_needs_a_result_a_text_a_reason_and_a_change() -> None:
+    log, _ = amendable()
+    before = log.to_text()
+    refused = [
+        ("press-09", "first_disclosure", "text", "why", "no candidate"),
+        ("press-02", "public_and_filing", "text", "why", "no result"),
+        ("press-02", "first_disclosure", "  ", "why", "not blank"),
+        ("press-02", "first_disclosure", "text", "  ", "has its reason"),
+        ("press-02", "first_disclosure", "$VARIABLE", "why", "the same"),
+    ]
+    for row_id, criterion, new, why, message in refused:
+        with pytest.raises(LogError, match=message):
+            log.amend_public(row_id, criterion, new, day(9), why)
+    assert log.to_text() == before
+
+
+def test_a_carried_rows_carried_criteria_are_amended_in_the_pre_registered_log_not_here() -> None:
+    log, _ = busy_log()
+    before = log.to_text()
+    for criterion in CRITERIA[:4]:
+        with pytest.raises(LogError, match="amend it in the pre-registered log"):
+            log.amend_public("closure-04", criterion, "text", day(9), "why")
+    assert log.to_text() == before
+    # what the row recorded here is this log's, so it can be amended
+    log.amend_public("closure-04", "maps_to_shape", "S3, by the plan", day(9), "why")
+    assert log.rows["closure-04"].results["maps_to_shape"].public_reason == "S3, by the plan"
+
+
+def test_a_carried_amendment_from_the_source_log_shows_in_this_public_view() -> None:
+    source = SelectionLog.from_text(source_text("closure-04"))
+    source.amend_public("closure-04", "real_decision", "a real decision", day(8), "why")
+    carried = source.to_text()
+    log = ExploratoryLog()
+    log.carry("closure-04", carried, SOURCE)
+    log.record("closure-04", "maps_to_shape", "pass", "r")
+    row = log.public_view()["rows"][0]
+    assert row["criteria"]["real_decision"]["amended_on"] == "2026-08-08"
+    assert "amended_on" not in row["criteria"]["maps_to_shape"]
+    with pytest.raises(LogError, match="pre-registered log"):
+        log.amend_public("closure-04", "real_decision", "other", day(9), "why")
+
+
+def test_a_hand_edited_amendment_event_is_refused() -> None:
+    log, text = amendable()
+    log.amend_public("press-02", "first_disclosure", "first wording", day(9), "why")
+    events = json.loads(log.to_text())["events"]
+
+    def edited(change: Callable[[dict[str, Any]], object]) -> str:
+        copied = json.loads(json.dumps(events))
+        change(copied[-1])
+        return json.dumps({"exploratory_version": 1, "events": copied})
+
+    with pytest.raises(LogError, match="has its reason"):
+        ExploratoryLog.from_text(edited(lambda e: e.update(why=" ")), {SOURCE: text})
+    with pytest.raises(LogError, match="no candidate"):
+        ExploratoryLog.from_text(edited(lambda e: e.update(id="press-77")), {SOURCE: text})
+    with pytest.raises(LogError, match="no result"):
+        ExploratoryLog.from_text(
+            edited(lambda e: e.update(criterion="inside_window")), {SOURCE: text}
+        )
+    with pytest.raises(LogError, match="cannot be read"):
+        ExploratoryLog.from_text(edited(lambda e: e.update(on="9 August")), {SOURCE: text})

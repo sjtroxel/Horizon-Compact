@@ -1278,6 +1278,150 @@ def test_xlog_refuses_a_public_reason_that_identifies_and_writes_nothing(
     assert sorted(p.name for p in folder.iterdir()) == before
 
 
+def _amend(*words: str) -> list[str]:
+    return ["amend-public", *words, "--why", "a stand-in was written, not its text"]
+
+
+def test_log_amend_public_writes_the_next_version_and_marks_only_the_date(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    words = ["closure", "record", "closure-01", "first_disclosure", "fail", "--reason", "private"]
+    assert _log(*words, "--public-reason", "$S2PUB") == CLEAN_EXIT
+    recorded = (folder / "selection-log-2.json").read_bytes()
+    capsys.readouterr()
+    amend = _amend("closure-01", "first_disclosure", "--text", "an earlier public mention")
+    assert _log("closure", *amend, "--on", "2026-10-26") == CLEAN_EXIT
+    assert "wrote selection-log-3.json" in capsys.readouterr().out
+    assert (folder / "selection-log-2.json").read_bytes() == recorded
+    assert _log("closure", "public") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    row = next(r for r in json.loads(out)["closure"]["rows"] if r["id"] == "closure-01")
+    assert row["criteria"]["first_disclosure"] == {
+        "result": "fail",
+        "reason": "an earlier public mention",
+        "amended_on": "2026-10-26",
+    }
+    assert "$S2PUB" not in out and "stand-in" not in out
+    rows = json.loads((folder / "selection-log-3.json").read_text())["rows"]
+    saved = next(r for r in rows if r["id"] == "closure-01")["results"]["first_disclosure"]
+    assert saved["amendments"][0]["replaced"] == "$S2PUB"
+
+
+def test_log_amend_public_defaults_to_today(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _log_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    words = ["closure", "record", "closure-01", "first_disclosure", "fail", "--reason", "private"]
+    assert _log(*words, "--public-reason", "$S2PUB") == CLEAN_EXIT
+    asked = date.today()
+    amend = _amend("closure-01", "first_disclosure", "--text", "an earlier public mention")
+    assert _log("closure", *amend) == CLEAN_EXIT
+    capsys.readouterr()
+    assert _log("closure", "public") == CLEAN_EXIT
+    row = next(r for r in json.loads(capsys.readouterr().out)["closure"]["rows"])
+    assert row["criteria"]["first_disclosure"]["amended_on"] in {
+        asked.isoformat(),
+        date.today().isoformat(),
+    }
+
+
+def test_log_amend_public_refuses_what_the_log_refuses_and_text_that_identifies(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _log_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    words = ["closure", "record", "closure-01", "first_disclosure", "fail", "--reason", "private"]
+    assert _log(*words, "--public-reason", "an earlier public mention") == CLEAN_EXIT
+    capsys.readouterr()
+    before = sorted(p.name for p in folder.iterdir())
+    refused = [
+        _amend("closure-01", "first_disclosure", "--text", "an earlier public mention"),  # the same
+        _amend("closure-01", "public_and_filing", "--text", "text"),  # no result
+        _amend("closure-09", "first_disclosure", "--text", "text"),  # no such candidate
+        _amend("closure-01", "first_disclosure", "--text", "  "),
+        _amend("closure-01", "first_disclosure", "--text", "a Zarnothic report"),  # a guard term
+        _amend("closure-01", "first_disclosure", "--text", "Canary Cages said so"),  # the name
+        _amend("closure-01", "first_disclosure", "--text", "mentioned on 2026-07-02"),  # a date
+        ["amend-public", "closure-01", "first_disclosure", "--text", "text", "--why", "  "],
+    ]
+    for words in refused:
+        assert _log("closure", *words) == REFUSED_EXIT, words
+        err = capsys.readouterr().err
+        assert err.startswith("refused:") and "Canary" not in err and "Zarnothic" not in err
+    assert sorted(p.name for p in folder.iterdir()) == before
+    # a row of another type is refused as `record` refuses it
+    assert _log("ai", *_amend("closure-01", "first_disclosure", "--text", "text")) == REFUSED_EXIT
+    assert "not ai" in capsys.readouterr().err
+
+
+def test_log_amend_public_is_allowed_after_the_log_is_closed_and_record_is_not(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    capsys.readouterr()
+    exploratory = sorted(p.name for p in folder.glob("exploratory-*.json"))
+    words = ["closure", "record", "closure-01", "maps_to_shape", "pass", "--reason", "r"]
+    assert _log(*words) == REFUSED_EXIT
+    assert "is closed" in capsys.readouterr().err
+    amend = _amend("closure-01", "real_decision", "--text", "a real decision, by the letter")
+    assert _log("closure", *amend, "--on", "2026-10-26") == CLEAN_EXIT
+    assert "wrote selection-log-6.json" in capsys.readouterr().out
+    assert sorted(p.name for p in folder.glob("exploratory-*.json")) == exploratory
+
+
+def test_xlog_amend_public_writes_the_next_version_and_marks_only_the_date(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    words = ["record", "closure-01", "maps_to_shape", "pass", "--reason", "r", "--list", "retool"]
+    assert _xlog(*words, "--public-reason", "$S2PUB") == CLEAN_EXIT
+    capsys.readouterr()
+    selection = sorted(p.name for p in folder.glob("selection-*.json"))
+    amend = _amend("closure-01", "maps_to_shape", "--text", "an expansion of existing capacity")
+    assert _xlog(*amend, "--on", "2026-10-26") == CLEAN_EXIT
+    assert "wrote exploratory-log-3.json" in capsys.readouterr().out
+    assert _xlog("public") == CLEAN_EXIT
+    out = capsys.readouterr().out
+    row = next(r for r in json.loads(out)["rows"] if r["id"] == "closure-01")
+    assert row["criteria"]["maps_to_shape"] == {
+        "result": "pass",
+        "reason": "an expansion of existing capacity",
+        "amended_on": "2026-10-26",
+    }
+    assert "$S2PUB" not in out and "stand-in" not in out and row["case"] is False
+    assert sorted(p.name for p in folder.glob("selection-*.json")) == selection
+
+
+def test_xlog_amend_public_refuses_a_carried_criterion_and_what_the_log_refuses(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    _guard_terms(tmp_path, monkeypatch)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    capsys.readouterr()
+    before = sorted(p.name for p in folder.iterdir())
+    refused = [
+        _amend(
+            "closure-01", "real_decision", "--text", "text"
+        ),  # carried: amended in `hc case log`
+        _amend("closure-01", "maps_to_shape", "--text", "text"),  # no result yet
+        _amend("closure-09", "maps_to_shape", "--text", "text"),
+        _amend("closure-01", "real_decision", "--text", "a Zarnothic report"),
+    ]
+    for words in refused:
+        assert _xlog(*words) == REFUSED_EXIT, words
+        err = capsys.readouterr().err
+        assert err.startswith("refused:") and "Zarnothic" not in err
+    assert sorted(p.name for p in folder.iterdir()) == before
+
+
 def test_xlog_refuses_before_the_search_has_run(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

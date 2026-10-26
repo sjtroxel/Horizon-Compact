@@ -2081,7 +2081,8 @@ def _check_public_reason(text: str, details: dict[str, dict[str, Any]]) -> None:
 
 def cmd_case_log(args: argparse.Namespace) -> int:
     """The selection log from the terminal (search-half IMPLEMENTATION doc §4.3): `show` and `public` read the
-    newest version; `record` and `read` apply exactly one change and write the next, never an earlier one."""
+    newest version; `record`, `read` and `amend-public` apply exactly one change and write the next, never an
+    earlier one."""
     case = open_case("search")
     log = load_newest_log(case)
     if args.log_action == "show":
@@ -2091,7 +2092,8 @@ def cmd_case_log(args: argparse.Namespace) -> int:
         view = {args.type: log.public_view()[args.type]}
         print(json.dumps(view, indent=2, ensure_ascii=False))
         return CLEAN_EXIT
-    if exploratory_started(case):
+    # an amendment changes the public text only, so it is allowed after the log is closed (plan 14a.1)
+    if exploratory_started(case) and args.log_action != "amend-public":
         raise LogError(
             "the pre-registered selection log is closed (§4.6.5 A.1): no row of it is edited or "
             "written again; record exploratory results with `hc case xlog`"
@@ -2101,7 +2103,11 @@ def cmd_case_log(args: argparse.Namespace) -> int:
         raise LogError(f"no candidate {args.id!r} in the log")
     if row.type != args.type:
         raise LogError(f"{args.id} is a {row.type} candidate, not {args.type}")
-    if args.log_action == "record":
+    if args.log_action == "amend-public":
+        _check_public_reason(args.text, _log_candidates(case))
+        log.amend_public(args.id, args.criterion, args.text, args.on or date.today(), args.why)
+        what = f"public reason of {args.criterion} amended"
+    elif args.log_action == "record":
         if args.public_reason is not None:
             _check_public_reason(args.public_reason, _log_candidates(case))
         log.record(
@@ -2154,8 +2160,8 @@ def _xlog_show(case: CaseAppendix, log: ExploratoryLog) -> None:
 
 def cmd_case_xlog(args: argparse.Namespace) -> int:
     """The exploratory log (search-half doc §4.6.5, B) from the terminal: `show` and `public` read the newest
-    version; `carry`, `record`, `read` and `release-fill` apply exactly one change and write the next, never
-    an earlier one. The pre-registered selection log is only read, never written."""
+    version; `carry`, `record`, `read`, `amend-public` and `release-fill` apply exactly one change and write
+    the next, never an earlier one. The pre-registered selection log is only read, never written."""
     case = open_case("search")
     log = load_newest_exploratory(case)
     if args.xlog_action == "show":
@@ -2179,6 +2185,10 @@ def cmd_case_xlog(args: argparse.Namespace) -> int:
         name = newest_selection_log_name(case)
         log.carry(args.id, read_source_log(case, name), name)
         what = f"carried from {name}"
+    elif args.xlog_action == "amend-public":
+        _check_public_reason(args.text, _log_candidates(case))
+        log.amend_public(args.id, args.criterion, args.text, args.on or date.today(), args.why)
+        what = f"public reason of {args.criterion} amended"
     elif args.xlog_action == "record":
         if args.public_reason is not None:
             _check_public_reason(args.public_reason, _log_candidates(case))
@@ -3080,7 +3090,7 @@ def build_parser() -> argparse.ArgumentParser:
     log = case_actions.add_parser(
         "log",
         help="The selection log (protocol §12.4) in the appendix: show, record a criterion, record the "
-        "independent reader's read, or print the public view. Each change writes the next version.",
+        "independent reader's read, amend a public reason, or print the public view. Each change writes the next version.",
     )
     log.add_argument("type", choices=TYPES)
     log_actions = log.add_subparsers(dest="log_action", required=True)
@@ -3111,12 +3121,24 @@ def build_parser() -> argparse.ArgumentParser:
         "--resolution",
         help="required when the reader disputes the rejection: his reason, logged with it",
     )
+    amend = log_actions.add_parser(
+        "amend-public",
+        help="Replace the public reason of a criterion that has a result (plan 14a.1). Only the public text "
+        "changes; the old text, the date and why stay in the private log. Allowed after the log is closed.",
+    )
+    amend.add_argument("id", help="the candidate's neutral id, such as closure-01")
+    amend.add_argument("criterion", choices=CRITERIA)
+    amend.add_argument(
+        "--text", required=True, help="the new public reason; checked as a new one is"
+    )
+    amend.add_argument("--why", required=True, help="why it is amended, kept in the private log")
+    amend.add_argument("--on", type=date.fromisoformat, help="YYYY-MM-DD; default today")
 
     xlog = case_actions.add_parser(
         "xlog",
         help="The exploratory log (search-half doc §4.6.5) in the appendix, separate from the selection "
         "log: show, carry a pre-registered row, record a criterion, record the independent reader's read, "
-        "lift the hold on the fill, or print the public view. Each change writes the next version.",
+        "amend a public reason, lift the hold on the fill, or print the public view. Each change writes the next version.",
     )
     xlog_actions = xlog.add_subparsers(dest="xlog_action", required=True)
     xlog_actions.add_parser(
@@ -3161,6 +3183,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     xrelease.add_argument("--on", type=date.fromisoformat, required=True, help="YYYY-MM-DD")
     xrelease.add_argument("--reason", required=True, help="his reason, kept in the log")
+    xamend = xlog_actions.add_parser(
+        "amend-public",
+        help="Replace the public reason of a criterion that has a result (plan 14a.1). Only the public text "
+        "changes; the old text, the date and why stay in the private log. Refused on a carried row's carried "
+        "criteria: amend those with `hc case log`.",
+    )
+    xamend.add_argument("id", help="the candidate's neutral id, such as closure-04")
+    xamend.add_argument("criterion", choices=(*CRITERIA[:5], KNOWLEDGE, CRITERIA[5]))
+    xamend.add_argument(
+        "--text", required=True, help="the new public reason; checked as a new one is"
+    )
+    xamend.add_argument("--why", required=True, help="why it is amended, kept in the private log")
+    xamend.add_argument("--on", type=date.fromisoformat, help="YYYY-MM-DD; default today")
     xread = xlog_actions.add_parser("read", help="The independent reader's read of a rejection")
     xread.add_argument("id", help="the candidate's neutral id, such as closure-04")
     xread.add_argument("criterion", choices=POOL_READ_REQUIRED)

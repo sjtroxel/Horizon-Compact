@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Callable
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
@@ -884,6 +885,115 @@ def test_the_log_round_trips_through_its_text() -> None:
         SelectionLog.from_text("{")
     with pytest.raises(LogError):
         SelectionLog.from_text(json.dumps({"log_version": 99, "rows": []}))
+
+
+AMENDED = date(2026, 10, 26)
+
+
+def logged_with_a_public_reason() -> SelectionLog:
+    """closure-01 rejected on real_decision and read, with a stand-in public reason; closure-02 untouched."""
+    log = log_of("closure-01", "closure-02")
+    log.record("closure-01", "first_disclosure", "pass", "first said here", disclosed=D)
+    for criterion in CRITERIA[1:3]:
+        log.record("closure-01", criterion, "pass", f"{criterion} ok")
+    log.record("closure-01", "real_decision", "fail", "private words", public_reason="$VARIABLE")
+    log.record_read("closure-01", "real_decision", reply=AGREED)
+    return log
+
+
+def test_an_amended_public_reason_changes_the_public_text_and_nothing_else() -> None:
+    log = logged_with_a_public_reason()
+    row = log.rows["closure-01"]
+    before = (row.results["real_decision"].result, row.results["real_decision"].reason)
+    reads, chosen, failed = dict(row.reads), log.selection("closure"), row.failed
+    log.amend_public(
+        "closure-01", "real_decision", "the plant's closure was not a real decision", AMENDED, "why"
+    )
+    after = (row.results["real_decision"].result, row.results["real_decision"].reason)
+    assert after == before and row.reads == reads and row.failed == failed
+    assert log.selection("closure") == chosen
+    criteria = {r["id"]: r for r in log.public_view()["closure"]["rows"]}["closure-01"]["criteria"]
+    assert criteria["real_decision"] == {
+        "result": "fail",
+        "reason": "the plant's closure was not a real decision",
+        "amended_on": "2026-10-26",
+    }
+    assert "amended_on" not in criteria["inside_window"]
+    public = json.dumps(log.public_view())
+    assert "$VARIABLE" not in public and "why" not in public and "private words" not in public
+
+
+def test_the_replaced_text_the_date_and_why_survive_a_save_and_a_reload() -> None:
+    log = logged_with_a_public_reason()
+    log.amend_public("closure-01", "real_decision", "first wording", AMENDED, "a variable name")
+    log.amend_public("closure-01", "real_decision", "second wording", date(2026, 10, 27), "tidier")
+    again = SelectionLog.from_text(log.to_text())
+    assert again.to_text() == log.to_text()
+    result = again.rows["closure-01"].results["real_decision"]
+    assert result.public_reason == "second wording" and result.amended_on == "2026-10-27"
+    assert [(a["replaced"], a["on"], a["why"]) for a in result.amendments] == [
+        ("$VARIABLE", "2026-10-26", "a variable name"),
+        ("first wording", "2026-10-27", "tidier"),
+    ]
+    assert again.public_view() == log.public_view()
+    assert again.selection("closure") == log.selection("closure")
+
+
+def test_a_log_saved_before_amendments_existed_still_reads_and_is_saved_as_it_was() -> None:
+    log = logged_with_a_public_reason()
+    text = log.to_text()
+    assert "amendments" not in text and "log_version" in text
+    again = SelectionLog.from_text(text)
+    assert again.to_text() == text
+    assert again.rows["closure-01"].results["real_decision"].amendments == []
+    assert "amended_on" not in json.dumps(again.public_view())
+
+
+def test_an_amendment_needs_a_result_a_text_a_reason_and_a_change() -> None:
+    log = logged_with_a_public_reason()
+    before = log.to_text()
+    refused = [
+        ("closure-09", "real_decision", "text", "why", "no candidate"),
+        ("closure-02", "real_decision", "text", "why", "no result"),
+        ("closure-01", "maps_to_shape", "text", "why", "no result"),
+        ("closure-01", "real_decision", "  ", "why", "not blank"),
+        ("closure-01", "real_decision", "text", "  ", "has its reason"),
+        ("closure-01", "real_decision", "$VARIABLE", "why", "the same"),
+    ]
+    for candidate, criterion, text, why, message in refused:
+        with pytest.raises(LogError, match=message):
+            log.amend_public(candidate, criterion, text, AMENDED, why)
+    assert log.to_text() == before
+
+
+def test_a_result_with_no_public_reason_can_be_given_one() -> None:
+    log = log_of("closure-01")
+    log.record("closure-01", "first_disclosure", "fail", "private words")
+    log.amend_public("closure-01", "first_disclosure", "an earlier public mention", AMENDED, "why")
+    again = SelectionLog.from_text(log.to_text())
+    assert again.rows["closure-01"].results["first_disclosure"].amendments[0]["replaced"] is None
+    assert again.public_view() == log.public_view()
+
+
+def test_a_hand_edited_amendment_is_refused() -> None:
+    log = logged_with_a_public_reason()
+    log.amend_public("closure-01", "real_decision", "first wording", AMENDED, "why")
+    log.amend_public("closure-01", "real_decision", "second wording", AMENDED, "why")
+    saved = json.loads(log.to_text())
+
+    def edited(change: Callable[[dict[str, Any]], object]) -> str:
+        copied = json.loads(json.dumps(saved))
+        change(copied["rows"][0]["results"]["real_decision"])
+        return json.dumps(copied)
+
+    with pytest.raises(LogError, match="text it never had"):
+        SelectionLog.from_text(edited(lambda r: r["amendments"][1].update(replaced="other")))
+    with pytest.raises(LogError, match="not the amended one"):
+        SelectionLog.from_text(edited(lambda r: r.update(public_reason="something else")))
+    with pytest.raises(LogError, match="has its reason"):
+        SelectionLog.from_text(edited(lambda r: r["amendments"][0].update(why=" ")))
+    with pytest.raises(LogError, match="cannot be read"):
+        SelectionLog.from_text(edited(lambda r: r["amendments"][0].update(on="26 October")))
 
 
 def test_a_hand_edited_log_cannot_step_around_the_rules() -> None:

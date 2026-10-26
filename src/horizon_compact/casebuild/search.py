@@ -554,6 +554,33 @@ class Result:
     disclosed: str | None = (
         None  # ISO date of first public disclosure; on a passed first_disclosure only
     )
+    # Each change of ``public_reason`` after it was recorded, oldest first: the text it replaced, the new
+    # text, the date and why. Private; the public view carries the date of the last only.
+    amendments: list[dict[str, Any]] = field(default_factory=list)
+
+    def amend_public(self, public_reason: str, on: date, why: str) -> None:
+        """Replace the public text and nothing else, keeping the text replaced, the date and why. Refuses
+        empty text or why, and text identical to the current; changes nothing when it refuses."""
+        if not public_reason.strip():
+            raise LogError("an amended public reason is not blank")
+        if not why.strip():
+            raise LogError("an amendment has its reason")
+        if public_reason == self.public_reason:
+            raise LogError("the amended public reason is the same as the current one")
+        self.amendments.append(
+            {
+                "replaced": self.public_reason,
+                "public_reason": public_reason,
+                "on": on.isoformat(),
+                "why": why,
+            }
+        )
+        self.public_reason = public_reason
+
+    @property
+    def amended_on(self) -> str | None:
+        """The date of the last amendment, which the public view shows in place of its history."""
+        return self.amendments[-1]["on"] if self.amendments else None
 
 
 READINGS = ("pass", "fail", "cannot_tell")
@@ -789,6 +816,17 @@ class SelectionLog:
             agrees, resolution, reply.reply, reply.reply_sha256, reply.reading, reply.type
         )
 
+    def amend_public(
+        self, candidate_id: str, criterion: str, public_reason: str, on: date, why: str
+    ) -> None:
+        """Replace the public reason of a criterion that has a result (see ``Result.amend_public``). The
+        result, the private reason, the reads and the selection are not touched. Saved with the rows, and
+        re-applied by ``from_text``."""
+        result = self._row(candidate_id).results.get(criterion)
+        if result is None:
+            raise LogError(f"{candidate_id} has no result for {criterion}")
+        result.amend_public(public_reason, on, why)
+
     def selection(self, case_type: str) -> Selection:
         """The first k that passed, in order of first disclosure (ties by id), window first. A candidate
         whose first-disclosure check is not done has no place in the order yet, and an unfinished one ahead
@@ -854,7 +892,7 @@ class SelectionLog:
                 "type": r.type,
                 "pool": r.pool,
                 "accession": r.accession,
-                "results": {c: vars(r.results[c]) for c in CRITERIA if c in r.results},
+                "results": {c: _saved_result(r.results[c]) for c in CRITERIA if c in r.results},
                 "reads": {c: vars(read) for c, read in r.reads.items()},
             }
             for r in self.rows.values()
@@ -880,15 +918,22 @@ class SelectionLog:
                 for r in (r for r in saved if r["pool"] == pool):
                     reads = dict(r["reads"])
                     for criterion, v in r["results"].items():
+                        amendments = list(v.get("amendments", []))
                         log.record(
                             r["id"],
                             criterion,
                             v["result"],
                             v["reason"],
-                            public_reason=v.get("public_reason"),
+                            # recorded with the text it first had, then amended in order
+                            public_reason=amendments[0]["replaced"]
+                            if amendments
+                            else v.get("public_reason"),
                             disclosed=date.fromisoformat(v["disclosed"])
                             if v.get("disclosed")
                             else None,
+                        )
+                        _replay_amendments(
+                            log, r["id"], criterion, amendments, v.get("public_reason")
                         )
                         # a disputed rejection lets the next result follow, so its read is applied now
                         if criterion in reads:
@@ -911,8 +956,9 @@ class SelectionLog:
             raise LogError(f"the selection log cannot be read: {type(exc).__name__}") from exc
 
     def public_view(self) -> dict[str, Any]:
-        """By case type, with no name, accession number, date or industry code. A row is its neutral number,
-        its pool and each criterion's result; a reason appears only where a ``public_reason`` was written."""
+        """By case type, with no name, accession number, date or industry code; the one date is an amended
+        criterion's ``amended_on``, the day the project changed its text. A row is its neutral number, its
+        pool and each criterion's result; a reason appears only where a ``public_reason`` was written."""
         view: dict[str, Any] = {}
         for case_type in TYPES:
             chosen = self.selection(case_type)
@@ -936,6 +982,7 @@ class SelectionLog:
                                 "result": r.results[c].result,
                                 "reason": r.results[c].public_reason,
                                 **({"disputed": True} if r.disputed(c) else {}),
+                                **amended_mark(r.results[c]),
                             }
                             for c in CRITERIA
                             if c in r.results
@@ -948,6 +995,46 @@ class SelectionLog:
                 ],
             }
         return view
+
+
+def _saved_result(result: Result) -> dict[str, Any]:
+    """A result as saved: ``public_reason`` is the current text, and ``amendments`` appears only on a result
+    that has some, so a log with none is saved as it always was."""
+    saved = dict(vars(result))
+    if not saved["amendments"]:
+        del saved["amendments"]
+    return saved
+
+
+def _replay_amendments(
+    log: SelectionLog,
+    candidate_id: str,
+    criterion: str,
+    amendments: Sequence[dict[str, Any]],
+    current: str | None,
+) -> None:
+    """Re-apply a saved result's amendments through ``amend_public``. Each must replace the text the one
+    before left, and the last must leave the saved ``public_reason``: a hand edit of either is refused."""
+    result = log.rows[candidate_id].results[criterion]
+    for saved in amendments:
+        if saved["replaced"] != result.public_reason:
+            raise LogError(f"{candidate_id}'s {criterion}: an amendment replaces text it never had")
+        log.amend_public(
+            candidate_id,
+            criterion,
+            saved["public_reason"],
+            date.fromisoformat(saved["on"]),
+            saved["why"],
+        )
+    if amendments and result.public_reason != current:
+        raise LogError(
+            f"{candidate_id}'s {criterion}: the saved public reason is not the amended one"
+        )
+
+
+def amended_mark(result: Result) -> dict[str, str]:
+    """What the public view says of an amendment: its date, and nothing of the old text or why."""
+    return {"amended_on": result.amended_on} if result.amended_on else {}
 
 
 def _saved_reply(read: dict[str, Any], row_type: str) -> ReaderReply:

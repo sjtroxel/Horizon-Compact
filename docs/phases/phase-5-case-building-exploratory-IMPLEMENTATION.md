@@ -196,6 +196,34 @@ case is swapped by hand: replacement follows the protocol.
 
 **Decided 2026-10-26, about 1:41 PM (his): 1(a), 2(a).**
 
+**14a.1. Amending a public reason (added 2026-10-26, about 4:15 PM, after the first freeze run).** The first run
+(about 4:09 PM) passed every check and wrote the three files; Opus's full read of them (14e) found two things, and
+the files were left uncommitted:
+- **80 public reasons are shell variable names, not text** (exploratory log, rows pre-73 to pre-172: `"$S2PUB"` 51,
+  `"$MULTIPUB"` 10, `$CONTRACT` 7, `$LINEBEFORE` 5, `"$NONEPUB"` 3, `$PRIORYEAR` 3, `"$CUTPUB"` 1). Batches 3a
+  and 3b (`scratch/xlog-batch3a.sh`, `3b.sh`) passed them inside single quotes, so the shell never expanded them.
+  Each variable has one definition in those scripts, so the intended text is known exactly. Not a privacy problem;
+  a defect in the public record.
+- **Two public reasons are specific enough to search for** (rule zero, the description the guard cannot catch):
+  closure-28's `real_decision` (pre-registered log), which names a loss of two leased aircraft, and pre-43's
+  `real_decision` (exploratory log), which names the products a new law will prohibit.
+
+Neither log can change a public reason, so this adds that one change. **Rules:** it replaces only the public text
+of a criterion that already has a result; the result, the private reason, any read and the selection are
+untouched; each amendment keeps the text it replaced, its date and why, so the history stays in the private log;
+the public view shows the current text and marks the criterion amended with its date only. The exploratory log
+takes it as a new event; it refuses on a carried row's carried criteria (those are the pre-registered log's, and
+are amended there). The pre-registered log is stored as rows, not events, so it keeps its amendments in the saved
+file and re-applies them on reading; a file saved before this change still reads. `casebuild/` is not in
+`prereg.lock`, so the gate's hashes are untouched; the pre-registered log gaining an amendment is presentation only
+and is reported so (dated note in the search-half doc at 14d). **Then (Opus with him):** a generated script
+applies the 80 from the scripts' own definitions and the two rewordings (his), each log gets one new version, the
+three uncommitted files are deleted, and `hc case freeze` runs again; the as-built note records that the first run's
+files were never committed.
+
+**Decided 2026-10-26, about 4:12 PM (his), all as recommended:** (1) fix the 80 by amendment, not a mapping note;
+(2) reword closure-28; (3) reword pre-43; (4) Sonnet builds, Opus reviews.
+
 ## 4. Money
 
 | Pot | What draws on it | Expected, from here to the end of Phase 5.5 |
@@ -1031,3 +1059,37 @@ the code writes under `<role>/<experiment>/`, and the probes and content under `
 list). One fix: the stored-content read was outside any S3 error handling, so an expired login gave a traceback
 instead of a refusal; it is now a reason like the others, with a test (44 tests; `make check` green, 2836). Not built, and not in 14a or
 14b: 14c's totals by pot, which §3.1 says "the command prints"; done at 14c instead.
+
+**Stage 5 step 14a.1: amending a public reason (2026-10-26, Sonnet built; Opus to review).** `Result.amend_public`
+(`casebuild/search.py`) replaces only `public_reason` and appends `{replaced, public_reason, on, why}` to
+`Result.amendments`; it refuses empty text or why and text identical to the current, and changes nothing when it
+refuses. `SelectionLog.amend_public` and `ExploratoryLog.amend_public` (a new `amended` event, replayed by `_take`)
+add the row and criterion lookups; the exploratory one also refuses a carried row's `CARRIED` criteria. Both public
+views add `"amended_on": <date of the last amendment>` to an amended criterion and nothing else.
+`hc case log <type> amend-public <id> <criterion> --text --why [--on]` and `hc case xlog amend-public ...` apply one
+amendment and write the next version; the new text goes through `_check_public_reason` as a new one does (name
+guard, candidate names, dates; fails closed). `hc case log amend-public` is allowed after the exploratory log has
+started (it changes presentation only); `record` and `read` there are still refused.
+- **Saved format.** The selection log is stored as rows, so a result saves `public_reason` as the current text and
+  an `amendments` list **only when it has some**; a file with none is saved byte-for-byte as before, and an old file
+  reads. `LOG_VERSION` is unchanged. On reading, the result is recorded with the first amendment's `replaced` text and
+  the amendments are re-applied in order through `amend_public`; an amendment that replaces text the one before did
+  not leave, or a saved `public_reason` that is not the last amendment's, is refused as a hand edit.
+- **Allowed beyond the plan's wording:** an amendment may give a public reason to a criterion that has a result but
+  none yet (`replaced` is then null). The plan lists no refusal for it.
+- **A carried criterion in the exploratory view** shows `amended_on` if the pre-registered log it was carried from,
+  at the pinned file, had the amendment; a carry pins one `selection-log-<n>.json` by sha256, so an amendment made in
+  a later selection-log version does **not** reach a carried row's view in the exploratory public file. It reaches
+  `selection-public.json`, which the freeze writes from the newest selection log. Whether any selected case
+  is a carried row whose carried public reason needs amending is for the review; closure-28 is not in the
+  exploratory public file.
+- **Not done, as scoped:** no amendment applied to either real log; `hc case freeze` not run; the three uncommitted
+  files in `docs/phases/evidence/phase-5/` untouched. 19 tests (6 selection log, 7 exploratory log, 6 command),
+  fictional rows only; `make check` green, 2855.
+- **Opus review (2026-10-26, about 5:30 PM): no defect; one fix to the docs in the code.** The two public views'
+  docstrings said they carry no date; they now name `amended_on` as the one date (the day the project changed
+  the text, not a date of the company's), and `cmd_case_log`'s docstring names `amend-public`. Checked on the
+  real logs, read-only: the newest selection log loads and saves byte-for-byte; the exploratory log loads with
+  the same five cases; the 80 shell-variable reasons are all on the exploratory log's own rows, none carried, so
+  the carried-row limit above does not touch this fix; closure-28 is not carried. The allowance beyond the plan
+  (a public reason given where none was) is kept: it passes the same check as any public reason.
