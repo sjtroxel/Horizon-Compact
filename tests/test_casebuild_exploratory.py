@@ -541,6 +541,49 @@ def test_step_5s_search_is_recorded_once_and_brings_no_row_after_it() -> None:
         ExploratoryLog.from_text(json.dumps({"exploratory_version": 1, "events": early}))
 
 
+def test_lifting_the_hold_fills_the_pending_rows_without_step_5() -> None:
+    """His decision, 2026-10-26: the hold of 2026-10-25 is lifted, so D.3's fill runs now, in D.1's order."""
+    rows = ["closure-01", "closure-02", "pre-01", "pre-02", "pre-03"]
+    log = a_log(
+        window("closure-01"),
+        window("closure-02"),
+        *[(r, "closure", "4", "pre") for r in rows[2:]],
+    )
+    for n, row_id in enumerate(rows, start=1):
+        take(log, row_id, n)
+    assert log.selection().pending == ("pre-01", "pre-02", "pre-03")
+    log.release_fill(date(2026, 10, 26), "the fill is not held for step 5")
+    chosen = log.selection()
+    assert chosen.cases == tuple(rows) and chosen.filled == ("pre-01", "pre-02", "pre-03")
+    assert chosen.pending == () and chosen.complete and chosen.shortfall == 0
+    # still reported: the shortfall of own cases
+    assert chosen.short_types == {"retool": 2, "ai": 1}
+    assert log.public_view()["fill_released"] and not log.step5_searched
+    again = ExploratoryLog.from_text(log.to_text())  # a saved log replays the release
+    assert again.fill_released and again.selection() == chosen
+
+
+def test_the_hold_is_lifted_once_with_a_reason_and_step_5_does_not_run_after() -> None:
+    log = a_log(window("closure-01"))
+    with pytest.raises(LogError, match="has its reason"):
+        log.release_fill(date(2026, 10, 26), "  ")
+    log.release_fill(date(2026, 10, 26), "his reason")
+    with pytest.raises(LogError, match="already lifted"):
+        log.release_fill(date(2026, 10, 27), "again")
+    with pytest.raises(LogError, match="step 5 does not run"):
+        log.mark_searched()
+    with pytest.raises(LogError, match="step 5 does not run"):
+        log.add("late-01", "closure", "5", "late", "0009999999-26-000099")
+    searched = a_log(window("closure-01"))
+    searched.mark_searched()
+    with pytest.raises(LogError, match="no hold to lift"):
+        searched.release_fill(date(2026, 10, 26), "his reason")
+    events = json.loads(log.to_text())["events"]
+    bad = [*events[:1], {"event": "released", "on": "26 October", "reason": "r"}]
+    with pytest.raises(LogError, match="cannot be read"):
+        ExploratoryLog.from_text(json.dumps({"exploratory_version": 1, "events": bad}))
+
+
 # --- reads --------------------------------------------------------------------------------------------
 
 

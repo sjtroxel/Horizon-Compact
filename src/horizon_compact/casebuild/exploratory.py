@@ -18,6 +18,8 @@ checking after the fifth (D.5), and, for the pool of steps 3 and 4, a ``not_know
 The fill is held until step 5's search has been recorded (his decision, 2026-10-25, dated note under D.3): a
 type is short only when no step left can give it a row. Until then a passed row that no type's own slots
 took is ``pending``, not a case, and the selection is not complete while a short type's slots are open.
+His decision of 2026-10-26 (second dated note under D.3) lifts the hold: a ``released`` event, with its date
+and his reason, lets the fill run without step 5, and step 5 then brings no row and is never recorded as run.
 """
 
 from __future__ import annotations
@@ -138,6 +140,12 @@ class ExploratoryLog:
     events: list[dict[str, Any]] = field(default_factory=list)
     # step 5's search is recorded: no step can give a short type a row now
     step5_searched: bool = False
+    # the hold on the fill is lifted (his decision, 2026-10-26): the fill runs without step 5
+    fill_released: bool = False
+
+    @property
+    def fill_open(self) -> bool:
+        return self.step5_searched or self.fill_released
 
     # --- the order -----------------------------------------------------------------------------------------
 
@@ -196,7 +204,7 @@ class ExploratoryLog:
             waiting.append(
                 "a short type's slots go to the next candidates, and a type is still open"
             )
-        elif slots and not self.step5_searched:
+        elif slots and not self.fill_open:
             waiting.append(HELD_FILL)
         elif slots:
             for row in ordered:
@@ -210,7 +218,7 @@ class ExploratoryLog:
                     if len(filled) == slots:
                         break
         chosen = taken | set(filled)
-        held_fill = bool(slots) and (bool(held) or not self.step5_searched)
+        held_fill = bool(slots) and (bool(held) or not self.fill_open)
         pending = tuple(
             r.id for r in ordered if held_fill and r.finished and r.passed and r.id not in chosen
         )
@@ -268,6 +276,12 @@ class ExploratoryLog:
         """Step 5's search has run, with rows or none: no step is left to give a short type a row, so the fill
         (D.3) may run. Recorded once, and after every row the search brings in has been added."""
         self._take({"event": "searched", "step": "5"})
+
+    def release_fill(self, on: date, reason: str) -> None:
+        """His decision, 2026-10-26: the hold on the fill is lifted, so a short type's slots go to the pending
+        rows now (D.3 as written) and step 5 does not run. Recorded once, with its date and his reason, and
+        never after step 5's search, when the fill runs anyway."""
+        self._take({"event": "released", "on": on.isoformat(), "reason": reason})
 
     def record(
         self,
@@ -342,6 +356,8 @@ class ExploratoryLog:
             self._apply_read(event)
         elif kind == "searched":
             self._apply_searched(event)
+        elif kind == "released":
+            self._apply_released(event)
         else:
             raise LogError(f"{kind!r} is not an event of the exploratory log")
 
@@ -352,7 +368,21 @@ class ExploratoryLog:
             )
         if self.step5_searched:
             raise LogError("step 5's search is already recorded")
+        if self.fill_released:
+            raise LogError("the hold on the fill is lifted: step 5 does not run")
         self.step5_searched = True
+
+    def _apply_released(self, event: dict[str, Any]) -> None:
+        date.fromisoformat(event["on"])
+        if not str(event["reason"]).strip():
+            raise LogError("lifting the hold on the fill has its reason")
+        if self.fill_released:
+            raise LogError("the hold on the fill is already lifted")
+        if self.step5_searched:
+            raise LogError(
+                "step 5's search is recorded: the fill runs, and there is no hold to lift"
+            )
+        self.fill_released = True
 
     def _apply_add(self, event: dict[str, Any]) -> None:
         row_id, case_type, step = str(event["id"]), event["type"], event["step"]
@@ -364,6 +394,8 @@ class ExploratoryLog:
             raise LogError(f"step {step!r} with pool {event['pool']!r} is not one of §4.6.5's")
         if step == "5" and self.step5_searched:
             raise LogError(f"{row_id}: step 5's search is recorded, so it brings no row after that")
+        if step == "5" and self.fill_released:
+            raise LogError(f"{row_id}: the hold on the fill is lifted, so step 5 does not run")
         if not str(event["accession"]).strip():
             raise LogError("a candidate has its accession number")
         self.rows[row_id] = ExploratoryRow(
@@ -538,6 +570,7 @@ class ExploratoryLog:
             "cases": list(chosen.cases),
             "filled": list(chosen.filled),
             "pending": list(chosen.pending),
+            "fill_released": self.fill_released,
             "complete": chosen.complete,
             "shortfall": chosen.shortfall,
             "short_types": dict(chosen.short_types),

@@ -17,8 +17,8 @@
 |---|---|---|---|---|---|
 | **1. The code** | 1-6 | the exploratory log and its command, the S3 case form, the brief, the new channel | Sonnet builds, Opus reviews; his commit | no | **done 2026-10-20** |
 | **2. Step 2's rows** | 7-9 | the ten pre-registered S3 rows re-read; the new channel run and checked; a count | Opus with him | a few cents (rejection reads) | **done 2026-10-21: 2 rows pass** |
-| **3. Each passing row to a case** | 10 | build, scenario, rubric, lock, probe, as every case | Opus with him | yes, about 10 cents a read: **the one top-up comes due here** | not started |
-| **4. The reserve** | 11-13 | the pre-cut-off pool and the knowledge probe; the pool extended; a second search on 2027-01-04 | as stage 1, then 2 and 3 | cents | **opened 2026-10-21** (decision 2(a)): step 3 first |
+| **3. Each passing row to a case** | 10 | build, scenario, rubric, lock, probe, as every case | Opus with him | yes, about 10 cents a read: **the one top-up comes due here** | **done 2026-10-25**: closure-07, closure-19, pre-11, pre-25 and pre-224 built and probed |
+| **4. The reserve** | 11-13 | the pre-cut-off pool and the knowledge probe; the pool extended; a second search on 2027-01-04 | as stage 1, then 2 and 3 | cents | **done 2026-10-26**: steps 3 and 4 finished; **step 13 dropped** (the hold lifted, his decision 2026-10-26) |
 | **5. The freeze** | 14 | the cases frozen with their labels | Opus with him; his commit | no | not started |
 
 **Where to look:** this doc is the plan, and each step gets a `[done]` marker and an as-built note (§9) as it is
@@ -122,6 +122,9 @@ push, then step 10.
     then stages 2 and 3 for its rows.
 12. **Step 4:** the same search over 2024-07-01 to 2025-06-30.
 13. **Step 5:** on 2027-01-04, the three channels of §12.3 and the press channel over 2026-10-16 to 2027-01-03.
+    **[dropped 2026-10-26]** His decision, after step 4 was finished: the hold on the fill is lifted (the search-half
+    doc's second dated note under §4.6.5 D.3), the fill ran at step 4's end, and five cases are selected, so D.5 stops
+    the checking and step 5 does not run. Not built.
 
 ### Stage 5: the freeze
 
@@ -907,3 +910,27 @@ call failed at the API, OpenRouter 429, and was made again). Excerpts carry what
 pre-325). **Method:** the total search uses the action's own words, as batch 4a's did; a first draft added the bare
 word "restructuring" to every search, which pulled whole annual-report sections into the reads (estimated $3.10), and
 was cut before any read. No retool or ai row passes; the case set is unchanged.
+
+**Stage 4 step 4: batch 4c, pool rows pre-339 to pre-420 (2026-10-26, Opus with him).** Eighty-two rows, checked as
+batch 4b's were (`scratch/xlog-batch4c*.sh`), the last of step 4. **10 fail criterion 1:** cost lines, updates or
+descriptions of closures stated before the pool (7), a balance-sheet provision line, contract wording, and one decision
+with an earlier public notice dated before the pool. **2 fail criterion 2** (pre-356 and pre-405: covers listing no
+US exchange). **pre-358 fails criterion 3:** its excerpt states a dissolution after "no viable strategic alternatives",
+as at pre-300. **69 fail criterion 4, none passes:** 56 S2 with no stated fall in operating income, among them pre-406,
+the batch's one ai lead, read as S2 by the pre-66 precedent (his call; it states no S1 number either, so it fails under
+either reading); 5 name more than one facility; 6 single-facility S3 rows with no headcount at the decision (3 with no
+source stating one, 2 whose only number is of people cut or affected, and pre-404, whose only number is from four
+years earlier: failed by the letter, his call); 2 match no shape. 70 reads, all "agree" (about $1.41). **pre-358's read
+was refused once before any call** (no excerpt: excerpts were placed only for the criterion 4 rows, the pre-229 miss
+again), its excerpt then placed and read (`4c3`). No retool or ai row passes in step 4. **All of step 4 is finished.**
+
+**The hold lifted (his decision, 2026-10-26; the search-half doc's second dated note under §4.6.5 D.3).** The log has
+a new event, `released` (its date and his reason, once; refused after step 5's search, and step 5's search and rows
+are refused after it), written by `ExploratoryLog.release_fill()` through `hc case xlog release-fill --on --reason`;
+`ExploratoryLog.fill_open` (step 5 searched, or the hold lifted) replaces `step5_searched` in the selection; the
+public view carries `fill_released`; step 4's opening (D.6) is refused once it is recorded. Recorded on the live log
+(`exploratory-log-2144`, `scratch/xlog-release-fill.sh`): **the selection is complete with five cases, all closures:
+closure-07, closure-19, pre-11, pre-25 and pre-224**, the last three filling the short slots (retool 2, ai 1) in D.1's
+order; nothing waiting, `problems()` empty. Retool and ai are reported as shortfalls of own cases, and §12.1's "at
+least one invest or retool" as not held. Decided after every step 4 row was seen, so it is reported as a change made
+with its effect known.

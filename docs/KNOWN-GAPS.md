@@ -7,7 +7,27 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-25, about 7:10 PM (BATCH 4b FINISHED; BATCH 4c NEXT)
+> ## START HERE — where things stand, 2026-10-26, about 1:00 PM (STEP 4 FINISHED; THE HOLD LIFTED; FIVE CASES)
+>
+> **Measured:** last commit `phase 5: batch 4b finished, pre-224 passed all` (`242ac1c`); this block's commit carries
+> batch 4c and the release. **Batch 4c, pre-339 to pre-420 (82 rows), is finished** (scripts `scratch/xlog-batch4c.sh`,
+> `4c2`, `4c3`): 10 fail criterion 1, 2 criterion 2, 1 criterion 3 (pre-358), 69 criterion 4; **none passes**, and the
+> one ai lead (pre-406) fails on the total under either reading. 70 reads, all "agree" (about $1.41); pre-358's read
+> was refused once for a missing excerpt (placed only for criterion 4 rows, the pre-229 miss again) and then made.
+> **All of step 4 is finished; no retool or ai row passed in steps 3 or 4.** **His decision, 2026-10-26, about 9:29
+> AM: the hold of 2026-10-25 is lifted** (he had misunderstood it and does not want the wait to 2027-01-04; decided
+> after step 4 was seen, and recorded so: search-half doc §4.6.5 D.3, second dated note). Built: the log's `released`
+> event and `hc case xlog release-fill` (Opus; tests added), recorded on the live log (`exploratory-log-2144`).
+> **The selection is complete: five cases, all closure: closure-07, closure-19, pre-11, pre-25, pre-224**, the last
+> three filling the short retool and ai slots in D.1's order; `problems()` empty. Retool (2) and ai (1) are reported as
+> shortfalls of own cases; §12.1's "at least one invest or retool" as not held. **Step 5 (step 13) is dropped.**
+> **Next:** his commit; then stage 5, the freeze (exploratory plan step 14: the freeze commit lists every case with its
+> step and label, the measured cost against §4, the DoD audit of §7). OpenRouter about $3.65 by estimate (about $5.10
+> less this batch's reads); check the dashboard. Open, his: as below.
+>
+> *The 7:10 PM block of 2026-10-25 below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-25, about 7:10 PM (BATCH 4b FINISHED; BATCH 4c NEXT)
 >
 > **Measured:** last commit `phase 5: batch 4a finished, pre-224 locked` (`6e3dc92`); this block's commit carries
 > batch 4b and the pre-224 pass (the 4:50 PM block below). **Batch 4b, pre-256 to pre-338 (83 rows), is finished**
@@ -2177,7 +2197,13 @@ closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-
 
 ---
 
-## OPEN 2026-10-25 — pre-11 and pre-25 passed every criterion and are pending: they fill a short slot only after step 5's search (his decision, search-half doc §4.6.5 D.3, dated note)
+## CLOSED 2026-10-26, his decision, the hold lifted (was OPEN 2026-10-25) — pre-11 and pre-25 passed every criterion and are pending: they fill a short slot only after step 5's search (his decision, search-half doc §4.6.5 D.3, dated note)
+
+**Closed 2026-10-26 (his, after every step 4 row was finished and seen):** the hold is lifted (search-half doc §4.6.5
+D.3, second dated note; `hc case xlog release-fill`, recorded in `exploratory-log-2144`). He had misunderstood the hold
+and does not want the wait to 2027-01-04. The fill ran at step 4's end: pre-11, pre-25 and pre-224 take the short
+slots, the selection is complete with five closure cases, retool and ai are reported short, and step 5 does not run.
+The record of 2026-10-25 below is kept as it was.
 
 **pre-11 and pre-25 have passed all** (every criterion, the probes included; START HERE of 2026-10-24 and the plan
 §9). They are **not cases yet.** His decision, 2026-10-25, before any step 4 row was seen: retool and ai

@@ -1176,6 +1176,24 @@ def test_xlog_refuses_what_the_log_refuses_and_writes_nothing(
     assert sorted(p.name for p in folder.iterdir()) == before
 
 
+def test_xlog_release_fill_writes_the_next_version_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _xlog_setup(tmp_path, monkeypatch, capsys)
+    assert _xlog("carry", "closure-01") == CLEAN_EXIT
+    capsys.readouterr()
+    words = ["release-fill", "--on", "2026-10-26", "--reason", "not held for step 5"]
+    assert _xlog(*words) == CLEAN_EXIT
+    assert "the hold on the fill is lifted (2026-10-26); wrote exploratory-log-2.json" in (
+        capsys.readouterr().out
+    )
+    assert _xlog("public") == CLEAN_EXIT
+    assert json.loads(capsys.readouterr().out)["fill_released"] is True
+    assert _xlog(*words) == REFUSED_EXIT
+    assert "already lifted" in capsys.readouterr().err
+    assert not (folder / "exploratory-log-3.json").exists()
+
+
 def test_xlog_read_takes_its_verdict_from_the_readers_reply(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -1901,6 +1919,20 @@ def test_step_4_does_not_open_at_five_cases_and_a_held_fill_is_not_a_case(
     transport = _step4_transport(monkeypatch, _step4_hits())
     assert main(STEP4_WORDS) == REFUSED_EXIT
     assert "fewer than 5 cases (D.6)" in capsys.readouterr().err
+    assert transport.requests == [] and not (folder / "pre-step4-candidates.json").exists()
+
+
+def test_step_4_does_not_open_once_the_hold_on_the_fill_is_lifted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    folder = _step3_finished(tmp_path, monkeypatch, capsys)
+    case = CaseAppendix(root=tmp_path, label="search")
+    log = load_newest_exploratory(case)
+    log.release_fill(date(2026, 10, 26), "his reason")
+    write_exploratory_version(case, log)
+    transport = _step4_transport(monkeypatch, _step4_hits())
+    assert main(STEP4_WORDS) == REFUSED_EXIT
+    assert "the hold on the fill is lifted" in capsys.readouterr().err
     assert transport.requests == [] and not (folder / "pre-step4-candidates.json").exists()
 
 

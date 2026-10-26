@@ -1778,7 +1778,8 @@ def _joiners(
 def _step4_opens(log: ExploratoryLog) -> None:
     """Step 4 opens by §4.6.5 D.6: every row of the steps before it finished, nothing open (a rejection
     awaiting its read), and fewer than five cases. Cases are each type's own: a short type's fill is held
-    until step 5 has run (D.3, dated note 2026-10-25), so it does not count."""
+    until step 5 has run (D.3, dated note 2026-10-25), so it does not count. Once the hold is lifted
+    (2026-10-26) the fill has run and step 4 does not open again."""
     unfinished = sorted(r.id for r in log.rows.values() if not r.finished)
     if unfinished:
         raise SearchError(
@@ -1790,6 +1791,8 @@ def _step4_opens(log: ExploratoryLog) -> None:
         raise SearchError(f"step 4 opens with fewer than {AT_MOST} cases (D.6)")
     if log.step5_searched:
         raise SearchError("step 5's search is recorded: step 4 can no longer open")
+    if log.fill_released:
+        raise SearchError("the hold on the fill is lifted: step 4 can no longer open")
 
 
 # step -> the pool's first and last filing date and its candidate file (§4.6.5 steps 3 and 4)
@@ -2083,8 +2086,8 @@ def _xlog_show(case: CaseAppendix, log: ExploratoryLog) -> None:
 
 def cmd_case_xlog(args: argparse.Namespace) -> int:
     """The exploratory log (search-half doc §4.6.5, B) from the terminal: `show` and `public` read the newest
-    version; `carry`, `record` and `read` apply exactly one change and write the next, never an earlier one.
-    The pre-registered selection log is only read, never written."""
+    version; `carry`, `record`, `read` and `release-fill` apply exactly one change and write the next, never
+    an earlier one. The pre-registered selection log is only read, never written."""
     case = open_case("search")
     log = load_newest_exploratory(case)
     if args.xlog_action == "show":
@@ -2092,6 +2095,17 @@ def cmd_case_xlog(args: argparse.Namespace) -> int:
         return CLEAN_EXIT
     if args.xlog_action == "public":
         print(json.dumps(log.public_view(), indent=2, ensure_ascii=False))
+        return CLEAN_EXIT
+    if args.xlog_action == "release-fill":
+        log.release_fill(args.on, args.reason)
+        name = write_exploratory_version(case, log)
+        chosen = log.selection()
+        print(f"the hold on the fill is lifted ({args.on.isoformat()}); wrote {name}")
+        print(
+            f"  cases {', '.join(chosen.cases) or 'none'}; filled {', '.join(chosen.filled) or 'none'}"
+        )
+        for line in chosen.waiting:
+            print(f"  waiting: {line}")
         return CLEAN_EXIT
     if args.xlog_action == "carry":
         name = newest_selection_log_name(case)
@@ -3021,7 +3035,7 @@ def build_parser() -> argparse.ArgumentParser:
         "xlog",
         help="The exploratory log (search-half doc §4.6.5) in the appendix, separate from the selection "
         "log: show, carry a pre-registered row, record a criterion, record the independent reader's read, "
-        "or print the public view. Each change writes the next version.",
+        "lift the hold on the fill, or print the public view. Each change writes the next version.",
     )
     xlog_actions = xlog.add_subparsers(dest="xlog_action", required=True)
     xlog_actions.add_parser(
@@ -3059,6 +3073,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="with a pool row's not_known fail, and only when his saved reads count a call empty three "
         "times: it fails by rule, with no independent read and no dispute",
     )
+    xrelease = xlog_actions.add_parser(
+        "release-fill",
+        help="Lift the hold on the fill (his decision, 2026-10-26, D.3's second dated note): the short "
+        "slots go to the pending rows now, and step 5 does not run. Once.",
+    )
+    xrelease.add_argument("--on", type=date.fromisoformat, required=True, help="YYYY-MM-DD")
+    xrelease.add_argument("--reason", required=True, help="his reason, kept in the log")
     xread = xlog_actions.add_parser("read", help="The independent reader's read of a rejection")
     xread.add_argument("id", help="the candidate's neutral id, such as closure-04")
     xread.add_argument("criterion", choices=POOL_READ_REQUIRED)
