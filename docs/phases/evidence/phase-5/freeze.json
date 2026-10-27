@@ -1,0 +1,333 @@
+{
+  "freeze_version": 1,
+  "sources": [
+    {
+      "file": "exploratory-log-2145.json",
+      "sha256": "c8aafb250b5ac6832fe5bfee42fe261af665a73f5fee1856604525054b6a73d9"
+    },
+    {
+      "file": "selection-log-633.json",
+      "sha256": "ae329e1008bfc36a3baca42b6ac3c1b733b6a5b4cf2c4e13aa1dbfec3458366b"
+    },
+    {
+      "file": "selection-log-634.json",
+      "sha256": "e011b559674681fececa7a73c5b4519ead7dffc9318e871739ba62e45edab431"
+    }
+  ],
+  "cases": [
+    {
+      "label": "closure-07",
+      "step": "2",
+      "type": "closure",
+      "filled": false,
+      "carried": true,
+      "text": "exploratory: selected by §4.6.5 step 2, after the pre-registered rule found none",
+      "probe_set": 1,
+      "dossier_sha256": "25ba504ae76424980aea33c88ebc216ca38b657dee3a4af699e57562b5cddae4",
+      "scenario_sha256": "a9fe131c476edac294ba4edea0961fafb3041e9401aff2cb32097614f5df5f9b",
+      "rubric_sha256": "75c9e63c4f7dbb96f3b70770eef7ac298b2dab91bf2d3fbcd2dae792d927c0f1",
+      "reads": {
+        "scenario": {
+          "reading": "concerns",
+          "his_resolution": true
+        },
+        "rubric": {
+          "reading": "agrees",
+          "his_resolution": false
+        }
+      }
+    },
+    {
+      "label": "closure-19",
+      "step": "2",
+      "type": "closure",
+      "filled": false,
+      "carried": true,
+      "text": "exploratory: selected by §4.6.5 step 2, after the pre-registered rule found none",
+      "probe_set": 2,
+      "dossier_sha256": "35fee60da1a6a5a8f9bc855f974b1d4e73c8f83c561f96411d35b2b36292d5bf",
+      "scenario_sha256": "3e572c8071dbb06f5937e18852ca34910794a7ef26c5f5f6d2afd0a24b4f4558",
+      "rubric_sha256": "ba984303fe1610554cc231842f89bed2e14b8350b6702eac6cb576337a755cf7",
+      "reads": {
+        "scenario": {
+          "reading": "concerns",
+          "his_resolution": true
+        },
+        "rubric": {
+          "reading": "agrees",
+          "his_resolution": false
+        }
+      }
+    },
+    {
+      "label": "pre-11",
+      "step": "3",
+      "type": "closure",
+      "filled": true,
+      "carried": false,
+      "text": "exploratory: selected by §4.6.5 step 3, after the pre-registered rule found none; first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and the extraction model found no recall",
+      "probe_set": 1,
+      "dossier_sha256": "a39f137a1029a2ca4a30871557f6f2afefd4a466a401beb90a8ec4070748ac06",
+      "scenario_sha256": "1bae5aac39655c771ee682957c4d11a3f127337f7fa1a85e11e77f9eead21152",
+      "rubric_sha256": "21aa926460336f3d88841e46d224f147ed800479078b7104a52b94f1c76e1dcd",
+      "reads": {
+        "scenario": {
+          "reading": "concerns",
+          "his_resolution": true
+        },
+        "rubric": {
+          "reading": "agrees",
+          "his_resolution": false
+        }
+      }
+    },
+    {
+      "label": "pre-25",
+      "step": "3",
+      "type": "closure",
+      "filled": true,
+      "carried": false,
+      "text": "exploratory: selected by §4.6.5 step 3, after the pre-registered rule found none; first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and the extraction model found no recall",
+      "probe_set": 1,
+      "dossier_sha256": "90dbed1ccc45bc251706ff7f93fdd3bb22a281b579251ceae48de403e7bdaa4f",
+      "scenario_sha256": "2e834cd8baae9c36a43b6bd2b6db90a35b6924c7a0e2a15b2af2df788d4b9518",
+      "rubric_sha256": "c428513667498a2cb106a2e982f936b26834f7ac6d05711e1bf30ac0ca0f5431",
+      "reads": {
+        "scenario": {
+          "reading": "concerns",
+          "his_resolution": true
+        },
+        "rubric": {
+          "reading": "agrees",
+          "his_resolution": false
+        }
+      }
+    },
+    {
+      "label": "pre-224",
+      "step": "4",
+      "type": "closure",
+      "filled": true,
+      "carried": false,
+      "text": "exploratory: selected by §4.6.5 step 4, after the pre-registered rule found none; first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and the extraction model found no recall",
+      "probe_set": 1,
+      "dossier_sha256": "c00248bb031dae1d95a27db6cb6c34931342153024c39a41ac4856caedbae1ae",
+      "scenario_sha256": "4f9e55e38592cb79e29cb38d6b43f7f5fd90e94ac4c8d1f901bd5210e9611ea2",
+      "rubric_sha256": "7370adb882f07836dcf83f513cbf70c781594fad5b6467ebe109761e8413a35a",
+      "reads": {
+        "scenario": {
+          "reading": "concerns",
+          "his_resolution": true
+        },
+        "rubric": {
+          "reading": "agrees",
+          "his_resolution": false
+        }
+      }
+    }
+  ],
+  "probes": {
+    "closure-07": [
+      {
+        "set": 1,
+        "model": "gpt-oss-openrouter",
+        "calls": 3,
+        "passed": 3
+      },
+      {
+        "set": 1,
+        "model": "haiku-5-5",
+        "calls": 3,
+        "passed": 3
+      }
+    ],
+    "closure-19": [
+      {
+        "set": 1,
+        "model": "gpt-oss-openrouter",
+        "calls": 3,
+        "passed": 0
+      },
+      {
+        "set": 1,
+        "model": "haiku-5-5",
+        "calls": 3,
+        "passed": 0
+      },
+      {
+        "set": 2,
+        "model": "gpt-oss-openrouter",
+        "calls": 3,
+        "passed": 3
+      },
+      {
+        "set": 2,
+        "model": "haiku-5-5",
+        "calls": 3,
+        "passed": 3
+      }
+    ],
+    "pre-11": [
+      {
+        "set": 1,
+        "model": "gpt-oss-openrouter",
+        "calls": 3,
+        "passed": 3
+      },
+      {
+        "set": 1,
+        "model": "haiku-5-5",
+        "calls": 3,
+        "passed": 3
+      }
+    ],
+    "pre-25": [
+      {
+        "set": 1,
+        "model": "gpt-oss-openrouter",
+        "calls": 3,
+        "passed": 3
+      },
+      {
+        "set": 1,
+        "model": "haiku-5-5",
+        "calls": 3,
+        "passed": 3
+      }
+    ],
+    "pre-224": [
+      {
+        "set": 1,
+        "model": "gpt-oss-openrouter",
+        "calls": 3,
+        "passed": 3
+      },
+      {
+        "set": 1,
+        "model": "haiku-5-5",
+        "calls": 3,
+        "passed": 3
+      }
+    ]
+  },
+  "order": [
+    {
+      "label": "closure-07",
+      "admitted": true,
+      "rubric_run": "39818350863",
+      "rubric_run_created": "2026-10-22T16:56:52+00:00",
+      "content_run": "39818350863",
+      "content_run_created": "2026-10-22T16:56:52+00:00",
+      "first_probe": "cases/closure-07/probes/set-1/haiku-5-5/call-1.json",
+      "first_probe_modified": "2026-10-22T17:03:23+00:00",
+      "first_counting_probe": "cases/closure-07/probes/set-1/haiku-5-5/call-1.json",
+      "first_counting_probe_modified": "2026-10-22T17:03:23+00:00",
+      "reasons": []
+    },
+    {
+      "label": "closure-19",
+      "admitted": true,
+      "rubric_run": "39827164113",
+      "rubric_run_created": "2026-10-22T17:57:23+00:00",
+      "content_run": "39845279294",
+      "content_run_created": "2026-10-22T20:01:59+00:00",
+      "first_probe": "cases/closure-19/probes/set-1/haiku-5-5/call-1.json",
+      "first_probe_modified": "2026-10-22T18:20:46+00:00",
+      "first_counting_probe": "cases/closure-19/probes/set-2/haiku-5-5/call-1.json",
+      "first_counting_probe_modified": "2026-10-22T20:06:57+00:00",
+      "reasons": []
+    },
+    {
+      "label": "pre-11",
+      "admitted": true,
+      "rubric_run": "40012875241",
+      "rubric_run_created": "2026-10-23T19:37:35+00:00",
+      "content_run": "40012875241",
+      "content_run_created": "2026-10-23T19:37:35+00:00",
+      "first_probe": "cases/pre-11/probes/set-1/haiku-5-5/call-1.json",
+      "first_probe_modified": "2026-10-23T19:43:03+00:00",
+      "first_counting_probe": "cases/pre-11/probes/set-1/haiku-5-5/call-1.json",
+      "first_counting_probe_modified": "2026-10-23T19:43:03+00:00",
+      "reasons": []
+    },
+    {
+      "label": "pre-25",
+      "admitted": true,
+      "rubric_run": "40114362787",
+      "rubric_run_created": "2026-10-24T17:03:13+00:00",
+      "content_run": "40114362787",
+      "content_run_created": "2026-10-24T17:03:13+00:00",
+      "first_probe": "cases/pre-25/probes/set-1/haiku-5-5/call-1.json",
+      "first_probe_modified": "2026-10-24T17:58:41+00:00",
+      "first_counting_probe": "cases/pre-25/probes/set-1/haiku-5-5/call-1.json",
+      "first_counting_probe_modified": "2026-10-24T17:58:41+00:00",
+      "reasons": []
+    },
+    {
+      "label": "pre-224",
+      "admitted": true,
+      "rubric_run": "40230301054",
+      "rubric_run_created": "2026-10-25T20:20:27+00:00",
+      "content_run": "40230301054",
+      "content_run_created": "2026-10-25T20:20:27+00:00",
+      "first_probe": "cases/pre-224/probes/set-1/haiku-5-5/call-1.json",
+      "first_probe_modified": "2026-10-25T21:34:10+00:00",
+      "first_counting_probe": "cases/pre-224/probes/set-1/haiku-5-5/call-1.json",
+      "first_counting_probe_modified": "2026-10-25T21:34:10+00:00",
+      "reasons": []
+    }
+  ],
+  "reads": {
+    "rejections": {
+      "preregistered": {
+        "maps_to_shape": {
+          "agrees": 88,
+          "disputes": 0
+        },
+        "real_decision": {
+          "agrees": 1,
+          "disputes": 11
+        }
+      },
+      "exploratory": {
+        "maps_to_shape": {
+          "agrees": 329,
+          "disputes": 4
+        },
+        "not_known": {
+          "agrees": 2,
+          "disputes": 0
+        },
+        "real_decision": {
+          "agrees": 6,
+          "disputes": 2
+        }
+      }
+    },
+    "scenario": {
+      "concerns": 5
+    },
+    "rubric": {
+      "agrees": 5
+    }
+  },
+  "shortfall": {
+    "at_most": 5,
+    "cases": 5,
+    "cases_by_type": {
+      "closure": 5,
+      "retool": 0,
+      "ai": 0
+    },
+    "short_by_type": {
+      "closure": 0,
+      "retool": 2,
+      "ai": 1
+    },
+    "filled": 3
+  },
+  "hold": {
+    "released": true,
+    "on": "2026-10-26"
+  }
+}

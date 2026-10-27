@@ -1093,3 +1093,64 @@ started (it changes presentation only); `record` and `read` there are still refu
   the same five cases; the 80 shell-variable reasons are all on the exploratory log's own rows, none carried, so
   the carried-row limit above does not touch this fix; closure-28 is not carried. The allowance beyond the plan
   (a public reason given where none was) is kept: it passes the same check as any public reason.
+- **Applied (Opus, 2026-10-26, about 5:55 PM; code committed as `b1c7787`).** A script read each variable's
+  definition from the batch scripts (every script that defines one defines it the same way) and amended the 80:
+  `S2PUB` 51, `MULTIPUB` 10, `CONTRACT` 7, `LINEBEFORE` 5, `NONEPUB` 3, `PRIORYEAR` 3, `CUTPUB` 1. Claude drafted
+  the two rewordings at his request and he approved them (about 5:46 PM): closure-28's says the company chose the
+  cut after an outside event and had an alternative; pre-43's says the exit was compelled by a change in law. Each
+  of the 82 texts passed the public-reason check before anything was written. One new version of each log
+  (`selection-log-634`, `exploratory-log-2145`); reloaded, no shell-variable reason is left, every selection is
+  unchanged and 82 criteria are marked amended. **The first run's three files were never committed** (one local
+  commit carried them, was undone before any push, and was made again without them); they are deleted, and the
+  freeze runs again.
+- **Second run (he ran it, 2026-10-26, about 5:51 PM): every check passed** for the five cases in D.1's order,
+  each order admitted; the three files written again from `selection-log-634` and `exploratory-log-2145`.
+  **Opus's full read (14e's privacy half):** every distinct string in the three files (936; 290 over 40
+  characters, read one by one). No name, ticker, place, accession number or company date; no shell-variable text
+  (`$` appears nowhere); 82 criteria carry `amended_on` (81 exploratory, 1 pre-registered). The long numbers are
+  this repo's own Actions run ids. Nothing found as specific as the two reworded; the nearest are generic (a plant
+  expansion's "power supply, land and building", a "lender's foreclosure", "reclamation wording"), each a
+  description many companies fit, none on a selected case. The files stay uncommitted until 14c to 14e, for his
+  commit `phase 5: the freeze`.
+
+**14d, the audit (Opus with him, 2026-10-27, about 4:20 to 4:45 AM; his calls, all as recommended).** Each row
+checked against the repo, `freeze.json` and the appendix's file names; nothing re-run that the freeze had run.
+
+*Search half §9:* **1** met as a shortfall: five cases, all closure and all exploratory; retool 2 and ai 1 short;
+"one invest or retool" not met, reported (§12.1). **2** met: both logs complete with `problems()` empty (the
+freeze's check 1); 100 rejection reads in the pre-registered log, 343 in the exploratory. **3** met, with one gap
+closed today: each case has `sources.json`, `foreshadow-1.json` with every hit justified, and the neutrality
+checklist in its private `foreshadow-1-justification.md`; `foreshadow-1.json` hashes the frozen dossier and
+scenario for four cases. **closure-19 was frozen on set 2's coarsened dossier, which had been checked by hand only**
+(the note of 2026-10-22 above), because `hc case foreshadow` read set 1's dossier alone. Fixed (his decision 1(a)):
+`--probe-set` added, with two tests that fail on the old code; run on set 2 with the same `outcome-terms.txt`
+(sha256 unchanged): `foreshadow-2.json`, 12 hits, the same terms as set 1's, six identical and six set 1's
+passages after coarsening, each justified for set 1's reason in a dated set-2 section of the justification file. Run
+after set 2's probe, so it is a record made late, not a check before the lock. **4** met: five rubric reads, all
+"agrees"; five scenario reads, all "concerns", each kept by his written resolution; the five order findings
+admitted, none with a reason. **5** met: four cases six of six on set 1; closure-19 none of six on set 1, coarsened,
+six of six on set 2. **6** met in part: no case decision has run (the freeze's check 3); the commit is 14e's.
+**7** met: CI green on all 115 runs since 2026-10-11 (none other than success); the guard on every commit; each
+case's `guard-additions.txt` in the appendix, dated the day of its lock and written before its `case.lock` commit,
+every term in it present in the term file. The term file's own repository does not date them (its last commit is
+2026-10-03), so the dated files are the proof. Found: of each case term list's company-name terms, five alternate
+forms were not in the term file (pre-11 three, pre-224 two); none appears in any tracked file, any commit's diff,
+any commit message or the evidence files (a whole-word history search). The two multi-word forms were added
+(108 terms, was 106; a dated line in each case's `guard-additions.txt`), and `make guard-history` scanned 116
+commits clean against it; two short forms that are common words were left out. **8** met: `projection.md`
+committed 2026-10-14 and amended 2026-10-15, before the 2026-10-16 search; `evidence/phase-5/cost.md`.
+
+*This doc's §7:* **1** met (the tests; `hc case xlog show` ends "selection complete"). **2** met (`hc scenarios
+check: ok`, instrument hash `a31d1f1184a5`, as in Phase 4's evidence). **3** met (stage 2, 2026-10-21). **4** met
+when the commit lands (each case in `freeze.json` carries its exploratory label). **5** reads met; the batch totals
+are in this section's notes and were not re-added at the audit. **6** met for CI as in row 7; `make check` at 14e.
+
+*The OPEN items (11 at the audit's start):* closed, four (the decision filed twice, moot with both selections
+complete; the two §4.6.2 entries, decided and built 2026-10-17, headers corrected; pay per head and the S3 figures,
+built in stage 1); carried to Phase 5.5 by name, four (the shortfall entry, until 5.5's scope note; the key prompt,
+narrowed to the `getpass` cause; the cost tag, its launch half proven by the probes and a Cost Explorer reading
+owed; the case mode's wiring, narrowed to the launch's order check and the container session); left as they stand,
+two (Phases 1 and 1.5; the pinned host's name), not Phase 5's. One more header corrected: the disputed-rejection
+entry, committed as `3ab62bf` on 2026-10-16. **A correction to the audit's first pass:** it reported pre-11's
+neutrality checklist as unrecorded, from a search of the repo only; the checklist is in the appendix, as for every
+case, and decision 2 needed no action.

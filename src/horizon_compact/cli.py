@@ -1141,8 +1141,9 @@ def _case_text(path: Path, what: str) -> str:
 
 def cmd_case_foreshadow(args: argparse.Namespace) -> int:
     case = open_case(args.label)
+    dossier_name = "dossier.toml" if args.probe_set == 1 else f"set-{args.probe_set}/dossier.toml"
     texts = {
-        "dossier": _case_text(case.dossier_path, "the case's dossier.toml"),
+        "dossier": _case_text(case.dossier_path_for(args.probe_set), f"the case's {dossier_name}"),
         "scenario": _case_text(case.scenario_path, "the case's scenario.toml"),
     }
     terms_text = _case_text(args.terms, "the term file")
@@ -2894,6 +2895,13 @@ def build_parser() -> argparse.ArgumentParser:
     foreshadow.add_argument("label", help="the case's neutral label, such as closure-1")
     foreshadow.add_argument(
         "--terms", type=Path, required=True, help="a file of terms, one per line"
+    )
+    foreshadow.add_argument(
+        "--probe-set",
+        type=int,
+        choices=(1, 2),
+        default=1,
+        help="search the dossier of this probe set (2: the coarsened set-2/dossier.toml)",
     )
     hashes = case_actions.add_parser(
         "hashes", help="Print case.lock for the case's dossier, scenario text and a rubric file"

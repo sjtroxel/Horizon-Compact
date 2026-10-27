@@ -161,6 +161,36 @@ def test_foreshadow_with_no_hit_is_clean_and_still_writes_a_record(
     assert "no hits (foreshadow-1.json)" in capsys.readouterr().out
 
 
+def test_foreshadow_on_probe_set_2_searches_the_coarsened_dossier(
+    appendix: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    terms = appendix / "terms.txt"
+    terms.write_text("widgets\n", encoding="utf-8")
+    coarsened = b'text = "a coarsened dossier about widgets"\n'
+    (appendix / "closure-1" / "set-2").mkdir()
+    (appendix / "closure-1" / "set-2" / "dossier.toml").write_bytes(coarsened)
+    assert main(["case", "foreshadow", "closure-1", "--terms", str(terms)]) == CLEAN_EXIT
+    assert (
+        main(["case", "foreshadow", "closure-1", "--terms", str(terms), "--probe-set", "2"])
+        == CHECK_FAILED_EXIT
+    )
+    assert "dossier line 1: 'widgets'" in capsys.readouterr().err
+    record = json.loads((appendix / "closure-1" / "foreshadow-2.json").read_text(encoding="utf-8"))
+    assert record["texts_sha256"]["dossier"] == hashlib.sha256(coarsened).hexdigest()
+
+
+def test_foreshadow_on_probe_set_2_refuses_without_the_coarsened_dossier(
+    appendix: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    terms = appendix / "terms.txt"
+    terms.write_text("widgets\n", encoding="utf-8")
+    assert (
+        main(["case", "foreshadow", "closure-1", "--terms", str(terms), "--probe-set", "2"])
+        == REFUSED_EXIT
+    )
+    assert "set-2/dossier.toml" in capsys.readouterr().err
+
+
 def test_foreshadow_refuses_without_a_scenario_text(
     appendix: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

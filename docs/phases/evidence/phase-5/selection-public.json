@@ -1,0 +1,4130 @@
+{
+  "closure": {
+    "k": 2,
+    "in_list": 36,
+    "considered": 36,
+    "cases": 0,
+    "fallback_cases": 0,
+    "complete": true,
+    "shortfall": 2,
+    "rows": [
+      {
+        "id": "closure-f01",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A plant closure the company chose, moving production to another of its plants."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A plant named for closure (S3), but no source states the number of employees at it, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-f02",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A decision the company made to end its product operations to preserve cash ahead of a merger."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-f03",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A workforce reduction the company chose alongside a merger it agreed."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-f04",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The company publicly said it planned to close the plant before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "closure-f05",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A multi-year restructuring the company chose to reduce costs."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-f06",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A workforce reduction the company chose under its efficiency program."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-f07",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A workforce reduction the company chose."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-01",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose to improve performance; nothing in the filing forced it."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-02",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "A near-total workforce cut to preserve cash while the company seeks a strategic outcome, with no alternative shown: read as a forced wind-down.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A workforce reduction with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "closure-03",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose to align costs with its strategy."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting (only a cost-reduction target), so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-04",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose to strengthen its finances, including a lab closure."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A facility named for closure (S3), but no source states the number of employees at it, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-05",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A consolidation into new capacity the company chose to build, with two older sites to close."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "Facilities named for closure (S3), but no source states the number of employees at them, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-06",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A realignment the company chose to focus on one program over another."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A realignment with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-07",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A plant consolidation the company chose to match its footprint to demand."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A plant named for closure (S3), but the number of employees there is given only as an upper bound, below the study's floor, so the scenario has no usable total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-08",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A workforce reduction the company chose to focus on its lead program."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A workforce reduction with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-09",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A plant closure the company chose to match capacity to market conditions."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A plant named for closure (S3), but no source states the number of employees at it, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-10",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A workforce reduction the company chose to cut operating costs."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A workforce reduction with no facility named (S2), but no source states the fall in operating income the company expected before acting (only a cost-reduction target), so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-11",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A reorganization the company chose to put one program ahead of another."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A reorganization with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-12",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A decision the company made to stop producing one product line."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A product line the company chose to stop producing, with no facility named (S2), but no source states the fall in operating income the company expected before acting (only charges), so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-13",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose, ending new equipment orders and reducing its workforce."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting (only charges), so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-14",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Shares trade over the counter and the company files with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "A workforce cut made as an operating subsidiary entered an insolvency proceeding: a forced wind-down, not a choice among alternatives.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A workforce reduction with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "closure-15",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose to put one program ahead of another."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A reorganization with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-16",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A decision the company made to move production out of one facility and sell the site."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A facility named for closure with its production moved to a facility the company is building: by the protocol's definition a retool case, so it does not count on the closure list."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-17",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A workforce reduction the company chose to extend its cash while it reviews strategic alternatives."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The filings state no expected fall in operating income as a dollar figure."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-18",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The actions were committed and carried out before the window, and reported in aggregate in pre-window results; the filing describes them after the fact."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "closure-19",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A plant closure the company chose, moving supply to its other sites."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A plant named for closure (S3), but the stated number of employees affected is below the study's floor, and no source gives a larger count at the site."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-20",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A decision the company made to stop producing one product line."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A product line the company chose to stop producing, with no facility named (S2), but no source states the fall in operating income the company expected before acting (only charges), so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-21",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose, reducing its workforce to redirect spending."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting (only costs and savings), so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-22",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A multi-year cost program the company chose, reorganizing its operations and reducing costs."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A multi-year cost program with no facility named (S2), but no source states the fall in operating income the company expected before acting (only charges, savings, a revenue percentage and an adjusted measure), so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-23",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose to put its own programs first after a partnered trial was stopped."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-24",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A plant closure the company chose."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "Plants named for closure (S3), but the stated number of jobs affected is below the study's floor, and no source gives a larger count at the sites."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-25",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose, stopping two programs while it reviews strategic alternatives."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-26",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose, consolidating its laboratory network."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "Laboratory sites closed but none named, so a restructuring with no facility named (S2); no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-27",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A restructuring the company chose, refocusing one division and reducing costs."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A restructuring with no facility named for closure or sale (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-28",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Shares trade over the counter and the company files with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A workforce reduction the company chose after an outside event cut its operations; it retrained some staff and separated others, so it had an alternative.",
+            "amended_on": "2026-10-26"
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A workforce reduction with no facility named (S2), but no source states the fall in operating income the company expected before acting, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "closure-29",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A plant exit and business exit the company chose to cut fixed costs."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "A plant named for exit (S3), but no source states the number of employees at it, so the scenario has no total."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      }
+    ]
+  },
+  "retool": {
+    "k": 2,
+    "in_list": 62,
+    "considered": 62,
+    "cases": 0,
+    "fallback_cases": 0,
+    "complete": true,
+    "shortfall": 2,
+    "rows": [
+      {
+        "id": "retool-f01",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f02",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f03",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f04",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f05",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f06",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f07",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f08",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f09",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f10",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's acquisition of another business."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a financing or the company's sale) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "retool-f11",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f12",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f13",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's decision to raise capital for strategic investments."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a financing or the company's sale) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "retool-f14",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to be acquired, after a strategic review."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a financing or the company's sale) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "retool-f15",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f16",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f17",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-f18",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-01",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-02",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-03",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-04",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-05",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-06",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-07",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-08",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-09",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a plan statement or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a sale, a financing, an investment or results commentary) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "retool-10",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a plan statement or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a sale, a financing, an investment or results commentary) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "retool-11",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-12",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-13",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-14",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-15",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a plan statement or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a sale, a financing, an investment or results commentary) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "retool-16",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-17",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a plan statement or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a sale, a financing, an investment or results commentary) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "retool-18",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-19",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's plan to expand an existing plant (power supply, land and building)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "An expansion of existing plants: no facility named for closure or sale and no annual program cost stated, so it matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "retool-20",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a plan statement or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a sale, a financing, an investment or results commentary) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "retool-21",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a plan statement or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a sale, a financing, an investment or results commentary) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "retool-22",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-23",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-24",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-25",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-26",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-27",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-28",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-29",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-30",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-31",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-32",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-33",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a plan statement or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a sale, a financing, an investment or results commentary) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "retool-34",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's plan to invest in expanding existing plants, funded by an outside investment it agreed to."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "An expansion of existing plants: no facility named for closure or sale and no annual program cost stated, so it matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "retool-35",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-36",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a plan statement or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an acquisition, a sale, a financing, an investment or results commentary) matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "retool-37",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-38",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-39",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-40",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's plan to invest in expanding existing plants, funded by an outside investment it agreed to."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "An expansion of existing plants: no facility named for closure or sale and no annual program cost stated, so it matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "retool-41",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-42",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed on a US exchange and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's plan to invest in expanding capacity at existing plants."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "An expansion of existing plants: no facility named for closure or sale and no annual program cost stated, so it matches no scenario shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "retool-43",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "retool-44",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      }
+    ]
+  },
+  "ai": {
+    "k": 1,
+    "in_list": 76,
+    "considered": 76,
+    "cases": 0,
+    "fallback_cases": 0,
+    "complete": true,
+    "shortfall": 1,
+    "rows": [
+      {
+        "id": "ai-f01",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f02",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f03",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f04",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f05",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's small reduction in force within a cost program."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f06",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "fail",
+            "reason": "No class of the filer's securities is listed or quoted for the public."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f07",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "fail",
+            "reason": "No class of the filer's securities is listed or quoted for the public."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f08",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "fail",
+            "reason": "No class of the filer's securities is listed or quoted for the public."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f09",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f10",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f11",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f12",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f13",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f14",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f15",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to be acquired."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f16",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f17",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f18",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f19",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f20",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f21",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f22",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f23",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f24",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-f25",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the fallback month."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-f26",
+        "pool": "fallback",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the fallback month, admitted after a window shortfall."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-01",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-02",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's cost-reduction plan with a small reduction in force."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-03",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's consolidation of its corporate function, with a reduction in force."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-04",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-05",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-06",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's reduction in force during a reorganization."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-07",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's restructuring plan with a reduction in force."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-08",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-09",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-10",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's reduction in force at its headquarters."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-11",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-12",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-13",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-14",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-15",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-16",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-17",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-18",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-19",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-20",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's restructuring plan with a workforce reduction."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-21",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-22",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-23",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-24",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-25",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's reduction in force, noted only as a severance cost."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-26",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-27",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's reduction in force after a product-launch delay."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-28",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-29",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-30",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-31",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-32",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-33",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-34",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-35",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-36",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-37",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-38",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-39",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a forward-looking mention or contract wording.",
+            "disputed": true
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          },
+          "real_decision": {
+            "agrees": false
+          }
+        }
+      },
+      {
+        "id": "ai-40",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-41",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's restructuring plan with a large reduction in force."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-42",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-43",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history, news coverage, or the filing's own text."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "fail",
+            "reason": "The matched passage announces no decision: it is commentary, a forward-looking mention or contract wording."
+          }
+        },
+        "independent_read": {
+          "real_decision": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-44",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-45",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-46",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-47",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "fail",
+            "reason": "The passage's subject was publicly stated before the window."
+          }
+        },
+        "independent_read": {}
+      },
+      {
+        "id": "ai-48",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-49",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      },
+      {
+        "id": "ai-50",
+        "pool": "window",
+        "passed": false,
+        "case": false,
+        "criteria": {
+          "first_disclosure": {
+            "result": "pass",
+            "reason": "No earlier public mention found in the filer's EDGAR history; the matched passage is contract wording, not an action."
+          },
+          "public_and_filing": {
+            "result": "pass",
+            "reason": "Listed or quoted publicly and filing with the SEC."
+          },
+          "inside_window": {
+            "result": "pass",
+            "reason": "First disclosed inside the window."
+          },
+          "real_decision": {
+            "result": "pass",
+            "reason": "A company's agreement to a transaction (a merger, purchase or financing)."
+          },
+          "maps_to_shape": {
+            "result": "fail",
+            "reason": "The decision the excerpt shows (an agreement, a financing, a cost reduction not attributed to AI) matches no S1 shape."
+          }
+        },
+        "independent_read": {
+          "maps_to_shape": {
+            "agrees": true
+          }
+        }
+      }
+    ]
+  }
+}

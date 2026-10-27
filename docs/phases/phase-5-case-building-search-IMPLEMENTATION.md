@@ -2130,3 +2130,11 @@ every such failure was a dispute that his resolution decided with nothing to rea
 rule, with no read and no dispute. (3) The brief's closing sentence named "a workforce reduction" for every
 shape, wider than the S3 definition; it now says "the decision the definition names". The brief had not been
 read, so no read's hash moves.
+
+**Dated note, 2026-10-27 (the freeze audit, 14d; exploratory doc §3.1 item 14a.1): the pre-registered log took one
+public-reason amendment, presentation only.** closure-28's `real_decision` public reason named the loss of two
+leased aircraft, specific enough to search for (rule zero, the description the guard cannot catch). It was reworded
+on 2026-10-26 by the amendment 14a.1 added (`selection-log-634`): the public text only, the replaced text kept in
+the private log with its date and reason, the result, the private reason, the read and the selection untouched; the
+public view marks the criterion amended with its date. `casebuild/` is not in `prereg.lock`, so no gate hash moves,
+and nothing the pre-registered rule decided changed: it still found no case of any type.

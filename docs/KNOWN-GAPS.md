@@ -7,9 +7,41 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-26, about 1:00 PM (STEP 4 FINISHED; THE HOLD LIFTED; FIVE CASES)
+> ## START HERE — where things stand, 2026-10-27, about 4:50 AM (14d AND 14e DONE; HIS COMMIT `phase 5: the freeze` CLOSES PHASE 5)
 >
-> **Measured:** last commit `phase 5: batch 4b finished, pre-224 passed all` (`242ac1c`); this block's commit carries
+> **Measured:** last commit `b1c7787` (pushed); `make check` green, **2857 tests**; CI green on all 115 runs since
+> 2026-10-11. **14d, the audit, done** (exploratory doc §9, "14d"; his calls, all as recommended): every DoD row of the
+> search half's §9 and the exploratory doc's §7 with its proof; the eleven OPEN items: four closed, four carried to
+> Phase 5.5 by name, two left (not Phase 5's), one stale header corrected. Two gaps found and closed: `hc case
+> foreshadow --probe-set` added (two tests) and closure-19's set-2 record written (`foreshadow-2.json`, late, said
+> so); two multi-word alternate company names added to the private term file (108 terms; `make guard-history`
+> clean, 116 commits). The pre-registered log's one amendment has its dated note (search-half doc §11, end).
+> **14e:** the public views and `freeze.json` were read in full on 2026-10-26 and have not changed since; ROADMAP
+> row, this block and `make check` done. **Uncommitted, for his one commit `phase 5: the freeze`:** the four
+> evidence files, this file, both Phase 5 IMPLEMENTATION docs, ROADMAP, `cli.py` and `tests/test_case_cli.py`.
+> **Phase 5 is closed by that commit.**
+>
+> **Next:** Phase 5.5 `case-runs`. Its IMPLEMENTATION doc (Opus) opens with the dated note in the Phase 5.5 scope
+> doc for exploratory cases (the CARRIED entry of 2026-10-18), and takes the three other CARRIED entries: the key
+> prompt, the cost tag's Cost Explorer reading, and the launch's order check with the container session. **His, outside
+> this repo:** the private term file has not been committed in its own repository since 2026-10-03 (every case's
+> additions are in the working copy only); commit it there.
+>
+> *The 6:10 PM block of 2026-10-26 below is superseded.*
+>
+> ## START HERE — where things stood, 2026-10-26, about 6:10 PM, HANDOFF (FREEZE RUN CLEAN; 14c DONE; 14d NEXT) *(superseded by the block above)*
+>
+> **Measured at handoff:** last commit `phase 5: public reasons can be amended` (`b1c7787`, pushed); `make check`
+> green, 2855. **Uncommitted on purpose until the end of 14e:** the four files in `docs/phases/evidence/phase-5/`
+> (`selection-public.json`, `exploratory-public.json`, `freeze.json` from the second run; `cost.md`). They are read
+> and clean; do NOT rerun the freeze unless a log changes. **Also uncommitted, his choice at handoff (one commit for
+> it all):** this file and the exploratory IMPLEMENTATION doc, carrying today's 14a.1, rerun and 14c notes. **Tomorrow, first:** 14d (exploratory doc §3.1): each row
+> of the search half's DoD (§9) and this doc's (§7) with its proof, then the 11 `## OPEN` items (counted at handoff),
+> his call on each that bears on Phase 5 (close with a reason, or carry to Phase 5.5 by name). Then 14e: ROADMAP row,
+> this block, the as-built note, `make check`, and his commit `phase 5: the freeze` naming the paths.
+>
+> *The day's record follows (written from about 1:00 PM on).* Last commit then `phase 5: batch 4b finished, pre-224
+> passed all` (`242ac1c`); this block's commit carries
 > batch 4c and the release. **Batch 4c, pre-339 to pre-420 (82 rows), is finished** (scripts `scratch/xlog-batch4c.sh`,
 > `4c2`, `4c3`): 10 fail criterion 1, 2 criterion 2, 1 criterion 3 (pre-358), 69 criterion 4; **none passes**, and the
 > one ai lead (pre-406) fails on the total under either reading. 70 reads, all "agree" (about $1.41); pre-358's read
@@ -29,11 +61,16 @@ case by its type and a neutral label. The names live only in the private longlis
 > files written, NOT committed:** Opus's full read (14e) found 80 public reasons that are shell variable names (batches
 > 3a and 3b) and two too specific (closure-28, pre-43). **Plan 14a.1 (exploratory doc §3.1) APPROVED about 4:12 PM
 > (his), all as recommended:** an "amend public reason" change to both logs. **Built (Sonnet, about 4:29 PM) and
-> reviewed (Opus, about 5:30 PM, no defect, docstrings fixed; exploratory doc §9).** **Next:** his commit (naming
-> paths, not `-A`: the three evidence files stay out); then Opus with him applies the amendments, deletes the three
-> files and reruns the freeze; then 14c to 14e.
-> OpenRouter about $3.65 by estimate (about $5.10 less this batch's reads); check the dashboard. Open, his:
-> as below.
+> reviewed (Opus, about 5:30 PM, no defect, docstrings fixed; exploratory doc §9); committed and pushed
+> (`b1c7787`).** **Applied about 5:55 PM:** the 80 restored and the two reworded (Claude drafted, he approved), one
+> new version of each log (`selection-log-634`, `exploratory-log-2145`), selections unchanged; the first run's three
+> files deleted, never pushed. **Second freeze run, about 5:51 PM: every check passed; Opus read the three files in
+> full, nothing identifying, no shell-variable text** (exploratory doc §9). Files uncommitted until the end of 14e.
+> **14c done about 6:05 PM** (`evidence/phase-5/cost.md`, uncommitted): Phase 5 drew about $16.89 against about $4
+> projected (the reader's 499 reads of the exploratory steps); cumulative at most about $45, about $50 at worst
+> after Phase 5.5, under the $60 re-plan point. Balances: Anthropic $11.96, OpenRouter $3.70. **Next:** 14d (audit:
+> the DoD rows and the 11 open items, his call on each), 14e (review), then his commit `phase 5: the freeze`.
+> Balances read from the dashboards at about 5:57 PM (no longer estimates). Open, his: as below.
 >
 > *The 7:10 PM block of 2026-10-25 below is superseded.*
 >
@@ -2237,7 +2274,11 @@ complete, or if he changes the rule.
 
 ---
 
-## OPEN 2026-10-18 — two of three types short: v1 has at most one real case (his, before Phase 5.5 is scoped further)
+## CARRIED to Phase 5.5, 2026-10-27 (was OPEN 2026-10-18) — two of three types short: v1 has at most one real case (his, before Phase 5.5 is scoped further)
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* half its closing condition holds: the exploratory selection is complete (five closure cases;
+retool 2 and ai 1 short, `freeze.json`). The Phase 5.5 scope doc has no dated note for exploratory cases yet.
+**Closes when** that note is written, first thing in Phase 5.5's IMPLEMENTATION doc.
 
 Closure (k = 2) and retool (k = 2) both ended in "selection complete; shortfall 2"; the ai type (k = 1) is not yet
 checked. Protocol §12.1 says "At most five cases, at least three, at least one invest or retool", and also that a
@@ -2254,7 +2295,11 @@ pre-registered rule. His decision: exploratory cases in a separate record (searc
 result reported first. Open until the exploratory selection is complete and the Phase 5.5 scope doc has a dated note
 for exploratory cases.
 
-## OPEN 2026-10-18 — one decision filed twice, as two candidates on one list (decide before either could become a case)
+## CLOSED 2026-10-27, at the freeze audit (was OPEN 2026-10-18) — one decision filed twice, as two candidates on one list (decide before either could become a case)
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* closed with no rule written. Both selections are complete and no row is checked again in v1,
+so the case cannot arise; it never decided an outcome (both rows failed criterion 4). A limitation for the methods
+page (Phase 6.5): the rule was not written, and the case did not recur.
 
 Found at the retool window: retool-40 (a presentation filed 10/2) describes the same decision as retool-34 (the
 announcement of 9/14), and the search found both, as two filings. §12.3 counts a filing found twice once, but no
@@ -2313,7 +2358,10 @@ cannot be recorded in the log's order. S1 and S3 only (S2 and S4 totals are doll
 is not affected. The 11a note that the too-small line in `total-search.txt` "must carry no figure and no factor"
 waits on this decision.
 
-## OPEN 2026-10-17 — the scenario total in criterion 4 is not in the reader's brief (decide before any criterion 4)
+## CLOSED 2026-10-17, his decision, search-half doc §4.6.2 (header corrected 2026-10-27) — the scenario total in criterion 4 is not in the reader's brief (decide before any criterion 4)
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* decided 2026-10-17 and built in step 11a, as the bold line below says; only the header was
+left OPEN.
 
 **DECIDED 2026-10-17 (his, about 4:54 AM CDT): search-half doc §4.6.2, read by the independent reader before
 adoption. Build work (step 11a) before any criterion 4. Kept below as the record.**
@@ -2342,7 +2390,10 @@ whether a type falls short.
 Also to settle with it: **what the S2 total is for a case** (the template's total is `s2_shortfall`, a dollar
 shortfall; rule 1's "size" examples are a facility's headcount, the roles affected, a program's annual cost).
 
-## OPEN 2026-10-17 — a search hit that announces no decision (decide with the total, before any retool or ai record)
+## CLOSED 2026-10-17, his decision, search-half doc §4.6.2 (header corrected 2026-10-27) — a search hit that announces no decision (decide with the total, before any retool or ai record)
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* decided 2026-10-17 and built in step 11a, as the bold line below says; only the header was
+left OPEN.
 
 **DECIDED 2026-10-17 (his, about 4:54 AM CDT): search-half doc §4.6.2, read by the independent reader before
 adoption. Build work (step 11a) before any criterion 4. Kept below as the record.**
@@ -2365,7 +2416,12 @@ adoption):**
 
 **Nothing of the retool type is recorded yet**; retool-01 to 22 are fetched into the appendix cache only.
 
-## OPEN 2026-10-17 — the hidden key prompt rejected a working OpenRouter key
+## CARRIED to Phase 5.5, 2026-10-27, narrowed (was OPEN 2026-10-17) — the hidden key prompt rejected a working OpenRouter key
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* the SSM half is proven: every recognition probe on `gpt-oss-openrouter` (five cases, closure-19
+twice) ran in the container on the key it reads from SSM. **Still open:** the `getpass` cause, not found; the key
+in the environment for the one command has been the method for every laptop read since. Carried because Phase 5.5
+runs on the same keys.
 
 `hc case reader closure-02` failed twice with HTTP 401 "User not found" from a key typed at the `getpass` prompt
 (both attempts recorded, no spend). The same key, read by bash's `read -rs`, passed OpenRouter's key endpoint and
@@ -2374,7 +2430,10 @@ received something well-formed but wrong; cause not found. **Until it is:** set 
 one command. The Anthropic prompt uses the same mechanism. **Before the first probe launch:** confirm the key the
 container reads from SSM is a working one.
 
-## OPEN 2026-10-16 — pay per head in a case scenario (before the first S1 or S3 render)
+## CLOSED 2026-10-27, at the freeze audit (was OPEN 2026-10-16) — pay per head in a case scenario (before the first S1 or S3 render)
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* built in the exploratory part's stage 1 (2026-10-20), as its dated note below required:
+`casebuild/scenario.py` `_pay_per_head`, recorded in each case's `scenario-render.json`.
 
 Protocol §12.6 asks that, wherever a total pay figure and a headcount are both stated, pay per head after rounding
 stay within 3.5% of its unscaled value; the dossier builder runs `scale.check_pay_per_head` on every such line. **The
@@ -2389,7 +2448,11 @@ record the result in `scenario-render.json`; a failure is a reported deviation f
 states a heads row and a total-pay row, recorded in `scenario-render.json`); closes when the exploratory part's stage
 1 builds it. S1 is not relaxed, so no S1 render is in view.
 
-## OPEN 2026-10-16 — S3 renders only with every option's figures (at Stage D)
+## CLOSED 2026-10-27, at the freeze audit (was OPEN 2026-10-16) — S3 renders only with every option's figures (at Stage D)
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* the figure-free S3 form was built in the exploratory part's stage 1 (2026-10-20), as its dated
+note below required, and the cases were rendered in it (exploratory doc §9). Under the pre-registered rule S3 yielded
+no case, as this entry expected.
 
 By §4.6.1 item 6 as written, any S3 option sentence with no case figure strips every figure from all three options,
 and the retool text is made only of sentences with figures, so the render refuses (criterion 4). Since the 8b review, a
@@ -2448,7 +2511,10 @@ through the reader, the verdict, the log and the gate and asserts the log and th
 
 ---
 
-## BUILT 2026-10-16, REVIEWED, AWAITING HIS COMMIT — a rejection the reader disputes still stood in the selection log
+## CLOSED 2026-10-16, committed `3ab62bf` (header corrected 2026-10-27) — a rejection the reader disputes still stood in the selection log
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* his commit `phase 5: disputed rejections do not stand` (`3ab62bf`) landed the same day; the
+header was never updated.
 
 Found in the Opus review of step 7. Protocol §12.4: "a rejection the reader disputes does not stand: the candidate
 goes on to the next criterion, and the disagreement is logged with both reasons." In `casebuild/search.py`,
@@ -2475,7 +2541,11 @@ decision 4). **Closes when:** Phase 1's C6 is committed, and Phase 1.5 is built 
 
 ---
 
-## OPEN 2026-10-15 — two small faults found at the reveal and the bills (both fixed 2026-10-15; item 1's proof owed)
+## CARRIED to Phase 5.5, 2026-10-27, half proven (was OPEN 2026-10-15) — two small faults found at the reveal and the bills (both fixed 2026-10-15; item 1's proof owed)
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* the launch half is proven: every recognition probe (2026-10-22 to 2026-10-25) was launched
+through `sweep/launch.py` `launch_task`, which passes `propagateTags`, and each task started (no AccessDenied).
+**Still owed:** a Cost Explorer reading showing those tasks' Fargate cost under `horizon-compact`.
 
 Found on 2026-10-15; neither touches a run record, a results file or a verdict.
 
@@ -2690,7 +2760,12 @@ inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-son
 
 ---
 
-## OPEN — for Phase 5: the case mode's readers and wiring, 2026-10-09
+## CARRIED to Phase 5.5, 2026-10-27 (was OPEN 2026-10-09, for Phase 5) — the launch's order check and the container session
+
+*At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* Phase 5's part is built and proven live: the record writer (`hc case lock`, five `case.lock`
+files), the S3 probe reader and the GitHub reader, run on every frozen case by `hc case freeze` (2026-10-26, every
+check passed). **Phase 5.5's:** the launch's order check writing `OrderFinding.as_record()` into the case sweep's
+manifest, and the container session that supplies case content and calls `check_case_official`.
 
 *2026-10-16: the record writer (`hc case lock`, 8a), the S3 probe reader, the GitHub reader and the probe runner are built (10a, 10b) and tested on fakes; their live proof is the first case's probe (Stage D). The launch's order check and the container session stay Phase 5.5's.*
 
