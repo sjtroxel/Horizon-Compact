@@ -26,7 +26,7 @@ import botocore
 from botocore.exceptions import BotoCoreError, ClientError
 
 import horizon_compact
-from horizon_compact.casebuild.appendix import AppendixError, CaseAppendix, open_case
+from horizon_compact.casebuild.appendix import AppendixError, CaseAppendix, appendix_dir, open_case
 from horizon_compact.casebuild.assemble import BuildError, assemble_case, prepare_case
 from horizon_compact.casebuild.cutoff import CutoffError
 from horizon_compact.casebuild.documents import DocumentsError, build_document_set, write_sources
@@ -1959,6 +1959,53 @@ def cmd_case_freeze(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_case_match(args: argparse.Namespace) -> int:
+    """``hc case match``: one finished case sweep to one results file, once (Phase 5.5 IMPLEMENTATION doc
+    §5.2). Prints the path and run counts by final status, never a distance, a nearest objective or an
+    allocation. The matcher needs scipy, which the image leaves out, so it is imported here."""
+    from horizon_compact.caseprobe.match import (
+        describe_rubric,
+        load_material,
+        match_sweep,
+        write_match,
+    )
+
+    root = default_repo_root()
+    store = _case_bucket_store(args)
+    appendix = appendix_dir()
+    if args.check_rubric:
+        for line in describe_rubric(load_material(root, store, args.label, appendix)):
+            print(line)
+        return CLEAN_EXIT
+    if not (args.model and args.sweep):
+        raise SweepRefusal("--model and --sweep are required unless --check-rubric is given")
+    # Scoped to the code: the results files this command leaves would otherwise block the next run.
+    if _git("status", "--porcelain", "--", "src", "pyproject.toml", "uv.lock"):
+        raise SweepRefusal(
+            "src, pyproject.toml or uv.lock differ from HEAD: commit them first, so the HEAD the file "
+            "records is the code that computed it"
+        )
+    result = match_sweep(
+        root,
+        store,
+        args.label,
+        args.model,
+        args.sweep,
+        head=_git("rev-parse", "HEAD"),
+        appendix=appendix,
+    )
+    path = write_match(result)
+    print(f"wrote {path.relative_to(root).as_posix()}")
+    print(f"runs:            {result.record['run_counts']['runs']}  {result.status_counts}")
+    if result.unmatched_calls:
+        print(
+            f"not matched:     {', '.join(result.unmatched_calls)} (no transcribed alternative); "
+            "depends_on_reading is not evaluated"
+        )
+    print("commit it with the rest at the reveal; it is never overwritten")
+    return CLEAN_EXIT
+
+
 def _today() -> date:
     """The local date; a function so the tests can set it."""
     return date.today()
@@ -2655,6 +2702,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_resolve(args)
         if args.action == "freeze":
             return cmd_case_freeze(args)
+        if args.action == "match":
+            return cmd_case_match(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (
         AppendixError,
@@ -3323,6 +3372,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     freeze.add_argument("--profile", help="the AWS profile (no default)")
     freeze.add_argument("--bucket", help=f"the results bucket (else {RESULTS_BUCKET_ENV})")
+    match = case_actions.add_parser(
+        "match",
+        help="Phase 5.5 (K2): match one finished case sweep against the rubric with the frozen matcher and "
+        "write experiment/results/cases/<label>/<model>.json, once. Prints the path and run counts by "
+        "status, never a distance or a nearest objective. --check-rubric reads the rubric only. Laptop, "
+        "named profile; refuses with every reason and writes nothing on any failure.",
+    )
+    match.add_argument("label", help="a frozen case's neutral label, such as closure-07")
+    match.add_argument("--model", help="a models.toml key: haiku-5-5 or gpt-oss-openrouter")
+    match.add_argument("--sweep", help="the case sweep's id")
+    match.add_argument(
+        "--check-rubric",
+        action="store_true",
+        help="parse the rubric and print its dimension names, reading names and shape; reads no run",
+    )
+    match.add_argument("--profile", help="the AWS profile (no default)")
+    match.add_argument("--bucket", help=f"the results bucket (else {RESULTS_BUCKET_ENV})")
     assemble = case_actions.add_parser(
         "assemble",
         help="Write the case's dossier once every flag has a decision in reviewed-flags.json",

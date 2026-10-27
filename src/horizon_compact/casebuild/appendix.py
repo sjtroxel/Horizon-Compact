@@ -146,6 +146,12 @@ class CaseAppendix:
         return self.directory / "rubric.toml"
 
     @property
+    def alternatives_path(self) -> Path:
+        """The uncertain calls' alternatives transcribed from the rubric's sentences into numbers (Phase 5.5
+        §5.2); private, only its hash is committed."""
+        return self.directory / "alternatives.toml"
+
+    @property
     def scenario_figures_path(self) -> Path:
         """The case's rows for its scenario (§4.6.1 item 2), written by hand at Stage D; private."""
         return self.directory / "scenario-figures.toml"

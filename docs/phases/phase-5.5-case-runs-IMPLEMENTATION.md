@@ -267,6 +267,66 @@ what was done instead:
   an unfinished run refused; the file refused if it already exists; the results file holds no excerpt, amount or
   outcome term (canary values in the fixture).
 
+**[done] K2, as built (2026-10-27; Sonnet built; awaiting Opus's review).** `make check` green, **2941 tests** (42
+new: `tests/test_casebuild_rubric.py`, `tests/test_case_match.py`); `hc protocol check` passes (no frozen file
+touched). No model, AWS or GitHub call in any test. The new code is `casebuild/rubric.py` (the strict reader),
+`caseprobe/match.py` (the driver) and `cmd_case_match` with the `match` subparser in `cli.py`. What did not fit
+§5.2's text, and what was done instead:
+
+- **The reader returns plain dataclasses, not `CompanyDecision`s.** `tests/test_architecture.py` bars `casebuild/`
+  from importing `analysis`, so `rubric.py` is standard library only and returns a `Rubric`. The driver builds the
+  `CompanyDecision` (`caseprobe/match.py`). The driver sits in `caseprobe/` and `cli.py` imports it inside its
+  command only (it needs scipy, which the image leaves out); `MatchRefused` is a `SweepRefusal` so the command line
+  catches it without that import.
+- **The five committed rubrics share one layout.** Read from `scratch/k2-rubric-shapes.txt` (key names and types
+  only): only the choice is observable, all four lines are `not observable`, and each rubric has one uncertain call
+  (`u1`) whose `alternative` is a sentence. *As built, Sonnet's diagnostic looked only for option words, concluded
+  that no alternative could be read into numbers, and left every call unmatched; Opus's review found otherwise
+  (below).*
+- **Two small mismatches between the rubrics and §4.7's words.** `shape` is written in upper case (`S3`) where the
+  scenario's id is `s3`; the reader compares it lower-cased. An observable line's `reading` is read as a
+  non-negative number (the only form §4.7 allows); **none of the five has an observable line, so that branch is
+  tested but not fitted to evidence.**
+- **Checks beyond §5.2's list, all refusals:** the rubric's `case` is the label, `scenario_total` is the scenario's
+  total, `choice.key` and the company's choice are the scenario's, the rubric's lines are exactly the scenario's, and
+  `dimensions` agree with which readings are observable; the sweep's manifest also runs the case's one scenario.
+  If one of these were wrong for a committed rubric, `--check-rubric` shows it at §6.0, before any sweep.
+- **`--check-rubric` also says whether the primary reading has enough dimensions** for the shape (`k_star` is public
+  data). It names no choice, amount, run or result.
+- **Provenance proves the frozen code, not that the driver was committed.** The file records HEAD, `hc protocol
+  check`'s result, the analysis files' combined sha256, `uv.lock`'s hash, the rubric's hash and the sweep id. HEAD
+  identifies the driver only if it is committed before the first `hc case match` run. A dirty-tree refusal would
+  block the second of the ten runs (the first leaves a results file), so none was added.
+- **Written once by a link, not a rename:** the file is written beside itself and `os.link`ed into place, so a
+  concurrent or repeated command is refused and never replaces it.
+
+**Opus's review of K2 (2026-10-27), and his decision on the alternatives.** `make check` green, **2952 tests**.
+
+- **The alternatives can be matched.** Each `u1` alternative states its lines as `line = number`: four of the five
+  make every line observable (all of the scenario's total on `eliminated`, the rest 0), and closure-19's makes
+  `eliminated` alone observable. pre-224's sentence also gives a second alternative that leaves every line not
+  observable with the same choice: that is the primary reading, so it is not matched separately. Leaving them
+  unmatched would have reported "depends on reading" (`planning/07` §10.4 item 6) as not evaluated for every case.
+- **Dated note, 2026-10-27, his decision (a), before any case run:** each alternative is transcribed into numbers in
+  a private `alternatives.toml` beside the rubric in the appendix (`CaseAppendix.alternatives_path`); the choice
+  stays the primary reading's, as no sentence changes it. **The rubric is not changed.** The transcription is legitimate
+  only because no case run exists: the rubric's lock guards against fitting the company to results, and there are
+  none. **The check is mechanical, not his line by line** (his request): a script compared every number in each file
+  with its sentence (each `line = N`, the "observable as" list in the rubric's line order, and "(all)" against
+  `scenario_total`) and all five agreed. Their sha256s are committed in `docs/phases/evidence/phase-5.5/alternatives.json`,
+  which must be in a commit before the first case sweep.
+- **What the code does with them:** `rubric.parse_alternatives` reads the file strictly against the rubric (its case,
+  a known call once each, known lines, non-negative numbers). The driver refuses a file that does not hash to the
+  committed sha256, a file with no committed hash and a hash with no file, runs each alternative through the frozen
+  `check_decision`, and passes it to `match_case` after the primary. The results file adds `company_alternatives` (each
+  reading's choice and renormalized shares, never an amount) and `provenance.alternatives_sha256`. A call with no
+  transcription is still reported unmatched, with `depends_on_reading` null. `--check-rubric` lists every reading and
+  each one's dimensions against `k_star`.
+- **Two fixes:** the manifest's own `sweep_id` is now checked against the sweep asked for (`read_runs` takes the
+  rows' sweep id from the manifest, so a manifest naming another sweep was accepted); and `hc case match` refuses
+  when `src`, `pyproject.toml` or `uv.lock` differ from HEAD, so the HEAD in the file is the code that computed it.
+  Scoped to the code, it does not block the second of the ten runs. Each has a test.
+
 ### 5.3 The record checks for case sweeps, and the deny list (K3)
 
 - **`hc protocol records --cases`** writes `docs/phases/evidence/phase-5.5/record-checks.md`. It reads manifests,

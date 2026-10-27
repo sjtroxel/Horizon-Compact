@@ -7,7 +7,24 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-27, about 12:45 PM (K1 BUILT AND REVIEWED; K2 NEXT)
+> ## START HERE — where things stand, 2026-10-27, about 2:25 PM, HANDOFF (K2 BUILT AND REVIEWED; K3 NEXT)
+>
+> **Measured:** last commit `4ec2a0b` (the IMPLEMENTATION doc and K1). `make check` green, **2952 tests** (run by Opus
+> at review). **K2, the rubric reader and `hc case match`, is built (Sonnet) and reviewed (Opus)** (IMPLEMENTATION doc
+> §5.2, as-built note and review notes). Two fixes: the manifest's sweep id is checked, and the command refuses
+> uncommitted code under `src`. **His decision (a) on the uncertain calls:** each case's `u1` alternative is
+> transcribed into numbers in a private `alternatives.toml` beside the rubric, checked against its sentence by a script
+> (all five agree), its sha256 committed in `docs/phases/evidence/phase-5.5/alternatives.json`. **That file must be
+> committed before the first case sweep.** The rubrics are not changed.
+>
+> **Uncommitted, for his commit `phase 5.5: k2 case matcher`:** `casebuild/rubric.py`, `casebuild/appendix.py`,
+> `caseprobe/match.py`, `cli.py`, the two test files, `alternatives.json`, the IMPLEMENTATION doc, this file and the
+> ROADMAP row. **Next:** K3 (the record checks for case sweeps, the deny list, `hc sweep status --case`), Sonnet
+> builds and Opus reviews. **His, outside this repo:** the private term file, uncommitted since 2026-10-03.
+>
+> *The 12:45 PM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-27, about 12:45 PM (K1 BUILT AND REVIEWED; K2 NEXT) *(superseded by the block above)*
 >
 > **Measured:** last commit `5f794ee` (Phase 5 closed). `make check` green, **2899 tests** (rerun by Opus at review).
 > **K1, the case session, is built (Sonnet) and reviewed (Opus): no code fix** (IMPLEMENTATION doc §5.1, as-built
