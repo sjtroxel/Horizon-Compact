@@ -26,10 +26,10 @@ that counts (the content that passed is the content that was committed first). A
 rule with one set.
 
 **Where each part runs.** Check 2 needs the GitHub API and S3, so it runs on the laptop at launch and its
-finding goes into the manifest (``OrderFinding.as_record``); the container re-checks 1, 3 and 4 and refuses a
-manifest whose finding is missing or not admitted. The GitHub and S3 readers are interfaces here (``CiRun``,
-``ProbeRecord``), tested with fakes; Phase 5 writes the real ones, so this check does not depend on where the
-content lives.
+finding is written beside the sweep's manifest as ``order.json`` (``OrderFinding.as_record``; Phase 5.5 §5.1);
+the container re-checks 1, 3 and 4 and refuses a finding that is missing or not admitted. The GitHub and S3
+readers are interfaces here (``CiRun``, ``ProbeRecord``), tested with fakes; Phase 5 writes the real ones,
+so this check does not depend on where the content lives.
 """
 
 from __future__ import annotations
@@ -254,7 +254,8 @@ def check_case_probes(
 
 @dataclass(frozen=True)
 class OrderFinding:
-    """Check 2's result, written into the case sweep's manifest on the laptop and re-read by the container."""
+    """Check 2's result, written as the case sweep's ``order.json`` on the laptop and re-read in the
+    container."""
 
     label: str
     admitted: bool
@@ -379,13 +380,13 @@ def check_case_order(
 
 
 def check_order_finding(label: str, finding: Mapping[str, Any] | None) -> list[str]:
-    """The container's view of check 2: the manifest's finding must exist, name this case and admit it."""
+    """The container's view of check 2: the sweep's ``order.json`` must exist, name this case and admit it."""
     if finding is None:
         return [
-            f"the manifest has no order finding for case {label} (check 2 runs on the laptop at launch)"
+            f"case {label} has no order finding (order.json; check 2 runs on the laptop at launch)"
         ]
     if finding.get("label") != label:
-        return [f"the manifest's order finding is for case {finding.get('label')!r}, not {label!r}"]
+        return [f"the order finding is for case {finding.get('label')!r}, not {label!r}"]
     if finding.get("admitted") is not True:
         reasons = finding.get("reasons") or ["no reason recorded"]
         return [f"the order check did not admit case {label}: {'; '.join(map(str, reasons))}"]
@@ -421,8 +422,8 @@ def run_case_gate(
     why: str = "dry run",
     package_dir: Path | None = None,
 ) -> GateResult:
-    """The container's case gate: the record and the content (1), the order finding from the manifest (2), the
-    probes (3), and the grid's checks 2, 5, 6, 7 and 8 (4). Every failure, in that order."""
+    """The container's case gate: the record and the content (1), the order finding from ``order.json`` (2),
+    the probes (3), and the grid's checks 2, 5, 6, 7 and 8 (4). Every failure, in that order."""
     root = (package_dir or default_package_dir()).parents[1]
     failures: list[str] = []
     lock, problems = check_lock_file(root)

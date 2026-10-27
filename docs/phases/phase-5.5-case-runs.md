@@ -12,6 +12,13 @@
 > measures or decides.**
 >
 > **Rule zero governs every line of this phase**, as in Phase 5: no company, candidate or identifier, anywhere public.
+>
+> **Amended 2026-10-27 (with the IMPLEMENTATION doc, `phase-5.5-case-runs-IMPLEMENTATION.md`, §0): exploratory
+> cases.** The pre-registered rule found no case. The cases this phase runs are the five exploratory closures of
+> search-half doc §4.6.5, frozen on 2026-10-27, each labeled exploratory wherever it appears. Retool is short 2 and ai
+> 1, so DoD 1 is met with the shortfall stated. The models are the fallback set: read every "Sonnet 4.6" below as
+> Haiku 5.5 and every "Nova Pro" as `gpt-oss-120b`. The cost is `docs/phases/evidence/phase-5/cost.md`'s projection
+> (about $3.10, worst $4.50), not the $18-20 below.
 
 ## What this phase is for
 

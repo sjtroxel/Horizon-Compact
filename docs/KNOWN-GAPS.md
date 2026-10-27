@@ -7,7 +7,45 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-27, about 4:50 AM (14d AND 14e DONE; HIS COMMIT `phase 5: the freeze` CLOSES PHASE 5)
+> ## START HERE — where things stand, 2026-10-27, about 12:45 PM (K1 BUILT AND REVIEWED; K2 NEXT)
+>
+> **Measured:** last commit `5f794ee` (Phase 5 closed). `make check` green, **2899 tests** (rerun by Opus at review).
+> **K1, the case session, is built (Sonnet) and reviewed (Opus): no code fix** (IMPLEMENTATION doc §5.1, as-built
+> note and review notes). `hc sweep launch --case` and `hc sweep run --case`; records under
+> `cases/<label>/runs/<sweep_id>/`; check 2 written as `order.json`. **His two decisions on K1's findings (as
+> recommended):** `hc sweep status --case` is built in K3 (§5.3), and §6.2 runs one sweep at a time per model, Haiku's
+> and `gpt-oss-120b`'s chains side by side (§6.2's dated note).
+>
+> **Uncommitted, for his one commit `phase 5.5: implementation doc and k1`:** the IMPLEMENTATION doc, the scope doc's
+> amendment, this file, the ROADMAP row, and K1's code and tests (`caseprobe/session.py`, `caseprobe/layout.py`,
+> `sweep/runner.py`, `cli.py`, `protocol/cases.py`, `tests/test_case_session.py`). **Next:** K2 (the matcher's driver
+> and the rubric reader), Sonnet builds and Opus reviews. **His, outside this repo:** the private term file,
+> uncommitted in its own repository since 2026-10-03.
+>
+> *The 11:50 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-27, about 11:50 AM (PHASE 5 CLOSED; PHASE 5.5 IMPLEMENTATION DOC APPROVED) *(superseded by the block above)*
+>
+> **Measured:** last commit `5f794ee` ("phase 5: five frozen cases / files"; the freeze, 14d and 14e), pushed, CI and
+> Deploy green: **Phase 5 is closed.** `make check` green, **2857 tests**. The 4:50 AM block below called that commit
+> uncommitted and named it `phase 5: the freeze`; it went in under the message above.
+>
+> **Phase 5.5's IMPLEMENTATION doc** (`docs/phases/phase-5.5-case-runs-IMPLEMENTATION.md`) is **written and APPROVED
+> (his, about 11:45 AM)**: decisions 1-3 as recommended (one reveal after all ten case sweeps and the record checks;
+> the matching from `main` with the frozen files proven unchanged; the re-identification check against SEC's
+> structured data, then a description search, threshold 20), decision 4 (d) (the memo scan: SEC's filer list and the
+> term file, plus a Haiku 5.5 pass, with every flag judged by the independent reader). Its §0 is the dated note for
+> exploratory cases, also added to the scope doc, which closes the CARRIED entry of 2026-10-18. **Its main finding:
+> the case path is not built** (no session runs a case, nothing parses a rubric or drives the matcher), so five items
+> come first (§5, K1-K5). Ten sweeps, 1,500 runs, seeds drawn in §4; about $3.10, worst $4.50.
+>
+> **Uncommitted, for his commit `phase 5.5: implementation doc`:** the doc, the scope doc's amendment, this file and
+> the ROADMAP row. **Next:** K1 (the case session), Sonnet builds and Opus reviews, then K2-K5. **His, outside this
+> repo:** the private term file, uncommitted in its own repository since 2026-10-03.
+>
+> *The 4:50 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-27, about 4:50 AM (14d AND 14e DONE; HIS COMMIT `phase 5: the freeze` CLOSES PHASE 5) *(superseded by the block above)*
 >
 > **Measured:** last commit `b1c7787` (pushed); `make check` green, **2857 tests**; CI green on all 115 runs since
 > 2026-10-11. **14d, the audit, done** (exploratory doc §9, "14d"; his calls, all as recommended): every DoD row of the
@@ -2274,7 +2312,10 @@ complete, or if he changes the rule.
 
 ---
 
-## CARRIED to Phase 5.5, 2026-10-27 (was OPEN 2026-10-18) — two of three types short: v1 has at most one real case (his, before Phase 5.5 is scoped further)
+## CLOSED 2026-10-27, with Phase 5.5's IMPLEMENTATION doc (was CARRIED 2026-10-27, OPEN 2026-10-18) — two of three types short: v1 has at most one real case (his, before Phase 5.5 is scoped further)
+
+*Closed 2026-10-27 (his approval of the doc):* the dated note for exploratory cases is written: Phase 5.5's
+IMPLEMENTATION doc §0, and the scope doc's amendment of the same date. The record below is kept as it was.
 
 *At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* half its closing condition holds: the exploratory selection is complete (five closure cases;
 retool 2 and ai 1 short, `freeze.json`). The Phase 5.5 scope doc has no dated note for exploratory cases yet.
@@ -2417,6 +2458,10 @@ adoption):**
 **Nothing of the retool type is recorded yet**; retool-01 to 22 are fetched into the appendix cache only.
 
 ## CARRIED to Phase 5.5, 2026-10-27, narrowed (was OPEN 2026-10-17) — the hidden key prompt rejected a working OpenRouter key
+
+*Dated note, 2026-10-27 (Phase 5.5's IMPLEMENTATION doc §10):* not fixed there, and not blocking. The case runs read
+SSM in the container; the one laptop call that takes a key is the memo scan's Haiku pass (decision 4 (d)), which
+uses the workaround. The `getpass` cause stays open.
 
 *At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* the SSM half is proven: every recognition probe on `gpt-oss-openrouter` (five cases, closure-19
 twice) ran in the container on the key it reads from SSM. **Still open:** the `getpass` cause, not found; the key

@@ -1,0 +1,561 @@
+# Phase 5.5 — Case Runs: IMPLEMENTATION (v0.5.5)
+
+> **IMPLEMENTATION doc. APPROVED 2026-10-27, about 11:45 AM (his): decisions 1-3 in §8 as recommended, (a);
+> decision 4 (d), an option added on his question (he preferred a model to make the reads). Patched 2026-10-27 after
+> K1's review (his decisions): `hc sweep status --case` goes into K3 (§5.3), and §6.2 runs one sweep at a time per
+> model (its dated note).** Written the day
+> Phase 5 closed (`5f794ee`), immediately before this phase is built. Sources: the Phase 5.5 scope doc
+> (`docs/phases/phase-5.5-case-runs.md`), the Phase 4 runs-half IMPLEMENTATION doc (its runbook is this one's model),
+> the search-half doc §4.6.5 and §4.7-4.11, the exploratory doc §3.1 and §9, protocol sections 12, 13.2 and 14,
+> `docs/phases/evidence/phase-5/freeze.json` and `cost.md`, `KNOWN-GAPS.md`'s START HERE and its four CARRIED entries
+> for Phase 5.5, and the code at `5f794ee` (`protocol/cases.py`, `caseprobe/run.py`, `caseprobe/layout.py`,
+> `experiment.py`, `sweep/plan.py`, `sweep/runner.py`, `sweep/prompt.py`, `analysis/records.py`,
+> `analysis/matcher.py`, `cli.py`, `.pre-commit-config.yaml`).
+>
+> **What this doc is.** As the scope doc says, mostly a runbook. Unlike the scope doc, it finds that the case path
+> is not built yet. The gate's case checks exist and are proven, but nothing runs a case: no session reads a case's
+> content, and no command matches it (§3). So five run-code items come first (§5). **Nothing frozen changes.** The
+> matcher, the records reader, the experiment loader and the instrument are used as tagged, and `hc protocol check`
+> proves it on every commit.
+>
+> **Rule zero governs every line.** No company, candidate or identifier appears in this doc, in any file this phase
+> commits, or in anything typed into GitHub. Cases are named by their neutral labels only.
+
+## 0. The dated note for exploratory cases (closes CARRIED 2026-10-18 when this doc is approved)
+
+The scope doc was written on 2026-10-04 for cases selected by the pre-registered rule. That rule found none in any
+type (search-half doc §11; `selection-log-633.json`, shortfalls closure 2, retool 2, ai 1). **The cases this phase
+runs are the five exploratory cases** selected under search-half doc §4.6.5 (his decision, 2026-10-19) and frozen
+on 2026-10-27 (`freeze.json`): `closure-07`, `closure-19`, `pre-11`, `pre-25`, `pre-224`. All five are closures.
+Retool is short 2 and ai is short 1, and §12.1's "at least one invest or retool" is not held. Each case carries its
+exploratory label from `freeze.json` wherever it appears, in this phase's files and every later surface. The
+pre-registered result (no case) is reported first.
+
+Read the scope doc with these changes:
+
+1. **Delivers 1:** the projection this checks against is `docs/phases/evidence/phase-5/cost.md` (case runs about
+   $3.10, worst $4.50), not the scope doc's $18-20.
+2. **Delivers 2 and the Cost section:** the model set is the fallback set (Phase 4 scope doc, amended 2026-10-13).
+   Read every "Sonnet 4.6" as Haiku 5.5 and every "Nova Pro" as `gpt-oss-120b`.
+3. **DoD 1:** "at least three cases, including an invest or retool case, unless Phase 5 reported a shortfall".
+   Phase 5 reported one, so DoD 1 is met by five closure cases with the shortfall stated.
+4. **Every result is a reading of an exploratory case.** It is never pooled with, or reported as, a result of the
+   pre-registered rule. Phase 4 stays the headline (§4.6.5 A.2).
+5. **What the cases can show is limited** (§4.6.5 G): every case is a closure, and some will be read on their
+   choice alone. No case shows an investment decision. The results file and every later surface say so.
+
+## 1. Where things stand on 2026-10-27
+
+- **Phase 5 is closed** (`5f794ee`, pushed, CI and Deploy green). Five cases are frozen. Each has a `case.lock`
+  (dossier, scenario and rubric hashes), every recognition probe passed in the set that counts (closure-19 in set
+  2, after coarsening; the rest in set 1), and the order check admitted all five from the laptop (`freeze.json`,
+  `order`).
+- **The model set** is Haiku 5.5 (`haiku-5-5`, main, Anthropic's API, prepaid credit) and `gpt-oss-120b`
+  (`gpt-oss-openrouter`, second family, OpenRouter pinned to DeepInfra `bf16`, his cash), as in the lock.
+- **Nothing has been run on a case** beyond the recognition probes, the knowledge probes and the extraction.
+  No official model has seen a case's scenario.
+- **Spend:** at most about $45 cumulative (`cost.md`), under the $60 re-plan point. The balances on 2026-10-26 were
+  Anthropic credit $11.96 (monthly limit $20, resets 2026-11-01), OpenRouter $3.70, and AWS inside the credits.
+- **The frozen files are unchanged since the tag:** `git diff prereg-v1 HEAD` over the analysis set,
+  `experiment.py`, the instrument and `uv.lock` is empty (checked 2026-10-27).
+
+## 2. What this phase delivers
+
+The scope doc's Delivers 1-8 for five exploratory closure cases on the fallback set:
+
+1. **The credit check** against `cost.md`'s projection, from that day's three balances, before any run.
+2. **Ten case sweeps**: five cases × two models, each 5 objectives × 3 wordings × 10 repeats = 150 runs, so 1,500
+   runs in all. Each sweep is admitted by the gate's case mode (protocol §12.10) in the container.
+3. **The matching**: for each case and model, `match_case` (frozen) on the rubric's primary reading and each
+   uncertain call's alternative. The output is all five distances with spreads, the label, and "depends on
+   reading" where it applies.
+4. **The memo scan** on every model-written text of every case run (§5.4).
+5. **The re-identification check** on each dossier (§5.5, decision 3).
+6. **The coarse descriptions**, each searched before publication (§6.6).
+7. **Publication as data** under `experiment/results/cases/` (§6.7). The public selection logs were already
+   committed by Phase 5 (`selection-public.json`, `exploratory-public.json`).
+8. **Measured cost**, from the records and then the bills.
+
+**Not in this phase:** building, coarsening or replacing a case; the explorer and the methods page (Phase 6, 6.5);
+any prose about a case (Phase 7, his words); a model outside the lock; Phases 1 and 1.5's open close-outs
+(KNOWN-GAPS OPEN 2026-10-15, Phase 6's prerequisite, not this phase's).
+
+## 3. What writing this doc found
+
+1. **No session runs a case.** `run_case_gate` and `check_case_official` (`protocol/cases.py`) are built and tested
+   on fakes, but nothing calls them. `hc sweep run` and `launch` load an experiment folder from the image, and a
+   case's content lives only in `cases/<label>/set-<n>/` in the bucket, never in the image or the repo. The launch's
+   order check (writing `OrderFinding.as_record()` into the manifest) and the container session that supplies case
+   content are the CARRIED entry of 2026-10-09. Both are §5.1.
+2. **The case's content fits the frozen loader.** The case's `dossier.toml` is in the frozen `title`/`text` format
+   (`casebuild/assemble.py`), and its `scenario.toml` is a rendered scenario. A folder holding those two files, the
+   tag's `company/objectives.toml` and a copy of `models.toml` loads through `load_experiment` unchanged. So the
+   prompt, the tool and the classifier are the grid's, as tagged.
+3. **The matcher has no driver, and nothing parses a rubric.** `match_case` (frozen) takes a `Scenario`,
+   `RunRow`s and `CompanyDecision` readings. `rubric.toml` was written by hand in §4.7's form. Until now it has only
+   been hashed and quoted to the reader (`reader/material.py`). §5.2 builds the parser and the command. **The
+   parser is fitted to the five rubrics as committed. A rubric is never edited to fit the parser**: its hash is in
+   `case.lock`, and the gate would refuse a changed one.
+4. **The tag's code has no case command, so protocol 14 cannot be met to the letter.** Protocol 14 says the
+   official analysis runs from a checkout of the tag. Phase 4 did that, because the tag's `hc analyze` was
+   complete. The tag has no case matcher driver, and a driver added now is not in it. Decision 2.
+5. **Case run records must stay private.** Every attempt record holds the request, so it holds the anonymized
+   dossier, which is published only if §5.5's check passes. So case sweeps write under
+   `cases/<label>/runs/<sweep_id>/`, which is never published and is already in the task role's grant
+   (search-half doc §4.8). No infrastructure change is needed. The frozen `read_runs` reads any prefix outside
+   `development/`, so it reads these unchanged.
+6. **The record checks cannot see case sweeps.** `hc protocol records` (`protocol/recordcheck.py`) lists only
+   `development/`, `pilot/` and `official/`. §5.3.
+7. **Claude's deny list does not cover the new commands** that read case run records. §5.3, his edit as in Phase 4
+   (Claude's auto mode will not edit its own permission file).
+8. **The memo scan's "general check for any company name" does not exist.** The name guard and `casebuild/terms.py`
+   match a term list only. Decision 4.
+9. **Scaling hides sizes, not shapes.** One factor multiplies every dollar figure and headcount, so every ratio
+   between two of them survives to rounding: revenue growth, margins, cash flow against revenue. Per-employee
+   figures are not scaled at all (§12.6). Three years of such ratios, at three significant digits, may be close to
+   a fingerprint against SEC's structured data, which is exactly the source §12.11 names. Decision 3.
+10. **The recognition probe sent the dossier file, not the decision prompt's system text.** `caseprobe/run.py` sends
+    `dossier.toml`'s bytes (its `title` line and the `text` block in TOML quoting). The decision prompt's system
+    text is the scenario's role sentence, the dossier's `text` and the currency note (`sweep/prompt.py`). The
+    dossier's words are the same in both. Recorded for the methods page. No action: the probe asked about the
+    dossier, and it was shown the dossier.
+11. **No refusal calls are needed.** The grid's blind refusal calls feed its refusal-rate table (protocol 4.7, 13.1).
+    Protocol 12 asks for no refusal rate for a case. The matcher reads valid runs only, and a `no_tool_call` run is
+    left out and counted either way. Status counts are published per case sweep.
+12. **`gpt-oss-120b` is the long pole.** In Phase 4 its valid calls took a median of 74 s, and 37% of attempts were
+    HTTP 429s. Its 750 case runs take about 15 hours as one task at a time. §6.2 runs its five sweeps side by side
+    and falls back to fewer if `api_errors` stops repeat.
+13. **The results-file hook already admits** `experiment/results/<a>/<b>/<c>.json` (`.pre-commit-config.yaml`), so
+    `experiment/results/cases/<label>/<model>.json` passes. A memo file is `.jsonl`, which the pattern does not
+    cover; §5.4 extends it.
+
+## 4. The run set, fixed now
+
+| Case | Model | Sweep | Runs | Seed |
+|---|---|---|---|---|
+| closure-07 | `haiku-5-5` | `case` | 150 | 4142789090 |
+| closure-19 | `haiku-5-5` | `case` | 150 | 916347355 |
+| pre-11 | `haiku-5-5` | `case` | 150 | 3510822617 |
+| pre-25 | `haiku-5-5` | `case` | 150 | 1933638959 |
+| pre-224 | `haiku-5-5` | `case` | 150 | 4141966721 |
+| closure-07 | `gpt-oss-openrouter` | `case` | 150 | 2401484987 |
+| closure-19 | `gpt-oss-openrouter` | `case` | 150 | 537881194 |
+| pre-11 | `gpt-oss-openrouter` | `case` | 150 | 218789764 |
+| pre-25 | `gpt-oss-openrouter` | `case` | 150 | 1259122587 |
+| pre-224 | `gpt-oss-openrouter` | `case` | 150 | 1744604528 |
+
+- **Each sweep:** the case's one scenario, all five objectives, all three wordings (`w1`, `w2`, `w3`), 10 repeats
+  (protocol §12.7), in one shuffled order. The request is the grid's: Haiku with thinking off, `gpt-oss-120b` at
+  `reasoning {effort: medium}`, the scenario's own `max_tokens`. **No pilot**: the repeat count is fixed by §12.7,
+  not computed.
+- **The seeds were drawn, not chosen**, as in Phase 4 §4. Each is the first eight hex digits of sha256 over `P`'s
+  full id, the model key and `case-<label>`, read as an integer:
+  `python3 -c "import hashlib; print(int(hashlib.sha256(b'649e8b9b8f1dde0e3698be0d279b62fef07ad70b|haiku-5-5|case-closure-07').hexdigest()[:8], 16))"`
+  prints 4142789090. `P` predates every case.
+- **One sweep per case per model.** A sweep the gate refuses is never run under another label.
+- **The scenario's shape is read from the case's `scenario.toml`** at the dry run. Every case is expected to be S3,
+  since the exploratory steps admitted closures on S3 only. If a case's shape is not S3, the dry run shows that before
+  any run, and the matcher uses that shape's calibrated pair.
+
+## 5. What is built before the first case run
+
+Five items, all run code, config or new commands. None touches the lock's sets. **Sonnet builds; Opus reviews each
+diff before he commits.** No model call and no AWS call in any test. `make check` green after each.
+
+### 5.1 The case session (K1; closes CARRIED 2026-10-09)
+
+`hc sweep launch --case <label> --model <key> --seed <seed> --cap-usd <cap> --max-minutes <m>` on the laptop, and
+`hc sweep run --case <label> ...` in the container.
+
+- **Only a frozen case:** the label must be in `freeze.json`'s `cases`. The probe set is that entry's, and it must
+  equal `case.lock`'s.
+- **The laptop:** reads `case.lock` and runs `check_case_order` with the GitHub and S3 readers Phase 5 built (the
+  ones `hc case freeze` used). It writes `OrderFinding.as_record()` as `order.json` beside the manifest, write-once,
+  before the first task starts. *Not inside `manifest.json`:* the manifest is recomputed by every session and must
+  match exactly (`sweep/plan.py`), and the container cannot recompute the finding (no GitHub access). A resume
+  recomputes the finding on the laptop and refuses unless it equals the stored one. It then runs the laptop half of
+  the gate (`run_case_gate`, container not required), the preflight bound and a dry-run print, all before any task
+  starts.
+- **The container:** reads `case.lock` from the image and the three content files from
+  `cases/<label>/set-<n>/`, and calls `check_case_official`. That checks the content hashes, `order.json`'s order
+  finding, the probes from S3, and the grid's checks 2 and 5-8 in the container. Any failure refuses before any call.
+- **The assembled experiment:** in a temporary folder, `models.toml` from the image, and under `case-<label>/`: the
+  case's `dossier.toml`, the image's `experiment/company/objectives.toml` (its sha256 checked against the lock's
+  `content.files` entry, refused if different), and `scenarios/<id>.toml` from the case's `scenario.toml`. Then
+  `load_experiment("case-<label>", root=<tmp>)`, unchanged.
+- **The plan:** experiment `case-<label>`, label `case`, the official model given, the one scenario, templates
+  `w1`-`w3`, repeats exactly 10, five objectives. Anything else is refused, naming what differs.
+  `check_not_official_rules` does not apply (this is an official run). The thinking sub-study's plan is refused
+  for a case.
+- **Where it writes:** `cases/<label>/runs/<sweep_id>/`, with the record label `case`. `sweep_prefix` gains the
+  `case` role, and a case sweep can write nowhere else.
+- **One sweep per case per model:** a launch or run is refused when the bucket already holds a case manifest for
+  that case and model under another sweep id. A resume of the same id is allowed.
+- **Progress lines carry no objective**, as for official sessions (Phase 4 §5.1).
+- **Tests, on fakes:** a label not in the freeze is refused; a probe-set mismatch is refused; content that does not
+  hash to `case.lock` is refused; a missing or not-admitted order finding is refused in the container; a changed
+  `objectives.toml` is refused; a plan with 9 repeats, two scenarios, or two templates is refused; the assembled
+  experiment's prompt for a fixed seed equals one built by hand from the same files; records land under the case
+  prefix only; a second sweep for the same case and model is refused and its resume is not; no progress line holds
+  an objective id.
+
+**[done] K1, as built (2026-10-27; Sonnet built; Opus reviewed about 12:40 PM, no code fix, `make check` rerun
+green at 2899).** `make check` green, **2899 tests** (42 new, in
+`tests/test_case_session.py`); `hc protocol check` passes (nothing in the lock's three sets changed). No model, AWS or
+GitHub call in any test. The new code is `caseprobe/session.py` (`prepare_case_sweep`, `check_case_plan`,
+`check_one_sweep_per_case`, `write_order`, the assembly); `caseprobe/layout.py` gains `runs_prefix`; `sweep/runner.py`
+gains the `case` role; `cli.py` gains `--case` on `sweep run` and `sweep launch`. What did not fit §5.1's text, and
+what was done instead:
+
+- **`order.json`, not the manifest, in the code's own words.** `check_order_finding`'s messages and the docstrings in
+  `protocol/cases.py` said "the manifest"; they now say `order.json`. The tests' substrings still hold.
+- **The container cannot read `freeze.json`** (the image holds `src/` and `experiment/`, not `docs/`), so "the label
+  must be in `freeze.json`" is the laptop's check (launch, dry run). In the container the same guarantee is
+  `order.json`, which only a launch that passed it writes; a hand-typed container command for another label finds
+  none and is refused.
+- **`_checked_content` is probe-shaped** (it also proves a probe call's worst case against a cap), so K1 reuses
+  `load_content` and `check_case_content` from it and not the function itself.
+- **`--case` and the plan flags.** `--experiment`, `--label` and the repeats are no longer required by the parser on
+  `run` and `launch`; `main` requires them unless `--case` is given (same message shape, same exit 2). With `--case`:
+  `--official`, `--pilot`, `--pilot-sweep`, `--experiment-dir`, `--repeats-file` and `--repeats-json` are refused by
+  name; `--experiment` must be `case-<label>`; `--label`, `--repeats`, `--scenario` and `--template` are accepted only
+  to be checked, so `--repeats 9` or `--label thinking` is refused naming what differs.
+- **Order of a launch:** every check (including the preflight bound and the one-sweep rule), then `order.json`
+  (`put_new`, or equal to the stored one on a resume), then the task. A launch the checks refuse writes nothing.
+- **The dry run reads the network** (the bucket, `gh`, `git`) where the grid's dry run reads none, because check 2 needs
+  them. It needs `--profile` and the bucket, as `hc case freeze` does.
+- **A run on a laptop** (not `--dry-run`) is refused first, before anything is read; a container run needs `--store s3`.
+- **`Role` gains `"case"`; `ROLES` does not.** `ROLES` stays the grid's three, so `--role` choices and the freeze's scan
+  of `development/`, `pilot/` and `official/` are unchanged. `sweep_prefix(..., "case")` needs an experiment named
+  `case-<label>` and returns `cases/<label>/runs/<sweep_id>/`.
+- **`_run_and_report`** was cut out of the end of `cmd_sweep_run` (stop flag, the session, the summary lines) so the
+  grid and the case path share it. No behavior change.
+- **`hc sweep status` does not read a case sweep.** Its `--role` choices are unchanged; reading a case's progress is
+  K3's (the deny list names `hc sweep status` for case sweeps). §6.1's "watch it with `hc sweep status`" is therefore
+  not yet possible. **Decided 2026-10-27 (his, as recommended): K3 adds `--case` to `hc sweep status`** (§5.3).
+- **One task per model blocks §6.2's parallel launches.** `launch_task` (`sweep/launch.py`) refuses a second running
+  task for the same model, because tasks share a model's request quota. §6.2 launched Haiku's other four, and
+  `gpt-oss-120b`'s five, together. **Decided 2026-10-27 (his, as recommended): the rule stays; each model's sweeps
+  run one after another** (§6.2's dated note).
+- **Review notes (Opus), no fix needed.** The assembled `Experiment`'s `root` is the temporary folder, gone once it
+  is read; nothing on the case path reads it, and a later reader would fail loudly, not silently. The one-sweep rule
+  counts manifests, so an `order.json` left by a container that refused before its manifest does not block a launch
+  under another seed; no run exists then, so no seed can be chosen by its results. K3's "exactly one sweep per case
+  and model" counts manifests for the same reason.
+
+### 5.2 The matcher's driver and the rubric reader (K2)
+
+- **`casebuild/rubric.py`**: a strict reader for `rubric.toml` in §4.7's form, giving the company's choice (or
+  "not observable"), the observable lines, the observable and excluded dimensions, and each uncertain call's
+  alternative reading. Its output is `CompanyDecision` readings, primary first. Excerpts and outcome terms are read
+  and dropped. **Fitted to the five committed rubrics**: a test per rubric shape, using fictional values only.
+- **`hc case match <label> --model <key> --sweep <id>`** (laptop, his to run). It reads the rubric from
+  `cases/<label>/set-<n>/rubric.toml` and refuses unless it hashes to `case.lock`. It reads the runs with the frozen
+  `read_runs` on the case prefix and refuses any unfinished run (as `results.build_results` does). It loads the
+  scenario through the same assembly as §5.1 and calls the frozen `match_case` with the calibrated pair for the
+  scenario's shape.
+  - **It writes** `experiment/results/cases/<label>/<model>.json`, once, never overwritten. The file holds: the
+    exploratory label text; run counts by final status; per reading, the label, nearest, tie, gap, all five
+    distances with spreads, the basis and the undistanced count; `depends_on_reading`; the observable and excluded
+    dimensions; and the company's reading as the matcher used it (the renormalized observable shares and the
+    choice; no amount and no excerpt). It also records provenance: HEAD's commit, `hc protocol check`'s result,
+    and the analysis files' combined sha256 from the lock.
+- **`hc case match <label> --check-rubric`**: parses the rubric and prints only its dimension names, its reading
+  names and the shape. No run is read. It is run at §6.0 on all five, so a rubric the reader cannot take is found
+  before any sweep.
+- **Tests:** a rubric fixture per form (choice only, choice and lines, an uncertain call); a hash mismatch refused;
+  an unfinished run refused; the file refused if it already exists; the results file holds no excerpt, amount or
+  outcome term (canary values in the fixture).
+
+### 5.3 The record checks for case sweeps, and the deny list (K3)
+
+- **`hc protocol records --cases`** writes `docs/phases/evidence/phase-5.5/record-checks.md`. It reads manifests,
+  session records and provenance fields only, never `validation`, `tool_calls`, `text_blocks` or `raw_response`.
+  It checks:
+  - every case manifest's content hashes equal its `case.lock`;
+  - its model is the lock's, with the lock's request (`thinking` value; DeepInfra for `gpt-oss-120b`);
+  - its seed equals §4's drawn value;
+  - its plan is §4's (one scenario, three templates, 10 repeats, five objectives);
+  - its order finding is admitted;
+  - every session ran in the container with a digest and a clean tree, and the digests are listed;
+  - every run has a `final.json`;
+  - there is exactly one sweep per case and model (counted by manifest, not by `order.json`: §5.1's review notes);
+  - every session started after the freeze commit's CI run;
+  - `hc protocol check` passes.
+
+  Run counts, attempts by status and cost come from the same pass.
+- **Deny entries** (his edit, from a `scratch/` script, as Phase 4 §5.4), both `uv run hc` and `uv run --no-sync hc`
+  forms: `hc case match`, `hc case memos`, `hc protocol records`, and `hc sweep status` when it reads a case
+  sweep. `tests/test_claude_settings.py` holds them. Claude reads what he pastes.
+- **`hc sweep status --case <label> --sweep-id <id>`** (added 2026-10-27, his decision on K1's finding): reads
+  `cases/<label>/runs/<sweep_id>/` through `sweep_prefix(..., "case")`, as `sweep/status.py` already can. The same
+  lines as the grid's status: counts by status, attempts, cost and sessions, never an allocation or an objective.
+  Tests on fakes: it reads a case sweep's records; it prints no objective id; without `--case` it is unchanged.
+
+### 5.4 The memo scan (K4; decision 4)
+
+`hc case memos <label> --model <key> --sweep <id>` (laptop, his to run). It runs after the reveal.
+
+- **Every model-written text of every run** is scanned: the tool call's `memo`, and the text blocks of a reply with no
+  tool call (also of a failed attempt that is the run's final). Reasoning is not published and not scanned.
+- **Two nets (decision 4 (d)):**
+  - **The list:** the private term file (every case's terms, found through `hc.nameGuardTerms`), and SEC's list of
+    filer names and tickers (`company_tickers.json`, fetched once per scan, its sha256 recorded), with corporate
+    suffixes stripped and names shorter than four characters dropped except as tickers in capitals. Matches are
+    case-sensitive and whole-word.
+  - **The model:** Haiku 5.5 reads every memo, in batches of up to 25, with a fixed brief committed before the
+    first scan (`experiment/readers/memo-names.txt`): "list every name of a real company, brand or ticker that
+    appears in each memo, quoted exactly, or none". The brief carries no objective, and the order is shuffled.
+    Requests and replies are written once in the case's appendix folder. A reply that does not account for every
+    memo in its batch is re-asked once for that batch; a second failure flags every memo in the batch.
+- **The judgment, by the independent reader:** every memo flagged by either net goes to the reader (`hc case reader
+  ... memo`, a new brief kind, `experiment/readers/memo.txt`). It is shown the memo, the flagged words and §12.11's
+  rule, never the dossier or a result, and answers per flag whether it names a real company. **A memo with a
+  confirmed name is held back and counted, never edited.** A memo the reader clears is published. He may read any
+  flag and overrule the reader toward holding, never toward publishing, and an overrule is logged with his reason.
+- **The key:** the Haiku pass is a laptop model call, so it takes the Anthropic key in the environment for the one
+  command (the CARRIED key-prompt workaround, §10).
+- **Writes** `experiment/results/cases/<label>/<model>-memos.jsonl`, once: one line per run, with run id, objective,
+  wording, final status, and the memo text or `"held"`. The counts held, by reason, also go into the results file's
+  summary. `.pre-commit-config.yaml`'s results exclusion is widened to `.jsonl` under `experiment/results/cases/`.
+- **The name guard runs on the commit as well**, a second layer for the term file.
+- **Tests, on fakes:** a canary term in a memo is flagged by the list; a fake model reply naming a canary flags its
+  memo; a batch reply missing a memo is re-asked once, then flags the batch; a memo the fake reader confirms is
+  held, and one it clears is published; an overrule toward publishing is refused; a held memo's text appears nowhere
+  in the output; whole-word matching (a term inside a longer word is not a hit); no brief or request holds an
+  objective id; the file is refused if it exists.
+
+### 5.5 The re-identification check (K5; decision 3)
+
+As recommended in decision 3 (a): **`hc case reident <label>`** (laptop, his to run, no model call).
+
+- **The figure half:** from the dossier's financial section, the ratios scaling cannot change. These are each
+  year-on-year revenue change, operating margin each year, and operating cash flow over revenue each year, plus
+  every unscaled per-employee figure. Each is compared, within its rounding tolerance, against SEC's XBRL frames for
+  the same periods across every filer. The real periods are known from the private appendix: an attacker who knows
+  the half-year from the public description gets them nearly free. The output is the number of filers that match
+  every ratio, and whether the case's own filer is among them (taken from the appendix, never printed).
+- **Fails if the company is among fewer than 20 matching filers.** The threshold is fixed here, before any case
+  is checked. The output, written to the appendix and summarized publicly, is "passed" or "withheld: its scale-free
+  figures match fewer than 20 filers in SEC's structured data". No count that narrows the case further is published.
+- **The description half**, only for a dossier that passed the figure half: he searches the overview's first
+  sentence and up to three distinctive phrases of the situation section as written, each in a web search engine,
+  and logs the queries and whether the company appears on the first page. If it appears, the dossier is withheld,
+  with the reason.
+- **A withheld dossier changes nothing else:** the case's results are still published by type and coarse
+  description, and the methods page says that this case cannot be re-run from published inputs (scope doc, Known
+  risks).
+- **Tests:** the ratios from a fictional dossier; the tolerance from three significant digits; a fixture frame in
+  which the target is unique (fail) and one in which it hides among 25 (pass); nothing the command prints holds a
+  name or a CIK.
+
+## 6. The runbook
+
+**His commands, one at a time.** Anything longer than one line goes in a `scratch/` script, with the string to look
+for named. Claude reads only what he pastes. The run log `docs/phases/evidence/phase-5.5/run-log.md` starts at §6.0.
+
+### 6.0 Before the first case run (no model call)
+
+1. §5's five items are committed and pushed, with **CI and Deploy green on that commit**. Its image digest goes into
+   `run-log.md`.
+2. **Live checks, Claude's, from the vendors' pages:** Haiku 5.5 is still served as `claude-haiku-5-5` at its price;
+   `gpt-oss-120b`'s `deepinfra/bf16` endpoint is listed. A missing model or host stops the phase for his decision.
+3. **The credit check (Delivers 1), his readings:** the Anthropic credit and the month's spend against its limit
+   (the limit resets 2026-11-01); OpenRouter's balance; AWS Billing. Claude sets them against `cost.md` (case runs
+   about $3.10, worst $4.50). If a pot cannot cover its share, he decides before any run: top up, or cut in the
+   pre-registered order (`planning/05` §5.1: the fifth case, then the fourth, where "fifth" is the last in
+   `freeze.json`'s order).
+4. **Dry runs:** `hc sweep launch --case <label> --model <key> --seed <seed> --dry-run` for all ten. Expect `every
+   check passes`, the order finding `admitted`, the scenario's shape, 150 runs and the preflight bound. Then
+   `hc case match <label> --check-rubric` for all five.
+5. **The caps:** each sweep's cap is its preflight bound rounded up to the next dollar, about $1-2 for Haiku and
+   under $1 for `gpt-oss-120b`. All are under the $25 official cap, so no over-cap flag is expected.
+
+### 6.1 The first sweep alone
+
+`haiku-5-5` on `closure-07` first, alone. It is watched with `hc sweep status --case closure-07` (K3) until about
+20 runs have a final result: counts by status only, never an allocation or an objective. This is the live proof of K1 (the assembly,
+the gate in the container, the case prefix) at a cost of a few cents. **It also closes the cost-tag item's launch
+half again**: the task starts, so `propagateTags` was accepted. If anything fails here, the fault is diagnosed and
+fixed (logged run code), and nothing else has launched.
+
+### 6.2 The other nine
+
+- **Haiku's other four** launch together once §6.1 looks right. Each takes about 20-30 minutes.
+- **`gpt-oss-120b`'s five** launch together, with `--max-minutes` 720. A session that stops on `api_errors` is
+  re-launched after about 30 minutes. If two such stops come within an hour, the remaining sweeps run two at a time.
+  Expect about a day, as in Phase 4.
+- **Dated note, 2026-10-27 (his decision on K1's finding, before any case run): one sweep at a time per model.**
+  `launch_task` refuses a second running task for the same model (tasks share its request quota), and the rule
+  stays. So the two bullets above run as two chains side by side: Haiku's other four one after another, and
+  `gpt-oss-120b`'s five one after another, each launched when the one before is complete. From Phase 4's run log
+  (Haiku about 990 runs in 3 hours; `gpt-oss-120b` about 1,270 in 11 over two sessions), about 2.5 hours for Haiku's
+  chain and 7-8 for `gpt-oss-120b`'s, plus any re-launch: still about a day. The "two at a time" fallback above is moot.
+- Every launch, stop, re-launch and fix is a line in `run-log.md`. **Phase 4 §7's stop table applies as written.**
+  One more refusal is possible: the case gate. A case-gate refusal is diagnosed and never worked around.
+
+### 6.3 The record checks
+
+`hc protocol records --cases`, once all ten sweeps are complete. **Any failed check stops the phase before the
+reveal.**
+
+### 6.4 The reveal (decision 1)
+
+`hc case match` for each case and model (`scratch/p55-match.sh`, ten lines), from `main`, under decision 2's rule.
+The ten results files are written. **This is the first time anyone reads a case result.** Claude reads them in full
+from here on.
+
+### 6.5 The memo scan
+
+`hc case memos` for each case and model, with the Anthropic key in the environment for the command, then `hc case
+reader ... memo` on the flagged memos (decision 4 (d)). He reads any flag he chooses. The counts held go into the run log.
+
+### 6.6 The re-identification check and the coarse descriptions
+
+- `hc case reident` for each case (decision 3).
+- **The coarse descriptions (Delivers 6), fixed here:** for each case, the SIC major group's name (two digits,
+  SEC's list), "plant closure", a revenue band on the unscaled latest annual revenue (under $1 billion, $1-10
+  billion, over $10 billion), the half-year of first disclosure, and the country. **He searches each as written and
+  with two variations** (the sector's plain-English synonym; the half-year as a quarter). If the company appears on
+  a first page, the description is coarsened once: the sector goes to SEC's division ("Manufacturing"), then the
+  half-year to the year. It is searched again. A second hit means the description is withheld, and the case is
+  published by type only.
+
+### 6.7 Publication
+
+**One commit, after the last session**: the ten results files, the ten memo files, `experiment/results/cases/cases.json`
+(per case: label, exploratory label text, type, shape, coarse description, probe results from `freeze.json`, the
+re-identification outcome, and the dossier as published or "withheld" with its reason), each dossier that passed as
+`experiment/results/cases/<label>/dossier.txt`, and `record-checks.md`. The commit deploys an image, which is
+harmless after the last session. The guard checks it. **No commentary**: prose is Phase 7's, in his words.
+
+### 6.8 The measured cost
+
+From the record checks' per-sweep totals, then the bills: the Console, OpenRouter's activity, and AWS Cost Explorer.
+**The Cost Explorer reading also closes the cost-tag CARRIED entry** if the case sweeps' Fargate cost shows under
+`horizon-compact`. If the `Project` tag was never activated as a cost-allocation tag, that is found here, activated
+by him, and the item closes on the next reading. Dated patches go to `planning/03` and `planning/07` §13, and to the
+ROADMAP's cost column. The $60 point is checked against measured spend.
+
+### 6.9 The close
+
+The DoD audit (§11), the honor statements (his in his words; Claude's: no case result read before §6.4, anything
+seen by accident disclosed), KNOWN-GAPS and START HERE, and the ROADMAP row.
+
+## 7. During the runs
+
+**The push freeze, one image for all ten sweeps**, as Phase 4 §7: from §6.1's launch to the last session's end, no
+push that touches `src/`, `experiment/`, `infra/`, `pyproject.toml` or `uv.lock`, except a logged run-code fix for an
+infrastructure fault. Docs-only pushes (the run log) are fine. A fix is made only for an infrastructure fault, never
+because of what a model answered. **The case content, the rubrics and the lock are never touched.**
+
+**What never stops a sweep:** a model's failures or refusals, at any rate. **A sweep ends partial** only if the model
+or its pinned host is withdrawn. It is reported as partial and never finished elsewhere.
+
+## 8. Decisions for him
+
+Each has a recommendation and a reason. What is not here is settled by the scope doc, the protocol, §4.6.5 or
+Phase 4's decisions.
+
+1. **DECIDED (his): (a). When case results are first read.**
+   - (a) **Recommended: one reveal, after all ten sweeps are complete and the record checks pass**, as Phase 4's
+     decision 1. Until then nobody reads anything by objective: no allocation, choice or memo. The reason: Haiku's
+     sweeps finish about a day before `gpt-oss-120b`'s. A choice made in that gap (a fix, a stop, a cut) would
+     otherwise be made by someone who knows the main model's readings. The cost is about a day.
+   - (b) Per model as each finishes. Haiku's readings a day sooner, and the second family's sweeps are then
+     conducted by someone who has seen them.
+2. **DECIDED (his): (a). Where the matching runs** (finding 4).
+   - (a) **Recommended: from `main`, with the frozen code proven unchanged.** The driver (§5.2) is new run code; the
+     computation is the tag's `match_case`, `read_runs`, `descriptive.distance`, intervals and thresholds. `hc
+     protocol check` proves these byte-identical to the lock, with `uv.lock` unchanged. Each results file records
+     HEAD, that check's result and the analysis hash, and the record checks re-run it. This keeps protocol 14's
+     purpose (the code that computes is the tag's), not its letter, and the methods page says so.
+   - (b) From a worktree of the tag with the driver and rubric reader copied in. Closer to the letter, but the tree
+     that runs is then neither the tag nor `main`, and nothing records which copy ran. It proves less than (a).
+3. **DECIDED (his): (a). The re-identification check's method** (finding 9).
+   - (a) **Recommended: the figure half against SEC's XBRL frames, then the description half (§5.5)**, with
+     withholding if either fails, at the threshold of 20 fixed now. It is measured rather than assumed, it uses the
+     source §12.11 names, and it costs no money (SEC's API is free). **Expect most or all dossiers to be withheld:**
+     three years of ratios at three significant digits are close to a fingerprint. That is a finding to report, and
+     it does not change any case's result.
+   - (b) Withhold every dossier without the check, the reason stated. It saves about half a day of build, but rests
+     on an unmeasured claim, and §12.11 says "published only after a re-identification check passes", which (b)
+     never tries.
+   - (c) The description search only. It misses the structured-data route that §12.11 names.
+4. **DECIDED (his): (d). The memo scan's general list** (finding 8).
+   - (d) **Recommended, added 2026-10-27 on his question, and taken: both nets, and a model judges what they
+     catch** (§5.4). (a)'s list runs as written; Haiku 5.5 also reads every memo for company names (about $0.20-0.30
+     of the credit); anything either flags goes to the independent reader, which decides whether it names a real
+     company. He reads nothing unless he chooses to. His reason: he preferred to delegate the reads to a model. The
+     list keeps a fixed, free net under the model's, so a model miss is not the only check.
+   - (a) SEC's public list of filer names and tickers** (`company_tickers.json`, fetched once at the
+     scan and its sha256 recorded), with corporate suffixes stripped and names shorter than four characters dropped
+     except as tickers in capitals. Every hit is read by him. It is mechanical, fixed and repeatable, and it covers
+     every listed company, which is where a name in a memo is most likely to come from.
+   - (b) A model reads every memo for any company name. It reaches private and foreign names, but adds about 1,500
+     calls, a model's judgment, and a cost.
+   - (c) The private term file only. That is not the "general check for any company name" §12.11 asks for.
+
+## 9. Rules this phase must not break
+
+The scope doc's rules hold as written. A frozen case is not changed by what its runs show, and a model's failures
+are outcomes. "Most closely matched" is always the wording, and ties and "no good match" are shown as such. No word
+about a company's motives. Rule zero. And from this doc:
+
+- Nothing reads a case result before §6.4 (decision 1). Claude runs no command that reads case run records (§5.3).
+- The rubric and the case content are never edited. The parser fits them.
+- Every case surface carries its exploratory label, and the pre-registered result (no case) comes first.
+
+## 10. Order of work
+
+1. **[Opus] This doc**, approved by him. With it go the scope doc's amendment (§0, already in this change), KNOWN-GAPS
+   START HERE (the 4:50 AM block corrected: Phase 5 is committed as `5f794ee`, not "uncommitted") with the CARRIED
+   entry of 2026-10-18 closed, and the ROADMAP row. One commit: `phase 5.5: implementation doc`.
+2. **[Sonnet builds, Opus reviews each] §5.1-5.5**, one commit each or together. `make check` green; he commits and
+   pushes; Deploy green; the digest is recorded. The deny entries are his.
+3. **[him, Claude reading pasted output] §6.0-6.9**, in order.
+
+**Model choice:** Sonnet for step 2; Opus to review it, and for the reveal's reading and the close.
+
+**The four CARRIED entries, and how each is taken:**
+
+| Entry | Taken by | Closes when |
+|---|---|---|
+| 2026-10-18, exploratory cases (two of three types short) | §0 | this doc is approved |
+| 2026-10-09, the launch's order check and the container session | §5.1 | the first case sweep is admitted in the container (§6.1) |
+| 2026-10-15, the cost tag | §6.1 and §6.8 | Cost Explorer shows the case sweeps' Fargate under `horizon-compact` |
+| 2026-10-17, the hidden key prompt | the workaround, at §6.5 | **Not fixed; not blocking.** The runs read SSM in the container. The one laptop call that takes a key is the memo scan (§5.4, decision 4 (d)); it uses the workaround, the key in the environment for the one command. The `getpass` cause stays open. |
+
+## 11. Definition of done, and the proof of each
+
+1. **Every frozen case ran on both models** through the case gate, or was cut at §6.0 with the reason; the shortfall
+   is stated. *Proof:* `record-checks.md`, ten sweeps complete; `run-log.md`.
+2. **Every case is matched,** with distances, spreads, alternative readings, and observed and excluded dimensions.
+   *Proof:* ten results files.
+3. **Every memo passed the scan or was held back and counted.** *Proof:* the memo files and their counts.
+4. **Every dossier passed the re-identification check or is withheld with its reason; every public description
+   passed its search.** *Proof:* `cases.json`, with each check's record in the appendix.
+5. **The results are committed as data, and the guard passed every commit.** *Proof:* §6.7's commit, with CI green.
+6. **Measured cost recorded; `make check` and CI green.** *Proof:* `run-log.md`'s cost section; the close commit's CI.
+
+## 12. Cost
+
+**Building §5: $0. The runs: about $3.10, worst $4.50** (`cost.md`). About $2.40 is Anthropic credit and about $0.70
+his OpenRouter cash. Fargate is under $1 of AWS credit. **Little money for the checks:** SEC's API and web searches are
+free. The memo scan's Haiku pass is about $0.20-0.30 of the credit, and the reader's reads of flagged memos a few
+cents each of his cash (decision 4 (d)). Cumulative after this phase: about $49, worst about $51, under the $60
+re-plan point.
+
+**Time:** about two days of build and review for §5. Then about a day of run time, set by `gpt-oss-120b`. Then about
+a day for the reveal, the scans, the checks and the close.
+
+## 13. Genuinely uncertain
+
+- **Whether every rubric reads cleanly into the matcher's terms.** They were written for the reader, in a form the
+  code never parsed. If one holds a dimension the scenario has no line for, `check_decision` (frozen) refuses it at
+  the reveal. §6.0's `--check-rubric` exists to find that first. If it happens, the case is reported as not
+  matchable as written, and the rubric is not changed.
+- **How many cases come out "not enough disclosed".** A choice-only S3 reading has one dimension, which S3's k* of 1
+  allows; any case whose choice is unobservable falls below it.
+- **Whether five `gpt-oss-120b` tasks at once draw more 429s than one.** §6.2's fallback covers it, at the cost of
+  time.

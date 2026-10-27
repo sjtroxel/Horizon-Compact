@@ -7,6 +7,8 @@ granted ``cases/*`` and nothing wider. Objects are write-once.
 * a probe call: ``cases/<label>/probes/set-<n>/<model>/call-<i>.json``
 * its verdict:  ``cases/<label>/probes/set-<n>/<model>/call-<i>.verdict.json``
 * a call that failed with an API error: ``.../<model>/errors/call-<i>-<k>.json`` (a call made, no answer)
+* a case sweep: ``cases/<label>/runs/<sweep_id>/`` (manifest, ``order.json``, runs, sessions). Private like
+  the rest: every attempt record holds the request, which holds the dossier.
 """
 
 from __future__ import annotations
@@ -40,11 +42,13 @@ __all__ = [
     "error_key",
     "parse_call_key",
     "probes_prefix",
+    "runs_prefix",
     "verdict_key",
 ]
 
 _LABEL = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*")
 _MODEL = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+_SWEEP = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 CALL_KEY = re.compile(
     rf"{CASES_PREFIX}/(?P<label>[^/]+)/probes/set-(?P<set>\d+)/(?P<model>[^/]+)/call-(?P<call>\d+)\.json"
 )
@@ -62,6 +66,12 @@ def _model(model_key: str) -> str:
     return model_key
 
 
+def _sweep(sweep_id: str) -> str:
+    if not _SWEEP.fullmatch(sweep_id):
+        raise ValueError(f"{sweep_id!r} is not a sweep id")
+    return sweep_id
+
+
 def content_key(label: str, probe_set: int, filename: str) -> str:
     if filename not in CONTENT_FILES:
         raise ValueError(f"{filename!r} is not one of {', '.join(CONTENT_FILES)}")
@@ -71,6 +81,12 @@ def content_key(label: str, probe_set: int, filename: str) -> str:
 def probes_prefix(label: str, probe_set: int | None = None) -> str:
     base = f"{CASES_PREFIX}/{_label(label)}/probes/"
     return base if probe_set is None else f"{base}set-{probe_set}/"
+
+
+def runs_prefix(label: str, sweep_id: str | None = None) -> str:
+    """Where a case's sweeps live; with ``sweep_id``, where one sweep does."""
+    base = f"{CASES_PREFIX}/{_label(label)}/runs/"
+    return base if sweep_id is None else f"{base}{_sweep(sweep_id)}/"
 
 
 def call_key(label: str, probe_set: int, model_key: str, call: int) -> str:

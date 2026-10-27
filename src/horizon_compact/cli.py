@@ -120,6 +120,15 @@ from horizon_compact.caseprobe.knowledge import Preview as KnowledgePreview
 from horizon_compact.caseprobe.knowledge_read import knowledge_verdict, saved_empty_calls
 from horizon_compact.caseprobe.run import ProbeRefused, check_probe_launch, run_case_probe
 from horizon_compact.caseprobe.s3reader import read_probe_records
+from horizon_compact.caseprobe.session import (
+    CASE_LABEL,
+    CASE_REPEATS,
+    CaseWorld,
+    PreparedSweep,
+    case_experiment_name,
+    prepare_case_sweep,
+    write_order,
+)
 from horizon_compact.caseprobe.upload import UploadError, upload_case
 from horizon_compact.caseprobe.verdict import VerdictError, probe_verdict
 from horizon_compact.dossier.check import default_repo_root, run_checks
@@ -167,6 +176,7 @@ from horizon_compact.protocol.cases import (
 )
 from horizon_compact.protocol.gate import (
     PilotRefusal,
+    check_container,
     check_official,
     check_one_sweep_per_study,
     check_repeats,
@@ -258,7 +268,14 @@ from horizon_compact.sweep.plan import (
 )
 from horizon_compact.sweep.prompt import render_prompt
 from horizon_compact.sweep.refusals import make_calls, require_calls_before_analysis
-from horizon_compact.sweep.runner import ROLES, Role, check_route, run_session, sweep_prefix
+from horizon_compact.sweep.runner import (
+    CASE_ROLE,
+    ROLES,
+    Role,
+    check_route,
+    run_session,
+    sweep_prefix,
+)
 from horizon_compact.sweep.spend import DEVELOPMENT_CAP_USD
 from horizon_compact.sweep.store import LocalStore, S3Store, Store
 from horizon_compact.sweep.tokens import tokens_report
@@ -695,6 +712,8 @@ def cmd_sweep_dry_run(args: argparse.Namespace) -> int:
 
 
 def cmd_sweep_run(args: argparse.Namespace) -> int:
+    if args.case is not None:
+        return cmd_case_sweep_run(args)
     if args.dry_run:
         return cmd_sweep_dry_run(args)
     experiment, plan_ = _load(args)
@@ -721,7 +740,25 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
         # container cannot skip them (protocol 8.3).
         check_repeats(store, plan_, args.pilot_sweep)
         check_one_sweep_per_study(store, plan_)
+    return _run_and_report(
+        args, experiment, plan_, route, provider, store, identity, account_id, cap, role
+    )
 
+
+def _run_and_report(
+    args: argparse.Namespace,
+    experiment: Experiment,
+    plan_: SweepPlan,
+    route: ModelRoute,
+    provider: Provider,
+    store: Store,
+    identity: RunnerIdentity,
+    account_id: str,
+    cap: float,
+    role: Role,
+) -> int:
+    """Run the session, stopping cleanly on a signal, and print its summary. The end of ``hc sweep run``,
+    for a grid sweep and for a case's."""
     stop_requested = {"flag": False}
 
     def request_stop(signum: int, frame: FrameType | None) -> None:
@@ -760,6 +797,8 @@ def cmd_sweep_run(args: argparse.Namespace) -> int:
 
 
 def cmd_sweep_launch(args: argparse.Namespace) -> int:
+    if args.case is not None:
+        return cmd_case_sweep_launch(args)
     experiment, plan_ = _load(args)
     launch_route = experiment.model(plan_.model_key).route
     if launch_route == "local":
@@ -828,6 +867,188 @@ def cmd_sweep_launch(args: argparse.Namespace) -> int:
     print(
         "watch it:        hc sweep status (same arguments); stop it: hc sweep stop --model "
         + args.model
+    )
+    return CLEAN_EXIT
+
+
+# --- a frozen case's sweep (Phase 5.5 K1) -----------------------------------------------------------------
+
+
+def _case_plan_flags(args: argparse.Namespace) -> dict[str, Any]:
+    """The plan flags a case sweep takes, as ``prepare_case`` arguments. A case fixes its experiment, its
+    label and its repeats, so a flag that would change them is passed on to be refused by name
+    (``check_case_plan``), and a flag that has no meaning for a case is refused here."""
+    name = case_experiment_name(args.case)
+    unused = [
+        flag
+        for flag, given in (
+            ("--official", args.official),
+            ("--pilot", args.pilot),
+            ("--pilot-sweep", args.pilot_sweep),
+            ("--experiment-dir", args.experiment_dir),
+            ("--repeats-file", args.repeats_file),
+            ("--repeats-json", args.repeats_json),
+        )
+        if given
+    ]
+    problems = [f"{flag} is not used with --case: a case sweep fixes it" for flag in unused]
+    if args.experiment is not None and args.experiment != name:
+        problems.append(
+            f"--experiment is {args.experiment!r}; a case sweep's experiment is {name!r}"
+        )
+    if problems:
+        raise SweepRefusal("; ".join(problems))
+    return {
+        "plan_label": args.label if args.label is not None else CASE_LABEL,
+        "repeats": args.repeats if args.repeats is not None else CASE_REPEATS,
+        "scenarios": args.scenario or None,
+        "templates": args.template or None,
+    }
+
+
+def _case_world(args: argparse.Namespace, identity: RunnerIdentity) -> CaseWorld:
+    """What a case session reads. The container: the results bucket and the probe records, with the task
+    role. The laptop: the freeze's readers (a named profile, ``gh`` and ``git`` in the repository). A function
+    so the tests can set it."""
+    if identity.in_container:
+        bucket = args.bucket or os.environ.get(RESULTS_BUCKET_ENV)
+        if not bucket:
+            raise SweepRefusal(f"--bucket or {RESULTS_BUCKET_ENV} is required")
+        client = _session(args, identity).client("s3")
+        return CaseWorld(
+            S3Store(client, bucket), lambda label: read_probe_records(client, bucket, label)
+        )
+    readers = _freeze_world(args, default_repo_root())
+    return CaseWorld(readers.store, readers.probes, readers.runs)
+
+
+def _print_case_checks(prepared: PreparedSweep) -> None:
+    plan_, experiment = prepared.plan, prepared.experiment
+    if plan_ is not None and experiment is not None:
+        print(f"sweep:   {plan_.sweep_id} ({len(plan_.runs)} runs, model {plan_.model_key})")
+        print(
+            f"shape:   scenario {', '.join(plan_.scenarios)} x {len(experiment.objectives)} objectives x "
+            f"{len(plan_.templates)} templates ({', '.join(plan_.templates)}) x {plan_.repeats_text()} repeats"
+        )
+    if prepared.finding is not None:
+        reasons = prepared.finding.get("reasons") or []
+        print(
+            "order:   "
+            + (
+                "admitted"
+                if prepared.finding.get("admitted") is True
+                else f"NOT admitted: {'; '.join(reasons)}"
+            )
+        )
+    if prepared.bound_usd is not None:
+        print(f"worst case: ${prepared.bound_usd:.2f} for the sweep (3 attempts per run)")
+    for note in prepared.notes:
+        print(f"note: {note}")
+
+
+def cmd_case_sweep_run(args: argparse.Namespace) -> int:
+    """``hc sweep run --case``: ``--dry-run`` on the laptop checks everything and writes nothing; the real
+    run is the container's, with the order finding read back from ``order.json``."""
+    flags = _case_plan_flags(args)
+    cap = _check_cap(args)
+    identity = identify(os.environ, _laptop_git)
+    if args.dry_run:
+        prepared = prepare_case_sweep(
+            args.case,
+            args.model,
+            args.seed,
+            world=_case_world(args, identity),
+            identity=identity,
+            container=False,
+            cap_usd=cap,
+            why="dry run",
+            **flags,
+        )
+        _print_case_checks(prepared)
+        if not prepared.ok:
+            print(prepared.refusal(), file=sys.stderr)
+            return REFUSED_EXIT
+        print("case sweep: every check passes (dry run; nothing written, nothing called)")
+        return CLEAN_EXIT
+    failures, _ = check_container(identity, required=True, why="run")
+    if failures:
+        raise SweepRefusal("; ".join(failures))
+    if args.store != "s3":
+        raise SweepRefusal("a case sweep's records go to the results bucket: use --store s3")
+    prepared = prepare_case_sweep(
+        args.case,
+        args.model,
+        args.seed,
+        world=_case_world(args, identity),
+        identity=identity,
+        container=True,
+        cap_usd=cap,
+        why="run",
+        **flags,
+    )
+    if not prepared.ok:
+        raise prepared.refusal()
+    experiment, plan_ = prepared.experiment, prepared.plan
+    assert experiment is not None and plan_ is not None  # an ok preparation has both
+    check_route(experiment, plan_.model_key, os.environ)
+    provider, route, store, account_id = _connect(
+        args,
+        experiment,
+        plan_.model_key,
+        identity,
+        lambda store: sweep_estimate(experiment, plan_, store, CASE_ROLE),
+        cap,
+    )
+    return _run_and_report(
+        args, experiment, plan_, route, provider, store, identity, account_id, cap, CASE_ROLE
+    )
+
+
+def cmd_case_sweep_launch(args: argparse.Namespace) -> int:
+    """``hc sweep launch --case``: every laptop check, then ``order.json`` (write-once), then the task."""
+    flags = _case_plan_flags(args)
+    cap = _check_cap(args)
+    identity = identify({}, _laptop_git)
+    world = _case_world(args, identity)
+    prepared = prepare_case_sweep(
+        args.case,
+        args.model,
+        args.seed,
+        world=world,
+        identity=identity,
+        container=False,
+        cap_usd=cap,
+        why="launch",
+        **flags,
+    )
+    if not prepared.ok:
+        raise prepared.refusal()
+    experiment, plan_ = prepared.experiment, prepared.plan
+    assert experiment is not None and plan_ is not None and prepared.finding is not None
+    config = experiment.model(plan_.model_key)
+    if config.route == "local" or (config.route == "openrouter" and not config.openrouter_provider):
+        raise SweepRefusal(f"{plan_.model_key} cannot run in the container for a case sweep")
+    write_order(world.store, args.case, plan_.sweep_id, prepared.finding)
+    session = _session(args, identity)
+    command = [
+        "sweep", "run",
+        "--case", args.case,
+        "--model", args.model,
+        "--seed", str(args.seed),
+        "--store", "s3",
+        "--cap-usd", str(cap),
+        "--max-minutes", str(args.max_minutes),
+    ]  # fmt: skip
+    if args.allow_over_cap:
+        command.append("--allow-over-cap")
+    arn = sweep_launch.launch_task(
+        session.client("ecs"), session.client("ec2"), model_key=args.model, command=command
+    )
+    print(f"launched:        {arn.rsplit('/', 1)[-1]}")
+    print(f"sweep:           {plan_.sweep_id}")
+    print(
+        "watch it:        the case's records are under cases/<label>/runs/ (not `hc sweep status`); "
+        f"stop it: hc sweep stop --model {args.model}"
     )
     return CLEAN_EXIT
 
@@ -2702,12 +2923,17 @@ def cmd_simulate(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
-def _add_plan_arguments(parser: argparse.ArgumentParser) -> None:
+def _add_plan_arguments(parser: argparse.ArgumentParser, *, case_ok: bool = False) -> None:
+    """The plan's arguments. Where a case sweep is possible (``case_ok``), ``--experiment``, ``--label`` and
+    the repeats are not required by the parser: ``main`` requires them unless ``--case`` is given."""
     parser.add_argument(
-        "--experiment", required=True, help="folder under experiment/, e.g. placeholder"
+        "--experiment",
+        required=not case_ok,
+        default=None,
+        help="folder under experiment/, e.g. placeholder",
     )
     parser.add_argument("--model", required=True, help="a key in experiment/models.toml")
-    repeats = parser.add_mutually_exclusive_group(required=True)
+    repeats = parser.add_mutually_exclusive_group(required=not case_ok)
     repeats.add_argument("--repeats", type=int, help="the same count for every scenario")
     repeats.add_argument(
         "--repeats-file", default=None, help="a repeats.json: a count for each scenario"
@@ -2726,8 +2952,15 @@ def _add_plan_arguments(parser: argparse.ArgumentParser) -> None:
         default=None,
         help="a wording template id (w1-w3); repeat for several; default: every template",
     )
-    parser.add_argument("--label", required=True)
+    parser.add_argument("--label", required=not case_ok, default=None)
     parser.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
+    if case_ok:
+        parser.add_argument(
+            "--case",
+            default=None,
+            metavar="LABEL",
+            help="a frozen case's sweep (Phase 5.5): replaces --experiment, --label and --repeats",
+        )
 
 
 def _add_run_arguments(parser: argparse.ArgumentParser) -> None:
@@ -2777,7 +3010,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_plan_arguments(plan_parser)
     plan_parser.add_argument("--show-prompts", action="store_true")
     run_parser = sweep_actions.add_parser("run", help="Run a session here: laptop or container")
-    _add_plan_arguments(run_parser)
+    _add_plan_arguments(run_parser, case_ok=True)
     _add_run_arguments(run_parser)
     run_parser.add_argument("--store", choices=("local", "s3"), default="local")
     run_parser.add_argument(
@@ -2787,7 +3020,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     run_parser.add_argument("--bucket", default=None)
     launch_parser = sweep_actions.add_parser("launch", help="Start the sweep as a Fargate task")
-    _add_plan_arguments(launch_parser)
+    _add_plan_arguments(launch_parser, case_ok=True)
     _add_run_arguments(launch_parser)
     launch_parser.set_defaults(store="s3")
     launch_parser.add_argument(
@@ -3325,8 +3558,29 @@ SWEEP_COMMANDS = {
 }
 
 
+def _require_plan_arguments(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    """What ``_add_plan_arguments`` leaves to here for ``sweep run`` and ``launch``: without ``--case`` the
+    experiment, the label and the repeats are required, as the parser required them before."""
+    if args.group != "sweep" or args.action not in ("run", "launch") or args.case is not None:
+        return
+    repeats_given = args.repeats is not None or bool(args.repeats_file or args.repeats_json)
+    missing = [
+        flag
+        for flag, given in (
+            ("--experiment", args.experiment is not None),
+            ("--label", args.label is not None),
+            ("--repeats or --repeats-file", repeats_given),
+        )
+        if not given
+    ]
+    if missing:
+        parser.error(f"the following arguments are required: {', '.join(missing)}")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    _require_plan_arguments(parser, args)
     if args.group == "dossier":
         return cmd_dossier(args)
     if args.group == "case":

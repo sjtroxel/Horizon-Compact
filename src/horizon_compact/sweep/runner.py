@@ -63,14 +63,29 @@ SONNET_ROUTE_ENV = "HC_SONNET_ROUTE"
 SONNET_ROUTES = frozenset({"application_profile", "geo_profile"})
 
 
-Role = Literal["development", "pilot", "official"]
+Role = Literal["development", "pilot", "official", "case"]
+# The roles that live under ``<role>/<experiment>/``. A case sweep has a prefix of its own (``sweep_prefix``),
+# so this tuple is the grid's and the freeze's scan of it: a case never appears in it.
 ROLES: tuple[Role, ...] = ("development", "pilot", "official")
+CASE_ROLE: Role = "case"
+CASE_EXPERIMENT_PREFIX = "case-"
 
 
 def sweep_prefix(experiment_name: str, sweep_id: str, role: Role = "development") -> str:
     """Where a sweep lives: its role, then the experiment's name, so placeholder and company runs never share
     a folder (Phase 2.5 IMPLEMENTATION doc section 8.4) and a pilot can never sit beside the grid (Phase 4
-    code half, section 4.2). The role is also the ``label`` of every record the sweep writes."""
+    code half, section 4.2). The role is also the ``label`` of every record the sweep writes. A case sweep
+    (Phase 5.5 K1) lives under ``cases/<label>/runs/<sweep_id>/``, the one place it can write."""
+    if role == CASE_ROLE:
+        # Imported here: the probe layout reads the case gate, which reads this module.
+        from horizon_compact.caseprobe.layout import runs_prefix
+
+        if not experiment_name.startswith(CASE_EXPERIMENT_PREFIX):
+            raise ValueError(
+                f"{experiment_name!r} is not a case's experiment (it is named "
+                f"{CASE_EXPERIMENT_PREFIX}<label>)"
+            )
+        return runs_prefix(experiment_name.removeprefix(CASE_EXPERIMENT_PREFIX), sweep_id)
     if role not in ROLES:
         raise ValueError(f"unknown role {role!r}; the roles are {', '.join(ROLES)}")
     return f"{role}/{experiment_name}/{sweep_id}/"
