@@ -7,7 +7,29 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-28, about 11:05 AM (K4 BUILT AND REVIEWED; HIS BRIEF APPROVAL, THEN K5)
+> ## START HERE — where things stand, 2026-10-28, about 5:15 PM, HANDOFF (K5 BUILT AND REVIEWED; §5 DONE; §6.0 NEXT)
+>
+> **Measured:** last commit `7619436` ("phase 5.5: k4 memo scan"), pushed. **K5, the re-identification check (`hc case
+> reident`), is built (Sonnet) and reviewed (Opus): one change, his decision (a)** (a coarsened case, `closure-19`,
+> is checked at its two-digit figures, not three; IMPLEMENTATION doc §5.5, as-built note and review notes). Nothing
+> was run against SEC; tested on fakes only. `make check` green, **3,116 tests**.
+>
+> **Uncommitted, for his commit `phase 5.5: k5 reident check`:** `caseprobe/reident.py`, `casebuild/edgar.py`
+> (`EdgarNotFound`), `cli.py`, `tests/test_case_reident.py`, the IMPLEMENTATION doc, this file and the ROADMAP row.
+> With it, **all five of §5's items (K1-K5) are built**. **Next: §6.0** (before the first case run, no model call):
+> his push with CI and Deploy green and the image digest into a new `docs/phases/evidence/phase-5.5/run-log.md`;
+> Claude's live checks (Haiku 5.5 served at its price, `gpt-oss-120b`'s `deepinfra/bf16` endpoint listed); his
+> credit readings (Anthropic credit and month's spend, OpenRouter, AWS Billing) against `cost.md`; the ten dry runs
+> and five `--check-rubric`s; the caps. Then §6.1, `haiku-5-5` on `closure-07` alone. **Open, his:** does the
+> private term file hold each case's plant location (§5.4's review notes: places are caught only by the commit's
+> name guard)? **His, outside this repo:** the private term file, uncommitted since 2026-10-03.
+>
+> **To expect at §6.6:** a case whose earlier years SEC's frames hold as recast (discontinued operations after a
+> closure) is withheld with the "could not confirm" reason (§5.5's review notes). Not a fault.
+>
+> *The 11:05 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-28, about 11:05 AM (K4 BUILT AND REVIEWED; HIS BRIEF APPROVAL, THEN K5) *(superseded by the block above)*
 >
 > **Measured:** last commit `4087e73` ("phase 5.5: k3 record checks and case status"). **K4, the memo scan (`hc case
 > memos`), is built (Sonnet) and reviewed (Opus): three fixes** (IMPLEMENTATION doc §5.4, its dated note, as-built

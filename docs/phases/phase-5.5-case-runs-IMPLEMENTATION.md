@@ -557,6 +557,98 @@ As recommended in decision 3 (a): **`hc case reident <label>`** (laptop, his to 
   which the target is unique (fail) and one in which it hides among 25 (pass); nothing the command prints holds a
   name or a CIK.
 
+**[done] K5, as built (2026-10-28; Sonnet built; awaiting Opus's review).** `make check` green, **3,115 tests** (45
+new, `tests/test_case_reident.py`); `hc protocol check` passes (no frozen file touched). No SEC, AWS, GitHub or model
+call in any test, and nothing was run for real; the private appendix was never opened. The new code is
+`caseprobe/reident.py` and `cmd_case_reident` with the `reident` subparser in `cli.py`; `casebuild/edgar.py` gains
+`EdgarNotFound` (a subclass of `EdgarError`, raised on a 404, so a frame SEC does not have is told from a failure; the
+old message and its test are unchanged). The module imports nothing that needs scipy (a test imports it and `cli` in a
+fresh interpreter and checks `scipy` is absent). **No AWS:** the case is loaded from the repository (`case.lock`,
+`freeze.json`, through `read_case` and `check_frozen`) and the private appendix (the dossier of the lock's probe set,
+hashed against `case.lock`; `build.json`; the CIK from `sources.json`); no bucket is read. It needs
+`HC_SEC_USER_AGENT` (or `hc.secUserAgent`) and the appendix setting, and fetches about 18 frames (three years, four
+revenue tags, income and cash flow) at 0.25 s apart, cached in the case's folder. What did not fit §5.5's text, and what
+was done instead:
+
+- **The figures are rebuilt from `build.json`, not read from the dossier's prose.** The raw XBRL value is rendered as
+  `figures.py` renders it (to $0.1 million, or whole dollars under $1 million), then scaled by `scale_dollars`, the
+  transform's own function, with the case's factor. *Departure from the brief's words: the interval is wider than half a
+  unit of the third digit.* The text was rendered to $0.1 million before it was scaled, so the true scaled value can sit
+  up to 0.05 million times the factor beyond the stated one; without that, the case's own figures could fall outside
+  their own intervals and withhold a case spuriously. The width is the third digit's half unit plus that rendering
+  half unit times the factor (`stated_interval`). It errs toward more matches, not fewer, the opposite of the other
+  assumptions, so it is the first thing for Opus to confirm or strike.
+- **Per-employee figures are not compared:** SEC has no headcount frame (`dei/EntityNumberOfEmployees` is a 404). Recorded
+  in the private record and here as a limit of the check; no substitute was invented.
+- **Every ratio is exact.** Intervals and filers' ratios are `Fraction`s, so "a value at the interval's edge matches" is
+  exact; a ratio whose denominator interval holds zero is dropped and recorded; a revenue interval is never assumed
+  positive. At most eight ratios (two growths, three margins, three cash-flow ratios); a line or year `build.json` lacks
+  drops the ratios that need it.
+- **Which frame, and what a filer's row is.** For each fiscal year the own filer's revenue tag (as `build.json` records
+  it, refused if it is not one `figures.LINES` lists) is asked for in the calendar-year frames of the year itself, the
+  year before and the year after, in that order and only as needed, until the own CIK appears there with
+  `end` equal to the fiscal year end. The other tags' frames are then taken at that year. A filer's revenue is the first
+  tag, in `figures.LINES`' order, with a row for it. A filer matches only if every ratio can be computed from its rows
+  and falls in the interval; its income or cash-flow row must end the day its revenue row ends, or the ratio is not
+  formed.
+- **The verdict, fail closed.** The own filer not found in a frame for a year a ratio needs, found but outside its own
+  intervals, or **no ratio at all** (a `build.json` that gives none) is "withheld: ... could not confirm"; fewer than 20
+  matching, own included, is the fewer-than-20 reason; the threshold test is exactly 20 passes, 19 withholds. When the
+  own filer is not found, no year after that is compared (so there is no matching count and the output says "not
+  compared").
+- **The description half.** The template holds the overview's first sentence (cut at the first full stop that is not an
+  abbreviation or an initial) and three empty slots. *Departure: query 1 need only be the start of the overview, not
+  equal to the first sentence the code cut*, so a wrong cut can be fixed by hand; each slot's phrase must appear in the
+  situation section, whitespace aside, and the dossier hash in the file must be the case's. An entry with an engine, a date
+  and `company_on_first_page` is answered; any `true` withholds even beside unanswered entries; query 1 and every filled
+  slot answered `false` passes; anything else is pending and nothing public is written. The template is written
+  only after a passed figure half.
+- **A coarsened case (probe set 2) is checked at `build.json`'s three-digit figures, not at its coarsened ones.** The
+  hand-coarsened dossier's figures (rounded to two significant digits, protocol §12.8) are not in `build.json`, and the
+  appendix was not opened. Three-digit intervals are the narrower test, so any count is a lower bound on what an attacker
+  of the coarsened dossier would match: it errs toward withholding. Recorded in the private record. `closure-19` is the
+  case in `freeze.json` this applies to. *Changed at Opus's review (his decision (a), below): a coarsened case is now
+  checked at its two-digit figures.*
+- **What is written.** Private, once: `reident-record.json` (ratios and intervals, every frame with URL, sha256 and fetch
+  time, whether each frame exists, the year found for each fiscal year, the matching CIKs, what was dropped, the
+  assumptions) and `reident-search.toml`. A rerun recomputes the record from the cached frames and refuses if it differs;
+  a frame SEC 404s is asked again (it is never cached), and a change there also refuses. Public, once, by a link,
+  `experiment/results/cases/<label>/reident.json`: `reident_version`, the label, `exploratory`, `status`, `reason` (one of the
+  three fixed strings or null), the threshold, and provenance by hash: HEAD, `build.json`, the dossier, the private record
+  and, *added to the brief's list so a pass can be traced to the answers it rested on*, `search_sha256` (the filled
+  template's, null when the figure half withheld it). No count, CIK, name, year, period or URL. Refused up front if the
+  file exists, with nothing fetched; the command also refuses when `src`, `pyproject.toml` or `uv.lock` differ from HEAD.
+- **What it prints** is the status and a note, the ratios used, the matching count (the case's own filer included) and
+  whether the own filer was found and matching; never a name, CIK, ticker or URL. A pending run says which file to
+  fill in (by its name in the case's folder) and writes nothing else.
+- **No deny entry**, as decided: it makes no model call and reads no result.
+
+**Opus's review of K5 (2026-10-28), and his decision on the coarsened case.** One change, his decision (a); the rest
+checked against the code it relies on. `make check` green before and after.
+
+- **Confirmed: the rendering's extra width stays.** `figures._dollars` renders to $0.1 million, and `transform._dollar`
+  scales that rendered number in its stated unit to three digits (`scale_dollars`), so the true scaled value sits up
+  to 0.05 million times the factor beyond the stated one. For a figure under about $10 million that term is the
+  larger part of the interval; without it a case's own small operating income would miss its own interval and the
+  case would be withheld for no real reason.
+- **Change (his decision (a)): a coarsened case is checked at its two-digit figures.** At three digits a pass was
+  conclusive but a "fewer than 20" was not, and the public file is write-once. For probe set 2 each figure is now
+  the three-digit figure rounded to two (protocol §12.8, done by hand from the three-digit dossier), and its interval
+  is centred there and widened by both roundings' half-units plus the rendering's: a rounding of a rounding can land
+  more than one half-unit away (1,545 goes to 1,550, then 1,600). `stated_interval(..., coarsened=True)`,
+  `build_ratios(..., coarsened=...)`, `COARSENED` reworded. One test added (that example, exact), and the coarsened
+  case's test now holds that its own filer matches and that every wide interval contains the plain one.
+- **Checked, no change:** the CIK is read where `documents.write_sources` writes it (`sources.json`'s ten-digit
+  string); the dossier's sections are read from its `text` key under `assemble.HEADINGS`; a cached frame keeps its
+  first `fetched_at`, so a rerun's record is stable; `ReidentRefused` is a `SweepRefusal` and `EdgarError` is caught
+  by `cmd_case`; nothing refused or printed holds a URL, a CIK or a name; every CIK and name in the tests is a
+  fictional canary.
+- **To know before the first run:** SEC's API page (read live 2026-10-28) says a frame holds, per filer, the fact
+  **last filed** for the period. A case whose earlier years were recast in a later 10-K (discontinued operations
+  after a closure are common) will not match its own intervals and is withheld with the "could not confirm" reason.
+  That is the fail-closed outcome chosen, not a fault; the output then says the own filer was found but not matching.
+  Not built (offered, not taken): the private record does not say which of the own filer's ratios missed.
+
 ## 6. The runbook
 
 **His commands, one at a time.** Anything longer than one line goes in a `scratch/` script, with the string to look

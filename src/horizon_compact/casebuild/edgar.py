@@ -46,6 +46,10 @@ class EdgarBlocked(EdgarError):
     """The SEC answered 403 or 429. Nothing is retried, and no later request is sent."""
 
 
+class EdgarNotFound(EdgarError):
+    """The SEC answered 404: there is no such document. Nothing is cached, so a later call asks again."""
+
+
 @dataclass(frozen=True)
 class Response:
     status: int
@@ -182,6 +186,8 @@ class EdgarClient:
         if response.status in BLOCKED_STATUSES:
             self._blocked = True
             raise EdgarBlocked(f"the SEC answered {response.status}; stopped, nothing retried")
+        if response.status == 404:
+            raise EdgarNotFound("the SEC answered 404 for a request")
         if response.status != 200:
             raise EdgarError(f"the SEC answered {response.status} for a request")
 

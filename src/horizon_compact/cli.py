@@ -118,6 +118,7 @@ from horizon_compact.caseprobe.knowledge import (
 )
 from horizon_compact.caseprobe.knowledge import Preview as KnowledgePreview
 from horizon_compact.caseprobe.knowledge_read import knowledge_verdict, saved_empty_calls
+from horizon_compact.caseprobe.reident import ReidentResult, run_reident
 from horizon_compact.caseprobe.run import ProbeRefused, check_probe_launch, run_case_probe
 from horizon_compact.caseprobe.s3reader import read_probe_records
 from horizon_compact.caseprobe.session import (
@@ -2145,6 +2146,45 @@ def _print_memo_counts(root: Path, result: Any) -> None:
     )
 
 
+def cmd_case_reident(args: argparse.Namespace) -> int:
+    """``hc case reident``: the re-identification check of a frozen case's dossier (Phase 5.5 IMPLEMENTATION
+    doc §5.5). The case and its CIK are read from the repository and the private appendix; only SEC's XBRL
+    frames are fetched (free, no key besides the declared User-Agent). Prints the status, the ratios used, the
+    matching count and whether the case's own filer was confirmed, never a name, CIK, ticker or URL."""
+    root = default_repo_root()
+    # Scoped to the code, as `hc case match` is: the public file the HEAD records is the code that wrote it.
+    if _git("status", "--porcelain", "--", "src", "pyproject.toml", "uv.lock"):
+        raise SweepRefusal(
+            "src, pyproject.toml or uv.lock differ from HEAD: commit them first, so the HEAD the file "
+            "records is the code that checked"
+        )
+    case = open_case(args.label)
+    sec = EdgarClient(appendix=case, transport=UrllibTransport(), user_agent=sec_user_agent())
+    result = run_reident(
+        root, args.label, appendix=case.root, head=_git("rev-parse", "HEAD"), sec=sec
+    )
+    _print_reident(root, result)
+    return CLEAN_EXIT
+
+
+def _print_reident(root: Path, result: ReidentResult) -> None:
+    """Counts and a status only. Nothing here can hold a name, a CIK, a ticker or a URL."""
+    print(f"status: {result.status} ({result.note})")
+    print(f"ratios used: {result.ratios_used} (at most 8)")
+    compared = "not compared" if result.matching is None else str(result.matching)
+    print(f"filers matching every ratio, the case's own included: {compared}")
+    print(f"the case's own filer found and matching: {'yes' if result.own_confirmed else 'no'}")
+    if result.public is not None:
+        print(f"wrote {result.public.relative_to(root).as_posix()}")
+    if result.template is not None:
+        print(
+            f"wrote {result.template.name} in the case's folder: search each query as written, fill in "
+            "engine, searched_on and company_on_first_page, and run the command again"
+        )
+    elif result.status == "pending":
+        print("nothing written: finish the entries of the description half's file and run it again")
+
+
 def _today() -> date:
     """The local date; a function so the tests can set it."""
     return date.today()
@@ -2845,6 +2885,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_match(args)
         if args.action == "memos":
             return cmd_case_memos(args)
+        if args.action == "reident":
+            return cmd_case_reident(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (
         AppendixError,
@@ -3559,6 +3601,17 @@ def build_parser() -> argparse.ArgumentParser:
     memos.add_argument("--yes", action="store_true", help="skip both spend questions")
     memos.add_argument("--profile", help="the AWS profile (no default)")
     memos.add_argument("--bucket", help=f"the results bucket (else {RESULTS_BUCKET_ENV})")
+    reident = case_actions.add_parser(
+        "reident",
+        help="Phase 5.5 (K5): the re-identification check of a frozen case's dossier (protocol §12.11). The "
+        "figure half compares the ratios scaling cannot change against SEC's XBRL frames for every filer "
+        "(withheld if the case is among fewer than 20, or cannot be confirmed); the description half is a "
+        "template of web searches he fills in by hand and the command reads on a rerun. Writes "
+        "experiment/results/cases/<label>/reident.json, once, when it has a verdict. No model call, no "
+        "AWS; fetches only SEC frames (free). Prints the status and counts, never a name, CIK or URL. "
+        "Laptop.",
+    )
+    reident.add_argument("label", help="a frozen case's neutral label, such as closure-07")
     assemble = case_actions.add_parser(
         "assemble",
         help="Write the case's dossier once every flag has a decision in reviewed-flags.json",
