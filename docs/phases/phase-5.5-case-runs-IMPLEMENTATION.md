@@ -3,7 +3,8 @@
 > **IMPLEMENTATION doc. APPROVED 2026-10-27, about 11:45 AM (his): decisions 1-3 in §8 as recommended, (a);
 > decision 4 (d), an option added on his question (he preferred a model to make the reads). Patched 2026-10-27 after
 > K1's review (his decisions): `hc sweep status --case` goes into K3 (§5.3), and §6.2 runs one sweep at a time per
-> model (its dated note).** Written the day
+> model (its dated note). Patched 2026-10-28 after K4's review (his decision): a ticker on SEC's list counts only
+> where the text marks it as a ticker (§5.4's dated note).** Written the day
 > Phase 5 closed (`5f794ee`), immediately before this phase is built. Sources: the Phase 5.5 scope doc
 > (`docs/phases/phase-5.5-case-runs.md`), the Phase 4 runs-half IMPLEMENTATION doc (its runbook is this one's model),
 > the search-half doc §4.6.5 and §4.7-4.11, the exploratory doc §3.1 and §9, protocol sections 12, 13.2 and 14,
@@ -417,6 +418,15 @@ the deny script: **3,017 tests, 3,013 pass, the same 4 fail by design.**
     filer names and tickers (`company_tickers.json`, fetched once per scan, its sha256 recorded), with corporate
     suffixes stripped and names shorter than four characters dropped except as tickers in capitals. Matches are
     case-sensitive and whole-word.
+    **Dated note, 2026-10-28 (his decision, after K4's review, before any memo exists): a ticker counts only where
+    the text marks it as one** (after an exchange, "NYSE: X" or "Nasdaq X"; after a dollar sign, "$X"; after the
+    word ticker, "ticker symbol X"). Bare tickers are left to the model net, whose brief asks for them. The reason,
+    measured on SEC's list of that day (10,430 tickers) over the repo's own business prose in memo-sized chunks:
+    as written, the rule flagged 42% of the scenario prose's chunks and 85% of the planning docs', nearly all on
+    one- and two-letter tickers that are ordinary words in capitals ("A", "D", "C", "AI"); with tickers marked,
+    1% and about 2%. Every flag is a paid read by the independent reader, so the rule as written would have sent
+    most of the 1,500 memos to it (an estimated $6-25 of his OpenRouter cash, against $1-6 now). Names are
+    unchanged.
   - **The model:** Haiku 5.5 reads every memo, in batches of up to 25, with a fixed brief committed before the
     first scan (`experiment/readers/memo-names.txt`): "list every name of a real company, brand or ticker that
     appears in each memo, quoted exactly, or none". The brief carries no objective, and the order is shuffled.
@@ -438,6 +448,90 @@ the deny script: **3,017 tests, 3,013 pass, the same 4 fail by design.**
   held, and one it clears is published; an overrule toward publishing is refused; a held memo's text appears nowhere
   in the output; whole-word matching (a term inside a longer word is not a hit); no brief or request holds an
   objective id; the file is refused if it exists.
+
+**[done] K4, as built (2026-10-28; Sonnet built; Opus reviewed about 11:00 AM, three fixes below).** `make check` green, **3,069 tests** (52 new,
+`tests/test_case_memos.py`; K3's four deny-list tests now pass, the script having been run); `hc protocol check` passes
+(no frozen file touched). No model, AWS, SEC or GitHub call in any test; nothing was run for real. The new code is
+`caseprobe/memos.py` (the scan), `reader/memo.py` (the two message builders and reply parsers, pure), two drafts of briefs
+(`experiment/readers/memo-names.txt` and `memo.txt`) and `cmd_case_memos` with the `memos` subparser in `cli.py`;
+`reader/briefs.py` gains `MEMO_KINDS`, `casebuild/appendix.py` gains `memo_overrules_path`, `.pre-commit-config.yaml`
+and `experiment/readers/README.md` are widened. What did not fit §5.4's text, and what was done instead:
+
+- **One command, not `hc case reader ... memo` per flag.** `hc case memos <label> --model <key> --sweep <id>` runs both
+  nets, the reader on every flagged memo, then writes. The `memo` brief sits beside the reader's kinds as a second tuple,
+  `MEMO_KINDS = ("memo-names", "memo")`, not in `KINDS`: `load_brief` takes either, `run_read` and `hc case reader`
+  still take only `KINDS` (a test holds that `hc case reader ... memo` is refused). Both briefs are under
+  `experiment/readers/`, so `frozen_reader_inputs` covers them, and every request record holds the brief's sha256.
+- **The held counts are not in the results file.** `hc case match`'s file is write-once, so the counts go to
+  `<model>-memos-summary.json` beside it (counts by reason, provenance as K2's file has it, both brief hashes, the SEC
+  list's hash, the reader-inputs commit), written once by a link. The memo file is `<model>-memos.jsonl`: one line per
+  run with run id, objective, wording, final status, `source` (`memo`, `reply_text` or null) and `memo` (the text,
+  `"held"`, or null for a run whose final attempt wrote no text). A reply with no tool call publishes its text blocks.
+- **Resumable, which §5.4 did not say.** His overrule needs a second pass after he has read the flags, and the records
+  are write-once. So every paid call is recorded (request before the call) and a rerun reads the records instead of
+  calling: he deletes the two uncommitted public files, adds `memo-overrules-<model>.toml` to the case's folder and runs
+  the command again, at no cost and with no question asked. A request with no reply is refused until he looks; a rerun
+  whose lists, flags or stored requests differ from the first run's is refused. The overrule file has `[[overrule]]`
+  entries of `run_id` and `reason` (optional `action`, which may only be `hold`); an entry that would publish, one for a
+  run with no text or no run, a repeat, or one without a reason stops the command before any spend. Each overrule is
+  logged with its reason in the appendix and counted.
+- **Order of the refusals.** Before any byte leaves: the results file for the model must exist (the reveal), the two
+  public files must not, `hc protocol check`, the reader's inputs committed and pushed, the models and briefs, the
+  case, the sweep (all of K2's checks, through `load_material` and `read_sweep`), the overrule file and the private term
+  file; the CLI also refuses when `src`, `pyproject.toml` or `uv.lock` differ from HEAD. Then SEC's list (free), then the
+  first question (Haiku), then the second (the reader), each asked only if it has a call left to make, the keys last.
+- **`read_runs` gives no texts.** The frozen reader returns rows, so `collect_texts` reads each run's `final.json` and its
+  final attempt's record by named fields only: `tool_calls[0].input.memo`, else `text_blocks`. Reasoning is never read.
+- **The reader's reply.** Per flagged word `yes`/`no`/`cannot_tell`, and once for the memo as a whole (so a name that no
+  net flagged can still be caught, and a memo flagged by a failed batch, with no word, can be judged). Any `yes` holds the
+  memo (`name_confirmed`); no `yes` and any `cannot_tell` holds it too (`reader_unclear`: neither cleared nor confirmed,
+  so fail closed); three unusable replies hold it (`reader_no_reply`). Only a full set of `no` publishes. His overrule is a
+  fourth reason (`overruled`).
+- **A call that fails at the API is not an attempt.** It is recorded and stops the run (a spent credit is not a model
+  failure, and treating it as an unaccounted batch would flag every memo); the rerun goes on from the records. A reply
+  that arrives but does not account for its batch counts as an attempt: two such flag every memo of the batch.
+- **The lists.** The term file is the name guard's (`hc.nameGuardTerms`, matched by `find_terms`, so its `allow:` lines
+  apply); the per-case `terms.txt` are not read. SEC's names and tickers are matched on whole-word tokens, which is the
+  guard's rule in effect, case-sensitively; a name is its title with a state tag (`/DE/`) and a legal form (Inc, Corp,
+  Co, Ltd, LLC, PLC, ...) stripped, dropped under four characters, and an all-capitals title is also matched
+  capitalized (SEC's casing is not a writer's). Tickers are kept at any length, in capitals only, as written. *(As
+  first built, a ticker counted bare, so a one- or two-letter ticker that is also a word in capitals flagged most
+  memos; the review measured it, and since the dated note of 2026-10-28 a ticker counts only where marked.)* The
+  first question prints how many memos the lists flagged, and the second prints the reader's worst case, so he sees
+  the size before spending. SEC's file is fetched through the one
+  EDGAR client and cached in the case's own folder, so the second model's scan of the same case reads the same file.
+- **The model net's shuffle is seeded** from the label, model and sweep, so a rerun asks the same questions; batch ids are
+  `m1`, `m2`, ... by position. Nothing sent holds a run id, an objective or a wording. Request records hold no
+  objective (they hold the run id of a reader's memo, privately).
+- **Haiku's allowance is a constant** (`NAMES_MAX_TOKENS = 4096`, in the record), since the model's `models.toml` entry has
+  none; its id, route and prices are the `haiku-5-5` entry's.
+- **The briefs are drafts for his approval.** `memo-names.txt` and `memo.txt` must be read and approved by him, then
+  committed and pushed before the first scan; until then `frozen_reader_inputs` refuses.
+
+**Opus's review of K4 (2026-10-28).** Three fixes, one of them his decision; the rest checked against the code it
+relies on. `make check` green before and after.
+
+- **Fix (his decision): a ticker counts only where marked** (the dated note above). `ListNet.words_in` matches SEC's
+  names as before and tickers through `_MARKED_TICKER`; the fixture memo now marks its ticker, and the list test
+  holds that a bare ticker, short or long, is not a flag and a marked one is (exchange, dollar sign, the word ticker),
+  in capitals and whole only.
+- **Fix: the reader's brief contradicted its task.** `memo.txt` said "Do not use anything you may remember about any
+  company, plant or news", a line carried from `rejection.txt` and `knowledge.txt`, where it belongs. Here the
+  reader cannot know whether a word is a real company without what it remembers. It now says to use what it knows to
+  recognize a name, and not to work out which company the memo is about. `memo-names.txt`'s "Use only the memos"
+  says the same: list only names written in the memos, recognized with what the model knows.
+- **Fix: an edit to the term file no longer blocks his overrules.** The flags record held the term file's hash and
+  a rerun compared it, so any edit between a scan and its overrule rerun (a term for another case) refused the rerun
+  for good. The rerun now compares every memo's flags and not the lists' hashes; a change that flags something new
+  is still refused. One test added (it fails without the fix).
+- **Checked, no change:** SEC's list is cached in the case's folder by the one EDGAR client, so a rerun sees the same
+  list. The name guard scans `.jsonl` on commit (only binary files are skipped). Reader calls are sequential and,
+  with reasoning, well under the entry's 10 a minute; a refusal at the API stops the run and the rerun goes on from
+  the records. Nothing printed or refused holds a flagged word or a memo. Every test §5.4 names is there.
+- **To know before the first scan:** the second question's worst case assumes the reader's full 24,000-token
+  allowance on every read (about $0.29 a read), so it prints far above the expected cost; and places do not count
+  under §12.11, so a real plant location in a memo is caught only by the commit's name guard, if the term file holds
+  it.
 
 ### 5.5 The re-identification check (K5; decision 3)
 
@@ -657,7 +751,8 @@ about a company's motives. Rule zero. And from this doc:
 **Building §5: $0. The runs: about $3.10, worst $4.50** (`cost.md`). About $2.40 is Anthropic credit and about $0.70
 his OpenRouter cash. Fargate is under $1 of AWS credit. **Little money for the checks:** SEC's API and web searches are
 free. The memo scan's Haiku pass is about $0.20-0.30 of the credit, and the reader's reads of flagged memos a few
-cents each of his cash (decision 4 (d)). Cumulative after this phase: about $49, worst about $51, under the $60
+cents each of his cash (decision 4 (d)); *(2026-10-28, K4's review: about $1-6 in all, an estimate that turns on how
+many memos Haiku flags; §5.4's dated note)*. Cumulative after this phase: about $49, worst about $51, under the $60
 re-plan point.
 
 **Time:** about two days of build and review for §5. Then about a day of run time, set by `gpt-oss-120b`. Then about

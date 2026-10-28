@@ -2046,6 +2046,105 @@ def cmd_case_match(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def _memo_names_provider() -> TextProvider:
+    """Anthropic's API with his key, from ``ANTHROPIC_API_KEY`` or a hidden prompt; a function so the tests
+    can set it. Asked for last, after every refusal and the spend question."""
+    return AnthropicProvider(read_anthropic_key(os.environ))
+
+
+def _confirm_memo_names_spend(preview: Any, *, yes: bool) -> bool:
+    """The model net's calls are paid from his own Anthropic credit. Counts and money only."""
+    print(
+        f"memo scan, model net: {preview.model_id}, {preview.memos} memos in {preview.batches} batches, "
+        f"up to {preview.calls_at_most} calls (at most about {preview.input_tokens_at_most:,} tokens in), "
+        f"the most about ${preview.worst_case_usd:.2f} of your own Anthropic API credit (usually far less)"
+    )
+    print(f"the lists have flagged {preview.flagged_by_lists} memos so far")
+    return _ask_continue(yes)
+
+
+def _confirm_memo_reader_spend(preview: Any, *, yes: bool) -> bool:
+    """The reader's calls are paid from his own OpenRouter credit. Counts and money only."""
+    print(
+        f"memo scan, reader: {preview.model_id}, {preview.memos} flagged memos, one call each (at most about "
+        f"{preview.input_tokens_at_most:,} tokens in), the most about ${preview.worst_case_usd:.2f} of your "
+        f"own OpenRouter credit (usually far less); if every reply were unusable and asked again, up to "
+        f"about ${preview.retries_worst_case_usd:.2f}"
+    )
+    return _ask_continue(yes)
+
+
+def _ask_continue(yes: bool) -> bool:
+    if yes:
+        return True
+    try:
+        answer = input("Continue? [y/N] ")
+    except EOFError:
+        answer = ""
+    return answer.strip().lower() == "y"
+
+
+def cmd_case_memos(args: argparse.Namespace) -> int:
+    """``hc case memos``: the company-name scan of every model-written text of one case sweep, after the
+    reveal (Phase 5.5 IMPLEMENTATION doc §5.4). Prints counts, never a flagged word or a memo's text. Imports
+    the scan here: it needs scipy through the matcher's material, which the image leaves out."""
+    from horizon_compact.caseprobe.memos import run_memo_scan
+
+    root = default_repo_root()
+    # Scoped to the code, as `hc case match` is: the files this command leaves would otherwise block a rerun.
+    if _git("status", "--porcelain", "--", "src", "pyproject.toml", "uv.lock"):
+        raise SweepRefusal(
+            "src, pyproject.toml or uv.lock differ from HEAD: commit them first, so the HEAD the summary "
+            "records is the code that scanned"
+        )
+    store = _case_bucket_store(args)
+    case = open_case(args.label)
+    sec = EdgarClient(appendix=case, transport=UrllibTransport(), user_agent=sec_user_agent())
+    result = run_memo_scan(
+        root,
+        store,
+        args.label,
+        args.model,
+        args.sweep,
+        appendix=case.root,
+        head=_git("rev-parse", "HEAD"),
+        git=git_in(root),
+        sec=sec,
+        confirm_names=lambda preview: _confirm_memo_names_spend(preview, yes=args.yes),
+        confirm_reader=lambda preview: _confirm_memo_reader_spend(preview, yes=args.yes),
+        make_names_provider=_memo_names_provider,
+        make_reader_provider=_reader_provider,
+    )
+    _print_memo_counts(root, result)
+    return CLEAN_EXIT
+
+
+def _print_memo_counts(root: Path, result: Any) -> None:
+    """Counts only. Nothing here can hold a flagged word or a memo's text."""
+    c = result.counts
+    for path in (result.memos_path, result.summary_path):
+        print(f"wrote {path.relative_to(root).as_posix()}")
+    print(f"runs: {c['runs']}, with a text to scan: {c['with_text']}, without: {c['without_text']}")
+    print(
+        f"flagged by the lists: {c['flagged_by_lists']}; by the model: {c['flagged_by_model']} "
+        f"(both: {c['flagged_by_both']}; batches the model did not account for: "
+        f"{c['model_net_unaccounted']} memos); to the reader: {c['flagged']}"
+    )
+    print(
+        f"reader: confirmed {c['reader_confirmed']}, unclear {c['reader_unclear']}, cleared "
+        f"{c['reader_cleared']}, no usable reply {c['reader_no_reply']}"
+    )
+    reasons = ", ".join(f"{reason} {n}" for reason, n in c["held_by_reason"].items())
+    print(
+        f"held back: {c['held']} ({reasons}); overruled by you: {c['overruled']}; published: {c['published']}"
+    )
+    print(f"this run's calls cost about ${result.cost_usd:.4f}")
+    print(
+        "to apply overrules (hold only): delete the two files above, uncommitted, add "
+        "memo-overrules-<model>.toml to the case's folder, and run the command again; it spends nothing"
+    )
+
+
 def _today() -> date:
     """The local date; a function so the tests can set it."""
     return date.today()
@@ -2744,6 +2843,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_freeze(args)
         if args.action == "match":
             return cmd_case_match(args)
+        if args.action == "memos":
+            return cmd_case_memos(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (
         AppendixError,
@@ -3441,6 +3542,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     match.add_argument("--profile", help="the AWS profile (no default)")
     match.add_argument("--bucket", help=f"the results bucket (else {RESULTS_BUCKET_ENV})")
+    memos = case_actions.add_parser(
+        "memos",
+        help="Phase 5.5 (K4): the company-name scan of every model-written text of one case sweep, after "
+        "`hc case match` (protocol §12.11). Two nets (the private term file and SEC's list; Haiku 5.5), then "
+        "the independent reader on every flagged memo. Costs his own Anthropic and OpenRouter credit, asked "
+        "before each is spent; the Anthropic key is read from the environment. Writes "
+        "experiment/results/cases/<label>/<model>-memos.jsonl and -memos-summary.json, once. Prints counts "
+        "only, never a flagged word or a memo. Laptop, named profile.",
+    )
+    memos.add_argument("label", help="a frozen case's neutral label, such as closure-07")
+    memos.add_argument(
+        "--model", required=True, help="a models.toml key: haiku-5-5 or gpt-oss-openrouter"
+    )
+    memos.add_argument("--sweep", required=True, help="the case sweep's id")
+    memos.add_argument("--yes", action="store_true", help="skip both spend questions")
+    memos.add_argument("--profile", help="the AWS profile (no default)")
+    memos.add_argument("--bucket", help=f"the results bucket (else {RESULTS_BUCKET_ENV})")
     assemble = case_actions.add_parser(
         "assemble",
         help="Write the case's dossier once every flag has a decision in reviewed-flags.json",

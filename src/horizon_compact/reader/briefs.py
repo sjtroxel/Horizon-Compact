@@ -1,4 +1,4 @@
-"""The reader's three fixed briefs, and the proof they were committed and pushed before the first read.
+"""The reader's fixed briefs, and the proof they were committed and pushed before the first read.
 
 A brief is the system text of one kind of read (``experiment/readers/<kind>.txt``). Its sha256 goes into every
 request record. ``frozen_reader_inputs`` refuses unless the briefs, ``experiment/models.toml`` (the reader's
@@ -16,6 +16,10 @@ from typing import Any
 from horizon_compact.casebuild.frozen import FrozenInputsError, Git
 
 KINDS = ("rejection", "scenario", "rubric")
+# The memo scan's two briefs (Phase 5.5 §5.4): Haiku's list-the-names pass and the independent reader's
+# judgment of a flagged memo. Kept apart from KINDS so ``hc case reader`` cannot take them: ``hc case memos``
+# reads both.
+MEMO_KINDS = ("memo-names", "memo")
 # A rejection on this criterion is read with its own brief (step 3 item 4); the three above are unchanged.
 CRITERION_BRIEFS = {"not_known": "knowledge"}
 BRIEFS_DIR = "experiment/readers"
@@ -35,8 +39,8 @@ class Brief:
 
 
 def load_brief(root: Path, kind: str, criterion: str | None = None) -> Brief:
-    if kind not in KINDS:
-        raise BriefError(f"{kind!r} is not a kind of read: {', '.join(KINDS)}")
+    if kind not in (*KINDS, *MEMO_KINDS):
+        raise BriefError(f"{kind!r} is not a kind of read: {', '.join((*KINDS, *MEMO_KINDS))}")
     name = CRITERION_BRIEFS.get(criterion or "", kind) if kind == "rejection" else kind
     path = root / BRIEFS_DIR / f"{name}.txt"
     try:

@@ -7,7 +7,25 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-28, about 9:10 AM (K3 BUILT AND REVIEWED; K4 NEXT)
+> ## START HERE — where things stand, 2026-10-28, about 11:05 AM (K4 BUILT AND REVIEWED; HIS BRIEF APPROVAL, THEN K5)
+>
+> **Measured:** last commit `4087e73` ("phase 5.5: k3 record checks and case status"). **K4, the memo scan (`hc case
+> memos`), is built (Sonnet) and reviewed (Opus): three fixes** (IMPLEMENTATION doc §5.4, its dated note, as-built
+> note and review notes). **His decision:** a ticker on SEC's list counts only where the text marks it as one
+> (measured: bare one- and two-letter tickers flagged 42-85% of memo-sized prose, each a paid read; about 1-2% now).
+> The reader's brief no longer forbids the knowledge it needs, and an edit to the term file no longer blocks his
+> overrules. `make check` green, **3,070 tests**.
+>
+> **Before the commit, his:** read and approve the two briefs, `experiment/readers/memo-names.txt` and `memo.txt`.
+> **Uncommitted, for his commit `phase 5.5: k4 memo scan`:** `caseprobe/memos.py`, `reader/memo.py`,
+> `reader/briefs.py`, `casebuild/appendix.py`, `cli.py`, `tests/test_case_memos.py`, the two briefs and the readers'
+> README, `.pre-commit-config.yaml`, the IMPLEMENTATION doc, this file and the ROADMAP row. The briefs must be
+> committed and pushed before the first scan. **Next:** K5 (the re-identification check, §5.5), Sonnet builds and
+> Opus reviews. **His, outside this repo:** the private term file, uncommitted since 2026-10-03.
+>
+> *The 9:10 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-28, about 9:10 AM (K3 BUILT AND REVIEWED; K4 NEXT) *(superseded by the block above)*
 >
 > **Measured:** last commit `c50e0df` ("phase 5.5: k2 case matcher"). **K3, the record checks for case sweeps and
 > `hc sweep status --case`, is built (Sonnet) and reviewed (Opus): one fix** (status with `--case` now refuses every

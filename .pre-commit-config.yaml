@@ -53,8 +53,9 @@ repos:
       - id: check-added-large-files
         args: [--maxkb=1024]
         # Generated evidence allowed past the limit: Phase 3 step 10's simulation results (2.6 MB of text), and the
-        # results files `hc analyze` writes (Phase 4 §6.8; a grid's is about 1.8 MB), never edited by hand.
-        exclude: ^(docs/phases/evidence/phase-3/simulation-results\.json|experiment/results/[^/]+/[^/]+/[^/]+\.json)$
+        # results files `hc analyze` writes (Phase 4 §6.8; a grid's is about 1.8 MB), never edited by hand. A
+        # case's memo file (Phase 5.5 §5.4) is a .jsonl, allowed under experiment/results/cases/ only.
+        exclude: ^(docs/phases/evidence/phase-3/simulation-results\.json|experiment/results/[^/]+/[^/]+/[^/]+\.json|experiment/results/cases/[^/]+/[^/]+\.jsonl)$
       - id: check-merge-conflict
       - id: check-toml
       - id: check-yaml

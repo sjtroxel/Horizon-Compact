@@ -151,6 +151,11 @@ class CaseAppendix:
         §5.2); private, only its hash is committed."""
         return self.directory / "alternatives.toml"
 
+    def memo_overrules_path(self, model_key: str) -> Path:
+        """His overrules of the memo scan for one model's sweep (Phase 5.5 §5.4): entries of run id and reason
+        that hold a memo the reader cleared. Written by hand, after he has read the flags; private."""
+        return self.directory / f"memo-overrules-{model_key}.toml"
+
     @property
     def scenario_figures_path(self) -> Path:
         """The case's rows for its scenario (§4.6.1 item 2), written by hand at Stage D; private."""
