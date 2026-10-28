@@ -18,6 +18,8 @@ READERS = (
     "sweep tokens",  # token counts by objective: a view of the results, his to run at the reveal
     "protocol repeats",
     "protocol records",
+    "case match",  # reads a case sweep's runs against the rubric: his to run at the reveal
+    "case memos",  # K4, not built yet; denied ahead
 )
 FORMS = ("uv run hc", "uv run --no-sync hc")
 

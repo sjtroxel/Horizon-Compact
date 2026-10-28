@@ -200,7 +200,13 @@ from horizon_compact.protocol.lock import (
     render_lock,
     write_lock,
 )
+from horizon_compact.protocol.recordcheck import format_case_report as format_case_record_report
 from horizon_compact.protocol.recordcheck import format_report as format_record_report
+from horizon_compact.protocol.recordcheck import (
+    frozen_case_labels,
+    frozen_case_records,
+    run_case_checks,
+)
 from horizon_compact.protocol.recordcheck import run_checks as run_record_checks
 from horizon_compact.providers.anthropic import (
     AnthropicKeyError,
@@ -1047,17 +1053,51 @@ def cmd_case_sweep_launch(args: argparse.Namespace) -> int:
     print(f"launched:        {arn.rsplit('/', 1)[-1]}")
     print(f"sweep:           {plan_.sweep_id}")
     print(
-        "watch it:        the case's records are under cases/<label>/runs/ (not `hc sweep status`); "
+        f"watch it:        hc sweep status --case {args.case} --sweep-id {plan_.sweep_id}; "
         f"stop it: hc sweep stop --model {args.model}"
     )
     return CLEAN_EXIT
 
 
+def _case_status_target(args: argparse.Namespace) -> tuple[str, Role, str]:
+    """``hc sweep status --case <label> --sweep-id <id>``: the case's experiment, the ``case`` role and the
+    sweep. A case sweep is found by its label and id alone, so the plan arguments and the other roles are
+    refused rather than ignored."""
+    problems = [
+        f"{flag} is not used with --case: a case sweep is found by its label and --sweep-id"
+        for flag, given in (
+            ("--role", args.role is not None),
+            ("--experiment", args.experiment is not None),
+            ("--model", args.model is not None),
+            ("--seed", args.seed is not None),
+            ("--label", args.label is not None),
+            ("--repeats", args.repeats is not None),
+            ("--repeats-file", bool(args.repeats_file or args.repeats_json)),
+            ("--scenario", args.scenario is not None),
+            ("--template", args.template is not None),
+            ("--experiment-dir", args.experiment_dir is not None),
+        )
+        if given
+    ]
+    if not args.sweep_id:
+        problems.append("--case needs --sweep-id (the case's sweep)")
+    labels = frozen_case_labels(default_repo_root())
+    if args.case not in labels:
+        problems.append(f"case {args.case!r} is not one of the frozen cases ({', '.join(labels)})")
+    if problems:
+        raise SweepRefusal("; ".join(problems))
+    return case_experiment_name(args.case), CASE_ROLE, args.sweep_id
+
+
 def cmd_sweep_status(args: argparse.Namespace) -> int:
-    sweep_id = args.sweep_id or _load(args)[1].sweep_id
+    if args.case is not None:
+        experiment, role, sweep_id = _case_status_target(args)
+    else:
+        experiment, role = args.experiment, args.role or "development"
+        sweep_id = args.sweep_id or _load(args)[1].sweep_id
     identity = identify({}, _laptop_git)
     session = None if args.store == "local" else _session(args, identity)
-    summary = sweep_status.summarize(_store(args, session), args.experiment, sweep_id, args.role)
+    summary = sweep_status.summarize(_store(args, session), experiment, sweep_id, role)
     if summary is None:
         print(f"no manifest for {sweep_id}: nothing has run yet")
         return CLEAN_EXIT
@@ -2794,6 +2834,7 @@ def cmd_protocol_repeats(args: argparse.Namespace, root: Path) -> int:
 
 
 RECORD_CHECKS_FILE = "docs/phases/evidence/phase-4/record-checks.md"
+CASE_RECORD_CHECKS_FILE = "docs/phases/evidence/phase-5.5/record-checks.md"
 
 
 def cmd_protocol_records(args: argparse.Namespace, root: Path) -> int:
@@ -2808,20 +2849,27 @@ def cmd_protocol_records(args: argparse.Namespace, root: Path) -> int:
         return REFUSED_EXIT
     session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
     store = _store(args, session)
-    report = run_record_checks(store, lock, list(check_lock(root).failures))
+    frozen_failures = list(check_lock(root).failures)
+    if args.cases:
+        records, problems = frozen_case_records(root)
+        report = run_case_checks(store, lock, frozen_failures, records, problems)
+        target_file, write_report = CASE_RECORD_CHECKS_FILE, format_case_record_report
+    else:
+        report = run_record_checks(store, lock, frozen_failures)
+        target_file, write_report = RECORD_CHECKS_FILE, format_record_report
     sha, dirty = _laptop_git()
-    text = format_record_report(
+    text = write_report(
         report,
         protocol=lock.protocol,
         tree=f"{sha[:12]}{' plus uncommitted changes' if dirty else ''}",
         made_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
-    target = root / RECORD_CHECKS_FILE
+    target = root / target_file
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text, encoding="utf-8", newline="\n")
     for check in report.checks:
         print(f"{'reported' if check.info else ('pass' if check.ok else 'FAIL'):<9}{check.name}")
-    print(f"written: {RECORD_CHECKS_FILE}")
+    print(f"written: {target_file}")
     return CLEAN_EXIT if report.ok else CHECK_FAILED_EXIT
 
 
@@ -2972,23 +3020,27 @@ def cmd_simulate(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
-def _add_plan_arguments(parser: argparse.ArgumentParser, *, case_ok: bool = False) -> None:
+def _add_plan_arguments(
+    parser: argparse.ArgumentParser, *, case_ok: bool = False, model_required: bool = True
+) -> None:
     """The plan's arguments. Where a case sweep is possible (``case_ok``), ``--experiment``, ``--label`` and
-    the repeats are not required by the parser: ``main`` requires them unless ``--case`` is given."""
+    the repeats are not required by the parser: ``main`` requires them unless ``--case`` is given. A case's
+    status needs no model or seed either (``model_required`` False; ``main`` requires them without
+    ``--case``)."""
     parser.add_argument(
         "--experiment",
         required=not case_ok,
         default=None,
         help="folder under experiment/, e.g. placeholder",
     )
-    parser.add_argument("--model", required=True, help="a key in experiment/models.toml")
+    parser.add_argument("--model", required=model_required, help="a key in experiment/models.toml")
     repeats = parser.add_mutually_exclusive_group(required=not case_ok)
     repeats.add_argument("--repeats", type=int, help="the same count for every scenario")
     repeats.add_argument(
         "--repeats-file", default=None, help="a repeats.json: a count for each scenario"
     )
     repeats.add_argument("--repeats-json", default=None, help=argparse.SUPPRESS)
-    parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument("--seed", type=int, required=model_required)
     parser.add_argument(
         "--scenario",
         action="append",
@@ -3076,12 +3128,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--bucket", default=None, help="the results bucket (to read the pilot's repeats.json)"
     )
     status_parser = sweep_actions.add_parser("status", help="Summarize a sweep's stored objects")
-    _add_plan_arguments(status_parser)
+    _add_plan_arguments(status_parser, case_ok=True, model_required=False)
     status_parser.add_argument("--sweep-id", default=None, help="instead of the plan arguments")
     status_parser.add_argument("--store", choices=("local", "s3"), default="s3")
     status_parser.add_argument("--bucket", default=None)
     status_parser.add_argument("--profile", default=None)
-    status_parser.add_argument("--role", choices=ROLES, default="development")
+    status_parser.add_argument("--role", choices=ROLES, default=None, help="default: development")
     report_parser = sweep_actions.add_parser(
         "report",
         help="Write the blind format report and the failures view. No amounts, choices or memos.",
@@ -3586,6 +3638,11 @@ def build_parser() -> argparse.ArgumentParser:
         "records",
         help="The record checks over every pilot and official sweep; read-only; writes the evidence file",
     )
+    records_parser.add_argument(
+        "--cases",
+        action="store_true",
+        help="the five frozen cases' sweeps instead (Phase 5.5); writes phase-5.5/record-checks.md",
+    )
     records_parser.add_argument("--store", choices=("local", "s3"), default="s3")
     records_parser.add_argument("--bucket", default=None)
     records_parser.add_argument("--profile", default=None)
@@ -3625,14 +3682,19 @@ SWEEP_COMMANDS = {
 
 
 def _require_plan_arguments(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
-    """What ``_add_plan_arguments`` leaves to here for ``sweep run`` and ``launch``: without ``--case`` the
-    experiment, the label and the repeats are required, as the parser required them before."""
-    if args.group != "sweep" or args.action not in ("run", "launch") or args.case is not None:
+    """What ``_add_plan_arguments`` leaves to here for ``sweep run``, ``launch`` and ``status``: without
+    ``--case`` the experiment, the label and the repeats (and for ``status`` the model and seed) are
+    required, as the parser required them before."""
+    if args.group != "sweep" or args.action not in ("run", "launch", "status"):
+        return
+    if args.case is not None:
         return
     repeats_given = args.repeats is not None or bool(args.repeats_file or args.repeats_json)
     missing = [
         flag
         for flag, given in (
+            ("--model", args.action != "status" or args.model is not None),
+            ("--seed", args.action != "status" or args.seed is not None),
             ("--experiment", args.experiment is not None),
             ("--label", args.label is not None),
             ("--repeats or --repeats-file", repeats_given),

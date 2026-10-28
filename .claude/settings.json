@@ -41,6 +41,10 @@
       "Bash(uv run --no-sync hc protocol repeats*)",
       "Bash(uv run hc protocol records*)",
       "Bash(uv run --no-sync hc protocol records*)",
+      "Bash(uv run hc case match*)",
+      "Bash(uv run --no-sync hc case match*)",
+      "Bash(uv run hc case memos*)",
+      "Bash(uv run --no-sync hc case memos*)",
       "Bash(docker push*)"
     ],
     "allow": [

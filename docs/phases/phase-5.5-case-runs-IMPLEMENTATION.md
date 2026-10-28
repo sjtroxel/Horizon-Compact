@@ -352,6 +352,60 @@ touched). No model, AWS or GitHub call in any test. The new code is `casebuild/r
   lines as the grid's status: counts by status, attempts, cost and sessions, never an allocation or an objective.
   Tests on fakes: it reads a case sweep's records; it prints no objective id; without `--case` it is unchanged.
 
+**[done] K3, as built (2026-10-28; Sonnet built; Opus reviewed about 9:10 AM, one fix).** `make check` stops at the tests: **3,015
+tests, 3,011 pass, 4 fail by design** (`tests/test_claude_settings.py`, `case match` and `case memos` in both forms,
+until he runs `scratch/k3-deny.py`). Format, lint and strict types are clean; `make root-check`, `make paths-check`
+and `hc protocol check` pass. 63 new tests (`tests/test_case_record_checks.py`, plus the settings parameters and one
+assertion in `tests/test_case_session.py`). No model, AWS or GitHub call in any test; nothing was run for real.
+
+- **Reused from the grid's pass, unchanged:** `check_model`, `check_container`, `check_image`, `check_request`,
+  `check_complete`, `check_frozen`, and the time test, now `_check_not_before` (with `check_after_tag` calling it, same
+  output). `_graded` includes the `case` role. **New, case-only:** `cases`, `one sweep`, `case plan`, `seed`,
+  `case content`, `order`, `after the freeze`. `Attempt` gains `dossier_hash` and `file_hashes`; `Sweep` gains the
+  case label, seed, scenarios, repeats and the order record. The grid's checks, report and file are unchanged.
+- **`hc protocol records --cases`** writes `docs/phases/evidence/phase-5.5/record-checks.md`, from the five labels in
+  `freeze.json` and their `case.lock`s (`frozen_case_records`; a freeze or lock that cannot be read fails the
+  `cases` check, never an empty set). Before any case run all ten pairs are missing and it exits 1, as intended.
+- **P is a constant, `PREREG_COMMIT`**, in `protocol/recordcheck.py`: the code held it nowhere else (only these docs
+  and the tag record do). A test checks it against `phase-3.5/tag-record.md`, and another reproduces §4's ten seeds
+  from `case_seed`, which computes them.
+- **What did not fit §5.3's text, and what was done instead:**
+  - *"Content hashes equal `case.lock`."* The run records carry the dossier hash and the per-file hashes (dossier,
+    objectives, scenario), so the check reads those, and recomputes the manifest's content hash from them. **The
+    rubric's hash is in no run record**, and reading it from the bucket would read the rubric, so this pass does not.
+    The gate checks it before every call and `hc case match` before every reading.
+  - *"Five objectives."* Checked as 150 runs = 1 scenario x 5 x 3 templates x 10 repeats, not by counting objective
+    ids (the module's source test forbids naming that field).
+  - *`cases` check:* any key under `cases/` for a label that is not one of the five fails, as asked. If the bucket
+    holds objects for an earlier, unfrozen candidate, the first real run will say so; that is his to look at, not to
+    silence in code.
+- **`hc sweep status --case <label> --sweep-id <id>`** reads `cases/<label>/runs/<sweep_id>/` through
+  `sweep_prefix(..., "case")`. It refuses a label outside `freeze.json`, a missing `--sweep-id`, and any explicit
+  `--role` or `--experiment`. To allow that, `--role` defaults to none (read as development) and `--model` and
+  `--seed` are no longer required by the parser for `status`; `main` requires them without `--case`, same message
+  shape, exit 2. K1's launch message now names this command.
+- **Deny list.** `hc protocol records*` and `hc sweep status*` are already denied in both forms, so they cover
+  `--cases` and `--case`; nothing added for them. `hc case match` and `hc case memos` are new, in both forms,
+  through `scratch/k3-deny.py` (his to run: `python3 scratch/k3-deny.py`, looking for `added 4 deny entries`).
+
+**Opus's review of K3 (2026-10-28).** One fix; the rest checked against the code it relies on. `make check` before
+the deny script: **3,017 tests, 3,013 pass, the same 4 fail by design.**
+
+- **Fix: `hc sweep status --case` refuses every plan flag**, as its docstring said. It refused `--role` and
+  `--experiment` only and silently ignored `--model`, `--seed`, `--label`, the repeats, `--scenario`, `--template` and
+  `--experiment-dir`. Harmless (the sweep id picks the sweep), but not what the code claimed, and K1's `--case` path
+  refuses or checks the same flags. Two test cases added.
+- **Checked, no change:** `FREEZE_CI_DONE` is CI run 40487345520's `updatedAt` on `5f794ee` (completed, success),
+  read from GitHub. The manifest's content hash is recomputed exactly as `load_experiment` makes it (every content
+  file but `models.toml`, through `combine_hashes`), and the runner writes `file_hashes` and `dossier_hash` on every
+  attempt record, so the case-content check reads real fields. The rubric's hash is checked by K1's gate before any
+  call (`protocol/cases.py`'s content check covers it), so leaving it out of this pass loses nothing. The deny
+  script changes four lines and nothing else; `hc sweep status*` and `hc protocol records*` already cover the new
+  flags (the review's own attempt to run `hc sweep status` was refused by the deny list).
+- **To know before the first record-check run:** the `cases` check fails on any label under `cases/` in the bucket
+  that is not one of the five. Every candidate that reached the recognition probe was frozen, so none is expected,
+  but an earlier development upload would show up there. Fail-closed is right; if it happens, it is his call then.
+
 ### 5.4 The memo scan (K4; decision 4)
 
 `hc case memos <label> --model <key> --sweep <id>` (laptop, his to run). It runs after the reveal.

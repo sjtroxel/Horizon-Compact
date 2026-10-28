@@ -628,6 +628,7 @@ def test_a_launch_writes_the_order_once_then_starts_the_task_with_a_case_command
     ]  # fmt: skip
     [sweep_line] = [line for line in out.splitlines() if line.startswith("sweep:")]
     sweep_id = sweep_line.split()[1]
+    assert f"hc sweep status --case {LABEL} --sweep-id {sweep_id}" in out
     stored = json.loads(cli_tree.store.get(order_key(LABEL, sweep_id)) or "")
     assert stored["admitted"] is True and stored["label"] == LABEL
     assert (

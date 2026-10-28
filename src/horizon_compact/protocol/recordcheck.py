@@ -24,17 +24,43 @@ official call and session began after the tag's Software Heritage visit; ``froze
 check`` passes on the tree that ran this.
 
 **Time.** The store gives no write time, so "after the tag" reads the records' own ``started_at``: an
-object cannot have been written before the call it records began."""
+object cannot have been written before the call it records began.
+
+**Case sweeps** (Phase 5.5 IMPLEMENTATION doc section 5.3, ``hc protocol records --cases``). The same pass
+over the five frozen cases' sweeps under ``cases/<label>/runs/<sweep_id>/``, never ``development/``,
+``pilot/`` or ``official/``. The container, image, request, model, complete and frozen-files checks are the
+grid's own, run on case ``Sweep`` objects. The case-only ones are ``cases`` (the labels in the bucket are the
+freeze's), ``one sweep`` (one manifest per case and model), ``case plan``, ``seed``, ``case content`` (the
+hashes the records carry equal ``case.lock``), ``order`` and ``after the freeze``. Still blind: the manifest
+and ``order.json`` are read through named fields, and the rubric is never read (its hash is in no run record;
+the gate checks it before every call and ``hc case match`` before every reading)."""
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections import Counter, defaultdict
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any, Literal
 
+from horizon_compact.caseprobe.freeze import EVIDENCE_DIR, FREEZE_FILE
+from horizon_compact.caseprobe.layout import runs_prefix
+from horizon_compact.caseprobe.session import (
+    CASE_LABEL,
+    CASE_OBJECTIVES,
+    CASE_REPEATS,
+    CASE_TEMPLATES,
+    OBJECTIVES_FILE,
+    ORDER_FILE,
+    case_experiment_name,
+)
+from horizon_compact.caseprobe.session import check_frozen as freeze_lists_case
+from horizon_compact.experiment import MODELS_FILE, combine_hashes
+from horizon_compact.protocol.cases import CaseError, CaseRecord, read_case
 from horizon_compact.protocol.lock import NOT_SET, REASONING_SENT, Lock, ModelIdentity
 from horizon_compact.protocol.lock import THINKING_OFF as LOCK_THINKING_OFF
 from horizon_compact.providers.anthropic import THINKING_DEFAULT as ANTHROPIC_DEFAULT
@@ -51,14 +77,27 @@ from horizon_compact.sweep.store import Store
 
 # The tag's outside timestamp (Phase 3.5 tag record: the Software Heritage visit of prereg-v1).
 TAG_VISIT = datetime(2026, 10, 13, 6, 24, 52, tzinfo=UTC)
+# The Phase 5 freeze commit's CI run, completed: CI run 40487345520 on
+# 5f794eef380ed05f3e946d79ebbf4254af15c797 ("phase 5: five frozen cases / files"). No case sweep may have a
+# record from before it (Phase 5.5 K3).
+FREEZE_CI_DONE = datetime(2026, 10, 27, 10, 20, 15, tzinfo=UTC)
+# P, the commit tagged ``prereg-v1`` (Phase 3.5 tag record). Phase 5.5 IMPLEMENTATION doc section 4 draws each
+# case sweep's seed from it, so it predates every case. The code holds it nowhere else; the docs do.
+PREREG_COMMIT = "649e8b9b8f1dde0e3698be0d279b62fef07ad70b"
+# Section 4's two models, by key: the lock's, in the order of the run table.
+CASE_MODELS = ("haiku-5-5", "gpt-oss-openrouter")
 PILOT = "pilot"
 OFFICIAL_LABELS = ("grid", THINKING_LABEL, "awareness")
 SWEEP_MANIFEST = re.compile(
     r"^(?P<role>development|pilot|official)/[^/]+/(?P<awareness>awareness/)?[^/]+/manifest\.json$"
 )
 
-Role = Literal["development", "pilot", "official"]
-ROLES: tuple[Role, ...] = ("development", "pilot", "official")
+Role = Literal["development", "pilot", "official", "case"]
+ROLES: tuple[Role, ...] = (
+    "development",
+    "pilot",
+    "official",
+)  # the grid's; a case sweep is read by label
 
 
 @dataclass(frozen=True)
@@ -81,6 +120,8 @@ class Attempt:
     content_hash: str
     model_key: str
     label: str
+    dossier_hash: str = ""
+    file_hashes: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -89,6 +130,15 @@ class Session:
     image_digest: str | None
     started_at: str
     stopped: str
+
+
+@dataclass(frozen=True)
+class OrderRecord:
+    """A case sweep's ``order.json``, read through three named fields."""
+
+    admitted: bool
+    label: str
+    reasons: tuple[str, ...]
 
 
 @dataclass
@@ -106,10 +156,19 @@ class Sweep:
     finished_runs: set[str] = field(default_factory=set)
     attempts: list[Attempt] = field(default_factory=list)
     sessions: list[Session] = field(default_factory=list)
+    case: str = ""  # a case sweep's label (from its prefix); empty for the grid's
+    seed: object = None
+    scenarios: list[str] = field(default_factory=list)
+    repeats: object = None
+    order: OrderRecord | None = None
 
     @property
     def name(self) -> str:
-        return f"{self.role} {self.sweep_id}"
+        return (
+            f"{self.role} {self.case}/{self.sweep_id}"
+            if self.case
+            else f"{self.role} {self.sweep_id}"
+        )
 
 
 @dataclass(frozen=True)
@@ -154,7 +213,15 @@ def _pick_attempt(record: dict[str, Any], *, shallow: bool = False) -> Attempt:
         content_hash=str(record.get("content_hash")),
         model_key=str(record.get("model_key")),
         label=str(record.get("label")),
+        dossier_hash="" if shallow else str(record.get("dossier_hash")),
+        file_hashes=() if shallow else _pick_hashes(record.get("file_hashes")),
     )
+
+
+def _pick_hashes(found: object) -> tuple[tuple[str, str], ...]:
+    if not isinstance(found, dict):
+        return ()
+    return tuple(sorted((str(path), str(digest)) for path, digest in found.items()))
 
 
 def _pick_session(record: dict[str, Any]) -> Session:
@@ -235,7 +302,7 @@ def _when(text: str) -> datetime | None:
 
 
 def _graded(sweeps: list[Sweep]) -> list[Sweep]:
-    return [s for s in sweeps if s.role in ("pilot", "official")]
+    return [s for s in sweeps if s.role in ("pilot", "official", "case")]
 
 
 def check_content(sweeps: list[Sweep], lock: Lock) -> Check:
@@ -427,9 +494,9 @@ def check_sealed_first(sweeps: list[Sweep], lock: Lock) -> Check:
     return Check("sealed first", not lines, tuple(lines))
 
 
-def check_after_tag(sweeps: list[Sweep]) -> Check:
+def _check_not_before(sweeps: list[Sweep], name: str, cutoff: datetime) -> Check:
     lines = []
-    for sweep in _graded(sweeps):
+    for sweep in sweeps:
         early = 0
         unreadable = 0
         for moment_text in [a.started_at for a in sweep.attempts] + [
@@ -438,13 +505,17 @@ def check_after_tag(sweeps: list[Sweep]) -> Check:
             moment = _when(moment_text)
             if moment is None:
                 unreadable += 1
-            elif moment < TAG_VISIT:
+            elif moment < cutoff:
                 early += 1
         if early:
-            lines.append(f"{sweep.name}: {early} record(s) began before {TAG_VISIT.isoformat()}")
+            lines.append(f"{sweep.name}: {early} record(s) began before {cutoff.isoformat()}")
         if unreadable:
             lines.append(f"{sweep.name}: {unreadable} record(s) have no readable start time")
-    return Check("after the tag", not lines, tuple(lines))
+    return Check(name, not lines, tuple(lines))
+
+
+def check_after_tag(sweeps: list[Sweep]) -> Check:
+    return _check_not_before(_graded(sweeps), "after the tag", TAG_VISIT)
 
 
 def check_frozen(frozen_failures: list[str]) -> Check:
@@ -472,16 +543,270 @@ def run_checks(store: Store, lock: Lock, frozen_failures: list[str]) -> RecordRe
     return RecordReport(checks, tuple(sweeps))
 
 
+# --- case sweeps (Phase 5.5 K3) -----------------------------------------------------------------------------
+
+_CASE_MANIFEST = re.compile(r"^cases/[^/]+/runs/[^/]+/manifest\.json$")
+
+
+def case_seed(model_key: str, label: str) -> int:
+    """The seed drawn for a case sweep (Phase 5.5 IMPLEMENTATION doc section 4): the first eight hex digits of
+    sha256 over ``<P>|<model key>|case-<label>``, read as an integer. Computed, never copied from the table.
+    """
+    digest = hashlib.sha256(f"{PREREG_COMMIT}|{model_key}|{case_experiment_name(label)}".encode())
+    return int(digest.hexdigest()[:8], 16)
+
+
+def frozen_case_labels(root: Path) -> list[str]:
+    """The labels ``freeze.json`` lists; empty when it cannot be read."""
+    try:
+        frozen = json.loads((root / EVIDENCE_DIR / FREEZE_FILE).read_text(encoding="utf-8"))
+        return [str(entry["label"]) for entry in frozen["cases"]]
+    except (OSError, ValueError, KeyError, TypeError):
+        return []
+
+
+def frozen_case_records(root: Path) -> tuple[dict[str, CaseRecord], list[str]]:
+    """The cases ``freeze.json`` lists, each with its committed ``case.lock``; and a line for everything that
+    cannot be read or does not agree. A problem here fails the ``cases`` check, so a missing freeze never
+    reads as no cases."""
+    labels = frozen_case_labels(root)
+    if not labels:
+        path = f"{EVIDENCE_DIR}/{FREEZE_FILE}"
+        return {}, [f"{path} cannot be read or lists no case: the frozen cases are not known"]
+    records: dict[str, CaseRecord] = {}
+    problems: list[str] = []
+    for label in labels:
+        try:
+            record = read_case(root, label)
+        except (CaseError, OSError, ValueError) as exc:
+            problems.append(f"case {label}: {exc}")
+            continue
+        records[label] = record
+        problems += freeze_lists_case(root, label, record)
+    return records, problems
+
+
+def _pick_order(store: Store, prefix: str) -> OrderRecord:
+    text = store.get(f"{prefix}{ORDER_FILE}")
+    if text is None:
+        return OrderRecord(False, "", (f"{ORDER_FILE} is not stored",))
+    try:
+        found = json.loads(text)
+        reasons = found["reasons"]
+        return OrderRecord(
+            found["admitted"] is True,
+            str(found["label"]),
+            tuple(str(reason) for reason in reasons),
+        )
+    except (ValueError, KeyError, TypeError):
+        return OrderRecord(False, "", (f"{ORDER_FILE} cannot be read",))
+
+
+def collect_cases(store: Store, labels: Sequence[str]) -> list[Sweep]:
+    """Every sweep under each given case's ``runs/``, with its provenance read through the pickers."""
+    sweeps: list[Sweep] = []
+    for label in labels:
+        keys = store.list_keys(runs_prefix(label))
+        for key in keys:
+            if _CASE_MANIFEST.match(key) is None:
+                continue
+            manifest = _load(store, key)
+            prefix = key[: -len("manifest.json")]
+            sweep = Sweep(
+                role="case",
+                prefix=prefix,
+                sweep_id=str(manifest.get("sweep_id")),
+                label=str(manifest.get("label")),
+                model_key=str(manifest.get("model_key")),
+                experiment=str(manifest.get("experiment")),
+                content_hash=str(manifest.get("content_hash")),
+                templates=[str(t) for t in manifest.get("templates") or []],
+                run_ids=[str(run["run_id"]) for run in manifest.get("runs") or []],
+                awareness=False,
+                case=label,
+                seed=manifest.get("seed"),
+                scenarios=[str(sid) for sid in manifest.get("scenarios") or []],
+                repeats=manifest.get("repeats"),
+            )
+            _read_sweep(store, sweep, [k for k in keys if k.startswith(prefix)])
+            sweep.order = _pick_order(store, prefix)
+            sweeps.append(sweep)
+    return sweeps
+
+
+def check_case_labels(
+    found: Sequence[str], expected: Sequence[str], problems: Sequence[str]
+) -> Check:
+    """The bucket holds the freeze's cases and no other: a key under ``cases/`` for another label fails."""
+    lines = list(problems)
+    for label in sorted(set(found) - set(expected)):
+        lines.append(f"the bucket holds objects for case {label!r}, which is not a frozen case")
+    return Check("cases", not lines, tuple(lines))
+
+
+def check_one_sweep(sweeps: list[Sweep], labels: Sequence[str]) -> Check:
+    """Exactly one manifest per case and model (counted by manifest, not by ``order.json``: the doc's K1
+    review notes). Before any case run, all of them are missing, and that is a failure."""
+    found: defaultdict[tuple[str, str], list[str]] = defaultdict(list)
+    for sweep in sweeps:
+        found[(sweep.case, sweep.model_key)].append(sweep.sweep_id)
+    lines = []
+    for label in labels:
+        for model in CASE_MODELS:
+            ids = found.get((label, model), [])
+            if not ids:
+                lines.append(f"case {label} on {model}: no sweep")
+            elif len(ids) > 1:
+                lines.append(
+                    f"case {label} on {model}: {len(ids)} sweeps ({', '.join(sorted(ids))}); exactly one"
+                )
+    expected = {(label, model) for label in labels for model in CASE_MODELS}
+    for case, model in sorted(set(found) - expected):
+        lines.append(f"case {case} on {model}: a sweep that is not one of the run set")
+    return Check("one sweep", not lines, tuple(lines))
+
+
+def check_case_plan_shape(sweeps: list[Sweep]) -> Check:
+    """Section 4's plan: the case's one scenario, templates ``w1`` to ``w3``, exactly 10 repeats, all five
+    objectives (so 150 runs), the experiment and label of a case sweep, and one of section 4's two models."""
+    wanted = CASE_OBJECTIVES * len(CASE_TEMPLATES) * CASE_REPEATS
+    lines = []
+    for sweep in sweeps:
+        if sweep.experiment != case_experiment_name(sweep.case):
+            lines.append(
+                f"{sweep.name}: experiment {sweep.experiment!r}, not {case_experiment_name(sweep.case)!r}"
+            )
+        if sweep.label != CASE_LABEL:
+            lines.append(f"{sweep.name}: label {sweep.label!r}, not {CASE_LABEL!r}")
+        wrong = sorted({a.label for a in sweep.attempts if a.label != CASE_LABEL})
+        if wrong:
+            lines.append(f"{sweep.name}: calls are labeled {wrong}, not {CASE_LABEL!r}")
+        if sweep.model_key not in CASE_MODELS:
+            lines.append(
+                f"{sweep.name}: model {sweep.model_key!r} is not one of {list(CASE_MODELS)}"
+            )
+        if len(sweep.scenarios) != 1:
+            lines.append(f"{sweep.name}: {len(sweep.scenarios)} scenarios, not 1")
+        odd = sorted({a.scenario_id for a in sweep.attempts} - set(sweep.scenarios))
+        if odd:
+            lines.append(f"{sweep.name}: calls name scenario(s) {odd}, not the manifest's")
+        if sweep.templates != list(CASE_TEMPLATES):
+            lines.append(f"{sweep.name}: templates {sweep.templates}, not {list(CASE_TEMPLATES)}")
+        if sweep.repeats != dict.fromkeys(sweep.scenarios, CASE_REPEATS):
+            lines.append(f"{sweep.name}: repeats {sweep.repeats!r}, not {CASE_REPEATS} a cell")
+        if len(sweep.run_ids) != wanted or len(set(sweep.run_ids)) != wanted:
+            lines.append(
+                f"{sweep.name}: {len(sweep.run_ids)} runs ({len(set(sweep.run_ids))} distinct), "
+                f"not {wanted}"
+            )
+    return Check("case plan", not lines, tuple(lines))
+
+
+def check_case_seed(sweeps: list[Sweep]) -> Check:
+    lines = []
+    for sweep in sweeps:
+        drawn = case_seed(sweep.model_key, sweep.case)
+        if sweep.seed != drawn or isinstance(sweep.seed, bool):
+            lines.append(f"{sweep.name}: seed {sweep.seed!r}, not the drawn {drawn}")
+    return Check("seed", not lines, tuple(lines))
+
+
+def check_case_content(sweeps: list[Sweep], records: Mapping[str, CaseRecord], lock: Lock) -> Check:
+    """The hashes the records carry equal ``case.lock``: each call's dossier hash, the dossier and scenario
+    in its file hashes, the objectives file (the lock's), and the manifest's content hash recomputed from
+    those file hashes. The rubric's hash is in no run record (see the module note)."""
+    objectives = lock.content.files.get(OBJECTIVES_FILE)
+    lines = []
+    for sweep in sweeps:
+        record = records.get(sweep.case)
+        if record is None:
+            lines.append(f"{sweep.name}: no case.lock to compare with")
+            continue
+        folder = case_experiment_name(sweep.case)
+        if not sweep.attempts:
+            lines.append(f"{sweep.name}: no call records to read the content hashes from")
+        wrong_manifest = sum(1 for a in sweep.attempts if a.content_hash != sweep.content_hash)
+        if wrong_manifest:
+            lines.append(
+                f"{sweep.name}: {wrong_manifest} call(s) carry a content hash that is not the manifest's"
+            )
+        wrong_dossier = sum(1 for a in sweep.attempts if a.dossier_hash != record.dossier_sha256)
+        if wrong_dossier:
+            lines.append(
+                f"{sweep.name}: {wrong_dossier} call(s) do not carry the dossier hash of case.lock"
+            )
+        for distinct in sorted({a.file_hashes for a in sweep.attempts}):
+            hashes = dict(distinct)
+            scenario = [
+                digest for path, digest in hashes.items() if path.startswith(f"{folder}/scenarios/")
+            ]
+            if hashes.get(f"{folder}/dossier.toml") != record.dossier_sha256:
+                lines.append(f"{sweep.name}: a call's dossier file hash is not case.lock's")
+            if scenario != [record.scenario_sha256]:
+                lines.append(f"{sweep.name}: a call's scenario file hash is not case.lock's")
+            if objectives is None or hashes.get(f"{folder}/objectives.toml") != objectives:
+                lines.append(
+                    f"{sweep.name}: a call's objectives file hash is not {lock.protocol}'s"
+                )
+            content = {path: digest for path, digest in hashes.items() if path != MODELS_FILE}
+            if combine_hashes(content) != sweep.content_hash:
+                lines.append(
+                    f"{sweep.name}: the manifest's content hash is not that of a call's files"
+                )
+    return Check("case content", not lines, tuple(dict.fromkeys(lines)))
+
+
+def check_case_order(sweeps: list[Sweep]) -> Check:
+    lines = []
+    for sweep in sweeps:
+        order = sweep.order
+        if order is None or not order.admitted:
+            detail = f" ({'; '.join(order.reasons)})" if order and order.reasons else ""
+            lines.append(f"{sweep.name}: the order finding is not admitted{detail}")
+        elif order.label != sweep.case:
+            lines.append(f"{sweep.name}: its order finding is for case {order.label!r}")
+    return Check("order", not lines, tuple(lines))
+
+
+def check_after_freeze(sweeps: list[Sweep]) -> Check:
+    return _check_not_before(sweeps, "after the freeze", FREEZE_CI_DONE)
+
+
+def run_case_checks(
+    store: Store,
+    lock: Lock,
+    frozen_failures: list[str],
+    records: Mapping[str, CaseRecord],
+    problems: Sequence[str] = (),
+) -> RecordReport:
+    """The record checks over the frozen cases' sweeps. ``records`` and ``problems`` come from
+    ``frozen_case_records``."""
+    labels = list(records)
+    found = {key.split("/")[1] for key in store.list_keys("cases/") if key.count("/") >= 2}
+    sweeps = collect_cases(store, labels)
+    checks = (
+        check_case_labels(sorted(found), labels, problems),
+        check_one_sweep(sweeps, labels),
+        check_case_plan_shape(sweeps),
+        check_case_seed(sweeps),
+        check_case_content(sweeps, records, lock),
+        check_case_order(sweeps),
+        check_model(sweeps, lock),
+        check_container(sweeps),
+        check_image(sweeps),
+        check_request(sweeps, lock),
+        check_complete(sweeps),
+        check_after_freeze(sweeps),
+        check_frozen(frozen_failures),
+    )
+    return RecordReport(checks, tuple(sweeps))
+
+
 # --- the report ---------------------------------------------------------------------------------------------
 
 
-def format_report(report: RecordReport, *, protocol: str, tree: str, made_at: str) -> str:
+def _result_lines(report: RecordReport) -> list[str]:
     lines = [
-        "# Record checks",
-        "",
-        f"Protocol `{protocol}`; tree `{tree}`; made {made_at}. Written by `hc protocol records`; do not edit by "
-        "hand. Counts, ids, hashes and dates only: no decision, choice, memo or reply is read or shown.",
-        "",
         f"**Result: {'every check passes' if report.ok else 'AT LEAST ONE CHECK FAILED'}.**",
         "",
         "| check | result |",
@@ -493,7 +818,17 @@ def format_report(report: RecordReport, *, protocol: str, tree: str, made_at: st
     for check in report.checks:
         if check.lines:
             lines += ["", f"## {check.name}", "", *(f"- {line}" for line in check.lines)]
-    lines += [
+    return lines
+
+
+def format_report(report: RecordReport, *, protocol: str, tree: str, made_at: str) -> str:
+    lines = [
+        "# Record checks",
+        "",
+        f"Protocol `{protocol}`; tree `{tree}`; made {made_at}. Written by `hc protocol records`; do not edit by "
+        "hand. Counts, ids, hashes and dates only: no decision, choice, memo or reply is read or shown.",
+        "",
+        *_result_lines(report),
         "",
         "## Run counts, per sweep (protocol 13.2)",
         "",
@@ -507,6 +842,33 @@ def format_report(report: RecordReport, *, protocol: str, tree: str, made_at: st
         cost = round(sum(a.cost_usd for a in sweep.attempts), 6)
         lines.append(
             f"| {sweep.role} | `{sweep.sweep_id}` | {sweep.label} | {sweep.model_key} | {len(sweep.run_ids)} "
+            f"| {len(sweep.finished_runs & set(sweep.run_ids))} | {len(sweep.attempts)} | {statuses} "
+            f"| {len(sweep.sessions)} | {cost:.4f} |"
+        )
+    lines.append("")
+    return "\n".join(lines)
+
+
+def format_case_report(report: RecordReport, *, protocol: str, tree: str, made_at: str) -> str:
+    lines = [
+        "# Record checks, case sweeps",
+        "",
+        f"Protocol `{protocol}`; tree `{tree}`; made {made_at}. Written by `hc protocol records --cases`; do not "
+        "edit by hand. Exploratory cases (Phase 5.5 IMPLEMENTATION doc section 0). Counts, ids, hashes and dates "
+        "only: no objective, allocation, choice, memo or reply is read or shown.",
+        "",
+        *_result_lines(report),
+        "",
+        "## Run counts, per sweep (protocol 13.2)",
+        "",
+        "| case | sweep | model | runs | finished | calls | calls by status | sessions | cost (USD) |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for sweep in report.sweeps:
+        statuses = dict(sorted(Counter(a.status for a in sweep.attempts).items()))
+        cost = round(sum(a.cost_usd for a in sweep.attempts), 6)
+        lines.append(
+            f"| {sweep.case} | `{sweep.sweep_id}` | {sweep.model_key} | {len(sweep.run_ids)} "
             f"| {len(sweep.finished_runs & set(sweep.run_ids))} | {len(sweep.attempts)} | {statuses} "
             f"| {len(sweep.sessions)} | {cost:.4f} |"
         )

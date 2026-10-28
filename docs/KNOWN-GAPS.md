@@ -7,7 +7,23 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-27, about 2:25 PM, HANDOFF (K2 BUILT AND REVIEWED; K3 NEXT)
+> ## START HERE — where things stand, 2026-10-28, about 9:10 AM (K3 BUILT AND REVIEWED; K4 NEXT)
+>
+> **Measured:** last commit `c50e0df` ("phase 5.5: k2 case matcher"). **K3, the record checks for case sweeps and
+> `hc sweep status --case`, is built (Sonnet) and reviewed (Opus): one fix** (status with `--case` now refuses every
+> plan flag, as its docstring said; IMPLEMENTATION doc §5.3, as-built note and review notes). `make check` stops at the
+> tests, **3,017 tests, 3,013 pass, 4 fail by design** until he runs `python3 scratch/k3-deny.py` (the deny entries for
+> `hc case match` and `hc case memos`); then it should be green.
+>
+> **Uncommitted, for his commit `phase 5.5: k3 record checks and case status`:** `protocol/recordcheck.py`, `cli.py`,
+> `tests/test_case_record_checks.py`, `tests/test_case_session.py`, `tests/test_claude_settings.py`,
+> `.claude/settings.json` (after the script), the IMPLEMENTATION doc, this file and the ROADMAP row. **Next:** K4 (the
+> memo scan, §5.4), Sonnet builds and Opus reviews. **His, outside this repo:** the private term file, uncommitted since
+> 2026-10-03.
+>
+> *The 2:25 PM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-27, about 2:25 PM, HANDOFF (K2 BUILT AND REVIEWED; K3 NEXT) *(superseded by the block above)*
 >
 > **Measured:** last commit `4ec2a0b` (the IMPLEMENTATION doc and K1). `make check` green, **2952 tests** (run by Opus
 > at review). **K2, the rubric reader and `hc case match`, is built (Sonnet) and reviewed (Opus)** (IMPLEMENTATION doc
