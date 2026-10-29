@@ -667,7 +667,10 @@ for named. Claude reads only what he pastes. The run log `docs/phases/evidence/p
    `freeze.json`'s order).
 4. **Dry runs:** `hc sweep launch --case <label> --model <key> --seed <seed> --dry-run` for all ten. Expect `every
    check passes`, the order finding `admitted`, the scenario's shape, 150 runs and the preflight bound. Then
-   `hc case match <label> --check-rubric` for all five.
+   `hc case match <label> --check-rubric` for all five. **Dated correction, 2026-10-29 (found at §6.0):** the
+   dry run is `hc sweep run --case <label> --model <key> --seed <seed> --profile horizon-compact --dry-run`.
+   `hc sweep launch` takes no `--dry-run`, and its case path writes `order.json` and starts the task, so the command
+   as first written must not be used. `scratch/p55-dryruns.sh` runs the ten and the five.
 5. **The caps:** each sweep's cap is its preflight bound rounded up to the next dollar, about $1-2 for Haiku and
    under $1 for `gpt-oss-120b`. All are under the $25 official cap, so no over-cap flag is expected.
 

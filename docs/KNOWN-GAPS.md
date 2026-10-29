@@ -7,7 +7,30 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-28, about 5:15 PM, HANDOFF (K5 BUILT AND REVIEWED; §5 DONE; §6.0 NEXT)
+> ## START HERE — where things stand, 2026-10-29, about 8:30 AM (§6.0 STEPS 1-4 DONE; THE CAPS, THEN §6.1)
+>
+> **Measured:** last commit `101e2df` ("phase 5.5: k5 re-identification check"), pushed, CI and Deploy green. Its
+> image digest, `sha256:ef0588f9...`, is in `docs/phases/evidence/phase-5.5/run-log.md`, which starts §6.0's record.
+> **§6.0 steps 1-4 are done** (Sonnet, with his readings and runs): the digest; the live checks (Haiku 5.5 and
+> `gpt-oss-120b`'s `deepinfra/bf16` both pass, prices unchanged); the credit check (Anthropic $11.96, OpenRouter
+> $3.70 with no top-up until next week at the earliest, AWS $0.45 month to date for the account; every pot covers
+> the runs); the ten dry runs (10 of 10 passed) and five `--check-rubric`s (5 of 5). Worst cases sum to $4.76 Haiku
+> and $1.66 `gpt-oss-120b`.
+>
+> **A correction found at §6.0:** the IMPLEMENTATION doc's step 4 named `hc sweep launch --case ... --dry-run`;
+> `launch` has no `--dry-run` and its case path starts a task. The doc now carries a dated correction (the dry run is
+> `hc sweep run --case ... --dry-run`).
+>
+> **Next:** step 5, the caps (his call; recommended: Haiku $2 each, `gpt-oss-120b` $0.50 each so the five cannot
+> take more than $2.50 of the $3.70), then §6.1, `haiku-5-5` on `closure-07` alone. **Watch for §6.5:** the memo
+> scan's reader reads may not fit in the OpenRouter cash left after the runs (about $3); count the flagged memos
+> first (Haiku's pass is Anthropic credit), then decide to read what fits or wait for the top-up. **Uncommitted:**
+> `run-log.md` and the doc correction. **His, outside this repo:** the private term file, uncommitted since
+> 2026-10-03; whether it holds each case's plant location.
+>
+> *The 5:15 PM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-28, about 5:15 PM, HANDOFF (K5 BUILT AND REVIEWED; §5 DONE; §6.0 NEXT) *(superseded by the block above)*
 >
 > **Measured:** last commit `7619436` ("phase 5.5: k4 memo scan"), pushed. **K5, the re-identification check (`hc case
 > reident`), is built (Sonnet) and reviewed (Opus): one change, his decision (a)** (a coarsened case, `closure-19`,
