@@ -7,7 +7,26 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-29, about 9 PM, HANDOFF (§6.2: 8 OF 10 SWEEPS COMPLETE; GPT-OSS `pre-25` AND `pre-224` NEXT)
+> ## START HERE — where things stand, 2026-10-30, about 12:40 PM (§6.2 AND §6.3 COMPLETE; §6.4, THE REVEAL, NEXT)
+>
+> **Measured:** last commit `fecd23d`. **All ten case sweeps are complete** (from `hc sweep status --case`, read by
+> him): 1,500 of 1,500 runs `valid`, $1.0673 in all (Haiku $0.8518, `gpt-oss-120b` $0.2155). Today's two,
+> `gpt-oss-120b` on `pre-25` and `pre-224`, each ran in one session with `api_error` attempts retried (63 and 94)
+> and no stop. Every session is in `docs/phases/evidence/phase-5.5/run-log.md`. **Nothing is running.**
+>
+> **The laptop's case commands need `--profile horizon-compact` and the results bucket** (`--bucket` or
+> `HC_RESULTS_BUCKET`; his shell does not set it). The 2026-10-29 block's launch commands left both out.
+>
+> **§6.3 done:** `hc protocol records --cases`, every check passes, one image digest for all ten sweeps
+> (`record-checks.md`, committed with this block).
+>
+> **Next: §6.4, the reveal.** `scratch/p55-match.sh` (ten `hc case match` lines) does not exist yet; write it and
+> check its flags against the CLI before anything runs. Running it is the first time anyone reads a case result. **Watch at §6.5:** count Haiku's memo flags before any
+> OpenRouter reader read. **His, open:** the Claude Docs connector, auto mode as his default.
+>
+> *The 9 PM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-29, about 9 PM, HANDOFF (§6.2: 8 OF 10 SWEEPS COMPLETE; GPT-OSS `pre-25` AND `pre-224` NEXT) *(superseded by the block above)*
 >
 > **Measured:** last commit `73f2cdf`; the commit below is his to run tonight. **8 of the 10 case sweeps are complete**
 > (from `hc sweep status --case`, read by him): all five Haiku (750 of 750 runs `valid`, $0.85) and three
