@@ -7,7 +7,44 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-29, about 8:30 AM (§6.0 STEPS 1-4 DONE; THE CAPS, THEN §6.1)
+> ## START HERE — where things stand, 2026-10-29, about 9 PM, HANDOFF (§6.2: 8 OF 10 SWEEPS COMPLETE; GPT-OSS `pre-25` AND `pre-224` NEXT)
+>
+> **Measured:** last commit `73f2cdf`; the commit below is his to run tonight. **8 of the 10 case sweeps are complete**
+> (from `hc sweep status --case`, read by him): all five Haiku (750 of 750 runs `valid`, $0.85) and three
+> `gpt-oss-120b` (`closure-07`, `closure-19`, `pre-11`; 450 of 450 `valid`, $0.13). **`pre-11` stopped twice on
+> `api_errors`** (DeepInfra, the pinned host, was down on and off from about 4 to 8 PM; OpenRouter showed status -5 and -2)
+> and was re-launched twice under the same sweep id; its third session ran clean. **Nothing is running.** Every
+> session, stop and reading is in `docs/phases/evidence/phase-5.5/run-log.md`.
+>
+> **Next, in the morning (his launches, one at a time):** `gpt-oss-openrouter` on `pre-25` (seed 1259122587, sweep id
+> `case-gpt-oss-openrouter-eb1036dc`), then `pre-224` (seed 1744604528, `case-gpt-oss-openrouter-2b24bdc9`), each with
+> `--cap-usd 0.5 --max-minutes 720`. Check DeepInfra on OpenRouter first. An `api_errors` stop means wait about 30
+> minutes and re-launch with the same command (a resume); the host is the protocol's and is not changed. Done when both
+> show 150 of 150 and `stopped: complete`; then §6.3, `hc protocol records --cases` (his).
+>
+> **His, open:** the Claude Docs connector (off, if unused) and auto mode as his default (now reasonable: the paid
+> `hc case` commands are denied). **Watch at §6.5:** count Haiku's memo flags before any OpenRouter reader read.
+>
+> *The 4:20 PM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-29, about 4:20 PM (§6.0 AND §6.1 DONE; §6.2: HAIKU CHAIN COMPLETE, GPT-OSS 3 OF 5 RUNNING) *(superseded by the block above)*
+>
+> **Measured:** last commit `73f2cdf` (§6.0), pushed. **Caps (his):** Haiku $2, `gpt-oss-120b` $0.50 per sweep.
+> **§6.1** (`haiku-5-5` on `closure-07`, alone) was clean, so **§6.2** ran: **the Haiku chain is complete**, 750 of 750
+> runs `valid`, $0.85. **`gpt-oss-120b`:** `closure-07` and `closure-19` complete (300 of 300 `valid`, $0.08, 6
+> `api_error` attempts retried); `pre-11` launched 4:14 PM; `pre-25` and `pre-224` next, one at a time, about an hour
+> each. Every launch and result is in `docs/phases/evidence/phase-5.5/run-log.md`, by status count only. Then §6.3,
+> `hc protocol records --cases` (his).
+>
+> **Also on 2026-10-29 (a /doctor review):** five `hc case` commands that spend money or write private storage
+> (`build`, `reader`, `knowledge-probe`, `probe`, `upload`) are now denied to Claude, pinned by
+> `tests/test_claude_settings.py`; the stale Layout tree is cut from `CLAUDE.md`. **§6.5 watch:** count Haiku's memo
+> flags before any OpenRouter reader read; his OpenRouter cash ($3.70 before the runs) cannot be topped up until next
+> week at the earliest.
+>
+> *The 8:30 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-29, about 8:30 AM (§6.0 STEPS 1-4 DONE; THE CAPS, THEN §6.1) *(superseded by the block above)*
 >
 > **Measured:** last commit `101e2df` ("phase 5.5: k5 re-identification check"), pushed, CI and Deploy green. Its
 > image digest, `sha256:ef0588f9...`, is in `docs/phases/evidence/phase-5.5/run-log.md`, which starts §6.0's record.

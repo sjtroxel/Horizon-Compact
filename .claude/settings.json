@@ -45,6 +45,16 @@
       "Bash(uv run --no-sync hc case match*)",
       "Bash(uv run hc case memos*)",
       "Bash(uv run --no-sync hc case memos*)",
+      "Bash(uv run hc case build*)",
+      "Bash(uv run --no-sync hc case build*)",
+      "Bash(uv run hc case reader*)",
+      "Bash(uv run --no-sync hc case reader*)",
+      "Bash(uv run hc case knowledge-probe*)",
+      "Bash(uv run --no-sync hc case knowledge-probe*)",
+      "Bash(uv run hc case probe*)",
+      "Bash(uv run --no-sync hc case probe*)",
+      "Bash(uv run hc case upload*)",
+      "Bash(uv run --no-sync hc case upload*)",
       "Bash(docker push*)"
     ],
     "allow": [

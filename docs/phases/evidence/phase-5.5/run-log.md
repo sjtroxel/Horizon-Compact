@@ -86,9 +86,37 @@ used `hc sweep run --case ... --dry-run`. The doc's step 4 carries a dated corre
 
 ## The caps (§6.0 step 5)
 
-To be set with him from the worst cases above; see the next entry.
+His decision, 2026-10-29 about 9:20 AM CDT, as recommended. Each sweep's cap against its worst case above:
+
+| Model | Cap per sweep | Worst cases | Why |
+|---|---|---|---|
+| `haiku-5-5` | **$2.00** | $0.89 to $1.00 | The doc's rule (bound rounded up to the next dollar) gives $1, but `pre-11`'s bound is $1.00 to the cent; $2 leaves room. |
+| `gpt-oss-openrouter` | **$0.50** | $0.31 to $0.35 | The doc says "under $1". His OpenRouter cash is $3.70 with no top-up until next week at the earliest; five sweeps at $0.50 cannot take more than $2.50. |
+
+All are under the $5 development cap and the $25 official cap; no `--allow-over-cap` is used and no over-cap flag is
+expected. Commit `73f2cdf` (`phase 5.5: section 6.0 readiness`) is pushed with CI green; Deploy did not run (it is
+path-filtered and the commit touched only docs), so the digest above is still the task definition's image.
+
+**§6.0 closed 2026-10-29. §6.1 next.**
+
+## Totals so far
+**The Haiku chain is complete, 2026-10-29:** five sweeps, 750 of 750 runs `valid`, 758 attempts (8 `schema_invalid`, all retried), $0.8518 in all against $4.76 of worst cases. Counts by status only.
+
+**`gpt-oss-120b`, three of five complete, 2026-10-29:** `closure-07`, `closure-19`, `pre-11`; 450 of 450 runs `valid`, $0.1289 in all ($0.0426 + $0.0381 + $0.0482) against caps of $0.50 each. `pre-25` and `pre-224` remain.
 
 ## Sessions
 
 | When | Sweep | Model | Session | Stopped | Runs finished | Cost (USD) | Note |
 |---|---|---|---|---|---|---|---|
+| 2026-10-29 about 14:24 UTC (9:24 AM CDT) | `case-haiku-5-5-9119a8cd` (`closure-07`, seed 4142789090, cap $2) | `haiku-5-5` | task `6092876d891847a1b0e623c9bffb4965` | complete (session started 2026-10-29 14:24:41 UTC) | 150 of 150, all `valid`; 151 attempts (1 `schema_invalid`, retried, then `valid`) | 0.1667 | §6.1, launched alone by him at `73f2cdf`; sweep id matches the dry run. Read by him at about 11:07 AM CDT with `hc sweep status --case`. Counts by status only. Against the $0.95 worst case and the $2 cap. No fault: the case path (assembly, gate in the container, case prefix) ran end to end, and the task started, so `propagateTags` was accepted |
+| 2026-10-29 about 16:08 UTC (11:08 AM CDT) | `case-gpt-oss-openrouter-90dc7f0d` (`closure-07`, seed 2401484987, cap $0.50, `--max-minutes 720`) | `gpt-oss-openrouter` | task `c125a241f1b94d2ca393e5255a9a8c68` | complete (session started 16:08:57 UTC) | 150 of 150, all `valid`; 150 attempts, no retry | 0.0426 | §6.2, `gpt-oss-120b` chain, 1 of 5; launched by him; sweep id matches the dry run |
+| 2026-10-29 about 16:36 UTC (11:36 AM CDT) | `case-haiku-5-5-3d85ff31` (`closure-19`, seed 916347355, cap $2) | `haiku-5-5` | task `3ff7ac4e08614f54b3e189427686865b` | complete (session started 16:36:48 UTC) | 150 of 150, all `valid`; 151 attempts (1 `schema_invalid`, retried) | 0.1459 | §6.2, Haiku chain, 2 of 5 (`closure-07` was §6.1); launched by him while the `gpt-oss-120b` `closure-07` sweep runs; sweep id matches the dry run |
+| 2026-10-29 about 17:05 UTC (12:05 PM CDT) | `case-haiku-5-5-13fab9d7` (`pre-11`, seed 3510822617, cap $2) | `haiku-5-5` | task `199714da1c0b4d8aa064350f5632587e` | complete (session started 17:05:34 UTC) | 150 of 150, all `valid`; 151 attempts (1 `schema_invalid`, retried) | 0.1861 | §6.2, Haiku chain, 3 of 5; launched by him after `closure-19` completed; sweep id matches the dry run |
+| 2026-10-29 about 17:14 UTC (12:14 PM CDT) | `case-gpt-oss-openrouter-1e058732` (`closure-19`, seed 537881194, cap $0.50, `--max-minutes 720`) | `gpt-oss-openrouter` | task `034eab78d68b484ebd6ec97447a044e8` | complete (session started 17:14:49 UTC) | 150 of 150, all `valid`; 156 attempts (6 `api_error`, each retried; the session did not stop) | 0.0381 | §6.2, `gpt-oss-120b` chain, 2 of 5; launched by him after `closure-07` completed; sweep id matches the dry run |
+| 2026-10-29 about 17:27 UTC (12:27 PM CDT) | `case-haiku-5-5-30276496` (`pre-25`, seed 1933638959, cap $2) | `haiku-5-5` | task `ebb335ba68fb49769a235b09b1582a0b` | complete (session started 17:27:48 UTC) | 150 of 150, all `valid`; 154 attempts (4 `schema_invalid`, each retried; the most of any sweep so far, still inside 3 attempts per run) | 0.1871 | §6.2, Haiku chain, 4 of 5; launched by him after `pre-11` completed; sweep id matches the dry run |
+| 2026-10-29 about 18:18 UTC (1:18 PM CDT) | `case-haiku-5-5-a7525775` (`pre-224`, seed 4141966721, cap $2) | `haiku-5-5` | task `714f218ed7754054a8207d2f9349e784` | complete (session started 18:19:07 UTC) | 150 of 150, all `valid`; 151 attempts (1 `schema_invalid`, retried) | 0.1660 | §6.2, Haiku chain, 5 of 5; launched by him after `pre-25` completed; sweep id matches the dry run |
+| 2026-10-29 about 21:14 UTC (4:14 PM CDT) | `case-gpt-oss-openrouter-e3ccf78f` (`pre-11`, seed 218789764, cap $0.50, `--max-minutes 720`) | `gpt-oss-openrouter` | task `ef8c155b957e42a298d25a9fdb058023` | **stopped: `api_errors`** (session started 21:15:00 UTC) | 19 of 150, all `valid`; 96 attempts (73 `api_error`, 4 `no_tool_call`, 19 `valid`) | 0.0060 | §6.2, `gpt-oss-120b` chain, 3 of 5; launched by him after `closure-19` completed (he was away about three hours between); sweep id matches the dry run |
+| 2026-10-29 about 22:00 UTC (5:00 PM CDT) | `case-gpt-oss-openrouter-e3ccf78f` | `gpt-oss-openrouter` | (stop, read by him) | | | | Phase 4 §7's stop table, `api_errors` row: wait about 30 minutes, re-launch. Cause read by Claude from OpenRouter's endpoints API at about 5:00 PM CDT: the pinned `deepinfra/bf16` endpoint at status -5, uptime 33% over 30 minutes and 80% over 5 (96% over a day). The pin is the protocol's and is not changed. A re-launch with the same seed resumes the same sweep id (`write_order` refuses unless the stored finding matches). |
+| 2026-10-29 about 22:37 UTC (5:37 PM CDT) | `case-gpt-oss-openrouter-e3ccf78f` (`pre-11`, re-launch, same seed and cap) | `gpt-oss-openrouter` | task `f3d252d76db04c14bda90acad62c3d2d` | **stopped: `api_errors`** (session started 22:37:43 UTC; stop time not read) | sweep at 68 of 150, all `valid`; 239 attempts in all (164 `api_error`, 7 `no_tool_call`, 68 `valid`); this session 143 attempts | 0.0218 (sweep) | Re-launch after the `api_errors` stop, about 37 minutes later; same sweep id, so a resume. DeepInfra read at about 5:36 PM CDT: status 0, uptime 87% over 30 minutes, 20% over 5, 96% over a day |
+| 2026-10-29 about 00:53 UTC 10/30 (7:53 PM CDT) | `case-gpt-oss-openrouter-e3ccf78f` | `gpt-oss-openrouter` | (second stop, read by him) | | | | Second `api_errors` stop, more than an hour after the first. DeepInfra read by Claude at about 7:54 PM CDT: status -2, uptime 20% over 5 minutes, 70% over 30, 93% over a day. |
+| 2026-10-30 00:55 UTC (7:55 PM CDT 10/29) | `case-gpt-oss-openrouter-e3ccf78f` (`pre-11`, second re-launch, same seed and cap) | `gpt-oss-openrouter` | session started 00:55:02 UTC (task id not pasted) | complete | **150 of 150, all `valid`**; sweep in all 321 attempts (164 `api_error`, 7 `no_tool_call`, 150 `valid`); this session 82 attempts, no `api_error` | 0.0482 (sweep) | Resume after the second stop; DeepInfra had recovered. Three sessions in all; the `no_tool_call` attempts were retried and no run finished on one |

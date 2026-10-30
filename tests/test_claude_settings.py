@@ -21,6 +21,13 @@ READERS = (
     "case match",  # reads a case sweep's runs against the rubric: his to run at the reveal
     "case memos",  # K4, not built yet; denied ahead
 )
+SPENDERS = (
+    "case build",  # the extraction model, his Anthropic credit
+    "case reader",  # the independent reader, his OpenRouter cash
+    "case knowledge-probe",  # calls to every official model
+    "case probe",  # the recognition probe; the prefix also covers probe-verdict, which pays the reader on a failure
+    "case upload",  # write-once private storage
+)
 FORMS = ("uv run hc", "uv run --no-sync hc")
 
 
@@ -32,6 +39,12 @@ def settings() -> dict[str, dict[str, list[str]]]:
 @pytest.mark.parametrize("form", FORMS)
 @pytest.mark.parametrize("command", READERS)
 def test_every_command_that_reads_a_record_is_denied(form: str, command: str) -> None:
+    assert f"Bash({form} {command}*)" in settings()["permissions"]["deny"]
+
+
+@pytest.mark.parametrize("form", FORMS)
+@pytest.mark.parametrize("command", SPENDERS)
+def test_every_command_that_spends_or_writes_is_denied(form: str, command: str) -> None:
     assert f"Bash({form} {command}*)" in settings()["permissions"]["deny"]
 
 

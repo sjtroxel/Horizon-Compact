@@ -98,16 +98,7 @@ fixed before real cases are accepted.
 
 ## Layout
 
-```
-src/horizon_compact/privacy/   the name guard (standard library only)
-tests/                         pytest; every name in a test is a fictional canary
-docs/planning/                 the closed design, 00-09
-docs/phases/                   scope and IMPLEMENTATION docs per phase
-docs/ROADMAP.md                spine, ledger, decision history
-docs/KNOWN-GAPS.md             open items, START HERE
-```
-
-Later phases add `infra/`, `experiment/`, `web/` and `pipelines/` (`docs/planning/02` §4). The root is capped
-at 16 entries (`make root-check`); relocate before raising it.
+Every name in a test is a fictional canary. The root is capped at 16 entries (`make root-check`); relocate
+before raising it.
 
 This repo shares one Claude memory store with `job-search-headquarters` through a symlink.
