@@ -1,0 +1,209 @@
+{
+  "results_version": 1,
+  "case": "closure-19",
+  "type": "closure",
+  "exploratory": true,
+  "exploratory_label": "exploratory: selected by §4.6.5 step 2, after the pre-registered rule found none",
+  "experiment": "case-closure-19",
+  "scenario_id": "s3",
+  "model_key": "haiku-5-5",
+  "sweep_id": "case-haiku-5-5-3d85ff31",
+  "run_counts": {
+    "runs": 150,
+    "by_final_status": {
+      "valid": 150
+    }
+  },
+  "thresholds": {
+    "d_star": 0.5456778377115402,
+    "k_star": 1,
+    "alpha": 0.05,
+    "resamples": 100000
+  },
+  "dimensions": {
+    "observable": [
+      "choice"
+    ],
+    "excluded": [
+      "eliminated",
+      "moved_other_plants",
+      "kept_at_plant",
+      "transferred_to_buyer"
+    ]
+  },
+  "company": {
+    "reading": "primary",
+    "choice": "close",
+    "shares": {}
+  },
+  "company_alternatives": [
+    {
+      "reading": "u1",
+      "choice": "close",
+      "shares": {
+        "eliminated": 1.0
+      }
+    }
+  ],
+  "readings": [
+    {
+      "reading": "primary",
+      "observable_lines": [],
+      "choice_observable": true,
+      "dimensions": 1,
+      "company_basis": "choice",
+      "label": "no_good_match",
+      "reason": "the nearest distance 1.0000 is above 0.5457",
+      "nearest": "A",
+      "tied_with": null,
+      "gap": {
+        "nearest": "A",
+        "second": "B",
+        "estimate": 0.0,
+        "low": 0.0,
+        "high": 0.0,
+        "seed": 51708200104990895674395918064214010461
+      },
+      "distances": [
+        {
+          "objective_id": "A",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 83056199750230843257787448591679246747,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "B",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 251231988090552275739499110059137096569,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "C",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 106749096455534219395288471634891755236,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "D",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 5606893349721914849577738334127995804,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "E",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 71252396098893517736645920117333357397,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        }
+      ]
+    },
+    {
+      "reading": "u1",
+      "observable_lines": [
+        "eliminated"
+      ],
+      "choice_observable": true,
+      "dimensions": 1,
+      "company_basis": "both",
+      "label": "no_good_match",
+      "reason": "the nearest distance 0.9000 is above 0.5457",
+      "nearest": "C",
+      "tied_with": null,
+      "gap": {
+        "nearest": "C",
+        "second": "A",
+        "estimate": 0.016666666666666607,
+        "low": -0.08333333333333326,
+        "high": 0.11666666666666647,
+        "seed": 76207675391635501257315963592492248637
+      },
+      "distances": [
+        {
+          "objective_id": "A",
+          "distance": 0.9166666666666666,
+          "low": 0.85,
+          "high": 0.9833333333333334,
+          "seed": 28308644954207136767205674066357532284,
+          "runs": 30,
+          "choice_only_runs": 25,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "B",
+          "distance": 0.9666666666666667,
+          "low": 0.9166666666666666,
+          "high": 1.0,
+          "seed": 155291056047846675710610750313554876133,
+          "runs": 30,
+          "choice_only_runs": 28,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "C",
+          "distance": 0.9,
+          "low": 0.8333333333333334,
+          "high": 0.9666666666666667,
+          "seed": 116261552893354309927743932560199323444,
+          "runs": 30,
+          "choice_only_runs": 24,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "D",
+          "distance": 0.9499999999999998,
+          "low": 0.8833333333333334,
+          "high": 1.0,
+          "seed": 55601822435654998511069205534334314798,
+          "runs": 30,
+          "choice_only_runs": 27,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "E",
+          "distance": 0.9333333333333332,
+          "low": 0.8666666666666667,
+          "high": 0.9833333333333334,
+          "seed": 322285535406910150894884698005146941458,
+          "runs": 30,
+          "choice_only_runs": 26,
+          "undistanced_runs": 0
+        }
+      ]
+    }
+  ],
+  "alternative_readings": {
+    "matched": 1,
+    "unmatched_calls": []
+  },
+  "depends_on_reading": true,
+  "provenance": {
+    "head": "cbd6cb0aa3035832b72758bcf417f15c26fd8640",
+    "protocol": "prereg-v1",
+    "protocol_check": "ok",
+    "analysis_sha256": "0cabbfd96fc42da1ecc1f0e7966e540a3ba9735487046c4e84fe7e45b0f50e0a",
+    "uv_lock_sha256": "d9cdf7fc2a169ebcb125bdac0349fa2cbb6ddff876266bbf04b9fe9afe072f81",
+    "rubric_sha256": "ba984303fe1610554cc231842f89bed2e14b8350b6702eac6cb576337a755cf7",
+    "alternatives_sha256": "640c03f1ffa49daf158aec963aa56954bd01e16d6a5ac5155c0c483662b92355",
+    "sweep_id": "case-haiku-5-5-3d85ff31"
+  }
+}

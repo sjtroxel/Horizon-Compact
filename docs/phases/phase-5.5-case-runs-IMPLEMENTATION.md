@@ -708,6 +708,10 @@ reveal.**
 The ten results files are written. **This is the first time anyone reads a case result.** Claude reads them in full
 from here on.
 
+**[done] 2026-10-31, at `cbd6cb0` (his run).** Ten files written, each 150 of 150 `valid` and `protocol_check: ok`;
+all 20 readings are no good match (`run-log.md`, §6.4). Two behaviors of the frozen matcher to disclose: KNOWN-GAPS,
+OPEN 2026-10-31.
+
 ### 6.5 The memo scan
 
 `hc case memos` for each case and model, with the Anthropic key in the environment for the command, then `hc case
@@ -731,6 +735,12 @@ reader ... memo` on the flagged memos (decision 4 (d)). He reads any flag he cho
 re-identification outcome, and the dossier as published or "withheld" with its reason), each dossier that passed as
 `experiment/results/cases/<label>/dossier.txt`, and `record-checks.md`. The commit deploys an image, which is
 harmless after the last session. The guard checks it. **No commentary**: prose is Phase 7's, in his words.
+
+**Dated note, 2026-10-31 (his decision, at §6.4):** the ten results files are committed with §6.4's docs, not held
+for this commit, so they are tracked rather than only on the laptop. They hold no name, amount or excerpt, are
+written once, and nothing after §6.4 recomputes them; the sessions are over, so the image the commit deploys is
+harmless. `record-checks.md` was already committed at §6.3 (`cbd6cb0`). This commit carries the rest: the memo
+files, `cases.json` and the dossiers that pass.
 
 ### 6.8 The measured cost
 

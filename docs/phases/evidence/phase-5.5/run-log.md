@@ -108,6 +108,31 @@ path-filtered and the commit touched only docs), so the digest above is still th
 
 **§6.3, the record checks, 2026-10-30 about 17:20 UTC (12:20 PM CDT):** `hc protocol records --cases`, run by him; every check passes (`record-checks.md`). The image check is reported, not judged: all ten sweeps ran on one digest, `sha256:ef0588f9...`, the one §6.0 recorded. The per-sweep counts match the session rows below. The file's tree reads `fecd23dffb1f plus uncommitted changes`: the uncommitted changes were this log, `KNOWN-GAPS.md` and `ROADMAP.md` only (no code), committed with it (his choice, over a re-run on a clean tree). **§6.3 closed. §6.4, the reveal, next.**
 
+**§6.4, the reveal, 2026-10-31 about 8:07 to 8:12 AM CDT:** `scratch/p55-match.sh` (ten `hc case match` lines, in
+freeze order), run by him from `main` at `cbd6cb0`. Ten results files written under `experiment/results/cases/`, each
+with `protocol_check: ok`, one `analysis_sha256` (`0cabbfd9...`) and one `uv_lock_sha256` (`d9cdf7fc...`) across all
+ten; the two files of each case share that case's `rubric_sha256`. Every file reads 150 of 150 runs `valid`, and every
+uncertain call's alternative was matched (no unmatched call). Against the S3 pair (`d_star` 0.5457, `k_star` 1):
+
+| Case | Model | `primary` | `u1` | `depends_on_reading` |
+|---|---|---|---|---|
+| `closure-07` | `haiku-5-5` | no good match | no good match | true (see KNOWN-GAPS, OPEN 2026-10-31, item 1) |
+| `closure-07` | `gpt-oss-openrouter` | no good match | no good match | false |
+| `closure-19` | `haiku-5-5` | no good match | no good match | true (item 1) |
+| `closure-19` | `gpt-oss-openrouter` | no good match | no good match | false |
+| `pre-11` | `haiku-5-5` | no good match | no good match | true (item 1) |
+| `pre-11` | `gpt-oss-openrouter` | no good match | no good match | false |
+| `pre-25` | `haiku-5-5` | no good match | no good match | false |
+| `pre-25` | `gpt-oss-openrouter` | no good match | no good match | false |
+| `pre-224` | `haiku-5-5` | no good match | no good match | false |
+| `pre-224` | `gpt-oss-openrouter` | no good match | no good match | false |
+
+**All 20 readings are no good match.** The distances and spreads are in the files; nothing here interprets them.
+Claude read all ten in full after they were written (a Sonnet session, then Opus checked every figure against the files
+and the frozen `matcher.py` and `descriptive.distance`). Two behaviors of the frozen matcher show in these files and are
+disclosure items for Phase 6 and 6.5, not changes: KNOWN-GAPS, OPEN 2026-10-31. **Honor statement (Claude's):** no case
+result was read before the files were written. **§6.4 closed. §6.5, the memo scan, next.**
+
 ## Sessions
 
 | When | Sweep | Model | Session | Stopped | Runs finished | Cost (USD) | Note |

@@ -1,0 +1,209 @@
+{
+  "results_version": 1,
+  "case": "closure-19",
+  "type": "closure",
+  "exploratory": true,
+  "exploratory_label": "exploratory: selected by §4.6.5 step 2, after the pre-registered rule found none",
+  "experiment": "case-closure-19",
+  "scenario_id": "s3",
+  "model_key": "gpt-oss-openrouter",
+  "sweep_id": "case-gpt-oss-openrouter-1e058732",
+  "run_counts": {
+    "runs": 150,
+    "by_final_status": {
+      "valid": 150
+    }
+  },
+  "thresholds": {
+    "d_star": 0.5456778377115402,
+    "k_star": 1,
+    "alpha": 0.05,
+    "resamples": 100000
+  },
+  "dimensions": {
+    "observable": [
+      "choice"
+    ],
+    "excluded": [
+      "eliminated",
+      "moved_other_plants",
+      "kept_at_plant",
+      "transferred_to_buyer"
+    ]
+  },
+  "company": {
+    "reading": "primary",
+    "choice": "close",
+    "shares": {}
+  },
+  "company_alternatives": [
+    {
+      "reading": "u1",
+      "choice": "close",
+      "shares": {
+        "eliminated": 1.0
+      }
+    }
+  ],
+  "readings": [
+    {
+      "reading": "primary",
+      "observable_lines": [],
+      "choice_observable": true,
+      "dimensions": 1,
+      "company_basis": "choice",
+      "label": "no_good_match",
+      "reason": "the nearest distance 0.7667 is above 0.5457",
+      "nearest": "E",
+      "tied_with": null,
+      "gap": {
+        "nearest": "E",
+        "second": "A",
+        "estimate": 0.2333333333333334,
+        "low": 0.09999999999999998,
+        "high": 0.3666666666666667,
+        "seed": 331402314079169024289091551708539168207
+      },
+      "distances": [
+        {
+          "objective_id": "A",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 310016575690552593605753531731535124090,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "B",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 119039149419130391815708467877692307910,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "C",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 239163617276425110984196178590238179740,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "D",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 168044176833497120780753913839214332741,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "E",
+          "distance": 0.7666666666666666,
+          "low": 0.6333333333333333,
+          "high": 0.9,
+          "seed": 141083487513915837311274391325543674096,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        }
+      ]
+    },
+    {
+      "reading": "u1",
+      "observable_lines": [
+        "eliminated"
+      ],
+      "choice_observable": true,
+      "dimensions": 1,
+      "company_basis": "both",
+      "label": "no_good_match",
+      "reason": "the nearest distance 0.6333 is above 0.5457",
+      "nearest": "E",
+      "tied_with": null,
+      "gap": {
+        "nearest": "E",
+        "second": "B",
+        "estimate": 0.10000000000000009,
+        "low": -0.050000000000000155,
+        "high": 0.2666666666666666,
+        "seed": 48473001132584690707188376300184103573
+      },
+      "distances": [
+        {
+          "objective_id": "A",
+          "distance": 0.8500000000000001,
+          "low": 0.7666666666666666,
+          "high": 0.9333333333333332,
+          "seed": 126713534249074163337967444889878210956,
+          "runs": 30,
+          "choice_only_runs": 21,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "B",
+          "distance": 0.7333333333333334,
+          "low": 0.65,
+          "high": 0.8166666666666668,
+          "seed": 111945219472050451142339209036436583774,
+          "runs": 30,
+          "choice_only_runs": 14,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "C",
+          "distance": 0.8333333333333334,
+          "low": 0.75,
+          "high": 0.9,
+          "seed": 319601111574121641119291660733173045648,
+          "runs": 30,
+          "choice_only_runs": 20,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "D",
+          "distance": 0.7833333333333333,
+          "low": 0.6999999999999998,
+          "high": 0.8666666666666667,
+          "seed": 41334997388675931469281767676289022015,
+          "runs": 30,
+          "choice_only_runs": 17,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "E",
+          "distance": 0.6333333333333333,
+          "low": 0.5,
+          "high": 0.7666666666666666,
+          "seed": 234484426243585852446403207128529680056,
+          "runs": 30,
+          "choice_only_runs": 15,
+          "undistanced_runs": 0
+        }
+      ]
+    }
+  ],
+  "alternative_readings": {
+    "matched": 1,
+    "unmatched_calls": []
+  },
+  "depends_on_reading": false,
+  "provenance": {
+    "head": "cbd6cb0aa3035832b72758bcf417f15c26fd8640",
+    "protocol": "prereg-v1",
+    "protocol_check": "ok",
+    "analysis_sha256": "0cabbfd96fc42da1ecc1f0e7966e540a3ba9735487046c4e84fe7e45b0f50e0a",
+    "uv_lock_sha256": "d9cdf7fc2a169ebcb125bdac0349fa2cbb6ddff876266bbf04b9fe9afe072f81",
+    "rubric_sha256": "ba984303fe1610554cc231842f89bed2e14b8350b6702eac6cb576337a755cf7",
+    "alternatives_sha256": "640c03f1ffa49daf158aec963aa56954bd01e16d6a5ac5155c0c483662b92355",
+    "sweep_id": "case-gpt-oss-openrouter-1e058732"
+  }
+}

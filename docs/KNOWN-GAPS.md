@@ -7,7 +7,25 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-30, about 12:40 PM (§6.2 AND §6.3 COMPLETE; §6.4, THE REVEAL, NEXT)
+> ## START HERE — where things stand, 2026-10-31, about 8:45 AM (§6.4, THE REVEAL, DONE; §6.5, THE MEMO SCAN, NEXT)
+>
+> **Measured:** last commit `cbd6cb0`. **§6.4 done:** he ran `scratch/p55-match.sh` at `cbd6cb0`; ten results files
+> are under `experiment/results/cases/`, each 150 of 150 `valid`, `protocol_check: ok`. **All 20 readings (ten files,
+> `primary` and `u1`) are no good match** against the S3 pair. Table and provenance in `run-log.md`, §6.4. Two
+> behaviors of the frozen matcher show in the files and must be disclosed wherever the results appear (OPEN
+> 2026-10-31, below): Haiku's `depends_on_reading: true` comes from a five-way exact tie, and `closure-19`'s `u1` has
+> one observable line. **Nothing is running.**
+>
+> **Next: §6.5, the memo scan.** `scratch/p55-memos.sh` does not exist yet; write it with flags checked against the
+> CLI. **Run Haiku's pass (`hc case memos`) on all ten first and count the flags before any OpenRouter reader read**,
+> then price the reader from that count: his OpenRouter cash is about $3.48 ($3.70 less the runs' $0.22) with no
+> top-up until next week, and K4's estimate was $1-6. Then §6.6 (re-identification, his searches), §6.7 (publication),
+> §6.8 (cost from the bills, which lag about a day), §6.9 (the close). **His, open:** the Claude Docs connector, auto
+> mode as his default.
+>
+> *The 2026-10-30 12:40 PM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-30, about 12:40 PM (§6.2 AND §6.3 COMPLETE; §6.4, THE REVEAL, NEXT) *(superseded by the block above)*
 >
 > **Measured:** last commit `fecd23d`. **All ten case sweeps are complete** (from `hc sweep status --case`, read by
 > him): 1,500 of 1,500 runs `valid`, $1.0673 in all (Haiku $0.8518, `gpt-oss-120b` $0.2155). Today's two,
@@ -2431,6 +2449,36 @@ closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN 2026-10-31 — two behaviors of the frozen matcher that the case results must disclose (for Phase 6 and 6.5)
+
+Found at Phase 5.5 §6.4, by Opus reading the ten results files against `analysis/matcher.py` and
+`analysis/descriptive.py`. **Neither is a fault to fix:** both are the frozen code behaving as written, and neither
+changes a label (all 20 readings are no good match; `run-log.md`, §6.4). Both must be stated wherever the case
+results are shown (the explorer, the methods page), so a reader does not take a number for more than it is.
+
+1. **A five-way exact tie under "no good match" yields an arbitrary nearest objective, and `depends_on_reading`
+   inherits it.** In Haiku's `primary` reading of every case, all five distances are exactly 1.000 with intervals
+   [1, 1]. An exact equality is broken by objective id (`matcher.py` docstring), so `nearest` is A; the tie rule
+   never runs because `no_good_match` is tested first (`matcher.py:360`), so `tied_with` is null. The matched set is
+   then {A}, and `depends_on_reading` compares matched sets whatever the label (`matcher.py:457`). So it reads true
+   in the three Haiku files whose `u1` nearest is not A (`closure-07`, `closure-19`, `pre-11`) and false in the two
+   where it happens to be A (`pre-25`, `pre-224`). **In these files the flag does not mean the company's reading
+   changes the result**: the label is no good match under both readings. *How to show it:* where every distance in a
+   reading is equal, show no nearest objective, and show `depends_on_reading` with this note.
+2. **A reading with one observable line still averages that line into the distance.** Phase 3's finding (a)
+   (`planning/07` §10.4, patched 2026-10-09) made a lone line count zero toward `k_star`, since every run that puts
+   anything on it is identical to the company. The per-run distance still averages that zero with the choice term
+   (`descriptive.distance`), so a run that eliminates anything but does not choose the company's option scores 0.5,
+   which is **below `d_star` (0.5457)**. `closure-19`'s `u1` is the one such reading here (one observable line). Its
+   distances are therefore pulled toward a match by construction and are not comparable with the other cases' `u1`
+   readings; `gpt-oss-120b`'s nearest there, 0.633, has an interval reaching 0.50, and the arithmetic fits this
+   effect (inferred from the files' counts, not checked against run records). *How to show it:* mark `closure-19`'s
+   `u1` distances with this note.
+
+**Closes when** Phase 6 and 6.5 carry both notes (their DoD audits name this entry).
 
 ---
 

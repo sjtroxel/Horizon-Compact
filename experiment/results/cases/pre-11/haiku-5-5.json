@@ -1,0 +1,215 @@
+{
+  "results_version": 1,
+  "case": "pre-11",
+  "type": "closure",
+  "exploratory": true,
+  "exploratory_label": "exploratory: selected by §4.6.5 step 3, after the pre-registered rule found none; first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and the extraction model found no recall",
+  "experiment": "case-pre-11",
+  "scenario_id": "s3",
+  "model_key": "haiku-5-5",
+  "sweep_id": "case-haiku-5-5-13fab9d7",
+  "run_counts": {
+    "runs": 150,
+    "by_final_status": {
+      "valid": 150
+    }
+  },
+  "thresholds": {
+    "d_star": 0.5456778377115402,
+    "k_star": 1,
+    "alpha": 0.05,
+    "resamples": 100000
+  },
+  "dimensions": {
+    "observable": [
+      "choice"
+    ],
+    "excluded": [
+      "eliminated",
+      "moved_other_plants",
+      "kept_at_plant",
+      "transferred_to_buyer"
+    ]
+  },
+  "company": {
+    "reading": "primary",
+    "choice": "close",
+    "shares": {}
+  },
+  "company_alternatives": [
+    {
+      "reading": "u1",
+      "choice": "close",
+      "shares": {
+        "eliminated": 1.0,
+        "moved_other_plants": 0.0,
+        "kept_at_plant": 0.0,
+        "transferred_to_buyer": 0.0
+      }
+    }
+  ],
+  "readings": [
+    {
+      "reading": "primary",
+      "observable_lines": [],
+      "choice_observable": true,
+      "dimensions": 1,
+      "company_basis": "choice",
+      "label": "no_good_match",
+      "reason": "the nearest distance 1.0000 is above 0.5457",
+      "nearest": "A",
+      "tied_with": null,
+      "gap": {
+        "nearest": "A",
+        "second": "B",
+        "estimate": 0.0,
+        "low": 0.0,
+        "high": 0.0,
+        "seed": 117654665998674395282260624735747060659
+      },
+      "distances": [
+        {
+          "objective_id": "A",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 233298692856837639218725986040998063596,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "B",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 238694326136174740762199306985286131585,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "C",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 324385010333320931085802038991256903462,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "D",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 135819235508400715617418478936825549157,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "E",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 189228026706530557311636149328281745471,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        }
+      ]
+    },
+    {
+      "reading": "u1",
+      "observable_lines": [
+        "eliminated",
+        "moved_other_plants",
+        "kept_at_plant",
+        "transferred_to_buyer"
+      ],
+      "choice_observable": true,
+      "dimensions": 4,
+      "company_basis": "both",
+      "label": "no_good_match",
+      "reason": "the nearest distance 0.9960 is above 0.5457",
+      "nearest": "E",
+      "tied_with": null,
+      "gap": {
+        "nearest": "E",
+        "second": "B",
+        "estimate": 0.002098765432098859,
+        "low": -0.0024691358024692134,
+        "high": 0.007283950617284041,
+        "seed": 252182990963011088653664442291721936423
+      },
+      "distances": [
+        {
+          "objective_id": "A",
+          "distance": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "seed": 73984327957480953196071733420425185928,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "B",
+          "distance": 0.9981481481481481,
+          "low": 0.995679012345679,
+          "high": 1.0,
+          "seed": 219763939042463544273845995708678712223,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "C",
+          "distance": 0.9987654320987653,
+          "low": 0.9962962962962963,
+          "high": 1.0,
+          "seed": 229607607911696021784508680168653237480,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "D",
+          "distance": 0.9987654320987653,
+          "low": 0.9962962962962963,
+          "high": 1.0,
+          "seed": 321986593373054829964709482329833105483,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "E",
+          "distance": 0.9960493827160493,
+          "low": 0.9912345679012345,
+          "high": 1.0,
+          "seed": 209585246717937026909248100228275276679,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        }
+      ]
+    }
+  ],
+  "alternative_readings": {
+    "matched": 1,
+    "unmatched_calls": []
+  },
+  "depends_on_reading": true,
+  "provenance": {
+    "head": "cbd6cb0aa3035832b72758bcf417f15c26fd8640",
+    "protocol": "prereg-v1",
+    "protocol_check": "ok",
+    "analysis_sha256": "0cabbfd96fc42da1ecc1f0e7966e540a3ba9735487046c4e84fe7e45b0f50e0a",
+    "uv_lock_sha256": "d9cdf7fc2a169ebcb125bdac0349fa2cbb6ddff876266bbf04b9fe9afe072f81",
+    "rubric_sha256": "21aa926460336f3d88841e46d224f147ed800479078b7104a52b94f1c76e1dcd",
+    "alternatives_sha256": "eba9461fe843cd1e7789ba8cda209c7826673a4f56ff02c1c656773989928807",
+    "sweep_id": "case-haiku-5-5-13fab9d7"
+  }
+}

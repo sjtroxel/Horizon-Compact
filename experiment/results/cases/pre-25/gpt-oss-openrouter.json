@@ -1,0 +1,215 @@
+{
+  "results_version": 1,
+  "case": "pre-25",
+  "type": "closure",
+  "exploratory": true,
+  "exploratory_label": "exploratory: selected by §4.6.5 step 3, after the pre-registered rule found none; first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and the extraction model found no recall",
+  "experiment": "case-pre-25",
+  "scenario_id": "s3",
+  "model_key": "gpt-oss-openrouter",
+  "sweep_id": "case-gpt-oss-openrouter-eb1036dc",
+  "run_counts": {
+    "runs": 150,
+    "by_final_status": {
+      "valid": 150
+    }
+  },
+  "thresholds": {
+    "d_star": 0.5456778377115402,
+    "k_star": 1,
+    "alpha": 0.05,
+    "resamples": 100000
+  },
+  "dimensions": {
+    "observable": [
+      "choice"
+    ],
+    "excluded": [
+      "eliminated",
+      "moved_other_plants",
+      "kept_at_plant",
+      "transferred_to_buyer"
+    ]
+  },
+  "company": {
+    "reading": "primary",
+    "choice": "close",
+    "shares": {}
+  },
+  "company_alternatives": [
+    {
+      "reading": "u1",
+      "choice": "close",
+      "shares": {
+        "eliminated": 1.0,
+        "moved_other_plants": 0.0,
+        "kept_at_plant": 0.0,
+        "transferred_to_buyer": 0.0
+      }
+    }
+  ],
+  "readings": [
+    {
+      "reading": "primary",
+      "observable_lines": [],
+      "choice_observable": true,
+      "dimensions": 1,
+      "company_basis": "choice",
+      "label": "no_good_match",
+      "reason": "the nearest distance 0.7667 is above 0.5457",
+      "nearest": "E",
+      "tied_with": null,
+      "gap": {
+        "nearest": "E",
+        "second": "A",
+        "estimate": 0.033333333333333326,
+        "low": -0.13333333333333341,
+        "high": 0.23333333333333328,
+        "seed": 162787488145063991870090947875426960267
+      },
+      "distances": [
+        {
+          "objective_id": "A",
+          "distance": 0.7999999999999999,
+          "low": 0.7000000000000001,
+          "high": 0.9,
+          "seed": 93636748344434490087088464267492556916,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "B",
+          "distance": 0.9,
+          "low": 0.7666666666666667,
+          "high": 1.0,
+          "seed": 37248488394962981721378253625532057247,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "C",
+          "distance": 0.9666666666666667,
+          "low": 0.9,
+          "high": 1.0,
+          "seed": 130224981218651868513322877732656355919,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "D",
+          "distance": 0.9,
+          "low": 0.7999999999999999,
+          "high": 1.0,
+          "seed": 16286384328144263240081989681082138442,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "E",
+          "distance": 0.7666666666666666,
+          "low": 0.6,
+          "high": 0.9,
+          "seed": 17284450065254423116831082775944258750,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        }
+      ]
+    },
+    {
+      "reading": "u1",
+      "observable_lines": [
+        "eliminated",
+        "moved_other_plants",
+        "kept_at_plant",
+        "transferred_to_buyer"
+      ],
+      "choice_observable": true,
+      "dimensions": 4,
+      "company_basis": "both",
+      "label": "no_good_match",
+      "reason": "the nearest distance 0.8122 is above 0.5457",
+      "nearest": "E",
+      "tied_with": null,
+      "gap": {
+        "nearest": "E",
+        "second": "A",
+        "estimate": 0.003401360544217691,
+        "low": -0.11734693877551017,
+        "high": 0.1333333333333333,
+        "seed": 140844570051648774120991291700276138289
+      },
+      "distances": [
+        {
+          "objective_id": "A",
+          "distance": 0.8156462585034013,
+          "low": 0.7462585034013606,
+          "high": 0.8870748299319727,
+          "seed": 300621166285789262839482551288121635653,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "B",
+          "distance": 0.9051020408163266,
+          "low": 0.8200680272108842,
+          "high": 0.9738095238095239,
+          "seed": 96830016352250260253263898713522327543,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "C",
+          "distance": 0.9387755102040817,
+          "low": 0.9037414965986393,
+          "high": 0.9663265306122449,
+          "seed": 67165438971246663349679411549878875208,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "D",
+          "distance": 0.9224489795918368,
+          "low": 0.8445578231292518,
+          "high": 0.9897959183673469,
+          "seed": 308433352955533030671703261687244229667,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        },
+        {
+          "objective_id": "E",
+          "distance": 0.8122448979591836,
+          "low": 0.7027210884353741,
+          "high": 0.9098639455782312,
+          "seed": 120472208668638327888539950220581120638,
+          "runs": 30,
+          "choice_only_runs": 0,
+          "undistanced_runs": 0
+        }
+      ]
+    }
+  ],
+  "alternative_readings": {
+    "matched": 1,
+    "unmatched_calls": []
+  },
+  "depends_on_reading": false,
+  "provenance": {
+    "head": "cbd6cb0aa3035832b72758bcf417f15c26fd8640",
+    "protocol": "prereg-v1",
+    "protocol_check": "ok",
+    "analysis_sha256": "0cabbfd96fc42da1ecc1f0e7966e540a3ba9735487046c4e84fe7e45b0f50e0a",
+    "uv_lock_sha256": "d9cdf7fc2a169ebcb125bdac0349fa2cbb6ddff876266bbf04b9fe9afe072f81",
+    "rubric_sha256": "c428513667498a2cb106a2e982f936b26834f7ac6d05711e1bf30ac0ca0f5431",
+    "alternatives_sha256": "5f94660bbdb55ad2fb438ca3ada1d6f9737689c99a5230b80387df784309efc2",
+    "sweep_id": "case-gpt-oss-openrouter-eb1036dc"
+  }
+}
