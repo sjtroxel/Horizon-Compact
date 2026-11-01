@@ -1,0 +1,48 @@
+{
+  "summary_version": 2,
+  "case": "closure-07",
+  "exploratory": true,
+  "exploratory_label": "exploratory: selected by §4.6.5 step 2, after the pre-registered rule found none",
+  "model_key": "haiku-5-5",
+  "sweep_id": "case-haiku-5-5-9119a8cd",
+  "counts": {
+    "runs": 150,
+    "with_text": 150,
+    "without_text": 0,
+    "flagged_by_lists": 67,
+    "flagged_by_model": 14,
+    "model_net_unaccounted": 0,
+    "flagged_by_both": 5,
+    "echoes_case_text": 76,
+    "flagged": 0,
+    "reader_confirmed": 0,
+    "reader_unclear": 0,
+    "reader_cleared": 0,
+    "reader_no_reply": 0,
+    "held": 76,
+    "held_by_reason": {
+      "name_confirmed": 0,
+      "reader_unclear": 0,
+      "reader_no_reply": 0,
+      "dossier_withheld": 76,
+      "overruled": 0
+    },
+    "overruled": 0,
+    "published": 74
+  },
+  "provenance": {
+    "head": "554ef8113656624a00a7dc1b5162d4b272a3ba6c",
+    "protocol": "prereg-v1",
+    "protocol_check": "ok",
+    "analysis_sha256": "0cabbfd96fc42da1ecc1f0e7966e540a3ba9735487046c4e84fe7e45b0f50e0a",
+    "uv_lock_sha256": "d9cdf7fc2a169ebcb125bdac0349fa2cbb6ddff876266bbf04b9fe9afe072f81",
+    "names_brief_sha256": "a527eee671b9bac8d2bc21f18770676d0b3d94c6a1d27bab640a59e0dce35a64",
+    "memo_brief_sha256": "486fe7cbf06cb9e2371b60bce192110168646693fb1cf9f380bd85cc23748414",
+    "names_entry_sha256": "296b2ea21b6de86a9ca0d39f5ae26f84d4fdd0bb54e860ebacb6a8af4a448b60",
+    "reader_inputs_commit": "7619436c47f0f0105f6933cfd547485f2bcbf0f2",
+    "sec_list_sha256": "3087398afcb236e5eef138bc383afe6292bb5bcc31644b8edae5222cd9305ce0",
+    "overrules_sha256": null,
+    "reident_status": "withheld",
+    "reident_sha256": "5c9ca33d4029da7225c83206bdb83a9aef1be2af6ad9779fadf3bc93d9207d05"
+  }
+}

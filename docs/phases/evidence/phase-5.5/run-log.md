@@ -162,7 +162,49 @@ segments, sellers and businesses, and its own terms for programs and products, r
 other 9: 4 memos join two or more of the dossier's placeholders into one phrase, 3 use a plant number the dossiers do not
 use (they label plants by letter), and 2 are a common word that matches a filer on SEC's list. Measured by a
 case-insensitive substring test against each `dossier.toml`, after folding dashes and spaces; not checked by a second
-reader.
+reader. (`closure-19`'s `dossier.toml` is the uncoarsened one, not its frozen probe set 2; none of its flags was counted
+as an echo, so the count does not depend on it.) What followed is the dated note of 2026-11-01 in the IMPLEMENTATION
+doc's §6.5 (`554ef81`).
+
+**§6.6's first item, `hc case reident`, 2026-11-01 about 9:45 AM CST, run by Claude at `554ef81` (no model call, SEC's
+frames only, $0), moved ahead of the memo scan's second half by that note: all five withheld by the figure half.**
+
+| Case | Ratios used | Filers matching every ratio | Own filer found and matching | Status |
+|---|---|---|---|---|
+| `closure-07` | 5 | 1 | yes | withheld (fewer than 20) |
+| `closure-19` | 8 | 1 | yes | withheld (fewer than 20) |
+| `pre-11` | 8 | 1 | yes | withheld (fewer than 20) |
+| `pre-25` | 8 | 0 | no | withheld (not confirmed) |
+| `pre-224` | 8 | 1 | yes | withheld (fewer than 20) |
+
+No dossier is published (§6.7 lists each as withheld with its reason). The description half did not run for any case,
+since it runs only after the figure half passes. Each memo that only repeats its case's text is therefore held
+(`dossier_withheld`).
+
+**§6.5, the memo scan, second half, 2026-11-01 about 9:50 to 10:10 AM CST:** `scratch/p55-memos-2.sh` (the same ten
+lines, at `554ef81`), run by him. Haiku's replies were reused ($0, no Anthropic question). The reader was asked about two
+sweeps and he said yes to both: **4 memos read, 4 cleared, 0 confirmed, 0 unclear, $0.0247 of his OpenRouter cash.** All
+ten pairs of memo files written; **1,237 of 1,500 memos published, 263 held, every one `dossier_withheld`.**
+
+| Case | Model | Flagged | To the reader | Held (`dossier_withheld`) | Published |
+|---|---|---|---|---|---|
+| `closure-07` | `haiku-5-5` | 76 | 0 | 76 | 74 |
+| `closure-07` | `gpt-oss-openrouter` | 27 | 1 (cleared) | 26 | 124 |
+| `closure-19` | `haiku-5-5` | 3 | 0 | 3 | 147 |
+| `closure-19` | `gpt-oss-openrouter` | 0 | 0 | 0 | 150 |
+| `pre-11` | `haiku-5-5` | 42 | 0 | 42 | 108 |
+| `pre-11` | `gpt-oss-openrouter` | 18 | 0 | 18 | 132 |
+| `pre-25` | `haiku-5-5` | 5 | 0 | 5 | 145 |
+| `pre-25` | `gpt-oss-openrouter` | 14 | 0 | 14 | 136 |
+| `pre-224` | `haiku-5-5` | 75 | 3 (cleared) | 72 | 78 |
+| `pre-224` | `gpt-oss-openrouter` | 7 | 0 | 7 | 143 |
+
+**Four read, not the nine of Claude's first-half count:** the code tests the dossier and the scenario as the model was
+given them, and the first-half count tested the dossier alone. Five of the nine (the plant number and the common word)
+are in the S3 scenario's own text. **The memo scan's cost in all: about $0.11** (Haiku $0.0817, the reader $0.0247).
+**For Phase 6.5's methods page:** a held memo here was held because it repeats its case's text while every dossier is
+withheld, not because any memo was found to name a company (the reader confirmed none); the rule does not tell a
+placeholder label from a product term, so it holds both. **§6.5 closed.**
 
 ## Sessions
 

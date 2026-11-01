@@ -1,0 +1,15 @@
+{
+  "reident_version": 1,
+  "case": "pre-25",
+  "exploratory": true,
+  "status": "withheld",
+  "reason": "withheld: the re-identification check could not confirm the case in SEC's structured data",
+  "threshold": 20,
+  "provenance": {
+    "head": "554ef8113656624a00a7dc1b5162d4b272a3ba6c",
+    "build_sha256": "b879d88d2647f5da0abbe3c5a508d9dfca9c4bd870092f26c32e08447bdd26d9",
+    "dossier_sha256": "90dbed1ccc45bc251706ff7f93fdd3bb22a281b579251ceae48de403e7bdaa4f",
+    "record_sha256": "dd4a0f8a60bbec6eb5a45fe065b1d166ecc8f2ac15e9d36cd655153594fed178",
+    "search_sha256": null
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "reident_version": 1,
+  "case": "pre-224",
+  "exploratory": true,
+  "status": "withheld",
+  "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data",
+  "threshold": 20,
+  "provenance": {
+    "head": "554ef8113656624a00a7dc1b5162d4b272a3ba6c",
+    "build_sha256": "2babfd5094d3feea46d57fd5ddf5c5de4438c3b869dfdab8e9b8325582b0ee2f",
+    "dossier_sha256": "c00248bb031dae1d95a27db6cb6c34931342153024c39a41ac4856caedbae1ae",
+    "record_sha256": "3e83831b0a6f80466570ab2ac9d8a2c640efcbd0f1aff9e717b0ab87b77bad2d",
+    "search_sha256": null
+  }
+}

@@ -760,6 +760,10 @@ written once, and nothing after §6.4 recomputes them; the sessions are over, so
 harmless. `record-checks.md` was already committed at §6.3 (`cbd6cb0`). This commit carries the rest: the memo
 files, `cases.json` and the dossiers that pass.
 
+**Dated note, 2026-11-01 (his decision, at §6.5's close), for the same reason:** the twenty memo files and the five
+`reident.json` files are committed when written, and the name guard reads the memos' text on that commit. No dossier
+passed `hc case reident`, so no dossier is published; this commit carries `cases.json` alone.
+
 ### 6.8 The measured cost
 
 From the record checks' per-sweep totals, then the bills: the Console, OpenRouter's activity, and AWS Cost Explorer.
