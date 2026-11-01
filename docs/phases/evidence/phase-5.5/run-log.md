@@ -133,6 +133,37 @@ and the frozen `matcher.py` and `descriptive.distance`). Two behaviors of the fr
 disclosure items for Phase 6 and 6.5, not changes: KNOWN-GAPS, OPEN 2026-10-31. **Honor statement (Claude's):** no case
 result was read before the files were written. **§6.4 closed. §6.5, the memo scan, next.**
 
+**§6.5, the memo scan, first half, 2026-11-01 about 7:00 to 7:20 AM CST:** `scratch/p55-memos.sh` (ten `hc case memos`
+lines, at `666fc35`), run by him. He answered yes to the model net (Haiku 5.5, his Anthropic credit) and no to the
+reader (OpenRouter, his cash) on every sweep, so **no reader call was made and no OpenRouter money was spent**. Each
+"no" refused before either public file was written; the model net's replies are kept in the appendix and a rerun reuses
+them. One sweep flagged nothing and finished: `closure-19` / `gpt-oss-openrouter`, both files written, 150 of 150
+published. The model net's cost, from its 60 recorded replies (6 batches per sweep, no retry): **$0.0817**.
+
+| Case | Model | Flagged by the lists | Sent to the reader | Reader's worst case (USD) |
+|---|---|---|---|---|
+| `closure-07` | `haiku-5-5` | 67 | 76 | 22.09 |
+| `closure-07` | `gpt-oss-openrouter` | 6 | 27 | 7.84 |
+| `closure-19` | `haiku-5-5` | 2 | 3 | 0.87 |
+| `closure-19` | `gpt-oss-openrouter` | 0 | 0 | (none; finished) |
+| `pre-11` | `haiku-5-5` | 0 | 42 | 12.21 |
+| `pre-11` | `gpt-oss-openrouter` | 0 | 18 | 5.22 |
+| `pre-25` | `haiku-5-5` | 0 | 5 | 1.45 |
+| `pre-25` | `gpt-oss-openrouter` | 0 | 14 | 4.06 |
+| `pre-224` | `haiku-5-5` | 0 | 75 | 21.80 |
+| `pre-224` | `gpt-oss-openrouter` | 0 | 7 | 2.03 |
+
+**267 memos to the reader, worst case about $77.57** (each read's worst case is its full 24,000-token allowance at $12
+per million output tokens), against about $3.48 of his OpenRouter cash. The reader cannot run as built.
+
+**What the flags are, read by Claude from the appendix's flag records (no flagged word is written here):** for **258 of
+the 267**, every flagged word appears verbatim in that case's own dossier: the dossier's placeholder labels for towns,
+segments, sellers and businesses, and its own terms for programs and products, repeated by the model in its memo. The
+other 9: 4 memos join two or more of the dossier's placeholders into one phrase, 3 use a plant number the dossiers do not
+use (they label plants by letter), and 2 are a common word that matches a filer on SEC's list. Measured by a
+case-insensitive substring test against each `dossier.toml`, after folding dashes and spaces; not checked by a second
+reader.
+
 ## Sessions
 
 | When | Sweep | Model | Session | Stopped | Runs finished | Cost (USD) | Note |

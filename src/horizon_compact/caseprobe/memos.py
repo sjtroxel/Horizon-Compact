@@ -8,8 +8,12 @@ list of filer names and tickers, fetched through the one EDGAR client and its ha
 **model net** (Haiku 5.5, in shuffled batches of at most 25 under opaque ids). Anything either net flags
 goes to the independent reader, one memo at a time, which says per flagged word whether it names a real
 company, brand or ticker. **A memo with a confirmed name is held back and counted, never edited**; one
-the reader clears is published. He may overrule the reader toward holding
-(``memo-overrules-<model>.toml`` in the case's folder); the file has no verb that publishes.
+the reader clears is published. **A memo whose every flagged word is in the case's own text** (the dossier
+and scenario the model was given, as frozen) **is not sent to the reader** (dated note 2026-11-01): it repeats
+the model's own prompt, so it is published if the case's dossier passed the re-identification check
+(``reident.json``, whose verdict is required before the scan) and held if the dossier is withheld. A term-file
+word, or a batch the model net did not account for, always goes to the reader. He may overrule the reader
+toward holding (``memo-overrules-<model>.toml`` in the case's folder); the file has no verb that publishes.
 
 **What is scanned:** the tool call's ``memo``, and the text blocks of a reply with no tool call (also of a
 failed attempt that is the run's final). Never reasoning. ``read_runs`` (frozen) gives the rows but not the
@@ -43,6 +47,7 @@ import os
 import random
 import re
 import tomllib
+import unicodedata
 from collections import Counter
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass
@@ -59,11 +64,14 @@ from horizon_compact.caseprobe.match import (
     read_sweep,
     results_path,
 )
-from horizon_compact.caseprobe.run import ProbeRefused, check_probe_model, probe_route
+from horizon_compact.caseprobe.reident import PASSED, WITHHELD
+from horizon_compact.caseprobe.reident import public_path as reident_path
+from horizon_compact.caseprobe.run import ProbeRefused, check_probe_model, load_content, probe_route
 from horizon_compact.experiment import MODELS_FILE
 from horizon_compact.model_config import ModelConfig, ModelsFile
 from horizon_compact.privacy.guard import GuardError, term_file_path
 from horizon_compact.privacy.names import TermFile, TermFileError, find_terms, load_term_file
+from horizon_compact.protocol.cases import check_case_content
 from horizon_compact.protocol.lock import check_lock
 from horizon_compact.providers.base import (
     RawDecision,
@@ -84,7 +92,9 @@ from horizon_compact.sweep.spend import (
 from horizon_compact.sweep.store import Store
 
 RECORD_VERSION = 1
-SUMMARY_VERSION = 1
+SUMMARY_VERSION = (
+    2  # 2 (2026-11-01): echoes_case_text, dossier_withheld, and the reident provenance
+)
 SEC_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 # The model net's model is the experiment's main model: its models.toml entry gives the id, route and prices.
 NAMES_KEY = "haiku-5-5"
@@ -94,7 +104,31 @@ MAX_NAMES_ATTEMPTS = 2  # the reply, and one re-ask for a batch that did not acc
 MAX_READ_ATTEMPTS = MAX_ATTEMPTS
 MEMO_SOURCE_MEMO, MEMO_SOURCE_REPLY = "memo", "reply_text"
 HELD = "held"
-HELD_REASONS = ("name_confirmed", "reader_unclear", "reader_no_reply", "overruled")
+HELD_REASONS = (
+    "name_confirmed",
+    "reader_unclear",
+    "reader_no_reply",
+    "dossier_withheld",
+    "overruled",
+)
+_FOLD_SPACE = re.compile(r"[\s\u2010-\u2015\u2212-]+")
+_MARKS = str.maketrans("", "", "\u00ae\u2122")  # a trademark sign adds no identity
+
+
+def fold(text: str) -> str:
+    """For the case-text test only: compatibility forms, dashes and runs of space as one space, trademark
+    signs dropped, case folded."""
+    return (
+        _FOLD_SPACE.sub(" ", unicodedata.normalize("NFKC", text).translate(_MARKS))
+        .casefold()
+        .strip()
+    )
+
+
+def in_case_text(word: str, case_text: str) -> bool:
+    """``word`` appears in the folded case text as a whole phrase (not inside a longer word)."""
+    folded = fold(word)
+    return bool(folded) and re.search(rf"(?<!\w){re.escape(folded)}(?!\w)", case_text) is not None
 
 
 class MemosRefused(SweepRefusal):
@@ -797,12 +831,18 @@ def run_memo_scan(
         )
     report = check_lock(root)
     reasons += [f"hc protocol check fails on this checkout: {line}" for line in report.failures]
+    reident_status, reident_sha256 = _reident_verdict(root, label, reasons)
     if reasons:
         raise MemosRefused("\n".join(reasons))
     frozen = frozen_reader_inputs(git)
     names = names_model(root)
     names_brief, memo_brief = load_brief(root, "memo-names"), load_brief(root, "memo")
     material = load_material(root, store, label, appendix)
+    content = load_content(store, label, material.record.probe_set)
+    problems = check_case_content(material.record, content)
+    if problems:
+        raise MemosRefused("\n".join(problems))
+    case_text = fold(content.dossier.decode("utf-8") + "\n" + content.scenario.decode("utf-8"))
     runset = read_sweep(store, material, model_key, sweep_id)
     case = CaseAppendix(appendix, label)
     texts = collect_texts(store, runs_prefix(label, sweep_id), runset.rows)
@@ -859,8 +899,23 @@ def run_memo_scan(
         },
     )
 
-    # --- the independent reader, on every flagged memo
-    to_read = [(by_run[run_id], f) for run_id, f in sorted(flags.items()) if f.flagged]
+    # --- what only repeats the case's own text skips the reader (dated note 2026-11-01)
+    echoes = {
+        run_id
+        for run_id, f in flags.items()
+        if f.flagged
+        and not f.unaccounted
+        and f.words
+        and not find_terms(by_run[run_id].text or "", term_file)
+        and all(in_case_text(word, case_text) for word in f.words)
+    }
+
+    # --- the independent reader, on every other flagged memo
+    to_read = [
+        (by_run[run_id], f)
+        for run_id, f in sorted(flags.items())
+        if f.flagged and run_id not in echoes
+    ]
     read = reader_pass(
         case,
         to_read,
@@ -882,6 +937,9 @@ def run_memo_scan(
             held[text.run_id] = "reader_unclear"
         elif verdict is None:
             held[text.run_id] = "reader_no_reply"
+    if reident_status == WITHHELD:
+        for run_id in echoes:
+            held[run_id] = "dossier_withheld"
     applied = [o for o in overrules if o.run_id not in held]
     for overrule in applied:
         held[overrule.run_id] = "overruled"
@@ -898,6 +956,7 @@ def run_memo_scan(
         "flagged_by_model": sum(1 for f in flags.values() if f.model),
         "model_net_unaccounted": sum(1 for f in flags.values() if f.unaccounted),
         "flagged_by_both": sum(1 for f in flags.values() if f.lists and f.model),
+        "echoes_case_text": len(echoes),
         "flagged": len(to_read),
         "reader_confirmed": verdicts[memo_reader.CONFIRMED],
         "reader_unclear": verdicts[memo_reader.UNCLEAR],
@@ -929,6 +988,8 @@ def run_memo_scan(
             "reader_inputs_commit": frozen["reader_inputs_commit"],
             "sec_list_sha256": listing.sha256,
             "overrules_sha256": overrules_sha,
+            "reident_status": reident_status,
+            "reident_sha256": reident_sha256,
         },
     }
     lines = "".join(
@@ -938,6 +999,28 @@ def run_memo_scan(
     _write_once(memos_path, lines)
     _write_once(summary_path, summary_text)
     return ScanResult(memos_path, summary_path, counts, round(named.cost_usd + read.cost_usd, 6))
+
+
+def _reident_verdict(root: Path, label: str, reasons: list[str]) -> tuple[str, str]:
+    """The re-identification check's verdict on the case's dossier, and the file's hash. A memo that only
+    repeats the case's text is published or held with the dossier, so the verdict is needed first."""
+    path = reident_path(root, label)
+    rel = path.relative_to(root).as_posix()
+    if not path.exists():
+        reasons.append(
+            f"{rel} is not there: run `hc case reident {label}` to its verdict first (dated note "
+            "2026-11-01), since a memo that only repeats the case's text follows the dossier"
+        )
+        return "", ""
+    data = path.read_bytes()
+    try:
+        status = json.loads(data)["status"]
+    except (ValueError, KeyError, TypeError):
+        status = None
+    if status not in (PASSED, WITHHELD):
+        reasons.append(f"{rel} holds no verdict ({PASSED} or {WITHHELD})")
+        return "", ""
+    return str(status), hashlib.sha256(data).hexdigest()
 
 
 def _record_flags(

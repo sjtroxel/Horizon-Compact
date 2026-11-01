@@ -717,6 +717,24 @@ OPEN 2026-10-31.
 `hc case memos` for each case and model, with the Anthropic key in the environment for the command, then `hc case
 reader ... memo` on the flagged memos (decision 4 (d)). He reads any flag he chooses. The counts held go into the run log.
 
+**Dated note, 2026-11-01 (his decision, after the first half's counts were seen):** the first half (the lists and
+Haiku's model net, all ten sweeps, $0.08; the reader declined on each) sent 267 memos to the reader, a worst case of
+about $77.57 against about $3.48 of his OpenRouter cash (`run-log.md`, §6.5). For 258 of them every flagged word is in
+the case's own dossier: its placeholder labels and its own terms, repeated by the model. So **a memo whose every flagged
+word appears, as a whole phrase, in the case text the model was given (the frozen dossier and scenario, from storage,
+checked against `case.lock`) is not sent to the reader.** It repeats the model's own prompt, so it shares the dossier's
+fate: **published if `hc case reident` passed the dossier, held (`dossier_withheld`) if it withheld it.** A memo with a
+term-file word, or in a batch the model net did not account for, still goes to the reader. The fold before the test:
+compatibility forms, dashes and spaces as one space, trademark signs dropped, case folded. **This changes a publication
+check, not a result**: no case file, rubric, run or reading is touched, and it is made after the counts were seen,
+which this note records. **The order changes to match:** `hc case reident` reaches a verdict on all five cases (§6.6's
+first item) before the second half runs, and the scan refuses without one. The second half then reruns the ten
+commands: Haiku's replies are reused ($0), the reader reads what is left (9 memos by Claude's count, worst case about
+$2.60), and `closure-19` / `gpt-oss-openrouter`, which flagged nothing and was written at `666fc35` under summary
+version 1, had its two uncommitted files deleted so the rerun writes them under version 2 ($0: no reader call). Built in
+`caseprobe/memos.py` (summary version 2: `echoes_case_text`, `dossier_withheld`, the reident status and hash in the
+provenance), with tests; built by Opus in the same session, so not independently reviewed.
+
 ### 6.6 The re-identification check and the coarse descriptions
 
 - `hc case reident` for each case (decision 3).

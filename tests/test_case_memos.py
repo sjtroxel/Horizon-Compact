@@ -316,12 +316,17 @@ def make_world(
     names: Scripted | None = None,
     read: Scripted | None = None,
     results: bool = True,
+    reident: str | None = "passed",
 ) -> Fake:
     root, store = make_tree(tmp_path, rubric_text())
     shutil.copytree(ROOT / "experiment" / "readers", root / "experiment" / "readers")
     write_memo_sweep(store, repeats=repeats, specs=specs)
     if results:
         write(root, f"{RESULTS}/{MODEL}.json", "{}\n")
+    if reident is not None:
+        write(
+            root, f"{RESULTS}/reident.json", json.dumps({"case": LABEL, "status": reident}) + "\n"
+        )
     return Fake(root, store, names or haiku(), read or reader(names_a))
 
 
@@ -671,9 +676,12 @@ def test_the_summary_counts_by_reason_and_records_where_the_scan_came_from(world
         "name_confirmed": 4,
         "reader_unclear": 0,
         "reader_no_reply": 0,
+        "dossier_withheld": 0,
         "overruled": 0,
     }
+    assert got["summary_version"] == 2 and got["counts"]["echoes_case_text"] == 0
     provenance = got["provenance"]
+    assert provenance["reident_status"] == "passed" and len(provenance["reident_sha256"]) == 64
     assert provenance["head"] == HEAD and provenance["protocol_check"] == "ok"
     assert provenance["names_brief_sha256"] == load_brief(ROOT, "memo-names").sha256
     assert provenance["memo_brief_sha256"] == load_brief(ROOT, "memo").sha256
@@ -995,3 +1003,64 @@ def test_the_precommit_size_exclusion_admits_the_memo_files_under_cases_only() -
         "docs/x.jsonl",
     ):
         assert not pattern.search(other)
+
+
+# --- a memo that only repeats the case's own text (dated note 2026-11-01) --------------------------------
+
+ECHO = "CANARY-DOSSIER-TEXT"  # in the fixture dossier (test_case_match.DOSSIER)
+ECHO_SPECS = {
+    **SPECS,
+    8: ("memo", f"As {ECHO} says, the firm makes widgets."),
+    9: ("memo", f"As {ECHO} says, {MODEL_NAME} leads."),
+    10: ("memo", "As canary\u2011dossier\u00a0text\u00ae says, close it."),
+}
+
+
+def echo_world(tmp_path: Path, reident: str | None = "passed") -> Fake:
+    return make_world(
+        tmp_path,
+        specs=ECHO_SPECS,
+        names=haiku((MODEL_NAME, ECHO, "canary\u2011dossier\u00a0text\u00ae")),
+        reident=reident,
+    )
+
+
+def test_a_memo_whose_every_flag_is_in_the_case_text_skips_the_reader_and_is_published(
+    tmp_path: Path,
+) -> None:
+    world = echo_world(tmp_path)
+    result = scan(world)
+    read_texts = " ".join(r.user for r in world.read.requests)
+    assert ECHO_SPECS[8][1] not in read_texts and ECHO_SPECS[10][1] not in read_texts
+    assert ECHO_SPECS[9][1] in read_texts  # one word outside the case text: the reader reads it
+    lines = by_run(world.root)
+    assert lines[run_id(8)]["memo"] == ECHO_SPECS[8][1]
+    assert lines[run_id(10)]["memo"] == ECHO_SPECS[10][1]  # dashes, spaces and marks folded
+    assert result.counts["echoes_case_text"] == 2 and result.counts["flagged"] == 6
+
+
+def test_an_echo_memo_is_held_when_the_dossier_is_withheld(tmp_path: Path) -> None:
+    world = echo_world(tmp_path, reident="withheld")
+    result = scan(world)
+    lines = by_run(world.root)
+    assert lines[run_id(8)]["memo"] == "held" and lines[run_id(10)]["memo"] == "held"
+    assert result.counts["held_by_reason"]["dossier_withheld"] == 2
+    assert summary(world.root)["provenance"]["reident_status"] == "withheld"
+
+
+def test_a_word_inside_a_longer_word_of_the_case_text_is_not_an_echo() -> None:
+    from horizon_compact.caseprobe.memos import fold, in_case_text
+
+    text = fold("The firm makes widgets in Steamtown.")
+    assert in_case_text("widgets", text) and in_case_text("FIRM", text)
+    assert not in_case_text("team", text) and not in_case_text("", text)
+
+
+@pytest.mark.parametrize("status", [None, "pending", "nonsense"])
+def test_the_scan_refuses_before_anything_is_sent_without_a_reident_verdict(
+    tmp_path: Path, status: str | None
+) -> None:
+    world = make_world(tmp_path, reident=status)
+    message = refused(world)
+    assert "reident" in message
+    assert world.made == [] and world.previews == [] and not records(world.root, "memos-*")
