@@ -7,7 +7,35 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-10-31, about 8:45 AM (§6.4, THE REVEAL, DONE; §6.5, THE MEMO SCAN, NEXT)
+> ## START HERE — where things stand, 2026-11-02, about 9 AM (§6.6 AND §6.7 DONE; §6.8, THE MEASURED COST, NEXT)
+>
+> **§6.6's coarse descriptions done 2026-11-02** (run log, §6.6): Claude searched at his instruction, 21 searches;
+> four descriptions pass (`closure-07`, `closure-19`, `pre-25` at the first level, `pre-224` after one coarsening),
+> `pre-11`'s is withheld (a hit at both levels; published by type only, its results unchanged). Dated note in the
+> IMPLEMENTATION doc's §6.6. **§6.7 done the same morning:** `experiment/results/cases/cases.json` (five cases, no
+> dossier published), built from public records by `scratch/p55-cases-json.py` (run log, §6.7), in his commit.
+> **Next: §6.8**, the cost from the bills (the Console, OpenRouter's activity, Cost Explorer; this also tests the
+> cost-tag CARRIED entry), then §6.9 (the close). The 8 AM block below still holds for everything else.
+
+> ## START HERE — where things stood, 2026-11-02, about 8 AM (§6.5 CLOSED; §6.6's RE-IDENTIFICATION CHECK DONE; THE COARSE DESCRIPTIONS NEXT) *(superseded by the block above)*
+>
+> **Measured:** last commit `5bcf064`, pushed. **§6.5, the memo scan, closed 2026-11-01** (run log, §6.5): 1,237 of
+> 1,500 memos published, 263 held, every one `dossier_withheld`; the reader read 4, cleared 4, confirmed 0 ($0.0247 of
+> his OpenRouter cash); the scan cost about $0.11 in all. The fold rule (a memo that only repeats its case's text shares
+> the dossier's fate) is a dated note in the IMPLEMENTATION doc's §6.5 (`554ef81`). **§6.6's first item, `hc case
+> reident`, ran 2026-11-01 ($0): all five dossiers withheld**, four with fewer than 20 matching filers and `pre-25` not
+> confirmed (run log, §6.6). No dossier is published; §6.7's commit carries `cases.json` alone (the doc's 2026-11-01
+> dated note). The twenty memo files and five `reident.json` files are committed. **Nothing is running.**
+>
+> **Next: §6.6's second item, the coarse descriptions.** Claude drafts each case's description in the form the doc
+> fixes, in the private appendix, never here; he searches each as written and with two variations, coarsens once on a
+> first-page hit, withholds on a second. Logged in the run log by status only. Then §6.7 (`cases.json`), §6.8 (cost
+> from the bills), §6.9 (the close). **His, open:** the Claude Docs connector (it loaded on 2026-11-02, so it is still
+> on), auto mode as his default.
+>
+> *The 2026-10-31 8:45 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-10-31, about 8:45 AM (§6.4, THE REVEAL, DONE; §6.5, THE MEMO SCAN, NEXT) *(superseded by the block above)*
 >
 > **Measured:** last commit `cbd6cb0`. **§6.4 done:** he ran `scratch/p55-match.sh` at `cbd6cb0`; ten results files
 > are under `experiment/results/cases/`, each 150 of 150 `valid`, `protocol_check: ok`. **All 20 readings (ten files,

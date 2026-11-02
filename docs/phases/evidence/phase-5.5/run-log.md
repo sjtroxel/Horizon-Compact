@@ -206,6 +206,46 @@ are in the S3 scenario's own text. **The memo scan's cost in all: about $0.11** 
 withheld, not because any memo was found to name a company (the reader confirmed none); the rule does not tell a
 placeholder label from a product term, so it holds both. **§6.5 closed.**
 
+**§6.6's second item, the coarse descriptions, 2026-11-02 about 8:20 to 8:40 AM CST:** drafted by Claude from the
+private appendix in the form §6.6 fixes, with place as "in the US" or "outside the US" (`planning/06` §6.3; dated
+note in the IMPLEMENTATION doc's §6.6). **Searched by Claude at his instruction** (§6.6 says he searches), with
+Claude Code's web search tool, not a browser: about ten links and the tool's summary per query stand in for a first
+page. 21 searches: three per case at level 0 (as written, the sector's plain-English synonym, the half-year as a
+quarter), and three more at level 1 for each case that hit. A hit is the case's own company on its own description's
+page. Each search, its result and the hit detail are recorded in the private appendix only.
+
+| Case | Level 0 (3 searches) | Level 1 (3 searches) | Outcome |
+|---|---|---|---|
+| `closure-07` | no hit | not run | published at level 0 |
+| `closure-19` | no hit | not run | published at level 0 |
+| `pre-11` | hit | hit | **withheld**; published by type only |
+| `pre-25` | no hit | not run | published at level 0 |
+| `pre-224` | hit | no hit | published at level 1 |
+
+The four descriptions that pass, as they will appear in `cases.json`:
+
+- `closure-07`: Primary Metal Industries; plant closure; revenue under $1 billion; second half of 2026; in the US.
+- `closure-19`: Chemicals and Allied Products; plant closure; revenue over $10 billion; second half of 2026; outside the US.
+- `pre-25`: Chemicals and Allied Products; plant closure; revenue over $10 billion; second half of 2025; outside the US.
+- `pre-224`: Manufacturing; plant closure; revenue $1-10 billion; first half of 2025; outside the US.
+
+Three times a case's company appeared on another case's page, each for a different closure. None is a hit under
+the rule; they are recorded privately, and never here, since pairing a company with a case would itself identify
+it. **For Phase 6.5's methods page:** the searches were run once, on one engine, on one day; results change over
+time. **§6.6 closed; §6.7 next.**
+
+**§6.7, publication, 2026-11-02 about 9 AM CST:** `experiment/results/cases/cases.json` written by Claude at `5bcf064`
+with `scratch/p55-cases-json.py`, from public records only: `freeze.json` (label, type, exploratory label text, probe
+set and results, shortfall), each `case.lock` (content hashes), each `reident.json` (the re-identification outcome),
+the results files (shape; the label text cross-checked), and §6.6's descriptions. The script asserts that the hashes,
+labels and types agree across those sources, and two runs wrote the same bytes. The four description texts match the
+§6.6 entry above character for character. Per case: description published (4) or withheld with its reason (`pre-11`);
+re-identification withheld (5 of 5), so no dossier is published and no `dossier.txt` is written. No commentary.
+`record-checks.md`, the ten results files, the twenty memo files and the five `reident.json` files were already
+committed (§6.3, §6.4 and §6.5 commits, the doc's dated notes). This commit touches `experiment/`, so it deploys an
+image; the sessions are over, so that is harmless (§6.7). **§6.7 closed with his commit; §6.8, the measured cost,
+next.**
+
 ## Sessions
 
 | When | Sweep | Model | Session | Stopped | Runs finished | Cost (USD) | Note |

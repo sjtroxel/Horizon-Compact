@@ -746,6 +746,13 @@ provenance), with tests; built by Opus in the same session, so not independently
   half-year to the year. It is searched again. A second hit means the description is withheld, and the case is
   published by type only.
 
+**Dated note, 2026-11-02 (his decisions, at §6.6):** (1) **"The country" is read as `planning/06` §6.3 states it**:
+"in the US" or "outside the US", by where the plant is. Four of the five plants are outside the US, and naming the
+country would break `06`'s rule. (2) **Claude ran the searches at his instruction**, with Claude Code's web search
+tool rather than a browser; about ten links and the tool's summary per query stand in for a first page. Neither
+changes a result. Outcome: four descriptions pass (three at the first level, one after one coarsening), one is
+withheld (run log, §6.6).
+
 ### 6.7 Publication
 
 **One commit, after the last session**: the ten results files, the ten memo files, `experiment/results/cases/cases.json`

@@ -1,0 +1,267 @@
+{
+  "cases_version": 1,
+  "cases": [
+    {
+      "label": "closure-07",
+      "type": "closure",
+      "shape": "s3",
+      "exploratory": true,
+      "exploratory_label": "exploratory: selected by §4.6.5 step 2, after the pre-registered rule found none",
+      "description": {
+        "status": "published",
+        "level": 0,
+        "sector": "Primary Metal Industries",
+        "decision": "plant closure",
+        "revenue_band": "under $1 billion",
+        "period": "second half of 2026",
+        "place": "in the US",
+        "text": "Primary Metal Industries; plant closure; revenue under $1 billion; second half of 2026; in the US."
+      },
+      "probe_set": 1,
+      "probes": [
+        {
+          "set": 1,
+          "model": "gpt-oss-openrouter",
+          "calls": 3,
+          "passed": 3
+        },
+        {
+          "set": 1,
+          "model": "haiku-5-5",
+          "calls": 3,
+          "passed": 3
+        }
+      ],
+      "reidentification": {
+        "status": "withheld",
+        "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data",
+        "threshold": 20
+      },
+      "dossier": {
+        "published": false,
+        "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data"
+      },
+      "content_sha256": {
+        "dossier": "25ba504ae76424980aea33c88ebc216ca38b657dee3a4af699e57562b5cddae4",
+        "scenario": "a9fe131c476edac294ba4edea0961fafb3041e9401aff2cb32097614f5df5f9b",
+        "rubric": "75c9e63c4f7dbb96f3b70770eef7ac298b2dab91bf2d3fbcd2dae792d927c0f1"
+      }
+    },
+    {
+      "label": "closure-19",
+      "type": "closure",
+      "shape": "s3",
+      "exploratory": true,
+      "exploratory_label": "exploratory: selected by §4.6.5 step 2, after the pre-registered rule found none",
+      "description": {
+        "status": "published",
+        "level": 0,
+        "sector": "Chemicals and Allied Products",
+        "decision": "plant closure",
+        "revenue_band": "over $10 billion",
+        "period": "second half of 2026",
+        "place": "outside the US",
+        "text": "Chemicals and Allied Products; plant closure; revenue over $10 billion; second half of 2026; outside the US."
+      },
+      "probe_set": 2,
+      "probes": [
+        {
+          "set": 1,
+          "model": "gpt-oss-openrouter",
+          "calls": 3,
+          "passed": 0
+        },
+        {
+          "set": 1,
+          "model": "haiku-5-5",
+          "calls": 3,
+          "passed": 0
+        },
+        {
+          "set": 2,
+          "model": "gpt-oss-openrouter",
+          "calls": 3,
+          "passed": 3
+        },
+        {
+          "set": 2,
+          "model": "haiku-5-5",
+          "calls": 3,
+          "passed": 3
+        }
+      ],
+      "reidentification": {
+        "status": "withheld",
+        "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data",
+        "threshold": 20
+      },
+      "dossier": {
+        "published": false,
+        "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data"
+      },
+      "content_sha256": {
+        "dossier": "35fee60da1a6a5a8f9bc855f974b1d4e73c8f83c561f96411d35b2b36292d5bf",
+        "scenario": "3e572c8071dbb06f5937e18852ca34910794a7ef26c5f5f6d2afd0a24b4f4558",
+        "rubric": "ba984303fe1610554cc231842f89bed2e14b8350b6702eac6cb576337a755cf7"
+      }
+    },
+    {
+      "label": "pre-11",
+      "type": "closure",
+      "shape": "s3",
+      "exploratory": true,
+      "exploratory_label": "exploratory: selected by §4.6.5 step 3, after the pre-registered rule found none; first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and the extraction model found no recall",
+      "description": {
+        "status": "withheld",
+        "reason": "withheld: a search found the company at the first level and again after one coarsening"
+      },
+      "probe_set": 1,
+      "probes": [
+        {
+          "set": 1,
+          "model": "gpt-oss-openrouter",
+          "calls": 3,
+          "passed": 3
+        },
+        {
+          "set": 1,
+          "model": "haiku-5-5",
+          "calls": 3,
+          "passed": 3
+        }
+      ],
+      "reidentification": {
+        "status": "withheld",
+        "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data",
+        "threshold": 20
+      },
+      "dossier": {
+        "published": false,
+        "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data"
+      },
+      "content_sha256": {
+        "dossier": "a39f137a1029a2ca4a30871557f6f2afefd4a466a401beb90a8ec4070748ac06",
+        "scenario": "1bae5aac39655c771ee682957c4d11a3f127337f7fa1a85e11e77f9eead21152",
+        "rubric": "21aa926460336f3d88841e46d224f147ed800479078b7104a52b94f1c76e1dcd"
+      }
+    },
+    {
+      "label": "pre-25",
+      "type": "closure",
+      "shape": "s3",
+      "exploratory": true,
+      "exploratory_label": "exploratory: selected by §4.6.5 step 3, after the pre-registered rule found none; first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and the extraction model found no recall",
+      "description": {
+        "status": "published",
+        "level": 0,
+        "sector": "Chemicals and Allied Products",
+        "decision": "plant closure",
+        "revenue_band": "over $10 billion",
+        "period": "second half of 2025",
+        "place": "outside the US",
+        "text": "Chemicals and Allied Products; plant closure; revenue over $10 billion; second half of 2025; outside the US."
+      },
+      "probe_set": 1,
+      "probes": [
+        {
+          "set": 1,
+          "model": "gpt-oss-openrouter",
+          "calls": 3,
+          "passed": 3
+        },
+        {
+          "set": 1,
+          "model": "haiku-5-5",
+          "calls": 3,
+          "passed": 3
+        }
+      ],
+      "reidentification": {
+        "status": "withheld",
+        "reason": "withheld: the re-identification check could not confirm the case in SEC's structured data",
+        "threshold": 20
+      },
+      "dossier": {
+        "published": false,
+        "reason": "withheld: the re-identification check could not confirm the case in SEC's structured data"
+      },
+      "content_sha256": {
+        "dossier": "90dbed1ccc45bc251706ff7f93fdd3bb22a281b579251ceae48de403e7bdaa4f",
+        "scenario": "2e834cd8baae9c36a43b6bd2b6db90a35b6924c7a0e2a15b2af2df788d4b9518",
+        "rubric": "c428513667498a2cb106a2e982f936b26834f7ac6d05711e1bf30ac0ca0f5431"
+      }
+    },
+    {
+      "label": "pre-224",
+      "type": "closure",
+      "shape": "s3",
+      "exploratory": true,
+      "exploratory_label": "exploratory: selected by §4.6.5 step 4, after the pre-registered rule found none; first disclosed before the main model's training cut-off (Haiku 5.5, June 2026) and after the second family's (gpt-oss-120b, June 2024); admitted after a knowledge probe of both official models and the extraction model found no recall",
+      "description": {
+        "status": "published",
+        "level": 1,
+        "sector": "Manufacturing",
+        "decision": "plant closure",
+        "revenue_band": "$1-10 billion",
+        "period": "first half of 2025",
+        "place": "outside the US",
+        "text": "Manufacturing; plant closure; revenue $1-10 billion; first half of 2025; outside the US."
+      },
+      "probe_set": 1,
+      "probes": [
+        {
+          "set": 1,
+          "model": "gpt-oss-openrouter",
+          "calls": 3,
+          "passed": 3
+        },
+        {
+          "set": 1,
+          "model": "haiku-5-5",
+          "calls": 3,
+          "passed": 3
+        }
+      ],
+      "reidentification": {
+        "status": "withheld",
+        "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data",
+        "threshold": 20
+      },
+      "dossier": {
+        "published": false,
+        "reason": "withheld: its scale-free figures match fewer than 20 filers in SEC's structured data"
+      },
+      "content_sha256": {
+        "dossier": "c00248bb031dae1d95a27db6cb6c34931342153024c39a41ac4856caedbae1ae",
+        "scenario": "4f9e55e38592cb79e29cb38d6b43f7f5fd90e94ac4c8d1f901bd5210e9611ea2",
+        "rubric": "7370adb882f07836dcf83f513cbf70c781594fad5b6467ebe109761e8413a35a"
+      }
+    }
+  ],
+  "shortfall": {
+    "at_most": 5,
+    "cases": 5,
+    "cases_by_type": {
+      "closure": 5,
+      "retool": 0,
+      "ai": 0
+    },
+    "short_by_type": {
+      "closure": 0,
+      "retool": 2,
+      "ai": 1
+    },
+    "filled": 3
+  },
+  "provenance": {
+    "head": "5bcf0640ce64017f2984a4e586cc543e73a85f6d",
+    "sources_sha256": {
+      "freeze.json": "3aa24d498d5ec4bcba0507925b47868c30151dfe748bbbd1c9bd98ac11a64f97",
+      "closure-07/reident.json": "5c9ca33d4029da7225c83206bdb83a9aef1be2af6ad9779fadf3bc93d9207d05",
+      "closure-19/reident.json": "002abc5a18ca5d98a75bd517a0c602e561e0b098d47f043ab0e62f1e119b9d9e",
+      "pre-11/reident.json": "c2eb3e7a8d629ba8974b2377670b59a79c8479d9dc0bec7782df026166f6a651",
+      "pre-25/reident.json": "8146db84ad334c23b67cd27881c3b53022a7387bd5c988d19ed669830ea98f06",
+      "pre-224/reident.json": "696539ab905eed366cc3e6f3742169804170feeb0c3e23dae84dd8aab6bb276a"
+    }
+  }
+}
