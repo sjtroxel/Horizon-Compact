@@ -7,7 +7,28 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-02, about 9 AM (§6.6 AND §6.7 DONE; §6.8, THE MEASURED COST, NEXT)
+> ## START HERE — where things stand, 2026-11-03, about 8:15 AM (PHASE 5.5 CLOSED WITH HIS COMMIT; PHASE 1'S CLOSE-OUT AND PHASE 1.5 NEXT, BEFORE PHASE 6)
+>
+> **Phase 5.5 is closed with his commit of this block.** The DoD audit passes 5 of 6 outright, the sixth on the close
+> commit's CI; both honor statements are in the IMPLEMENTATION doc's §14 (his drafted by Claude at his request and
+> approved by him). **§6.8 done the same morning** from his bill readings (`docs/phases/evidence/phase-5.5/cost.md`):
+> **Phase 5.5 cost about $1.28, at most $1.37** (Anthropic $0.96, his OpenRouter $0.24, Fargate $0.08); OpenRouter
+> matches the records to the cent, Anthropic is about $0.03 above them, not traced. **Cumulative at most about $46**,
+> under the $60 re-plan point. Pots left: Anthropic $11.00, his OpenRouter $3.46, AWS credits $135.38.
+>
+> **Closed today:** the cost tag (§6.8) and the launch's order check with the container session (§14). **Still open
+> and carried:** the hidden key prompt (not blocking), the two matcher behaviors to disclose (OPEN 2026-10-31, for
+> Phase 6 and 6.5), and Phases 1 and 1.5 (OPEN 2026-10-15). **His open items are both closed:** the Claude Docs
+> connector disabled through `/mcp`, and auto mode is his default (new sessions start in it, his report). **Nothing
+> is running.**
+>
+> **Next:** Phase 1.5 `publish-path` is Phase 6's prerequisite and has not started (OPEN 2026-10-15), and Phase 1's
+> DoD 7 and C6 are still open. So the next work is Phase 1's close-out, then Phase 1.5's IMPLEMENTATION doc (Opus),
+> written and approved immediately before its build; Phase 6's comes after.
+>
+> *The 2026-11-02 9 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-02, about 9 AM (§6.6 AND §6.7 DONE; §6.8, THE MEASURED COST, NEXT) *(superseded by the block above)*
 >
 > **§6.6's coarse descriptions done 2026-11-02** (run log, §6.6): Claude searched at his instruction, 21 searches;
 > four descriptions pass (`closure-07`, `closure-19`, `pre-25` at the first level, `pre-224` after one coarsening),
@@ -2685,7 +2706,11 @@ adoption):**
 
 **Nothing of the retool type is recorded yet**; retool-01 to 22 are fetched into the appendix cache only.
 
-## CARRIED to Phase 5.5, 2026-10-27, narrowed (was OPEN 2026-10-17) — the hidden key prompt rejected a working OpenRouter key
+## OPEN, past Phase 5.5's close 2026-11-03 (was CARRIED to Phase 5.5 2026-10-27, narrowed; OPEN 2026-10-17) — the hidden key prompt rejected a working OpenRouter key
+
+*At Phase 5.5's close, 2026-11-03 (IMPLEMENTATION doc §14):* not fixed, as the doc's §10 foresaw, and it did not
+block the phase. The `getpass` cause is still not found. **Until it is:** the key in the environment for the one
+command.
 
 *Dated note, 2026-10-27 (Phase 5.5's IMPLEMENTATION doc §10):* not fixed there, and not blocking. The case runs read
 SSM in the container; the one laptop call that takes a key is the memo scan's Haiku pass (decision 4 (d)), which
@@ -2814,7 +2839,12 @@ decision 4). **Closes when:** Phase 1's C6 is committed, and Phase 1.5 is built 
 
 ---
 
-## CARRIED to Phase 5.5, 2026-10-27, half proven (was OPEN 2026-10-15) — two small faults found at the reveal and the bills (both fixed 2026-10-15; item 1's proof owed)
+## CLOSED 2026-11-03, at Phase 5.5 §6.8 (was CARRIED to Phase 5.5 2026-10-27, OPEN 2026-10-15) — two small faults found at the reveal and the bills (both fixed 2026-10-15; item 1 proven 2026-11-03)
+
+*Closed 2026-11-03 (Phase 5.5 §6.8, `docs/phases/evidence/phase-5.5/cost.md`):* Cost Explorer, 2026-10-29 to
+2026-11-02, grouped by tag `Project`, Elastic Container Service only, credits excluded: one row, `horizon-compact`,
+$0.08, and no "No tag key" row. The case sweeps' Fargate cost is attributed. `Project` has been an active resource
+cost-allocation tag since 2026-10-04.
 
 *At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* the launch half is proven: every recognition probe (2026-10-22 to 2026-10-25) was launched
 through `sweep/launch.py` `launch_task`, which passes `propagateTags`, and each task started (no AccessDenied).
@@ -3033,7 +3063,11 @@ inference profiles. `models.toml` routes Sonnet 4.6 through `horizon-compact-son
 
 ---
 
-## CARRIED to Phase 5.5, 2026-10-27 (was OPEN 2026-10-09, for Phase 5) — the launch's order check and the container session
+## CLOSED 2026-11-03, at Phase 5.5's close (was CARRIED to Phase 5.5 2026-10-27, OPEN 2026-10-09) — the launch's order check and the container session
+
+*Closed 2026-11-03 (Phase 5.5 IMPLEMENTATION doc §14):* every case sweep was admitted by the case gate in the
+container; the record checks "order" and "container" pass on all ten (`docs/phases/evidence/phase-5.5/record-checks.md`,
+`cbd6cb0`).
 
 *At the Phase 5 freeze audit, 2026-10-27 (14d, his call):* Phase 5's part is built and proven live: the record writer (`hc case lock`, five `case.lock`
 files), the S3 probe reader and the GitHub reader, run on every frozen case by `hc case freeze` (2026-10-26, every

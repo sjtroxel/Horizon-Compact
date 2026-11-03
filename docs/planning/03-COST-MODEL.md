@@ -15,6 +15,8 @@
 - **Patched 2026-10-15 (his), from Phase 4's measured cost (`docs/phases/evidence/phase-4/run-log.md`, §6.9):** §4
   a measured note under the table; §7 item 5 closed for the fictional company. The estimates above stay as the
   record of what was planned; they were made for Sonnet 4.6 and Nova Pro, and v1 ran Haiku 5.5 and `gpt-oss-120b`.
+- **Patched 2026-11-03 (his), from Phase 5.5's measured cost (`docs/phases/evidence/phase-5.5/cost.md`):** §4 a
+  second measured note, for the real cases.
 - **The one-line answer:** v1 should cost **roughly $50-110 in total**, almost all of it model tokens, inside the
   **$135.97** of credits he has left, which expire **2027-07-30** and are **shared with Musical Mycelium**. The
   biggest swing factor is whether the model "thinks" before answering (§3.3).
@@ -140,6 +142,12 @@ Anthropic credit (Haiku 5.5), $0.59 of his OpenRouter cash (`gpt-oss-120b`), $0.
 estimate (about $20-30) was seven to ten times higher mostly because of the models, not the volumes: Haiku 5.5 costs a small fraction
 of Sonnet 4.6. **Output tokens ran about twice §3.2's assumption:** 1,406 a run on S1 without thinking (against
 ~700), 6,026 with thinking (against ~2,700).
+
+*Measured 2026-11-03 (Phase 5.5, `docs/phases/evidence/phase-5.5/cost.md`):* the five real cases' ten sweeps (1,500
+runs) and the memo scan cost **about $1.28, at most $1.37**: $0.96 of Anthropic credit, $0.24 of his OpenRouter cash,
+$0.08 of AWS credit for Fargate (at most $0.17 for the whole shared account), **no AWS cash**. Phase 5, the case
+search and build, cost about $16.89 (`docs/phases/evidence/phase-5/cost.md`), most of it the independent reader.
+Cumulative project spend is at most about $46.
 
 ## 5. Options considered and rejected for v1
 

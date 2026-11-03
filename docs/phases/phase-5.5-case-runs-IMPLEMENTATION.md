@@ -4,7 +4,8 @@
 > decision 4 (d), an option added on his question (he preferred a model to make the reads). Patched 2026-10-27 after
 > K1's review (his decisions): `hc sweep status --case` goes into K3 (§5.3), and §6.2 runs one sweep at a time per
 > model (its dated note). Patched 2026-10-28 after K4's review (his decision): a ticker on SEC's list counts only
-> where the text marks it as a ticker (§5.4's dated note).** Written the day
+> where the text marks it as a ticker (§5.4's dated note). Runbook done 2026-10-29 to 2026-11-03 (§6, `[done]`
+> lines); CLOSED 2026-11-03 with his commit: DoD audit and both honor statements in §14.** Written the day
 > Phase 5 closed (`5f794ee`), immediately before this phase is built. Sources: the Phase 5.5 scope doc
 > (`docs/phases/phase-5.5-case-runs.md`), the Phase 4 runs-half IMPLEMENTATION doc (its runbook is this one's model),
 > the search-half doc §4.6.5 and §4.7-4.11, the exploratory doc §3.1 and §9, protocol sections 12, 13.2 and 14,
@@ -735,6 +736,9 @@ version 1, had its two uncommitted files deleted so the rerun writes them under 
 `caseprobe/memos.py` (summary version 2: `echoes_case_text`, `dossier_withheld`, the reident status and hash in the
 provenance), with tests; built by Opus in the same session, so not independently reviewed.
 
+**[done] 2026-11-01 (his runs, `554ef81` and `5bcf064`).** 1,237 of 1,500 memos published, 263 held, every one
+`dossier_withheld`; the reader read 4, cleared 4, confirmed 0 ($0.0247); the scan cost about $0.11 (`run-log.md`, §6.5).
+
 ### 6.6 The re-identification check and the coarse descriptions
 
 - `hc case reident` for each case (decision 3).
@@ -752,6 +756,9 @@ country would break `06`'s rule. (2) **Claude ran the searches at his instructio
 tool rather than a browser; about ten links and the tool's summary per query stand in for a first page. Neither
 changes a result. Outcome: four descriptions pass (three at the first level, one after one coarsening), one is
 withheld (run log, §6.6).
+
+**[done] 2026-11-01 and 2026-11-02.** `hc case reident` withheld all five dossiers (2026-11-01, `5bcf064`); four
+descriptions pass, `pre-11`'s is withheld (2026-11-02, `d5c91b9`). Each check's record is in the private appendix.
 
 ### 6.7 Publication
 
@@ -771,6 +778,9 @@ files, `cases.json` and the dossiers that pass.
 `reident.json` files are committed when written, and the name guard reads the memos' text on that commit. No dossier
 passed `hc case reident`, so no dossier is published; this commit carries `cases.json` alone.
 
+**[done] 2026-11-02 (`d5c91b9`, CI and Deploy green).** `experiment/results/cases/cases.json`: five cases, four
+descriptions published, no dossier published (`run-log.md`, §6.7).
+
 ### 6.8 The measured cost
 
 From the record checks' per-sweep totals, then the bills: the Console, OpenRouter's activity, and AWS Cost Explorer.
@@ -779,10 +789,16 @@ From the record checks' per-sweep totals, then the bills: the Console, OpenRoute
 by him, and the item closes on the next reading. Dated patches go to `planning/03` and `planning/07` §13, and to the
 ROADMAP's cost column. The $60 point is checked against measured spend.
 
+**[done] 2026-11-03 (his readings).** Phase 5.5 about $1.28, at most $1.37; cumulative at most about $46, under $60.
+The `Project` tag was already active (since 2026-10-04); Cost Explorer shows the case sweeps' Fargate under
+`horizon-compact`, so the cost-tag entry closes (`evidence/phase-5.5/cost.md`).
+
 ### 6.9 The close
 
 The DoD audit (§11), the honor statements (his in his words; Claude's: no case result read before §6.4, anything
 seen by accident disclosed), KNOWN-GAPS and START HERE, and the ROADMAP row.
+
+**[done] 2026-11-03.** §14.
 
 ## 7. During the runs
 
@@ -902,3 +918,63 @@ a day for the reveal, the scans, the checks and the close.
   allows; any case whose choice is unobservable falls below it.
 - **Whether five `gpt-oss-120b` tasks at once draw more 429s than one.** §6.2's fallback covers it, at the cost of
   time.
+
+## 14. DoD audit, 2026-11-03
+
+Against §11. Drafted by Claude (Opus) from the repo; every item points at its evidence. **Passes 5 of 6 outright;
+item 6 passes when the close commit's CI is green.**
+
+| # | Item | Result | Evidence |
+|---|---|---|---|
+| 1 | Every frozen case ran on both models through the case gate, or was cut with the reason; the shortfall stated | **pass** | `record-checks.md` (`cbd6cb0`): every check passes, ten sweeps of 150 runs complete, one image digest (`sha256:ef0588f9...`) for all ten; no case cut at §6.0; the shortfall (retool 2, ai 1) in `cases.json` |
+| 2 | Every case matched, with distances, spreads, alternative readings, and observed and excluded dimensions | **pass** | Ten results files (`666fc35`), each `protocol_check: ok`: `readings` (all five distances with intervals, the gap), `alternative_readings`, `depends_on_reading`, `dimensions` (observable, excluded). All 20 readings no good match (`run-log.md`, §6.4); two behaviors to disclose, KNOWN-GAPS OPEN 2026-10-31 |
+| 3 | Every memo passed the scan or was held back and counted | **pass** | Twenty memo files (`5bcf064`): 1,237 published and 263 held, 1,500 in all, every hold `dossier_withheld` (`run-log.md`, §6.5) |
+| 4 | Every dossier passed the re-identification check or is withheld with its reason; every public description passed its search | **pass** | `cases.json` (`d5c91b9`): all five dossiers withheld with their reasons; four descriptions published after their searches, `pre-11`'s withheld; each case's re-identification record and the searches are in the private appendix (listed 2026-11-03) |
+| 5 | Results committed as data; the guard passed every commit | **pass** | §6.7's commit `d5c91b9`, CI `41463732174` and Deploy `41463732240` green; every CI and Deploy run of the phase's commits (`4ec2a0b` to `d5c91b9`) succeeded; the hooks are installed (`make doctor`), and no bypass is recorded |
+| 6 | Measured cost recorded; `make check` and CI green | **pass on the cost; the close commit's CI owed** | `evidence/phase-5.5/cost.md` and `run-log.md` §6.8: about $1.28, at most $1.37, cumulative at most about $46; `make check` green, 3,132 tests, 2026-11-03 |
+
+**The rules (§9 and the scope doc), held:**
+
+- **Nothing read a case result before §6.4:** the honor statements below; Claude ran no command that reads case run
+  records (§5.3's deny list).
+- **The case content, the rubrics and the lock were never touched:** record checks "case content", "after the
+  freeze" and "frozen files" pass; every results file reads `protocol_check: ok`.
+- **The push freeze held, one image for all ten sweeps:** the two commits made while sweeps ran (`fecd23d`,
+  `cbd6cb0`) touched docs, `.claude/settings.json`, `CLAUDE.md` and one test only, so neither deployed; the record
+  checks show one digest.
+- **Failures are outcomes:** no sweep was stopped for what a model answered. `pre-11` on `gpt-oss-120b` stopped twice
+  on `api_errors` (an outage at the pinned host) and was resumed under the same sweep id; the host was not changed.
+- **Every case surface carries its exploratory label:** every results file, memo summary and `cases.json` entry has
+  `exploratory: true` and its label text, which states that the pre-registered rule found none. Putting the
+  pre-registered result first on the page is Phase 6's.
+- **Rule zero:** the name guard ran on every commit of the phase; cases are named by neutral labels only.
+
+**Disclosed at the close, not in the DoD:**
+
+- **§6.5's fold rule was adopted after the first half's counts were seen** (its dated note, his decision), and built
+  by Opus in the same session without an independent review. It changes a publication check, not a result.
+- **§6.6's searches were run by Claude** with Claude Code's web search, at his instruction, not by him in a browser
+  (its dated note).
+- **Anthropic's bill is about $0.03 above the records**, not traced (`cost.md`).
+
+**The four CARRIED entries (§10):** exploratory cases, closed with this doc's approval (2026-10-27); the launch's
+order check and the container session, **closed** (record checks "order" and "container" pass on all ten sweeps); the
+cost tag, **closed** at §6.8; the hidden key prompt, **not fixed and still open**, as §10 foresaw (the `getpass`
+cause, not blocking).
+
+### 14.1 Honor statements
+
+**Claude's (Opus, 2026-11-03).** In this session I read the results files, memo summaries and `cases.json` only for
+this audit, three days after the reveal; before them I read docs, the run log, the record checks and the bills. For
+the earlier sessions of this phase I can vouch only through their record, not from memory: the §6.4 entry records that
+no case result was read before the files were written, §9's rule and §5.3's deny list kept every command that reads
+case run records from Claude, and during §6.2 Claude read OpenRouter's endpoints API for the host's status, which
+carries no run content. Nothing was seen by accident that I know of.
+
+**His (2026-11-03; drafted by Claude at his request and approved by him as written, about 8:00 AM CST):**
+
+> Honor Statement of sjtroxel: (a) I saw no case decision broken down by objective before I ran the reveal script
+> on the morning of October 31. (b) Before then, during the case runs, I read only the counts and status lines from
+> `hc sweep status --case`, the record checks, and the balances on the Anthropic, OpenRouter and AWS pages. (c) So far
+> as I am aware I did not see, and certainly did not comprehend, anything accidental from the runs in the logs, the
+> vendors' pages or elsewhere. This is the honor statement of sjtroxel.

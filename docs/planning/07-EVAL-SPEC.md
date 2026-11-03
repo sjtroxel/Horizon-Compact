@@ -46,6 +46,8 @@
   (his decision 2, 2026-10-09); §14 item 5 the false-no-split target (decision 4).
   **Patched 2026-10-15 (his), from Phase 4's measured cost (`docs/phases/evidence/phase-4/run-log.md` §6.9):** §13
   a measured note; the table stays as the record of the Sonnet 4.6 plan.
+  **Patched 2026-11-03 (his), from Phase 5.5's measured cost (`docs/phases/evidence/phase-5.5/cost.md`):** §13 a
+  second measured note, for the real cases.
 - **Read after:** `06-NARRATIVE-AND-VOCABULARY`. **Read before:** `08-REVIEW`.
 - **What this doc is:** the measurement design. **What it is not:** the pre-registration itself. In Phase 3 (`05`
   §5) this design is filled in with the final wordings, dossier and numbers, committed and tagged `prereg-v1`, and from
@@ -772,6 +774,11 @@ repeats its pilot set, `gpt-oss-120b` 1,200), the thinking sub-study (100) and b
 **about $3.01** in all, retries included: $2.11 of Anthropic credit, $0.59 of his OpenRouter cash, $0.31 of AWS
 credit, no AWS cash. Cumulative project spend is at most about $28 (an overstatement: it counts the shared AWS
 credits' whole use). **The $60 re-plan point did not trigger; nothing on the cut list was needed for cost.**
+
+*Measured 2026-11-03 (Phase 5.5, `docs/phases/evidence/phase-5.5/cost.md`):* the real cases cost far less than the
+grid: Phase 5 (search and build) about $16.89, Phase 5.5 (ten sweeps of 150 runs and the memo scan) about $1.28, at
+most $1.37. Cumulative project spend is at most about $46 (the same overstatement). **The $60 re-plan point has not
+triggered.**
 
 ---
 

@@ -246,6 +246,13 @@ committed (§6.3, §6.4 and §6.5 commits, the doc's dated notes). This commit t
 image; the sessions are over, so that is harmless (§6.7). **§6.7 closed with his commit; §6.8, the measured cost,
 next.**
 
+**§6.8, the measured cost, 2026-11-03 about 7:20 to 7:40 AM CST:** his readings of the three bills; the table and the
+checks are in `cost.md`. **Phase 5.5 cost about $1.28, at most $1.37** (Anthropic $0.96, his OpenRouter $0.24, AWS
+Fargate $0.08, at most $0.17 for the whole account). OpenRouter matches the records to the cent; Anthropic's bill is
+about $0.03 above them, not traced. **Cumulative at most about $46**, under the $60 re-plan point. Cost Explorer shows
+the case sweeps' Fargate under `Project` = `horizon-compact` and nothing untagged, so the cost-tag CARRIED entry
+closes. **§6.8 closed; §6.9, the close, next.**
+
 ## Sessions
 
 | When | Sweep | Model | Session | Stopped | Runs finished | Cost (USD) | Note |
