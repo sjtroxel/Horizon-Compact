@@ -18,6 +18,9 @@
   time, a CI job that re-scores the published raw responses, and no visitor tracking
   (`docs/phases/phase-6-explorer.md`, decisions 2, 4, 5 and 6).
   **Patched 2026-10-04 (his):** §2.10, ECR moves from `main` to `bootstrap` (`docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md`, decision 1).
+  **Patched 2026-11-04 (his):** §2.8, DuckDB is not used: the frozen analysis engine (Phase 3) is Python over the
+  run objects, and the placeholder page's data comes from a small run-code builder (Phase 1.5 IMPLEMENTATION doc §0,
+  §6).
 - **Read after:** `01-DATA-SOURCES`. **Read before:** `03-COST-MODEL`.
 - **Inherits from Musical Mycelium** wherever a pattern already worked there: Python 3.13 + uv, Terraform with
   separate `bootstrap` and `main` stacks, GitHub Actions deploying through OIDC with no long-lived keys, a React +
@@ -210,7 +213,8 @@ its own platforms (Bedrock sets its own dates). Fine for throwaway development, 
   the harness never overwrites). Raw responses are kept, so any score can be recomputed later. *Corrected
   2026-10-03 (`08` §4.2):* the first draft wrote one object per shard, but with one task per model (§2.3) a shard is
   the whole sweep, so an interrupted task would have lost everything; per-run objects let it resume by `run_id`.
-- **Aggregation with DuckDB**, reading straight from S3, on the laptop (*patched 2026-10-04:* laptop only; the
+- **Aggregation with DuckDB** (*patched 2026-11-04: not used; the analysis is Python over the run objects, see the
+  status line*), reading straight from S3, on the laptop (*patched 2026-10-04:* laptop only; the
   output JSON is committed to the repo, and CI never reads raw results, §2.11): per-cell means, spread, rejection
   rates, wording-variant comparisons, real-case matching. Output: small static JSON files for the site.
 - **Scoring is deterministic.** The main measure (where the money goes, what was chosen) comes straight from

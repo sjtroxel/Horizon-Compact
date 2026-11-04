@@ -885,3 +885,9 @@ run and is not needed, Bedrock having been dropped (2026-10-11); whether the sco
 is still untested (§21, §21a); the per-run log line's "so far" restarts at a resume (cosmetic, §21).
 
 **Phase 1 is CLOSED 2026-11-04, with his commit of this section.**
+
+*Dated note, 2026-11-04, later the same morning (found writing the Phase 1.5 IMPLEMENTATION doc, its §3 finding 3):*
+**this audit missed one close-out item.** Phase 0.5 decision A, as amended by this phase's decision 2, deletes the
+`horizon-compact-dev` access key at Phase 1's close. It was not deleted, and it is still needed. His decision the
+same day (Phase 1.5 decision 6): the key is kept until Phase 7 closes or 2027-01-02, whichever is first (Phase 0.5
+IMPLEMENTATION doc, decision A amended a second time). The close stands; the item moved, it was not met.

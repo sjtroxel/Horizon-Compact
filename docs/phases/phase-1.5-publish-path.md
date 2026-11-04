@@ -7,6 +7,13 @@
 >
 > Written before Phase 0.5 and Phase 1 are built. **Lines marked *(rests on 1)* depend on what Phase 1 builds;** if
 > Phase 1 comes out different, they are the lines to amend.
+>
+> **Amended 2026-11-04 (his), at the IMPLEMENTATION doc's approval:** a month and five closed phases after this doc
+> was written, it was reviewed line by line. Read it through the IMPLEMENTATION doc's §0
+> (`docs/phases/phase-1.5-publish-path-IMPLEMENTATION.md`): the main model is Haiku 5.5; the frozen engine cannot read
+> the placeholder, so a run-code site-data builder replaces "the scorer" for it, and DuckDB is dropped; the builder
+> refuses every record but the placeholder's; the site forbids third-party requests and is `noindex` until go-live;
+> the deploy role is fenced by tag; the teardown runs as a dispatch-only workflow. No rule here is lowered.
 
 ## What this phase is for
 

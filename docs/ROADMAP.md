@@ -74,7 +74,7 @@ after it. Both live in `docs/phases/`. Superseded docs move to `docs/archive/`; 
 | 0 | **APPROVED 2026-10-03** | **APPROVED 2026-10-03; built; DoD audit §11a** |
 | 0.5 `aws-foundation` | **APPROVED 2026-10-04**, all eight decisions as recommended | **APPROVED 2026-10-04**, its four decisions (A-D) as recommended; **built 2026-10-04** (`b9c9aaf`, `52aa3fd`, `ac2fbe0`); **closed 2026-10-08**, DoD audit §21 |
 | 1 `walking-skeleton` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 1 and 1.5 | **APPROVED 2026-10-04**, its four decisions as recommended; **built 2026-10-05** (steps 0-2, 4-8 and 10; step 3 blocked on Bedrock); **step 9 run and step 11 read 2026-10-11 on the development model**; **step 9 run again 2026-10-12 on Haiku 5.5 through Anthropic's API (§21a): DoD 1 closed, with the stop and re-launch on a separate 50-run sweep**; **CLOSED 2026-11-04 (his): DoD 7 waived, C6 done, DoD audit §22** |
-| 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1 | not written; immediately before its build |
+| 1.5 `publish-path` | **APPROVED 2026-10-04**, with Phase 1; **reviewed 2026-11-04** (the IMPLEMENTATION doc §0, a dated note on approval) | **written 2026-11-04 (Opus), APPROVED the same morning (his), all ten decisions as recommended**; step 0's notes done; C1 (`bootstrap`) next, Sonnet builds and Opus reviews |
 | 2 `company-dossier` | **APPROVED 2026-10-04**, all five decisions as recommended; split into 2 and 2.5 | **APPROVED 2026-10-06**, its five decisions as recommended; **built and closed 2026-10-06**, DoD audit in §14 |
 | 2.5 `scenarios-and-wordings` | **APPROVED 2026-10-04**, all six decisions as recommended | **APPROVED 2026-10-07**, its seven decisions as recommended (8 and 9 added and decided in the build); **built and closed 2026-10-07**, DoD audit in §22 |
 | 3 `scoring-and-simulation` | **APPROVED 2026-10-04**, both decisions as recommended; split into 3 and 3.5 | **APPROVED 2026-10-08 (his)**, its ten decisions as recommended; **built and closed 2026-10-09**, DoD audit in §19a (`8e391c7`, `10c7ed6`, `7d3b2a6`, `4d0b9c1`, `0e8ec0b`, `4febc15`, `84d82d7`, plus step 13's commit) |
@@ -542,6 +542,12 @@ Ollama installed on the Windows side; whether WSL can reach it is still unchecke
 
 ## 4. Decision history
 
+- **2026-11-04 — Phase 1.5's IMPLEMENTATION doc approved, all ten decisions as recommended** (his). The placeholder
+  page shows Phase 1's skeleton sweep; three type previews before the build; `noindex` until go-live; the Vercel
+  rewrite deployed by him with the CLI; the origin access control and headers policy in `bootstrap`; the dev key kept
+  to Phase 7 or 2027-01-02; ECR's ten-image rule removed before any code push; Phase 4's raw manifest built here, its
+  full text in 6.5; the teardown's early log deletion accepted; version 0.5.5 at the close. Doc §0 is the scope
+  review, §11 the decisions.
 - **2026-11-04 — Phase 1 closed, DoD 7 waived** (his, on Claude's recommendation to waive rather than delete the row).
   The phase's spend was about $0.07 by its records and is already inside the cumulative ceiling, so the October bills
   were not read; the row stays, marked waived. The version stays `0.0.5` until Phase 1.5 closes (Phase 2 decision 4).

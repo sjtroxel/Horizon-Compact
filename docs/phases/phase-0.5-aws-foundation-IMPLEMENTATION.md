@@ -87,7 +87,7 @@ Musical Mycelium's rule is a scoped IAM user whose key is time-boxed and deleted
 
 **Recommended (decision A):** a new IAM user **`horizon-compact-dev`**, created by him in the console, with a
 customer managed policy **`horizon-compact-dev`** pasted from the tracked file `infra/iam/horizon-compact-dev-policy.json`,
-and an access key in a profile named **`horizon-compact`**. **The key is deleted when this phase closes** (*amended 2026-10-04: kept through Phase 1 and deleted at Phase 1's close; §17 decision A*), and a new
+and an access key in a profile named **`horizon-compact`**. **The key is deleted when this phase closes** (*amended 2026-10-04: kept through Phase 1 and deleted at Phase 1's close; §17 decision A*; *amended again 2026-11-04 (his, Phase 1.5 decision 6): kept until Phase 7 closes or 2027-01-02, 90 days from its creation, whichever is first, then deleted. Phases 1.5 to 6.5 need laptop reads of S3 and Phase 1.5 a `bootstrap` apply*), and a new
 one is made when Phase 1 needs one (two minutes in the console). The policy uses `*` where an account ID would go, so
 the tracked file holds none. It is a managed policy, not an inline one, because an inline user policy is capped at
 2,048 characters and this one is longer.

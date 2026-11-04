@@ -7,7 +7,35 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-04, about 9 AM (PHASE 1 CLOSED, DoD 7 WAIVED; PHASE 1.5'S IMPLEMENTATION DOC NEXT)
+> ## START HERE — where things stand, 2026-11-04, about 9:15 AM (PHASE 1.5'S IMPLEMENTATION DOC APPROVED; C1, THE `bootstrap` CHANGE, NEXT)
+>
+> **The Phase 1.5 IMPLEMENTATION doc is APPROVED** (his, about 9:05 AM, all ten decisions as recommended). Step 0's
+> dated notes are written: the scope doc, `planning/02` §2.8, the Phase 0.5 doc (decision A), the Phase 1 doc §22, and
+> four entries below (ECR images, Phase 4's raw manifest, the dev key, Musical Mycelium's CloudFront grant).
+> **ECR measured (his command, about 9:20 AM): only Phase 5.5's image survives**; the Phase 4 official image and Phase
+> 1's skeleton image have expired (the ECR entry below). Phase 5.5's must not be lost: the rule below stands.
+>
+> **Next: C1 (doc §12 step 1), the `bootstrap` change**, built by Sonnet from `scratch/p15-c1-build-prompt.md` and
+> reviewed by Opus: the ECR lifecycle fix, the two CloudFront objects, the deploy policy's grants, the deploy paths
+> and the image's ignore list. **No push that builds an image until he has applied `bootstrap`** (the ECR entry
+> below). A commit is fine; the push of C1 comes after the apply.
+>
+> *The earlier 2026-11-04 blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-04, about 10:30 AM (PHASE 1.5'S IMPLEMENTATION DOC DRAFTED; HIS DECISIONS NEXT) *(superseded by the block above)*
+>
+> **`docs/phases/phase-1.5-publish-path-IMPLEMENTATION.md` is a DRAFT (Opus), awaiting his approval**: §0 reviews the
+> month-old scope doc (ten changes), §11 holds ten decisions. **Nothing is built, applied or pushed from it yet.**
+> Three findings reach outside the phase (doc §3): (1) ECR's ten-image rule has probably expired the Phase 4 official
+> image and Phase 1's skeleton image, and Phase 5.5's is fifth newest, so **no push that builds an image before the
+> lifecycle fix** (decision 7; his read-only check command is in §3); (2) Phase 4's raw-object manifest (its decision
+> 2 (a)) was not found committed; (3) the dev access key was due for deletion at Phase 1's close and was missed by
+> that audit (decision 6). The `KNOWN-GAPS.md` entries for them are written with the doc's approval (§12 step 0).
+> **A docs-only commit builds nothing** (Deploy ignores `docs/`).
+>
+> *The 9 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-04, about 9 AM (PHASE 1 CLOSED, DoD 7 WAIVED; PHASE 1.5'S IMPLEMENTATION DOC NEXT) *(superseded by the block above)*
 >
 > **Phase 1 is closed with his commit of this block** (his decision, 2026-11-04). DoD 1-6 are met on proof already in
 > the IMPLEMENTATION doc (§21, §21a); **DoD 7 is waived**, not met: the phase's spend was about $0.07 by its records
@@ -2515,6 +2543,59 @@ closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN 2026-11-04 — ECR's ten-image rule has probably expired images that pin the records (fix before any image-building push)
+
+Found writing the Phase 1.5 IMPLEMENTATION doc (§3 finding 1). `bootstrap/ecr.tf` rule 2 keeps at most ten images.
+Phase 1 §8 item 2 said official images would get a protected tag prefix "before Phase 4"; it was never written (not
+found in `ecr.tf` or any later doc, a search and not a proof). Every push touching `experiment/**` builds an image,
+results-only commits included; Deploy has run 94 times, 46 since 2026-10-14. **Inferred, not measured:** the Phase 4
+official image (`sha256:ff978703...`, every grid record) and Phase 1's skeleton image (`sha256:ef2582ed...`) have very
+likely expired; Phase 5.5's (`sha256:ef0588f9...`, every case record, built at `101e2df`) is fifth newest by the
+deploy list. Claude's read-only listing was denied; **his command** is in the Phase 1.5 doc §3. **The records are
+unchanged** (each still carries its digest; the code is pinned by the tag, the archive and each record's `git_sha`).
+What an expired image loses is the exact bytes, so a run cannot be repeated on the identical image: a
+reproducibility limit for the methods page, not a change to any result. **Fix (his decision 7 (a), 2026-11-04):** rule
+2 removed in `bootstrap` before any of Phase 1.5's code pushes, and results-only commits stop building images.
+**Measured 2026-11-04, about 9:20 AM (his command, Phase 1.5 doc §3): only Phase 5.5's image
+(`sha256:ef0588f9...`) still exists. The Phase 4 official image (`sha256:ff978703...`) and Phase 1's skeleton image
+(`sha256:ef2582ed...`) have expired.** So every official grid record and Phase 1's skeleton records name an image that
+is no longer in the registry; the methods page (Phase 6.5) and the Phase 1.5 page's provenance say so. **Closes when**
+the `bootstrap` apply lands (no further image can expire), with Phase 5.5's image confirmed present after it.
+
+---
+
+## OPEN 2026-11-04 — Phase 4's manifest of raw objects was not committed (found by search only)
+
+Phase 4 runs-half decision 2 (a), his: "at this phase's close, commit a manifest of every pilot and official object
+(key, bytes, sha256), and publish the full text with the publish path (Phase 1.5, or 6.5 at the latest)." Its DoD
+audit (§13) has no row for it, and no manifest file is tracked. **His decision (Phase 1.5 decision 8 (a), 2026-11-04):**
+the manifest is built and committed in Phase 1.5 (its §12 step 3), and the full text is published in Phase 6.5 with
+the re-scoring check that reads it. **Closes when** the manifest is committed; the full-text half moves to Phase 6.5's
+DoD.
+
+---
+
+## CLOSED 2026-11-04, his decision (found the same day) — the dev access key was due for deletion at Phase 1's close
+
+Phase 0.5 decision A, as amended by Phase 1 decision 2, deletes the `horizon-compact-dev` key at Phase 1's close; the
+Phase 1 audit (its §22) missed it. **His decision (Phase 1.5 decision 6 (a)):** kept until Phase 7 closes or 2027-01-02
+(90 days from its creation, 2026-10-04), whichever is first, then deleted. Recorded in the Phase 0.5 doc (decision A,
+amended a second time) and in a dated note on the Phase 1 doc's §22. **Carried as a date:** delete the key by
+2027-01-02.
+
+---
+
+## OPEN 2026-11-04, Musical Mycelium's to fix, not this repo's — its deploy role can change this project's CloudFront distribution
+
+Musical Mycelium's deploy role holds its CloudFront actions on `*` (its `bootstrap/oidc.tf`), so it can update or
+delete any distribution in the shared account, this project's included once Phase 1.5 creates one. This repo fences
+its own role by tag (Phase 1.5 doc §9; AWS's service reference, read 2026-11-04, shows distributions take
+`aws:ResourceTag`), so the reverse risk is closed here. Musical Mycelium's Terraform is not changed from this repo
+(`CLAUDE.md`). **For him, in a Musical Mycelium session:** the same tag fence on its role. **Closes when** he decides
+there.
 
 ---
 
