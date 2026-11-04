@@ -7,7 +7,24 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-03, about 8:15 AM (PHASE 5.5 CLOSED WITH HIS COMMIT; PHASE 1'S CLOSE-OUT AND PHASE 1.5 NEXT, BEFORE PHASE 6)
+> ## START HERE — where things stand, 2026-11-04, about 9 AM (PHASE 1 CLOSED, DoD 7 WAIVED; PHASE 1.5'S IMPLEMENTATION DOC NEXT)
+>
+> **Phase 1 is closed with his commit of this block** (his decision, 2026-11-04). DoD 1-6 are met on proof already in
+> the IMPLEMENTATION doc (§21, §21a); **DoD 7 is waived**, not met: the phase's spend was about $0.07 by its records
+> and sits inside the cumulative ceiling, so the October bills were not read. The audit is that doc's §22; the scope
+> doc and `ROADMAP.md` carry dated notes. `pyproject.toml` stays `0.0.5` until Phase 1.5 closes (Phase 2 decision 4).
+> **Phase 5.5's last DoD row is met:** CI on the close commit `3c309a2` passed (run `41651016754`). **Nothing is
+> running.**
+>
+> **Next: Phase 1.5 `publish-path`'s IMPLEMENTATION doc** (Opus), written and approved immediately before its build,
+> from the scope doc `phase-1.5-publish-path.md`, the CARRIED list below (with its 2026-11-04 note), and the OPEN
+> entry of 2026-10-15, now narrowed to Phase 1.5. Phase 6's doc comes after Phase 1.5 closes. **Still open and
+> carried:** the hidden key prompt (not blocking) and the two matcher behaviors to disclose (OPEN 2026-10-31, for
+> Phase 6 and 6.5).
+>
+> *The 2026-11-03 8:15 AM block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-03, about 8:15 AM (PHASE 5.5 CLOSED WITH HIS COMMIT; PHASE 1'S CLOSE-OUT AND PHASE 1.5 NEXT, BEFORE PHASE 6) *(superseded by the block above)*
 >
 > **Phase 5.5 is closed with his commit of this block.** The DoD audit passes 5 of 6 outright, the sixth on the close
 > commit's CI; both honor statements are in the IMPLEMENTATION doc's §14 (his drafted by Claude at his request and
@@ -2827,7 +2844,12 @@ criterion 3, 4 or 5 is recorded.
 
 ---
 
-## OPEN 2026-10-15 — Phases 1 and 1.5 are not closed
+## OPEN, narrowed 2026-11-04 to Phase 1.5 (Phase 1 CLOSED that day, DoD 7 waived; OPEN 2026-10-15) — Phases 1 and 1.5 are not closed
+
+**Narrowed 2026-11-04 (his):** Phase 1 is closed, DoD 1-6 met and DoD 7 waived (spend about $0.07 by the records,
+inside the cumulative ceiling; the bills not read), C6 done as the IMPLEMENTATION doc's §22. **What stays open is
+Phase 1.5**, and with it the version step to 0.1.0 and 0.1.5. The entry as written:
+
 
 Found while checking "are Phases 1-4 done" (his question, 2026-10-15). **Phase 1:** built and DoD 1-6 met (DoD 1 on Haiku
 5.5, IMPLEMENTATION doc §21a), but **DoD 7 (the phase's spend from the bill) and C6 (the close-out: DoD audit,
@@ -2964,6 +2986,11 @@ in Phase 1.5's IMPLEMENTATION doc.
 - **Laptop reads need the bucket name** (`--bucket` or `HC_RESULTS_BUCKET`); the dev user cannot list buckets.
 - **Calls take about 30 s on this route** (28-63 s), so a stop lands about one call late; the pacing interval is a
   floor, not the speed.
+- *Dated note, 2026-11-04, at Phase 1's close:* the first bullet is out of date. **A main-model Fargate sweep exists**:
+  `skeleton-haiku-5-5-f1467906` (Haiku 5.5 through Anthropic's API, 15 of 15 `valid`, the provenance checks passed;
+  Phase 1 doc §21a), with `stoptest-haiku-5-5-c61e6830` beside it. So the page can show the main model's sweep instead of
+  the development model's; which one is Phase 1.5's doc's call. "Sonnet 4.6" in the scope doc is superseded by the
+  2026-10-11 fallback set. Both sweeps are under `development/placeholder/`. Calls on this route take 5 to 9 s, not 30.
 
 ---
 

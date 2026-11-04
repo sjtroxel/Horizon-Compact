@@ -15,6 +15,10 @@
 >
 > Written before Phase 0.5 is built. **Lines marked *(rests on 0.5)* depend on a Phase 0.5 check that has not been
 > measured yet;** if that check comes back different, they are the lines to amend.
+>
+> **Amended 2026-11-04 (his), at the close:** DoD 7 is **waived**, not met. The phase's spend was about $0.07 by its own
+> records and sits inside the project's cumulative ceiling, so the October bills were not read. Phase 1 closed the same
+> day; the audit is the IMPLEMENTATION doc's §22.
 
 ## What this phase is for
 

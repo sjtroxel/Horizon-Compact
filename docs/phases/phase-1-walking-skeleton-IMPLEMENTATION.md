@@ -11,6 +11,10 @@
 > `objectives.toml`). Claude wrote the placeholder rather than leaving it to the build, because it is the one piece
 > where an author could drift toward the experiment's subject; §4 says what was checked. The build may change it only
 > to fix a format or clarity problem a development run shows, logged with the reason.
+>
+> **CLOSED 2026-11-04 (his), DoD audit in §22.** DoD 1-6 met (§21, §21a); **DoD 7 waived by his decision**, not
+> measured: the phase's spend was about $0.07 by its own records and already sits inside the project's cumulative
+> ceiling. C6 done in that audit; `pyproject.toml` stays `0.0.5` until Phase 1.5 closes (Phase 2 decision 4).
 
 ## 1. What this phase delivers
 
@@ -524,7 +528,7 @@ All offline (the Phase 0.5 conftest makes the network unreachable). Expected new
 | C3 | `infra/terraform/bootstrap/` additions, `infra/iam/*.json`, the dev policy file | bootstrap applied, second plan clean |
 | C4 | `infra/terraform/main/`, `deploy.yml`, `aws-permission-check.yml`, `make tf-check` over both roots | pushed: the first deploy runs from it |
 | C5 | evidence and as-built notes; `planning/07` §4 note | the sweep, the resume, the refusals |
-| C6 | close-out: `KNOWN-GAPS.md`, `ROADMAP.md`, version 0.1.0, DoD audit | the bill |
+| C6 | close-out: `KNOWN-GAPS.md`, `ROADMAP.md`, version 0.1.0, DoD audit | the bill *(as built 2026-11-04: no bill reading, DoD 7 waived; the version waits for Phase 1.5, Phase 2 decision 4; §22)* |
 
 ## 16. Order of work
 
@@ -557,7 +561,7 @@ All offline (the Phase 0.5 conftest makes the network unreachable). Expected new
 11. **[done 2026-10-11, same notes]** **Claude reads every object** of the sweep: digest present and matching ECR's; hashes; resume behavior (no run
     re-run, no object overwritten, attempt numbers continuing); cache fields; costs; then writes the as-built notes
     and the CARRIED list for Phase 1.5. **He commits C5.**
-12. **A day later: the phase's spend from the bill** (DoD 7), then the close-out (C6).
+12. **[waived 2026-11-04 (his), then C6 done; §22]** **A day later: the phase's spend from the bill** (DoD 7), then the close-out (C6).
 
 ## 17. Definition of done, and the proof of each
 
@@ -569,7 +573,7 @@ All offline (the Phase 0.5 conftest makes the network unreachable). Expected new
 | 4. An official sweep is refused, with a reason | the gate tests; his pasted refusal |
 | 5. The deploy role cannot create outside its prefix or widen itself | `deploy.json` and its tests; the permission-check run ID |
 | 6. `make check` and CI green; root under cap; every commit through the guard | CI run IDs; root 13 of 16 (`experiment/` added) |
-| 7. Spend measured from the bill; with Phase 1.5, about $1 or less | the Cost Explorer reading |
+| 7. Spend measured from the bill; with Phase 1.5, about $1 or less | the Cost Explorer reading *(waived 2026-11-04, his decision; the records' figure instead, §22)* |
 
 ## 18. Decisions for him
 
@@ -851,3 +855,33 @@ changes"). Image built from `8ab367c` (K6); `apply main` green. **Two sweeps, bo
   still carries `role = "development"` for it until the protocol names it (Phase 3.5 build step 9); nothing official
   can run on it before the tag. DoD 3 is met on this route as well. DoD 7 (spend from the bill) and Phase 1.5 are not
   done by this step.
+
+## 22. Close-out (C6), 2026-11-04: the DoD audit
+
+Written by Claude (Opus) on 2026-11-04, three weeks after the build, from the as-built record above and checks run the
+same morning. **His decision the same morning:** close Phase 1 now, and **waive DoD 7** rather than read the October
+bills, because the phase's spend is a few cents and is already inside the project's cumulative ceiling. The row is
+kept and marked waived, not removed, so the record shows what was planned and what was decided. Every other row is
+met on proof already in this doc.
+
+| Scope DoD | Met | Proof |
+|---|---|---|
+| 1. A placeholder sweep from the laptop runs as a Fargate task on the main model, paced, one object per attempt, provenance including digest and hashes | **yes**, 2026-10-12 | §21a: `skeleton-haiku-5-5-f1467906` on Haiku 5.5 through Anthropic's API (the main model by the 2026-10-11 dated note in §21), 15 of 15 `valid`; every record's image digest equals ECR's for tag `8ab367cf...-38218565554`; one `git_sha`, one content hash |
+| 2. The spend cap works both ways; the manifest records cost | **yes**, by test, as the scope doc asks | `test_a_sweep_that_could_pass_its_cap_is_refused_before_any_call` (preflight), `test_the_cap_stops_the_session_before_the_attempt_that_would_pass_it` and `test_the_cap_is_per_sweep_across_sessions` (running) in `tests/test_sweep_runner.py`; `test_the_running_cap_stops_before_the_attempt_that_would_pass_it` in `tests/test_sweep_pacing_spend.py`; all pass, re-run 2026-11-04. The measured cost is in the session summaries, not the manifest, which §7 makes write-once before any call; §17's proof column already named the summaries. Real totals agree with the attempts (§21, §21a). No real sweep reached its cap |
+| 3. Interrupt and re-launch resumes without re-running or overwriting | **yes**, 2026-10-11 and 2026-10-12 | §21 (`skeleton-gpt-oss-openrouter-78a37f95`) and §21a (`stoptest-haiku-5-5-c61e6830`, 50 of 50, every key one version, no delete markers); the runner tests |
+| 4. An official sweep is refused, with a reason | **yes**, 2026-10-05 | §21 step 10, his pasted refusal (`no committed protocol (prereg-v1 does not exist)`); `tests/test_protocol_gate.py`. Since the tag, the gate refuses on a hash mismatch instead (Phase 3.5) |
+| 5. The deploy role cannot create outside its prefix or widen itself | **yes**, 2026-10-05 | permission-check run `37353579140` (all four forbidden actions refused); `infra/iam/deploy.json` and its tests in `tests/test_architecture.py` |
+| 6. `make check` and CI green; root under cap; every commit through the guard | **yes** | CI green on every Phase 1 commit: `70a4c4e` run `37338714768`, `b89b270` `37344738655`, `927036f` `37349696165`, `ab76636` `37352790895` (and Deploy `37352790960`), `bf16a03` `38149635315`; the K6 commit that carried §21a's image, `8ab367c`, CI `38218565805`. All 125 CI runs listed on 2026-11-04 are `success`. Root 13 of 16 (`make root-check`, 2026-11-04). **The guard's proof is the hook, not CI:** it runs on every commit, message and push and fails closed, and CI cannot run the name scan (it needs the private term file; `ci.yml`). this doc's as-built notes record no bypass |
+| 7. Spend measured from the bill; with Phase 1.5, about $1 or less | **waived** (his, 2026-11-04) | Not read from the bill. **From the records: about $0.07** ($0.0033 of his OpenRouter cash on 2026-10-11, §21; $0.0621 of the Anthropic credit on 2026-10-12, §21a; step 3's 28 throttled attempts $0, §21), plus Fargate on the AWS credits, never measured per phase. All of it is inside the cumulative ceiling, which counts every AWS credit dollar used and the whole OpenRouter cap as this project's (`evidence/phase-4/projection.md`, carried to `evidence/phase-5.5/cost.md`: at most about $46). The "about $1 with Phase 1.5" target carries to Phase 1.5, which starts from about $0.07 |
+
+**C6 as built.** This audit; `ROADMAP.md` (the spine row, the phase-doc table, the decision history); `KNOWN-GAPS.md`
+(START HERE; the OPEN 2026-10-15 entry narrowed to Phase 1.5; a dated note on the CARRIED list for Phase 1.5); a dated
+note on the scope doc's DoD 7. **Not done: the version.** `pyproject.toml` stays `0.0.5` (Phase 2 decision 4: the
+version steps through 0.1, 0.1.5 and 0.2 in order once Phases 1 and 1.5 are both closed), so it moves at Phase 1.5's
+close.
+
+**Left open by this close, none of it Phase 1's to fix:** step 3 (the laptop development run on Nova Lite) was never
+run and is not needed, Bedrock having been dropped (2026-10-11); whether the scoped `kms:Decrypt` grant is needed at all
+is still untested (§21, §21a); the per-run log line's "so far" restarts at a resume (cosmetic, §21).
+
+**Phase 1 is CLOSED 2026-11-04, with his commit of this section.**
