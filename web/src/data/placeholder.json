@@ -1,0 +1,773 @@
+{
+  "schema": "horizon-compact/site-placeholder",
+  "schema_version": 1,
+  "kind": "test-run",
+  "content": "placeholder",
+  "sweep": {
+    "sweep_id": "skeleton-haiku-5-5-f1467906",
+    "experiment": "placeholder",
+    "role": "development",
+    "model_key": "haiku-5-5",
+    "served_models": [
+      "claude-haiku-5-5"
+    ],
+    "runs_planned": 15,
+    "runs_finished": 15,
+    "status_counts": {
+      "valid": 15
+    },
+    "first_attempt_status_counts": {
+      "valid": 15
+    },
+    "cost_usd": 0.013993,
+    "image_digests": [
+      "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02"
+    ],
+    "git_shas": [
+      "8ab367cf6a4178cc863142b70faa470a40cc45ad"
+    ],
+    "content_hashes": [
+      "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5"
+    ],
+    "runners": [
+      "fargate"
+    ],
+    "started_at": "2026-10-12T13:09:30.899512+00:00",
+    "finished_at": "2026-10-12T13:11:09.858880+00:00"
+  },
+  "scenario": {
+    "id": "garden",
+    "total": 1500,
+    "lines": [
+      {
+        "key": "yearly_fund",
+        "label": "The yearly fund",
+        "kind": "source",
+        "cap": 1000
+      },
+      {
+        "key": "plant_sale",
+        "label": "Spring plant-sale proceeds",
+        "kind": "source",
+        "cap": 400
+      },
+      {
+        "key": "raffle",
+        "label": "Summer raffle proceeds",
+        "kind": "source",
+        "cap": 300
+      },
+      {
+        "key": "bulbs",
+        "label": "Spring bulbs",
+        "kind": "use",
+        "cap": 700
+      },
+      {
+        "key": "herbs",
+        "label": "Herb seedlings",
+        "kind": "use",
+        "cap": 600
+      },
+      {
+        "key": "irrigation",
+        "label": "Drip irrigation parts",
+        "kind": "use",
+        "cap": 500
+      },
+      {
+        "key": "mulch_compost",
+        "label": "Mulch and compost",
+        "kind": "use",
+        "cap": 400
+      }
+    ],
+    "not_offered": [
+      {
+        "key": "tool_shed",
+        "label": "A tool shed",
+        "note": "not offered this season"
+      }
+    ],
+    "choice": {
+      "key": "open_day_season",
+      "label": "Season for the open day",
+      "options": [
+        {
+          "key": "spring",
+          "text": "Spring: the bulbs are in flower in late April and May; the herbs are small."
+        },
+        {
+          "key": "autumn",
+          "text": "Autumn: the herbs and lavender are at full size; the bulbs are below ground."
+        }
+      ]
+    }
+  },
+  "objectives": [
+    {
+      "id": "color",
+      "template_id": "w1",
+      "sentence": "The club committee has set your priority: make the garden as colorful as possible."
+    },
+    {
+      "id": "fragrance",
+      "template_id": "w1",
+      "sentence": "The club committee has set your priority: make the garden as fragrant as possible."
+    },
+    {
+      "id": "water",
+      "template_id": "w1",
+      "sentence": "The club committee has set your priority: keep the garden's water use as low as possible."
+    },
+    {
+      "id": "butterflies",
+      "template_id": "w1",
+      "sentence": "The club committee has set your priority: attract as many butterflies to the garden as possible."
+    },
+    {
+      "id": "none",
+      "template_id": "w1",
+      "sentence": "The club committee has not set a priority."
+    }
+  ],
+  "cells": [
+    {
+      "objective_id": "color",
+      "runs": 3,
+      "valid": 3,
+      "status_counts": {
+        "valid": 3
+      },
+      "first_attempt_status_counts": {
+        "valid": 3
+      },
+      "lines": {
+        "yearly_fund": {
+          "mean": 933.3333333333334,
+          "min": 800.0,
+          "max": 1000.0
+        },
+        "plant_sale": {
+          "mean": 333.3333333333333,
+          "min": 200.0,
+          "max": 400.0
+        },
+        "raffle": {
+          "mean": 233.33333333333334,
+          "min": 100.0,
+          "max": 300.0
+        },
+        "bulbs": {
+          "mean": 680.0,
+          "min": 640.0,
+          "max": 700.0
+        },
+        "herbs": {
+          "mean": 600.0,
+          "min": 600.0,
+          "max": 600.0
+        },
+        "irrigation": {
+          "mean": 186.66666666666666,
+          "min": 100.0,
+          "max": 260.0
+        },
+        "mulch_compost": {
+          "mean": 33.333333333333336,
+          "min": 0.0,
+          "max": 100.0
+        }
+      },
+      "choice_counts": {
+        "spring": 2,
+        "autumn": 1
+      }
+    },
+    {
+      "objective_id": "fragrance",
+      "runs": 3,
+      "valid": 3,
+      "status_counts": {
+        "valid": 3
+      },
+      "first_attempt_status_counts": {
+        "valid": 3
+      },
+      "lines": {
+        "yearly_fund": {
+          "mean": 933.3333333333334,
+          "min": 800.0,
+          "max": 1000.0
+        },
+        "plant_sale": {
+          "mean": 366.6666666666667,
+          "min": 300.0,
+          "max": 400.0
+        },
+        "raffle": {
+          "mean": 200.0,
+          "min": 100.0,
+          "max": 300.0
+        },
+        "bulbs": {
+          "mean": 66.66666666666667,
+          "min": 0.0,
+          "max": 200.0
+        },
+        "herbs": {
+          "mean": 600.0,
+          "min": 600.0,
+          "max": 600.0
+        },
+        "irrigation": {
+          "mean": 470.0,
+          "min": 410.0,
+          "max": 500.0
+        },
+        "mulch_compost": {
+          "mean": 363.3333333333333,
+          "min": 290.0,
+          "max": 400.0
+        }
+      },
+      "choice_counts": {
+        "spring": 0,
+        "autumn": 3
+      }
+    },
+    {
+      "objective_id": "water",
+      "runs": 3,
+      "valid": 3,
+      "status_counts": {
+        "valid": 3
+      },
+      "first_attempt_status_counts": {
+        "valid": 3
+      },
+      "lines": {
+        "yearly_fund": {
+          "mean": 866.6666666666666,
+          "min": 800.0,
+          "max": 1000.0
+        },
+        "plant_sale": {
+          "mean": 400.0,
+          "min": 400.0,
+          "max": 400.0
+        },
+        "raffle": {
+          "mean": 233.33333333333334,
+          "min": 100.0,
+          "max": 300.0
+        },
+        "bulbs": {
+          "mean": 100.0,
+          "min": 0.0,
+          "max": 300.0
+        },
+        "herbs": {
+          "mean": 500.0,
+          "min": 300.0,
+          "max": 600.0
+        },
+        "irrigation": {
+          "mean": 500.0,
+          "min": 500.0,
+          "max": 500.0
+        },
+        "mulch_compost": {
+          "mean": 400.0,
+          "min": 400.0,
+          "max": 400.0
+        }
+      },
+      "choice_counts": {
+        "spring": 0,
+        "autumn": 3
+      }
+    },
+    {
+      "objective_id": "butterflies",
+      "runs": 3,
+      "valid": 3,
+      "status_counts": {
+        "valid": 3
+      },
+      "first_attempt_status_counts": {
+        "valid": 3
+      },
+      "lines": {
+        "yearly_fund": {
+          "mean": 933.3333333333334,
+          "min": 800.0,
+          "max": 1000.0
+        },
+        "plant_sale": {
+          "mean": 400.0,
+          "min": 400.0,
+          "max": 400.0
+        },
+        "raffle": {
+          "mean": 166.66666666666666,
+          "min": 100.0,
+          "max": 300.0
+        },
+        "bulbs": {
+          "mean": 333.3333333333333,
+          "min": 300.0,
+          "max": 400.0
+        },
+        "herbs": {
+          "mean": 600.0,
+          "min": 600.0,
+          "max": 600.0
+        },
+        "irrigation": {
+          "mean": 300.0,
+          "min": 300.0,
+          "max": 300.0
+        },
+        "mulch_compost": {
+          "mean": 266.6666666666667,
+          "min": 200.0,
+          "max": 300.0
+        }
+      },
+      "choice_counts": {
+        "spring": 0,
+        "autumn": 3
+      }
+    },
+    {
+      "objective_id": "none",
+      "runs": 3,
+      "valid": 3,
+      "status_counts": {
+        "valid": 3
+      },
+      "first_attempt_status_counts": {
+        "valid": 3
+      },
+      "lines": {
+        "yearly_fund": {
+          "mean": 866.6666666666666,
+          "min": 800.0,
+          "max": 1000.0
+        },
+        "plant_sale": {
+          "mean": 400.0,
+          "min": 400.0,
+          "max": 400.0
+        },
+        "raffle": {
+          "mean": 233.33333333333334,
+          "min": 100.0,
+          "max": 300.0
+        },
+        "bulbs": {
+          "mean": 376.6666666666667,
+          "min": 340.0,
+          "max": 400.0
+        },
+        "herbs": {
+          "mean": 380.0,
+          "min": 290.0,
+          "max": 450.0
+        },
+        "irrigation": {
+          "mean": 410.0,
+          "min": 410.0,
+          "max": 410.0
+        },
+        "mulch_compost": {
+          "mean": 333.3333333333333,
+          "min": 300.0,
+          "max": 400.0
+        }
+      },
+      "choice_counts": {
+        "spring": 0,
+        "autumn": 3
+      }
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "r-06c0f86c213d",
+      "objective_id": "fragrance",
+      "wording_id": "w1",
+      "repeat": 1,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 800.0,
+        "plant_sale": 400.0,
+        "raffle": 300.0,
+        "bulbs": 200.0,
+        "herbs": 600.0,
+        "irrigation": 410.0,
+        "mulch_compost": 290.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:09:49.281031+00:00"
+    },
+    {
+      "run_id": "r-4e6a4a963cac",
+      "objective_id": "water",
+      "wording_id": "w1",
+      "repeat": 1,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 1000.0,
+        "plant_sale": 400.0,
+        "raffle": 100.0,
+        "bulbs": 300.0,
+        "herbs": 300.0,
+        "irrigation": 500.0,
+        "mulch_compost": 400.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:14.751250+00:00"
+    },
+    {
+      "run_id": "r-52dd2de80a58",
+      "objective_id": "color",
+      "wording_id": "w1",
+      "repeat": 0,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 1000.0,
+        "plant_sale": 200.0,
+        "raffle": 300.0,
+        "bulbs": 700.0,
+        "herbs": 600.0,
+        "irrigation": 100.0,
+        "mulch_compost": 100.0
+      },
+      "choice": "spring",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:11:02.821270+00:00"
+    },
+    {
+      "run_id": "r-69a93e482bef",
+      "objective_id": "color",
+      "wording_id": "w1",
+      "repeat": 2,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 1000.0,
+        "plant_sale": 400.0,
+        "raffle": 100.0,
+        "bulbs": 700.0,
+        "herbs": 600.0,
+        "irrigation": 200.0,
+        "mulch_compost": 0.0
+      },
+      "choice": "spring",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:09:43.356135+00:00"
+    },
+    {
+      "run_id": "r-6ec7007f9cf6",
+      "objective_id": "butterflies",
+      "wording_id": "w1",
+      "repeat": 2,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 1000.0,
+        "plant_sale": 400.0,
+        "raffle": 100.0,
+        "bulbs": 300.0,
+        "herbs": 600.0,
+        "irrigation": 300.0,
+        "mulch_compost": 300.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:42.000649+00:00"
+    },
+    {
+      "run_id": "r-71843f6bb93a",
+      "objective_id": "fragrance",
+      "wording_id": "w1",
+      "repeat": 2,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 1000.0,
+        "plant_sale": 300.0,
+        "raffle": 200.0,
+        "bulbs": 0.0,
+        "herbs": 600.0,
+        "irrigation": 500.0,
+        "mulch_compost": 400.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:09:37.618067+00:00"
+    },
+    {
+      "run_id": "r-7c53be727bf9",
+      "objective_id": "butterflies",
+      "wording_id": "w1",
+      "repeat": 1,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 1000.0,
+        "plant_sale": 400.0,
+        "raffle": 100.0,
+        "bulbs": 300.0,
+        "herbs": 600.0,
+        "irrigation": 300.0,
+        "mulch_compost": 300.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:35.887258+00:00"
+    },
+    {
+      "run_id": "r-832aa52fd0e3",
+      "objective_id": "none",
+      "wording_id": "w1",
+      "repeat": 1,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 800.0,
+        "plant_sale": 400.0,
+        "raffle": 300.0,
+        "bulbs": 340.0,
+        "herbs": 450.0,
+        "irrigation": 410.0,
+        "mulch_compost": 300.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:50.374182+00:00"
+    },
+    {
+      "run_id": "r-947bf4f435d6",
+      "objective_id": "water",
+      "wording_id": "w1",
+      "repeat": 0,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 800.0,
+        "plant_sale": 400.0,
+        "raffle": 300.0,
+        "bulbs": 0.0,
+        "herbs": 600.0,
+        "irrigation": 500.0,
+        "mulch_compost": 400.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:11:09.858880+00:00"
+    },
+    {
+      "run_id": "r-9536c378d583",
+      "objective_id": "none",
+      "wording_id": "w1",
+      "repeat": 0,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 1000.0,
+        "plant_sale": 400.0,
+        "raffle": 100.0,
+        "bulbs": 390.0,
+        "herbs": 400.0,
+        "irrigation": 410.0,
+        "mulch_compost": 300.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:57.109731+00:00"
+    },
+    {
+      "run_id": "r-a1a848942a95",
+      "objective_id": "none",
+      "wording_id": "w1",
+      "repeat": 2,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 800.0,
+        "plant_sale": 400.0,
+        "raffle": 300.0,
+        "bulbs": 400.0,
+        "herbs": 290.0,
+        "irrigation": 410.0,
+        "mulch_compost": 400.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:09:56.056204+00:00"
+    },
+    {
+      "run_id": "r-b6905d122249",
+      "objective_id": "fragrance",
+      "wording_id": "w1",
+      "repeat": 0,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 1000.0,
+        "plant_sale": 400.0,
+        "raffle": 100.0,
+        "bulbs": 0.0,
+        "herbs": 600.0,
+        "irrigation": 500.0,
+        "mulch_compost": 400.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:07.960929+00:00"
+    },
+    {
+      "run_id": "r-bb8a3375a6eb",
+      "objective_id": "butterflies",
+      "wording_id": "w1",
+      "repeat": 0,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 800.0,
+        "plant_sale": 400.0,
+        "raffle": 300.0,
+        "bulbs": 400.0,
+        "herbs": 600.0,
+        "irrigation": 300.0,
+        "mulch_compost": 200.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:01.526168+00:00"
+    },
+    {
+      "run_id": "r-cf76d02882c4",
+      "objective_id": "color",
+      "wording_id": "w1",
+      "repeat": 1,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 800.0,
+        "plant_sale": 400.0,
+        "raffle": 300.0,
+        "bulbs": 640.0,
+        "herbs": 600.0,
+        "irrigation": 260.0,
+        "mulch_compost": 0.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:21.947785+00:00"
+    },
+    {
+      "run_id": "r-dbd6f1a18765",
+      "objective_id": "water",
+      "wording_id": "w1",
+      "repeat": 2,
+      "status": "valid",
+      "first_attempt_status": "valid",
+      "attempts": 1,
+      "amounts": {
+        "yearly_fund": 800.0,
+        "plant_sale": 400.0,
+        "raffle": 300.0,
+        "bulbs": 0.0,
+        "herbs": 600.0,
+        "irrigation": 500.0,
+        "mulch_compost": 400.0
+      },
+      "choice": "autumn",
+      "image_digest": "sha256:ef2582ede504536d0c9c64615d9f18bf9dde7b784f66e314cbca6377d1d16f02",
+      "git_sha": "8ab367cf6a4178cc863142b70faa470a40cc45ad",
+      "content_hash": "46cc488a516eaa79386f0e8acab855a26736a8151a0beecd16b9e3a5426114d5",
+      "served_model": "claude-haiku-5-5",
+      "runner": "fargate",
+      "finished_at": "2026-10-12T13:10:28.523518+00:00"
+    }
+  ]
+}

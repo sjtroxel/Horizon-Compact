@@ -7,7 +7,20 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-04, about noon (PHASE 1.5 C1 APPLIED; HIS COMMIT AND PUSH, THEN C2)
+> ## START HERE — where things stand, 2026-11-04, about 3:20 PM (PHASE 1.5 C2 BUILT, REVIEWED, CMP IDENTICAL; HIS COMMIT NEXT)
+>
+> **C2, the site-data builder (`hc site data`), is built (Sonnet) and reviewed (Opus)**; the record is the Phase 1.5
+> doc §18. His S3 run wrote `web/src/data/placeholder.json` (15 runs, five cells, cost `0.013993`, no ARN, no memo
+> text); his local run over the same sweep ended `cmp: identical`. `make check` green, 3195. One review note (§18
+> departure 4): the account-id check's known false positive on an all-digit run id stays as decided; the fix first
+> proposed there would have blinded the check to an account id after a hyphen.
+>
+> **Next: his commit of C2, then its push** (it touches `src/**`, so Deploy builds an image, safe since C1); CI and
+> Deploy green. Then **step 3, the Phase 4 raw-object manifest** (doc §12), Sonnet builds, Opus reviews.
+>
+> *The earlier 2026-11-04 blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-04, about noon (PHASE 1.5 C1 DONE AND GREEN; C2 NEXT) *(superseded by the block above)*
 >
 > **C1, the `bootstrap` change, is built (Sonnet), reviewed (Opus) and applied (his)**: the ECR ten-image rule is gone,
 > the site's origin access control and response headers policy exist, and the deploy role holds the site grants as an
@@ -16,8 +29,10 @@ case by its type and a neutral label. The names live only in the private longlis
 > 1.5 doc §17. **The ECR entry below is CLOSED.** One review change: the dev policy's headers-policy wildcard was
 > narrowed to the twelve decided actions (checked against AWS's service reference).
 >
-> **Next: his commit of C1, then its push** (it runs Deploy and builds an image, now safe); CI and Deploy green. Then
-> **C2, the site-data builder** (doc §12 step 2, Sonnet builds, Opus reviews).
+> **Committed `0526a2b` and pushed (his); CI and Deploy green** (runs `41882765796`, `41882765814`; new image
+> `sha256:2b95efa8...`). **C1 is done. Next: C2, the site-data builder** (doc §12 step 2): **Sonnet builds from
+> `scratch/p15-c2-build-prompt.md`** (written by Opus about 1:45 PM), Opus reviews, then his S3 and local runs and the
+> `cmp`.
 >
 > *The earlier 2026-11-04 blocks below are superseded.*
 

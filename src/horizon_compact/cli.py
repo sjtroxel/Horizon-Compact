@@ -1312,6 +1312,37 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+SITE_DATA_PATH = Path("web") / "src" / "data" / "placeholder.json"
+
+
+def cmd_site_data(args: argparse.Namespace) -> int:
+    """One finished placeholder sweep to the site's data file (Phase 1.5 IMPLEMENTATION doc section 6). It
+    can read only ``development/placeholder/<sweep>/`` and only reads: the builder is handed a record source,
+    not a store."""
+    from horizon_compact.site.data import SiteDataRefusal, build_site_data, write_site_data
+
+    experiment = load_experiment(
+        args.experiment, Path(args.experiment_dir) if args.experiment_dir else None
+    )
+    if args.runs_root and args.store == "local":
+        store: Store = LocalStore(Path(args.runs_root))
+    else:
+        session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+        store = _store(args, session)
+    out = (
+        Path(args.out) if args.out else Path(_git("rev-parse", "--show-toplevel")) / SITE_DATA_PATH
+    )
+    try:
+        text = build_site_data(store, args.sweep, experiment)
+        path = write_site_data(text, out)
+    except SiteDataRefusal as exc:
+        raise SweepRefusal(str(exc)) from exc
+    print(f"wrote {path}")
+    print(f"sweep: {args.sweep}")
+    print(f"runs:  {json.loads(text)['sweep']['runs_finished']}")
+    return CLEAN_EXIT
+
+
 FORMAT_REPORT_DIR = "docs/phases/evidence/phase-2.5/format"
 
 
@@ -3349,6 +3380,23 @@ def build_parser() -> argparse.ArgumentParser:
     analyze.add_argument("--root", default=None, help=argparse.SUPPRESS)
     analyze.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
 
+    site = groups.add_parser("site", help="Phase 1.5 site data. Reads records; calls no model.")
+    site_actions = site.add_subparsers(dest="action", required=True)
+    site_data = site_actions.add_parser(
+        "data",
+        help="One finished placeholder sweep to web/src/data/placeholder.json. Reads only.",
+    )
+    site_data.add_argument(
+        "--experiment", required=True, help="placeholder is the only one accepted"
+    )
+    site_data.add_argument("--sweep", required=True, help="the sweep id")
+    site_data.add_argument("--store", choices=("local", "s3"), required=True)
+    site_data.add_argument("--bucket", default=None)
+    site_data.add_argument("--profile", default=None)
+    site_data.add_argument("--out", default=None, help="default: web/src/data/placeholder.json")
+    site_data.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
+    site_data.add_argument("--runs-root", default=None, help=argparse.SUPPRESS)
+
     dossier = groups.add_parser("dossier", help="Phase 2 company dossier. Offline; calls no model.")
     dossier.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
     dossier_actions = dossier.add_subparsers(dest="action", required=True)
@@ -3907,6 +3955,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.group == "analyze":
         try:
             return cmd_analyze(args)
+        except (SweepRefusal, ExperimentError) as exc:
+            print(f"refused: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
+        except IdentityError as exc:
+            print(f"cannot tell where this is running: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
+        except (BotoCoreError, ClientError) as exc:
+            print(f"AWS error: {exc}", file=sys.stderr)
+            return REFUSED_EXIT
+    if args.group == "site":
+        try:
+            return cmd_site_data(args)
         except (SweepRefusal, ExperimentError) as exc:
             print(f"refused: {exc}", file=sys.stderr)
             return REFUSED_EXIT

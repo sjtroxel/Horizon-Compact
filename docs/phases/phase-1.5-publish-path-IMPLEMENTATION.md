@@ -445,12 +445,12 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
 0. **[done 2026-11-04, except his ECR command]** **[his]** Read this doc; take the decisions. **His ECR command** (§3). Claude writes the dated notes: scope doc
    (§0), `planning/02` §2.8, Phase 1 §22 (the key), and the `KNOWN-GAPS.md` entries for §3 findings 1-4. **His commit
    C0** (docs only; builds nothing).
-1. **[done 2026-11-04 except his commit and push: built (Sonnet), reviewed (Opus), applied (his)]** **[Claude, then his]** **C1, `bootstrap`:** the lifecycle change, the two CloudFront objects, the deploy policy and
+1. **[done 2026-11-04: built (Sonnet), reviewed (Opus), applied and committed `0526a2b` (his); CI and Deploy green]** **[Claude, then his]** **C1, `bootstrap`:** the lifecycle change, the two CloudFront objects, the deploy policy and
    its tests, the dev policy's additions. He pastes the dev policy; plans; Claude reads the plan (nothing destroyed;
    only the listed changes); he applies; plans again for "No changes". The deploy paths and the image ignore list go
    in the same commit. He commits and pushes; CI and Deploy green.
-2. **[Sonnet builds, Opus reviews]** **C2, the site-data builder** (§6) with tests; his S3 and local runs and the
-   `cmp`; the JSON committed with it.
+2. **[done 2026-11-04 except his commit and push: built (Sonnet), reviewed (Opus); his S3 and local runs, `cmp: identical`]** **[Sonnet builds, Opus reviews]**
+   **C2, the site-data builder** (§6) with tests; his S3 and local runs and the `cmp`; the JSON committed with it.
 3. **[Sonnet builds, Opus reviews; his run]** **The raw-object manifest** (decision 8 (a)), committed as
    `docs/phases/evidence/phase-4/raw-manifest.json` with the command's code.
 4. **[Claude, then his]** **The previews** (decision 2), in `scratch/` (gitignored); he picks.
@@ -521,7 +521,7 @@ API is $0.01 a request).
 ## 17. As built, C1 (2026-11-04)
 
 Built by Sonnet from `scratch/p15-c1-build-prompt.md`. Code and tests only: no AWS call, no `terraform plan`, `apply`
-or backend `init`, no commit, no push. **Review, his plan and his apply are owed.**
+or backend `init`, no commit, no push. **Review, his plan and his apply are owed.** *(Done the same day; see below.)*
 
 **What was built**
 
@@ -627,3 +627,91 @@ Resources: 4 added, 0 changed, 1 destroyed."** Outputs `site_origin_access_contr
 check after the apply (§3's command): Phase 5.5's image `sha256:ef0588f9...` is present**; the KNOWN-GAPS ECR entry is
 closed. The commit and its push are owed; the push runs Deploy (it touches `infra/**` and `deploy.yml`) and builds an
 image, which is now safe.
+
+**Committed and pushed (2026-11-04, about noon):** his commit `0526a2b`. CI run `41882765796` passed; Deploy run
+`41882765814` passed, built the image `sha256:2b95efa8...` (the first without `experiment/results/`), and replaced
+only `main`'s sweep task definition to name it ("1 added, 0 changed, 1 destroyed"), as every image-building deploy
+does. The task definition it replaced named `sha256:ad14e7b4...`, a later image than Phase 5.5's and named by no
+record (not traced). **C1 is done.**
+
+## 18. As built, C2 (2026-11-04)
+
+Built by Sonnet from `scratch/p15-c2-build-prompt.md`. Code, tests and two scripts for him. No AWS call of any kind
+(`make check`'s own `terraform init -backend=false` and `validate` aside), no commit, no push. `web/src/data/placeholder.json`
+was **not** written: it comes from his S3 run. **Review, his S3 run, his local run and the `cmp` are owed.** *(Done the same day; see below.)*
+
+**What was built**
+
+- `src/horizon_compact/site/data.py` (new, run code, standard library only): `build_site_data(source, sweep_id,
+  experiment) -> str`, `write_site_data(text, path) -> Path`, and `SiteDataRefusal`. The builder takes an
+  `analysis.records.RecordSource`, never a `Store`; it calls the frozen `read_runs` and nothing else frozen is
+  changed. The prefix is `development/placeholder/<sweep_id>/`, built in code; the experiment must be `placeholder`
+  and the sweep id must `fullmatch` `[a-z0-9][a-z0-9-]*`.
+- `src/horizon_compact/cli.py`: a `site` group with one command, `hc site data --experiment placeholder --sweep <id>
+  --store s3|local [--bucket ...] [--profile ...] [--out PATH]`. `--store` is required; the bucket falls back to
+  `HC_RESULTS_BUCKET` through the existing `_store` and `_session`. `--out` defaults to
+  `<repo top>/web/src/data/placeholder.json`. Hidden test-only arguments: `--experiment-dir` and `--runs-root` (a
+  local store's root). It prints the path, the sweep id and the run count. A refusal prints `refused: ...` and
+  returns `REFUSED_EXIT`. The module is imported inside the command, as `cmd_analyze` does.
+- `tests/test_site_data.py` (new, 50 tests): second build byte-identical; the builder writes nothing to the store;
+  `S3Store` (a small fake client with paginated listing) and `LocalStore` give identical text; key order pinned at
+  every level; one cell worked by hand, a mean checked against `fsum`, a `valid_rescaled` run counted at its scaled
+  amounts, a cell with no valid run (null ranges), the earliest start taken over all attempts, the cost summed over two
+  sessions; no memo text, request id, ARN or account-bearing field in the output; the account-id check both ways (a
+  lone 12-digit number and an ARN are refused, a digest holding twelve decimal digits in a row is not); each refusal
+  of decided point 3, one test each (plus the ones listed below); the writer's no-op, refusal and newline bytes;
+  the command end to end on the local store, its refusals, the store being required, and `--store s3` needing a
+  profile and a bucket.
+- `scratch/p15-c2-s3.sh` and `scratch/p15-c2-local.sh` (gitignored; his).
+
+**Run on the real copy (no AWS).** The skeleton sweep copied to the local store's layout and built: 15 runs, five
+cells (three valid each; `color` 2 spring and 1 autumn, the other four 3 autumn), one image digest, one git SHA, one
+content hash (`46cc488a...`, equal to `load_experiment("placeholder").content_hash`), runner `fargate`, cost
+`0.013993`. No memo text (the first 40 characters of every one of the 15 memos searched for: none), no `arn:`, no
+12-digit run. The local script was also run twice end to end: the copy is idempotent, the build is a no-op the second
+time, and the `cmp` fails only because the web file does not exist yet.
+
+**Departures: what did not fit, and what was done instead**
+
+1. **`runner` became `runners`** (a sorted list), as for `served_models` and the other distinct-value fields. §6 had a
+   single `runner`; a sweep resumed from another place has more than one. Per-run `runner` is unchanged.
+2. **`not_offered` was added to `scenario`** (each `key`, `label`, `note`), after `lines` and before `choice`; the
+   model saw those levers, so the page may show them. §6's `options` is `choice` (`key`, `label`, `options` as `key`
+   and `text`), as decided point 4 says.
+3. **Refusals beyond the decided list**, each with a test: an objective with no runs in the sweep; a run whose
+   objective or scenario the experiment does not have; a valid run whose amounts do not match the scenario's lines or
+   whose choice is not an option; a session summary naming another sweep or with no `cost_usd_this_session`; a sweep
+   with no runs. `RecordRefusal` from `read_runs` is re-raised as `SiteDataRefusal`.
+4. **The account-id check, as decided, has one known false positive: a run id that is twelve decimal digits.** The
+   decided pattern excludes letters and digits on either side, not `-`, so `r-123456789012` matches. A random run id
+   (twelve hex characters) is all digits about 0.35 percent of the time, so about 5 percent of the time a sweep of 15
+   runs would be refused, loudly and with the output not produced. The skeleton sweep is not affected (it built). The
+   test fixtures use ids with a letter in them for this reason.
+
+   **Review (Opus, 2026-11-04): no code change, and the fix first proposed here is wrong.** Adding `-` to the
+   lookbehind would stop the check catching an account id after a hyphen, which is exactly how this project's
+   bucket name ends: the likeliest leak is the one it would miss. The page shows one sweep (decision 1), which
+   built clean, and a false positive refuses loudly rather than leaking, so it stays as decided. If another sweep is
+   ever refused this way, the fix is to exempt the run-id values themselves (blank each `"r-[0-9a-f]{12}"` token
+   before scanning), not to widen the lookbehind. The same holds for a float whose shortest form has exactly twelve
+   decimals (a mean of five integer digits can, as `12345.666666666666` does); at the placeholder's scale (lines of
+   at most 1,000, means of three) none occurred in a million trial means.
+5. **`cp -rn` prints a coreutils warning** ("behavior of -n is non-portable"). It is harmless; the script copies the
+   contents (`.../.`) so a second run is a no-op and never nests a copy.
+
+**The deny list.** `.claude/settings.json` is **not** changed. Its list keeps Claude from the commands that read or
+write pilot and official records and spend money. This command can only build a `development/placeholder/` prefix:
+the prefix is fixed in code and checked twice (the builder's own rule, then `read_runs`'s refusal of any other
+development experiment), and it only reads.
+
+**For later steps.** C3's Prettier check must exclude `web/src/data/` (a `.prettierignore` line), or a reformat would
+break the byte identity DoD 2 rests on.
+
+**`make check`: green, 3195 tests pass** (3145 before this step); `hc protocol check` ok. Frozen files untouched.
+
+**His runs (2026-11-04, about 3:20 PM).** `scratch/p15-c2-s3.sh` read the bucket (read-only) and wrote
+`web/src/data/placeholder.json`: sweep `skeleton-haiku-5-5-f1467906`, 15 runs. Opus checked the file: 15 runs, five
+cells, cost `0.013993`, content hash `46cc488a...`, no `arn:` and no memo text. `scratch/p15-c2-local.sh` built the same
+sweep from the local copy and ended **`cmp: identical`** (DoD 2's byte identity holds for this sweep). Opus re-ran
+`make check` after the review: green, 3195. **Owed: his commit, which carries the code, the tests, the JSON and these
+notes, and its push** (it touches `src/**`, so Deploy builds an image; safe since C1).
