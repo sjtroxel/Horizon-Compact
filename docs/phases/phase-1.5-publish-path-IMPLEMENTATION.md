@@ -445,7 +445,7 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
 0. **[done 2026-11-04, except his ECR command]** **[his]** Read this doc; take the decisions. **His ECR command** (§3). Claude writes the dated notes: scope doc
    (§0), `planning/02` §2.8, Phase 1 §22 (the key), and the `KNOWN-GAPS.md` entries for §3 findings 1-4. **His commit
    C0** (docs only; builds nothing).
-1. **[Claude, then his]** **C1, `bootstrap`:** the lifecycle change, the two CloudFront objects, the deploy policy and
+1. **[done 2026-11-04 except his commit and push: built (Sonnet), reviewed (Opus), applied (his)]** **[Claude, then his]** **C1, `bootstrap`:** the lifecycle change, the two CloudFront objects, the deploy policy and
    its tests, the dev policy's additions. He pastes the dev policy; plans; Claude reads the plan (nothing destroyed;
    only the listed changes); he applies; plans again for "No changes". The deploy paths and the image ignore list go
    in the same commit. He commits and pushes; CI and Deploy green.
@@ -517,3 +517,113 @@ API is $0.01 a request).
 - **No account id or email address in a tracked file;** the bucket name is computed, never written.
 - **Nothing always-on;** Musical Mycelium's resources, budgets and Terraform are not changed from here.
 - **He runs every apply, commit, push and dispatch;** Claude reads plans and logs.
+
+## 17. As built, C1 (2026-11-04)
+
+Built by Sonnet from `scratch/p15-c1-build-prompt.md`. Code and tests only: no AWS call, no `terraform plan`, `apply`
+or backend `init`, no commit, no push. **Review, his plan and his apply are owed.**
+
+**What was built**
+
+- `infra/terraform/bootstrap/ecr.tf`: rule 2 ("keep at most ten images") removed; rule 1 (untagged expire after one
+  day) kept exactly; the comment rewritten to say why (the old rule expired Phase 4's official image and Phase 1's
+  skeleton image; Phase 1 §8 item 2's protected prefix was never written; KNOWN-GAPS OPEN 2026-11-04).
+- `infra/terraform/bootstrap/site.tf` (new): `aws_cloudfront_origin_access_control.site` and
+  `aws_cloudfront_response_headers_policy.site`, both named `${var.project}-site`, with the headers of §9 exactly
+  (the content security policy string as written, override true; Strict-Transport-Security 63072000 with
+  `includeSubDomains`; `nosniff`; `no-referrer`; custom `X-Robots-Tag: noindex`, override true). A comment says the
+  noindex header goes at Phase 6.5's go-live.
+- `outputs.tf`: `site_origin_access_control_id` and `site_response_headers_policy_id`, not sensitive.
+- `infra/iam/deploy-site.json` (new), `iam.tf`: the four site statements of §9, as an **inline policy on the deploy
+  role** (see the first departure). `SiteRead` is three statements (`SiteRead`, `SiteReadOriginAccessControl`,
+  `SiteReadResponseHeadersPolicy`) because the two Get actions name different resources. No create, update or delete
+  of an origin access control or a response headers policy, and no `cloudfront:*`, anywhere in either deploy file.
+  `deploy.json` is unchanged, so every existing Deny is. Read: no existing Deny reaches the new statements (the
+  results-bucket deny names that bucket only; the rest are on ec2, iam, ecs and bedrock). A test holds this.
+- `infra/iam/horizon-compact-dev-policy.json`: one statement, `CloudFrontBootstrapObjects` (see the second
+  departure). ECR (`ecr:*` on the repository, so the lifecycle change) and the role-policy actions (`ProjectRoles`
+  already covers `PutRolePolicy`, `GetRolePolicy`, `DeleteRolePolicy`) were already there; nothing duplicated. Its
+  existing denies are kept.
+- `.github/workflows/deploy.yml`: `"!experiment/results/**"` added to `on.push.paths` after `"experiment/**"`; nothing
+  else, and no `web/**`.
+- `infra/docker/Dockerfile.dockerignore`: `experiment/results/` after the `!experiment/` line, with a comment.
+- `tests/test_architecture.py`: 13 tests added (3145 pass after, 3132 before): the lifecycle has no
+  `imageCountMoreThan` rule and keeps the untagged rule; the access control and the headers policy; the two outputs;
+  the four site statements' actions, resources and conditions; no `cloudfront:*` and no write on the two objects;
+  `s3:*` only on the site bucket pattern; no Deny reaches the site grants; the dev policy's size and its new
+  statement; the deploy paths; the ignore file's order. The size test now covers `deploy-site.json`.
+
+**Schema check (the provider this root has locked).** `terraform -chdir=infra/terraform/bootstrap providers schema
+-json` on the already-initialised local root (reads the local plugin; no AWS call), provider `hashicorp/aws` 6.67.0
+from `.terraform.lock.hcl`. Confirmed: the access control takes `name`, `origin_access_control_origin_type`,
+`signing_behavior`, `signing_protocol` (all required), `description`, and exports `arn` and `id`; the headers policy
+takes `security_headers_config` (with `content_security_policy`, `strict_transport_security`, `content_type_options`,
+`referrer_policy` blocks) and `custom_headers_config` (`items` with `header`, `value`, `override`), and exports `arn`
+and `id`. `terraform validate` and `fmt -check` pass on the root.
+
+**The search for item 7: does anything the container runs read `experiment/results/`?** Searched `src/` for the
+three path helpers that name it (`analysis/results.py` `RESULTS_ROOT`, `caseprobe/match.py` `CASE_RESULTS_DIR`,
+`caseprobe/reident.py` `PUBLIC_DIR`) and every caller. Callers: `results.write_results` (reached from `hc analyze`),
+`match.py` (`hc case match`'s checks) and `memos.py` (`hc case memos`'s scan, and its re-identification verdict
+read): all laptop commands. The task definition (`infra/terraform/main/ecs.tf`) sets no command; the entrypoint is
+`hc`, and `hc sweep launch` supplies `sweep run` or the case session. Also searched: every `rglob`, `glob`,
+`iterdir` over the experiment folder (none reaches `results/`); the protocol lock (`protocol/lock.py` hashes the
+frozen code sets, `experiment/protocol/` files, `uv.lock`, the simulation results under `docs/`, and
+`experiment/<experiment name>/` for the experiment tree hash, which never names `results`); the gate
+(`protocol/gate.py`) and `protocol/sets.py`; and the `Dockerfile` (`COPY experiment ./experiment` only). **Nothing
+reads it.** A grep miss is not proof (CLAUDE.md), so the proof is the build: **Docker was available; the image was
+built locally from `infra/docker/Dockerfile`, `ls /app/experiment` shows `README.md case-forms cases company
+models.toml placeholder protocol readers s4shape shapes` with no `results`, `find` finds no path containing
+`results`, and `hc protocol check` inside the image prints `protocol check: ok`.** The local image was removed after.
+
+**Departures: what did not fit, and what was done instead**
+
+1. **The deploy policy's four statements did not fit in `deploy.json`.** It renders to 5,674 of IAM's 6,144 non-space
+   characters; the four statements (about 1,430 with the ARN variables) would take it to about 7,100. Done instead:
+   they are in a new `infra/iam/deploy-site.json`, attached as an **inline policy** (`aws_iam_role_policy`
+   `horizon-compact-deploy-site`) on the existing deploy role. Why inline and not a second managed policy: the dev
+   key's `ProjectRoles` statement already covers `PutRolePolicy`, `GetRolePolicy` and `DeleteRolePolicy` on
+   `role/horizon-compact-*`, so the dev policy needs nothing for the attach (a second managed policy would have
+   needed `AttachDeployPolicyOnly`'s condition widened); and `NeverChangeOwnPermissions` (`iam:*` on the role) already
+   covers editing it. The two new ARNs are passed through a separate `site_policy_vars`, so the boundary and the
+   deploy policy do not read values unknown until the objects exist and will not show as changed in the plan. The
+   statements, actions, resources and conditions are exactly as decided; only the file differs. **Opus to confirm
+   inline, or ask for a managed policy and the wider dev attach condition.** Expected new plan lines: one
+   `aws_iam_role_policy.github_deploy_site`.
+2. **The dev policy's twelve named actions did not fit either.** It was 5,727 characters; twelve named
+   CloudFront actions add 558, giving about 6,285. Done instead: two wildcard actions in one statement,
+   `cloudfront:*OriginAccessControl*` and `cloudfront:*ResponseHeadersPolic*` (the last one short on purpose, since
+   `ListResponseHeadersPolicies` ends "Policies"), on `*`. They cover the twelve decided actions and, by their
+   names, nothing else in CloudFront's current action list as Sonnet knows it. **That was not checked against AWS's
+   service reference, which Sonnet did not read; Opus to confirm.** The file is now 5,878 characters. A test holds
+   the file under the limit.
+   **Opus review (2026-11-04):** checked against AWS's service reference (`servicereference.us-east-1.amazonaws.com`,
+   CloudFront, 173 actions, read 2026-11-04). The first wildcard matches the six access-control actions exactly. The
+   second also matched `ListDistributionsByResponseHeadersPolicyId` (read-only, but not decided), so it was narrowed
+   to `cloudfront:*ResponseHeadersPolicy` plus `GetResponseHeadersPolicyConfig` and `ListResponseHeadersPolicies`
+   named: the statement now matches the twelve decided actions and nothing else. The file is 5,963 characters.
+3. **The outputs test.** `test_outputs_with_account_ids_are_sensitive` required every output in `bootstrap` to be
+   sensitive. The two new ids are not (decided point 3), so the test now skips exactly those two by name, and a new
+   test checks they come from the two resources and are not marked sensitive.
+4. **The whole-service-wildcard test.** `test_deploy_policy_has_no_wildcard_allow_of_a_whole_service` still holds
+   for `deploy.json` unchanged. `SiteBucket`'s `s3:*` is in `deploy-site.json`, and a new test allows it only on the
+   two site-bucket resources.
+
+**For the review and the plan.** (a) The plan should add exactly: the access control, the headers policy, the inline
+role policy, and two outputs; change the ECR lifecycle policy in place (rule 2 gone); and destroy nothing. (b)
+`aws:RequestTag` on `CreateDistribution` is untested until C4 (§15). (c) Nothing in `main` changed, and no
+CloudFront variable exists in CI yet. (d) `make check`: green, **3145 tests pass**; `hc protocol check` ok.
+
+**Review, plan and apply (2026-11-04, about 11:20 AM to noon).** Opus reviewed the build against the decided points
+(see departure 2's review note; departure 1, the inline policy, confirmed: the deploy role has no permissions
+boundary, `NeverChangeOwnPermissions` already denies it `iam:*` on itself, and the dev key already holds
+`PutRolePolicy` on it). `make check` green, 3145 passed; `hc protocol check` ok. He pasted the dev policy ("Policy
+horizon-compact-dev updated."). **His plan: 4 to add, 0 to change, 1 to destroy**, not the 3/1/0 expected above: the
+provider marks a change to `aws_ecr_lifecycle_policy`'s `policy` as forcing replacement, so the lifecycle policy was
+deleted and recreated (rule 1 unchanged, rule 2 gone). Deleting a lifecycle policy deletes no image. Nothing else
+changed or was destroyed; the boundary and the deploy policy were untouched. **His apply: "Apply complete!
+Resources: 4 added, 0 changed, 1 destroyed."** Outputs `site_origin_access_control_id = E1L3LEZALRKH6Y`,
+`site_response_headers_policy_id = e75c6c69-6030-4efb-ba96-014e5a493e08`. **His second plan: "No changes."** **His ECR
+check after the apply (§3's command): Phase 5.5's image `sha256:ef0588f9...` is present**; the KNOWN-GAPS ECR entry is
+closed. The commit and its push are owed; the push runs Deploy (it touches `infra/**` and `deploy.yml`) and builds an
+image, which is now safe.

@@ -1,0 +1,72 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SiteBucket",
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::horizon-compact-site-*",
+        "arn:aws:s3:::horizon-compact-site-*/*"
+      ]
+    },
+    {
+      "Sid": "SiteDistributionCreate",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:CreateDistribution",
+        "cloudfront:TagResource"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/Project": "horizon-compact"
+        }
+      }
+    },
+    {
+      "Sid": "SiteDistributionManage",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:GetDistribution",
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:UpdateDistribution",
+        "cloudfront:DeleteDistribution",
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation",
+        "cloudfront:ListTagsForResource",
+        "cloudfront:TagResource",
+        "cloudfront:UntagResource"
+      ],
+      "Resource": "arn:aws:cloudfront::${account_id}:distribution/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/Project": "horizon-compact"
+        }
+      }
+    },
+    {
+      "Sid": "SiteRead",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:ListDistributions",
+        "cloudfront:ListCachePolicies",
+        "cloudfront:GetCachePolicy",
+        "tag:GetResources"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SiteReadOriginAccessControl",
+      "Effect": "Allow",
+      "Action": "cloudfront:GetOriginAccessControl",
+      "Resource": "${origin_access_control_arn}"
+    },
+    {
+      "Sid": "SiteReadResponseHeadersPolicy",
+      "Effect": "Allow",
+      "Action": "cloudfront:GetResponseHeadersPolicy",
+      "Resource": "${response_headers_policy_arn}"
+    }
+  ]
+}

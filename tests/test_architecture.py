@@ -160,6 +160,12 @@ def test_outputs_with_account_ids_are_sensitive() -> None:
     blocks = re.split(r'(?=output\s+")', code)[1:]
     assert blocks
     for block in blocks:
+        # The two CloudFront ids hold no account id (checked in test_site_objects_outputs...), so CI
+        # reads them as plain repository variables.
+        if re.match(
+            r'output\s+"(site_origin_access_control_id|site_response_headers_policy_id)"', block
+        ):
+            continue
         assert re.search(r"sensitive\s*=\s*true", block), block.splitlines()[0]
 
 
@@ -219,6 +225,11 @@ _FAKE_VARS = {
     "nova_pro_profile_arn": (
         "arn:aws:bedrock:us-east-1:000000000000:application-inference-profile/mnopqrstuvwx"
     ),
+    # The two bootstrap CloudFront objects' ARNs, which only the site policy reads (iam.tf).
+    "origin_access_control_arn": "arn:aws:cloudfront::000000000000:origin-access-control/E1ABCDEFGHIJKL",
+    "response_headers_policy_arn": (
+        "arn:aws:cloudfront::000000000000:response-headers-policy/abcdef01-2345-6789-abcd-ef0123456789"
+    ),
     # main passes a JSON list here (jsonencode); a plain substitution is enough to parse the template.
     "bedrock_resources": (
         '["arn:aws:bedrock:us-east-1:000000000000:application-inference-profile/abcdefghijkl",'
@@ -255,10 +266,18 @@ def _allowed_actions(name: str) -> list[str]:
 
 
 def test_iam_templates_render_to_json_and_fit_a_managed_policy() -> None:
-    for name in ("boundary.json", "deploy.json"):
+    # deploy-site.json is an inline role policy, not a managed one, but it is held to the same limit.
+    for name in ("boundary.json", "deploy.json", "deploy-site.json"):
         text, _ = _rendered(name)
         size = len("".join(text.split()))
         assert size < _MANAGED_POLICY_LIMIT, f"{name} renders to {size} non-space characters"
+
+
+def test_dev_policy_fits_a_managed_policy() -> None:
+    """He pastes this one into the console; IAM refuses a managed policy over 6,144 non-space characters."""
+    text = (IAM / "horizon-compact-dev-policy.json").read_text(encoding="utf-8")
+    size = len("".join(text.split()))
+    assert size < _MANAGED_POLICY_LIMIT, f"the dev policy is {size} non-space characters"
 
 
 def test_boundary_grants_no_iam_and_no_s3_delete() -> None:
@@ -337,6 +356,236 @@ def test_ecr_tags_are_immutable_and_scanned() -> None:
     code = _strip_comments((BOOTSTRAP / "ecr.tf").read_text(encoding="utf-8"))
     assert re.search(r'image_tag_mutability\s*=\s*"IMMUTABLE"', code)
     assert re.search(r"scan_on_push\s*=\s*true", code)
+
+
+def test_ecr_lifecycle_expires_only_untagged_images() -> None:
+    """The records carry image digests, so a tagged image never expires (Phase 1.5 decision 7, KNOWN-GAPS
+    OPEN 2026-11-04: the old ten-image rule expired Phase 4's official image)."""
+    code = _strip_comments((BOOTSTRAP / "ecr.tf").read_text(encoding="utf-8"))
+    assert "imageCountMoreThan" not in code
+    assert re.search(r"rulePriority\s*=\s*1\b", code)
+    assert not re.search(r"rulePriority\s*=\s*[2-9]", code)
+    assert re.search(r'tagStatus\s*=\s*"untagged"', code)
+    assert re.search(r'countType\s*=\s*"sinceImagePushed"', code)
+    assert re.search(r"countNumber\s*=\s*1\b", code)
+    assert 'tagStatus   = "any"' not in code
+
+
+# --- the site's CloudFront objects and the deploy role's site grants (Phase 1.5 sections 9 and 11) ---------
+
+_ACCESS_CONTROL_AND_HEADERS_POLICY_WRITES = re.compile(
+    r"^cloudfront:(Create|Update|Delete|Associate|Disassociate|Copy|Publish)"
+    r"(OriginAccessControl|ResponseHeadersPolic)"
+)
+
+
+def test_site_origin_access_control_signs_every_request_to_s3() -> None:
+    code = _strip_comments((BOOTSTRAP / "site.tf").read_text(encoding="utf-8"))
+    assert 'resource "aws_cloudfront_origin_access_control" "site"' in code
+    assert 'name                              = "${var.project}-site"' in code
+    assert re.search(r'origin_access_control_origin_type\s*=\s*"s3"', code)
+    assert re.search(r'signing_behavior\s*=\s*"always"', code)
+    assert re.search(r'signing_protocol\s*=\s*"sigv4"', code)
+
+
+def test_site_headers_policy_forbids_third_party_requests_and_noindexes_until_go_live() -> None:
+    raw = (BOOTSTRAP / "site.tf").read_text(encoding="utf-8")
+    code = _strip_comments(raw)
+    assert 'resource "aws_cloudfront_response_headers_policy" "site"' in code
+    match = re.search(r'content_security_policy\s*=\s*"([^"]+)"', code)
+    assert match
+    assert match.group(1) == (
+        "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+        "font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; "
+        "frame-ancestors 'none'"
+    )
+    assert re.search(r"access_control_max_age_sec\s*=\s*63072000", code)
+    assert re.search(r"include_subdomains\s*=\s*true", code)
+    assert re.search(r'referrer_policy\s*=\s*"no-referrer"', code)
+    assert re.search(r'header\s*=\s*"X-Robots-Tag"', code)
+    assert re.search(r'value\s*=\s*"noindex"', code)
+    # Every header overrides whatever the origin sends, so the policy is the one source of truth.
+    assert "override" in code and not re.search(r"override\s*=\s*false", code)
+    # The comment says when the noindex header goes (decision 3).
+    assert "Phase 6.5" in raw
+
+
+def test_site_objects_outputs_are_the_two_ids_and_hold_no_account_id() -> None:
+    code = _strip_comments((BOOTSTRAP / "outputs.tf").read_text(encoding="utf-8"))
+    blocks = {
+        re.match(r'output\s+"([^"]+)"', b).group(1): b  # type: ignore[union-attr]
+        for b in re.split(r'(?=output\s+")', code)[1:]
+    }
+    for name, resource in (
+        ("site_origin_access_control_id", "aws_cloudfront_origin_access_control.site.id"),
+        ("site_response_headers_policy_id", "aws_cloudfront_response_headers_policy.site.id"),
+    ):
+        assert resource in blocks[name]
+        assert "sensitive" not in blocks[name]
+
+
+def test_site_policy_variables_stay_out_of_the_boundary_and_the_deploy_policy() -> None:
+    """The new ARNs are unknown until the objects exist; if the two older policies read them, the plan would
+    show both as changed."""
+    code = _strip_comments((BOOTSTRAP / "iam.tf").read_text(encoding="utf-8"))
+    base = code[code.index("policy_vars = {") : code.index("}", code.index("policy_vars = {"))]
+    assert "cloudfront" not in base
+    assert (
+        'templatefile("${path.module}/../../iam/deploy-site.json", local.site_policy_vars)' in code
+    )
+    for name in ("boundary.json", "deploy.json"):
+        assert f'iam/{name}", local.policy_vars)' in code
+
+
+def test_deploy_policies_name_the_site_grants_exactly() -> None:
+    by_sid = {str(s["Sid"]): s for s in _statements("deploy-site.json")}
+    assert list(by_sid) == [
+        "SiteBucket",
+        "SiteDistributionCreate",
+        "SiteDistributionManage",
+        "SiteRead",
+        "SiteReadOriginAccessControl",
+        "SiteReadResponseHeadersPolicy",
+    ]
+    assert all(s["Effect"] == "Allow" for s in by_sid.values())
+
+    bucket = by_sid["SiteBucket"]
+    assert _actions(bucket) == ["s3:*"]
+    assert _as_list(bucket["Resource"]) == [
+        "arn:aws:s3:::horizon-compact-site-*",
+        "arn:aws:s3:::horizon-compact-site-*/*",
+    ]
+
+    create = by_sid["SiteDistributionCreate"]
+    assert _actions(create) == ["cloudfront:CreateDistribution", "cloudfront:TagResource"]
+    assert create["Resource"] == "*"
+    assert create["Condition"] == {"StringEquals": {"aws:RequestTag/Project": "horizon-compact"}}
+
+    manage = by_sid["SiteDistributionManage"]
+    assert sorted(_actions(manage)) == sorted(
+        f"cloudfront:{a}"
+        for a in (
+            "GetDistribution",
+            "GetDistributionConfig",
+            "UpdateDistribution",
+            "DeleteDistribution",
+            "CreateInvalidation",
+            "GetInvalidation",
+            "ListTagsForResource",
+            "TagResource",
+            "UntagResource",
+        )
+    )
+    assert manage["Resource"] == "arn:aws:cloudfront::000000000000:distribution/*"
+    assert manage["Condition"] == {"StringEquals": {"aws:ResourceTag/Project": "horizon-compact"}}
+
+    read = by_sid["SiteRead"]
+    assert sorted(_actions(read)) == [
+        "cloudfront:GetCachePolicy",
+        "cloudfront:ListCachePolicies",
+        "cloudfront:ListDistributions",
+        "tag:GetResources",
+    ]
+    assert read["Resource"] == "*" and "Condition" not in read
+    assert _actions(by_sid["SiteReadOriginAccessControl"]) == ["cloudfront:GetOriginAccessControl"]
+    assert (
+        by_sid["SiteReadOriginAccessControl"]["Resource"] == _FAKE_VARS["origin_access_control_arn"]
+    )
+    assert _actions(by_sid["SiteReadResponseHeadersPolicy"]) == [
+        "cloudfront:GetResponseHeadersPolicy"
+    ]
+    assert (
+        by_sid["SiteReadResponseHeadersPolicy"]["Resource"]
+        == _FAKE_VARS["response_headers_policy_arn"]
+    )
+
+
+def test_deploy_role_never_gets_cloudfront_star_or_a_write_on_the_two_bootstrap_objects() -> None:
+    """The origin access control and the response headers policy take no tag condition, so the deploy role
+    holds no write on them at all (decision 5): it could otherwise change Musical Mycelium's."""
+    for name in ("deploy.json", "deploy-site.json"):
+        allowed = _allowed_actions(name)
+        assert "cloudfront:*" not in allowed, name
+        assert not [a for a in allowed if _ACCESS_CONTROL_AND_HEADERS_POLICY_WRITES.match(a)], name
+        assert not [a for a in allowed if a.startswith("cloudfront:") and "*" in a], name
+
+
+def test_the_only_whole_service_wildcard_in_the_deploy_role_is_the_site_bucket() -> None:
+    """deploy.json allows none (above). deploy-site.json allows s3:* on the site bucket pattern alone,
+    for the reason Musical Mycelium's role does: the provider's bucket read path calls a dozen Get*."""
+    wide = [
+        (str(s["Sid"]), _as_list(s["Resource"]))
+        for s in _statements("deploy-site.json")
+        if s["Effect"] == "Allow" and any(a == "*" or a.endswith(":*") for a in _actions(s))
+    ]
+    assert wide == [
+        (
+            "SiteBucket",
+            ["arn:aws:s3:::horizon-compact-site-*", "arn:aws:s3:::horizon-compact-site-*/*"],
+        )
+    ]
+
+
+def test_no_deploy_deny_reaches_the_site_grants() -> None:
+    """The results-bucket deny names that bucket only; every other deny is on ec2, iam, ecs or bedrock."""
+    for s in _statements("deploy.json"):
+        if s["Effect"] != "Deny":
+            continue
+        for action in _actions(s):
+            if action.split(":")[0] in {"s3", "cloudfront", "tag"}:
+                assert s["Sid"] == "CiNeverReadsRawResults", (s["Sid"], action)
+                assert all("horizon-compact-results-" in r for r in _as_list(s["Resource"]))
+
+
+def test_dev_policy_can_apply_the_two_bootstrap_objects_and_nothing_wider() -> None:
+    import json
+
+    statements = json.loads((IAM / "horizon-compact-dev-policy.json").read_text(encoding="utf-8"))[
+        "Statement"
+    ]
+    [grant] = [s for s in statements if s["Sid"] == "CloudFrontBootstrapObjects"]
+    assert grant["Effect"] == "Allow" and grant["Resource"] == "*"
+    # Wildcards instead of the twelve named actions, which would put the policy over IAM's size limit.
+    # Against AWS's service reference (read 2026-11-04), the first matches the six access-control actions
+    # and the second Create, Get, Update and Delete of a headers policy; a wider "*ResponseHeadersPolic*"
+    # would also match ListDistributionsByResponseHeadersPolicyId, so the other two are named.
+    assert _as_list(grant["Action"]) == [
+        "cloudfront:*OriginAccessControl*",
+        "cloudfront:*ResponseHeadersPolicy",
+        "cloudfront:GetResponseHeadersPolicyConfig",
+        "cloudfront:ListResponseHeadersPolicies",
+    ]
+    assert not [
+        a
+        for s in statements
+        if s["Effect"] == "Allow"
+        for a in _as_list(s["Action"])
+        if a == "cloudfront:*"
+    ]
+
+
+def test_deploy_paths_leave_out_results_commits_and_not_yet_the_site() -> None:
+    text = (WORKFLOWS / "deploy.yml").read_text(encoding="utf-8")
+    paths = re.search(
+        r"on:\n  push:\n    branches: \[main\]\n    paths:\n((?:      - .*\n)+)", text
+    )
+    assert paths
+    listed = [line.strip()[2:].strip('"') for line in paths.group(1).splitlines()]
+    assert listed.index("!experiment/results/**") == listed.index("experiment/**") + 1
+    assert not [p for p in listed if p.startswith("web/")]  # C4 adds web/**, not C1
+
+
+def test_the_image_leaves_experiment_results_out() -> None:
+    """Nothing the container runs reads experiment/results/ (Phase 1.5 C1 search), and a results-only
+    commit must not change the image. Later lines win, so the exclusion follows `!experiment/`."""
+    lines = [
+        line.strip()
+        for line in (INFRA / "docker" / "Dockerfile.dockerignore")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+    assert lines.index("experiment/results/") > lines.index("!experiment/")
 
 
 # --- the `main` root and the workflows (Phase 1 IMPLEMENTATION doc sections 9, 10 and 12) -----------------

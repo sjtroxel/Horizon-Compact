@@ -12,6 +12,7 @@ on:
     paths:
       - "src/**"
       - "experiment/**"
+      - "!experiment/results/**"
       - "infra/**"
       - "pyproject.toml"
       - "uv.lock"

@@ -4,6 +4,9 @@
 !uv.lock
 !src/
 !experiment/
+# Later lines win. Nothing the container runs reads experiment/results/ (laptop writers only), and a results-only
+# commit must not change the image (Phase 1.5 decision 7).
+experiment/results/
 !README.md
 **/__pycache__
 **/*.pyc

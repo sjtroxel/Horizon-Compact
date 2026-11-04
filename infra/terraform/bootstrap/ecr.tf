@@ -13,7 +13,11 @@ resource "aws_ecr_repository" "sweep" {
   }
 }
 
-# Before Phase 4, official images get a protected tag prefix excluded from expiry (Phase 4's IMPLEMENTATION doc).
+# Untagged images expire after a day and nothing else expires. The records carry the image digest of the run
+# that wrote them, so an image a record names must stay pullable; the earlier rule that kept only the ten
+# newest images expired Phase 4's official image and Phase 1's skeleton image (KNOWN-GAPS, OPEN 2026-11-04).
+# Phase 1 section 8 item 2's protected tag prefix, "before Phase 4", was never written. Images share most of
+# their layers, so keeping them all costs cents a month; the close of Phase 1.5 measures it.
 resource "aws_ecr_lifecycle_policy" "sweep" {
   repository = aws_ecr_repository.sweep.name
 
@@ -27,16 +31,6 @@ resource "aws_ecr_lifecycle_policy" "sweep" {
           countType   = "sinceImagePushed"
           countUnit   = "days"
           countNumber = 1
-        }
-        action = { type = "expire" }
-      },
-      {
-        rulePriority = 2
-        description  = "Keep at most ten images"
-        selection = {
-          tagStatus   = "any"
-          countType   = "imageCountMoreThan"
-          countNumber = 10
         }
         action = { type = "expire" }
       },

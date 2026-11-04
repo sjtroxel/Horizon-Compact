@@ -48,3 +48,16 @@ output "boundary_arn" {
   value       = aws_iam_policy.boundary.arn
   sensitive   = true
 }
+
+# The next two hold no account id, so they are not sensitive: CI reads them as plain repository variables (set
+# by hand in Phase 1.5's C4). Read one with `terraform output -raw <name>`.
+
+output "site_origin_access_control_id" {
+  description = "The site distribution's origin access control; main receives it as a CI repository variable."
+  value       = aws_cloudfront_origin_access_control.site.id
+}
+
+output "site_response_headers_policy_id" {
+  description = "The site distribution's response headers policy; main receives it as a CI repository variable."
+  value       = aws_cloudfront_response_headers_policy.site.id
+}

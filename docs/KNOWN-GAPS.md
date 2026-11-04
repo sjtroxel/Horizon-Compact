@@ -7,7 +7,21 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-04, about 9:15 AM (PHASE 1.5'S IMPLEMENTATION DOC APPROVED; C1, THE `bootstrap` CHANGE, NEXT)
+> ## START HERE — where things stand, 2026-11-04, about noon (PHASE 1.5 C1 APPLIED; HIS COMMIT AND PUSH, THEN C2)
+>
+> **C1, the `bootstrap` change, is built (Sonnet), reviewed (Opus) and applied (his)**: the ECR ten-image rule is gone,
+> the site's origin access control and response headers policy exist, and the deploy role holds the site grants as an
+> inline policy (`infra/iam/deploy-site.json`). His plan was 4 added, 1 destroyed (the lifecycle policy replaced, no
+> image deleted); his second plan "No changes"; Phase 5.5's image confirmed present after. The record is the Phase
+> 1.5 doc §17. **The ECR entry below is CLOSED.** One review change: the dev policy's headers-policy wildcard was
+> narrowed to the twelve decided actions (checked against AWS's service reference).
+>
+> **Next: his commit of C1, then its push** (it runs Deploy and builds an image, now safe); CI and Deploy green. Then
+> **C2, the site-data builder** (doc §12 step 2, Sonnet builds, Opus reviews).
+>
+> *The earlier 2026-11-04 blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-04, about 9:15 AM (PHASE 1.5'S IMPLEMENTATION DOC APPROVED; C1, THE `bootstrap` CHANGE, NEXT) *(superseded by the block above)*
 >
 > **The Phase 1.5 IMPLEMENTATION doc is APPROVED** (his, about 9:05 AM, all ten decisions as recommended). Step 0's
 > dated notes are written: the scope doc, `planning/02` §2.8, the Phase 0.5 doc (decision A), the Phase 1 doc §22, and
@@ -2546,7 +2560,7 @@ closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-
 
 ---
 
-## OPEN 2026-11-04 — ECR's ten-image rule has probably expired images that pin the records (fix before any image-building push)
+## CLOSED 2026-11-04, with Phase 1.5 C1's apply (was OPEN the same day) — ECR's ten-image rule had expired images that pin the records (fix before any image-building push)
 
 Found writing the Phase 1.5 IMPLEMENTATION doc (§3 finding 1). `bootstrap/ecr.tf` rule 2 keeps at most ten images.
 Phase 1 §8 item 2 said official images would get a protected tag prefix "before Phase 4"; it was never written (not
@@ -2564,6 +2578,10 @@ reproducibility limit for the methods page, not a change to any result. **Fix (h
 (`sha256:ef2582ed...`) have expired.** So every official grid record and Phase 1's skeleton records name an image that
 is no longer in the registry; the methods page (Phase 6.5) and the Phase 1.5 page's provenance say so. **Closes when**
 the `bootstrap` apply lands (no further image can expire), with Phase 5.5's image confirmed present after it.
+**Closed 2026-11-04, about noon:** his `bootstrap` apply removed rule 2 (Phase 1.5 doc §17; the lifecycle policy was
+replaced, which deletes no image), his second plan showed "No changes", and §3's command after it printed Phase 5.5's
+image `sha256:ef0588f9...`. Only untagged images expire now. The two expired images stay a disclosed limit for the
+methods page (above); they cannot be recovered.
 
 ---
 

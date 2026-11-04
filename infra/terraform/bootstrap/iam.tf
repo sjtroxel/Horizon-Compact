@@ -37,3 +37,22 @@ resource "aws_iam_role_policy_attachment" "github_deploy" {
   role       = aws_iam_role.github_deploy.name
   policy_arn = aws_iam_policy.deploy.arn
 }
+
+# The site's grants (Phase 1.5 section 9) are a second, inline policy on the same role. deploy.json already sits at
+# 5,674 of IAM's 6,144 non-space characters for one managed policy, and four more statements do not fit in it.
+# Inline keeps the grants on this role alone, needs no new attach permission for the dev key (its ProjectRoles
+# statement already covers PutRolePolicy), and the deploy policy's NeverChangeOwnPermissions deny already covers
+# the role. Its variables are built apart from `policy_vars` so the boundary and the deploy policy do not read
+# the two new objects' ARNs, which are unknown until they exist and would show both as changed in the plan.
+locals {
+  site_policy_vars = merge(local.policy_vars, {
+    origin_access_control_arn   = aws_cloudfront_origin_access_control.site.arn
+    response_headers_policy_arn = aws_cloudfront_response_headers_policy.site.arn
+  })
+}
+
+resource "aws_iam_role_policy" "github_deploy_site" {
+  name   = "${var.project}-deploy-site"
+  role   = aws_iam_role.github_deploy.name
+  policy = templatefile("${path.module}/../../iam/deploy-site.json", local.site_policy_vars)
+}

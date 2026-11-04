@@ -147,6 +147,17 @@
       "Resource": "*"
     },
     {
+      "Sid": "CloudFrontBootstrapObjects",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:*OriginAccessControl*",
+        "cloudfront:*ResponseHeadersPolicy",
+        "cloudfront:GetResponseHeadersPolicyConfig",
+        "cloudfront:ListResponseHeadersPolicies"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "ProjectManagedPolicies",
       "Effect": "Allow",
       "Action": [
