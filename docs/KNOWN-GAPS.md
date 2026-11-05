@@ -7,7 +7,31 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-04, about 3:20 PM (PHASE 1.5 C2 BUILT, REVIEWED, CMP IDENTICAL; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-11-05, about 3:10 AM (PHASE 1.5 STEP 3 BUILT, REVIEWED AND RUN; HIS COMMIT NEXT)
+>
+> **Step 3, the Phase 4 raw-object manifest, is built (Sonnet), reviewed (Opus, one fix) and run (his):**
+> `docs/phases/evidence/phase-4/raw-manifest.json`, 5,247 objects, 104,785,272 bytes, no refusal, every sweep's call
+> count equal to `record-checks.md`'s. The record is the Phase 1.5 doc §19; the OPEN entry of 2026-11-04 is closed by
+> the commit that adds the file, and its full-text half is Phase 6.5's DoD row 8. `make check` green, 3229.
+>
+> **Next: his commit of step 3** (code, tests, deny list, manifest, docs; it touches `src/**`, so Deploy builds an
+> image, safe since C1); CI and Deploy green. Then **step 4, the previews** (doc §12), Claude then his.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-05, about 2:15 AM (PHASE 1.5 C2 DONE AND GREEN; STEP 3, THE RAW MANIFEST, NEXT) *(superseded by the block above)*
+>
+> **C2 is done:** committed `b9b8ac8` and pushed (his); CI and Deploy green (runs `41916412080`, `41916412096`). The
+> record is the Phase 1.5 doc §18.
+>
+> **Next: step 3, the Phase 4 raw-object manifest** (doc §12 step 3, decision 8 (a); the OPEN entry of 2026-11-04
+> below): **Sonnet builds from `scratch/p15-step3-build-prompt.md`** (written by Opus 2026-11-05), Opus reviews, then
+> his read-only S3 run writes `docs/phases/evidence/phase-4/raw-manifest.json`, committed with the code. The command
+> reads pilot and official records, so it joins the deny list: his to run, never Claude's.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-04, about 3:20 PM (PHASE 1.5 C2 BUILT, REVIEWED, CMP IDENTICAL; HIS COMMIT NEXT) *(superseded by the block above)*
 >
 > **C2, the site-data builder (`hc site data`), is built (Sonnet) and reviewed (Opus)**; the record is the Phase 1.5
 > doc §18. His S3 run wrote `web/src/data/placeholder.json` (15 runs, five cells, cost `0.013993`, no ARN, no memo
@@ -2600,7 +2624,7 @@ methods page (above); they cannot be recovered.
 
 ---
 
-## OPEN 2026-11-04 — Phase 4's manifest of raw objects was not committed (found by search only)
+## CLOSED 2026-11-05, by the commit that adds it — Phase 4's manifest of raw objects was not committed (found by search only)
 
 Phase 4 runs-half decision 2 (a), his: "at this phase's close, commit a manifest of every pilot and official object
 (key, bytes, sha256), and publish the full text with the publish path (Phase 1.5, or 6.5 at the latest)." Its DoD
@@ -2608,6 +2632,11 @@ audit (§13) has no row for it, and no manifest file is tracked. **His decision 
 the manifest is built and committed in Phase 1.5 (its §12 step 3), and the full text is published in Phase 6.5 with
 the re-scoring check that reads it. **Closes when** the manifest is committed; the full-text half moves to Phase 6.5's
 DoD.
+
+**Closed 2026-11-05.** `hc site raw-manifest` (built by Sonnet, reviewed by Opus), his read-only S3 run:
+`docs/phases/evidence/phase-4/raw-manifest.json`, 5,247 objects, 104,785,272 bytes, every object the only version of
+its key, every sweep's call count equal to `record-checks.md`'s (Phase 1.5 doc §19). The full-text half is Phase 6.5's
+DoD row 8 (dated note in that doc).
 
 ---
 

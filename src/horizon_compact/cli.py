@@ -1343,6 +1343,50 @@ def cmd_site_data(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+RAW_MANIFEST_PATH = Path("docs") / "phases" / "evidence" / "phase-4" / "raw-manifest.json"
+
+
+def _raw_s3_client(session: boto3.Session) -> Any:
+    """The S3 client the raw-object manifest reads through. A function of its own so a test can swap it."""
+    return session.client("s3")
+
+
+def cmd_site_raw_manifest(args: argparse.Namespace) -> int:
+    """Phase 4's manifest of raw objects (Phase 1.5 IMPLEMENTATION doc section 12 step 3). It reads every
+    pilot and official object, once each and as bytes, and writes nothing to the bucket: the reader it is
+    handed has no write call."""
+    from horizon_compact.site.rawmanifest import (
+        RawManifestRefusal,
+        S3RawReader,
+        build_raw_manifest,
+        repository_experiments,
+        write_raw_manifest,
+    )
+
+    top = Path(_git("rev-parse", "--show-toplevel"))
+    session = _session(args, identify({}, _laptop_git))
+    bucket = args.bucket or os.environ.get(RESULTS_BUCKET_ENV)
+    if not bucket:
+        raise SweepRefusal(f"site raw-manifest needs --bucket or {RESULTS_BUCKET_ENV}")
+    reader = S3RawReader(_raw_s3_client(session), bucket)
+
+    def progress(done: int, total: int) -> None:
+        print(f"read {done} of {total} objects", file=sys.stderr)
+
+    out = Path(args.out) if args.out else top / RAW_MANIFEST_PATH
+    try:
+        text = build_raw_manifest(reader, repository_experiments(top), bucket, progress)
+        path = write_raw_manifest(text, out)
+    except RawManifestRefusal as exc:
+        raise SweepRefusal(str(exc)) from exc
+    data = json.loads(text)
+    print(f"wrote {path}")
+    print(f"objects: {data['object_count']}")
+    print(f"bytes:   {data['total_bytes']}")
+    print(f"groups:  {len(data['groups'])}")
+    return CLEAN_EXIT
+
+
 FORMAT_REPORT_DIR = "docs/phases/evidence/phase-2.5/format"
 
 
@@ -3396,6 +3440,15 @@ def build_parser() -> argparse.ArgumentParser:
     site_data.add_argument("--out", default=None, help="default: web/src/data/placeholder.json")
     site_data.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
     site_data.add_argument("--runs-root", default=None, help=argparse.SUPPRESS)
+    site_raw = site_actions.add_parser(
+        "raw-manifest",
+        help="Key, bytes and sha256 of every pilot and official object. Reads only; his to run.",
+    )
+    site_raw.add_argument("--bucket", default=None)
+    site_raw.add_argument("--profile", default=None)
+    site_raw.add_argument(
+        "--out", default=None, help="default: docs/phases/evidence/phase-4/raw-manifest.json"
+    )
 
     dossier = groups.add_parser("dossier", help="Phase 2 company dossier. Offline; calls no model.")
     dossier.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
@@ -3966,6 +4019,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return REFUSED_EXIT
     if args.group == "site":
         try:
+            if args.action == "raw-manifest":
+                return cmd_site_raw_manifest(args)
             return cmd_site_data(args)
         except (SweepRefusal, ExperimentError) as exc:
             print(f"refused: {exc}", file=sys.stderr)

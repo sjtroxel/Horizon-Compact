@@ -20,6 +20,7 @@ READERS = (
     "protocol records",
     "case match",  # reads a case sweep's runs against the rubric: his to run at the reveal
     "case memos",  # K4, not built yet; denied ahead
+    "site raw-manifest",  # reads every pilot and official object (Phase 1.5 step 3): his to run
 )
 SPENDERS = (
     "case build",  # the extraction model, his Anthropic credit

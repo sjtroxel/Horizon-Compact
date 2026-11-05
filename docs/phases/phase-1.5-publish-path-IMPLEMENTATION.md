@@ -449,9 +449,9 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
    its tests, the dev policy's additions. He pastes the dev policy; plans; Claude reads the plan (nothing destroyed;
    only the listed changes); he applies; plans again for "No changes". The deploy paths and the image ignore list go
    in the same commit. He commits and pushes; CI and Deploy green.
-2. **[done 2026-11-04 except his commit and push: built (Sonnet), reviewed (Opus); his S3 and local runs, `cmp: identical`]** **[Sonnet builds, Opus reviews]**
+2. **[done 2026-11-04: built (Sonnet), reviewed (Opus); his S3 and local runs, `cmp: identical`; committed `b9b8ac8` and pushed (his); CI and Deploy green]** **[Sonnet builds, Opus reviews]**
    **C2, the site-data builder** (§6) with tests; his S3 and local runs and the `cmp`; the JSON committed with it.
-3. **[Sonnet builds, Opus reviews; his run]** **The raw-object manifest** (decision 8 (a)), committed as
+3. **[done 2026-11-05: built (Sonnet), reviewed (Opus, one fix: errors/ keys count as calls); his S3 run wrote the manifest, 5,247 objects, every sweep's calls matched; commit owed]** **The raw-object manifest** (decision 8 (a)), committed as
    `docs/phases/evidence/phase-4/raw-manifest.json` with the command's code.
 4. **[Claude, then his]** **The previews** (decision 2), in `scratch/` (gitignored); he picks.
 5. **[Sonnet builds, Opus reviews]** **C3, the page** (§7, §8): `web/`, `make web-check`, `ci.yml`. His words land in
@@ -714,4 +714,120 @@ break the byte identity DoD 2 rests on.
 cells, cost `0.013993`, content hash `46cc488a...`, no `arn:` and no memo text. `scratch/p15-c2-local.sh` built the same
 sweep from the local copy and ended **`cmp: identical`** (DoD 2's byte identity holds for this sweep). Opus re-ran
 `make check` after the review: green, 3195. **Owed: his commit, which carries the code, the tests, the JSON and these
-notes, and its push** (it touches `src/**`, so Deploy builds an image; safe since C1).
+notes, and its push** (it touches `src/**`, so Deploy builds an image; safe since C1). *(Done the same day: committed
+`b9b8ac8` and pushed (his); CI and Deploy green, runs `41916412080` and `41916412096`, checked 2026-11-05. C2 is done.)*
+
+## 19. As built, step 3 (2026-11-05)
+
+Built by Sonnet from `scratch/p15-step3-build-prompt.md`. Code, tests, a deny-list change and one script for him. No AWS
+call of any kind (`make check`'s own `terraform init -backend=false` and `validate` aside), no commit, no push.
+`docs/phases/evidence/phase-4/raw-manifest.json` was **not** written: it comes from his S3 run. **Reviewed by Opus 2026-11-05 (one fix, below); his run done the same night (below).**
+
+**What was built**
+
+- `src/horizon_compact/site/rawmanifest.py` (new, run code, standard library plus a boto3 client handed in):
+  `build_raw_manifest(reader, experiments, bucket, progress=None) -> str`, `write_raw_manifest(text, path) -> Path`,
+  `RawManifestRefusal`, the `RawReader` Protocol (`versioning`, `list_versions`, `read`; no write call), `S3RawReader`
+  (`get_bucket_versioning`, a paginated `list_object_versions` returning versions and delete markers, and `get_object`
+  with `VersionId`, streamed through `iter_chunks`), `ObjectVersion`, `repository_experiments(root)` and
+  `account_id(bucket)`. The prefixes are `("official/", "pilot/")` in code; there is no prefix, role or experiment
+  argument. The sha256 is taken over the stored bytes chunk by chunk and nothing is decoded; objects are read one at a
+  time in key order.
+- `src/horizon_compact/cli.py`: `hc site raw-manifest [--bucket] [--profile] [--out]`, a second action in the `site`
+  group. `--out` defaults to `docs/phases/evidence/phase-4/raw-manifest.json`. It prints `read N of M objects` to
+  stderr every 500 objects (counts only), then four lines: `wrote <path>`, `objects:`, `bytes:`, `groups:`. A refusal
+  prints `refused: ...` and returns `REFUSED_EXIT`; an AWS error is caught by the `site` group's existing handler.
+- `.claude/settings.json`: `hc site raw-manifest` joins the deny list, in both the `uv run hc` and `uv run --no-sync hc`
+  forms, beside the other readers. `tests/test_claude_settings.py` lists it under `READERS`. `hc site data` stays
+  runnable. The edit went in directly; no script for him is needed.
+- `tests/test_site_rawmanifest.py` (new, 32 tests): see the list below.
+- `scratch/p15-step3-s3.sh` (gitignored; his).
+
+**The file.** Schema `horizon-compact/raw-manifest`, `schema_version` 1, key order: `schema`, `schema_version`, `kind`
+(`raw-object-manifest`), `hash` (`sha256`), `prefixes`, `versioning`, `object_count`, `total_bytes`, `groups`, `objects`.
+`groups` are sorted by prefix, one per sweep (the longest `manifest.json` directory above a key; an awareness sweep is
+one level deeper) and one `<role>/<experiment>/` group for keys under no sweep; each has `prefix`, `objects`, `bytes`,
+`attempt_objects` (the `attempt-N.json` and probe-call shapes, and an awareness API error under `errors/`, which is
+how `recordcheck._read_sweep` counts a call; Opus's review added the `errors/` keys: the number to check against
+`record-checks.md`'s `calls` column) and `final_objects`. `objects` are sorted by key, **one per line**, each `key`, `bytes`, `sha256`,
+`version_id`, `last_modified` (UTC, seconds, a `Z`). Never written: the bucket name, the account id, any object's
+content, any ETag or owner. No timestamp of its own.
+
+**The refusals** (one test each): versioning not `Enabled`; an empty prefix; a delete marker; a second version of a key;
+a listed version that is not the latest; a key under an experiment this repository lacks; a key outside
+`[A-Za-z0-9._/-]`, ending in `/`, with an empty or dot segment, or too shallow to name an experiment; a read whose byte
+count differs from the listing's `Size`; an output holding `arn:`, the bucket name or the account id; a bucket name with
+no trailing account id (checked before anything is read); and, in the writer, a file that already holds different bytes.
+
+**The account check, and why it is not C2's.** `site data` refuses on `arn:` or a standalone run of twelve digits. This
+file holds thousands of run ids (`r-` and twelve hex digits, all decimal about 0.35 percent of the time) and thousands of
+sha256 values (a run of twelve decimal digits in about one in five), so that pattern would refuse almost every real
+build (§18 departure 4). This builder looks for exactly what could leak: `arn:`, the bucket name, and the account id
+taken from the bucket name's last hyphen-separated part. A test pins both directions: the account id in a key is refused;
+a twelve-digit run id (`r-100000000001`) and a digest holding twelve decimal digits are not.
+
+**Departures: what did not fit, and what was done instead**
+
+1. **`build_raw_manifest` takes `bucket` and an optional `progress`** besides `reader` and `experiments`. The prompt said
+   the bucket is passed "for this check only" and named a progress line but gave the signature with two arguments.
+2. **`repository_experiments` is a local copy of `caseprobe/freeze.py`'s `_experiments`**, which is private to its module.
+   Both use `EXPERIMENT_FILES`. Today it returns `company`, `placeholder`, `s4shape` and `shapes`.
+3. **`SWEEP_MANIFEST` is imported from `protocol/recordcheck.py`** (public there); **`_FINAL`, `_ATTEMPT` and
+   `_PROBE_CALL` are copied**, because they are private. A drift would show in the attempt counts, which the review checks
+   against the Phase 4 record checks.
+4. **The writer mirrors `write_site_data`** rather than reusing it, so each module raises its own refusal class.
+5. **The command's test hook is `cli._raw_s3_client(session)`**, a module-level function the tests replace; no hidden
+   argument. The profile is checked before the bucket, as in `site data`.
+
+**Tests.** Build twice, byte-identical; key order at every level; one object per line and the whole parsing; objects
+sorted and hashed over bytes, including a body that is not valid UTF-8; the time in UTC with a `Z`; totals and groups by
+hand (a pilot sweep, a grid sweep with a session summary, an awareness sweep one level deeper, a loose `repeats.json`);
+the digit cases above; nothing of the bodies, the bucket or the listing's extras in the output; the reader making only
+the three read calls and one GET per object; progress at 500 and 1,000 of 1,002; every refusal; the writer's no-op, its
+refusal and its bytes; the experiment folders; and the command end to end, from the environment, refusing without
+writing, and needing a profile and a bucket.
+
+**Cost of his run (an estimate, to be measured).** One GET per object, plus the listing and one versioning call: about
+Phase 4 decision 2's 100 MB out, and a few thousand objects (`record-checks.md`: about 2,780 calls across the seven
+sweeps, plus finals, manifests and session summaries). Cents at most.
+
+**For the review, what to look at.** (a) The first real run may refuse on something legitimate under `official/` or
+`pilot/` that the fixtures do not model: that would be a finding to read, not to code around. (b) If versioning was
+turned on after the first objects were written, those objects carry the version id `null`; it is passed to `get_object`
+as it is and written as it is. (c) The group totals against `record-checks.md`: `attempt_objects` per sweep should equal
+that table's `calls` (the pilots 95 and 94, the awareness sweeps 15 and 15, the grids 1,333 and 1,128, the thinking sweep
+100).
+
+**`make check`: green, 3229 tests pass** (3195 before this step); `hc protocol check` ok. Frozen files untouched.
+
+**Opus's review (2026-11-05).** One fix: `attempt_objects` now also counts an awareness API error kept under `errors/`,
+as `recordcheck._read_sweep` counts a call (Phase 4's awareness sweeps had none, so its numbers were not affected). A
+fixture object and its counts were added. Checked and unchanged: the dev policy allows the three read calls on the
+results bucket; versioning has been `Enabled` since the bucket was created, and its policy denies every delete, so a
+delete marker cannot exist; every key shape the harness writes passes the key check; case sweeps live under `cases/`,
+outside both prefixes. `make check` green, 3229.
+
+**His run (2026-11-05, about 3:05 AM), `scratch/p15-step3-s3.sh`.** Refused nothing. Wrote
+`docs/phases/evidence/phase-4/raw-manifest.json`: **5,247 objects, 104,785,272 bytes, 7 groups**, versioning `Enabled`,
+no `null` version id, last-modified times from `2026-10-14T00:28:27Z` to `2026-10-15T00:10:39Z` (before the record
+checks were made, `00:18:23Z`). The file is 5,313 lines, about 1.4 MB.
+
+| group | objects | `attempt_objects` | `record-checks.md` calls | `final_objects` | runs | the rest |
+|---|---|---|---|---|---|---|
+| pilot gpt-oss `1f75b653` | 178 | 95 | 95 | 80 | 80 | manifest, `repeats.json`, 1 session |
+| pilot haiku `0b9d9e79` | 177 | 94 | 94 | 80 | 80 | manifest, `repeats.json`, 1 session |
+| awareness gpt-oss `6a05acef` | 16 | 15 | 15 | 0 | 15 | manifest |
+| awareness haiku `0ce6ad12` | 16 | 15 | 15 | 0 | 15 | manifest |
+| grid gpt-oss `fe599ad2` | 2,538 | 1,333 | 1,333 | 1,200 | 1,200 | manifest, the refusal-calls file and its meta, 2 sessions |
+| grid haiku `0b99fabb` | 2,120 | 1,128 | 1,128 | 990 | 990 | manifest, 1 session |
+| thinking haiku `418caa9c` | 202 | 100 | 100 | 100 | 100 | manifest, 1 session |
+
+Every sweep's calls match, every finished run has its final, and the session counts match `record-checks.md`'s
+`sessions` column. Every object is accounted for: no key outside these shapes. **Cost:** one listing per prefix, one
+versioning call and 5,247 GETs, about 105 MB out (Phase 4 decision 2 estimated about 100 MB): cents, to be confirmed in
+the close's spend reading.
+
+**The commit's one snag.** The first `git commit` was stopped by `check-added-large-files` (limit 1,024 KB; the
+manifest is 1,431 KB). Its exact path was added to that hook's exclude list in `.pre-commit-config.yaml`, beside the
+other generated evidence already allowed past the limit (Phase 3's simulation results, Phase 4's results files). The
+limit itself is unchanged.

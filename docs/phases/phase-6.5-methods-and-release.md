@@ -5,6 +5,10 @@
 > docs. **APPROVED 2026-10-04 (his)** with Phase 6: its rules come from Phase 6's decisions 2-6, all approved that day.
 > It adds no decision of its own.
 >
+> **Amended 2026-11-05** (Phase 1.5 decision 8 (a), his, 2026-11-04): Phase 4's raw-object manifest was committed in
+> Phase 1.5 (`docs/phases/evidence/phase-4/raw-manifest.json`, 5,247 objects); the full text of those objects is
+> published in this phase, beside the re-scoring check that reads it. Definition of done row 8.
+>
 > **Split out of Phase 6 on 2026-10-04** (his, Phase 6 decision 1). Phase 6's scoping findings cover this half too
 > (`docs/phases/phase-6-explorer.md`).
 >
@@ -94,6 +98,8 @@ In order.
    company in a search; every published real-case memo passed the name scan (`planning/05` Phase 6 done-when, as
    patched 2026-10-04); the vocabulary recheck is dated.
 7. **The site is live** at `horizon-compact.vercel.app` and matches the preview.
+8. **The full text of every Phase 4 pilot and official object is published,** and every published file's bytes and
+   sha256 match its line in `docs/phases/evidence/phase-4/raw-manifest.json` (added 2026-11-05, Phase 1.5 decision 8 (a)).
 8. **`make check` and CI are green,** and every commit passed the guard.
 
 ## Prerequisites
