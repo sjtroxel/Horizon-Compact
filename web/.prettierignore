@@ -1,0 +1,5 @@
+# The data file is written by `hc site data` and is byte-compared (Phase 1.5 DoD 2): a reformat would break it.
+src/data/
+dist/
+node_modules/
+package-lock.json

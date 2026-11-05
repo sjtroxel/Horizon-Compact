@@ -37,10 +37,22 @@ jobs:
           terraform_version: "1.15.8"
           terraform_wrapper: false
 
+      # Node 22, as installed locally and as Musical Mycelium's site uses; the cache is keyed on the page's lock file.
+      - name: Install Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
       # --locked fails the build if uv.lock disagrees with pyproject.toml, instead of resolving
       # something different from what runs locally.
       - name: Install dependencies
         run: uv sync --locked
+
+      # `npm ci` installs exactly what web/package-lock.json names and fails if it disagrees with package.json.
+      - name: Install page dependencies
+        run: npm --prefix web ci
 
       # The same target as local. GitHub sets CI=true, so `make check` skips `doctor` by name and says so.
       # The name scan itself never runs here: it needs the private term file, which never leaves the

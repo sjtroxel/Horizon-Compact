@@ -3,7 +3,7 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help setup install fmt lint typecheck test root-check paths-check dossier-check scenarios-check protocol-check doctor \
-        check guard-history fingerprint tf-fmt tf-check
+        check guard-history fingerprint tf-fmt tf-check web-check
 
 GUARD := uv run --no-sync python -m horizon_compact.privacy.guard
 ROOT_CAP := 16
@@ -17,6 +17,8 @@ help: ## List available targets
 install: ## Create the venv and install all dependencies (uv provisions Python 3.13)
 	@command -v uv >/dev/null || { echo "uv is not installed: https://docs.astral.sh/uv/"; exit 1; }
 	uv sync --locked
+	@command -v npm >/dev/null || { echo "npm is not installed (Node 22): https://nodejs.org/"; exit 1; }
+	npm --prefix web ci
 
 # The term file's path is stored in this clone's own git config (.git/config), which git never tracks,
 # so the path cannot be committed by mistake (Phase 0, decision 2). It is asked for once per clone.
@@ -71,6 +73,12 @@ tf-check: ## Terraform fmt -check and validate (no credentials, no AWS call)
 	terraform -chdir=$(TF_MAIN) init -backend=false -input=false -lockfile=readonly
 	terraform -chdir=$(TF_MAIN) validate
 
+# The page in web/ (Phase 1.5): Prettier check, strict tsc, Vitest (run once), the production build, then the check on
+# the built files (asset budget, no inline script or style, no other host). No network call and no AWS call.
+# One Vitest check, `his words are written`, fails while any of his values in web/src/copy.ts is still a `[his:` placeholder.
+web-check: ## Check the page in web/ (format, types, tests, build, built files)
+	npm --prefix web run check
+
 paths-check: ## Fail if any tracked path is under methods-appendix/ (needs no private file)
 	@$(GUARD) paths-check
 
@@ -94,7 +102,7 @@ doctor: ## Check the hooks are installed and the private term file loads
 
 # CI never has the hooks or the private term file, so `doctor` is skipped there BY NAME, and says so.
 # Everything else is identical, so a green local `make check` predicts a green check on GitHub.
-check: lint typecheck test root-check paths-check dossier-check scenarios-check protocol-check tf-check ## Everything CI runs, plus doctor when not in CI
+check: lint typecheck test root-check paths-check dossier-check scenarios-check protocol-check tf-check web-check ## Everything CI runs, plus doctor when not in CI
 ifdef CI
 	@echo "SKIPPED in CI: doctor (no hooks or private term file on a CI runner, by design)"
 else

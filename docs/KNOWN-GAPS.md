@@ -7,7 +7,47 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-05, about 3:10 AM (PHASE 1.5 STEP 3 BUILT, REVIEWED AND RUN; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-11-05, about 3:30 PM, HANDOFF (PHASE 1.5 C3 READY; HIS COMMIT NEXT)
+>
+> **C3, the page, is built (Sonnet) and reviewed (Opus, one test fix).** His four sentences in `web/src/copy.ts` are
+> Claude-drafted at his request and approved by him; he approved the three label redrafts. `make check` green at the
+> handoff: Python 3233, Vitest 29 of 29. The record is the Phase 1.5 doc §20.
+>
+> **Next: his commit `phase 1.5: c3 the page` and push** (if he did not run it at the close of 2026-11-05, check `git
+> log -1` first). CI runs; Deploy does not watch `web/**` until C4. Then **C4, the site in `main`** (doc §12 step 6):
+> Opus writes the build prompt, Sonnet builds.
+>
+> **Open, his:** word-for-word approval of the other drafted labels (doc §20's list), before C4 makes the page public.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-05, about 10:45 AM (PHASE 1.5 C3 BUILT AND REVIEWED; HIS LABELS AND WORDS NEXT) *(superseded by the block above)*
+>
+> **C3, the page in `web/`, is built (Sonnet) and reviewed (Opus, no code change)**; the record is the Phase 1.5 doc
+> §20 and its review paragraph. Everything passes except the by-design `his words are written` test; the name guard's
+> scanner finds nothing in the 28 files.
+>
+> **Next, his:** approve the drafted labels word for word (three redrafts proposed in §20's review), write his four
+> sentences in `web/src/copy.ts`, run `make check` to green, then commit and push. **Do not push before his words are
+> in: CI runs the same test and would go red.** Deploy does not watch `web/**` until C4.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-05, about 9:25 AM (PHASE 1.5 STEP 3 DONE; STEP 4 PICKED; C3 PROMPT WRITTEN) *(superseded by the block above)*
+>
+> **Step 3 is done:** committed `3714f44` and pushed (his); CI and Deploy green (runs `42002738203`, `42002738227`).
+> **Step 4, the previews, is done** (`scratch/previews/`, gitignored), and his picks are recorded in the Phase 1.5
+> doc §7.3: type A for prose and labels, Big Shoulders Display for the name, Source Sans 3 headings, the lede
+> upright; the Ink and paper colors; his footer from his other projects; logo 1e in the header and 1b as the
+> favicon, in golden; and transitions with a job each, after he chose against a marketing-style splash.
+>
+> **Next: C3, the page** (doc §12 step 5). **Sonnet builds from `scratch/p15-c3-build-prompt.md`**, Opus reviews,
+> he writes his words in `web/src/copy.ts` (one test fails by design until he does), then he commits. CI runs;
+> Deploy does not watch `web/**` until C4.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-05, about 3:10 AM (PHASE 1.5 STEP 3 BUILT, REVIEWED AND RUN; HIS COMMIT NEXT) *(superseded by the block above)*
 >
 > **Step 3, the Phase 4 raw-object manifest, is built (Sonnet), reviewed (Opus, one fix) and run (his):**
 > `docs/phases/evidence/phase-4/raw-manifest.json`, 5,247 objects, 104,785,272 bytes, no refusal, every sweep's call

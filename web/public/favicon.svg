@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .bar { fill: #141a26; }
+    .sun { fill: #e9a23b; }
+    .ray { stroke: #e9a23b; }
+    @media (prefers-color-scheme: dark) {
+      .bar { fill: #eee8da; }
+      .sun { fill: #f4c04f; }
+      .ray { stroke: #f4c04f; }
+    }
+  </style>
+  <clipPath id="above"><rect x="0" y="0" width="32" height="23"/></clipPath>
+  <circle class="sun" cx="16" cy="23" r="8" clip-path="url(#above)"/>
+  <g class="ray" stroke-width="2.6" stroke-linecap="round">
+    <line x1="25.01" y1="16.69" x2="27.88" y2="14.68"/>
+    <line x1="16" y1="12" x2="16" y2="8.5"/>
+    <line x1="6.99" y1="16.69" x2="4.12" y2="14.68"/>
+  </g>
+  <rect class="bar" x="1.5" y="22.5" width="29" height="3" rx="1.5"/>
+</svg>

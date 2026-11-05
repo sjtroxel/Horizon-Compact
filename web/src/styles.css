@@ -1,0 +1,558 @@
+/* Fonts: self-hosted WOFF2, Latin only, written here so only these files are built (no .woff, no other subset).
+   Source Serif 4 400 for prose; Source Sans 3 400 and 600 for labels, tables, the chart and every heading from h2
+   down; Big Shoulders Display 800 for the name only. */
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-400-normal.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/source-sans-3/files/source-sans-3-latin-400-normal.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/source-sans-3/files/source-sans-3-latin-600-normal.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "Big Shoulders Display";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/big-shoulders-display/files/big-shoulders-display-latin-800-normal.woff2")
+    format("woff2");
+}
+
+/* Color: Ink and paper (his pick, 2026-11-05), validated in both modes (Phase 1.5 IMPLEMENTATION doc section 20).
+   Light and dark follow prefers-color-scheme only; there is no toggle. --sun is the logo's warm yellow and is not
+   data, so the one-series-hue rule does not bind it. */
+:root {
+  color-scheme: light;
+  --surface: #f6f2e9;
+  --ink: #141a26;
+  --ink2: #4d4a43;
+  --muted: #8a8270;
+  --grid: #e2dbcb;
+  --axis: #c2b9a5;
+  --series: #2a6fc9;
+  --accent: #1c3a66;
+  --sun: #e9a23b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --surface: #0f1520;
+    --ink: #eee8da;
+    --ink2: #bdb6a6;
+    --muted: #7d8696;
+    --grid: #1c2433;
+    --axis: #2e3a4d;
+    --series: #4b8fe6;
+    --accent: #e9c98f;
+    --sun: #f4c04f;
+  }
+}
+
+:root {
+  --serif: "Source Serif 4", ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --display: "Big Shoulders Display", "Arial Narrow", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --s-1: 0.8125rem;
+  --s0: 1.0625rem;
+  --s1: 1.375rem;
+  --s2: 1.75rem;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t-fast: 160ms;
+  --t: 280ms;
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--s0);
+  line-height: 1.55;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+main,
+footer {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+@media (min-width: 40rem) {
+  main,
+  footer {
+    padding: 0 2.5rem;
+  }
+}
+.prose {
+  max-width: 65ch;
+}
+p {
+  margin: 0 0 1rem;
+}
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0;
+}
+h2 {
+  font-family: var(--sans);
+  font-size: var(--s2);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+}
+h3 {
+  font-family: var(--sans);
+  font-size: var(--s0);
+}
+section {
+  margin: 0 0 5rem;
+}
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition:
+    color var(--t-fast) var(--ease),
+    text-decoration-color var(--t-fast) var(--ease);
+}
+a:hover {
+  color: var(--accent);
+}
+:focus-visible {
+  outline: 2px solid var(--series);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 0.875em;
+}
+/* His words while they are still marked placeholders: the secondary ink, upright. */
+.placeholder {
+  color: var(--ink2);
+}
+
+/* The first screen: the name large, his sentences, the notice, then straight into the chart. */
+.hero {
+  padding: clamp(3.5rem, 10vh, 7rem) 0 2.5rem;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.logo {
+  flex: none;
+}
+.logo-sun {
+  fill: var(--sun);
+}
+.logo-ray {
+  stroke: var(--sun);
+}
+.logo-bar {
+  fill: var(--ink);
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(3.25rem, 10vw, 6.25rem);
+  letter-spacing: 0.005em;
+  line-height: 0.98;
+  margin-bottom: 1.5rem;
+}
+.lede {
+  font-size: var(--s1);
+  line-height: 1.45;
+  max-width: 34em;
+}
+.notice {
+  max-width: 65ch;
+  margin: 2.25rem 0 0;
+  padding: 0.25rem 0 0.25rem 1.125rem;
+  border-left: 3px solid var(--accent);
+}
+
+/* The priority control: one button per panel, and an indicator that slides to the chosen one. */
+.control {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  margin: 2rem 0 2.5rem;
+  font-family: var(--sans);
+  font-size: var(--s0);
+  border-bottom: 1px solid var(--grid);
+}
+.control button {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--ink2);
+  font: inherit;
+  padding: 0.5rem 0 0.625rem;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease);
+}
+.control button:hover {
+  color: var(--ink);
+}
+.control button[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.control .bar {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  width: 0;
+  background: var(--accent);
+  transform-origin: left;
+}
+.control .bar.animate {
+  transition:
+    transform var(--t) var(--ease),
+    width var(--t) var(--ease);
+}
+.key {
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+  max-width: 65ch;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3.5rem 3.5rem;
+}
+@media (min-width: 54rem) {
+  .panels {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.panel {
+  font-family: var(--sans);
+  padding-right: 1.5rem;
+  border-radius: 4px;
+  transition: opacity var(--t) var(--ease);
+}
+.panels.focus .panel:not(.chosen) {
+  opacity: 0.22;
+}
+.panel .meta {
+  font-size: var(--s-1);
+  color: var(--ink2);
+  margin: 0.125rem 0 0.75rem;
+}
+.group {
+  font-size: var(--s-1);
+  color: var(--ink2);
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--grid);
+}
+.kind:first-of-type .group {
+  border-top: 0;
+  padding-top: 0;
+}
+.row {
+  display: grid;
+  grid-template-columns: 10.5rem 1fr;
+  align-items: center;
+  min-height: 2.125rem;
+}
+.row .label {
+  font-size: var(--s-1);
+  line-height: 1.25;
+  padding-right: 0.75rem;
+}
+.plot {
+  position: relative;
+  height: 2.125rem;
+}
+.plot .g {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--grid);
+}
+.plot .cap {
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background: var(--muted);
+}
+.plot .mean {
+  position: absolute;
+  top: 16%;
+  bottom: 16%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+  transition: opacity var(--t) var(--ease);
+}
+.dot {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.dot::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--series);
+  box-shadow: 0 0 0 2px var(--surface);
+  transition:
+    transform var(--t) var(--ease),
+    opacity var(--t) var(--ease);
+}
+.panel.tracing .dot::after {
+  opacity: 0.2;
+}
+.panel.tracing .mean {
+  opacity: 0.25;
+}
+.panel.tracing .dot.on::after {
+  opacity: 1;
+  transform: scale(1.45);
+}
+.axis {
+  display: grid;
+  grid-template-columns: 10.5rem 1fr;
+  margin-top: 0.25rem;
+}
+.axis .ticks {
+  position: relative;
+  height: 1.25rem;
+  border-top: 1px solid var(--axis);
+}
+.axis .t {
+  position: absolute;
+  top: 0.125rem;
+  transform: translateX(-50%);
+  font-size: var(--s-1);
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 39.99rem) {
+  .row,
+  .axis {
+    grid-template-columns: 1fr;
+  }
+  .row .label {
+    padding: 0.375rem 0 0;
+  }
+  .axis > span:first-child {
+    display: none;
+  }
+  .panel {
+    padding: 0 1.25rem 0 0.75rem;
+  }
+}
+
+.tip {
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  max-width: 16rem;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  line-height: 1.35;
+  color: var(--surface);
+  background: var(--ink);
+  border-radius: 4px;
+  opacity: 0;
+  transform: translate(-50%, calc(-100% - 10px)) translateY(6px);
+  transition:
+    opacity var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.tip.show {
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+.tip b {
+  font-size: var(--s0);
+  font-variant-numeric: tabular-nums;
+  display: block;
+}
+
+.frame {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+}
+th,
+td {
+  padding: 0.375rem 0.75rem;
+  border-bottom: 1px solid var(--grid);
+  white-space: nowrap;
+}
+thead th {
+  font-weight: 600;
+  color: var(--ink2);
+  border-bottom: 1px solid var(--axis);
+  vertical-align: bottom;
+}
+th {
+  text-align: left;
+  font-weight: 400;
+}
+td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+td.l {
+  text-align: left;
+}
+th:first-child,
+td:first-child {
+  padding-left: 0;
+}
+tr.zero td {
+  color: var(--ink2);
+}
+.status th.pri {
+  text-align: center;
+  padding-left: 1.25rem;
+  border-bottom: 1px solid var(--grid);
+}
+.status th.sub {
+  text-align: right;
+  font-weight: 400;
+}
+.status th.sub:nth-child(odd),
+.status td.first {
+  padding-left: 1.25rem;
+}
+.status td.pair {
+  text-align: center;
+  padding-left: 1.25rem;
+}
+.runs tbody tr {
+  transition:
+    background-color var(--t) var(--ease),
+    opacity var(--t) var(--ease);
+}
+.runs td:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  padding-right: 1rem;
+  transition: background-color var(--t) var(--ease);
+}
+.runs.tracing tbody tr {
+  opacity: 0.35;
+}
+.runs.tracing tbody tr.on {
+  opacity: 1;
+  background: var(--grid);
+}
+.runs.tracing tbody tr.on td:first-child {
+  background: var(--grid);
+}
+.runs.choosing tbody tr:not(.in) {
+  opacity: 0.35;
+}
+
+dl {
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  margin: 0;
+  max-width: 50rem;
+}
+dl .item {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.25rem 2rem;
+  margin: 0 0 0.5rem;
+}
+@media (min-width: 40rem) {
+  dl .item {
+    grid-template-columns: 11rem 1fr;
+    margin: 0 0 0.25rem;
+  }
+}
+dt {
+  color: var(--ink2);
+}
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.notes {
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+  max-width: 65ch;
+  margin-top: 1.5rem;
+}
+
+footer {
+  padding-top: 1.75rem;
+  padding-bottom: 2.5rem;
+  border-top: 1px solid var(--grid);
+  text-align: center;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+}
+footer a {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-left: 0.25rem;
+  color: var(--ink2);
+}
+footer a:hover {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+  }
+}

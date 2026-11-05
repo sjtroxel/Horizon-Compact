@@ -285,6 +285,46 @@ Each preview: a text column of about 65 characters, a fixed type scale, tabular 
 light and dark. Faces common across generated web apps (Inter, Geist) are left out on purpose, as the most visible
 sign of a default.
 
+### 7.3 His decisions after the previews (2026-11-05)
+
+- **Type: A,** Source Serif 4 for headings and prose, Source Sans 3 for labels, tables and the chart; the system mono
+  stack for ids and hashes (A carries no mono face). Self-hosted from `@fontsource`, weights 400, 400 italic and 600
+  for the serif, 400 and 600 for the sans (about 91 KB of WOFF2, inside §8's 150 KB budget).
+- **Footer: his footer from every other project** (Patchwork Assurance, Heritage Odyssey, Asteroid Bonanza, Poster
+  Pilot): `© 2026 sjtroxel`, the GitHub mark linking to the repository, `. All rights reserved.` It replaces §7 item
+  8's bare link and is still nothing else: no analytics, no badges, no "built with".
+- **A logo and a favicon,** his pick from previews (§8 already allowed "a favicon of his choice"). No mark that draws
+  convergence: whether the long horizons converge is the claim under test. **His ask after round 2: a warm sun,
+  yellow or orange, not the chart's blue** (the logo is not data, so the one-series-hue rule does not bind it). A
+  warm pair per mode: a deeper step on light surfaces and white tabs, a brighter one on dark; the dark horizon line
+  carries the shape on white. **His pick: logo 1b, the sun on the horizon with three rays, in golden** (`#e9a23b` on
+  light surfaces, `#f4c04f` on dark), 2026-11-05. The plain half-sun (1) was read by a friend as an egg; the rays fix
+  that read and still separate at 16px, where five rays blurred. The honest cost: it sits close to the common
+  weather-app "sunrise" glyph. Source: `scratch/previews/sun_variants.py`. **Then his refinement, the same morning:
+  1b stays the favicon, and the page header carries 1e** (1c's sun cut by the horizon with a line below, plus 1b's
+  three rays; `scratch/previews/sun_pair.py`) at about 56px, where it has room to read; at 16px 1e blurs, which is
+  why the two sizes take two marks of one family.
+- **The name's face: Big Shoulders Display 800** (his pick from seven, 2026-11-05, `scratch/previews/titles.py`),
+  for "Horizon Compact" only. His reason: the serif title over an italic serif lede on cream read as AI-generated.
+  **Section headings in Source Sans 3 semibold** (his pick over Source Serif 4, `scratch/previews/heads.py`).
+  Source Serif 4 stays for prose, now **upright**: the lede and the notice are no longer italic. So A's type is
+  amended: no serif headings, and the serif needs only its 400.
+- **Drafted labels avoid the rhythm he reads as generated** (his note, 2026-11-05): runs of short one-fact
+  sentences of the same length, joined instead where a person would join them; likewise no "not X, it's Y" turns,
+  reflexive threes, colon reveals or tidy closers. He still approves every label word for word.
+- **Color identity: Ink and paper** (his pick, 2026-11-05): light, a warm paper surface (`#f6f2e9`) with dark-blue
+  ink; dark, deep navy (`#0f1520`) with warm ink and a gold accent. Every token validated in both modes
+  (`scratch/previews/identities-validator.txt`: text at least 4.5:1, marks at least 3:1).
+- **Asked for a marketing-agency splash with motion and vivid color, then chose against it** on the reasons given:
+  `planning/06` §7.2 rules 1 and 7, §8 below (his standard of 2026-11-04), and Phase 6 decision 6, whose impressive
+  layer is where a splash belongs, built from real results. **Instead, within the rules:** a bold first screen (large
+  serif title, his sentences, the chart directly under the notice); a color identity for the page itself, his pick
+  from previews, every token validated in both modes, with the data hue still the one series hue; and **transitions
+  done exceptionally well**, every one doing a job (`planning/06` §7.2 rule 7): hovering or focusing a run lights its
+  dots in every line of its panel and its row in the run table, the rest dimmed; a priority control that brings one
+  panel forward and dims the rest; a tooltip that eases in. No entrance animation, no gradient, no glow; every
+  transition off under `prefers-reduced-motion`.
+
 ## 8. What "polished" means here, as checks
 
 His standard (2026-11-04): professional, with no telltale sign of generated filler. Each item below is checked at the
@@ -453,8 +493,8 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
    **C2, the site-data builder** (§6) with tests; his S3 and local runs and the `cmp`; the JSON committed with it.
 3. **[done 2026-11-05: built (Sonnet), reviewed (Opus, one fix: errors/ keys count as calls); his S3 run wrote the manifest, 5,247 objects, every sweep's calls matched; commit owed]** **The raw-object manifest** (decision 8 (a)), committed as
    `docs/phases/evidence/phase-4/raw-manifest.json` with the command's code.
-4. **[Claude, then his]** **The previews** (decision 2), in `scratch/` (gitignored); he picks.
-5. **[Sonnet builds, Opus reviews]** **C3, the page** (§7, §8): `web/`, `make web-check`, `ci.yml`. His words land in
+4. **[done 2026-11-05: previews built (Opus), `scratch/previews/`; his pick: A, Source Serif 4 and Source Sans 3]** **[Claude, then his]** **The previews** (decision 2), in `scratch/` (gitignored); he picks.
+5. **[built 2026-11-05 (Sonnet); reviewed (Opus, one test fix); his words and the three label redrafts approved by him, the other drafted labels not yet; `make check` green; his commit owed]** **C3, the page** (§7, §8): `web/`, `make web-check`, `ci.yml`. His words land in
    `copy.ts` before this commit. Built and checked locally (`npm run dev`, then the production build served with the
    content security policy set locally); Deploy does not yet watch `web/**`, so this push runs CI only.
 6. **[Sonnet builds, Opus reviews]** **C4, the site in `main`:** `site.tf`, the deploy workflow's `changes` and `site`
@@ -831,3 +871,221 @@ the close's spend reading.
 manifest is 1,431 KB). Its exact path was added to that hook's exclude list in `.pre-commit-config.yaml`, beside the
 other generated evidence already allowed past the limit (Phase 3's simulation results, Phase 4's results files). The
 limit itself is unchanged.
+
+## 20. As built, C3 (2026-11-05)
+
+Built by Sonnet from `scratch/p15-c3-build-prompt.md`. Code, tests and the `make` and CI wiring. No AWS call, no
+`terraform` command other than `make check`'s own, no Vercel command, no commit, no push. The deploy workflow is
+untouched (C4). **Review (Opus), his words in `web/src/copy.ts` and his commit are owed.**
+
+**What was built**
+
+- `web/`: `package.json`, `package-lock.json`, `index.html`, `vite.config.ts`, `tsconfig.json`, `.prettierrc`,
+  `.prettierignore` (it excludes `src/data/`, so a reformat cannot break DoD 2's byte identity), `public/favicon.svg`
+  (mark 1b, golden, light and dark in an internal `<style>`), `scripts/check-dist.mjs`, and `src/`: `main.tsx`,
+  `App.tsx`, `copy.ts`, `data.ts`, `styles.css`, `components/` (`Logo`, `Control`, `Chart`, `Tables`, `Provenance`,
+  `Footer`) and three test files. Stack: Vite, React and TypeScript, plain CSS custom properties; no CSS framework,
+  component library, chart library, animation library, router or state library. `web/src/data/placeholder.json` was
+  read and never rewritten.
+- `Makefile`: `web-check` (`npm --prefix web run check`) joins `check`; `install` also runs `npm --prefix web ci`.
+  `.github/workflows/ci.yml`: `actions/setup-node@v7.1.0` (Node 22, npm cache keyed on `web/package-lock.json`) and
+  `npm --prefix web ci`, before `make check`.
+- `tests/test_web.py` (4 tests): nothing under `web/src` imports from outside `web/` (static, re-export,
+  side-effect and dynamic imports, `new URL`, and CSS `url()`; a fixture proves each shape is seen), and the page's
+  twelve statuses equal `sweep/classify.py`'s, in order.
+- The check script (`web/scripts/check-dist.mjs`, last step of `npm run check`): JavaScript under 100 KB gzipped in all;
+  fonts under 150 KB in all and `.woff2` only; no `<script>` without `src`, no `<style>` element and no `style=`
+  attribute in `dist/index.html`; every `src` and `href` in it the favicon or a built asset; no CSS `url()` that is a
+  host or a `data:` URI, and no `@import`.
+- `web/package.json` scripts: `dev`, `build`, `preview`, `test`, `format`, and `check` = Prettier check, `tsc --noEmit`
+  (strict, plus `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`), Vitest run once, `vite build`, the check
+  script. `engines.node` is `>=22.13.0 <23`.
+
+**Pinned versions** (every date re-checked 2026-11-05 with `npm view <pkg> time`; none is younger than 14 days, the
+newest being Vite 8.3.5 at 15 days)
+
+| Package | Version | Published |
+|---|---|---|
+| `vite` | 8.3.5 | 2026-10-21 |
+| `react`, `react-dom` | 19.3.1 | 2026-10-14 |
+| `typescript` | 7.0.2 | 2026-07-08 |
+| `@vitejs/plugin-react` | 6.1.2 | 2026-10-05 |
+| `vitest` | 4.1.12 | 2026-10-15 |
+| `jsdom` | 29.1.1 | 2026-04-30 |
+| `@testing-library/react` | 16.3.3 | 2026-08-27 |
+| `@testing-library/dom` | 10.4.2 | 2026-09-13 |
+| `axe-core` | 4.14.0 | 2026-10-05 |
+| `prettier` | 3.9.10 | 2026-10-10 |
+| `@types/react`, `@types/react-dom` | 19.3.0 | 2026-09-09 |
+| `@types/node` | 22.20.5 | 2026-10-01 |
+| `@fontsource/source-serif-4`, `@fontsource/source-sans-3` | 5.3.1 | 2026-10-11 |
+| `@fontsource/big-shoulders-display` | 5.3.0 | 2026-07-19 |
+
+`npm audit` at install: 0 vulnerabilities. Fonts: own `@font-face` rules in `styles.css` pointing at the WOFF2 files
+(Source Serif 4 400; Source Sans 3 400 and 600; Big Shoulders Display 800; Latin only; `font-display: swap`);
+Fontsource's CSS is not imported, so the build holds four font files and no `.woff`.
+
+**The content security policy, proved in a browser.** `vite.config.ts` puts the section 9 policy, word for word, and
+`X-Robots-Tag: noindex` in `preview.headers`; `curl -I` on the preview server shows both on every response. The page
+was built, served with `vite preview`, and loaded in the headless Chromium (chrome-headless-shell, build 1234, from
+the Playwright cache) at 1280 and 390 pixels wide, light and dark, **driven over the DevTools protocol**, not by the
+`--enable-logging` flags: a listener installed before the page's scripts recorded every `securitypolicyviolation`
+event, and the console, log and network events were collected. Result, all four combinations: **zero policy
+violations, zero errors, zero failed requests**; every request went to the page's own origin (the document, one
+script, one stylesheet, four WOFF2 files); all four font faces report `loaded`. **A negative control confirmed the
+probe sees what it should:** adding a `<style>` element and a `style` attribute by script on the same page gave
+`style-src-elem inline` and `style-src-attr inline` and the matching console messages. Dark mode was set with the
+protocol's emulated `prefers-color-scheme` media feature, which worked (the body background read `rgb(15, 21, 32)`);
+`--force-dark-mode` was not tried. React `style={{...}}` objects (dot positions, tooltip position, the control's bar)
+trip nothing, as expected.
+
+**The color tokens**, Ink and paper only, both modes by `prefers-color-scheme` (no toggle, no `data-theme`),
+`--sun` `#e9a23b` light and `#f4c04f` dark. The dataviz validator on the one series hue against its surface, run
+2026-11-05 (`node validate_palette.js "<hex>" --mode <mode> --surface "<surface>"`):
+
+```
+paper light, series #2a6fc9 on #f6f2e9  [PASS] Lightness band (L 0.43-0.77)  [PASS] Chroma floor (>= 0.1)
+  [PASS] CVD separation n/a  [PASS] Normal-vision floor n/a  [PASS] Contrast vs surface (>= 3:1)  ALL CHECKS PASS
+paper dark,  series #4b8fe6 on #0f1520  [PASS] Lightness band (L 0.48-0.67)  [PASS] Chroma floor (>= 0.1)
+  [PASS] CVD separation n/a  [PASS] Normal-vision floor n/a  [PASS] Contrast vs surface (>= 3:1)  ALL CHECKS PASS
+```
+
+Contrast against the surface, computed with the WCAG formula: light, ink 15.59, ink2 7.91, accent 10.18, series 4.46,
+muted 3.41, sun 1.94, axis 1.74, grid 1.23; dark, ink 14.97, ink2 9.06, accent 11.51, series 5.55, muted 4.98, sun
+10.88, axis 1.59, grid 1.18. All text is ink or ink2 (at least 4.5 to 1); the marks that carry data (series, muted for
+the cap) are at least 3 to 1. **Two honest notes:** the sun on the light surface is 1.94 to 1, below 3 to 1; the logo
+is decoration (`aria-hidden`, the `h1` names the page) and the ink horizon bar carries its shape, as section 7.3
+recorded, but it is a real number. The grid and axis hairlines are deliberately recessive (section 7.1). The earlier
+six-token run is `scratch/previews/identities-validator.txt`.
+
+**Measured sizes** (`node web/scripts/check-dist.mjs`, after `vite build`): JavaScript, gzipped, in all **75,362 bytes
+(73.6 KB)**, budget 100 KB; fonts, 4 files, **66,008 bytes (64.5 KB)**, budget 150 KB, WOFF2 only; 8 files in `dist/`;
+`dist/index.html` holds one `<script type="module" src>` and one stylesheet link, nothing inline.
+
+**Tests and `make check`.** Python: **3233 passed** (3229 before this step, plus the 4 above). Vitest: **29 tests, 28
+pass and 1 fails by design, `his words are written`** (`src/copy.test.ts`), which fails while any of `lede`, `notice`,
+`resultsTitle` or `resultsSentence` still begins with `[his:`. Every other check in `make check` passed:
+`ruff`, `mypy`, `root-check` (14 of 16), `paths-check`, `dossier-check`, `scenarios-check`, `hc protocol check` ("ok"),
+`tf-check`, Prettier, `tsc`, the production build, and the check script; `make doctor` passed on its own. `make check`
+as a whole exits non-zero until he writes his words, and the run stops at `web-check`, which is the last step, so
+`doctor` was run by hand. Vitest covers: axe (no violations on the page, and with a priority chosen and a run
+traced; the color-contrast rule is off there because jsdom has no layout, so contrast rests on the validator above);
+tracing (pointing marks exactly 7 dots and 1 table row, focus does the same, Escape and leaving the panel clear, the
+tooltip's order); the control (one panel chosen, 3 rows in, `aria-pressed`); the keyboard (one tab stop per panel,
+the four arrows, clamped inside the panel, the tooltip follows focus); every amount for every run and line as text in
+the run table; the data check throwing on a wrong `schema`, `schema_version`, `kind`, `content`, `sweep.role` or
+`sweep.experiment`, and on a shape the page cannot draw; the display helpers; and the copy file.
+
+**Screenshots** are in `scratch/c3-shots/` (gitignored): `preview-{1280,390}-{light,dark}.png` (the production build
+under the policy), the same with `-traced` (the "Fragrance" priority chosen and one dot pointed at), `dev-*` (the
+dev server), and `clipA-*` and `clipB-*` (phone-width crops). Compared with `scratch/previews/shots/heads-sans-*.png`:
+the header, the type, the logo, the chart, the footer and the dimmed-panel and traced states match. Page height is
+about 4,200 px at 1280 and 6,400 px at 390.
+
+**Departures: what did not fit, and what was done instead**
+
+1. **jsdom is 29.1.1, not §2's 30.1.3.** jsdom 30.1.x and three of its dependencies declare `node ^22.22.2 || ...`,
+   and his installed Node is 22.20.0 (npm printed `EBADENGINE`). 29.1.1 supports `^22.13.0`; `engines` says so.
+2. **`@vitejs/plugin-react` is 6.1.2, not 6.2.1** (6.2.1 was published 2026-11-02, inside the 14 days). Its peer
+   range accepts Vite 8.
+3. **Dot offsets are by position, not by `repeat` value.** The preview computed `top = 50 + (repeat - 2) * 22`
+   percent, which assumes repeats start at 1; the data's repeats are 0, 1 and 2, so the preview's dots sat in the
+   upper half of each row. The page uses `50 + (index - (n - 1) / 2) * 22` over the run's position among its panel's
+   runs sorted by repeat: 28, 50 and 72 percent, centered, still fixed and not jitter.
+4. **Not carried from the preview:** the body's background-and-color transition (it moves only when the operating
+   system changes scheme, and the prompt lists the transitions). **Added:** the control's bar is placed, not animated,
+   on load, on a resize or wrap, and when the fonts arrive (it animates only on a choice), so nothing moves on load;
+   it follows its container with a `ResizeObserver`, not a window `resize` listener (the first version left the bar
+   stranded in a screenshot taken at 390 px when the layout changed; found by looking at the screenshot).
+5. **A scroll clears a pointer's trace but not a focused dot's.** A keyboard user's arrow keys scroll the page by
+   themselves, which would clear the trace at once, so a focused dot keeps its trace and the tooltip is repositioned.
+   Leaving the panel, Escape and a blur out of the panel clear either kind.
+6. **The tooltip is `aria-hidden`.** The preview's `role="status"` live region would repeat what each dot's
+   `aria-label` already says on focus (amount, line, run, status).
+7. **Added for accessibility:** each table frame is a keyboard-focusable `role="region"` with a label (a scrollable
+   region must be reachable by keyboard), the provenance list uses a `div` per term and description, and each panel's
+   two groups sit in a `.kind` wrapper.
+8. **The boundary check and the status-list check are in Python** (`tests/test_web.py`), as the prompt allowed, so
+   they run in `make check` without Node.
+9. **No preload of fonts by hand** (the prompt allowed leaving it out), `assetsInlineLimit` 0 and the module preload
+   polyfill off, so nothing is inlined as a `data:` URI. **No meta description** is rendered while `his.description` is
+   empty; when it is not, the page renders a `<meta>` in the tree and React 19 hoists it into the head (not exercised,
+   since the value is empty).
+10. **`ci.yml`'s pin style.** The prompt named `actions/setup-node@v7.1.0` and that exact tag is used (the release
+    exists, published 2026-10-08, checked with `gh`); the file's other steps use a mix of floating major tags and exact
+    tags, so this one sits with the exact ones.
+11. **Not run:** `git commit` hooks (the name guard's scan of `web/package-lock.json` happens at his commit; if it
+    refuses, the class of term is reported, never the term, and he adds an `allow:` line, per section 3 finding 7).
+
+**Labels as drafted** (Claude-drafted; he approves each word for word; the source is the `labels` object in
+`web/src/copy.ts`). His rule applied (joined facts, no runs of short same-length sentences, no "not X, it's Y", no
+reflexive threes, no colon reveals, no tidy closers).
+
+- Chart: title "Amounts by line, three runs per priority"; key "Each dot is one run, the solid tick marks the mean of the
+  three, and the thin mark at the end of each line is its cap; point at a dot to follow that run through every line."
+  (heads-sans.html's joined sentence); control "Priority", "All five"; priorities "Color", "Fragrance", "Low water use",
+  "Butterflies", "No priority set"; group headings "Sources", "Uses"; panel line "n = 3 runs; open day: spring 2,
+  autumn 1; test run, placeholder content"; tooltip: the amount, the line, then "<run id>, <status>"; each dot's
+  accessible label "$800, Spring plant-sale proceeds, run r-..., valid".
+- First attempt and final: title "First attempt and final"; key **(redrafted)** "Each priority shows how its runs
+  ended on the first attempt and on the final one, with any status that never occurred counted as zero." (was "How
+  each run's call ended, on its first attempt and on its final one, by priority. A status that never happened is
+  shown as zero."); headings "Status", "Runs", "first", "final"; region label "First attempt and final status counts,
+  by priority".
+- Every run: title "Every run"; key **(redrafted)** "Each dot in the chart above has its own row here, one row per
+  run." (was "One row per run: each dot in the chart above is a row here."); region label "Every run, one row each";
+  columns "Run", "Priority", "Status", "Attempts", the seven line labels from the data, "Open day", "Image".
+- Provenance: title "Provenance"; terms "Sweep", "Model, as served", "Image digest", "Code", "Content hash", "Runner",
+  "Started", "Finished", "Runs" ("15 of 15 finished"), "Measured cost"; times end "UTC"; **the two notes are now one
+  joined sentence (redrafted)**: "The records are kept write-once in S3 under development/placeholder/<sweep id>/, and
+  the image this digest names is no longer held in the registry, because an older rule there kept only the ten
+  newest." (the reason is section 3 finding 1 and section 17's ECR rule).
+- Footer, his: "© 2026 sjtroxel", the GitHub mark (link, new tab, "GitHub, Horizon Compact (opens in a new tab)"), ". All
+  rights reserved."
+- His to write, placeholders now: `lede`, `notice`, `resultsTitle`, `resultsSentence`, and `description` (empty, so no
+  meta tag). They render in the secondary ink, upright.
+
+**For the review, what to look at.** (a) Departure 3, the centered dots (a visible change from the approved preview, for
+a reason in the data). (b) Departures 4 and 5, the two interaction changes. (c) The sun's 1.94 to 1 on light. (d) Whether
+the page should carry `his.description` at all. (e) The first CI run of `setup-node` and `npm ci` with the lock file
+(not run here). The push touches `web/**`, `ci.yml`, `Makefile`, `tests/` and docs, so CI runs and Deploy does not.
+
+**Review (Opus, 2026-11-05, about 10:45 AM). No code change.** Read every file against the build prompt and §7, §7.3,
+§8 and §9. Re-run here: `npm run check` (28 of 29 Vitest pass, the one failure the by-design `his words are written`),
+then `vite build` and the check script by hand (75,362 bytes of JavaScript gzipped, 66,008 bytes of fonts, ok),
+`tests/test_web.py` (4 passed), `hc protocol check` (ok). **The name guard's own scanner, run over the 28 files this
+commit adds or changes (counts only, no term printed): 0 findings**, so §3 finding 7's collision did not happen.
+Checked live: the six key packages' publish dates and the `actions/setup-node` `v7.1.0` release (2026-10-08) match the
+table above. The provenance block's facts hold: the prefix is `sweep_prefix`'s `role/experiment/sweep_id/`, write-once
+is the bucket policy and `IfNoneMatch`, the skeleton image `ef2582ed...` was measured gone (§3 finding 1), and the
+linked commit `8ab367c` is on `origin/main`. Departures 1 to 11 accepted; departure 3 (centered dots) is right, the
+preview's dots sat high. The Right arrow wrapping to the next line at a line's end is the preview's behavior, kept.
+The sun's 1.94 to 1 on light stays: a logo is exempt from the non-text contrast rule and the ink bar carries the shape.
+`his.description` stays empty until Phase 6.5's go-live (the page is `noindex` until then).
+
+**Labels: three redrafts proposed, his choice.** (1) The run table's key says "Each dot ... has its own row", which is
+false: a run is seven dots and one row. (2) The provenance note joins two unrelated facts with "and"; two sentences of
+different lengths read more naturally than one forced join. (3) The status key says "Each priority shows", where the
+table shows them by priority. **CI goes red until his words are in `copy.ts`, so the push waits for them.**
+
+**His approval and the words (2026-11-05, about 3:15 PM).** He approved the three label redrafts as proposed; they
+are in `labels`. **The four `his` values are Claude-drafted at his request** ("draft for me ... since I don't know what
+you mean for me to write"), and **approved by him as written**, after one revision: the notice now says why the test
+runs are a garden club (a stand-in with the decision's shape and none of its subject, Phase 1 decision 2), after he
+asked why. Checked while drafting: "AI models", plural (the runs used more than one); "planned before the experiment
+ran", not "before any result existed" (official results exist in the repo; `planning/04` §1.2 is dated 2026-10-03);
+the title is first person because the section holds results against his own view (`04` §1.2, principle 1). The lede
+explains "compact" by its meaning rather than by the Mayflower and UN Global Compact references `planning/06` §6.4
+asks for; he accepted that. `description` stays empty until go-live.
+
+**One test fix (Opus), found by writing the words:** "shows his placeholders in the placeholder class" asserted at
+least four placeholders, so it would fail the moment the words were written; my review missed it. It now holds each of
+the four values' placeholder class equal to whether it is still a placeholder, in either state. **`make check` green:
+Python 3233 passed, Vitest 29 of 29, `hc protocol check` ok, check-dist ok (JavaScript 75,702 bytes gzipped, fonts
+66,008), doctor ok.** The name guard's scanner over the 28 files: 0 findings.
+
+**At the handoff (2026-11-05, about 3:30 PM).** The remaining drafted labels (chart title and key, table headings,
+provenance terms; the list above) have **no explicit word-for-word approval yet**: asked, unanswered at the close, so
+owed before C4 makes the page public. `copy.ts`'s comment says so. Stale "fails until he writes" comments in the
+`Makefile` and `copy.test.ts` reworded. `make check` re-run green after: Python 3233, Vitest 29 of 29, check-dist ok,
+doctor ok; the guard's scanner, 29 files, 0 findings.
