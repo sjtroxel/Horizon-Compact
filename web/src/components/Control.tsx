@@ -67,6 +67,7 @@ export function Control({ chosen, onChoose, objectiveIds }: ControlProps) {
             else buttons.current.delete(id);
           }}
           aria-pressed={chosen === id}
+          data-label={text}
           onClick={() => onChoose(id)}
         >
           {text}

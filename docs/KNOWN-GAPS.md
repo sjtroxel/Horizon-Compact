@@ -7,7 +7,48 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-06, late morning (PHASE 1.5 C4 BUILT; HIS APPLY, VARIABLES, COMMIT NEXT)
+> ## START HERE — where things stand, 2026-11-06, about 5:20 PM (PHASE 1.5 §8 FIXES BUILT AND REVIEWED; HIS COMMIT, THEN C5)
+>
+> **The five fixes, the dimmed-panel change and his type change (Newsreader, lede 19px, body 17px) are built**
+> (Sonnet, the Phase 1.5 doc §23) **and reviewed** (Opus, §23a: every browser measurement reproduced; `make check`
+> green, Python 3248, Vitest 37). **One change in review, his decision:** choosing a priority scrolls its panel into
+> view in the one-column layout only (under 54rem); on desktop the page no longer jumps. **Accepted as built:** the
+> run table scrolls sideways from 1,024 to about 1,199px (10px at 1,180), not from 1,180 as §22 estimated.
+>
+> **Next, his:** one commit carrying the fixes and all of today's uncommitted docs (C4's record, the permission check,
+> the review), then push. CI runs, and Deploy's `site` job publishes the page to CloudFront (no image, no apply);
+> Claude reads both. **Then C5**, the Vercel rewrite (doc §12 step 9, his).
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-06, about 4:40 PM (PHASE 1.5 §8 REVIEW DONE; FIXES AND THE TYPE CHANGE NEXT) *(superseded by the block above)*
+>
+> **The review against §8 is done** (Claude's captures of the live CloudFront page at 1280 and 390 pixels, light and
+> dark, and a scripted pass over hover, keyboard, the priority control and reduced motion; he reviewed them). Most of
+> §8 passes. **Five misses** to fix before C5 (the chosen panel off screen on a phone, the status table's first
+> column, the run table's hidden columns at desktop, the control's label shift, the fonts on a cold load) and three
+> departures accepted. **His type change:** the prose face becomes Newsreader, the lede 19px, body 17px (deliberately
+> one step under the preview's 20 and 18; the record is the Phase 1.5 doc §22).
+>
+> **Next:** Sonnet builds the fixes and the type change in a fresh session from
+> `scratch/p15-review-fixes-build-prompt.md` (miss 3 decided: wrapped headings, the frame extended right), Opus reviews, the page is captured again, and his one commit carries them with today's
+> uncommitted docs (C4's record, the permission check, this review). Then C5.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-06, about 9:45 AM (PHASE 1.5 C4 DONE; PERMISSION CHECK PASSED; THE §8 REVIEW NEXT) *(superseded by the block above)*
+>
+> **C4 is done:** committed `69b88ce` (his), CI `42244341282` and Deploy `42244341172` green on the first attempt, no
+> permission added. The site is on `d17t61og2l6kuo.cloudfront.net` (distribution `E2I9ASU9R5GM22`) with every header;
+> the public URL waits for C5. The record is the Phase 1.5 doc §21.
+>
+> **The permission check passed** (run `42245451195`, all six refused; the tag claim by the new explicit deny), so the
+> tag-claim entry below is CLOSED and DoD 8 is proved. **Next: §12 step 8, the review against §8** on the CloudFront
+> domain, both widths and both modes; fixes before C5.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-06, late morning (PHASE 1.5 C4 BUILT; HIS APPLY, VARIABLES, COMMIT NEXT) *(superseded by the block above)*
 >
 > **C4, the site in `main`, is built** (Opus, in session, his call): `site.tf`, the deploy workflow's `changes` and
 > `site` jobs, `teardown.yml`, two new permission-check attempts. `make check` green, Python 3248, Vitest 29 of 29.
@@ -2663,7 +2704,7 @@ closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-
 
 ---
 
-## OPEN 2026-11-06 — the deploy role could claim another project's CloudFront distribution by tag (fix built, his apply owed)
+## CLOSED 2026-11-06, with the permission check (was OPEN the same day) — the deploy role could claim another project's CloudFront distribution by tag
 
 Found building Phase 1.5 C4 (the Phase 1.5 doc §21). C1's `SiteDistributionCreate` (`infra/iam/deploy-site.json`)
 allows `cloudfront:TagResource` on `*` whenever the request sets `Project = horizon-compact`, and AWS's service
@@ -2675,6 +2716,9 @@ project's), the CloudFront twin of `deploy.json`'s `NeverRetagUntaggedNetwork`. 
 (his; 1 changed, then "No changes").** **Closes when** his `bootstrap` apply
 lands the deny and the permission check's "claim another project's distribution by tag" attempt is refused. **Stays
 disclosed:** a distribution with no `Project` tag at all is not covered (a stronger deny could block the create).
+**Closed 2026-11-06, about 9:43 AM:** permission-check run `42245451195` (his dispatch) refused the tag claim on
+Musical Mycelium's distribution "with an explicit deny in an identity-based policy", and all six attempts passed. The
+Phase 1.5 doc §21 holds the record.
 
 ---
 

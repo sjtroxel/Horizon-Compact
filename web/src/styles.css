@@ -1,13 +1,13 @@
 /* Fonts: self-hosted WOFF2, Latin only, written here so only these files are built (no .woff, no other subset).
-   Source Serif 4 400 for prose; Source Sans 3 400 and 600 for labels, tables, the chart and every heading from h2
-   down; Big Shoulders Display 800 for the name only. */
+   Newsreader 400 for prose; Source Sans 3 400 and 600 for labels, tables, the chart and every heading from h2
+   down; Big Shoulders Display 800 for the name only. The name's face and Newsreader 400 are the two files the
+   build preloads (web/vite.config.ts). */
 @font-face {
-  font-family: "Source Serif 4";
+  font-family: "Newsreader";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("../node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-400-normal.woff2")
-    format("woff2");
+  src: url("../node_modules/@fontsource/newsreader/files/newsreader-latin-400-normal.woff2") format("woff2");
 }
 @font-face {
   font-family: "Source Sans 3";
@@ -65,7 +65,7 @@
 }
 
 :root {
-  --serif: "Source Serif 4", ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --serif: "Newsreader", ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --display: "Big Shoulders Display", "Arial Narrow", system-ui, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -186,8 +186,11 @@ h1 {
   line-height: 0.98;
   margin-bottom: 1.5rem;
 }
+/* Deliberate sizes (IMPLEMENTATION doc section 22, his type change): he chose Newsreader at 20px for this paragraph
+   and 18px for prose as Google Fonts' variable font sets it. The static file used here sets one step larger, so 19px
+   (below) and the 17px body (--s0) match what he approved. Do not "correct" them to 20 and 18. */
 .lede {
-  font-size: var(--s1);
+  font-size: 1.1875rem;
   line-height: 1.45;
   max-width: 34em;
 }
@@ -226,6 +229,17 @@ h1 {
   color: var(--ink);
   font-weight: 600;
 }
+/* The chosen button turns semibold, which is wider. A hidden semibold copy of each label (from data-label) holds
+   the button at its semibold width, so choosing never moves the buttons after it. The empty alternative text after
+   the slash keeps the copy out of the accessible name. */
+.control button::after {
+  content: attr(data-label) / "";
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 600;
+}
 .control .bar {
   position: absolute;
   left: 0;
@@ -252,6 +266,7 @@ h1 {
   grid-template-columns: 1fr;
   gap: 3.5rem 3.5rem;
 }
+/* Chart.tsx reads this breakpoint too: below it, choosing a priority scrolls its panel into view. */
 @media (min-width: 54rem) {
   .panels {
     grid-template-columns: 1fr 1fr;
@@ -261,10 +276,12 @@ h1 {
   font-family: var(--sans);
   padding-right: 1.5rem;
   border-radius: 4px;
+  /* Choosing a priority scrolls its panel into view when it is not already (Chart.tsx); this is where it lands. */
+  scroll-margin-top: 1rem;
   transition: opacity var(--t) var(--ease);
 }
 .panels.focus .panel:not(.chosen) {
-  opacity: 0.22;
+  opacity: 0.35;
 }
 .panel .meta {
   font-size: var(--s-1);
@@ -419,6 +436,12 @@ h1 {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+/* The run table is wider than the text column. On wide screens its frame keeps its left edge on the text column and
+   runs right to the page's right margin (the same 2.5rem gutter), never past it. The extra width is half of what
+   the viewport has beyond main's 64rem; 100vw includes a classic scrollbar, and the gutter absorbs that. */
+.frame.wide {
+  margin-right: calc(-1 * max(0px, (100vw - 64rem) / 2));
+}
 table {
   border-collapse: collapse;
   font-family: var(--sans);
@@ -453,6 +476,23 @@ td:first-child {
 }
 tr.zero td {
   color: var(--ink2);
+}
+/* The seven line headings wrap so the table fits a smaller frame; the amounts stay right-aligned under them, and
+   every body cell stays on one line. */
+th.amt {
+  white-space: normal;
+  text-align: right;
+  vertical-align: bottom;
+}
+/* Each table's first column stays put when the table scrolls sideways. For the status table that cell is the
+   first header cell (it spans both header rows) and the row names. */
+.status thead tr:first-child th:first-child,
+.status tbody th:first-child,
+.runs thead th:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  padding-right: 1rem;
 }
 .status th.pri {
   text-align: center;

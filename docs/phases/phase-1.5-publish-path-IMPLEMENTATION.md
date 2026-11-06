@@ -309,6 +309,9 @@ sign of a default.
   **Section headings in Source Sans 3 semibold** (his pick over Source Serif 4, `scratch/previews/heads.py`).
   Source Serif 4 stays for prose, now **upright**: the lede and the notice are no longer italic. So A's type is
   amended: no serif headings, and the serif needs only its 400.
+- **Amended 2026-11-06 (his, at the §8 review, §22):** the prose face is **Newsreader 400** (`@fontsource/newsreader`),
+  replacing Source Serif 4, and the lede drops from 22px to **19px**; body prose stays 17px. The static file sets one
+  step larger than the previewed variable font, so 19 and 17 are deliberate.
 - **Drafted labels avoid the rhythm he reads as generated** (his note, 2026-11-05): runs of short one-fact
   sentences of the same length, joined instead where a person would join them; likewise no "not X, it's Y" turns,
   reflexive threes, colon reveals or tidy closers. He still approves every label word for word.
@@ -497,11 +500,11 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
 5. **[built 2026-11-05 (Sonnet); reviewed (Opus, one test fix); his words and the three label redrafts approved by him, the other drafted labels approved 2026-11-06 (one change, §20); `make check` green; committed `ea2bb7d` and pushed (his); CI green, run `42112962435`]** **C3, the page** (§7, §8): `web/`, `make web-check`, `ci.yml`. His words land in
    `copy.ts` before this commit. Built and checked locally (`npm run dev`, then the production build served with the
    content security policy set locally); Deploy does not yet watch `web/**`, so this push runs CI only.
-6. **[built 2026-11-06 (Opus, in session, his call); his `bootstrap` apply, two repository variables, commit and push owed; §21]** **[Sonnet builds, Opus reviews]** **C4, the site in `main`:** `site.tf`, the deploy workflow's `changes` and `site`
+6. **[done 2026-11-06: built (Opus, in session, his call); his `bootstrap` apply and two repository variables; committed `69b88ce` (his); CI and Deploy green, first attempt, no permission added; §21]** **[Sonnet builds, Opus reviews]** **C4, the site in `main`:** `site.tf`, the deploy workflow's `changes` and `site`
    jobs, `teardown.yml`, the permission check's new attempt. He pushes; Claude reads the Deploy log; each missing
    permission is added by name, scoped, with the error recorded, as in Phase 1.
-7. **[his]** **The permission check**, dispatched; Claude reads the log.
-8. **[his, Claude reading]** **The review against §8**, on the CloudFront domain, at both widths, both modes. Fixes
+7. **[done 2026-11-06: run `42245451195`, all six refused; §21]** **[his]** **The permission check**, dispatched; Claude reads the log.
+8. **[reviewed 2026-11-06: five misses, three departures accepted, his type change; §22. Fixes built 2026-11-06 (Sonnet), reviewed (Opus, one change by his decision: the panel scroll on a phone only); his commit owed; §23, §23a]** **[his, Claude reading]** **The review against §8**, on the CloudFront domain, at both widths, both modes. Fixes
    before the next step.
 9. **[his]** **C5, the rewrite:** `infra/vercel/vercel.json` with the domain; deploy (decision 4); the public URL
    checked.
@@ -1194,3 +1197,245 @@ e75c6c69-6030-4efb-ba96-014e5a493e08`, the values §17 recorded.
 
 **Step 2 done (2026-11-06, about 9:30 AM, his).** `gh variable set` for both: "Created variable
 SITE_ORIGIN_ACCESS_CONTROL_ID" and "Created variable SITE_RESPONSE_HEADERS_POLICY_ID", each with those values.
+
+**Step 3 done (2026-11-06, about 9:34 AM, his).** Commit `69b88ce` `phase 1.5: c4 the site in main, labels approved`
+(every hook passed, the name guard on paths, content and message included), pushed. **CI run `42244341282` passed.
+Deploy run `42244341172` passed, every job, on the first attempt.** Read by Claude:
+
+- `what changed`: `code=true site=true` (the push touched `infra/**` and `deploy.yml`).
+- The image `sha256:0482bac0...`; the apply's plan **"5 to add, 0 to change, 1 to destroy"** (the distribution, the
+  site bucket, its policy and its public access block created; the task definition replaced to name the new image, as
+  on every image-building deploy), then "Apply complete! Resources: 5 added, 0 changed, 1 destroyed." **No access
+  error anywhere in the log**, so the create met `aws:RequestTag/Project` with the provider's `default_tags` (§15's
+  question answered) and no permission had to be added.
+- The distribution `E2I9ASU9R5GM22`, domain `d17t61og2l6kuo.cloudfront.net`. The sync uploaded seven files under
+  `assets/` and `index.html` and `favicon.svg` beside them; one invalidation of `/*`.
+- The smoke test: the new script `index-Dk1RsRTF.js` served on attempt 7 (about a minute, a new distribution's name
+  resolving); every header served; the script and stylesheet with their types; the bundle names
+  `skeleton-haiku-5-5-f1467906`. "The site serves this build, with its headers."
+- No 12-digit account id in the public log (the only 12-digit strings are fragments of image layer hashes).
+- Claude's own `curl -I` of the domain afterwards: `HTTP/2 200`, `cache-control: no-cache` on `index.html`, the
+  content security policy word for word as §9, `max-age=63072000; includeSubDomains`, `nosniff`, `no-referrer`,
+  `x-robots-tag: noindex`.
+- Annotations only: GitHub's notice that `ubuntu-latest` moves to Ubuntu 26 from 2026-10-19. Not acted on here.
+
+**Step 7 done (2026-11-06, about 9:43 AM): the permission check.** His dispatch; run `42245451195` passed, read by
+Claude: **"All six forbidden actions were refused."** Each with an access error: create a role without the boundary
+and create a bucket outside the project (no policy allows them), put an inline policy on its own role and run a task
+(explicit deny in `horizon-compact-deploy`), **delete another project's distribution** (no policy allows
+`DeleteDistribution` on it: the tag fence), and **claim another project's distribution by tag**, refused "with an
+explicit deny in an identity-based policy": the new `NeverRetagAnotherProjectsDistribution`, evaluated before the
+over-long tag value was ever read. The distribution tested was the one other distribution listed (Musical
+Mycelium's); nothing about it changed. Account ids appear only as `<account-id>`. **DoD 8 proved.** The KNOWN-GAPS
+entry of 2026-11-06 is closed.
+
+**Next: §12 step 8, the review against §8** on `d17t61og2l6kuo.cloudfront.net`, at 1280 and 390 pixels, light and
+dark (his, Claude reading); fixes before C5. *(Done 2026-11-06: the review is §22, its fixes §23 and §23a.)*
+
+## 22. The review against §8 (2026-11-06, §12 step 8)
+
+Claude's screenshots of the live page on `d17t61og2l6kuo.cloudfront.net` (headless Chromium, 1280 and 390 pixels,
+light and dark), and a script driving the live page over the DevTools protocol: hover, the keyboard path, the
+priority control, reduced motion, the console and every request's host. He reviewed the screenshots. Headless
+Chromium only: not Safari or Firefox, not a real phone. axe, the asset budget and the contrast validator were not
+re-run here; they run in `make check` and `npm run check`.
+
+**Passes.** No template residue (the title is the name, the favicon is his). No decoration without a job, no filler
+word (a sweep of the rendered text for §8's list and `planning/06`'s found none). Hierarchy by space and type. Every
+panel has its run count, the axis starts at $0, spread is drawn. A dot's hit area is 24 by 24 pixels; hovering a dot
+lights its run's seven dots and its row in the run table, the tooltip giving the amount first. Tab gives one stop per
+panel, the arrow keys move between its dots with the same tooltip, Escape clears, the focus ring is a 2px solid
+outline. The priority control dims the other panels and sets `aria-pressed`. Under `prefers-reduced-motion` every
+transition is 0s. No console message, no request to any host but the page's own. A faint dark-mode tooltip in one
+capture was the capture (computed opacity 1, a plain viewport capture solid).
+
+**Misses, to fix before C5:**
+
+1. **On a phone, choosing a priority leaves its panel off screen.** In one column, choosing Fragrance dims Color and
+   Fragrance stays below the fold ("No priority set" is four panels down). Fix: bring the chosen panel into view, with
+   no smooth scroll under reduced motion.
+2. **The status table's first column scrolls away on a phone.** Only the run table's first column is fixed, so
+   scrolling to Butterflies loses the status names. Fix: fix that column too.
+3. **At 1280 the run table hides its last five columns** (the seeds line onward) behind a sideways scroll, and an
+   overlay scrollbar (macOS) gives no sign of them. §7.1 planned that scroll for phone width only. **Measured on the
+   live page:** the table is 1,454px wide at every desktop width, its frame 944px (the text column); with its line
+   headings allowed to wrap, its narrowest is 1,022px (without the Image column, 916px). **His decision (2026-11-06,
+   about 4:37 PM, "avoid unnecessary scroll", as recommended):** the line headings wrap, and on wide screens the
+   table's frame keeps its left edge on the text column and extends right to the page's right margin, so it scrolls
+   at no width from about 1,180px up (1280, 1440, 1920 included); at 1024 a small scroll remains, and at phone width
+   the scroll §7.1 planned. The Image column stays (§7 item 6). *(Dated note, 2026-11-06, the review of the fixes: as built, with only the
+   seven line headings wrapping, the point is about 1,200px, not 1,180; 10px of scroll at 1,180. Accepted by him;
+   §23a.)*
+4. **The chosen priority's label turns semibold and pushes the labels after it** about 3 pixels ("Color" measured
+   moving from x 240 to 237). Fix: reserve the semibold width so nothing moves.
+5. **A cold load shows the fallback faces first** (`font-display: swap`, no preload): the first capture caught the
+   name on two lines, and the first screen reflows when the fonts arrive. Fix: preload the name's face and the prose
+   face.
+
+**Departures from the doc's letter, accepted (a dated note, no fix):**
+
+6. The status table also scrolls sideways at phone width (§7.1 names only the run table). It sits in its own labelled,
+   focusable frame and never moves the page.
+7. The status counts are centered under their "first" and "final" headings, not right-aligned (§8). Every count is a
+   single digit.
+8. The dimmed panels sit at opacity 0.22, the run table's dimmed rows at 0.35. **Raised to 0.35 with the fixes**
+   (his acceptance of the recommendations, 2026-11-06), so a dimmed panel stays legible.
+
+**His type change (2026-11-06, about 4:30 PM): the prose face becomes Newsreader, and the opening paragraph smaller.**
+He found the lede too large between the name and the notice (22px against the notice's 17px) and was not keen on
+Source Serif 4. From previews of five faces and then four sizes (`scratchpad` only, not tracked), he chose
+**Newsreader with the lede at 20px and body prose at 18px as served by Google Fonts' variable font**, whose optical
+sizes set it tighter at those sizes. **Self-hosted, that look is set with the static file at 19px and 17px:**
+`@fontsource/newsreader` 5.3.0 (published 2026-07-19, OFL-1.1, checked live), `newsreader-latin-400-normal.woff2`,
+22,480 bytes, a single cut for text sizes that sets wider than the variable font, so one step smaller matches it (his
+comparison of the three, side by side). He took that over the variable file (`@fontsource-variable/newsreader`,
+132,000 bytes for the Latin optical-size file, which would take the fonts to about 178 KB, past §8's 150 KB) and over
+a trimmed variable file (a font-processing step and a generated file in the repository). **So the CSS reads 19px and
+17px on purpose; do not "correct" them to 20 and 18.** Fonts go from 66,008 bytes to 68,400 (Source Serif 4's 20,088
+out). §7.3's type amended by a dated note.
+
+**Next:** the five fixes, item 8 and the type change are built (Sonnet, a fresh session, from
+`scratch/p15-review-fixes-build-prompt.md`), Opus reviews, the page is
+captured again at both widths and modes, and his commit carries them with today's docs. Then C5. *(Dated note, 2026-11-06,
+about 5:20 PM: built and reviewed, §23 and §23a; the "after" captures stand, §23a says why. His commit owed, then
+C5.)*
+
+## 23. As built, the §8 review fixes (2026-11-06)
+
+Built by Sonnet in a fresh session from `scratch/p15-review-fixes-build-prompt.md`; Opus reviews; he commits. No AWS
+call, no `terraform` command other than `make check`'s own, no Vercel command. `web/src/copy.ts`, the data file and
+everything outside `web/` and this doc are untouched; `hc protocol check` prints ok.
+
+**What was built, per item.**
+
+1. **A chosen priority's panel is brought into view.** `Chart` keeps a ref to the chosen panel (set only on that
+   panel) and an effect on `chosen`: not for "All five"; if the panel's rectangle is not fully inside the viewport,
+   `scrollIntoView({ block: "start", behavior })`, `"smooth"`, or `"auto"` under `prefers-reduced-motion: reduce`;
+   `.panel` has `scroll-margin-top: 1rem`. `scrollIntoView` and `matchMedia` are called defensively (jsdom has neither).
+2. **The status table's first column is sticky:** the first header cell (it spans both header rows, so it is the only
+   header cell in column 0) and each row's name, surface background, `left: 0`. The same rule now also fixes the run
+   table's first header cell (see the departures).
+3. **The run table stops hiding columns on desktop.** The seven line headings carry `th.amt` (wrap, right-aligned,
+   bottom-aligned); every body cell stays on one line. The run table's frame carries `.wide`, with `margin-right:
+   calc(-1 * max(0px, (100vw - 64rem) / 2))`, so it keeps its left edge on the text column and runs to the right
+   margin. Nothing else widens.
+4. **The control no longer shifts.** Each button has `data-label`, and `.control button::after` holds a hidden
+   semibold copy of the label (`content: attr(data-label) / ""`, `height: 0`, `overflow: hidden`, `visibility:
+   hidden`, `font-weight: 600`), so the button is always as wide as its semibold self.
+5. **The two first-screen fonts are preloaded.** `preloadFonts()` in `web/vite.config.ts` finds the emitted Big
+   Shoulders Display 800 and Newsreader 400 files in the bundle and adds a `<link rel="preload" as="font"
+   type="font/woff2" crossorigin>` for each (it throws if either pattern matches other than once, and does nothing on
+   the dev server). `web/scripts/check-dist.mjs` now requires exactly those two preloads, each `as="font"`, each
+   `type="font/woff2"`, each with `crossorigin`, each naming a file that exists in `dist/assets/`. Tried against
+   three broken copies of `index.html` (no `crossorigin`, one preload missing, one naming a missing file): each fails
+   with its own message; the good build passes.
+6. **His type change.** `@fontsource/newsreader` pinned at exactly `5.3.0`; `@fontsource/source-serif-4` removed from
+   `package.json` and the lock. Checked live against the npm registry today: version 5.3.0, license OFL-1.1, published
+   2026-07-19 (110 days, past the 14-day rule), and the `latest` tag. The serif `@font-face` points at
+   `newsreader-latin-400-normal.woff2` (22,480 bytes), no Fontsource CSS import; `--serif` starts with "Newsreader".
+   The lede is `1.1875rem` (19px), body prose stays `--s0` (17px); a CSS comment citing §22 says why, so nobody
+   corrects them to 20 and 18. The comment at the top of `styles.css` is updated.
+7. **Dimmed panels:** `.panels.focus .panel:not(.chosen)` is 0.35, as the run table's dimmed rows.
+
+**Browser proof.** Headless Chromium (chrome-headless-shell 1234) driven over the DevTools protocol against `npm run
+preview`, the production build under the served content security policy, on localhost. Classic scrollbars on for every
+measurement (15px, measured: `innerWidth - clientWidth`); `--hide-scrollbars` only for the screenshots. Scripts are in
+the session's scratchpad, not the repository. Chromium only: not Safari, not Firefox, not a phone.
+
+- **Item 1.** At 390 x 844, choosing "No priority set" leaves the panel's top at 16px and its heading at 16-35px: inside
+  the viewport (before the fix it was four panels down). The scroll is smooth: after 120ms `scrollY` was 842 of a final
+  3,599; under reduced motion it was 3,599 at 120ms. A panel already fully in view (Color, top 120px, bottom 677px)
+  did not move the page (`scrollY` 1,043 before and after), and "All five" did not either.
+- **Item 2.** At 390, with the status frame scrolled fully right (328px of scroll), the status column's 14 cells (the
+  header cell and 13 rows) all stay at x = 16, as before the scroll. The run table, scrolled fully right (689px), keeps
+  its first column at x = 16 too.
+- **Item 3.** Frame and page, by viewport width:
+
+  | width | page scrolls sideways? | frame's width | table's width | frame's overflow | right gutter |
+  |---|---|---|---|---|---|
+  | 320 | no (305 of 305) | 273 | 1,032 | 759 | 16 |
+  | 390 | no | 343 | 1,032 | 689 | 16 |
+  | 768 | no | 673 | 1,032 | 359 | 40 |
+  | 1024 | no | 929 | 1,032 | **103** | 40 |
+  | 1180 | no | 1,022 | 1,032 | **10** | 33 |
+  | 1280 | no | 1,072 | 1,072 | 0 | 33 |
+  | 1440 | no | 1,152 | 1,152 | 0 | 33 |
+  | 1920 | no | 1,392 | 1,392 | 0 | 33 |
+
+  "Right gutter" is the distance from the frame's right edge to the page's right edge, inside the scrollbar. With a
+  classic 15px scrollbar the 2.5rem gutter (40px) absorbs the 7.5px `100vw` overstates, and it is 33px; the frame
+  never passes the margin, and the page never scrolls sideways. With an overlay scrollbar (macOS, a phone) there is
+  nothing to absorb and the gutter is the full 40px; that case was not measured. The first column stays sticky;
+  tracing lights and dims rows (the Vitest tests for it pass, and a traced run is in the screenshots).
+- **Item 4.** For each of the six choices, every button's left edge and width are identical to the 0.5px bound: the
+  largest difference is 0px ("All five" 160.5/48, Color 232.5/39, Fragrance 295.5/75, Low water use 394.5/105,
+  Butterflies 523.5/76, No priority set 623.5/101). With the `::after` rule switched off the buttons do move (Color
+  232.5 to 229.5, the review's 3px), so the 0 is the rule's doing. The bar sits under the chosen button (left and width
+  equal). The accessible names in Chromium's accessibility tree are the six labels, undoubled, with the alt-text form
+  and with plain `content: attr(data-label)` alike. axe reports nothing in the Vitest suite (it cannot see pseudo-element
+  content in jsdom; the accessibility tree above is the check for that).
+- **Item 5.** Cold load, cache disabled: each of the four font files requested exactly once (the two preloaded ones
+  included: `crossorigin` works), one host (`localhost:4173`), no content-security-policy violation, no console or
+  exception event, and no "preloaded but not used" warning after waiting past the usual 3 seconds.
+
+**Sizes.** JavaScript 75,874 bytes gzipped (74.1 KB; budget 100 KB). Fonts 68,400 bytes (66.8 KB; budget 150 KB; from
+66,008), four WOFF2 files: Big Shoulders Display 800 14.55 KB, Newsreader 400 22.48 KB, Source Sans 3 400 15.69 KB and
+600 15.66 KB. CSS 8.70 KB (2.76 KB gzipped).
+
+**Screenshots** (`scratch/p15-review/shots-after/`, gitignored; "before" in `shots-before/`): the full page at 1280 and
+390 in light and dark (`desk-*.png`, `phone-*.png`, and `sections/` for the readable crops), the control with Fragrance
+chosen at 390 (`m-control-*.png`) and at 1280 (`control-*.png`), a traced run at 1280 (`hover-*.png`), the run table
+at 1280 (`runs-table-*.png`), and both tables on a phone scrolled fully right (`m-status-scrolled-*.png`,
+`m-runs-scrolled-*.png`). Looked at against the "before" set: the name is on one line, the lede is calmer, all fourteen
+columns of the run table show at 1280 with the amounts right-aligned under their wrapped headings, the sticky names hold
+on a phone, and a dimmed panel is legible.
+
+**What did not fit, and what was done instead.**
+
+- **At 1180 the run table still scrolls, by 10px, and at 1024 by 103px.** §22 and his decision said the scroll goes
+  "from about 1,180px up". Its 1,022px figure was measured with every heading allowed to wrap; the decision wraps only
+  the seven line headings, and then the table's narrowest is 1,032px (measured both ways today: 1,022 with every
+  heading wrapping, 1,032 as built). The 10px is the two-word "Open day" heading. The frame is `(viewport + 1,024) / 2 -
+  80` wide, so the scroll goes at a viewport of about 1,200px, not 1,180. Nothing was changed to chase it; the two
+  ways to close it are letting "Open day" wrap as well (it is a heading, not one of the seven) or trimming the cell
+  padding by about 1px a column, and either is his call at review.
+- **The run table's first header cell is sticky too** (not asked for). Without it the "Run" heading scrolls away from
+  its column while the ids stay. The rule is the status table's, and the same one-line selector list.
+- **Status table, "the first cell of each header row":** its second header row has no cell in column 0 (the "Status"
+  cell spans both rows), so one cell is sticky there, not two.
+- **`content: attr(data-label) / ""`** uses the alternative-text form so that engines that count pseudo-element content
+  in a name do not double it. Chromium needed no help (it ignores the hidden copy); Firefox and Safari were not tried.
+  An engine that does not read the form drops the declaration, and then the buttons shift 3px as before: nothing breaks.
+- **Not done, as the prompt says:** a sticky priority control (on a phone the control is above the viewport once the
+  panel is in view); new words (none were needed); Safari, Firefox and a real phone.
+
+**`make check`:** green. Python 3,248 passed; Vitest 36 passed (37 after the review, §23a) (29 before; seven added: five for item 1, two for
+`data-label` and the `wide` and `amt` hooks); prettier, `tsc`, the build and `check-dist` all pass; `terraform
+validate` succeeds; `doctor` ok (hooks installed, term file loads). `hc protocol check`: ok.
+
+### 23a. Opus's review of the fixes (2026-11-06, about 5:15 PM)
+
+Read the whole diff against the build prompt and §8, re-ran `make check` (green: Python 3,248, Vitest 36), and
+measured the production build again under `npm run preview` in headless Chromium with classic scrollbars, with
+scripts of its own (scratchpad, not tracked). **Every measurement above reproduced to the pixel:** the item 3 table at
+all eight widths (and 1,200: no scroll), the item 4 button positions, the four font files requested once each from one
+host with no console or policy message, and the two preload tags in `dist/index.html`. The accessibility tree names
+the six buttons once each. `@fontsource/newsreader` 5.3.0 re-checked live: OFL-1.1, published 2026-07-19, its
+integrity matching the lock.
+
+**One finding, from the prompt, not the build: item 1 also moved the page on desktop.** The prompt asked for the
+scroll at every width; the miss in §22 was on a phone. At 1280 by 800, choosing Low water use, Butterflies or No
+priority set scrolled the page 700 to 1,150px and carried the control off screen at every choice. **His decision
+(2026-11-06, about 5:10 PM, as recommended): only in the one-column layout.** Opus changed it in review: the effect
+returns early when `(min-width: 54rem)` matches, the two-column breakpoint in `styles.css` (a comment there now
+points back at `Chart.tsx`), and one Vitest test proves it (37 now). In the browser: at 390 and 800 the chosen panel
+lands at 16px; at 880 and 1280 the page does not move.
+
+**The 10px at 1180: his decision (about 5:10 PM, as recommended), accepted as built.** The seven-heading rule stands;
+the run table scrolls from 1,024 to about 1,199px, and not from about 1,200px up. Letting "Open day" wrap as well was
+measured: it moves that point only to about 1,180 (5px still at 1,170). §22's "about 1,180px" reads as about 1,200.
+
+**Nothing else to change.** Departures accepted: the sticky "Run" header cell, and one sticky header cell in the
+status table. The `::after` alternative-text form was proven in Chromium only (Firefox and Safari not tried, not checked
+live); where an engine does not read it, the declaration drops and the buttons shift 3px as before. The "after" screenshots stand: the desktop shots never
+scrolled, and the phone behavior is unchanged.

@@ -74,7 +74,7 @@ export function RunsTable({ chosen, tracedRunId }: RunsTableProps) {
   if (tracedRunId !== null) classes.push("tracing");
   if (chosen !== "all") classes.push("choosing");
   return (
-    <div className="frame" role="region" aria-label={labels.runsTableLabel} tabIndex={0}>
+    <div className="frame wide" role="region" aria-label={labels.runsTableLabel} tabIndex={0}>
       <table className={classes.join(" ")}>
         <thead>
           <tr>
@@ -83,7 +83,9 @@ export function RunsTable({ chosen, tracedRunId }: RunsTableProps) {
             <th>{labels.columnStatus}</th>
             <th>{labels.columnAttempts}</th>
             {lines.map((line) => (
-              <th key={line.key}>{line.label}</th>
+              <th key={line.key} className="amt">
+                {line.label}
+              </th>
             ))}
             <th>{labels.columnOpenDay}</th>
             <th>{labels.columnImage}</th>

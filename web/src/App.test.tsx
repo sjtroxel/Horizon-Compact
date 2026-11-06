@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, within } from "@testing-library/react";
 import axe from "axe-core";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { his, isPlaceholder } from "./copy";
 import { data, money } from "./data";
@@ -119,6 +119,106 @@ describe("the priority control", () => {
     expect(container.querySelectorAll(".panel.chosen")).toHaveLength(0);
     expect(container.querySelectorAll(".runs tbody tr.in")).toHaveLength(0);
     expect(container.querySelector(".panels.focus")).toBeNull();
+  });
+});
+
+/** jsdom has no layout: place a panel by hand, and stand in for scrollIntoView and matchMedia. */
+function placePanel(container: HTMLElement, priority: string, top: number, bottom: number) {
+  const panel = container.querySelector<HTMLElement>(`.panel[data-priority="${priority}"]`)!;
+  panel.getBoundingClientRect = () => ({ top, bottom }) as DOMRect;
+  return panel;
+}
+
+describe("choosing a priority brings its panel into view", () => {
+  const original = {
+    scrollIntoView: Element.prototype.scrollIntoView,
+    matchMedia: window.matchMedia,
+  };
+  afterEach(() => {
+    Element.prototype.scrollIntoView = original.scrollIntoView;
+    window.matchMedia = original.matchMedia;
+  });
+
+  function mock(reduced: boolean, twoColumns = false) {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    window.matchMedia = ((query: string) => ({
+      matches:
+        (reduced && query === "(prefers-reduced-motion: reduce)") ||
+        (twoColumns && query === "(min-width: 54rem)"),
+    })) as typeof window.matchMedia;
+    return scrollIntoView;
+  }
+
+  it("never moves the page in the two-column layout", () => {
+    const scrollIntoView = mock(false, true);
+    const { container, getByRole } = render(<App />);
+    placePanel(container, "fragrance", window.innerHeight + 200, window.innerHeight + 700);
+    fireEvent.click(getByRole("button", { name: "Fragrance" }));
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("scrolls a panel that is out of view to the top, smoothly", () => {
+    const scrollIntoView = mock(false);
+    const { container, getByRole } = render(<App />);
+    const panel = placePanel(container, "fragrance", window.innerHeight + 200, window.innerHeight + 700);
+    fireEvent.click(getByRole("button", { name: "Fragrance" }));
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "start", behavior: "smooth" });
+    expect(scrollIntoView.mock.contexts[0]).toBe(panel);
+  });
+
+  it("scrolls a panel that is only partly in view", () => {
+    const scrollIntoView = mock(false);
+    const { container, getByRole } = render(<App />);
+    placePanel(container, "water", window.innerHeight - 100, window.innerHeight + 300);
+    fireEvent.click(getByRole("button", { name: "Low water use" }));
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not move the page for a panel that is fully in view", () => {
+    const scrollIntoView = mock(false);
+    const { container, getByRole } = render(<App />);
+    placePanel(container, "color", 80, 520);
+    fireEvent.click(getByRole("button", { name: "Color" }));
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("never scrolls for All five", () => {
+    const scrollIntoView = mock(false);
+    const { container, getByRole } = render(<App />);
+    fireEvent.click(getByRole("button", { name: "Butterflies" }));
+    scrollIntoView.mockClear();
+    for (const cell of data.cells) placePanel(container, cell.objective_id, 5000, 5400);
+    fireEvent.click(getByRole("button", { name: "All five" }));
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("does not animate under prefers-reduced-motion", () => {
+    const scrollIntoView = mock(true);
+    const { container, getByRole } = render(<App />);
+    placePanel(container, "fragrance", window.innerHeight + 200, window.innerHeight + 700);
+    fireEvent.click(getByRole("button", { name: "Fragrance" }));
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "start", behavior: "auto" });
+  });
+});
+
+describe("the layout hooks the stylesheet depends on", () => {
+  it("gives every priority button its own label as data-label, for the reserved semibold width", () => {
+    const { container } = render(<App />);
+    const buttons = Array.from(container.querySelectorAll<HTMLButtonElement>(".control button"));
+    expect(buttons).toHaveLength(data.cells.length + 1);
+    for (const button of buttons) expect(button.getAttribute("data-label")).toBe(button.textContent);
+  });
+
+  it("marks the run table's frame wide and its seven line headings as amounts", () => {
+    const { container } = render(<App />);
+    const frames = container.querySelectorAll(".frame");
+    expect(frames).toHaveLength(2);
+    expect(frames[0]!.classList.contains("wide")).toBe(false);
+    expect(frames[1]!.classList.contains("wide")).toBe(true);
+    expect(container.querySelectorAll("table.runs th.amt")).toHaveLength(LINES);
+    expect(container.querySelectorAll("table.status th.amt")).toHaveLength(0);
   });
 });
 

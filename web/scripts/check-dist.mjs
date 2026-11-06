@@ -49,6 +49,31 @@ for (const match of html.matchAll(/\b(src|href)\s*=\s*"([^"]*)"/gi)) {
   if (!allowed) fail(`index.html ${attribute}="${value}" is not the favicon or a built asset`);
 }
 
+// Preloads: exactly two, the name's face (Big Shoulders Display 800) and the prose face (Newsreader 400), each as a
+// font with `crossorigin` (without it the browser fetches the font twice), each naming a file that is in dist/.
+const preloads = (html.match(/<link\b[^>]*>/gi) ?? []).filter((tag) => /\brel\s*=\s*"preload"/i.test(tag));
+const wanted = [
+  /\/big-shoulders-display-latin-800-normal-[^/"]*\.woff2$/,
+  /\/newsreader-latin-400-normal-[^/"]*\.woff2$/,
+];
+if (preloads.length !== wanted.length) {
+  fail(`index.html has ${preloads.length} preload link(s); it must have exactly ${wanted.length}`);
+}
+const preloaded = [];
+for (const tag of preloads) {
+  const href = /\bhref\s*=\s*"([^"]*)"/i.exec(tag)?.[1] ?? "";
+  preloaded.push(href);
+  if (!/\bas\s*=\s*"font"/i.test(tag)) fail(`preload ${href} is not as="font"`);
+  if (!/\btype\s*=\s*"font\/woff2"/i.test(tag)) fail(`preload ${href} is not type="font/woff2"`);
+  if (!/\scrossorigin(?=[\s>=/])/i.test(tag)) fail(`preload ${href} has no crossorigin attribute`);
+  if (!href.startsWith("/assets/") || !files.includes(join(DIST, href))) {
+    fail(`preload ${href} does not name a file in dist/assets/`);
+  }
+}
+for (const pattern of wanted) {
+  if (!preloaded.some((href) => pattern.test(href))) fail(`no preload for ${pattern}`);
+}
+
 // CSS: every url() is relative to the build; no @import.
 const css = files.filter((f) => extname(f) === ".css");
 for (const f of css) {
