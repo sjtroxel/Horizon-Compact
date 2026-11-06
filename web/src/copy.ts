@@ -17,16 +17,16 @@ export const his = {
 };
 
 /**
- * Claude-drafted words, approved by him word for word only where section 20 says so (the three redrafted keys and
- * notes, 2026-11-05); the rest await his explicit approval before the page goes public (C4). Where a key or note holds related facts they are
- * joined as a person would join them, with no run of short same-length sentences, no "not X, it's Y" turn, no
+ * Claude-drafted words, approved by him word for word (the three redrafted keys and notes 2026-11-05, the rest
+ * 2026-11-06 with the chart key's "marks" changed to "shows"; the IMPLEMENTATION doc section 20). Where a key or
+ * note holds related facts they are joined as a person would join them, with no run of short same-length sentences, no "not X, it's Y" turn, no
  * reflexive three, no colon reveal and no tidy closing restatement (his rule, 2026-11-05).
  */
 export const labels = {
   // The chart
   chartTitle: "Amounts by line, three runs per priority",
   chartKey:
-    "Each dot is one run, the solid tick marks the mean of the three, and the thin mark at the end of each line is its cap; point at a dot to follow that run through every line.",
+    "Each dot is one run, the solid tick shows the mean of the three, and the thin mark at the end of each line is its cap; point at a dot to follow that run through every line.",
   priorityControl: "Priority",
   allFive: "All five",
   priorities: {

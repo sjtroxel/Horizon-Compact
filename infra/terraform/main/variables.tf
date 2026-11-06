@@ -34,3 +34,27 @@ variable "sonnet_route" {
     error_message = "sonnet_route must be application_profile or geo_profile."
   }
 }
+
+# The two `bootstrap` objects (Phase 1.5 decision 5). Their ids hold no account id, so CI passes them from plain
+# repository variables (SITE_ORIGIN_ACCESS_CONTROL_ID, SITE_RESPONSE_HEADERS_POLICY_ID), set by hand from
+# `terraform -chdir=infra/terraform/bootstrap output -raw <name>`. No default, so a deploy cannot run without them.
+
+variable "site_origin_access_control_id" {
+  description = "The site distribution's origin access control, from `bootstrap`'s output of the same name."
+  type        = string
+
+  validation {
+    condition     = can(regex("^E[0-9A-Z]{10,20}$", var.site_origin_access_control_id))
+    error_message = "site_origin_access_control_id must look like a CloudFront id (E followed by capitals and digits)."
+  }
+}
+
+variable "site_response_headers_policy_id" {
+  description = "The site distribution's response headers policy, from `bootstrap`'s output of the same name."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.site_response_headers_policy_id))
+    error_message = "site_response_headers_policy_id must be a UUID."
+  }
+}

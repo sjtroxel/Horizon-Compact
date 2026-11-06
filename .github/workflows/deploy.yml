@@ -1,7 +1,9 @@
 name: Deploy
 
 # Phase 1 decision 3: a push to main that touches code the sweep runs, or the infrastructure, builds the image and
-# applies `main`. A push that touches only docs does nothing here (CI still runs).
+# applies `main`. Phase 1.5 (IMPLEMENTATION doc section 9): a push that touches the page, the infrastructure or this
+# file builds the page and syncs it to the site; a page-only push builds no image and applies nothing. A push that
+# touches only docs or results does nothing here (CI still runs). A manual dispatch does everything.
 #
 # CI NEVER LAUNCHES A SWEEP. The deploy role's policy denies ecs:RunTask and every model call, so this workflow
 # could not start one if it tried (infra/iam/deploy.json: CiNeverLaunchesASweep).
@@ -14,6 +16,7 @@ on:
       - "experiment/**"
       - "!experiment/results/**"
       - "infra/**"
+      - "web/**"
       - "pyproject.toml"
       - "uv.lock"
       - ".github/workflows/deploy.yml"
@@ -28,6 +31,47 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Which halves this push needs, from its changed paths (plain git diff, no third-party action). `code` builds the
+  # image and applies `main`; `site` builds and syncs the page. A dispatch, or a push whose base is unknown (a new
+  # branch, a force-push), sets both.
+  changes:
+    name: what changed
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+      site: ${{ steps.diff.outputs.site }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Read the changed paths
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != "push" ] || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            echo "a dispatch, or a push with no known base: both halves"
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "site=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          code=false
+          site=false
+          while IFS= read -r path; do
+            case "$path" in
+              experiment/results/*) ;;
+              src/* | experiment/* | pyproject.toml | uv.lock) code=true ;;
+              infra/* | .github/workflows/deploy.yml) code=true; site=true ;;
+              web/*) site=true ;;
+            esac
+          done < <(git diff --name-only "$BEFORE" "$GITHUB_SHA")
+          echo "code=$code site=$site"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "site=$site" >> "$GITHUB_OUTPUT"
+
   check:
     name: make check
     runs-on: ubuntu-latest
@@ -46,15 +90,27 @@ jobs:
           terraform_version: "1.15.8"
           terraform_wrapper: false
 
+      # `make check` runs the page's checks too (`make web-check`, Phase 1.5 C3), so Node is needed here as in CI.
+      - name: Install Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
       - name: Install dependencies
         run: uv sync --locked
+
+      - name: Install page dependencies
+        run: npm --prefix web ci
 
       - name: make check
         run: make check
 
   image:
     name: build and push the arm64 image
-    needs: check
+    needs: [changes, check]
+    if: needs.changes.outputs.code == 'true'
     # Fargate runs ARM64 (task definition), so the image is built natively on an ARM runner, not emulated.
     runs-on: ubuntu-24.04-arm
     permissions:
@@ -129,6 +185,152 @@ jobs:
           terraform -chdir=infra/terraform/main plan -input=false -no-color -out=main.tfplan
           -var "image_digest=${{ needs.image.outputs.digest }}"
           -var "sonnet_route=${{ vars.SONNET_ROUTE }}"
+          -var "site_origin_access_control_id=${{ vars.SITE_ORIGIN_ACCESS_CONTROL_ID }}"
+          -var "site_response_headers_policy_id=${{ vars.SITE_RESPONSE_HEADERS_POLICY_ID }}"
 
       - name: Apply
         run: terraform -chdir=infra/terraform/main apply -input=false -no-color main.tfplan
+
+  # The page (Phase 1.5 IMPLEMENTATION doc section 9). After `infra` when it ran, so a new distribution exists
+  # before the sync; alone on a page-only push. Never when `check`, the image or the apply failed.
+  site:
+    name: build, sync and smoke-test the site
+    needs: [changes, check, image, infra]
+    if: >-
+      needs.changes.outputs.site == 'true'
+      && !cancelled()
+      && needs.check.result == 'success'
+      && (needs.image.result == 'success' || needs.image.result == 'skipped')
+      && (needs.infra.result == 'success' || needs.infra.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      # Again here, since a dispatch may target a commit CI never saw. `check` ends with the production build and
+      # the built-files check, so web/dist is what was checked.
+      - name: Install, check and build the page
+        run: |
+          npm --prefix web ci
+          npm --prefix web run check
+
+      - name: Assume the deploy role
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.15.8"
+          terraform_wrapper: false
+
+      - name: Init
+        run: >
+          terraform -chdir=infra/terraform/main init -input=false -lockfile=readonly
+          -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      # Two cache lifetimes. Vite names every file under assets/ by its content, so those are immutable for a year
+      # and a new build has new names; everything else (index.html, the favicon) is revalidated on every load, or a
+      # visitor keeps the old page's asset names after a deploy. `--delete` prunes the last build's files; a key a
+      # sync excludes is excluded from its deletion too, so the two syncs never delete each other's files.
+      - name: Sync the build and invalidate
+        run: |
+          set -euo pipefail
+          bucket="$(terraform -chdir=infra/terraform/main output -raw site_bucket)"
+          echo "::add-mask::$bucket"
+          distribution="$(terraform -chdir=infra/terraform/main output -raw site_distribution_id)"
+          echo "distribution: $distribution"
+
+          aws s3 sync web/dist/assets "s3://${bucket}/assets/" \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable"
+          aws s3 sync web/dist "s3://${bucket}/" \
+            --delete \
+            --exclude "assets/*" \
+            --cache-control "no-cache"
+
+          # One wildcard path counts as one of the 1,000 free invalidation paths a month.
+          aws cloudfront create-invalidation \
+            --distribution-id "$distribution" \
+            --paths '/*' \
+            --query 'Invalidation.Id' --output text
+
+      # Against the *.cloudfront.net domain, never the public URL: the rewrite is his step (C5), so a teardown day
+      # cannot turn this red. Retried, because a new distribution's name takes minutes to resolve and the edge
+      # serves the previous object until the invalidation lands.
+      - name: Smoke test the site
+        run: |
+          set -euo pipefail
+          site="https://$(terraform -chdir=infra/terraform/main output -raw site_domain)"
+          asset="$(basename "$(ls web/dist/assets/index-*.js)")"
+          sweep="$(jq -r '.sweep.sweep_id' web/src/data/placeholder.json)"
+          echo "site:  $site"
+          echo "asset: $asset"
+          echo "sweep: $sweep"
+
+          serving=false
+          for attempt in $(seq 1 36); do
+            if body="$(curl -fsS --max-time 20 "$site/" 2>&1)" && printf '%s' "$body" | grep -qF "$asset"; then
+              echo "the site serves this build (attempt $attempt)"
+              serving=true
+              break
+            fi
+            echo "attempt $attempt: not serving this build yet, waiting"
+            sleep 10
+          done
+          if [ "$serving" != true ]; then
+            echo "::error::$site did not serve $asset within about six minutes"
+            exit 1
+          fi
+
+          failures=0
+          headers="$(curl -fsSI --max-time 20 "$site/")"
+          for wanted in \
+            "content-security-policy: default-src 'none'; script-src 'self'; style-src 'self'" \
+            "x-robots-tag: noindex" \
+            "x-content-type-options: nosniff" \
+            "strict-transport-security: max-age=" \
+            "referrer-policy: no-referrer"; do
+            if printf '%s' "$headers" | grep -qiF "$wanted"; then
+              echo "header ok: $wanted"
+            else
+              echo "::error::header missing: $wanted"
+              failures=$((failures + 1))
+            fi
+          done
+
+          # nosniff makes the browser refuse a script or stylesheet served with the wrong type.
+          script_headers="$(curl -fsSI --max-time 20 "$site/assets/$asset")"
+          if ! printf '%s' "$script_headers" | grep -qiE '^content-type: (text|application)/javascript'; then
+            echo "::error::the script is not served as JavaScript"
+            failures=$((failures + 1))
+          fi
+          style="$(basename "$(ls web/dist/assets/*.css)")"
+          if ! curl -fsSI --max-time 20 "$site/assets/$style" | grep -qiE '^content-type: text/css'; then
+            echo "::error::the stylesheet is not served as CSS"
+            failures=$((failures + 1))
+          fi
+          if curl -fsS --max-time 20 "$site/assets/$asset" | grep -qF "$sweep"; then
+            echo "the bundle names the sweep $sweep"
+          else
+            echo "::error::the bundle does not name the sweep $sweep"
+            failures=$((failures + 1))
+          fi
+
+          if [ "$failures" -ne 0 ]; then
+            echo "$failures smoke checks failed"
+            exit 1
+          fi
+          echo "The site serves this build, with its headers."

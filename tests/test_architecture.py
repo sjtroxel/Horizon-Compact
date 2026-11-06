@@ -446,8 +446,11 @@ def test_deploy_policies_name_the_site_grants_exactly() -> None:
         "SiteRead",
         "SiteReadOriginAccessControl",
         "SiteReadResponseHeadersPolicy",
+        "NeverRetagAnotherProjectsDistribution",
     ]
-    assert all(s["Effect"] == "Allow" for s in by_sid.values())
+    assert [sid for sid, s in by_sid.items() if s["Effect"] != "Allow"] == [
+        "NeverRetagAnotherProjectsDistribution"
+    ]
 
     bucket = by_sid["SiteBucket"]
     assert _actions(bucket) == ["s3:*"]
@@ -498,6 +501,29 @@ def test_deploy_policies_name_the_site_grants_exactly() -> None:
         by_sid["SiteReadResponseHeadersPolicy"]["Resource"]
         == _FAKE_VARS["response_headers_policy_arn"]
     )
+
+
+def test_the_deploy_role_cannot_claim_another_projects_distribution_by_tag() -> None:
+    """SiteDistributionCreate allows TagResource on any resource when the request sets
+    Project=horizon-compact, which create-with-tags needs. Without this deny, the role could tag Musical
+    Mycelium's distribution as this project's and then update or delete it (found writing C4, 2026-11-06).
+    The Null guard leaves a resource with no Project tag alone, since a distribution being created may be
+    evaluated with none."""
+    deny = _statement("deploy-site.json", "NeverRetagAnotherProjectsDistribution")
+    assert deny["Effect"] == "Deny"
+    assert _actions(deny) == ["cloudfront:TagResource", "cloudfront:UntagResource"]
+    assert deny["Resource"] == "*"
+    assert deny["Condition"] == {
+        "StringNotEquals": {"aws:ResourceTag/Project": "horizon-compact"},
+        "Null": {"aws:ResourceTag/Project": "false"},
+    }
+    # Every Allow that can tag a distribution is covered by it.
+    taggers = [
+        str(s["Sid"])
+        for s in _statements("deploy-site.json")
+        if s["Effect"] == "Allow" and "cloudfront:TagResource" in _actions(s)
+    ]
+    assert taggers == ["SiteDistributionCreate", "SiteDistributionManage"]
 
 
 def test_deploy_role_never_gets_cloudfront_star_or_a_write_on_the_two_bootstrap_objects() -> None:
@@ -564,7 +590,7 @@ def test_dev_policy_can_apply_the_two_bootstrap_objects_and_nothing_wider() -> N
     ]
 
 
-def test_deploy_paths_leave_out_results_commits_and_not_yet_the_site() -> None:
+def test_deploy_paths_leave_out_results_commits_and_take_the_site() -> None:
     text = (WORKFLOWS / "deploy.yml").read_text(encoding="utf-8")
     paths = re.search(
         r"on:\n  push:\n    branches: \[main\]\n    paths:\n((?:      - .*\n)+)", text
@@ -572,7 +598,7 @@ def test_deploy_paths_leave_out_results_commits_and_not_yet_the_site() -> None:
     assert paths
     listed = [line.strip()[2:].strip('"') for line in paths.group(1).splitlines()]
     assert listed.index("!experiment/results/**") == listed.index("experiment/**") + 1
-    assert not [p for p in listed if p.startswith("web/")]  # C4 adds web/**, not C1
+    assert "web/**" in listed  # Phase 1.5 C4
 
 
 def test_the_image_leaves_experiment_results_out() -> None:
@@ -784,17 +810,29 @@ def test_deploy_workflow_never_cancels_an_apply_and_builds_one_manifest() -> Non
     assert "ecs run-task" not in text and "sweep launch" not in text
 
 
-def test_permission_check_covers_the_four_refusals() -> None:
+def test_permission_check_covers_the_six_refusals() -> None:
     text = (WORKFLOWS / "aws-permission-check.yml").read_text(encoding="utf-8")
     for needle in (
         "create-role",
         "create-bucket",
         "put-role-policy",
         "run-task",
+        "delete-distribution",
+        "tag-resource",
         "workflow_dispatch",
     ):
         assert needle in text, needle
     assert "push:" not in text
+    assert text.count('expect_refused "') == 6
+
+
+def test_the_distribution_attempts_could_never_change_it() -> None:
+    """If the fence were missing, the delete still fails on a stale ETag and the tag on a value over 256
+    characters, so the check can never alter another project's distribution."""
+    text = (WORKFLOWS / "aws-permission-check.yml").read_text(encoding="utf-8")
+    assert "--if-match E0000000000000" in text
+    assert "seq 1 300" in text and "Value=${too_long}" in text
+    assert "update-distribution" not in text and "untag-resource" not in text
 
 
 def test_workflows_hold_no_account_id() -> None:
@@ -1080,3 +1118,180 @@ def test_the_reader_reads_the_flagged_answers_from_a_file_not_from_the_case_prob
         for _, module in _imported_modules(ast.parse(path.read_text(encoding="utf-8")))
     ]
     assert not [m for m in imported if "caseprobe" in m]
+
+
+# --- the site (Phase 1.5 IMPLEMENTATION doc sections 9 and 10, C4) ----------------------------------------
+
+
+def _site_code() -> str:
+    return _strip_comments((MAIN / "site.tf").read_text(encoding="utf-8"))
+
+
+def test_the_site_bucket_is_private_computed_and_needs_no_emptying() -> None:
+    code = _site_code()
+    assert 'site_bucket = "${var.project}-site-${local.account_id}"' in code
+    assert re.search(r"force_destroy\s*=\s*true", code)
+    for setting in (
+        "block_public_acls",
+        "block_public_policy",
+        "ignore_public_acls",
+        "restrict_public_buckets",
+    ):
+        assert re.search(rf"{setting}\s*=\s*true", code), setting
+    assert "prevent_destroy" not in code  # the results bucket keeps it, in bootstrap
+
+
+def test_only_this_distribution_can_read_the_site_bucket() -> None:
+    code = _site_code()
+    assert re.search(r'actions\s*=\s*\["s3:GetObject"\]', code)
+    assert '"cloudfront.amazonaws.com"' in code
+    assert re.search(r'variable\s*=\s*"AWS:SourceArn"', code)
+    assert "aws_cloudfront_distribution.site.arn" in code
+
+
+def test_the_distribution_uses_the_bootstrap_objects_and_never_creates_them() -> None:
+    """Decision 5: the two objects take no tag condition, so main reads them by id and the deploy role
+    holds no write on them."""
+    main = _main_code()
+    for resource in (
+        "aws_cloudfront_origin_access_control",
+        "aws_cloudfront_response_headers_policy",
+    ):
+        assert not re.search(rf'resource\s+"{resource}"', main), resource
+    code = _site_code()
+    assert "id = var.site_origin_access_control_id" in code
+    assert "id = var.site_response_headers_policy_id" in code
+    assert "origin_access_control_id = data.aws_cloudfront_origin_access_control.site.id" in code
+    assert (
+        "response_headers_policy_id = data.aws_cloudfront_response_headers_policy.site.id" in code
+    )
+    assert '"Managed-CachingOptimized"' in code
+
+
+def test_the_distribution_is_https_get_only_and_the_cheapest_class() -> None:
+    code = re.sub(r"[ \t]+", " ", _site_code())
+    assert 'viewer_protocol_policy = "redirect-to-https"' in code
+    assert 'allowed_methods = ["GET", "HEAD"]' in code
+    assert 'price_class = "PriceClass_100"' in code
+    assert "cloudfront_default_certificate = true" in code
+    assert "wait_for_deployment = false" in code
+    assert "for_each = [403, 404]" in code
+    assert not re.search(r"\baliases\b", code)  # the public URL is the Vercel rewrite (C5)
+
+
+def test_main_outputs_hide_the_site_bucket_and_show_the_distribution() -> None:
+    code = _strip_comments((MAIN / "outputs.tf").read_text(encoding="utf-8"))
+    blocks = {
+        re.match(r'output\s+"([^"]+)"', b).group(1): b  # type: ignore[union-attr]
+        for b in re.split(r'(?=output\s+")', code)[1:]
+    }
+    plain = {"site_distribution_id", "site_domain"}  # neither holds the account id
+    for name, block in blocks.items():
+        if name in plain:
+            assert "sensitive" not in block, name
+        else:
+            assert re.search(r"sensitive\s*=\s*true", block), name
+    assert plain <= set(blocks) and "site_bucket" in blocks
+
+
+def test_main_requires_the_two_site_ids_with_no_default() -> None:
+    code = (MAIN / "variables.tf").read_text(encoding="utf-8")
+    for name in ("site_origin_access_control_id", "site_response_headers_policy_id"):
+        block = re.search(rf'variable\s+"{name}"\s*\{{(.*?)\n\}}', code, flags=re.DOTALL)
+        assert block is not None, name
+        assert not re.search(r"^\s*default\s*=", block.group(1), flags=re.MULTILINE), name
+        assert "validation" in block.group(1), name
+
+
+def _deploy() -> str:
+    return (WORKFLOWS / "deploy.yml").read_text(encoding="utf-8")
+
+
+def _job(text: str, name: str) -> str:
+    match = re.search(
+        rf"^  {name}:\n(.*?)(?=^  [a-z]+:\n|\Z)", text, flags=re.DOTALL | re.MULTILINE
+    )
+    assert match, name
+    return match.group(1)
+
+
+def test_deploy_splits_the_image_from_the_site_by_changed_paths() -> None:
+    text = _deploy()
+    changes = _job(text, "changes")
+    assert "git diff --name-only" in changes and "fetch-depth: 0" in changes
+    assert "uses: dorny" not in text and "paths-filter" not in text  # no third-party action
+    # A results-only path is matched first, so it can never set either half.
+    case = changes[changes.index('case "$path" in') :]
+    assert case.index("experiment/results/*) ;;") < case.index("experiment/*")
+    assert "web/*) site=true" in changes
+    image = _job(text, "image")
+    assert "needs: [changes, check]" in image
+    assert "if: needs.changes.outputs.code == 'true'" in image
+
+
+def test_deploy_check_job_installs_node_for_the_page_checks() -> None:
+    check = _job(_deploy(), "check")
+    assert "actions/setup-node@v7.1.0" in check
+    assert "npm --prefix web ci" in check
+    assert check.index("npm --prefix web ci") < check.index("run: make check")
+
+
+def test_the_apply_passes_the_two_site_ids() -> None:
+    infra = _job(_deploy(), "infra")
+    assert "site_origin_access_control_id=${{ vars.SITE_ORIGIN_ACCESS_CONTROL_ID }}" in infra
+    assert "site_response_headers_policy_id=${{ vars.SITE_RESPONSE_HEADERS_POLICY_ID }}" in infra
+
+
+def test_the_site_job_runs_after_a_good_apply_or_alone_and_never_after_a_failure() -> None:
+    site = _job(_deploy(), "site")
+    assert "needs: [changes, check, image, infra]" in site
+    for clause in (
+        "!cancelled()",
+        "needs.changes.outputs.site == 'true'",
+        "needs.check.result == 'success'",
+        "(needs.image.result == 'success' || needs.image.result == 'skipped')",
+        "(needs.infra.result == 'success' || needs.infra.result == 'skipped')",
+    ):
+        assert clause in site, clause
+    assert "npm --prefix web run check" in site
+    assert "mask-aws-account-id: true" in site
+    assert "::add-mask::$bucket" in site
+
+
+def test_the_site_sync_caches_hashed_assets_only() -> None:
+    site = _job(_deploy(), "site")
+    assets = site.index('aws s3 sync web/dist/assets "s3://${bucket}/assets/"')
+    rest = site.index('aws s3 sync web/dist "s3://${bucket}/"')
+    assert assets < rest
+    assert "immutable" in site[assets:rest]
+    assert '--exclude "assets/*"' in site[rest:] and '--cache-control "no-cache"' in site[rest:]
+    assert "--paths '/*'" in site
+
+
+def test_the_smoke_test_checks_the_build_the_headers_and_the_sweep_on_cloudfront_only() -> None:
+    site = _job(_deploy(), "site")
+    smoke = site[site.index("Smoke test the site") :]
+    assert "output -raw site_domain" in smoke
+    assert "vercel.app" not in smoke  # the rewrite is his step; a teardown day cannot turn this red
+    for needle in (
+        "content-security-policy: default-src 'none'",
+        "x-robots-tag: noindex",
+        "x-content-type-options: nosniff",
+        "strict-transport-security",
+        ".sweep.sweep_id",
+        "text/css",
+        "javascript",
+    ):
+        assert needle in smoke, needle
+
+
+def test_the_teardown_runs_only_on_the_typed_phrase_and_never_beside_a_deploy() -> None:
+    text = (WORKFLOWS / "teardown.yml").read_text(encoding="utf-8")
+    assert "workflow_dispatch:" in text and "push:" not in text and "schedule:" not in text
+    assert "if: inputs.confirm == 'destroy main'" in text
+    assert re.search(r"group:\s*deploy-main", text)
+    assert re.search(r"cancel-in-progress:\s*false", text)
+    assert "terraform -chdir=infra/terraform/main destroy" in text
+    assert "infra/terraform/bootstrap" not in text.split("\n# ", 1)[-1].split("jobs:", 1)[1]
+    assert "Key=Root,Values=main" in text
+    assert "mask-aws-account-id: true" in text

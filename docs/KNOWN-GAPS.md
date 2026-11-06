@@ -7,7 +7,31 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-05, about 3:30 PM, HANDOFF (PHASE 1.5 C3 READY; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-11-06, late morning (PHASE 1.5 C4 BUILT; HIS APPLY, VARIABLES, COMMIT NEXT)
+>
+> **C4, the site in `main`, is built** (Opus, in session, his call): `site.tf`, the deploy workflow's `changes` and
+> `site` jobs, `teardown.yml`, two new permission-check attempts. `make check` green, Python 3248, Vitest 29 of 29.
+> **One finding:** the deploy role could claim another project's distribution by tag (OPEN entry below); the deny is
+> built in `deploy-site.json` and lands with his `bootstrap` apply. The record is the Phase 1.5 doc §21.
+>
+> **Next, his, in order** (§21's list): the `bootstrap` apply (**done 9:28 AM**, 1 changed, then "No changes"), the two repository variables
+> `SITE_ORIGIN_ACCESS_CONTROL_ID` and `SITE_RESPONSE_HEADERS_POLICY_ID` (**done 9:30 AM**), then one commit and push for today's docs,
+> the label change and C4. Then Claude reads the Deploy log, and he dispatches the permission check.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-06, about 9:10 AM (PHASE 1.5 C3 DONE; LABELS APPROVED; C4 NEXT) *(superseded by the block above)*
+>
+> **C3, the page, is done:** committed `ea2bb7d` and pushed (his), CI green (run `42112962435`). Deploy did not run,
+> as expected; it does not watch `web/**` until C4. The record is the Phase 1.5 doc §20.
+>
+> **Every label is approved** (his, 2026-11-06, word for word; one change, the chart key's "marks" to "shows"; §20).
+> The commit of today's docs and that one-word change is his. **Next: C4, the site in `main`** (doc §12 step 6): Opus
+> writes the build prompt, Sonnet builds, Opus reviews.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-05, about 3:30 PM, HANDOFF (PHASE 1.5 C3 READY; HIS COMMIT NEXT) *(superseded by the block above)*
 >
 > **C3, the page, is built (Sonnet) and reviewed (Opus, one test fix).** His four sentences in `web/src/copy.ts` are
 > Claude-drafted at his request and approved by him; he approved the three label redrafts. `make check` green at the
@@ -2636,6 +2660,21 @@ closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN 2026-11-06 — the deploy role could claim another project's CloudFront distribution by tag (fix built, his apply owed)
+
+Found building Phase 1.5 C4 (the Phase 1.5 doc §21). C1's `SiteDistributionCreate` (`infra/iam/deploy-site.json`)
+allows `cloudfront:TagResource` on `*` whenever the request sets `Project = horizon-compact`, and AWS's service
+reference (read 2026-11-06) confirms `TagResource` takes that condition. So the deploy role could re-tag Musical
+Mycelium's distribution as this project's, and `SiteDistributionManage` would then let it update or delete it. Not
+exploited: nothing has ever made that call, and no distribution of this project exists yet. **Fix, built:** the Deny
+`NeverRetagAnotherProjectsDistribution` (no tag or untag where the resource's `Project` tag exists and is not this
+project's), the CloudFront twin of `deploy.json`'s `NeverRetagUntaggedNetwork`. **Applied 2026-11-06, about 9:28 AM
+(his; 1 changed, then "No changes").** **Closes when** his `bootstrap` apply
+lands the deny and the permission check's "claim another project's distribution by tag" attempt is refused. **Stays
+disclosed:** a distribution with no `Project` tag at all is not covered (a stronger deny could block the create).
 
 ---
 

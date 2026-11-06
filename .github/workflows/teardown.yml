@@ -1,0 +1,127 @@
+name: Teardown main
+
+# MANUAL ONLY, from main (the deploy role's trust is pinned to refs/heads/main). The teardown test (Phase 1.5
+# IMPLEMENTATION doc section 10, definition of done 3): destroys every resource in the `main` root, then lists what
+# is left. `bootstrap` (the results bucket, the image repository, the state, the two CloudFront objects) is never
+# touched: `main` only names those, and the results bucket keeps `prevent_destroy` in its own root.
+#
+# It runs only when the dispatch input is exactly "destroy main". The re-apply is a Deploy dispatch, his step.
+#
+# Accepted with decision 9 (2026-11-04): destroying `main` deletes the sweep log group, and with it the task logs
+# before their 30-day retention would have expired them. The record is S3, which this never touches.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "destroy main" to destroy every resource in the main root.'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# The same group as Deploy, so a teardown never runs beside an apply, and neither is ever cancelled.
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  destroy:
+    name: destroy main and list what is left
+    if: inputs.confirm == 'destroy main'
+    runs-on: ubuntu-latest
+    # A distribution is disabled, then waited on until the edge reports it, then deleted: many minutes.
+    timeout-minutes: 75
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Assume the deploy role
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.15.8"
+          terraform_wrapper: false
+
+      - name: Init
+        run: >
+          terraform -chdir=infra/terraform/main init -input=false -lockfile=readonly
+          -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      # The variables have no default. Nothing is created, so the digest is a placeholder of the right shape; the
+      # other three are what Deploy passes.
+      - name: Destroy
+        run: >
+          terraform -chdir=infra/terraform/main destroy -auto-approve -input=false -no-color
+          -var "image_digest=sha256:0000000000000000000000000000000000000000000000000000000000000000"
+          -var "sonnet_route=${{ vars.SONNET_ROUTE }}"
+          -var "site_origin_access_control_id=${{ vars.SITE_ORIGIN_ACCESS_CONTROL_ID }}"
+          -var "site_response_headers_policy_id=${{ vars.SITE_RESPONSE_HEADERS_POLICY_ID }}"
+
+      # Section 10 step 3. The tag listing is retried, since it lags a delete. A deregistered task definition stays
+      # in the listing as INACTIVE (it bills nothing and AWS keeps it), so task definitions are checked by status
+      # instead: none may be ACTIVE. The cluster and the distribution are also checked by name.
+      - name: Nothing billable from main remains
+        shell: bash
+        run: |
+          set -uo pipefail
+          left=""
+          for attempt in $(seq 1 20); do
+            if ! listing="$(aws resourcegroupstaggingapi get-resources --region us-east-1 \
+                --tag-filters Key=Project,Values=horizon-compact Key=Root,Values=main \
+                --query 'ResourceTagMappingList[].ResourceARN' --output text)"; then
+              echo "::error::the tag listing failed"
+              exit 1
+            fi
+            left="$(printf '%s' "$listing" | tr '\t' '\n' | grep -v '^$' | grep -v ':task-definition/' || true)"
+            if [ -z "$left" ]; then
+              echo "the tag listing holds nothing from main but inactive task definitions (attempt $attempt)"
+              break
+            fi
+            echo "attempt $attempt: still listed:"
+            printf '%s\n' "$left" | sed -E 's/[0-9]{12}/<account-id>/g'
+            sleep 30
+          done
+
+          failures=0
+          if [ -n "$left" ]; then
+            echo "FAIL: resources from main are still tagged after about ten minutes"
+            failures=$((failures + 1))
+          fi
+
+          active_clusters="$(aws ecs describe-clusters --clusters horizon-compact \
+            --query 'length(clusters[?status==`ACTIVE`])' --output text)"
+          echo "active clusters named horizon-compact: $active_clusters"
+          [ "$active_clusters" = "0" ] || failures=$((failures + 1))
+
+          if out="$(aws ecs describe-task-definition --task-definition horizon-compact-sweep 2>&1)"; then
+            echo "FAIL: an ACTIVE horizon-compact-sweep task definition remains"
+            failures=$((failures + 1))
+          elif printf '%s' "$out" | grep -q "ClientException"; then
+            echo "no ACTIVE horizon-compact-sweep task definition: $(printf '%s' "$out" | head -1)"
+          else
+            # An access error or a typo must not pass as "absent".
+            echo "FAIL: the task definition check failed for another reason:"
+            printf '%s\n' "$out" | sed -E 's/[0-9]{12}/<account-id>/g' | head -3
+            failures=$((failures + 1))
+          fi
+
+          distributions="$(aws cloudfront list-distributions \
+            --query "length(DistributionList.Items[?Comment=='horizon-compact site'] || \`[]\`)" --output text)"
+          echo "distributions with this project's comment: $distributions"
+          [ "$distributions" = "0" ] || failures=$((failures + 1))
+
+          if [ "$failures" -ne 0 ]; then
+            echo "$failures checks failed: something from main is left"
+            exit 1
+          fi
+          echo "Nothing billable from main remains. Re-apply with a Deploy dispatch."

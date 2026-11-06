@@ -491,13 +491,13 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
    in the same commit. He commits and pushes; CI and Deploy green.
 2. **[done 2026-11-04: built (Sonnet), reviewed (Opus); his S3 and local runs, `cmp: identical`; committed `b9b8ac8` and pushed (his); CI and Deploy green]** **[Sonnet builds, Opus reviews]**
    **C2, the site-data builder** (§6) with tests; his S3 and local runs and the `cmp`; the JSON committed with it.
-3. **[done 2026-11-05: built (Sonnet), reviewed (Opus, one fix: errors/ keys count as calls); his S3 run wrote the manifest, 5,247 objects, every sweep's calls matched; commit owed]** **The raw-object manifest** (decision 8 (a)), committed as
+3. **[done 2026-11-05: built (Sonnet), reviewed (Opus, one fix: errors/ keys count as calls); his S3 run wrote the manifest, 5,247 objects, every sweep's calls matched; committed `3714f44` and pushed (his); CI and Deploy green]** **The raw-object manifest** (decision 8 (a)), committed as
    `docs/phases/evidence/phase-4/raw-manifest.json` with the command's code.
 4. **[done 2026-11-05: previews built (Opus), `scratch/previews/`; his pick: A, Source Serif 4 and Source Sans 3]** **[Claude, then his]** **The previews** (decision 2), in `scratch/` (gitignored); he picks.
-5. **[built 2026-11-05 (Sonnet); reviewed (Opus, one test fix); his words and the three label redrafts approved by him, the other drafted labels not yet; `make check` green; his commit owed]** **C3, the page** (§7, §8): `web/`, `make web-check`, `ci.yml`. His words land in
+5. **[built 2026-11-05 (Sonnet); reviewed (Opus, one test fix); his words and the three label redrafts approved by him, the other drafted labels approved 2026-11-06 (one change, §20); `make check` green; committed `ea2bb7d` and pushed (his); CI green, run `42112962435`]** **C3, the page** (§7, §8): `web/`, `make web-check`, `ci.yml`. His words land in
    `copy.ts` before this commit. Built and checked locally (`npm run dev`, then the production build served with the
    content security policy set locally); Deploy does not yet watch `web/**`, so this push runs CI only.
-6. **[Sonnet builds, Opus reviews]** **C4, the site in `main`:** `site.tf`, the deploy workflow's `changes` and `site`
+6. **[built 2026-11-06 (Opus, in session, his call); his `bootstrap` apply, two repository variables, commit and push owed; §21]** **[Sonnet builds, Opus reviews]** **C4, the site in `main`:** `site.tf`, the deploy workflow's `changes` and `site`
    jobs, `teardown.yml`, the permission check's new attempt. He pushes; Claude reads the Deploy log; each missing
    permission is added by name, scoped, with the error recorded, as in Phase 1.
 7. **[his]** **The permission check**, dispatched; Claude reads the log.
@@ -1089,3 +1089,108 @@ provenance terms; the list above) have **no explicit word-for-word approval yet*
 owed before C4 makes the page public. `copy.ts`'s comment says so. Stale "fails until he writes" comments in the
 `Makefile` and `copy.test.ts` reworded. `make check` re-run green after: Python 3233, Vitest 29 of 29, check-dist ok,
 doctor ok; the guard's scanner, 29 files, 0 findings.
+
+**Committed (2026-11-05, his).** `ea2bb7d` `phase 1.5: c3 the page`, pushed; CI green (run `42112962435`, about
+3:28 PM CST). Deploy did not run, as expected (it does not watch `web/**` until C4). The name guard passed at his
+commit, so `web/package-lock.json` raised no collision (§3 finding 7). Docs brought current 2026-11-06, about
+9:05 AM.
+
+**The remaining labels approved (2026-11-06, about 9:07 AM, his).** Every drafted label in the list above is
+approved word for word, with one change: the chart key's "the solid tick marks the mean" is now "the solid tick
+shows the mean" (Claude's suggestion; "tick marks" read as a noun). Claude also flagged the panel line's "n =" as
+statistics shorthand; **he kept it** (most readers have met it in a statistics class). The provenance terms ("Image
+digest", "Content hash", "Runner") were noted as technical and kept, as suited to that block. Every word the page
+shows is now approved; nothing in `copy.ts` blocks C4.
+
+## 21. As built, C4 (2026-11-06)
+
+Built by Opus in session (his call, "go ahead and do C4"), from §9, §10 and §12 step 6; no separate build prompt.
+Code, tests and docs only: no AWS call, no `terraform plan` or `apply` against AWS, no commit, no push, no dispatch.
+**His `bootstrap` apply, his two repository variables, his commit and push, and Claude's read of the Deploy log are
+owed, in that order** (below).
+
+**What was built**
+
+- `infra/terraform/main/site.tf` (new), as §9: the bucket `horizon-compact-site-<account-id>` (computed,
+  `force_destroy = true`, all four public access blocks); the origin access control and the response headers policy
+  read as **data sources by id** from two new variables, so a wrong id fails the plan rather than the page; the
+  managed `Managed-CachingOptimized` policy by name; the distribution (`redirect-to-https`, GET and HEAD, compression,
+  `PriceClass_100`, the default certificate, `wait_for_deployment = false`, 403 and 404 served as `/index.html` with
+  200, comment `horizon-compact site`, no aliases); the bucket policy, `s3:GetObject` to `cloudfront.amazonaws.com`
+  only where `AWS:SourceArn` is this distribution. Tags come from the provider's `default_tags`.
+- `variables.tf`: `site_origin_access_control_id` and `site_response_headers_policy_id`, no default, each with a shape
+  check. `outputs.tf`: `site_bucket` (sensitive), `site_distribution_id` and `site_domain` (not sensitive; neither holds
+  the account id).
+- `.github/workflows/deploy.yml`: `web/**` in the paths; a **`changes` job** (plain `git diff --name-only` over the
+  push's range; a results path matches first and sets nothing; `src`, `experiment`, `pyproject.toml`, `uv.lock` set
+  `code`; `infra/**` and `deploy.yml` set both; `web/**` sets `site`; a dispatch or an unknown base sets both); the
+  `image` job runs only when `code` is set, so a page-only push builds no image and applies nothing; the plan passes
+  the two ids from the repository variables `SITE_ORIGIN_ACCESS_CONTROL_ID` and `SITE_RESPONSE_HEADERS_POLICY_ID`;
+  a **`site` job** after `infra`, or alone when `image` and `infra` were skipped, and never after a failure:
+  `npm ci`, `npm run check` (which ends with the build and the built-files check), init, then `assets/` synced with a
+  year's immutable cache and everything else with `no-cache` (the favicon is not content-hashed, so it is not
+  immutable), `--delete` on both, an invalidation of `/*`, and the smoke test against the `*.cloudfront.net` domain
+  only (retried for about six minutes): `index.html` names this build's script; the content security policy,
+  `X-Robots-Tag: noindex`, `nosniff`, Strict-Transport-Security and `no-referrer` headers are served; the script is
+  served as JavaScript and the stylesheet as CSS (`nosniff` would make a browser refuse either otherwise); the bundle
+  names the sweep id from `web/src/data/placeholder.json`.
+- `.github/workflows/teardown.yml` (new), as §10 steps 2 and 3: dispatch only, runs only when the input is `destroy
+  main`, in Deploy's concurrency group and never cancelled; `terraform destroy` on `main` with a zero digest; then the
+  tag listing for `Project = horizon-compact` and `Root = main`, retried for about ten minutes, which must hold nothing
+  but task definitions; no `ACTIVE` `horizon-compact-sweep` task definition (an access error does not pass as
+  absent); no `ACTIVE` cluster named `horizon-compact`; no distribution with this project's comment.
+- `.github/workflows/aws-permission-check.yml`: two attempts on another project's distribution (the first listed
+  without this project's comment), each of which must be refused with an access error: **delete it with a stale
+  ETag**, and **claim it by tag** (`Project = horizon-compact`, plus a second tag whose value is over CloudFront's
+  256-character limit). Neither call could change the distribution if the fence were missing.
+- `infra/iam/deploy-site.json`: one Deny, **`NeverRetagAnotherProjectsDistribution`** (the finding below). This file is
+  `bootstrap`'s, so it lands only with his apply.
+- `tests/test_architecture.py`: 15 tests added, 3 changed (the site grants' statement list, the deploy paths, the
+  permission check's six attempts). `make check` green: **Python 3248 passed** (3233 before), Vitest 29 of 29, check-dist
+  ok, `hc protocol check` ok, doctor ok.
+
+**Finding: the deploy role could take over another project's distribution (bootstrap, from C1).** Checked against
+AWS's service reference for CloudFront (read 2026-11-06): `TagResource` accepts `aws:RequestTag`, and C1's
+`SiteDistributionCreate` allows `cloudfront:TagResource` on `*` when the request sets `Project = horizon-compact`.
+So the role could tag Musical Mycelium's distribution (tagged `Project = musical-mycelium` by its provider's
+`default_tags`) as this project's, and `SiteDistributionManage` would then let it update or delete it. Decision 5's
+intent was that it never could. `deploy.json` already guards EC2 the same way (`NeverRetagUntaggedNetwork`); the
+CloudFront statements had no equivalent. **Fix:** a Deny on `TagResource` and `UntagResource` where the resource
+already has a `Project` tag that is not this project's. The `Null` guard leaves a resource with no `Project` tag alone,
+because a distribution being created may be evaluated with none, and a stronger deny could block the create.
+**Remaining:** an untagged distribution in the account could still be claimed; this account's known distributions are
+Musical Mycelium's (tagged) and this one. KNOWN-GAPS OPEN 2026-11-06. The C1 review missed it.
+
+**Departures**
+
+1. **The permission check deletes rather than updates** (§9 named `UpdateDistribution` with a stale `If-Match`). An
+   update needs a full distribution config in the request, and the role cannot read another project's
+   (`GetDistributionConfig` is tag-fenced). `DeleteDistribution` takes only the id and the ETag, and is fenced by the
+   same statement. A second attempt, the tag claim, covers the finding above.
+2. **The two ids are read as data sources**, not passed straight into the distribution, so the grants C1 gave
+   (`GetOriginAccessControl`, `GetResponseHeadersPolicy`) are used and a wrong variable fails the plan.
+3. **Deploy's `check` job gains Node and `npm ci`.** C3 put `web-check` into `make check`, and Deploy's `check` job had
+   no Node, so the first Deploy after C3 would have failed there. C3's push ran CI only, so nothing turned red.
+4. **`infra/**` sets both halves**, not only `code`: an apply can replace the distribution, and a new distribution
+   serves nothing until a sync.
+
+**His steps, in order** (each with the output to look for):
+
+1. **`bootstrap` apply with the dev key** (the deny). Expected plan: **1 to change** (`aws_iam_role_policy.github_deploy_site`,
+   updated in place), 0 to add, 0 to destroy. Then a second plan: "No changes".
+2. **The two repository variables**, from §17's recorded outputs: `SITE_ORIGIN_ACCESS_CONTROL_ID` and
+   `SITE_RESPONSE_HEADERS_POLICY_ID`. Without them the plan fails its variable checks: a red Deploy, nothing changed.
+3. **His commit and push.** It touches `infra/**` and `deploy.yml`, so Deploy runs every job: `check`, an image, the
+   apply (expected: the bucket, its public access block, its policy and the distribution added, and the task
+   definition replaced as on every image-building deploy), then `site`.
+4. **Claude reads the Deploy log.** Each missing permission is added by name, scoped, with the error recorded (§12
+   step 6). Then §12 step 7, the permission check, his dispatch.
+
+**Step 1 done (2026-11-06, about 9:28 AM, his).** His plan (`scratch/p15-c4-plan.sh`): **0 to add, 1 to change, 0 to
+destroy**, the one change `aws_iam_role_policy.github_deploy_site` gaining exactly the Deny above, the other five
+statements unchanged. His apply: "Apply complete! Resources: 0 added, 1 changed, 0 destroyed." His second plan: "No
+changes." The outputs printed `site_origin_access_control_id = E1L3LEZALRKH6Y` and `site_response_headers_policy_id =
+e75c6c69-6030-4efb-ba96-014e5a493e08`, the values §17 recorded.
+
+**Step 2 done (2026-11-06, about 9:30 AM, his).** `gh variable set` for both: "Created variable
+SITE_ORIGIN_ACCESS_CONTROL_ID" and "Created variable SITE_RESPONSE_HEADERS_POLICY_ID", each with those values.

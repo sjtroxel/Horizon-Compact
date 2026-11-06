@@ -1,9 +1,9 @@
 name: AWS permission check
 
 # MANUAL ONLY, from main (the deploy role's trust is pinned to refs/heads/main). Proves the deploy role CANNOT do
-# four things it must never do (Phase 1 definition of done 5). Each attempt must be refused with an access error:
-# a command that fails for any other reason (a typo, a missing argument) does not count as "refused", so the
-# check cannot pass by being broken. If any attempt succeeds, the job cleans up what it can and fails.
+# six things it must never do (Phase 1 definition of done 5; the last two, Phase 1.5 definition of done 8). Each
+# attempt must be refused with an access error: a command that fails for any other reason (a typo, a missing
+# argument, an invalid value) does not count as "refused", so the check cannot pass by being broken. If any attempt succeeds, the job cleans up what it can and fails.
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   check:
-    name: attempt four forbidden actions
+    name: attempt six forbidden actions
     runs-on: ubuntu-latest
     steps:
       - name: Assume the deploy role
@@ -74,9 +74,30 @@ jobs:
               --launch-type FARGATE \
               --network-configuration "awsvpcConfiguration={subnets=[subnet-00000000]}"
 
+          # Phase 1.5: another project's distribution (any not carrying this project's comment). Neither attempt
+          # can change it even if the fence were missing: the first sends a stale ETag, and the second carries a
+          # tag value over CloudFront's 256-character limit, so the call could only fail. Each must instead be
+          # refused before it is read.
+          other="$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?Comment!='horizon-compact site'] | [0].ARN" --output text)"
+          if [ -z "$other" ] || [ "$other" = "None" ]; then
+            echo "FAIL: no other project's distribution to test the fence against"
+            failures=$((failures + 2))
+          else
+            other_id="${other##*/}"
+            too_long="$(printf 'x%.0s' $(seq 1 300))"
+
+            expect_refused "delete another project's distribution" \
+              aws cloudfront delete-distribution --id "$other_id" --if-match E0000000000000
+
+            expect_refused "claim another project's distribution by tag" \
+              aws cloudfront tag-resource --resource "$other" \
+                --tags "Items=[{Key=Project,Value=horizon-compact},{Key=hc-check,Value=${too_long}}]"
+          fi
+
           echo
           if [ "$failures" -ne 0 ]; then
-            echo "$failures of 4 checks failed"
+            echo "$failures of 6 checks failed"
             exit 1
           fi
-          echo "All four forbidden actions were refused."
+          echo "All six forbidden actions were refused."

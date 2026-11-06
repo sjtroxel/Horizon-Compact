@@ -67,6 +67,23 @@
       "Effect": "Allow",
       "Action": "cloudfront:GetResponseHeadersPolicy",
       "Resource": "${response_headers_policy_arn}"
+    },
+    {
+      "Sid": "NeverRetagAnotherProjectsDistribution",
+      "Effect": "Deny",
+      "Action": [
+        "cloudfront:TagResource",
+        "cloudfront:UntagResource"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "aws:ResourceTag/Project": "horizon-compact"
+        },
+        "Null": {
+          "aws:ResourceTag/Project": "false"
+        }
+      }
     }
   ]
 }

@@ -15,3 +15,22 @@ output "security_group_id" {
   value     = aws_security_group.sweep.id
   sensitive = true
 }
+
+# The site (Phase 1.5). The bucket's name holds the account id, so it is sensitive; the distribution's id and its
+# *.cloudfront.net domain do not, so the site job can print them.
+
+output "site_bucket" {
+  description = "Where the deploy workflow's site job syncs the build."
+  value       = aws_s3_bucket.site.id
+  sensitive   = true
+}
+
+output "site_distribution_id" {
+  description = "The distribution the site job invalidates after a sync."
+  value       = aws_cloudfront_distribution.site.id
+}
+
+output "site_domain" {
+  description = "The distribution's *.cloudfront.net domain: the smoke test's target and the Vercel rewrite's destination."
+  value       = aws_cloudfront_distribution.site.domain_name
+}
