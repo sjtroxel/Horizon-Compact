@@ -508,7 +508,7 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
    before the next step.
 9. **[done 2026-11-07: deployed by him, checked by Claude; §24]** **[his]** **C5, the rewrite:** `infra/vercel/vercel.json` with the domain; deploy (decision 4); the public URL
    checked.
-10. **[his, Claude reading]** **The teardown test** (§10); C6, the evidence and the rewrite's new domain.
+10. **[done 2026-11-07: passed, two fixes on the way; §25, `evidence/phase-1.5/teardown.md`]** **[his, Claude reading]** **The teardown test** (§10); C6, the evidence and the rewrite's new domain.
 11. **A day later:** the spend from the bills (his Console readings: AWS Cost Explorer for the build days, filtered to
     the `Project` tag; no model call means no Anthropic or OpenRouter line), then **the
     close (C7):** the DoD audit, the version (decision 10), `ROADMAP.md`, `KNOWN-GAPS.md`.
@@ -1467,7 +1467,8 @@ and was renewed by the device flow. Ready in 29 seconds; aliased to `https://hor
   message, policy violation or failed request. Screenshots in the scratchpad, not tracked.
 
 **Not checked here:** the run table's run ids and image digest against the records, DoD 1's trace, which C6 commits
-with the screenshot set; and Firefox and Safari.
+with the screenshot set; and Firefox and Safari. *(Checked 2026-11-07 after the teardown test, §25: all 15 run ids and the digest
+in the live bundle, the digest Phase 1 recorded; screenshots in `docs/phases/screenshots/phase-1.5/`.)*
 
 **Deploy's path filter, fixed (his ask, 2026-11-07).** `infra/**` set both halves, so a commit touching only
 `infra/vercel/` would have built an image and applied `main` with nothing changed in AWS, and would again at the
@@ -1483,7 +1484,7 @@ alone, 1 added and 1 destroyed; the public `index.html` unchanged.)*
 **Next: step 10, the teardown test** (§10). It gives the distribution a new domain, and step 5 of that test puts the
 new domain into this file and deploys it again.
 
-## 25. The teardown test (2026-11-07, §12 step 10), in progress
+## 25. The teardown test (2026-11-07, §12 step 10)
 
 **Step 1, before (his, 10:18 AM):** `scratch/p15-teardown-counts.sh before`. The shown sweep 15 of 15 valid, $0.0140;
 `development/placeholder/` 257 keys, 257 versions, 0 delete markers; the whole results bucket 9,257 keys, 9,257
@@ -1526,3 +1527,21 @@ dispatch. **So the fixed check has not had a real run:** step 3 rests on run `42
 three of the check's four parts passed, the fourth failed only on the INACTIVE cluster AWS documents), with the fix
 held by its test and the simulation. Its first real run is the next teardown. Two commits (the check alone first,
 then a teardown re-run) were offered and declined.
+
+**Step 4, the re-apply (Deploy `42397385746`, on the push of `f49d530`; CI `42397385741`): green.** 20 added; the
+distribution `E3N78URQESJO0Y` at `d10219migxiagd.cloudfront.net`; the smoke test passed. **The image digest did not
+change** (`sha256:c5f8862f...`, as on `9b18bd4`): §10 step 4 expected a new one, but no code changed and the build
+reproduced the same image, so ECR holds no extra image.
+
+**Step 5, the rewrite (his, about 12:45 PM):** `vercel.json` to the new domain, `npx vercel@65.2.0 deploy --prod`,
+aliased, ready in 4 seconds.
+
+**Step 6, after (his, 12:49 PM, and Claude):** the counts equal the step 1 counts line for line (15 of 15 valid;
+257, 257, 0; 9,257, 9,257, 0). The public page and all eight built files are byte-identical to the reviewed build,
+with the five headers; the live bundle carries all 15 run ids and the image digest Phase 1 recorded for the sweep
+(Phase 1 doc §21a); headless Chromium clean at both widths. Full-page screenshots, light and dark at 1280 and 390,
+committed in `docs/phases/screenshots/phase-1.5/` (not under `evidence/`, whose scan reads every file as text).
+
+**The teardown test passes (DoD 3)**, with two fixes found on the way, both in `f49d530`: the read after delete
+(`bootstrap`, applied) and the INACTIVE cluster in the check (not yet proved by a real run). The record is
+`evidence/phase-1.5/teardown.md`. **C6** is the commit of that file, the screenshots and `vercel.json`.

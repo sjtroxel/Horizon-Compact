@@ -7,7 +7,26 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-07, about 11:45 AM (PHASE 1.5 TEARDOWN: `main` DESTROYED; THE RE-APPLY NEXT)
+> ## START HERE — where things stand, 2026-11-07, about 1:00 PM (PHASE 1.5 TEARDOWN TEST PASSED; C6, THEN THE CLOSE A DAY LATER)
+>
+> **The teardown test passed** (DoD 3; the Phase 1.5 doc §25, `docs/phases/evidence/phase-1.5/teardown.md`). `main`
+> was destroyed (two dispatches, two fixes, `f49d530`) and re-applied by Deploy `42397385746`; the site is on
+> `d10219migxiagd.cloudfront.net` behind the rewrite, back at `horizon-compact.vercel.app`; the counts before and after
+> are equal. The check's INACTIVE-cluster fix has not had a real run (his decision; its first is the next teardown).
+>
+> **This block rides in C6, his commit `phase 1.5: c6 teardown evidence, new site domain`** (the evidence, the four
+> screenshots, `vercel.json`, these docs; `make check` green at handoff, Python 3249, Vitest 37). C6 starts no
+> Deploy; its CI is the only check owed: read it first (`gh run list --limit 2`). If `git log -1` is not C6, that
+> commit is first.
+>
+> **Next, from 2026-11-08: §12 step 11.** His Cost Explorer reading for the build days, filtered to the `Project` tag
+> (no model call this phase, so no Anthropic or OpenRouter line); then the close (C7): the DoD audit in §13's rows,
+> the version to `0.5.5` (decision 10), `ROADMAP.md`, `KNOWN-GAPS.md`. **Deferred on purpose (his, 2026-11-07):** a
+> real run of the teardown check's INACTIVE-cluster fix waits for the next teardown.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-07, about 11:45 AM (PHASE 1.5 TEARDOWN: `main` DESTROYED; THE RE-APPLY NEXT) *(superseded by the block above)*
 >
 > **`main` is fully destroyed; the public URL is down.** The permission fix is applied (his). The second destroy
 > (run `42395590670`) finished; its check failed only because a deleted ECS cluster stays listed as INACTIVE for a
