@@ -7,7 +7,32 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-07, about 9:00 AM (PHASE 1.5 C5 DONE; THE TEARDOWN TEST NEXT)
+> ## START HERE — where things stand, 2026-11-07, about 11:45 AM (PHASE 1.5 TEARDOWN: `main` DESTROYED; THE RE-APPLY NEXT)
+>
+> **`main` is fully destroyed; the public URL is down.** The permission fix is applied (his). The second destroy
+> (run `42395590670`) finished; its check failed only because a deleted ECS cluster stays listed as INACTIVE for a
+> while. The check is fixed in `teardown.yml` (uncommitted). The record is the Phase 1.5 doc §25.
+>
+> **Next, his:** one commit with all of it, and push, which starts Deploy: the re-apply (his decision; the fixed
+> check gets its first real run at the next teardown, §25). Then the new domain into `vercel.json`, the Vercel
+> deploy, and `scratch/p15-teardown-counts.sh after`.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-07, about 11:00 AM (PHASE 1.5 TEARDOWN TEST HALF DONE; A PERMISSION FIX FIRST) *(superseded by the block above)*
+>
+> **C5 is done and committed** (`9b18bd4`, CI and Deploy green). **The teardown test (§10) is under way and `main` is
+> mostly destroyed: the public URL is down.** The before counts are taken (the Phase 1.5 doc §25). The destroy
+> (run `42392129939`) removed 18 of 20 resources and stopped on the distribution: its delete was accepted, then the
+> wait was refused, because `GetDistribution` was fenced by a tag a deleted distribution no longer has. **Fix built,
+> uncommitted:** `GetDistribution` in its own unconditioned statement in `infra/iam/deploy-site.json` (§25).
+>
+> **Next, his:** `scratch/p15-teardown-fix-plan.sh` (expect 1 to change), the `bootstrap` apply, the teardown
+> dispatched again; then the Deploy dispatch, the new domain into `vercel.json`, the after counts.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-07, about 9:00 AM (PHASE 1.5 C5 DONE; THE TEARDOWN TEST NEXT) *(superseded by the block above)*
 >
 > **Step 8 is done** (`a121fc3`, his; CI `42311321663` and Deploy `42311321638` green). **C5 is done:** the page is
 > public at `https://horizon-compact.vercel.app`, through `infra/vercel/vercel.json`'s rewrite to the CloudFront
@@ -15,8 +40,10 @@ case by its type and a neutral label. The names live only in the private longlis
 > (§15 resolved); the page and every file it loads are byte-identical to the reviewed build; it renders clean in
 > headless Chromium at both widths. The record is the Phase 1.5 doc §24.
 >
-> **Next, his commit** (C5 and this morning's docs), **then step 10, the teardown test** (doc §10, his, Claude
-> reading): destroy and re-apply `main`, the new distribution domain into `vercel.json` and deployed again, the counts
+> **Committed `9b18bd4` (his), pushed; CI `42385351266` and Deploy `42385351271` green.** Deploy ran both halves
+> (its own file changed): new image `sha256:c5f8862f...`, `main` applied with only the task definition replaced
+> (1 added, 1 destroyed), the site re-synced, the public page unchanged. **Next: step 10, the teardown test** (doc
+> §10, his, Claude reading): destroy and re-apply `main`, the new distribution domain into `vercel.json` and deployed again, the counts
 > compared. Then C6, the evidence.
 >
 > *The earlier blocks below are superseded.*

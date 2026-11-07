@@ -28,7 +28,6 @@
       "Sid": "SiteDistributionManage",
       "Effect": "Allow",
       "Action": [
-        "cloudfront:GetDistribution",
         "cloudfront:GetDistributionConfig",
         "cloudfront:UpdateDistribution",
         "cloudfront:DeleteDistribution",
@@ -44,6 +43,12 @@
           "aws:ResourceTag/Project": "horizon-compact"
         }
       }
+    },
+    {
+      "Sid": "SiteDistributionReadAfterDelete",
+      "Effect": "Allow",
+      "Action": "cloudfront:GetDistribution",
+      "Resource": "arn:aws:cloudfront::${account_id}:distribution/*"
     },
     {
       "Sid": "SiteRead",

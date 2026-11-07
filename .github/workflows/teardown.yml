@@ -83,8 +83,24 @@ jobs:
               exit 1
             fi
             left="$(printf '%s' "$listing" | tr '\t' '\n' | grep -v '^$' | grep -v ':task-definition/' || true)"
+            # A deleted ECS cluster is INACTIVE and "may remain discoverable in your account for a period of time"
+            # (the DeleteCluster API reference); it bills nothing. Found by the teardown test, 2026-11-07. A cluster
+            # in any other state, or one the describe call cannot answer for, stays listed.
+            kept=""
+            for arn in $left; do
+              if [[ "$arn" == *":cluster/"* ]]; then
+                status="$(aws ecs describe-clusters --clusters "$arn" --query 'clusters[0].status' --output text \
+                  2>/dev/null || echo UNKNOWN)"
+                if [ "$status" = "INACTIVE" ]; then
+                  echo "an INACTIVE (deleted) cluster is still discoverable: ${arn##*/}"
+                  continue
+                fi
+              fi
+              kept="${kept}${arn}"$'\n'
+            done
+            left="$(printf '%s' "$kept" | grep -v '^$' || true)"
             if [ -z "$left" ]; then
-              echo "the tag listing holds nothing from main but inactive task definitions (attempt $attempt)"
+              echo "the tag listing holds nothing from main but inactive task definitions and clusters (attempt $attempt)"
               break
             fi
             echo "attempt $attempt: still listed:"
@@ -107,7 +123,7 @@ jobs:
             echo "FAIL: an ACTIVE horizon-compact-sweep task definition remains"
             failures=$((failures + 1))
           elif printf '%s' "$out" | grep -q "ClientException"; then
-            echo "no ACTIVE horizon-compact-sweep task definition: $(printf '%s' "$out" | head -1)"
+            echo "no ACTIVE horizon-compact-sweep task definition: $(printf '%s' "$out" | grep -m1 ClientException)"
           else
             # An access error or a typo must not pass as "absent".
             echo "FAIL: the task definition check failed for another reason:"

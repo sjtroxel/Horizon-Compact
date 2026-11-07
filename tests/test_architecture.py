@@ -443,6 +443,7 @@ def test_deploy_policies_name_the_site_grants_exactly() -> None:
         "SiteBucket",
         "SiteDistributionCreate",
         "SiteDistributionManage",
+        "SiteDistributionReadAfterDelete",
         "SiteRead",
         "SiteReadOriginAccessControl",
         "SiteReadResponseHeadersPolicy",
@@ -468,7 +469,6 @@ def test_deploy_policies_name_the_site_grants_exactly() -> None:
     assert sorted(_actions(manage)) == sorted(
         f"cloudfront:{a}"
         for a in (
-            "GetDistribution",
             "GetDistributionConfig",
             "UpdateDistribution",
             "DeleteDistribution",
@@ -481,6 +481,14 @@ def test_deploy_policies_name_the_site_grants_exactly() -> None:
     )
     assert manage["Resource"] == "arn:aws:cloudfront::000000000000:distribution/*"
     assert manage["Condition"] == {"StringEquals": {"aws:ResourceTag/Project": "horizon-compact"}}
+
+    # A deleted distribution has no tags, so a tag-conditioned GetDistribution is denied rather than
+    # answered "no such distribution", and Terraform's delete waiter and refresh stop on it (the teardown
+    # test, 2026-11-07). The read alone is unconditioned; every write stays fenced by tag above.
+    after_delete = by_sid["SiteDistributionReadAfterDelete"]
+    assert _actions(after_delete) == ["cloudfront:GetDistribution"]
+    assert after_delete["Resource"] == "arn:aws:cloudfront::000000000000:distribution/*"
+    assert "Condition" not in after_delete
 
     read = by_sid["SiteRead"]
     assert sorted(_actions(read)) == [
@@ -1299,3 +1307,17 @@ def test_the_teardown_runs_only_on_the_typed_phrase_and_never_beside_a_deploy() 
     assert "infra/terraform/bootstrap" not in text.split("\n# ", 1)[-1].split("jobs:", 1)[1]
     assert "Key=Root,Values=main" in text
     assert "mask-aws-account-id: true" in text
+
+
+def test_the_teardown_check_lets_only_inactive_leftovers_through() -> None:
+    """A deleted ECS cluster stays discoverable as INACTIVE for a while, as task definitions do (the teardown
+    test, 2026-11-07). The check may pass over those two, and only by type and status: an ACTIVE cluster, or
+    one the describe call cannot answer for, still fails it."""
+    text = (WORKFLOWS / "teardown.yml").read_text(encoding="utf-8")
+    assert "grep -v ':task-definition/'" in text
+    assert 'if [[ "$arn" == *":cluster/"* ]]; then' in text
+    assert "--query 'clusters[0].status'" in text and "|| echo UNKNOWN" in text
+    assert 'if [ "$status" = "INACTIVE" ]; then' in text
+    # The direct checks by name stay, whatever the listing says.
+    assert "length(clusters[?status==`ACTIVE`])" in text
+    assert "Comment=='horizon-compact site'" in text

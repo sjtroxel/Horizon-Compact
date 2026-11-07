@@ -1476,6 +1476,53 @@ and matches `infra/vercel/*` first in the `changes` job, setting neither half; t
 `tests/test_architecture.py` hold both. Run by hand on sample paths: the rewrite alone sets neither, the rewrite with
 a Terraform file sets both. **The commit carrying this still runs both halves**, because `deploy.yml` itself changed:
 a new image is built and `main` applied, with no expected change beyond the task definition's image.
+*(Done 2026-11-07: committed `9b18bd4`, his; CI `42385351266` and Deploy `42385351271` green; image
+`sha256:c5f8862f52499773af85bc07695b2379ef08e8002352b0df2c4864c91d78dabe`; the apply replaced the task definition
+alone, 1 added and 1 destroyed; the public `index.html` unchanged.)*
 
 **Next: step 10, the teardown test** (§10). It gives the distribution a new domain, and step 5 of that test puts the
 new domain into this file and deploys it again.
+
+## 25. The teardown test (2026-11-07, §12 step 10), in progress
+
+**Step 1, before (his, 10:18 AM):** `scratch/p15-teardown-counts.sh before`. The shown sweep 15 of 15 valid, $0.0140;
+`development/placeholder/` 257 keys, 257 versions, 0 delete markers; the whole results bucket 9,257 keys, 9,257
+versions, 0 delete markers.
+
+**Step 2, the destroy, first attempt (his dispatch; run `42392129939`): FAILED after 3 minutes, 18 of 20 destroyed.**
+Everything in `main` went but the distribution and the site bucket. Terraform's delete of the distribution was
+accepted; its waiter's `GetDistribution` was then refused with `AccessDenied`. **The cause:** `SiteDistributionManage`
+allowed `GetDistribution` only on a distribution tagged `Project = horizon-compact`, and a deleted distribution has no
+tags, so the read is denied instead of answered "no such distribution". The same refusal would stop a re-run, whose
+refresh reads the distribution still in state. The site bucket was not reached (it waits on the distribution); it has
+`force_destroy`. The results bucket, ECR, the state and the two `bootstrap` CloudFront objects are not in `main`.
+
+**The fix (Opus, 2026-11-07):** `GetDistribution` moves out of `SiteDistributionManage` into its own statement,
+`SiteDistributionReadAfterDelete`, on `distribution/*` with no condition; every write stays fenced by tag, and the
+retag deny is unchanged. Accepted cost: the role can read the configuration of any distribution in the account
+(Musical Mycelium's included; it could already list them all with `ListDistributions`), and gains no write. The
+assertion in `tests/test_architecture.py` holds it. `bootstrap`, his apply.
+
+**The fix applied (his, 11:16 AM):** plan 0 to add, 1 to change, 0 to destroy, exactly the statement move; apply the
+same.
+
+**Step 2, second attempt (his dispatch, run `42395590670`): the destroy complete; the check FAILED on a false
+positive.** The refresh read the distribution as gone and dropped it from state; the plan was 1 to destroy, the site
+bucket, emptied and deleted; "Destroy complete! Resources: 1 destroyed." All 20 of `main`'s resources are gone. Of the
+check's four parts, three passed (no ACTIVE cluster by name, no ACTIVE task definition, no distribution with the
+project's comment); the tag listing still named `cluster/horizon-compact` at all 20 attempts, about ten minutes, some
+50 minutes after its delete. **The cause:** a deleted ECS cluster is INACTIVE and "may remain discoverable in your
+account for a period of time" (the ECS DeleteCluster API reference, read 2026-11-07), as an inactive task definition
+is, and bills nothing. The check already passed over task definitions and not clusters.
+
+**The fix (Opus, 2026-11-07):** in `teardown.yml`'s check, a listed cluster is described by ARN and passed over only
+when its status is INACTIVE; any other status, or a failed describe, keeps it listed and fails the check. The deploy
+role already holds `ecs:DescribeClusters` on that cluster. Simulated on a fake listing (INACTIVE passed over, ACTIVE
+kept); a new test holds it; the "no ACTIVE task definition" line now prints the AWS error instead of an empty line.
+
+**The order from here (his decision, 2026-11-07): one commit** carrying the check's fix, `deploy-site.json`, the
+tests and these docs. Its `infra/` path starts Deploy, which is §10 step 4's re-apply, both halves, with no separate
+dispatch. **So the fixed check has not had a real run:** step 3 rests on run `42395590670` (the destroy complete,
+three of the check's four parts passed, the fourth failed only on the INACTIVE cluster AWS documents), with the fix
+held by its test and the simulation. Its first real run is the next teardown. Two commits (the check alone first,
+then a teardown re-run) were offered and declined.
