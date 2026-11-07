@@ -32,6 +32,9 @@ build/
 node_modules/
 web/dist/
 
+# Vercel CLI link (project and team ids); the rewrite is deployed by hand from infra/vercel (Phase 1.5 decision 4)
+.vercel/
+
 # Local caches and experiment scratch (EDGAR fetches, dev runs)
 .cache/
 cache/

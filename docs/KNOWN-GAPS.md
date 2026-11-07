@@ -7,7 +7,33 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-06, about 5:20 PM (PHASE 1.5 §8 FIXES BUILT AND REVIEWED; HIS COMMIT, THEN C5)
+> ## START HERE — where things stand, 2026-11-07, about 9:00 AM (PHASE 1.5 C5 DONE; THE TEARDOWN TEST NEXT)
+>
+> **Step 8 is done** (`a121fc3`, his; CI `42311321663` and Deploy `42311321638` green). **C5 is done:** the page is
+> public at `https://horizon-compact.vercel.app`, through `infra/vercel/vercel.json`'s rewrite to the CloudFront
+> domain, deployed by him with `vercel@65.2.0`. All five security headers come through unchanged, so no `headers` block
+> (§15 resolved); the page and every file it loads are byte-identical to the reviewed build; it renders clean in
+> headless Chromium at both widths. The record is the Phase 1.5 doc §24.
+>
+> **Next, his commit** (C5 and this morning's docs), **then step 10, the teardown test** (doc §10, his, Claude
+> reading): destroy and re-apply `main`, the new distribution domain into `vercel.json` and deployed again, the counts
+> compared. Then C6, the evidence.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-07, about 8:40 AM (PHASE 1.5 STEP 8 DONE; C5 NEXT) *(superseded by the block above)*
+>
+> **Step 8 is done.** The fixes and the type change are committed (`a121fc3`, his) and pushed; CI `42311321663` and
+> Deploy `42311321638` green, Deploy's `site` job published the page (image and apply skipped, as expected). Checked
+> 2026-11-07: the CloudFront domain serves the Newsreader build, its `index.html` identical to the reviewed local build.
+>
+> **Next: C5, the Vercel rewrite** (the Phase 1.5 doc §12 step 9, his): `infra/vercel/vercel.json` pointing at the
+> CloudFront domain, the deploy, and the public URL checked, including whether CloudFront's security headers come
+> through the rewrite (§15). Then step 10, the teardown test and C6.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-06, about 5:20 PM (PHASE 1.5 §8 FIXES BUILT AND REVIEWED; HIS COMMIT, THEN C5) *(superseded by the block above)*
 >
 > **The five fixes, the dimmed-panel change and his type change (Newsreader, lede 19px, body 17px) are built**
 > (Sonnet, the Phase 1.5 doc §23) **and reviewed** (Opus, §23a: every browser measurement reproduced; `make check`

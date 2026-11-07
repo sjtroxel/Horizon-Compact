@@ -504,9 +504,9 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
    jobs, `teardown.yml`, the permission check's new attempt. He pushes; Claude reads the Deploy log; each missing
    permission is added by name, scoped, with the error recorded, as in Phase 1.
 7. **[done 2026-11-06: run `42245451195`, all six refused; §21]** **[his]** **The permission check**, dispatched; Claude reads the log.
-8. **[reviewed 2026-11-06: five misses, three departures accepted, his type change; §22. Fixes built 2026-11-06 (Sonnet), reviewed (Opus, one change by his decision: the panel scroll on a phone only); his commit owed; §23, §23a]** **[his, Claude reading]** **The review against §8**, on the CloudFront domain, at both widths, both modes. Fixes
+8. **[reviewed 2026-11-06: five misses, three departures accepted, his type change; §22. Fixes built 2026-11-06 (Sonnet), reviewed (Opus, one change by his decision: the panel scroll on a phone only); §23, §23a. Done 2026-11-07: committed `a121fc3` (his), CI `42311321663` and Deploy `42311321638` green, the live page matches the reviewed build]** **[his, Claude reading]** **The review against §8**, on the CloudFront domain, at both widths, both modes. Fixes
    before the next step.
-9. **[his]** **C5, the rewrite:** `infra/vercel/vercel.json` with the domain; deploy (decision 4); the public URL
+9. **[done 2026-11-07: deployed by him, checked by Claude; §24]** **[his]** **C5, the rewrite:** `infra/vercel/vercel.json` with the domain; deploy (decision 4); the public URL
    checked.
 10. **[his, Claude reading]** **The teardown test** (§10); C6, the evidence and the rewrite's new domain.
 11. **A day later:** the spend from the bills (his Console readings: AWS Cost Explorer for the build days, filtered to
@@ -540,7 +540,7 @@ API is $0.01 a request).
 
 - **Whether Vercel passes CloudFront's security headers through the rewrite.** Musical Mycelium's public URL passes
   `cache-control` through (checked today). Checked at step 9; if a header is dropped, the same policy goes into
-  `vercel.json`'s `headers`.
+  `vercel.json`'s `headers`. *(Resolved 2026-11-07, §24: all five come through unchanged; no `headers` block.)*
 - **Whether the provider's create call satisfies `aws:RequestTag`** with `default_tags`. The first deploy shows it; a
   denial is fixed by name.
 - **Whether anything Vite emits trips the content security policy.** Checked in step 5 by serving the production
@@ -1439,3 +1439,43 @@ measured: it moves that point only to about 1,180 (5px still at 1,170). §22's "
 status table. The `::after` alternative-text form was proven in Chromium only (Firefox and Safari not tried, not checked
 live); where an engine does not read it, the declaration drops and the buttons shift 3px as before. The "after" screenshots stand: the desktop shots never
 scrolled, and the phone behavior is unchanged.
+
+## 24. As built, C5 (2026-11-07)
+
+**The rewrite.** `infra/vercel/vercel.json` holds one rewrite, every path to `https://d17t61og2l6kuo.cloudfront.net/$1`,
+the shape Musical Mycelium uses. `.vercel/` (the CLI's link: project and team ids) is gitignored. The folder was linked
+to the existing `horizon-compact` project by copying the link from the 2026-10-05 placeholder deploy, so no
+interactive `vercel link` was needed.
+
+**The deploy (his, about 8:45 AM, decision 4):** `npx vercel@65.2.0 deploy --prod` from `infra/vercel`. 65.2.0
+(2026-10-22) is the newest release at least 14 days old; 65.3 to 65.12.1 were younger. The saved CLI login had lapsed
+and was renewed by the device flow. Ready in 29 seconds; aliased to `https://horizon-compact.vercel.app`.
+
+**Checked by Claude, 2026-11-07:**
+
+- **Headers (§15's open question): all five of CloudFront's security headers come through the rewrite unchanged**:
+  `content-security-policy`, `strict-transport-security`, `x-content-type-options`, `referrer-policy` and
+  `x-robots-tag: noindex`, each identical to the distribution's. `cache-control: no-cache` on the page too. No
+  `headers` block is needed in `vercel.json`.
+- **The build:** the public `index.html` is byte-identical to the reviewed local build, and so is each of the seven
+  files it names or serves beside it (the script, the stylesheet, the four fonts, the favicon), each with the right
+  content type.
+- **A missing path answers 200 with the page**, as the distribution does by design (`site.tf` maps 403 and 404 to
+  `/index.html`); Vercel passes that through.
+- **In headless Chromium at 1280 and 390 pixels:** all four faces loaded (Newsreader 400, Source Sans 3 400 and 600,
+  Big Shoulders Display 800), 28 table rows, every request to `horizon-compact.vercel.app` alone, and no console
+  message, policy violation or failed request. Screenshots in the scratchpad, not tracked.
+
+**Not checked here:** the run table's run ids and image digest against the records, DoD 1's trace, which C6 commits
+with the screenshot set; and Firefox and Safari.
+
+**Deploy's path filter, fixed (his ask, 2026-11-07).** `infra/**` set both halves, so a commit touching only
+`infra/vercel/` would have built an image and applied `main` with nothing changed in AWS, and would again at the
+teardown test's step 5, right after the re-apply. `deploy.yml` now leaves `infra/vercel/**` out of its trigger paths
+and matches `infra/vercel/*` first in the `changes` job, setting neither half; two assertions in
+`tests/test_architecture.py` hold both. Run by hand on sample paths: the rewrite alone sets neither, the rewrite with
+a Terraform file sets both. **The commit carrying this still runs both halves**, because `deploy.yml` itself changed:
+a new image is built and `main` applied, with no expected change beyond the task definition's image.
+
+**Next: step 10, the teardown test** (§10). It gives the distribution a new domain, and step 5 of that test puts the
+new domain into this file and deploys it again.

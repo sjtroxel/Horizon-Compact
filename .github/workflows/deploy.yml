@@ -16,6 +16,7 @@ on:
       - "experiment/**"
       - "!experiment/results/**"
       - "infra/**"
+      - "!infra/vercel/**"
       - "web/**"
       - "pyproject.toml"
       - "uv.lock"
@@ -63,6 +64,8 @@ jobs:
           while IFS= read -r path; do
             case "$path" in
               experiment/results/*) ;;
+              # The Vercel rewrite is deployed by hand (Phase 1.5 decision 4); it changes nothing in AWS.
+              infra/vercel/*) ;;
               src/* | experiment/* | pyproject.toml | uv.lock) code=true ;;
               infra/* | .github/workflows/deploy.yml) code=true; site=true ;;
               web/*) site=true ;;

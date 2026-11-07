@@ -599,6 +599,8 @@ def test_deploy_paths_leave_out_results_commits_and_take_the_site() -> None:
     listed = [line.strip()[2:].strip('"') for line in paths.group(1).splitlines()]
     assert listed.index("!experiment/results/**") == listed.index("experiment/**") + 1
     assert "web/**" in listed  # Phase 1.5 C4
+    # The Vercel rewrite is deployed by hand and touches nothing in AWS (Phase 1.5 C5); later patterns win.
+    assert listed.index("!infra/vercel/**") == listed.index("infra/**") + 1
 
 
 def test_the_image_leaves_experiment_results_out() -> None:
@@ -1223,6 +1225,8 @@ def test_deploy_splits_the_image_from_the_site_by_changed_paths() -> None:
     # A results-only path is matched first, so it can never set either half.
     case = changes[changes.index('case "$path" in') :]
     assert case.index("experiment/results/*) ;;") < case.index("experiment/*")
+    # The Vercel rewrite is matched before infra/, so it never builds an image or applies (Phase 1.5 C5).
+    assert case.index("infra/vercel/*) ;;") < case.index("infra/* |")
     assert "web/*) site=true" in changes
     image = _job(text, "image")
     assert "needs: [changes, check]" in image
