@@ -7,7 +7,27 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-07, about 1:00 PM (PHASE 1.5 TEARDOWN TEST PASSED; C6, THEN THE CLOSE A DAY LATER)
+> ## START HERE — where things stand, 2026-11-08, about 8:30 AM (PHASE 1.5 CLOSED, VERSION 0.5.5; PHASE 6'S DOC NEXT)
+>
+> **Phase 1.5 is closed** (the Phase 1.5 IMPLEMENTATION doc §26): DoD 1-10 met; the spend **$0.01** by his Cost
+> Explorer reading (2026-11-04 to 2026-11-07, tag `Project`), about $0.08 with Phase 1's records. **The version is
+> `0.5.5`** (decision 10) in `pyproject.toml`, `src/horizon_compact/__init__.py` and `uv.lock`. **Every phase through
+> 5.5 is now closed.**
+>
+> **This block rides in the close commit, his: `phase 1.5: close, version 0.5.5`.** It changes `src/`,
+> `pyproject.toml` and `uv.lock`, so **both CI and Deploy's code half are owed** (a new image, since the version line
+> changes the bytes; `main` applied with the task definition replaced). Read both first (`gh run list --limit 3`). If
+> `git log -1` is not that commit, it is first.
+>
+> **Next: Phase 6 `explorer`'s IMPLEMENTATION doc (Opus)**, its scope doc approved 2026-10-04 and a month old, so it
+> gets the same line-by-line scope review Phase 1.5's did. **Still open, carried:** the teardown check's
+> INACTIVE-cluster fix has had no real run (his, first run at the next teardown); Musical Mycelium's deploy role can
+> change this project's distribution (OPEN 2026-11-04, that repo's to fix); the frozen matcher's two behaviors for
+> Phase 6 and 6.5 (OPEN 2026-10-31).
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-07, about 1:00 PM (PHASE 1.5 TEARDOWN TEST PASSED; C6, THEN THE CLOSE A DAY LATER) *(superseded by the block above)*
 >
 > **The teardown test passed** (DoD 3; the Phase 1.5 doc §25, `docs/phases/evidence/phase-1.5/teardown.md`). `main`
 > was destroyed (two dispatches, two fixes, `f49d530`) and re-applied by Deploy `42397385746`; the site is on
@@ -3182,7 +3202,11 @@ criterion 3, 4 or 5 is recorded.
 
 ---
 
-## OPEN, narrowed 2026-11-04 to Phase 1.5 (Phase 1 CLOSED that day, DoD 7 waived; OPEN 2026-10-15) — Phases 1 and 1.5 are not closed
+## CLOSED 2026-11-08, with Phase 1.5's close (was narrowed 2026-11-04 to Phase 1.5; OPEN 2026-10-15) — Phases 1 and 1.5 are not closed
+
+**Closed 2026-11-08:** Phase 1.5 is closed (its IMPLEMENTATION doc §26; DoD 1-10 met, the spend $0.01 by his Cost
+Explorer reading) and the version is `0.5.5`, in one step rather than through 0.1.0 and 0.1.5 (Phase 1.5 decision 10,
+his). Both halves of the closing condition below are met.
 
 **Narrowed 2026-11-04 (his):** Phase 1 is closed, DoD 1-6 met and DoD 7 waived (spend about $0.07 by the records,
 inside the cumulative ceiling; the bills not read), C6 done as the IMPLEMENTATION doc's §22. **What stays open is
@@ -3311,7 +3335,11 @@ row, run from `main` before the reveal. Closes when §5.3 is built.
 
 ---
 
-## CARRIED — from Phase 1 to Phase 1.5, 2026-10-11
+## CLOSED 2026-11-08, with Phase 1.5's close (was CARRIED from Phase 1 to Phase 1.5, 2026-10-11)
+
+**Closed 2026-11-08:** every bullet landed in Phase 1.5's IMPLEMENTATION doc (2026-11-04): the page shows the
+main model's sweep, `skeleton-haiku-5-5-f1467906` (decision 1); the site-data builder reads the
+`<role>/<experiment>/<sweep_id>/` layout and takes the bucket by name (§6, §18). The phase closed 2026-11-08 (§26).
 
 Found by Phase 1's build and its step 9 run (`docs/phases/phase-1-walking-skeleton-IMPLEMENTATION.md` §21); each lands
 in Phase 1.5's IMPLEMENTATION doc.

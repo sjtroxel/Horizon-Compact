@@ -1,6 +1,8 @@
 # Phase 1.5 — Publish Path: IMPLEMENTATION (v0.1.5)
 
 > **IMPLEMENTATION doc. APPROVED 2026-11-04, about 9:05 AM (his): all ten decisions in §11 as recommended, (a).**
+> **CLOSED 2026-11-08** (his commit of §26): DoD 1-10 met, the spend $0.01 by his Cost Explorer reading, version `0.5.5`.
+>
 > Drafted the same morning (Opus). Written the day Phase 1 closed
 > (`01d9758`), immediately before this phase is built, and a month after its scope doc. Sources: the scope doc
 > (`docs/phases/phase-1.5-publish-path.md`), the Phase 6 and 6.5 scope docs (what they expect of this phase),
@@ -509,7 +511,7 @@ of them is still a marked placeholder, so the deploy commit cannot ship without 
 9. **[done 2026-11-07: deployed by him, checked by Claude; §24]** **[his]** **C5, the rewrite:** `infra/vercel/vercel.json` with the domain; deploy (decision 4); the public URL
    checked.
 10. **[done 2026-11-07: passed, two fixes on the way; §25, `evidence/phase-1.5/teardown.md`]** **[his, Claude reading]** **The teardown test** (§10); C6, the evidence and the rewrite's new domain.
-11. **A day later:** the spend from the bills (his Console readings: AWS Cost Explorer for the build days, filtered to
+11. **[done 2026-11-08: his Cost Explorer reading $0.01; the close (C7) written, §26]** **A day later:** the spend from the bills (his Console readings: AWS Cost Explorer for the build days, filtered to
     the `Project` tag; no model call means no Anthropic or OpenRouter line), then **the
     close (C7):** the DoD audit, the version (decision 10), `ROADMAP.md`, `KNOWN-GAPS.md`.
 
@@ -1545,3 +1547,53 @@ committed in `docs/phases/screenshots/phase-1.5/` (not under `evidence/`, whose 
 **The teardown test passes (DoD 3)**, with two fixes found on the way, both in `f49d530`: the read after delete
 (`bootstrap`, applied) and the INACTIVE cluster in the check (not yet proved by a real run). The record is
 `evidence/phase-1.5/teardown.md`. **C6** is the commit of that file, the screenshots and `vercel.json`.
+
+## 26. Close-out (C7), 2026-11-08: the spend and the DoD audit
+
+Written by Claude (Opus) on 2026-11-08, the day after the teardown test, from the as-built record above, his Cost
+Explorer reading and checks run the same morning.
+
+**The spend (§12 step 11; his reading, about 7:57 AM).** AWS Cost Explorer, 2026-11-04 to 2026-11-07 (UTC), monthly,
+unblended, grouped by service, filtered to the tag `Project = horizon-compact`: **$0.01 in all**. ECR $0.01; S3,
+CloudFront and CloudWatch $0.00 each. No model call was made this phase, so there is no Anthropic or OpenRouter line.
+Three limits on the number, none of which moves it near the bar: AWS calls the current month's figures estimated;
+Cost Explorer can lag by up to a day, so 2026-11-07 may be partly missing; and a tag filter counts only tagged
+resources (it is the right filter all the same, since Musical Mycelium shares the account). **With Phase 1's about
+$0.07 by its records (§22 of the Phase 1 doc), the two phases come to about $0.08**, against DoD 6's "about $1 or
+less". The ECR line is the images no longer expired (decision 7), the one cost this phase adds that grows; §14 said
+to measure it at the close. **Measured 2026-11-08, about 8:10 AM (his read-only command, `aws ecr describe-images`
+summing `imageSizeInBytes`): 16 images, 1,832,897,851 bytes (about 1.8 GB).** At $0.10 per GB-month (ECR's private
+storage price, read on its pricing page the same morning; the new-customer free tier does not apply to this account)
+that is **at most about $0.18 a month**, inside the credits. It is an upper bound: the sum counts layers shared
+between images once per image, and ECR stores a shared layer once. Each image-building push adds about a cent a
+month at this size (about 115 MB an image on average, the same upper bound); untagged images still expire.
+
+| Scope DoD (as read through §0) | Met | Proof |
+|---|---|---|
+| 1. The page at `horizon-compact.vercel.app` shows the placeholder sweep with spread and run counts, labeled a test in his words; any number traced to run ids and image digest | **yes**, 2026-11-07 | §24 and §25 step 6: the public page and all eight built files byte-identical to the reviewed build; the live bundle carries all 15 run ids of `skeleton-haiku-5-5-f1467906` and the image digest Phase 1 recorded (Phase 1 doc §21a); the labels his, word for word (§20); full-page screenshots, light and dark at 1280 and 390, in `docs/phases/screenshots/phase-1.5/`. The page answers 200 on 2026-11-08 |
+| 2. The published JSON is committed, produced by the site-data builder; a re-run is byte-identical | **yes**, 2026-11-04 | §18: `tests/test_site_data.py` (a second build byte-identical; the S3 and local stores give identical text); his S3 and local runs, `cmp: identical`; `web/src/data/placeholder.json` committed in `b9b8ac8` |
+| 3. Destroy and re-apply both succeed; nothing billable left; page, traceability and raw record back | **yes**, 2026-11-07, with one part proved by test only | §25 and `evidence/phase-1.5/teardown.md`: destroy runs `42392129939` (stopped, fixed) and `42395590670` (all 20 gone; three of the check's four parts passed, the fourth failed only on the INACTIVE cluster AWS documents); re-apply Deploy `42397385746`; step 1 and step 6 counts equal line for line. **The check's INACTIVE-cluster fix has had no real run** (his decision, §25); it is held by its test and a simulation, and its first real run is the next teardown |
+| 4. The section for results against the thesis is on the page, with his title | **yes**, 2026-11-05 | `web/src/copy.ts`: `resultsTitle` "Results that go against what I expected" and its sentence, approved by him (§20); on the live page |
+| 5. `make check` and CI green; root under cap; every commit through the guard | **yes** | CI green on every Phase 1.5 commit: `0deae78` `41857222175`; `0526a2b` `41882765796` (Deploy `41882765814`); `b9b8ac8` `41916412080` (Deploy `41916412096`); `3714f44` `42002738203` (Deploy `42002738227`); `ea2bb7d` `42112962435`; `69b88ce` `42244341282` (Deploy `42244341172`); `a121fc3` `42311321663` (Deploy `42311321638`); `9b18bd4` `42385351266` (Deploy `42385351271`); `f49d530` `42397385741` (Deploy `42397385746`); `cf1fb71` `42404183618`. The two red runs in the phase are the teardown dispatches above, recorded in §25, not checks. Root 14 of 16 (`make root-check`, 2026-11-08). The guard's proof is the hook (Phase 1 doc §22, row 6); no bypass is recorded in this doc |
+| 6. Spend measured from the bill; with Phase 1's, about $1 or less | **yes**, 2026-11-08 | his Cost Explorer reading above: $0.01 for this phase; about $0.08 with Phase 1 |
+| *Added by this doc:* 7. No request leaves for another host; the security headers are served | **yes** | the content security policy (`default-src 'none'`, every other source `'self'`) and the built-files check in `npm run check`; Deploy's smoke test (§21, §25 step 4); at the public URL on 2026-11-08 all five headers (`content-security-policy`, `strict-transport-security`, `x-content-type-options`, `referrer-policy`, `x-robots-tag: noindex`), as in §24 |
+| *Added by this doc:* 8. The deploy role cannot change a distribution that is not this project's | **yes**, 2026-11-06 | permission-check run `42245451195`, all six refused, the tag claim by the explicit deny (§21); the KNOWN-GAPS entry closed. Widened on purpose 2026-11-07 for reads only (`SiteDistributionReadAfterDelete`, §25): the role can read any distribution's configuration and still change none but its own |
+| *Added by this doc:* 9. The image record: the lifecycle no longer expires images, and the lost digests are recorded | **yes**, 2026-11-04 | §17: his `bootstrap` plan and apply, the second plan "No changes", Phase 5.5's image confirmed after it; `KNOWN-GAPS.md`'s ECR entry (closed 2026-11-04) records the two expired digests (`ff978703...`, `ef2582ed...`) as a disclosed limit for the methods page |
+| *Added by this doc:* 10. §8's checks pass | **yes**, 2026-11-07 | §22 (the review: five misses, three departures accepted), §23 and §23a (the fixes, Opus's review, one change by his decision); `a121fc3` live and matching the reviewed build |
+
+**C7 as built.** This section; §12 step 11 marked done; **the version to `0.5.5`** (decision 10) in `pyproject.toml`
+and `src/horizon_compact/__init__.py`, **and in `uv.lock`**, whose editable entry carries it (decision 10's "not in
+the lock (checked)" was wrong; CI's `uv sync --locked` would have refused a stale lock, so `uv lock` was re-run and
+changed that one line only). `ROADMAP.md` (the spine row, the phase-doc table, the decision history); `KNOWN-GAPS.md`
+(START HERE; the OPEN entry of 2026-10-15 and the CARRIED list of 2026-10-11 closed); a dated note on the scope doc.
+The version is recorded as `harness_version` in every record written from here on and compared nowhere (checked:
+`cli.py` writes it; no code reads it back). **The close commit changes `src/`, `pyproject.toml` and `uv.lock`, so it
+starts Deploy's code half:** a new image (the version line changes its bytes) and `main` applied with the task
+definition replaced. That Deploy is owed with the CI.
+
+**Left open by this close:** the INACTIVE-cluster check unproved by a real run (row 3, his decision); Musical
+Mycelium's deploy role can still change this project's distribution (OPEN 2026-11-04, that repo's to fix); the
+`horizon-compact-dev` access key kept to Phase 7's close or 2027-01-02 (decision 6); `noindex` stays until go-live
+(decision 3).
+
+**Phase 1.5 is CLOSED 2026-11-08, with his commit of this section.** Every phase through 5.5 is now closed.

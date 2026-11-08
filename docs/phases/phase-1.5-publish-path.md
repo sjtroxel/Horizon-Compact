@@ -8,6 +8,9 @@
 > Written before Phase 0.5 and Phase 1 are built. **Lines marked *(rests on 1)* depend on what Phase 1 builds;** if
 > Phase 1 comes out different, they are the lines to amend.
 >
+> **CLOSED 2026-11-08** (his): every DoD row met, DoD 6 at $0.01 by his Cost Explorer reading (about $0.08 with Phase 1);
+> the audit is the IMPLEMENTATION doc's §26.
+>
 > **Amended 2026-11-04 (his), at the IMPLEMENTATION doc's approval:** a month and five closed phases after this doc
 > was written, it was reviewed line by line. Read it through the IMPLEMENTATION doc's §0
 > (`docs/phases/phase-1.5-publish-path-IMPLEMENTATION.md`): the main model is Haiku 5.5; the frozen engine cannot read
