@@ -1387,6 +1387,41 @@ def cmd_site_raw_manifest(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+EXPLORER_RESULTS_PATH = Path("experiment") / "results"
+EXPLORER_DATA_PATH = Path("web") / "explorer-data"
+
+
+def cmd_site_explorer(args: argparse.Namespace) -> int:
+    """The committed results files to the explorer's split JSON (Phase 6 IMPLEMENTATION doc section 5). It
+    reads only committed files, calls nothing, and replaces its own output directory whole."""
+    from horizon_compact.site.explorer import (
+        ExplorerDataRefusal,
+        build_explorer_data,
+        explorer_data_matches,
+        write_explorer_data,
+    )
+
+    top = Path(_git("rev-parse", "--show-toplevel"))
+    results = Path(args.results) if args.results else top / EXPLORER_RESULTS_PATH
+    out = Path(args.out) if args.out else top / EXPLORER_DATA_PATH
+    try:
+        files = build_explorer_data(results)
+        unchanged = explorer_data_matches(files, out)
+        write_explorer_data(files, out)
+    except ExplorerDataRefusal as exc:
+        raise SweepRefusal(str(exc)) from exc
+    total = 0
+    for relative, text in files.items():
+        size = len(text.encode("utf-8"))
+        total += size
+        print(f"{'kept' if unchanged else 'wrote'} {out / relative}  {size} bytes")
+    print(f"files:   {len(files)}")
+    print(f"bytes:   {total}")
+    if unchanged:
+        print("unchanged")
+    return CLEAN_EXIT
+
+
 FORMAT_REPORT_DIR = "docs/phases/evidence/phase-2.5/format"
 
 
@@ -3450,6 +3485,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--out", default=None, help="default: docs/phases/evidence/phase-4/raw-manifest.json"
     )
 
+    site_explorer = site_actions.add_parser(
+        "explorer",
+        help="The committed results files to web/explorer-data/. Reads committed files only.",
+    )
+    site_explorer.add_argument(
+        "--results", default=None, help="default: experiment/results under the repository root"
+    )
+    site_explorer.add_argument("--out", default=None, help="default: web/explorer-data")
+
     dossier = groups.add_parser("dossier", help="Phase 2 company dossier. Offline; calls no model.")
     dossier.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
     dossier_actions = dossier.add_subparsers(dest="action", required=True)
@@ -4021,6 +4065,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         try:
             if args.action == "raw-manifest":
                 return cmd_site_raw_manifest(args)
+            if args.action == "explorer":
+                return cmd_site_explorer(args)
             return cmd_site_data(args)
         except (SweepRefusal, ExperimentError) as exc:
             print(f"refused: {exc}", file=sys.stderr)

@@ -407,7 +407,7 @@ My recommendation is (a) in each, for the reason given.
 ## 14. Order of work
 
 1. **[done 2026-11-09: the doc approved (his); the scope doc's dated note; ROADMAP and KNOWN-GAPS]** **[Claude]** Step 0: this doc approved; the scope doc's dated note pointing to §0; KNOWN-GAPS.
-2. **[Sonnet builds, Opus reviews]** **C1, the explorer-data builder** (§5) with tests and its committed output; the CI
+2. **[built 2026-11-09 by Sonnet, §21; reviewed by Opus, §21a]** **C1, the explorer-data builder** (§5) with tests and its committed output; the CI
    re-run check.
 3. **[his runs]** **The grid memo extract** (decision 4) and **the real-case figure count** (decision 5); his choice on
    decision 5 recorded. **C2** commits both.
@@ -540,6 +540,7 @@ marked **6.5** are the methods page's; the explorer links to them.
 |---|---|
 | The section of results against the thesis was filled by a rule written after the results | §19 on the page: sources dated, the disclosure, no alternative rule tried, and the list whatever it yields |
 | The real cases were selected after the pre-registered rule found none, with the criteria relaxed step by step | the exploratory label on every case surface; the public selection logs (`evidence/phase-5/selection-public.json`, `exploratory-public.json`); **6.5** tells the story in order |
+| All five cases are plant closures: no retool and no AI-workforce case, though `ROADMAP.md` §1 lists "three real cases including an invest or retool case" among what is never cut | the cases view states the shortfall from `cases.json` (`short_by_type`: retool 2, ai 1) beside the cases; **6.5** gives the history (KNOWN-GAPS CLOSED 2026-10-27, "two of three types short") |
 | Every case reading is "no good match", so the cases add no evidence | the cases view says so first, and frames the cases as the protocol applied, never as validation |
 | The matcher's five-way tie and the one-line reading (KNOWN-GAPS OPEN 2026-10-31) | both notes on the cases view (DoD row 8) and **6.5** |
 | No case dossier is published, so no case can be re-run | the cases view; **6.5**'s re-run section; `cases.json` gives each reason |
@@ -560,3 +561,119 @@ marked **6.5** are the methods page's; the explorer links to them.
 OpenRouter for $1.34 of his cash (2026-10-03). The same kind of read on the finished site and the methods page fits
 **Phase 6.5**, before go-live, as a check on this list; its cost and the model's availability are rechecked live then,
 and it is his call, from his cash.
+
+## 21. As built, C1: the explorer-data builder (2026-11-09, Sonnet; Opus review §21a)
+
+Built from `scratch/p6-c1-build-prompt.md`. No AWS call, no S3 read, no model call; it reads only committed files.
+Not committed (his commit).
+
+**What was built.**
+
+- `src/horizon_compact/site/explorer.py` (new, run code): `build_explorer_data(results_root) -> dict[str, str]`,
+  `write_explorer_data(files, out) -> Path`, `explorer_data_matches(files, out) -> bool` (a read-only helper the
+  command uses to say "unchanged"), and `ExplorerDataRefusal`. Standard library only (`tomllib` for
+  `objectives.toml`). Compact JSON, `ensure_ascii=False`, `allow_nan=False`, key order as built, one newline.
+  Integers above 2**53 - 1 are written as decimal strings (only the case files' 39-digit bootstrap seeds are).
+- `hc site explorer [--results <dir>] [--out <dir>]` in `cli.py`, defaulting to `experiment/results` and
+  `web/explorer-data`. Prints each file with its byte count, the file count, the total, and `unchanged` when the bytes
+  were the same (in that case each line starts `kept`, not `wrote`). A refusal prints `refused: ...` and exits
+  `REFUSED_EXIT`. It is not on the deny list.
+- `tests/test_site_explorer.py` (new, 98 tests): fixtures for each refusal, each clause of §19 on each scenario's sign
+  and each pair, the notes true and false, the writer, the command, and the real-data group below.
+- `web/explorer-data/` (new, committed output, 21 files) and `web/.prettierignore` (`explorer-data/`, with its reason).
+- Nothing in `experiment/`, `infra/`, `.github/` or `web/src/` changed; no frozen file was touched.
+  `hc protocol check`: ok.
+
+**Output, measured 2026-11-09** (bytes; 21 files, **1,441,167 in all**; the largest, 292,118, is far under the large-file hook's 1,024 KB):
+
+| Files | Bytes |
+|---|---|
+| `index.json` | 24,992 |
+| `grid/haiku-5-5/` s1, s2, s3, s4 | 102,458; 97,977; 139,133; 281,038 |
+| `grid/gpt-oss-openrouter/` s1, s2, s3, s4 | 101,804; 169,978; 141,087; 292,118 |
+| `thinking/haiku-5-5/s1.json` | 42,200 |
+| `cases/index.json` | 5,838 |
+| `cases/<label>/<model>.json`, ten files | 3,909 to 4,570 |
+
+**Real-data facts the tests assert** (all against the real output): every case's Haiku `primary` reading has
+`all_distances_equal` true; `closure-19`'s `u1` reading has `one_observable_line` true for both models (one line);
+every case result is exploratory with its label; all ten case files hold their seeds as strings and no other number
+above 2**53 - 1; the three sources' sha256 values in `index.json` match the files; the output holds no memo, no `arn:`
+and no `horizon-compact-results-`. The committed `web/explorer-data/` is reproduced byte for byte by a fresh build,
+and holds no other file (§15 row 7; it runs inside `pytest`, so CI needs no change). A second build is
+byte-identical. A walk over every leaf (measured 2026-11-09: 81,870 in the grid and thinking files, 1,528 in the ten case files, 926 in the verdicts) finds each value in the
+grid files, the case files, the verdicts and the entries equal to its source value, with the one allowed change.
+A separate, plainer recomputation of §19's list from the source files agrees with the builder's.
+
+**`against_thesis`, counts only** (rule `Phase 6 IMPLEMENTATION doc §19, 2026-11-09`):
+
+| Model | `no_split` entries | `reversed_split` entries | scenarios listed whole |
+|---|---|---|---|
+| `haiku-5-5` | 2 | 0 | 0 |
+| `gpt-oss-openrouter` | 0 | 0 | 0 |
+
+**Checks:** `make check` green: Python 3,347 tests (3,249 before this step, +98), Vitest 37, strict mypy, root cap,
+paths-check, doctor. `uv run hc site explorer` run once (wrote 21 files) and again (`unchanged`).
+
+**What did not fit, and what was done instead.**
+
+1. **A case result's `sweep_id` cannot equal its filename** (the files are `<model_key>.json`, the sweep id is
+   `case-<model_key>-<hex>`). The check is: `model_key` equals the filename, `sweep_id` matches
+   `case-<model_key>-<hex>`, and `case` equals the label. The grid and thinking files do check `sweep_id` against
+   the filename stem.
+2. **Refusals added beyond the list** (all pass on the real data; each has a test): a case result that disagrees
+   with `cases.json` on `exploratory` or its label; a scenario whose outcome, kind or threshold differs between
+   official files; a reading without five distances; an unknown verdict value; a "split" with no difference at
+   all (as well as zero); exactly one thinking file (not "at most one"); a symbolic link in a `prereg-v1/` folder
+   or in the output folder.
+3. **Objective E** is carried as `{"id": "E", "who": null, "when": null}`, not with the keys left out, so the front
+   end reads one shape.
+4. **`verdicts` is a list** of `{model_key, sweep_id, scenario_id, comparisons}`, grids only. The thinking
+   sub-study's comparisons are in its own file, so no view can mix it with a grid by accident.
+5. **`cases/index.json` leaves out** `probe_set` and `content_sha256`, which the prompt's list did not name.
+6. **A hazard for C2, which was not decided here.** §5.3 puts the grid memo extract in `web/explorer-data/memos/`
+   (`.jsonl`). The writer replaces `explorer-data/` whole and refuses an existing folder that holds anything but
+   `.json` files in its layout, as decided; so once `memos/` is there, `hc site explorer` will **refuse** (nothing is
+   deleted), and the reproduction test, which says the folder holds no other file, will fail. C2 has to choose:
+   put the memos in a sibling folder (such as `web/explorer-memos/`, with its own builder and `.prettierignore`
+   line), or extend the layout and the test to include `memos/`. Recommended: the sibling folder, since the writer's
+   "replace whole" is exactly what keeps stale files out of the results files.
+7. **The tests count the real leaves as a floor** (more than 20,000 in grid and thinking, 500 in the case files,
+   600 in the verdicts; well under the measured counts above), so a change that silently stopped walking would fail.
+
+## 21a. Opus review of C1 (2026-11-09)
+
+**Passed, with one test added; no change to the builder or its output.**
+
+**Reproduced, not taken on report:** `make check` green on Claude's own run (Python 3,347 before the added test and
+3,348 with it, Vitest 37, strict mypy, root cap, paths-check, doctor); `hc protocol check` ok; `uv run hc site explorer` prints
+`unchanged` (21 files, 1,441,167 bytes). The name guard, run by hand over the 26 new and changed files (nothing
+staged), finds nothing.
+
+**The rule, checked against the frozen analysis, not the prompt.** `difference` is the first named minus the second
+(`analysis/intervals.py`: `welch_difference` and `newcombe_difference` estimate first minus second;
+`analysis/verdict.py` passes `cells[first], cells[second]`). S3 counts `close` and S4 counts `fund`
+(`analysis/outcomes.py`), so §19's four signs (s1 +1, s2 -1, s3 -1, s4 +1) read correctly. **A separate recount from
+the two grid files, written without the builder's code, gives the same list:** Haiku `s1` B vs D and `s3` B vs D, both
+`no_split`; no reversed split in either model (every split goes the way the thesis expects); no scenario whole.
+Counts only, as §19 says; what they mean is the page's, in his approved words.
+
+**Nothing new is exposed.** Every input is already tracked in the public repo; the output carries no memo text (the
+longest string is the exploratory label) and no field that is not in a tracked results file.
+
+**The one change: a test.** The leaf walk covered the grid, thinking and case files, the verdicts and the entries, but
+not `index.json`'s `models`, `scenarios` and `objectives` blocks or `cases/index.json`, which carry numbers too
+(`alpha`, `threshold`, the shortfall counts). §5 asks for every number at its source path, so
+`test_every_leaf_in_the_index_blocks_and_the_cases_index_is_the_source_value` walks them against the grid files,
+`objectives.toml` and `cases.json`. Four mutations (a shortfall count, a model's alpha, a threshold, an objective's
+`when`) each fail it.
+
+**On §21's "what did not fit":** items 1 to 5 and 7 are accepted as built. **Item 6, the memo folder: decided (his,
+2026-11-09), the sibling folder.** As recommended: the sibling folder (`web/explorer-memos/`) and a dated note on §5 and §5.3 when C2's
+prompt is written, for a reason beyond §21's: the memo extract comes from his S3 run, so CI can never rebuild it, and
+keeping it out of the folder CI reproduces keeps that check exact. C2 then also extends §6's placeholder-mode check
+to the new folder and adds its `.prettierignore` line.
+
+**Carried forward, not a C1 change:** `objectives` carries `who` and `when` but not the three wording templates or
+the sealed one (`w2`). If a view shows the sentence the model read, the templates come from `objectives.toml` in a
+later step, copied, not composed by hand.

@@ -1,5 +1,8 @@
 # The data file is written by `hc site data` and is byte-compared (Phase 1.5 DoD 2): a reformat would break it.
 src/data/
+# The explorer data is written by `hc site explorer` and is byte-compared against a fresh build (Phase 6 DoD 7):
+# a reformat would break it.
+explorer-data/
 dist/
 node_modules/
 package-lock.json

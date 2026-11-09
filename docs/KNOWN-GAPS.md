@@ -7,7 +7,26 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-09, about 8:45 AM (PHASE 6 IMPLEMENTATION DOC APPROVED, STEP 0 DONE; C1 NEXT)
+> ## START HERE — where things stand, 2026-11-09, about 10:15 AM (PHASE 6 C1 BUILT AND REVIEWED; HIS COMMIT, THEN C2'S RUNS)
+>
+> **C1, the explorer-data builder, is built (Sonnet) and reviewed (Opus):** `hc site explorer`, its tests and the
+> committed `web/explorer-data/` (21 files, 1,441,167 bytes). The Phase 6 IMPLEMENTATION doc §21 is the as-built
+> record and **§21a the review**: passed, one test added (the leaf walk extended to `index.json`'s other blocks and
+> `cases/index.json`), no change to the builder or its output. §19's list was recounted from the grid files without
+> the builder's code and agrees. `make check` green.
+>
+> **Uncommitted, for his commit `phase 6: c1 explorer-data builder`** (the code, the output, the docs, this block).
+> **Deploy runs both halves** (`src/*` sets code, `web/explorer-data/` sets site): a new image with only the task
+> definition replaced, as at Phase 1.5's close, and a site sync of an unchanged placeholder page (checked: `dist/` holds
+> the same 8 files and none of the explorer data; nothing it builds from changed). Read CI and Deploy.
+>
+> **Next:** the two scripts for his runs (decisions 4 and 5: the grid memo extract and the real-case figure count),
+> then C2. **Decided (his, 2026-11-09):** the memo extract lives in a sibling `web/explorer-memos/`, not in
+> `web/explorer-data/` (§21a: CI cannot rebuild what comes from S3); C2's prompt carries the dated note on §5 and §5.3.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-09, about 8:45 AM (PHASE 6 IMPLEMENTATION DOC APPROVED, STEP 0 DONE; C1 NEXT) *(superseded by the block above)*
 >
 > **Phase 6 `explorer`'s IMPLEMENTATION doc is approved** (his, 2026-11-09): `docs/phases/phase-6-explorer-IMPLEMENTATION.md`,
 > all nine decisions as recommended except **decision 2, changed to a local preview** after his question (no second
