@@ -2277,6 +2277,45 @@ def cmd_case_reident(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_case_echoes(args: argparse.Namespace) -> int:
+    """``hc case echoes``: how many published real-case memos repeat a distinctive word, percentage or
+    figure from their withheld case text (Phase 6 IMPLEMENTATION doc section 22). Reads the repository and the
+    private appendix; no model call, no AWS, no network. Writes the counts to the repository and the tokens
+    to each case's appendix folder. Prints counts only."""
+    from horizon_compact.casebuild.appendix import ensure_untracked
+    from horizon_compact.caseprobe.echoes import KINDS, PRIVATE_NAME, EchoRefusal, run_echo_count
+
+    root = default_repo_root()
+    if _git("status", "--porcelain", "--", "src", "pyproject.toml", "uv.lock"):
+        raise SweepRefusal(
+            "src, pyproject.toml or uv.lock differ from HEAD: commit them first, so the HEAD the file "
+            "records is the code that counted"
+        )
+    try:
+        appendix = appendix_dir()
+        ensure_untracked(appendix)  # the private reports must never land in a repository
+        result, path, wrote = run_echo_count(root, appendix, _git("rev-parse", "HEAD"))
+    except EchoRefusal as exc:
+        raise SweepRefusal(str(exc)) from exc
+    print(
+        "case           model                published  held  "
+        + "  ".join(f"with_{k}" for k in KINDS)
+        + "  with_any"
+    )
+    for row in result.public["counts"]:
+        kinds = "  ".join(f"{row[f'with_{k}']:>{len(k) + 5}}" for k in KINDS)
+        print(
+            f"{row['label']:<14} {row['model_key']:<20} {row['published']:>9}  {row['held']:>4}  {kinds}  "
+            f"{row['with_any']:>8}"
+        )
+    shown = path.relative_to(root).as_posix()
+    print(f"{'wrote' if wrote else 'unchanged'} {shown}")
+    print(
+        f"wrote {len(result.private)} private reports, {PRIVATE_NAME} in each case's appendix folder"
+    )
+    return CLEAN_EXIT
+
+
 def _print_reident(root: Path, result: ReidentResult) -> None:
     """Counts and a status only. Nothing here can hold a name, a CIK, a ticker or a URL."""
     print(f"status: {result.status} ({result.note})")
@@ -2997,6 +3036,8 @@ def cmd_case(args: argparse.Namespace) -> int:
             return cmd_case_memos(args)
         if args.action == "reident":
             return cmd_case_reident(args)
+        if args.action == "echoes":
+            return cmd_case_echoes(args)
         return cmd_case_foreshadow(args) if args.action == "foreshadow" else cmd_case_hashes(args)
     except (
         AppendixError,
@@ -3757,6 +3798,13 @@ def build_parser() -> argparse.ArgumentParser:
         "Laptop.",
     )
     reident.add_argument("label", help="a frozen case's neutral label, such as closure-07")
+    case_actions.add_parser(
+        "echoes",
+        help="Phase 6 (decision 5): how many published real-case memos repeat a distinctive word, percentage "
+        "or figure from their withheld dossier and scenario. Reads the repository and the private appendix; "
+        "no model call, no AWS. Writes counts to docs/phases/evidence/phase-6/memo-echoes.json and the "
+        "tokens to each case's appendix folder. Prints counts only. Laptop; his to run.",
+    )
     assemble = case_actions.add_parser(
         "assemble",
         help="Write the case's dossier once every flag has a decision in reviewed-flags.json",

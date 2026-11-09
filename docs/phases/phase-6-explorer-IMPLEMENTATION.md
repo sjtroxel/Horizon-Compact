@@ -199,6 +199,10 @@ first, narrow form of Phase 6.5's re-scoring check, reading only committed files
 
 ### 5.3 The grid memo extract (decision 4)
 
+*Amended 2026-11-09 (his, §21a item 6):* the extract is written to **`web/explorer-memos/`**, a sibling of
+`web/explorer-data/`, not inside it: it comes from his S3 run, so CI cannot rebuild it, and the folder CI reproduces
+stays exact. Read `web/explorer-data/memos/` below as `web/explorer-memos/`.
+
 `hc site memos --store s3` (his run; on the deny list, since it reads official records): for each official run of the
 two grids and the sub-study, the run id, model, scenario, objective, wording, repeat, status and memo text, written to
 `web/explorer-data/memos/`, plus a line per source object with its key and sha256 from
@@ -380,6 +384,8 @@ My recommendation is (a) in each, for the reason given.
    - (b) Wait for Phase 6.5's full-text publication and build the memo reader from it. One source fewer, but the
      memo reader waits for the next phase.
 5. **DECIDED 2026-11-09 (his): (a).** *Was:* **Real-case memos that repeat scale-free figures from a withheld dossier.**
+   *Widened 2026-11-09 (his, §22):* the count also covers distinctive **words** shared with the withheld text,
+   after a published memo was found repeating a product line and a program name; (c) is the expected choice.
    - (a) **Recommended: count first, then decide.** A local script (Claude writes, he runs; it reads the private
      dossiers) counts, per case and model, the published memos that contain a percentage, rate or other unscaled
      figure that also appears in the case's withheld dossier, and writes only the counts to the repository. With the
@@ -409,8 +415,8 @@ My recommendation is (a) in each, for the reason given.
 1. **[done 2026-11-09: the doc approved (his); the scope doc's dated note; ROADMAP and KNOWN-GAPS]** **[Claude]** Step 0: this doc approved; the scope doc's dated note pointing to §0; KNOWN-GAPS.
 2. **[built 2026-11-09 by Sonnet, §21; reviewed by Opus, §21a]** **C1, the explorer-data builder** (§5) with tests and its committed output; the CI
    re-run check.
-3. **[his runs]** **The grid memo extract** (decision 4) and **the real-case figure count** (decision 5); his choice on
-   decision 5 recorded. **C2** commits both.
+3. **[his runs]** **The grid memo extract** (decision 4; `web/explorer-memos/`, §5.3's note) and **the real-case
+   count** (decision 5, widened: `hc case echoes`, §22); his choice on decision 5 recorded. **C2** commits both.
 4. **[Claude builds, his picks]** **The previews** (§7): form, then palette, then layout.
 5. **[Sonnet builds, Opus reviews]** **C3, build modes and the shell:** the two modes, the placeholder-mode check, the
    paths and their HTML files, the local preview script.
@@ -677,3 +683,47 @@ to the new folder and adds its `.prettierignore` line.
 **Carried forward, not a C1 change:** `objectives` carries `who` and `when` but not the three wording templates or
 the sealed one (`w2`). If a view shows the sentence the model read, the templates come from `objectives.toml` in a
 later step, copied, not composed by hand.
+
+## 22. Decision 5 widened: published real-case memos and their withheld dossiers (2026-11-09)
+
+**What was found.** Writing step 3's scripts, Claude read the first published memo of closure-07 and found it
+repeats terms from the case's withheld dossier: a product line, its abbreviation, a product category and a named
+employee program, none of them in the case's published 98-character description. Counted on public files only, 140
+of closure-07's 198 published memos hold at least one of the four (Haiku 50 of 74, gpt-oss 90 of 124). The terms
+are not written in this repository. Phase 5.5's scan looked for names and held memos whose flagged words came from a
+withheld dossier; these words were never flagged, so they passed. Finding 5 (§3) expected scale-free figures to be
+the exposure; words are the larger one. KNOWN-GAPS OPEN 2026-11-09 tracks it.
+
+**His decisions (2026-11-09), on Claude's recommendations:** (1) widen decision 5's count from figures to words,
+percentages and other unscaled figures; (2) for the explorer, the expected choice is (c), holding real-case memos
+from the site, at least for every case whose dossier is withheld (all five), with the counts and the reason shown in
+their place; it is final once the counts are in; (3) the copies already in the repository: decided after the
+counts. The grid memos (decision 4) are not affected: every one is about the fictional company.
+
+**The count: `hc case echoes`** (`src/horizon_compact/caseprobe/echoes.py`; his to run, on the deny list, since it
+reads the private dossiers). No model call, no AWS, no network. For each case it reads the dossier and scenario
+from the appendix and refuses unless each hashes to the case's `case.lock`, so the text compared is the text the
+model was given. It takes three kinds of token, after the memo scan's own `fold`: **words** (three or more letters),
+**percentages**, and **other figures** of two or more digits (a figure written with `$` or followed by million,
+billion, thousand or trillion is skipped, since dollar amounts are scaled, protocol §12.6). A token is
+**distinctive** for a case when it is in the case's withheld text and in none of: the reference text (every
+`.toml`, `.txt` and `.md` under `experiment/` outside `results/` and `cases/`: the fictional company, the protocol,
+the reader briefs); the case's published description; and, for words only, every other case's published memos (a
+word memos about other companies also use is ordinary business English). A published memo is counted for a kind
+when it holds at least one distinctive token of it.
+
+**It is an upper bound.** An ordinary word the reference text happens to lack is counted too; and a term the model
+knew from training, but the dossier lacks, is not seen. The private report beside each case's dossier lists every
+token with the runs that carry it, most frequent first, so he can judge which, if any, point toward the company.
+
+**What is public:** `docs/phases/evidence/phase-6/memo-echoes.json`, written once: per case and model, the memos
+published and held, how many carry a distinctive word, percentage or figure, how many carry any, and how many
+distinct tokens of each kind; with the HEAD that counted, each dossier's and scenario's sha256 from `case.lock`,
+each memo file's sha256 and the reference text's digest. A check refuses the file if it would hold any string that
+is not a key, a label, a model key, the rule's name or a hash. The command prints counts only.
+
+**His steps.** (1) Commit the code (the command refuses to run on uncommitted `src/`, so the HEAD it records is the
+code that counted). (2) `uv run hc case echoes`. (3) Paste the printed table; Claude reads only that. (4) Open the
+private report in each case's appendix folder and look at the top of each list: does any word, alone or with the
+published description, point toward the company? (5) His choice on (2) and (3) above, recorded here. The counts file
+rides in C2.

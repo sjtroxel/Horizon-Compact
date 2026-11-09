@@ -7,7 +7,26 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-09, about 10:15 AM (PHASE 6 C1 BUILT AND REVIEWED; HIS COMMIT, THEN C2'S RUNS)
+> ## START HERE — where things stand, 2026-11-09, about 11:30 AM (A FINDING ON REAL-CASE MEMOS; `hc case echoes` BUILT, HIS RUN NEXT)
+>
+> **Found writing step 3's scripts** (KNOWN-GAPS OPEN 2026-11-09, below; the Phase 6 IMPLEMENTATION doc §22):
+> published real-case memos repeat distinctive terms from their withheld dossiers. On closure-07, 140 of 198 published
+> memos hold at least one of four such terms. Phase 5.5's scan looked for names; these words were never flagged.
+> Public since `5bcf064`. **His decisions (2026-11-09):** decision 5's count widened to words, percentages and figures;
+> the explorer is expected to hold real-case memos from the site (final after the counts); the repository copies are
+> decided after the counts. The grid memos are not affected.
+>
+> **Built, uncommitted (Opus, in session):** `hc case echoes` (`caseprobe/echoes.py`, its tests, two deny-list lines
+> and their test), §22, the dated notes on §5.3 and decision 5, this block and the OPEN entry. `make check` green
+> (Python 3,365, Vitest 37). **His order:** commit `phase 6: memo echo count` and push; then `uv run hc case echoes`
+> (it refuses on uncommitted `src/`); paste the table; read the private reports; his choice into §22.
+>
+> **In parallel:** C2's build prompt for `hc site memos` (the grid memo extract into `web/explorer-memos/`), for a
+> fresh Sonnet session, then an Opus review and his S3 run. C2 commits the extract and the counts file.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-09, about 10:15 AM (PHASE 6 C1 COMMITTED `a2a2280`, CI AND DEPLOY GREEN; C2'S RUNS NEXT) *(superseded by the block above)*
 >
 > **C1, the explorer-data builder, is built (Sonnet) and reviewed (Opus):** `hc site explorer`, its tests and the
 > committed `web/explorer-data/` (21 files, 1,441,167 bytes). The Phase 6 IMPLEMENTATION doc §21 is the as-built
@@ -15,10 +34,12 @@ case by its type and a neutral label. The names live only in the private longlis
 > `cases/index.json`), no change to the builder or its output. §19's list was recounted from the grid files without
 > the builder's code and agrees. `make check` green.
 >
-> **Uncommitted, for his commit `phase 6: c1 explorer-data builder`** (the code, the output, the docs, this block).
-> **Deploy runs both halves** (`src/*` sets code, `web/explorer-data/` sets site): a new image with only the task
-> definition replaced, as at Phase 1.5's close, and a site sync of an unchanged placeholder page (checked: `dist/` holds
-> the same 8 files and none of the explorer data; nothing it builds from changed). Read CI and Deploy.
+> **Committed `a2a2280` (his), pushed; CI `42651800364` and Deploy `42651800366` green.** This record of the runs is
+> uncommitted, docs only; it rides with the next commit.
+>
+> **Deploy ran both halves** (`code=true site=true`): new image `sha256:fd98bc1d...`, `main` applied with only the task
+> definition replaced (1 added, 1 destroyed); the site half synced the same 8 placeholder files, content-hashed names
+> unchanged (`index-UP0ANYtT.js`, `style-8pjkDroo.css`), `check-dist: ok`, headers ok. No explorer data is on the site.
 >
 > **Next:** the two scripts for his runs (decisions 4 and 5: the grid memo extract and the real-case figure count),
 > then C2. **Decided (his, 2026-11-09):** the memo extract lives in a sibling `web/explorer-memos/`, not in
@@ -2829,6 +2850,27 @@ closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-
 > **Each session, alongside Phase 2.5:** check case 179121856900232 (restricted-list follow-up added 2026-10-06; BLOCKED
 > entry). If Bedrock answers again (`scratch/throttle-check.py`), run step 3 (`scratch/step3-dev-run.sh`), then step 9.
 > Phase 0.5's billing close-out (WAITING entry) can run the same day.
+
+---
+
+## OPEN 2026-11-09, his decision after the counts — published real-case memos repeat distinctive terms from their withheld dossiers
+
+Found writing the Phase 6 step 3 scripts (the Phase 6 IMPLEMENTATION doc §22). Phase 5.5's memo scan (its §5.4,
+`caseprobe/memos.py`) looked for company **names**, and held a memo only when a word it flagged came from a withheld
+dossier. Words it did not flag passed, so a published memo can repeat a product line, a program name or a
+scale-free figure the model read in its withheld dossier. **Measured on one case, closure-07, by Claude on public
+files only:** 140 of its 198 published memos (Haiku 50 of 74, gpt-oss 90 of 124) hold at least one of four terms (a
+product line, its abbreviation, a product category, a named employee program) that are not in the case's published
+description; its dossier is withheld because its scale-free figures match fewer than 20 filers. The four terms are
+not written here or in any tracked file. **Not checked:** whether they point to one company; doing so would be the
+identification itself, and it is his judgment against the private longlist.
+
+**Public since `5bcf064` (2026-11-01)**, in `experiment/results/cases/<label>/<model>-memos.jsonl`; that cannot be
+taken back. **What is still open:** (1) how far it reaches across all five cases, which `hc case echoes` (§22)
+counts; (2) the explorer's choice for real-case memos (decision 5), expected to be holding them from the site; (3)
+whether anything is done about the copies in the repository. Those files are write-once results, and removing them
+from the current tree would not remove them from history; that choice is his, after the counts. **Closes when** his
+choice on (2) and (3) is recorded in §22.
 
 ---
 

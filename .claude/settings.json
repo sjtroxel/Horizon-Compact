@@ -47,6 +47,8 @@
       "Bash(uv run --no-sync hc case match*)",
       "Bash(uv run hc case memos*)",
       "Bash(uv run --no-sync hc case memos*)",
+      "Bash(uv run hc case echoes*)",
+      "Bash(uv run --no-sync hc case echoes*)",
       "Bash(uv run hc case build*)",
       "Bash(uv run --no-sync hc case build*)",
       "Bash(uv run hc case reader*)",
