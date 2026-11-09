@@ -7,15 +7,34 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-09, about 12:35 PM (C2'S CODE BUILT AND REVIEWED; HIS COMMIT, THEN HIS RUN)
+> ## START HERE — where things stand, 2026-11-09, about 2:10 PM, HANDOFF (PHASE 6 STEPS 0-3 DONE; STEP 4, THE PREVIEWS, NEXT)
 >
-> **C2's code, `hc site memos`, is built (Sonnet, the Phase 6 IMPLEMENTATION doc §23) and reviewed (Opus, §23a):**
-> passed, one test and one docstring added (the commit guard cannot see a term past an escaped line break in a
-> memo; the extract's own scan of the decoded memo can, and the test pins that). Uncommitted. **His order (§23a):**
-> commit the code with the counts file (`phase 6: c2 memo extract builder`) and push; run `scratch/p6-c2-memos.sh`
-> and paste what it prints; `make check`; commit `web/explorer-memos/`.
+> **First, tomorrow:** `git log -1 --oneline` should be `phase 6: c2 grid memo extract` (his commit of the extract
+> and this record, given at handoff). If it is not, `git status` will show `web/explorer-memos/` and three docs
+> uncommitted: that commit is first (`make check` before it). Then `gh run list --limit 2`: CI and Deploy green.
+> Deploy runs its site half on that push (it changes `web/`); `web/explorer-memos/` is not in Vite's input, so the
+> sync should be the same 8 placeholder files and the content-hashed names unchanged.
+>
+> **Done 2026-11-09:** C1 (`a2a2280`); the real-case echo count and decision 5 (`705ea98`, §22: hold real-case memo
+> text on the site, leave the repository copies); **C2's code, `hc site memos`** (Sonnet §23, Opus review §23a: one
+> test and one docstring added, because the commit guard cannot see a term past an escaped line break in a memo and
+> the extract's own scan can), **committed `75048aa` with the echo counts file; CI `42682850981` and Deploy
+> `42682850610` green.** **His run, about 1:55 PM:** no refusal; `web/explorer-memos/` holds 46 files (45 cells, none
+> split, and `index.json`), 2,290 runs, 2,280 with text, 4.4 MB, the largest file 137 KB (§23a). `make check` with
+> the extract present (measured about 2:00 PM, before the last doc edits): green, 3,423 passed, 0 skipped.
+>
+> **Next: step 4, the previews (§7)** — Claude builds three to six throwaway static previews in `scratch/` from the
+> real data (chart form first, then palette, then layout), captured light and dark at 1280 and 390; the `dataviz`
+> skill loaded first. **The picks are his**, one decision at a time; Claude recommends, does not choose. Opus for
+> this step (design judgment).
 >
 > *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-09, about 12:35 PM (C2'S CODE BUILT AND REVIEWED; HIS COMMIT, THEN HIS RUN) *(superseded by the block above)*
+>
+> **C2's code, `hc site memos`, is built (Sonnet, the Phase 6 IMPLEMENTATION doc §23) and reviewed (Opus, §23a):**
+> passed, one test and one docstring added. Uncommitted. **His order (§23a):** commit the code with the counts
+> file and push; run `scratch/p6-c2-memos.sh`; `make check`; commit `web/explorer-memos/`.
 
 > ## START HERE — where things stood, 2026-11-09, about 11:30 AM (REAL-CASE MEMO FINDING SETTLED: HOLD AND LEAVE; C2 WITH SONNET) *(superseded by the block above)*
 >

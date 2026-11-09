@@ -417,8 +417,9 @@ My recommendation is (a) in each, for the reason given.
    re-run check.
 3. **[his runs]** **The grid memo extract** (decision 4; `web/explorer-memos/`, §5.3's note) and **the real-case
    count** (decision 5, widened: `hc case echoes`, §22); his choice on decision 5 recorded. **C2** commits both.
-   **[count done and decision 5 settled 2026-11-09, §22; C2's code built 2026-11-09 by Sonnet, §23; Opus review and
-   his run of `scratch/p6-c2-memos.sh` pending]**
+   **[count done and decision 5 settled 2026-11-09, §22; C2's code built 2026-11-09 by Sonnet, §23, reviewed by Opus,
+   §23a, committed `75048aa`; his run of `scratch/p6-c2-memos.sh` done the same day, §23a; the extract rides in his
+   commit `phase 6: c2 grid memo extract`]**
 4. **[Claude builds, his picks]** **The previews** (§7): form, then palette, then layout.
 5. **[Sonnet builds, Opus reviews]** **C3, build modes and the shell:** the two modes, the placeholder-mode check, the
    paths and their HTML files, the local preview script.
@@ -910,3 +911,14 @@ rule, the escaped separators, and the extra cross-check, each for §23's reason.
 **His steps, amended.** (1) Commit the code with the counts file, which nothing in the build depends on (`phase 6:
 c2 memo extract builder`); push. (2) `scratch/p6-c2-memos.sh`; paste what it prints. (3) `make check`. (4) Commit
 `web/explorer-memos/`.
+
+**As run (2026-11-09).** (1) Committed `75048aa` (his), pushed; CI `42682850981` and Deploy `42682850610` green.
+(2) His run, about 1:55 PM, HEAD `75048aa`: no refusal, so no memo held a term-file term and every object, count and
+cross-check agreed. **46 files** (45 memo files, one per scenario and objective cell: 20 gpt-oss, 20 Haiku grid,
+5 thinking, none split, plus `index.json`), **2,290 runs**, **2,280 with text**, 4,426,213 bytes; the largest file
+`grid/haiku-5-5/s1/C.jsonl` at 137,465 bytes, far under the limit (§23's upper bound was about 20 times the real
+size). By status: gpt-oss 1,158 `valid`, 3 `valid_rescaled`, 33 `schema_invalid`, 2 `sum_mismatch`, 2
+`no_tool_call`, 1 `truncated`, 1 `unexpected_stop` (the 10 runs without text are among these); Haiku grid 980
+`valid`, 10 `sum_mismatch`; thinking 100 `valid`. The valid counts (1,161, 980, 100) equal the results files'
+per-run counts. (3) Claude's `make check` with the extract present: green, **3,423 passed, 0 skipped** (the four
+committed-output tests' first run), Vitest 37, `check-dist: ok`, `hc protocol check` ok. (4) His commit next.
