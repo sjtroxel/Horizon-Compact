@@ -7,22 +7,34 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-09, about 11:30 AM (A FINDING ON REAL-CASE MEMOS; `hc case echoes` BUILT, HIS RUN NEXT)
+> ## START HERE — where things stand, 2026-11-09, about 12:35 PM (C2'S CODE BUILT AND REVIEWED; HIS COMMIT, THEN HIS RUN)
 >
-> **Found writing step 3's scripts** (KNOWN-GAPS OPEN 2026-11-09, below; the Phase 6 IMPLEMENTATION doc §22):
+> **C2's code, `hc site memos`, is built (Sonnet, the Phase 6 IMPLEMENTATION doc §23) and reviewed (Opus, §23a):**
+> passed, one test and one docstring added (the commit guard cannot see a term past an escaped line break in a
+> memo; the extract's own scan of the decoded memo can, and the test pins that). Uncommitted. **His order (§23a):**
+> commit the code with the counts file (`phase 6: c2 memo extract builder`) and push; run `scratch/p6-c2-memos.sh`
+> and paste what it prints; `make check`; commit `web/explorer-memos/`.
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-09, about 11:30 AM (REAL-CASE MEMO FINDING SETTLED: HOLD AND LEAVE; C2 WITH SONNET) *(superseded by the block above)*
+>
+> **Found writing step 3's scripts** (KNOWN-GAPS CLOSED 2026-11-09, below; the Phase 6 IMPLEMENTATION doc §22):
 > published real-case memos repeat distinctive terms from their withheld dossiers. On closure-07, 140 of 198 published
 > memos hold at least one of four such terms. Phase 5.5's scan looked for names; these words were never flagged.
 > Public since `5bcf064`. **His decisions (2026-11-09):** decision 5's count widened to words, percentages and figures;
-> the explorer is expected to hold real-case memos from the site (final after the counts); the repository copies are
-> decided after the counts. The grid memos are not affected.
+> after the counts, hold on the site and leave the repository copies. The grid memos are not affected.
 >
-> **Built, uncommitted (Opus, in session):** `hc case echoes` (`caseprobe/echoes.py`, its tests, two deny-list lines
-> and their test), §22, the dated notes on §5.3 and decision 5, this block and the OPEN entry. `make check` green
-> (Python 3,365, Vitest 37). **His order:** commit `phase 6: memo echo count` and push; then `uv run hc case echoes`
-> (it refuses on uncommitted `src/`); paste the table; read the private reports; his choice into §22.
+> **`hc case echoes` built (Opus, in session), committed `705ea98` (his), pushed; CI `42666083696` and Deploy
+> `42666083674` green** (code half; site skipped). **His run done, about 11:35 AM:** 845 of 1,237 published real-case
+> memos hold a distinctive token (an upper bound; §22 has the table). The counts file
+> `docs/phases/evidence/phase-6/memo-echoes.json` is uncommitted and rides in C2. **Settled (his, about 12:05 PM):**
+> nothing in the private reports points toward a company or plant; the site **holds** real-case memo text, the
+> repository copies are **left**; §22 records it, and the KNOWN-GAPS entry is CLOSED 2026-11-09.
 >
-> **In parallel:** C2's build prompt for `hc site memos` (the grid memo extract into `web/explorer-memos/`), for a
-> fresh Sonnet session, then an Opus review and his S3 run. C2 commits the extract and the counts file.
+> **C2's build prompt is written:** `scratch/p6-c2-build-prompt.md` (`hc site memos`, the grid memo extract into
+> `web/explorer-memos/`, each object read by version and checked against the raw manifest). A fresh Sonnet session
+> builds, Opus reviews; he commits the code, runs `scratch/p6-c2-memos.sh`, then commits the extract with the counts.
 >
 > *The earlier blocks below are superseded.*
 
@@ -2853,7 +2865,7 @@ closures may be run ahead in Phase 5.5 meanwhile, D.5). **Next:** batch 4b (pre-
 
 ---
 
-## OPEN 2026-11-09, his decision after the counts — published real-case memos repeat distinctive terms from their withheld dossiers
+## CLOSED 2026-11-09, his decision after the counts (was OPEN the same day) — published real-case memos repeat distinctive terms from their withheld dossiers
 
 Found writing the Phase 6 step 3 scripts (the Phase 6 IMPLEMENTATION doc §22). Phase 5.5's memo scan (its §5.4,
 `caseprobe/memos.py`) looked for company **names**, and held a memo only when a word it flagged came from a withheld
@@ -2871,6 +2883,11 @@ counts; (2) the explorer's choice for real-case memos (decision 5), expected to 
 whether anything is done about the copies in the repository. Those files are write-once results, and removing them
 from the current tree would not remove them from history; that choice is his, after the counts. **Closes when** his
 choice on (2) and (3) is recorded in §22.
+**Closed 2026-11-09, about 12:05 PM.** His run of `hc case echoes` (HEAD `705ea98`): 845 of 1,237 published memos
+hold a distinctive token, an upper bound (`docs/phases/evidence/phase-6/memo-echoes.json`). He read the five private
+reports and found nothing pointing toward a specific company or plant (his judgment; Claude did not check it). His
+choices, on Claude's recommendations: the explorer **holds** real-case memo text (counts and the reason shown
+instead); the repository copies are **left** as published. The Phase 6 IMPLEMENTATION doc §22 holds the record.
 
 ---
 

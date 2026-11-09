@@ -3,6 +3,9 @@ src/data/
 # The explorer data is written by `hc site explorer` and is byte-compared against a fresh build (Phase 6 DoD 7):
 # a reformat would break it.
 explorer-data/
+# The memo extract is written by `hc site memos` from his S3 run, and its lines hold model-written text
+# byte for byte (Phase 6 section 5.3): a reformat would change a memo.
+explorer-memos/
 dist/
 node_modules/
 package-lock.json

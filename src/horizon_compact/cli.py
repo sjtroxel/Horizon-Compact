@@ -1422,6 +1422,66 @@ def cmd_site_explorer(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+EXPLORER_MEMOS_PATH = Path("web") / "explorer-memos"
+
+
+def cmd_site_memos(args: argparse.Namespace) -> int:
+    """The grid memo extract (Phase 6 IMPLEMENTATION doc section 5.3, decision 4). It reads the official
+    sweeps' objects from S3, each by the version id and checked against the sha256 and size that
+    ``raw-manifest.json`` records, and writes ``web/explorer-memos/``. The reader it is handed has no write
+    call. His to run, so it is on the deny list. Prints counts and sizes, never a memo's text."""
+    from horizon_compact.site.memos import (
+        MemoExtractRefusal,
+        build_memo_extract,
+        memo_extract_matches,
+        write_memo_extract,
+    )
+    from horizon_compact.site.rawmanifest import S3RawReader
+
+    # Scoped to the code, as `hc case reident` is: the head the index records is the code that ran.
+    if _git("status", "--porcelain", "--", "src", "pyproject.toml", "uv.lock"):
+        raise SweepRefusal(
+            "src, pyproject.toml or uv.lock differ from HEAD: commit them first, so the head the index "
+            "records is the code that ran"
+        )
+    top = Path(_git("rev-parse", "--show-toplevel"))
+    head = _git("rev-parse", "HEAD")
+    results = Path(args.results) if args.results else top / EXPLORER_RESULTS_PATH
+    manifest = Path(args.manifest) if args.manifest else top / RAW_MANIFEST_PATH
+    out = Path(args.out) if args.out else top / EXPLORER_MEMOS_PATH
+    try:
+        term_file = load_configured_term_file()  # fails closed, before anything is read
+    except GuardError as exc:
+        raise SweepRefusal(str(exc)) from exc
+    session = _session(args, identify({}, _laptop_git))
+    bucket = args.bucket or os.environ.get(RESULTS_BUCKET_ENV)
+    if not bucket:
+        raise SweepRefusal(f"site memos needs --bucket or {RESULTS_BUCKET_ENV}")
+    reader = S3RawReader(_raw_s3_client(session), bucket)
+
+    def progress(done: int) -> None:
+        print(f"read {done} objects", file=sys.stderr)
+
+    try:
+        files = build_memo_extract(reader, results, manifest, term_file, head, progress)
+        unchanged = memo_extract_matches(files, out)
+        write_memo_extract(files, out)
+    except MemoExtractRefusal as exc:
+        raise SweepRefusal(str(exc)) from exc
+    index = json.loads(files["index.json"])
+    sizes = {path: len(text.encode("utf-8")) for path, text in files.items()}
+    largest = max((p for p in sizes if p != "index.json"), key=lambda p: sizes[p])
+    print(f"{'kept' if unchanged else 'wrote'} {out}")
+    print(f"files:      {len(files)}")
+    print(f"runs:       {sum(s['runs'] for s in index['sweeps'])}")
+    print(f"with text:  {sum(s['with_text'] for s in index['sweeps'])}")
+    print(f"bytes:      {sum(sizes.values())}")
+    print(f"largest:    {largest}  {sizes[largest]} bytes")
+    if unchanged:
+        print("unchanged")
+    return CLEAN_EXIT
+
+
 FORMAT_REPORT_DIR = "docs/phases/evidence/phase-2.5/format"
 
 
@@ -3535,6 +3595,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     site_explorer.add_argument("--out", default=None, help="default: web/explorer-data")
 
+    site_memos = site_actions.add_parser(
+        "memos",
+        help="The grid memo extract to web/explorer-memos/. Reads official records; his to run.",
+    )
+    site_memos.add_argument("--bucket", default=None)
+    site_memos.add_argument("--profile", default=None)
+    site_memos.add_argument("--out", default=None, help="default: web/explorer-memos")
+    site_memos.add_argument("--results", default=None, help=argparse.SUPPRESS)
+    site_memos.add_argument("--manifest", default=None, help=argparse.SUPPRESS)
+
     dossier = groups.add_parser("dossier", help="Phase 2 company dossier. Offline; calls no model.")
     dossier.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
     dossier_actions = dossier.add_subparsers(dest="action", required=True)
@@ -4115,6 +4185,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 return cmd_site_raw_manifest(args)
             if args.action == "explorer":
                 return cmd_site_explorer(args)
+            if args.action == "memos":
+                return cmd_site_memos(args)
             return cmd_site_data(args)
         except (SweepRefusal, ExperimentError) as exc:
             print(f"refused: {exc}", file=sys.stderr)

@@ -417,6 +417,8 @@ My recommendation is (a) in each, for the reason given.
    re-run check.
 3. **[his runs]** **The grid memo extract** (decision 4; `web/explorer-memos/`, §5.3's note) and **the real-case
    count** (decision 5, widened: `hc case echoes`, §22); his choice on decision 5 recorded. **C2** commits both.
+   **[count done and decision 5 settled 2026-11-09, §22; C2's code built 2026-11-09 by Sonnet, §23; Opus review and
+   his run of `scratch/p6-c2-memos.sh` pending]**
 4. **[Claude builds, his picks]** **The previews** (§7): form, then palette, then layout.
 5. **[Sonnet builds, Opus reviews]** **C3, build modes and the shell:** the two modes, the placeholder-mode check, the
    paths and their HTML files, the local preview script.
@@ -692,7 +694,7 @@ employee program, none of them in the case's published 98-character description.
 of closure-07's 198 published memos hold at least one of the four (Haiku 50 of 74, gpt-oss 90 of 124). The terms
 are not written in this repository. Phase 5.5's scan looked for names and held memos whose flagged words came from a
 withheld dossier; these words were never flagged, so they passed. Finding 5 (§3) expected scale-free figures to be
-the exposure; words are the larger one. KNOWN-GAPS OPEN 2026-11-09 tracks it.
+the exposure; words are the larger one. KNOWN-GAPS (OPEN, then CLOSED 2026-11-09) tracks it.
 
 **His decisions (2026-11-09), on Claude's recommendations:** (1) widen decision 5's count from figures to words,
 percentages and other unscaled figures; (2) for the explorer, the expected choice is (c), holding real-case memos
@@ -727,3 +729,184 @@ code that counted). (2) `uv run hc case echoes`. (3) Paste the printed table; Cl
 private report in each case's appendix folder and look at the top of each list: does any word, alone or with the
 published description, point toward the company? (5) His choice on (2) and (3) above, recorded here. The counts file
 rides in C2.
+
+**The counts, his run (2026-11-09, about 11:35 AM, HEAD `705ea98`;
+`docs/phases/evidence/phase-6/memo-echoes.json`).** Of **1,237** published real-case memos, **845** hold at least one
+distinctive token (an upper bound; 263 more were already held by Phase 5.5's scan). Per case and model:
+
+| Case | Model | Published | Held | With a word | With a percentage | With a figure | With any | Distinct words / percentages / figures |
+|---|---|---|---|---|---|---|---|---|
+| closure-07 | gpt-oss | 124 | 26 | 112 | 0 | 89 | 118 | 17 / 0 / 2 |
+| closure-07 | haiku | 74 | 76 | 72 | 33 | 55 | 74 | 25 / 6 / 1 |
+| closure-19 | gpt-oss | 150 | 0 | 4 | 0 | 0 | 4 | 4 / 0 / 0 |
+| closure-19 | haiku | 147 | 3 | 91 | 17 | 0 | 94 | 17 / 2 / 0 |
+| pre-11 | gpt-oss | 132 | 18 | 32 | 0 | 76 | 90 | 7 / 0 / 2 |
+| pre-11 | haiku | 108 | 42 | 108 | 8 | 82 | 108 | 19 / 2 / 1 |
+| pre-25 | gpt-oss | 136 | 14 | 109 | 0 | 71 | 122 | 16 / 0 / 2 |
+| pre-25 | haiku | 145 | 5 | 141 | 1 | 101 | 145 | 22 / 1 / 1 |
+| pre-224 | gpt-oss | 143 | 7 | 26 | 2 | 1 | 29 | 6 / 1 / 1 |
+| pre-224 | haiku | 78 | 72 | 45 | 34 | 2 | 61 | 11 / 6 / 1 |
+
+The distinct tokens are few (4 to 25 words, at most 6 percentages and 2 figures per case and model), so his read of
+the private reports (step 4) covers every token, not a sample.
+
+**His read and his choices (2026-11-09, about 12:05 PM).** He read all five private reports and found nothing that
+points toward a specific company or plant. This is his judgment against the private longlist; Claude did not
+check it, since checking would be the identification itself. On Claude's recommendations he chose:
+
+- **The site: hold** (option (c)). The explorer shows no real-case memo text. The cases view shows, per case and
+  model, the published and held counts from this file and the reason, in his approved words. His read rules out an
+  obvious pointer, not a combined one: 68% of published memos echo dossiers withheld because their figures narrow
+  the field to fewer than 20 filers, and the site would put them in front of readers. The memo reader keeps every
+  grid memo.
+- **The repository copies: leave them** as Phase 5.5 published them. They are write-once results; removing them
+  from the current tree would not remove them from history; and this section, the counts file and KNOWN-GAPS
+  (CLOSED 2026-11-09) disclose the finding.
+
+Decision 5 is settled. C5 (the real cases) builds the cases view without memo text.
+
+## 23. As built, C2 code: the grid memo extract, `hc site memos` (2026-11-09, Sonnet; Opus review pending)
+
+Built from `scratch/p6-c2-build-prompt.md`. **No AWS call, no S3 read, no `terraform` command and no model call
+was made**, and `hc site memos` and his script were not run. Not committed (his commit). The command reads official
+records, so it is his to run and it is on the deny list.
+
+**What was built.**
+
+- `src/horizon_compact/site/memos.py` (new, run code): `build_memo_extract(reader, results_root, manifest_path,
+  term_file, head, progress) -> dict[str, str]`, `write_memo_extract(files, out)`, `memo_extract_matches(files,
+  out)`, and `MemoExtractRefusal`. The reader it is handed needs only `read(key, version_id)`; `S3RawReader`
+  (Phase 1.5) has that and no write call. The file rules for which results files name the official sweeps are
+  C1's: it imports `_read_prereg` and `_Grid` from `site/explorer.py` (private names, imported and not edited), so
+  there is one rule for what an official results file is. `final_text` is imported from `caseprobe/memos.py` and a
+  comment in the module says the two must read the same field.
+- `hc site memos [--profile P] [--bucket B] [--out DIR]` in `cli.py`, with two hidden options (`--results`,
+  `--manifest`) that only the tests use, as C1 has `--results`. Default `--out` is `web/explorer-memos`. It refuses
+  uncommitted `src/`, `pyproject.toml` or `uv.lock` first (as `cmd_case_reident` does), then loads the term file
+  (failing closed), and only then makes an S3 client. It prints the file count, runs, runs with text, total bytes
+  and the largest file with its size, never a memo's text. A refusal prints `refused: ...` and exits `REFUSED_EXIT`.
+- `.claude/settings.json` and `tests/test_claude_settings.py`: `hc site memos` denied in both forms, added to
+  `READERS`, with a comment. `web/.prettierignore`: `explorer-memos/`, with its reason.
+- `scratch/p6-c2-memos.sh` (his run, in the shape of `scratch/p15-step3-s3.sh`; `scratch/` is untracked).
+- `tests/test_site_memos.py` (new, 54 tests, 4 of them skipped until `web/explorer-memos/` exists): see below.
+- Nothing under `experiment/`, `analysis/`, `site/explorer.py`, `caseprobe/` or `web/explorer-data/` changed, and
+  `docs/phases/evidence/phase-6/memo-echoes.json` is untouched (it rides in C2's second commit). `hc protocol check`: ok.
+
+**What it reads, as decided.** The three sweeps the committed results files name (`grid-gpt-oss-openrouter-fe599ad2`,
+`grid-haiku-5-5-0b99fabb`, `thinking-haiku-5-5-418caa9c`), prefix `official/company/<sweep_id>/`. Every manifest
+entry under those prefixes is read once **by its recorded version id, as bytes** and refused unless its byte count
+and sha256 are the manifest's: 4,860 objects, 97,159,462 bytes (the group totals in `raw-manifest.json`), about as
+many reads as Phase 1.5's manifest run. Objects the frozen reader does not need (the sweep summaries, the
+refusal-call files) are verified and then dropped; the manifest, every `final.json` and every `attempt-N.json` are
+served to `read_runs` through an in-memory `RecordSource`, so one sweep's needed bytes (about 40 to 52 MB) are held
+at a time. A pilot, awareness or case prefix is never listed, and a test records every key the fake reader was asked
+for and compares the set with the manifest's three prefixes.
+
+**The cross-checks** (each a refusal, each tested): the run count equals the manifest group's `final_objects`; per
+scenario, objective and wording, the runs with a valid status equal that cell's `valid` in the results file (in
+both directions, so a cell on either side alone is caught); every `descriptive.per_run` run is in the extract with
+a valid status. **Added beyond the prompt:** the per-run entry's objective, wording and repeat must equal the run's,
+and each cell must carry its scenario's id. These compare fields the frozen analysis copied from the same records,
+so a refusal on the real data would be a finding and not a mismatch of representation.
+
+**The output** is the prompt's: `<kind>/<model_key>/<scenario_id>/<objective_id>.jsonl` and `index.json`, one line
+per run ordered by wording, repeat and run id, compact JSON with the key order the prompt gives. `files` in the index
+is the sorted list of memo files. The writer is C1's (sibling folder, swap, refusal of any other name or any foreign
+file, same bytes a no-op, the old folder put back if the swap fails).
+
+**Size estimate (item 6).** The manifest gives each object's whole size, and an attempt record holds the request
+and the raw response as well as the memo, so it cannot say how large a memo file will be; it gives only an upper
+bound. Summing every attempt of the valid runs in a scenario-objective cell: the largest cell is 2,934.7 KB for
+gpt-oss, 3,260.0 KB for the Haiku grid and 1,085.2 KB for the thinking sub-study, against the hook's 1,024 KB. By
+that bound a file could pass the limit, so the split is built in, and **it applies on the real size, not on the
+estimate**: a cell file over `MAX_FILE_BYTES` (1,000,000, under the hook's 1,048,576) is written as one file per
+wording, `<objective_id>-<wording_id>.jsonl`, and a wording's file still over it is refused. Which cells, if any, are
+split is therefore known only after his run (the command prints the largest file, and the index's `files` lists what
+was written). The committed-output test fails if any file in `web/explorer-memos/` is over the limit. The hook's
+limit is not raised and no exclusion was added to `.pre-commit-config.yaml`.
+
+**What did not fit, and what was done instead.**
+
+1. *A fixed layout.* The prompt's item 6 splits "that file" if one could pass. Since the estimate cannot say which,
+   the split is conditional on the actual size (above). A consumer (C5) must read the paths from `index.json`'s
+   `files`, not build them from the cell's name.
+2. *The `arn:` test as a bare substring.* A bare `arn:` also matches "learn:" and "warn:", which a memo can
+   contain, and a refusal there could not be worked around. The test is `arn:` with no letter or digit before it;
+   `horizon-compact-results-` is still a bare substring. Tested both ways. The prompt's other leak test (a bare run
+   of twelve digits) is not made, as instructed.
+3. *`ensure_ascii=False` with nothing else changed.* U+0085, U+2028 and U+2029 are written as `\u0085`, `\u2028` and
+   `\u2029`. They parse back to the same character, so no memo is changed; written raw, they cut a line in two for
+   any reader that splits on them (Python's `splitlines`, among others). Tested: a memo holding all three
+   round-trips and the file holds none of them raw.
+4. *Reply-text and refused runs.* They are in the extract with their status and the text of their final attempt
+   (`source` `reply_text`), as the prompt says, and the tests cover both.
+
+**Tests** (`tests/test_site_memos.py`, fictional canary sweeps, runs and memos, a fake in-memory reader): each
+refusal (hash, size, a missing manifest entry, group or version, a cross-check, a name-guard term, an `arn:`, the
+bucket prefix, an object that is not UTF-8, an unexpected results file); that the read goes by the recorded
+version (the fake serves other bytes for any other version id, and a reader that asks for another is refused); a
+run with no text; a reply-text run; a run whose final attempt is the second; the ordering (and that the fixture is
+not already sorted); the split and its refusal; the writer's swap, no-op, stale file, foreign file, leftover and
+failed swap; the term-file refusal with a canary term (the message names the run and not the term, and the command
+prints neither the term nor a memo); and the command end to end. **Four tests skip until `web/explorer-memos/`
+exists** and then run in CI: every line's `final` and `attempt` key and sha256 are in `raw-manifest.json`; the
+per-cell valid counts and the run counts equal the committed results files; no file is over the limit; no `arn:`
+or bucket name. Two of the tests were checked by breaking the code (the hash check removed; the read made by another
+version id): each failed as it should.
+
+**`make check`: green, 3,417 passed and 4 skipped** (the 4 are this file's committed-output tests), the web tests
+37 passed, `check-dist: ok`, `doctor` ok. `hc protocol check`: ok.
+
+**His steps.** (1) Opus reviews this section and the code. (2) Commit the code (`phase 6: c2 memo extract builder`).
+(3) `scratch/p6-c2-memos.sh` (about 4,860 reads, about 97 MB; paste the printed counts and the largest file). (4)
+Commit `web/explorer-memos/` with `docs/phases/evidence/phase-6/memo-echoes.json`. If the run refuses, the message
+names the object or the run and never a memo or a term; a refusal on a cross-check is a finding to report, not
+something to code around. *(Steps amended by §23a: the counts file moves into step 2's commit.)*
+
+## 23a. Review of C2's code (2026-11-09, Opus)
+
+**Passed. One test added and one docstring; the builder's behavior and its output are unchanged.** Read: the module,
+the command, the tests, the deny-list lines, the run script, and this section against the build prompt's eight points.
+`make check` re-run before the additions: green, 3,417 passed and 4 skipped, Vitest 37.
+
+**Checked against the real committed files, not only the fixtures** (the fixtures cannot show these):
+
+- The three official prefixes do not overlap the awareness groups, which sit under `official/company/awareness/`.
+  The manifest's `final_objects` are 1,200 (gpt-oss grid), 990 (Haiku grid, S2 at 6 repeats) and 100 (thinking),
+  and each results file's `attempted` totals agree. The frozen `build_results` refuses unfinished runs as this
+  extract does, so a sweep the analysis read cannot be refused here for that.
+- Every `descriptive.per_run` entry in the three results files carries `objective_id`, `wording_id` and an integer
+  `repeat` (2,241 entries), so §23's added cross-check compares fields that exist; per scenario, the per-run count
+  equals the cells' `valid` sum. The committed-output tests' valid statuses equal `VALID_STATUSES`.
+- `_NEEDED` keeps exactly the keys the frozen reader's `_RUN_KEY` and its `manifest.json` read use.
+- The three escaped separators are the only line breaks `str.splitlines` knows that `json.dumps` writes raw; the
+  others are control characters, which it already escapes.
+
+**Added: the scan's reason, pinned by a test.** The commit guard reads a file as written, where a line break in a
+memo is backslash and `n`. A term just after a break then has a letter before it, and a two-word term split by a
+break is no longer split by whitespace, so the guard misses both. The extract's scan of the decoded memo catches
+both, so for these files it is the protection that counts, not the hook. A docstring on `_scan_names` says so, and
+`test_the_scan_reads_the_memo_because_the_commit_guard_cannot_see_past_an_escape` (two cases) shows the guard
+finding nothing in the written line and the extract refusing. Checked by breaking the scan: both cases failed, and
+passed again on restore.
+
+**Accepted as departures:** the conditional split (C5 reads paths from `index.json`'s `files`), the `arn:` edge
+rule, the escaped separators, and the extra cross-check, each for §23's reason.
+
+**Noted, no change:**
+
+1. The scan uses the term file only. A model naming some other real company as an analogy in a grid memo would be
+   published, as Phase 5.5 published case memos that passed its scan. The term file is the rule-zero mechanism.
+2. `site/memos.py` imports C1's private `_read_prereg` and `_Grid`, so there is one rule for what an official results
+   file is. Acceptable inside the package; a rename in `explorer.py` breaks this at import, loudly.
+3. The command checks that `src/`, `pyproject.toml` and `uv.lock` are committed, not the results files or the raw
+   manifest it reads. The committed-output tests compare the index's manifest sha256 and every count with the
+   committed files, so a local edit to either would fail `make check` before the extract could be committed.
+4. The four committed-output tests have only run on nothing. `make check` after his run and before the extract's
+   commit is their first run, so a fault in them shows locally, not as a red check.
+5. The extract's commit changes `web/`, so Deploy runs its site half. `web/explorer-memos/` is not in Vite's input and
+   is not in `dist/`, so the sync should be the same 8 placeholder files.
+
+**His steps, amended.** (1) Commit the code with the counts file, which nothing in the build depends on (`phase 6:
+c2 memo extract builder`); push. (2) `scratch/p6-c2-memos.sh`; paste what it prints. (3) `make check`. (4) Commit
+`web/explorer-memos/`.

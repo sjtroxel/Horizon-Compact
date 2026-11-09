@@ -1,0 +1,184 @@
+{
+  "schema": "horizon-compact/memo-echoes",
+  "method_version": 1,
+  "rule": "Phase 6 IMPLEMENTATION doc §22, 2026-11-09",
+  "head": "705ea98bba4721fe997472ccae9db79c59a7540d",
+  "reference": {
+    "files": 43,
+    "sha256": "7b9c41dbba86b00dcdecc4fc664fb81d830a10d2c2a6f17d7864460b315ac78b"
+  },
+  "cases": [
+    {
+      "label": "closure-07",
+      "description_published": true,
+      "dossier_sha256": "25ba504ae76424980aea33c88ebc216ca38b657dee3a4af699e57562b5cddae4",
+      "scenario_sha256": "a9fe131c476edac294ba4edea0961fafb3041e9401aff2cb32097614f5df5f9b"
+    },
+    {
+      "label": "closure-19",
+      "description_published": true,
+      "dossier_sha256": "35fee60da1a6a5a8f9bc855f974b1d4e73c8f83c561f96411d35b2b36292d5bf",
+      "scenario_sha256": "3e572c8071dbb06f5937e18852ca34910794a7ef26c5f5f6d2afd0a24b4f4558"
+    },
+    {
+      "label": "pre-11",
+      "description_published": false,
+      "dossier_sha256": "a39f137a1029a2ca4a30871557f6f2afefd4a466a401beb90a8ec4070748ac06",
+      "scenario_sha256": "1bae5aac39655c771ee682957c4d11a3f127337f7fa1a85e11e77f9eead21152"
+    },
+    {
+      "label": "pre-25",
+      "description_published": true,
+      "dossier_sha256": "90dbed1ccc45bc251706ff7f93fdd3bb22a281b579251ceae48de403e7bdaa4f",
+      "scenario_sha256": "2e834cd8baae9c36a43b6bd2b6db90a35b6924c7a0e2a15b2af2df788d4b9518"
+    },
+    {
+      "label": "pre-224",
+      "description_published": true,
+      "dossier_sha256": "c00248bb031dae1d95a27db6cb6c34931342153024c39a41ac4856caedbae1ae",
+      "scenario_sha256": "4f9e55e38592cb79e29cb38d6b43f7f5fd90e94ac4c8d1f901bd5210e9611ea2"
+    }
+  ],
+  "counts": [
+    {
+      "label": "closure-07",
+      "model_key": "gpt-oss-openrouter",
+      "published": 124,
+      "held": 26,
+      "with_word": 112,
+      "with_percent": 0,
+      "with_figure": 89,
+      "with_any": 118,
+      "distinct_words": 17,
+      "distinct_percents": 0,
+      "distinct_figures": 2,
+      "memos_sha256": "49366616bf3a1c47917be51dcb386ea969707e581bcc1f1ac945b40e6ba8acaf"
+    },
+    {
+      "label": "closure-07",
+      "model_key": "haiku-5-5",
+      "published": 74,
+      "held": 76,
+      "with_word": 72,
+      "with_percent": 33,
+      "with_figure": 55,
+      "with_any": 74,
+      "distinct_words": 25,
+      "distinct_percents": 6,
+      "distinct_figures": 1,
+      "memos_sha256": "f827e4e879572926662fb1bf7e0745d90841c8c35b87e29ca2890217c7c833fc"
+    },
+    {
+      "label": "closure-19",
+      "model_key": "gpt-oss-openrouter",
+      "published": 150,
+      "held": 0,
+      "with_word": 4,
+      "with_percent": 0,
+      "with_figure": 0,
+      "with_any": 4,
+      "distinct_words": 4,
+      "distinct_percents": 0,
+      "distinct_figures": 0,
+      "memos_sha256": "f50e249bbadd183d061031d42c6d47e43d9f271276aed452d4f1715ddae4fb61"
+    },
+    {
+      "label": "closure-19",
+      "model_key": "haiku-5-5",
+      "published": 147,
+      "held": 3,
+      "with_word": 91,
+      "with_percent": 17,
+      "with_figure": 0,
+      "with_any": 94,
+      "distinct_words": 17,
+      "distinct_percents": 2,
+      "distinct_figures": 0,
+      "memos_sha256": "b44fa6219084dd40e37bdb99b8546ca884fe472173200f921a906cdbd993dc52"
+    },
+    {
+      "label": "pre-11",
+      "model_key": "gpt-oss-openrouter",
+      "published": 132,
+      "held": 18,
+      "with_word": 32,
+      "with_percent": 0,
+      "with_figure": 76,
+      "with_any": 90,
+      "distinct_words": 7,
+      "distinct_percents": 0,
+      "distinct_figures": 2,
+      "memos_sha256": "3bc03ab7ba0e46fb7dc60295dc574157251bd276bc14af9a2ca2ac4f042a6f98"
+    },
+    {
+      "label": "pre-11",
+      "model_key": "haiku-5-5",
+      "published": 108,
+      "held": 42,
+      "with_word": 108,
+      "with_percent": 8,
+      "with_figure": 82,
+      "with_any": 108,
+      "distinct_words": 19,
+      "distinct_percents": 2,
+      "distinct_figures": 1,
+      "memos_sha256": "a593380a1851fb3edf65eac26a319084d0c3ecd7b75f6221b08d04d2ab0c9a91"
+    },
+    {
+      "label": "pre-25",
+      "model_key": "gpt-oss-openrouter",
+      "published": 136,
+      "held": 14,
+      "with_word": 109,
+      "with_percent": 0,
+      "with_figure": 71,
+      "with_any": 122,
+      "distinct_words": 16,
+      "distinct_percents": 0,
+      "distinct_figures": 2,
+      "memos_sha256": "e2deca0a9d2ef0dfd57c324c9093425f3d473cd8ff5d7ad764ffec445de43048"
+    },
+    {
+      "label": "pre-25",
+      "model_key": "haiku-5-5",
+      "published": 145,
+      "held": 5,
+      "with_word": 141,
+      "with_percent": 1,
+      "with_figure": 101,
+      "with_any": 145,
+      "distinct_words": 22,
+      "distinct_percents": 1,
+      "distinct_figures": 1,
+      "memos_sha256": "5aa60d030c5a1ac4ab0a11fae646f86a13ccf1e0cc13a1c1b45f1998f327ef5c"
+    },
+    {
+      "label": "pre-224",
+      "model_key": "gpt-oss-openrouter",
+      "published": 143,
+      "held": 7,
+      "with_word": 26,
+      "with_percent": 2,
+      "with_figure": 1,
+      "with_any": 29,
+      "distinct_words": 6,
+      "distinct_percents": 1,
+      "distinct_figures": 1,
+      "memos_sha256": "aabd872959acd614e57b88b111cde21973f92ba1e070b47c5420ef95b0ff9d36"
+    },
+    {
+      "label": "pre-224",
+      "model_key": "haiku-5-5",
+      "published": 78,
+      "held": 72,
+      "with_word": 45,
+      "with_percent": 34,
+      "with_figure": 2,
+      "with_any": 61,
+      "distinct_words": 11,
+      "distinct_percents": 6,
+      "distinct_figures": 1,
+      "memos_sha256": "ea5dcc81c3fe34b04583bbb213fe849c2db4a9e0c2a06dc33eeb859d5bd1d881"
+    }
+  ]
+}

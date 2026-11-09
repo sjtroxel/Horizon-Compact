@@ -43,6 +43,8 @@
       "Bash(uv run --no-sync hc protocol records*)",
       "Bash(uv run hc site raw-manifest*)",
       "Bash(uv run --no-sync hc site raw-manifest*)",
+      "Bash(uv run hc site memos*)",
+      "Bash(uv run --no-sync hc site memos*)",
       "Bash(uv run hc case match*)",
       "Bash(uv run --no-sync hc case match*)",
       "Bash(uv run hc case memos*)",
