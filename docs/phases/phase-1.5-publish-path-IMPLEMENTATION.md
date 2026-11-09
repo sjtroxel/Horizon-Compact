@@ -1597,3 +1597,7 @@ Mycelium's deploy role can still change this project's distribution (OPEN 2026-1
 (decision 3).
 
 **Phase 1.5 is CLOSED 2026-11-08, with his commit of this section.** Every phase through 5.5 is now closed.
+
+*Dated note, 2026-11-08, about 8:40 AM:* the close commit is `2227a26` (his); CI `42490367867` and Deploy
+`42490367866` green. Deploy's code half only (the site half skipped): new image `sha256:ea6bb1cb...` (the version
+line changed its bytes), `main` 1 added, 0 changed, 1 destroyed (the task definition replaced).

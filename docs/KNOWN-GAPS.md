@@ -7,17 +7,34 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-08, about 8:30 AM (PHASE 1.5 CLOSED, VERSION 0.5.5; PHASE 6'S DOC NEXT)
+> ## START HERE — where things stand, 2026-11-09, about 8:45 AM (PHASE 6 IMPLEMENTATION DOC APPROVED, STEP 0 DONE; C1 NEXT)
+>
+> **Phase 6 `explorer`'s IMPLEMENTATION doc is approved** (his, 2026-11-09): `docs/phases/phase-6-explorer-IMPLEMENTATION.md`,
+> all nine decisions as recommended except **decision 2, changed to a local preview** after his question (no second
+> Vercel site; a hidden path on the public site was considered and rejected, §13). **Decision 1's rule is §19**, written
+> as if a skeptical AI reviewer will audit it (his instruction), with its disclosure that Claude saw the grid verdicts
+> before writing it; **§20** lists what such a reviewer would dig for and where each is answered.
+>
+> **This block rides in his commit `phase 6: implementation doc approved`** with the new doc and yesterday's record of
+> Phase 1.5's close runs (this file and the Phase 1.5 doc §26). Docs only: no Deploy; CI the only check. Read it first
+> (`gh run list --limit 2`); if `git log -1` is not that commit, it is first.
+>
+> **Step 0 is done** (the scope doc's dated note, 2026-11-09). **Next:** **C1, the explorer-data builder** (§5, with §19's
+> rule; Sonnet builds, Opus reviews), and the two scripts for his runs (decisions 4 and 5).
+>
+> *The earlier blocks below are superseded.*
+
+> ## START HERE — where things stood, 2026-11-08, about 8:30 AM (PHASE 1.5 CLOSED `2227a26`, VERSION 0.5.5; PHASE 6'S DOC NEXT) *(superseded by the block above)*
 >
 > **Phase 1.5 is closed** (the Phase 1.5 IMPLEMENTATION doc §26): DoD 1-10 met; the spend **$0.01** by his Cost
 > Explorer reading (2026-11-04 to 2026-11-07, tag `Project`), about $0.08 with Phase 1's records. **The version is
 > `0.5.5`** (decision 10) in `pyproject.toml`, `src/horizon_compact/__init__.py` and `uv.lock`. **Every phase through
 > 5.5 is now closed.**
 >
-> **This block rides in the close commit, his: `phase 1.5: close, version 0.5.5`.** It changes `src/`,
-> `pyproject.toml` and `uv.lock`, so **both CI and Deploy's code half are owed** (a new image, since the version line
-> changes the bytes; `main` applied with the task definition replaced). Read both first (`gh run list --limit 3`). If
-> `git log -1` is not that commit, it is first.
+> **Committed `2227a26` (his), pushed; CI `42490367867` and Deploy `42490367866` green.** Deploy ran the code half
+> only (the site half skipped, no `web/` change): new image `sha256:ea6bb1cb...`, `main` applied with only the task
+> definition replaced (1 added, 1 destroyed). The record of these runs is uncommitted, docs only; it rides with the
+> next commit.
 >
 > **Next: Phase 6 `explorer`'s IMPLEMENTATION doc (Opus)**, its scope doc approved 2026-10-04 and a month old, so it
 > gets the same line-by-line scope review Phase 1.5's did. **Still open, carried:** the teardown check's

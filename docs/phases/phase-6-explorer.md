@@ -13,6 +13,13 @@
 >
 > Written before Phases 0.5 through 5.5 are built. **Lines marked *(rests on N)* depend on what Phase N builds,
 > measures or decides.**
+>
+> **Amended 2026-11-09 (his), at the IMPLEMENTATION doc's approval:** five weeks and every phase through 1.5 after
+> this doc was written, it was reviewed line by line. Read it through the IMPLEMENTATION doc's §0
+> (`docs/phases/phase-6-explorer-IMPLEMENTATION.md`): the model set is the fallback set (Haiku 5.5 and gpt-oss-120b,
+> each shown separately); verdicts come in four kinds, not three; the real cases are exploratory and none can be re-run;
+> Delivers 8's preview is **local only** (decision 2 of that doc, which replaces "deployed somewhere he can open it");
+> and the section for results against the thesis is filled by the rule in that doc's §19.
 
 ## What this phase is for
 
