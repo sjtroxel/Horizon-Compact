@@ -24,6 +24,15 @@ export interface ExplorerHis {
   /** The section for results against the thesis: his title and his introductory sentence. */
   againstTitle: string;
   againstIntro: string;
+  /** The memo reader's introduction. */
+  memosIntro: string;
+  /** The real-cases page's introduction, and the note that explains why no real-case memo text is shown. */
+  casesIntro: string;
+  caseMemosHeld: string;
+  /** The studies page: its introduction and the titles of its two parts. */
+  studiesIntro: string;
+  studiesThinkingTitle: string;
+  studiesAwarenessTitle: string;
   pages: Pages;
 }
 
@@ -211,4 +220,200 @@ export const explorerLabels = {
   runsHeading: "Every run",
   runsKey: "The same runs as the chart, as a table.",
   tableFailures: (type: string, runs: number) => `${type}: ${runs}`,
+
+  // ------------------------------------------------------------------------------------------------------------
+  // C5: the memo reader, the real cases and the studies. Claude-drafted, unapproved.
+
+  // The memo reader.
+  memoKindLabel: "Set of memos",
+  memoKinds: { grid: "Main grid", thinking: "Thinking sub-study" } as Record<string, string>,
+  memoScenarioLabel: "Scenario",
+  memoGoalLabel: "Goal",
+  memoRunsHeading: "Runs in this set",
+  memoRunLine: (wording: string, repeat: number, status: string) =>
+    `wording ${wording}, repeat ${repeat}, ${status}`,
+  memoCardLabel: (model: string, letter: string, goal: string, thinking: boolean) =>
+    `Written by ${model} under goal ${letter} (${goal}), for a fictional company. This is the model’s output, not the project’s view.${thinking ? " Thinking was on for this run." : ""}`,
+  memoRun: "Run",
+  memoWording: "Wording",
+  memoRepeat: "Repeat",
+  memoStatus: "Status",
+  memoSource: "Text from",
+  memoSources: {
+    memo: "the memo the model wrote with its decision",
+    reply_text: "the model’s reply text, because it made no tool call",
+  } as Record<string, string>,
+  memoLeftNone: "This run left no memo.",
+  memoSourceHeading: "Source records",
+  memoSourceNote: (path: string, sha: string) =>
+    `The object key and sha256 of this run’s final record and of its final attempt, for checking against the raw-object manifest (${path}, sha256 ${sha}).`,
+  memoFinalRecord: "Final record",
+  memoAttemptRecord: "Final attempt",
+  memoFileLink: "The file these memos are read from",
+  memoFileNote: "JSON Lines, one run to a line, exactly as the site reads it",
+  memoPrevious: "Previous run",
+  memoNext: "Next run",
+  memoNone: "no earlier run",
+  memoNoneNext: "no later run",
+  memoNavLabel: "Move through this set",
+  memoLoading: "Loading the memos",
+  memoMessages: {
+    kind: "That is not a set of memos the reader holds.",
+    scenario: "That is not a scenario in this experiment.",
+    objective: "That is not one of the five goals.",
+    cell: "The reader holds no memos for that combination.",
+    run: "That run is not in this set.",
+  } as Record<string, string>,
+  memoThinkingOnly: (model: string) =>
+    `The thinking sub-study ran on ${model} only, so there are no thinking memos for this model.`,
+  memoSeeSubStudy: "See the sub-study",
+  memoToFirst: "Go to the first memo",
+
+  // The real cases.
+  casesFraming:
+    "These cases are the protocol applied to real decisions. They are readings, not tests, and they are not a validation of the protocol.",
+  casesLabelLead: "Every case below carries this label, as its file writes it:",
+  allNoGoodMatch: "Every reading of every case below is labelled no good match, for every model.",
+  shortfallHeading: "What the selection found, and what it did not",
+  shortfallNote:
+    "The protocol asks for cases of three types and says a type that yields fewer than its places is a reported shortfall, never filled by judgment (protocol section 12.1).",
+  caseTypes: {
+    closure: "Closure or restructuring",
+    retool: "Invest or retool",
+    ai: "AI-attributed workforce change",
+  } as Record<string, string>,
+  shortfallTableLabel: "Cases found and places left short, by type",
+  shortfallType: "Type",
+  shortfallFound: "Cases found",
+  shortfallShort: "Places left short",
+  shortfallAtMost: "The most cases the protocol allows",
+  shortfallFilled: "Cases that filled a short type’s place",
+  shortfallFilledNote:
+    "Under the exploratory selection, a place a short type left open could go to a case of another type.",
+  selectionLogsHeading: "The public selection logs",
+  selectionLogs: {
+    preregistered: "The pre-registered search’s log",
+    exploratory: "The exploratory selection’s log",
+  } as Record<string, string>,
+  caseTypeLabel: "Type",
+  caseDescriptionHeading: "The case, as published",
+  caseDescriptionStatus: (status: string) => `Description: ${status}`,
+  caseDescriptionWithheld: "withheld, so this case is shown by its type only",
+  caseDossierHeading: "The dossier",
+  caseDossierStatus: (published: boolean) => `Dossier: ${published ? "published" : "withheld"}`,
+  caseReasonLabel: "Reason, as the file states it",
+  caseReidentHeading: "The re-identification check",
+  caseReidentStatus: (status: string) => `Status: ${status}`,
+  caseThresholdLabel: "Threshold",
+  caseProbesHeading: "Recognition probes",
+  caseProbesKey:
+    "Before any decision run each model was asked which company the dossier described (protocol section 12.8). A call passes when it does not name the company.",
+  caseProbeSet: "Set",
+  caseProbeModel: "Model",
+  caseProbeCalls: "Calls",
+  caseProbePassed: "Passed",
+  caseCompanyHeading: "The company’s decision, as the case codes it",
+  caseCompanyChoice: (choice: string) => `Choice: ${choice}`,
+  caseCompanyReading: (reading: string) => `Reading ${reading}`,
+  caseNoShares: "no lever shares in this reading",
+  caseDimensionsHeading: "What the case was matched on",
+  caseObservable: "Matched on",
+  caseExcluded: "Left out",
+  caseDimensionChoice: "The choice itself (close, retool or sell)",
+  caseModelHeading: (model: string) => model,
+  caseRunCounts: (runs: number) => `${runs} runs, by their final status:`,
+  caseFinalStatus: (status: string, runs: number) => `${status}: ${runs}`,
+  caseReadingNote:
+    "The primary reading is the rubric’s own. An alternative reading matches the runs again with one uncertain call in the rubric read the other way.",
+  readingNames: { primary: "Primary reading" } as Record<string, string>,
+  readingAlternative: (id: string) => `Alternative reading ${id}`,
+  readingLabels: {
+    match: "match",
+    tie: "tie",
+    no_good_match: "no good match",
+    not_enough_disclosed: "not enough disclosed",
+  } as Record<string, string>,
+  readingLabelIs: (label: string) => `Label: ${label}`,
+  readingReason: "Reason, as the matcher wrote it",
+  readingLines: "Lines observable in this reading",
+  distanceKey:
+    "One row per goal. The dot is the distance between that goal’s runs and the company’s decision: a shorter distance is nearer. The line is its interval. A distance above the rule is no good match.",
+  distanceAxis: "Distance from the company’s decision, 0 to 1",
+  distanceRule: (distance: string) => `no good match above ${distance}`,
+  distanceRowNumbers: (distance: string, low: string, high: string) =>
+    `distance ${distance}, interval ${low} to ${high}`,
+  distanceRuns: (runs: number, choiceOnly: number, undistanced: number) =>
+    `${runs} runs distanced, ${choiceOnly} on the choice alone, ${undistanced} left out`,
+  distanceChartLabel: (caseLabel: string, model: string, reading: string) =>
+    `Distances for ${caseLabel}, ${model}, ${reading}`,
+  distanceLevel: (level: string) => `${level} bootstrap interval`,
+  nearestLine: (goal: string, letter: string) => `Nearest goal: ${goal} (${letter})`,
+  gapLine: (second: string, estimate: string, low: string, high: string) =>
+    `Gap to the next nearest, goal ${second}: ${estimate} (interval ${low} to ${high})`,
+  tiedWith: (ids: string) => `Tied with: ${ids}`,
+  tieNote:
+    "Every distance in this reading is equal, so the nearest goal is the matcher’s tie-break by letter, not a finding. No nearest goal is shown.",
+  oneLineNote:
+    "This reading has one observable line, which the distance still averages with the choice term, so its distances are pulled toward a match by construction and are not comparable with other cases’ readings.",
+  dependsLabel: "Depends on the reading",
+  dependsYes: "yes",
+  dependsNo: "no",
+  dependsTieNote:
+    "This flag inherits the tie-break in a reading where every distance is equal, so by itself it does not mean the company’s reading changes the result.",
+  dependsSameLabel: (label: string) => `The label is ${label} under every reading.`,
+  alternativesLine: (matched: number, unmatched: string) =>
+    `Alternative readings matched: ${matched}. Calls left unmatched: ${unmatched}.`,
+  caseMemosHeading: "Memos",
+  caseMemosNone: "no real-case memo text is on this site, and none is linked",
+  memoCountLabels: {
+    runs: "Runs",
+    with_text: "With text",
+    without_text: "Without text",
+    published: "Published",
+    held: "Held",
+  } as Record<string, string>,
+  heldReasonsHeading: "Held, by reason",
+  heldReasons: {
+    name_confirmed: "a name was confirmed in the memo",
+    reader_unclear: "a reader could not tell whether the memo names the company",
+    reader_no_reply: "the reader gave no reply",
+    dossier_withheld: "the memo repeats words from the case’s withheld dossier",
+    overruled: "held by a later decision",
+  } as Record<string, string>,
+  caseLoading: "Loading the case",
+  casesLoading: "Loading the cases",
+  caseSeeCase: "Read the case",
+
+  // The studies.
+  studiesSubStudyLabel:
+    "A sub-study on scenario s1, on Haiku 5.5 only. It is outside the family of 16 comparisons and is not part of the main grid.",
+  studiesSettings:
+    "Settings: the sealed wording w2 only, all five goals, thinking on at effort high. The exact request is in protocol section 9.5.",
+  studiesSettingsLink: "Protocol section 9.5, at the pre-registered tag",
+  studiesGridCard: "Main grid, scenario s1, wording w2 only",
+  studiesThinkingCard: "Thinking sub-study, scenario s1, wording w2",
+  studiesGridNote:
+    "The scenario view shows the grid’s three wordings; here the grid is cut to w2, so it sits like for like beside the sub-study.",
+  studiesLevel: (level: string) => `Each verdict uses the analysis’s ${level} interval.`,
+  studiesComparisonsHeading: "The five comparisons in the sub-study",
+  studiesGridSealed: (wording: string, verdict: string) =>
+    `The main grid on wording ${wording} alone, also outside the family of 16: ${verdict}`,
+  studiesMemosLink: "Read the sub-study’s memos",
+  studiesRunsHeading: "Every run of the sub-study",
+  studiesRunsKey: "Each run id opens that run’s memo in the reader.",
+  awarenessLabel:
+    "Context only. Every reply is quoted in full and none is used to filter or weight any run (protocol section 9.6).",
+  awarenessInstructionLabel:
+    "The instruction the model was given in place of the decision, word for word from protocol section 9.6:",
+  awarenessSettings:
+    "One call for each of the five goals under each of three templates, 15 to a model, on scenario s1.",
+  awarenessLink: "Protocol section 9.6, at the pre-registered tag",
+  awarenessGoalHeading: (goal: string, letter: string) => `${goal} (${letter})`,
+  awarenessCardLabel: (model: string, letter: string, goal: string, template: string) =>
+    `A reply to the awareness probe, not a decision memo. Written by ${model} under goal ${letter} (${goal}), template ${template}.`,
+  awarenessStatus: (status: string, stop: string, tokens: number) =>
+    `status ${status}, stop reason ${stop}, ${tokens} output tokens`,
+  awarenessNotRecorded: "This call was not recorded.",
+  awarenessEmpty: "The reply had no text.",
+  studiesLoading: "Loading the studies",
 };

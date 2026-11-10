@@ -33,6 +33,11 @@ export function formatPoints(difference: number, digits = 1): string {
   return `${difference < 0 ? MINUS : "+"}${text}`;
 }
 
+/** A distance from the matcher (0 to 1) as it is in the file, to `digits` decimal places (three unless asked). */
+export function formatDistance(distance: number, digits = 3): string {
+  return distance.toFixed(digits);
+}
+
 /**
  * A comparison's difference and its interval as text, in points, or null when the file has none (a comparison that
  * is not assessable). Each end is `formatPoints` of the field.

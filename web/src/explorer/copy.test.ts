@@ -2,7 +2,16 @@ import { describe, expect, it } from "vitest";
 import { isPlaceholder, PLACEHOLDER_MARK } from "../copy";
 import { explorerHis, explorerLabels } from "./copy";
 import { allRoutes } from "./page-meta.mjs";
-import { realCasesIndex, realGrids, realIndex } from "./fixtures";
+import { MEMO_KINDS } from "./route";
+import {
+  readAwareness,
+  readMemoRows,
+  realCaseFiles,
+  realCasesIndex,
+  realGrids,
+  realIndex,
+  realMemoIndex,
+} from "./fixtures";
 
 /** Every string in a nested object; a function is called with a sample argument and its text is read. */
 function strings(value: unknown, path = ""): Array<[string, string]> {
@@ -128,5 +137,99 @@ describe("the labels keyed by the data", () => {
     for (const id of scenarios) expect(explorerHis.scenarioBriefs[id], id).toBeTruthy();
     expect(explorerHis.againstTitle).toBeTruthy();
     expect(explorerHis.againstIntro).toBeTruthy();
+  });
+});
+
+describe("the labels keyed by the C5 data", () => {
+  it("hold a word for every label the matcher can write, and every one in the real case files", () => {
+    // matcher.py: Label = match | tie | no_good_match | not_enough_disclosed.
+    for (const label of ["match", "tie", "no_good_match", "not_enough_disclosed"]) {
+      expect(explorerLabels.readingLabels[label], label).toBeTruthy();
+    }
+    const found = new Set(realCaseFiles.flatMap((c) => c.file.readings.map((r) => r.label)));
+    expect(found.size).toBeGreaterThan(0);
+    for (const label of found) expect(explorerLabels.readingLabels[label], label).toBeTruthy();
+    expect(Object.keys(explorerLabels.readingLabels).sort()).toEqual([
+      "match",
+      "no_good_match",
+      "not_enough_disclosed",
+      "tie",
+    ]);
+  });
+
+  it("name the primary reading, and every case type and every kind of memo set", () => {
+    expect(explorerLabels.readingNames["primary"]).toBeTruthy();
+    expect(explorerLabels.readingAlternative("u1")).toContain("u1");
+    const types = new Set([
+      ...Object.keys(realCasesIndex.shortfall.cases_by_type),
+      ...Object.keys(realCasesIndex.shortfall.short_by_type),
+      ...realCasesIndex.cases.map((c) => c.type),
+    ]);
+    for (const type of types) expect(explorerLabels.caseTypes[type], type).toBeTruthy();
+    for (const kind of MEMO_KINDS) expect(explorerLabels.memoKinds[kind], kind).toBeTruthy();
+  });
+
+  it("label every choice, lever and dimension in the real case files", () => {
+    for (const { file } of realCaseFiles) {
+      expect(explorerLabels.choices[file.company.choice]).toBeTruthy();
+      for (const reading of [file.company, ...file.company_alternatives]) {
+        for (const lever of Object.keys(reading.shares))
+          expect(explorerLabels.levers[lever], lever).toBeTruthy();
+      }
+      for (const key of [
+        ...file.dimensions.observable,
+        ...file.dimensions.excluded,
+        ...file.readings.flatMap((r) => r.observable_lines),
+      ]) {
+        expect(key === "choice" || explorerLabels.levers[key], key).toBeTruthy();
+      }
+    }
+  });
+
+  it("word every reason a memo is held, and every count the cases page shows", () => {
+    for (const { file } of realCaseFiles) {
+      for (const reason of Object.keys(file.memo_counts.held_by_reason)) {
+        expect(explorerLabels.heldReasons[reason], reason).toBeTruthy();
+      }
+    }
+    expect(Object.keys(explorerLabels.memoCountLabels)).toEqual([
+      "runs",
+      "with_text",
+      "without_text",
+      "published",
+      "held",
+    ]);
+  });
+
+  it("word every source a memo can have, and every reason the reader can refuse a choice", () => {
+    const sources = new Set<string>();
+    for (const file of realMemoIndex.files.slice(0, 8))
+      for (const row of readMemoRows(file)) if (row.source !== null) sources.add(row.source);
+    expect(sources.size).toBeGreaterThan(0);
+    for (const source of [...sources, "memo", "reply_text"])
+      expect(explorerLabels.memoSources[source], source).toBeTruthy();
+    for (const why of ["kind", "scenario", "objective", "cell", "run"])
+      expect(explorerLabels.memoMessages[why], why).toBeTruthy();
+  });
+
+  it("hold a title for each part of the studies page, and the introductions, as placeholders that name what goes there", () => {
+    for (const key of [
+      "memosIntro",
+      "casesIntro",
+      "caseMemosHeld",
+      "studiesIntro",
+      "studiesThinkingTitle",
+      "studiesAwarenessTitle",
+    ] as const) {
+      expect(isPlaceholder(explorerHis[key]), key).toBe(true);
+    }
+  });
+
+  it("have an awareness file for every model in the index, with fifteen calls each", () => {
+    for (const model of realIndex.models.map((m) => m.model_key)) {
+      const file = readAwareness(model);
+      expect(file.model_key).toBe(model);
+      expect(file.calls).toHaveLength(15);
+    }
   });
 });

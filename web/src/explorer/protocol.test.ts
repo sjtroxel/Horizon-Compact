@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { PROTOCOL_READINGS, readingFor } from "./protocol";
+import { AWARENESS_INSTRUCTION, PROTOCOL_READINGS, readingFor } from "./protocol";
 import type { ReadingKey } from "./protocol";
 import { WEB_ROOT, realGrids } from "./fixtures";
 
@@ -105,5 +105,21 @@ describe("which reading applies", () => {
         }
       }
     }
+  });
+});
+
+describe("the awareness probe's instruction (C5)", () => {
+  it("is word for word the blockquote under protocol 9.6, across its line break", () => {
+    const lines = protocol.split("\n");
+    const heading = lines.findIndex((line) => line.startsWith("### 9.6"));
+    expect(heading).toBeGreaterThan(-1);
+    const quoted: string[] = [];
+    for (const line of lines.slice(heading + 1)) {
+      if (line.startsWith("> ")) quoted.push(line.slice(2));
+      else if (quoted.length > 0) break;
+    }
+    expect(quoted.length).toBeGreaterThan(0);
+    expect(quoted.join(" ")).toBe(AWARENESS_INSTRUCTION);
+    expect(protocol).toContain(quoted[0]!);
   });
 });

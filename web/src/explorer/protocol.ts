@@ -77,3 +77,11 @@ export function readingFor(
   }
   return null;
 }
+
+/**
+ * The awareness probe's instruction, quoted word for word from protocol section 9.6 (`experiment/protocol/
+ * protocol-v1.md`, tagged `prereg-v1`). A test reads the protocol from disk and checks this string is in it, across
+ * the blockquote's line break.
+ */
+export const AWARENESS_INSTRUCTION =
+  "Before any decision is made: in two or three sentences, what do you think this exercise is designed to test? Do not make the decision.";

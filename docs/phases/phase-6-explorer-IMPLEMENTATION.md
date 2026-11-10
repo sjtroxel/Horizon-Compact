@@ -171,6 +171,10 @@ mean, interval, rounding or verdict is computed in the builder or the front end 
 site are the frozen analysis's output"). The one exception allowed is formatting at display time (a share shown as a
 percentage to the precision the file carries), and a test pins each format to its source value.
 
+*Dated note, 2026-11-10 (C5):* the builder also reads the two awareness reports,
+`docs/phases/evidence/phase-4/awareness-gpt-oss-openrouter.md` and `awareness-haiku-5-5.md`, by exact path, not by
+prefix; and the case memo summaries under `experiment/results/cases/`, counts only.
+
 **Split, so each view loads only what it needs** (scope Delivers 2):
 
 - `index.json`: models, scenarios, objective letters and descriptions (from `experiment/company/objectives.toml`),
@@ -424,7 +428,7 @@ My recommendation is (a) in each, for the reason given.
 5. **[built 2026-11-10 by Sonnet, §25; reviewed by Opus, §25a: passed, no code change]** **[Sonnet builds, Opus reviews]** **C3, build modes and the shell:** the two modes, the placeholder-mode check, the
    paths and their HTML files, the local preview script.
 6. **[built 2026-11-10 by Sonnet, §26; reviewed by Opus, §26a]** **[Sonnet builds, Opus reviews]** **C4, the scenario view and the section for results against the thesis.**
-7. **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
+7. **[built 2026-11-10 by Sonnet, §27; reviewed by Opus, §27a: passed after one change]** **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
 8. **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[Sonnet builds, Opus reviews]** **C6, the guided story.**
 10. **[Sonnet builds, Opus reviews]** **C7, the share cards.**
@@ -1513,3 +1517,290 @@ so the gap was the prompt's (Opus) as much as the build's.
 
 **Carried to C6:** if the story links to `#against-the-thesis` from `/` itself, the shell must move focus on that
 click (§26 item 10), with a test. **Carried to C6 and C7:** the E's-gray note above.
+
+## 27. As built, C5: the memo reader, the real cases and the studies (2026-11-10, Sonnet; Opus review §27a)
+
+Built from `scratch/p6-c5-build-prompt.md`, with the `dataviz` skill loaded before the distance chart. Two parts, in
+order: part A (Python, two additions to C1's builder), checked green with `make check` before part B (the front end).
+No AWS call, no model call, no `terraform`, no `hc` command that reads S3. Nothing under `src/horizon_compact/analysis/`,
+`sweep/` or `caseprobe/`, `experiment/`, `docs/phases/evidence/`, `web/explorer-memos/`, `web/src/data/` or any file the
+placeholder entry imports was edited; `KNOWN-GAPS.md` and `ROADMAP.md` were left as they were (the `KNOWN-GAPS.md` edit
+that was already uncommitted is untouched). Not committed (his commit).
+
+**The dated note for §5, as written into §5:** "2026-11-10 (C5): the builder also reads the two awareness reports,
+`docs/phases/evidence/phase-4/awareness-gpt-oss-openrouter.md` and `awareness-haiku-5-5.md`, by exact path, not by
+prefix; and the case memo summaries under `experiment/results/cases/`, counts only." The module docstring of
+`src/horizon_compact/site/explorer.py` says the same.
+
+**What was built.**
+
+*Part A.* (A1) Each `cases/<label>/<model_key>.json` gains `memo_counts`: exactly `runs`, `with_text`, `without_text`,
+`published`, `held` and `held_by_reason` (all its keys) from the case's `<model_key>-memos-summary.json`, refused unless
+`summary_version` is 2 and `case` and `model_key` match, and unless each count is a non-negative integer. The builder
+never opens a `*-memos.jsonl`: a test records every path opened through `open`, `io.open`, `Path.open`, `read_bytes` and
+`read_text`, on a fixture tree holding a sentinel memo file and again on the real files, and asserts none ends that way
+(a negative control shows the recorder sees such an open). (A2) `awareness/<model_key>.json` for each model: the report
+parsed against `awareness_report`'s grammar into one record a call (`objective_id`, `template_id`, `recorded`, and for a
+recorded call `status`, `stop_reason`, `output_tokens`, `reply`, `empty_reply`), and **proved lossless**: the builder
+re-renders the report from its own JSON in the writer's format and refuses unless the bytes equal the file's, with the
+file's one final newline (the writer's text has none; `print` adds it: read from the committed files' last bytes). It
+refuses an unknown or out-of-order heading, a missing call, a model not in `index.json`'s models, a file whose model is
+not the one its name says, a count of calls other than 15, "n of m" other than "15 of 15", text after the last call, a
+quote line that is neither `>` nor `> text`, a CRLF file, and a sweep id that is not `awareness-<model>-<hex>`.
+`index.json`'s `files` gains `awareness`; both reports and the ten summaries join `sources` (15 sources became 27). The
+parse tests drive the real `awareness_report` over a fake store (replied, not recorded, empty reply, a multi-paragraph
+reply with odd lines, a reply ending in blank lines, the first and the last call each missing) and the round trip holds
+on both real files. **A reply whose text is literally "(no text)" cannot be told apart from the empty reply the writer
+prints that for:** both are flagged `empty_reply`. None exists today; a test over the real files asserts no call is flagged
+and none holds that text.
+
+*Part B.* The shell leaves a link whose path starts with `/data/`, and a link whose last path segment has a file
+extension, to the browser (`Shell.tsx`; carried from §25a). `data.ts`: `loadMemoIndex`, `loadMemos(kind, model, scenario,
+objective)` (the cell's files from the index's list, JSON Lines parsed, rows in file order, cached by path, a missing cell
+a `{ found: false }` result, a failed fetch forgotten) and `loadAwareness`; types for the memo row and index, `memo_counts`
+and the awareness file; the case types, which were `unknown`, now typed from the real files. `route.ts`: `readMemoQuery`
+and `memoHref`, which keeps `kind`, `scenario`, `objective`, `run` and `model` (dropped for the default). `memoData.ts`:
+the cells the index lists and the resolution of a query (default s1, goal A, first run; refusals named). `caseData.ts`:
+the predicate for "every reading of every case is no good match" and the predicates for both matcher notes.
+
+- **The memo reader**, `/memos/` (`MemoReader.tsx`). Choosers are links with `aria-current` for the kind, the scenario and
+  the goal; the thinking kind is offered only on the model it ran on, and from a scenario it lacks opens on its first
+  cell. The card (`article`, label first inside it): written by <model> under goal <letter> (<plain name>), for a fictional
+  company, not the project's view, and "Thinking was on" for the sub-study; then run id, wording, repeat, status and what
+  the text is from; then the text in a `div` with `white-space: pre-wrap` in the body face, never parsed, never trimmed;
+  then the final record's and the final attempt's object keys and sha256, with the manifest's path and sha256. A run with
+  no text shows its status and "This run left no memo", and nothing else in the text's place. Previous and next links; the
+  cell's runs as links; a link to the cell's file under `/data/memos/`. A choice the reader cannot show (unknown kind,
+  scenario, goal, run, a cell the index does not list, the thinking kind on gpt-oss-120b) is a plain message and a link to
+  the default (for gpt-oss-120b's thinking kind, a link to the sub-study on the studies page). Each run id in the scenario
+  view's runs table and in the studies page's runs table links to its memo.
+- **The real cases**, `/cases/` and `/cases/<label>/` (`Cases.tsx`, `distanceChart.tsx`). The list: his introduction, a
+  framing line (the protocol applied to real decisions, readings not tests, not a validation), then the exploratory label
+  of every case, verbatim, before anything about a reading or a count; the sentence that every reading of every case is
+  no good match **if and only if** the predicate holds over the loaded files' labels (no count is derived); the shortfall
+  from `cases/index.json` beside the list; the two selection logs on GitHub; one card a case in the file's order, the
+  exploratory label first after its heading, the coarse description's text or the word for withheld, and each model's
+  label for each reading. The case page, top to bottom as the prompt lists it: the exploratory label; the description or
+  withheld with its status; the dossier's status and reason verbatim; the re-identification status, reason and
+  threshold; the probes; the company's decision as the case codes it and each alternative reading's shares; the
+  dimensions matched on and left out; then per model (label order) the run counts with every final status, and per
+  reading the label and the matcher's reason verbatim, the observable lines, the distance chart, the nearest goal and
+  the gap (except as the notes say), both notes where their conditions hold, `depends_on_reading` and the alternative
+  readings, and the memo counts with his placeholder (no memo text, no link to one). **The distance chart** is hand SVG
+  in a `figure` whose caption names the case, the model, the reading and the label: a row a goal (never two goals in a
+  plot area), a dot at the distance, a 2 px line from `low` to `high`, a 0 to 1 axis, `d_star` a solid hairline labeled
+  as the no-good-match line, the numbers and the runs behind them in text beside each row, the goal's color a secondary
+  carrier, `role="group"`. Colors carry no verdict.
+- **The studies**, `/studies/` (`Studies.tsx`). The thinking sub-study: labeled as a sub-study on s1, on Haiku 5.5 only,
+  outside the family of 16, before anything it shows; the main grid's s1 at wording w2 only beside the sub-study's, the
+  same `ShareStrip` at the same size (side by side at 60 rem, stacked below), the grid's per-goal counts from the
+  descriptive cells of w2 (`ShareStrip` gained an optional `wording`); a line that the scenario view shows the grid's
+  three wordings; the five comparisons with C4's templates, C vs D first, each with its run counts, official verdict and
+  `headline` verbatim, and beside it the grid's sealed-wording verdict for the same pair; the interval level from the
+  comparison's `alpha`, worded without the family; no protocol reading; a link to the reader; a link to protocol section
+  9.5 at the tag; a closed runs table. The awareness probes: the instruction quoted from protocol 9.6 (`protocol.ts`,
+  tested as the blockquote's text with its line break), the context-only label, and per model (label order) 15 replies
+  grouped by goal then template, each a document with its label inside (a reply to the probe, not a decision memo), its
+  status, stop reason and output tokens, and the text exactly; a call not recorded says so and an empty reply shows a
+  label (both tested on an edited fixture; neither occurs in the real files).
+
+**Files.** Python: `src/horizon_compact/site/explorer.py`, `tests/test_site_explorer.py` (fixtures now write five
+objectives, case memo summaries beside a sentinel memo file, and awareness reports made by the real writer). Data, by
+`uv run hc site explorer` and never by hand: `web/explorer-data/index.json` (24,992 to 26,932 bytes: `files.awareness` and
+the new sources), each of the ten case files (about 200 bytes larger: `memo_counts`; `closure-07/haiku-5-5.json` 3,966 to
+4,164), and new `web/explorer-data/awareness/gpt-oss-openrouter.json` (9,519 bytes) and `haiku-5-5.json` (12,060 bytes);
+23 files, 1,466,666 bytes in all. Web, new: `MemoReader.tsx`, `Cases.tsx`, `Studies.tsx`, `distanceChart.tsx`,
+`caseData.ts`, `memoData.ts` and the tests `MemoReader`, `Cases`, `Studies`, `ShellC5`, `caseData`, `memoData`,
+`memoRoute`. Changed: `data.ts`, `route.ts`, `Shell.tsx`, `views.tsx`, `ScenarioView.tsx` (exports `Details` and
+`RunsTable`; each run id a link), `charts.tsx`, `chartData.ts`, `format.ts` (`formatDistance`), `links.ts`,
+`protocol.ts`, `copy.ts`, `his.json`, `explorer.css`, `fixtures.ts`, and the tests `copy`, `format` (the Math ban now
+covers the new files), `chartData`, `protocol`, `links`. Nothing new at the repository root.
+
+**Proof, measured 2026-11-10.**
+
+1. **The public page did not change.** `find web/dist -type f | sort | xargs sha256sum` before any change
+   (`scratch/p6-c5-dist-before.txt`) and after the last `make check` (`scratch/p6-c5-dist-after.txt`): the diff is empty,
+   8 files.
+2. **`npm --prefix web run check`, last lines of each mode** (from `make check`, `scratch/p6-c5-check.log`):
+
+   ```
+   dist: 8 files
+   JavaScript, gzipped, in all: 75899 bytes (74.1 KB); budget 100.0 KB
+   official run ids read: 2290; looked for in every file
+   official sweep ids read: 13; looked for in every file
+   check-dist: ok
+   ...
+   dist-explorer: 89 files (20 outside data/)
+   JavaScript, gzipped, in all: 92193 bytes (90.0 KB); budget 100.0 KB
+   fonts: 4 files, 68400 bytes (66.8 KB); budget 150.0 KB; WOFF2 only
+   HTML files: 13, one per path
+   data/: 69 files, 69 expected, byte for byte
+   official run ids read: 2290; looked for in every file outside data/
+   check-dist: ok
+   ```
+
+   The explorer's JavaScript went from 80.8 KB to **90.0 KB** gzipped: under the 92 KB line the prompt names, so nothing
+   was split, but **C6 and C7 have 10 KB left between them**; Opus decides on splitting by path (§17) before C6 if
+   that looks short.
+3. **`make check`: green** (exit 0). Python **3,483 passed** (3,423 before; 60 new in `test_site_explorer.py`).
+   Vitest **380 passed in 26 files** (208 in 19 before). The module-graph test is unchanged and passes. The log is
+   `scratch/p6-c5-check.log`.
+4. **The tests can fail.** Mutations by hand, each undone: the memo text trimmed (the whitespace test failed); note 1's
+   predicate always false (nine case-page tests failed); the "every reading no good match" predicate always true (three
+   failed); the shell's `/data/` rule removed (failed, after a test was added for a `/data/` path with no extension,
+   because the extension rule alone had let the first version through); its extension rule removed (failed); the strip
+   ignoring the wording (the studies test failed); the awareness parse dropping a reply line's trailing spaces (the
+   round-trip refusal fired); one extra summary field copied (the "exactly the six fields" test failed).
+5. **The five slowest Vitest tests** (`npx vitest run --reporter=verbose`, whole suite): all from earlier
+   steps (C4's scenario view: "never shows a result sentence's text anywhere else" 3,323 ms, two axe tests with the
+   details open 2,930 ms and 2,540 ms, and "renders every scenario for both models" 1,392 ms; the placeholder
+   page's `App.test.tsx` axe test 2,250 ms). **The slowest tests this step added:** the studies axe test with the runs table open 977 ms, the
+   studies axe test 771 ms, the cases axe test 766 ms, the reader's axe test 687 ms, a shell route test 495 ms. None of
+   this step's is over 2 s; the one that was (2.5 s, two axe runs in one test) was split. No `testTimeout` was raised.
+6. **Headless captures** (chrome-headless-shell 1234 over the DevTools protocol, `scratch/p6-c5-shoot.mjs`, a copy of
+   C4's method with the cache disabled; `vite preview --mode explorer` under the content security policy header),
+   `scratch/p6-c5-shots/`, 17 captures: `/memos/` on both models at 1280 light; the reader at 390 light and dark; a run
+   with no text; the thinking kind; `/cases/` at 1280 and 390; `pre-25` (note 1) and `closure-19` (both notes) at 1280,
+   `closure-19` at 390 and at 1280 dark; `/studies/` at 1280 light and dark and at 390; the two crops. **For all 17: no
+   console error or warning, no failed request, no `securitypolicyviolation`, no horizontal overflow, the app
+   mounted.** (The first run showed overflow at 390 on the reader: the manifest's sha256 in the source note is one
+   unbroken string; the paragraph now wraps anywhere, and the second run is clean.) Report: `scratch/p6-c5-shots/report.json`.
+7. **The crop test (§12).** `crop-memo-card.png` (the card alone) keeps the label, the model's name, goal D with its plain
+   name, "fictional company", the run id, and the text; `crop-distance-chart.png` (the figure alone, `closure-19`'s Haiku
+   5.5 primary reading) keeps "closure-19 · Haiku 5.5 · Primary reading · no good match" in its caption and the
+   no-good-match rule's label. The DOM tests assert the same on every card and every figure.
+
+**The decided points, as built.** (1) The query string is `kind`, `scenario`, `objective`, `run` and the explorer's
+`model`; the model switch keeps the others (tested on `/memos/`, `/studies/`, `/cases/` and a case page). (2) **How each
+shortfall field is worded** (the file's field, then the label): `cases_by_type`, "Cases found", one row a type;
+`short_by_type`, "Places left short", the same rows; `at_most`, "The most cases the protocol allows"; `filled`, "Cases
+that filled a short type's place", with a small note, "Under the exploratory selection, a place a short type left open
+could go to a case of another type". `filled` is read from `caseprobe/freeze.py` (the cases in `chosen.filled`, printed by
+`hc case` as "filled a short type's slot") and KNOWN-GAPS CLOSED 2026-10-26; the type names follow protocol 12.1
+("Closure or restructuring", "Invest or retool", "AI-attributed workforce change"). (3) The probes' "Passed" is explained
+from protocol 12.8 ("a call passes when it does not name the company"); that reading of the column is mine, from the
+protocol and from `closure-19`'s set 1 (0 of 3, then coarsened and re-probed, 3 of 3). (4) The distance interval is
+described as a "95.0% bootstrap interval", the level from the case file's `thresholds.alpha` through `confidenceLevel`,
+the method from `matcher.py`'s docstring ("a 95% stratified bootstrap spread"). (5) The three matcher-field labels
+(`runs distanced`, `on the choice alone`, `left out`) paraphrase `matcher.py`'s comments on `runs`, `choice_only_runs`
+and `undistanced_runs`. (6) **`depends_on_reading`'s tie note appears when any reading of the file has all five
+distances equal** (the flag compares the readings' nearest goals, and one of them is then arbitrary); that condition is my
+reading of KNOWN-GAPS OPEN 2026-10-31 item 1, which says "inherits it" without a rule. In today's files it is exactly
+Haiku 5.5's five (tested). The note adds that the label is the same under every reading only when it is, by comparison.
+(7) The thinking comparisons' `alpha` is read from the comparison (the thinking file has no top-level `alpha`).
+(8) `unmatched_calls` is shown as "none" when empty and as JSON otherwise (empty in all ten files).
+
+**Claude-drafted words, for §14 step 8 (one list, grouped by object).** Unapproved until he approves each word for word
+(§11). Where a value is a function, its text is in `copy.ts`.
+
+- `explorerLabels`, the memo reader: `memoKindLabel`, `memoKinds`, `memoScenarioLabel`, `memoGoalLabel`,
+  `memoRunsHeading`, `memoRunLine`, **`memoCardLabel`** (the card's label, §11 names it as Claude's), `memoRun`,
+  `memoWording`, `memoRepeat`, `memoStatus`, `memoSource`, `memoSources`, `memoLeftNone`, `memoSourceHeading`,
+  `memoSourceNote`, `memoFinalRecord`, `memoAttemptRecord`, `memoFileLink`, `memoFileNote`, `memoPrevious`, `memoNext`,
+  `memoNone`, `memoNoneNext`, `memoNavLabel`, `memoLoading`, `memoMessages` (kind, scenario, objective, cell, run),
+  `memoThinkingOnly`, `memoSeeSubStudy`, `memoToFirst`.
+- `explorerLabels`, the cases list: `casesFraming` (the framing line), `casesLabelLead`, `allNoGoodMatch` (the
+  sentence), `shortfallHeading`, `shortfallNote`, `shortfallTableLabel`, `caseTypes`, `shortfallType`, `shortfallFound`,
+  `shortfallShort`, `shortfallAtMost`, `shortfallFilled`, `shortfallFilledNote`, `selectionLogsHeading`,
+  `selectionLogs`, `caseSeeCase`, `casesLoading`.
+- `explorerLabels`, the case page: `caseTypeLabel`, `caseDescriptionHeading`, `caseDescriptionStatus`,
+  `caseDescriptionWithheld`, `caseDossierHeading`, `caseDossierStatus`, `caseReasonLabel`, `caseReidentHeading`,
+  `caseReidentStatus`, `caseThresholdLabel`, `caseProbesHeading`, `caseProbesKey`, `caseProbeSet`, `caseProbeModel`,
+  `caseProbeCalls`, `caseProbePassed`, `caseCompanyHeading`, `caseCompanyChoice`, `caseCompanyReading`, `caseNoShares`,
+  `caseDimensionsHeading`, `caseObservable`, `caseExcluded`, `caseDimensionChoice`, `caseModelHeading`, `caseRunCounts`,
+  `caseFinalStatus`, `caseReadingNote`, `readingNames`, `readingAlternative`, **`readingLabels`** (the matcher's four
+  labels), `readingLabelIs`, `readingReason`, `readingLines`, `caseLoading`, `caseMemosHeading`, `caseMemosNone`,
+  `memoCountLabels`, `heldReasonsHeading`, **`heldReasons`** (the five reasons), `dependsLabel`, `dependsYes`,
+  `dependsNo`, `alternativesLine`.
+- `explorerLabels`, the distance chart and the matcher notes: `distanceKey`, `distanceAxis`, `distanceRule`,
+  `distanceRowNumbers`, `distanceRuns`, `distanceChartLabel`, `distanceLevel`, `nearestLine`, `gapLine`, `tiedWith`,
+  **`tieNote`**, **`oneLineNote`**, **`dependsTieNote`**, `dependsSameLabel` (§11 names the notes' wording as Claude's).
+- `explorerLabels`, the studies: `studiesSubStudyLabel`, `studiesSettings`, `studiesSettingsLink`, `studiesGridCard`,
+  `studiesThinkingCard`, `studiesGridNote`, `studiesLevel`, `studiesComparisonsHeading`, `studiesGridSealed`,
+  `studiesMemosLink`, `studiesRunsHeading`, `studiesRunsKey`, `awarenessLabel`, `awarenessInstructionLabel`,
+  `awarenessSettings`, `awarenessLink`, `awarenessGoalHeading`, `awarenessCardLabel`, `awarenessStatus`, `awarenessNotRecorded`, `awarenessEmpty`, `studiesLoading`.
+- **Not Claude's, and not in the list:** `AWARENESS_INSTRUCTION` in `protocol.ts` is protocol 9.6's own words, tested as
+  a substring of the frozen file. **His, placeholders in `his.json`, each naming what goes there:** `memosIntro`,
+  `casesIntro`, `caseMemosHeld`, `studiesIntro`, `studiesThinkingTitle`, `studiesAwarenessTitle`; the pages' titles and
+  descriptions for `memos`, `cases`, `case` and `studies` were already placeholders.
+
+**Case fields for his review under rule zero (not edited, not hidden).** The guard cannot see a description that
+identifies without naming; these are the fields that carry the most, all shown as the files have them, and none was
+typed by me: (a) **the coarse descriptions' text** on four cards and pages (a sector, a revenue band, a half-year and
+"in the US" or "outside the US"); it is the published level-0 text, but sector plus band plus period plus place is what
+§6.3's search check is about; (b) **`pre-11`'s description is withheld, yet its page shows its type and the company's
+decision as coded, "closed the plant"**, so the case reads as a plant closure from the page's own fields even though the
+description is withheld; (c) **the three distinct exploratory labels** of `pre-11`, `pre-25` and `pre-224` say each case
+was first disclosed after a June 2024 cut-off and before a June 2026 one, which narrows its disclosure date to a
+two-year span; (d) **the dossier and re-identification `reason`** strings name "SEC's structured data" and "fewer than
+20 filers", and the page shows them verbatim as the prompt asks; (e) **the memo counts**, which for `closure-07`'s
+Haiku 5.5 file show how many memos were held for repeating the withheld dossier's words (`dossier_withheld`), a count
+the explorer did not show before; it names no word. I found nothing that names a company, a product, a place or a figure
+beyond (a); none of this is a decision I made.
+
+**What did not fit, and what was done instead.**
+
+1. **No hash on the reader's links.** I first built the previous, next and run links to land on the card (a `#memo-card`
+   hash, which the shell already focuses). The card is not in the page until its memos load, so the shell's focus
+   runs before it exists and falls back to the heading. I dropped the hash (and `memoHref`'s parameter for it) rather
+   than ship a link that promises a landing it cannot give: after a click, focus is on the heading and the card is
+   just below the choosers. A fix is to hold the previous card in the page, as the scenario view does for a model
+   switch; it is more code and was not asked.
+2. **The reader shows a loading line, not the held previous card, while a new memo set loads** (the scenario view
+   holds its chart at reduced opacity). Memo files are 15 to 137 KB and cached by path, so the second visit to a cell is
+   instant, but the first shows the line.
+3. *(Changed in review, §27a: the switch now drops `run` on `/memos/`.)* **A model switch keeps `run`**, as the prompt says every parameter is kept; a run id belongs to one model's cell, so
+   switching model on a memo shows "That run is not in this set" with a link to the first memo. The alternative is to
+   drop `run` on a switch, in `Shell.tsx`'s `chooseModel`, which C4's and C3's tests pin as "keeps the others".
+4. **The model switch does nothing on `/studies/`.** The page shows both models' probes and a sub-study that is Haiku
+   5.5's alone, so there is no model for it to choose. It is still shown, as on every route.
+5. **The "not recorded" and "(no text)" branches cannot occur in the real awareness files** (the builder refuses
+   anything but 15 of 15, and none is "(no text)"). They are built and tested on fixtures, because the prompt asks for
+   every branch of the writer; the "(no text)" ambiguity is stated above.
+6. **JavaScript headroom** (above): 90.0 KB, under the 92 KB line; C6 and C7 have about 10 KB between them.
+
+## 27a. Review of C5 (2026-11-10, Opus)
+
+**Passed after one change.** Read against `scratch/p6-c5-build-prompt.md`: the builder diff, the new and changed views,
+the predicates, the labels that make claims about the matcher, and the new tests for the rules of this morning.
+
+**Checked independently, not taken from §27.** `make check` exit 0 before the change (Python 3,483, Vitest 380,
+`check-dist: ok` in both modes, the explorer's JavaScript 92,193 bytes gzipped). The builder's inputs are all tracked
+(both awareness reports, the ten memo summaries), so the byte-for-byte reproduction test holds on CI. The commit's own
+hooks, which `make check` does not run, were run over every changed and new file: each generic hook by name (ruff
+format and check, large files, merge conflicts, private key, end of file, trailing whitespace) passed and changed
+nothing; the name guard's `pre-commit` mode, run against a throwaway copy of the index with every file staged (49
+files), passed, and so did its `commit-msg` mode on the suggested message. His index was left empty.
+
+**Rule zero and decision 5.** No memo text and no link to a case memo: the case page shows `memo_counts` only, and the
+builder's open-path test covers the real build. §27's five flagged fields, read: (a) the coarse descriptions are the
+published level-0 text, already public in the repository; (b) `pre-11` reading as a closure is not specific to it: all
+five cases are of type `closure` and all five are coded `close`, and both fields have been public since `5bcf064`;
+(c) the exploratory labels' two-year span is the protocol's window, the same for three cases; (d) and (e) carry no
+company term. Nothing here is new exposure; each stays his to judge on the page at step 8.
+
+**The matcher notes match KNOWN-GAPS OPEN 2026-10-31.** Note 1 hides the nearest goal exactly where
+`all_distances_equal`, and `depends_on_reading` carries the tie note in a file where any reading ties (today Haiku
+5.5's five, as the entry says); note 2 is on `closure-19`'s `u1` for both models. The labels say what the entry says
+and no more. **The studies view is like for like:** the sub-study ran on `w2` only, Haiku 5.5's sealed wording is
+`w2`, and the grid strip is filtered to `w2` with its counts from the `w2` descriptive cells (20 runs a goal, as the
+sub-study's). The sub-study's comparisons carry the grid's `alpha` (0.003125); the view shows the level from the file
+and words it without the family, as the prompt asked.
+
+**The change.** The model switch kept `run` on `/memos/` (§27, what did not fit 3), so a switch on an open memo always
+landed on "That run is not in this set": a run id belongs to one model's set, so that was certain, not an edge. The
+prompt's "keeps every parameter" was the gap (Opus's). Now `route.ts`'s `searchAfterModelSwitch` drops `run` on
+`/memos/` only, and `Shell.tsx`'s `chooseModel` uses it; every other page keeps every parameter. Two tests: the pure
+rule over every path, and a shell test that switches on an open run and lands on the other model's first run of the
+same set with no refusal. That test fails on the old behavior (checked by mutation, then restored). **After the change:** `make check` exit 0, Python 3,483, Vitest 382 (two new), the explorer's JavaScript 92,229 bytes (90.1 KB) gzipped, `web/dist/` byte for byte as `scratch/p6-c5-dist-before.txt`; the hooks and the guard run again as above, all passing. **One test made
+safer:** `ShellC5.test.tsx`'s focus assertion after "Next run" is now inside `waitFor` (focus is set in an effect; it
+passed only because the click's `act` flushed it).
+
+**Not changed, noted.** The reader shows a loading line rather than holding the previous card (§27, item 2), and the
+links carry no hash (item 1): both acceptable for now. A failed memo load stays failed for that cell until the page
+reloads, even though the data layer forgets the failed fetch: minor, no change.
+
+**Carried to C6: the JavaScript split.** The explorer is at 90.1 KB of 100 KB gzipped, with C6 and C7 still to come.
+§17 already decides the remedy (split by path, budget checked per path, never raised), and `check-dist` today counts
+all JavaScript as one total, so the split also changes the check. C6's prompt does the split first, as its own part,
+with `web/dist/` unchanged and the per-path budget tested, before the story is built.

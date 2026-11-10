@@ -146,6 +146,8 @@ export interface DataFiles {
   cases: string;
   /** case label, then model key, to a path. */
   case_results: Record<string, Record<string, string>>;
+  /** model key to the awareness probe's file (protocol 9.6). */
+  awareness: Record<string, string>;
 }
 
 export interface DataIndex {
@@ -257,22 +259,104 @@ export interface GridFile {
   descriptive: Descriptive;
 }
 
+/** What the case's coarse description says; `text` only when it is published. */
+export interface CaseDescription {
+  status: string;
+  text?: string;
+  reason?: string;
+}
+
+export interface CaseProbe {
+  set: number;
+  model: string;
+  calls: number;
+  passed: number;
+}
+
 export interface CaseEntry {
   label: string;
   type: string;
   shape: string;
   exploratory: boolean;
+  /** The label as the file writes it; shown verbatim, first, wherever the case appears. */
   exploratory_label: string;
-  description: unknown;
-  dossier: unknown;
-  reidentification: unknown;
-  probes: unknown;
+  description: CaseDescription;
+  dossier: { published: boolean; reason: string };
+  reidentification: { status: string; reason: string; threshold: number };
+  probes: CaseProbe[];
+}
+
+/** The shortfall block of `cases.json` (protocol 12.1): copied, never derived. */
+export interface Shortfall {
+  at_most: number;
+  cases: number;
+  cases_by_type: Record<string, number>;
+  short_by_type: Record<string, number>;
+  filled: number;
 }
 
 export interface CasesIndex {
-  shortfall: unknown;
+  shortfall: Shortfall;
   provenance: unknown;
   cases: CaseEntry[];
+}
+
+/** One goal's distance from the company in one reading: the dot, its interval, and the runs behind it. */
+export interface CaseDistance {
+  objective_id: string;
+  distance: number;
+  low: number;
+  high: number;
+  seed: string;
+  runs: number;
+  choice_only_runs: number;
+  undistanced_runs: number;
+}
+
+export interface CaseGap {
+  nearest: string;
+  second: string;
+  estimate: number;
+  low: number;
+  high: number;
+  seed: string;
+}
+
+/** One reading of a case (the rubric's primary reading, or an alternative): the matcher's output, plus two notes
+ * the builder derives from copied values (KNOWN-GAPS OPEN 2026-10-31). */
+export interface CaseReading {
+  reading: string;
+  observable_lines: string[];
+  choice_observable: boolean;
+  dimensions: number;
+  company_basis: string;
+  /** The matcher's label: match, tie, no_good_match or not_enough_disclosed. */
+  label: string;
+  reason: string;
+  nearest: string | null;
+  tied_with: string | string[] | null;
+  gap: CaseGap | null;
+  distances: CaseDistance[];
+  /** True when all five distances (and their intervals) are equal: the nearest goal is then a tie-break by letter. */
+  all_distances_equal: boolean;
+  /** True when the reading has one observable line, which the distance still averages with the choice term. */
+  one_observable_line: boolean;
+}
+
+export interface CompanyReading {
+  reading: string;
+  choice: string;
+  shares: Record<string, number>;
+}
+
+/** The six count fields of a case's memo summary (decision 5: counts, never text). */
+export interface MemoCounts {
+  runs: number;
+  with_text: number;
+  without_text: number;
+  published: number;
+  held: number;
+  held_by_reason: Record<string, number>;
 }
 
 /** One case's results for one model. */
@@ -287,15 +371,84 @@ export interface CaseFile {
   model_key: string;
   sweep_id: string;
   run_counts: { runs: number; by_final_status: Record<string, number> };
-  thresholds: unknown;
-  dimensions: unknown;
-  company: unknown;
-  company_alternatives: unknown[];
-  readings: unknown[];
-  alternative_readings: unknown;
+  thresholds: { d_star: number; k_star: number; alpha: number; resamples: number };
+  dimensions: { observable: string[]; excluded: string[] };
+  company: CompanyReading;
+  company_alternatives: CompanyReading[];
+  readings: CaseReading[];
+  alternative_readings: { matched: number; unmatched_calls: unknown[] };
   depends_on_reading: boolean;
   provenance: unknown;
+  memo_counts: MemoCounts;
 }
+
+/** One call of the awareness probe (protocol 9.6): fifteen to a model, five goals by three templates. */
+export type AwarenessCall =
+  | { objective_id: string; template_id: string; recorded: false }
+  | {
+      objective_id: string;
+      template_id: string;
+      recorded: true;
+      status: string;
+      stop_reason: string;
+      output_tokens: number;
+      /** The reply exactly as the report has it; "(no text)" when the reply had none, flagged by `empty_reply`. */
+      reply: string;
+      empty_reply: boolean;
+    };
+
+export interface AwarenessFile {
+  model_key: string;
+  sweep_id: string;
+  experiment: string;
+  content_hash: string;
+  scenario: string;
+  seed: number;
+  calls_recorded: number;
+  calls_total: number;
+  calls: AwarenessCall[];
+}
+
+/** A pointer to the source record a memo was read from, so a reader can check it against the raw-object manifest. */
+export interface SourceRecord {
+  key: string;
+  sha256: string;
+}
+
+/** One row of the memo extract. `memo` is null for a run that left no text. */
+export interface MemoRow {
+  run_id: string;
+  wording_id: string;
+  repeat: number;
+  status: string;
+  /** `memo`: the memo field of the model's first tool call; `reply_text`: its text, when it made no tool call. */
+  source: "memo" | "reply_text" | null;
+  memo: string | null;
+  final: SourceRecord;
+  attempt: SourceRecord;
+}
+
+export interface MemoSweep {
+  kind: string;
+  model_key: string;
+  sweep_id: string;
+  prefix: string;
+  runs: number;
+  with_text: number;
+  by_status: Record<string, number>;
+}
+
+export interface MemoIndex {
+  explorer_memos_version: number;
+  head: string;
+  raw_manifest: { path: string; sha256: string };
+  sweeps: MemoSweep[];
+  /** Every file of the extract, relative to /data/memos/, in order. */
+  files: string[];
+}
+
+/** The rows of one cell (a kind, a model, a scenario and a goal), or that the index lists no such cell. */
+export type MemoCell = { found: true; rows: MemoRow[]; paths: string[] } | { found: false };
 
 const DATA_ROOT = "/data/";
 const INDEX_PATH = `${DATA_ROOT}index.json`;
@@ -318,6 +471,24 @@ export function dataPath(relative: string): string {
 
 type Fetcher = (path: string) => Promise<Response>;
 
+/** Where the memo extract lives under /data/ (the build copies web/explorer-memos/ there). */
+export const MEMOS_ROOT = "memos/";
+
+/**
+ * Which cell a memo file belongs to, from its path in the index's `files`: `<kind>/<model>/<scenario>/<goal>.jsonl`,
+ * or `<goal>-<wording>.jsonl` when a cell was split by wording (Phase 6 doc section 23). Null for a path of any
+ * other shape.
+ */
+export function memoPathCell(
+  path: string,
+): { kind: string; model: string; scenario: string; objective: string } | null {
+  const parts = path.split("/");
+  if (parts.length !== 4) return null;
+  const [kind, model, scenario, file] = parts as [string, string, string, string];
+  const found = /^([A-Z])(?:-[a-z0-9]+)?\.jsonl$/.exec(file);
+  return found === null ? null : { kind, model, scenario, objective: found[1]! };
+}
+
 export interface DataApi {
   loadIndex(): Promise<DataIndex>;
   loadGrid(model: string, scenario: string): Promise<GridFile>;
@@ -325,6 +496,12 @@ export interface DataApi {
   loadThinking(): Promise<GridFile[]>;
   loadCasesIndex(): Promise<CasesIndex>;
   loadCase(label: string, model: string): Promise<CaseFile>;
+  /** The memo extract's index (`/data/memos/index.json`). */
+  loadMemoIndex(): Promise<MemoIndex>;
+  /** A cell's rows in file order, from the files the memo index lists for it; `found: false` when it lists none. */
+  loadMemos(kind: string, model: string, scenario: string, objective: string): Promise<MemoCell>;
+  /** One model's awareness probe (protocol 9.6). */
+  loadAwareness(model: string): Promise<AwarenessFile>;
 }
 
 /** The loaders over a fetch function; tests pass one that serves fixtures. Each file is fetched once. */
@@ -350,6 +527,31 @@ export function createDataApi(fetcher: Fetcher = (path) => fetch(path)): DataApi
     return getJson<DataIndex>(INDEX_PATH);
   }
 
+  // JSON Lines: one object a line, kept by path like any other file. The rows come back in the file's order.
+  function getRows<T>(path: string): Promise<T[]> {
+    const key = `rows:${path}`;
+    const kept = cache.get(key);
+    if (kept !== undefined) return kept as Promise<T[]>;
+    const loading = (async () => {
+      const response = await fetcher(path);
+      if (!response.ok) throw new Error(`explorer data: ${path} answered ${response.status}`);
+      const text = await response.text();
+      return text
+        .split("\n")
+        .filter((line) => line.trim() !== "")
+        .map((line) => JSON.parse(line) as T);
+    })();
+    cache.set(key, loading);
+    loading.catch(() => {
+      if (cache.get(key) === loading) cache.delete(key);
+    });
+    return loading;
+  }
+
+  function loadMemoIndex(): Promise<MemoIndex> {
+    return getJson<MemoIndex>(`${DATA_ROOT}${MEMOS_ROOT}index.json`);
+  }
+
   async function fromFiles<T>(describe: string, pick: (files: DataFiles) => string | undefined): Promise<T> {
     const { files } = await loadIndex();
     const relative = pick(files);
@@ -369,8 +571,38 @@ export function createDataApi(fetcher: Fetcher = (path) => fetch(path)): DataApi
     loadCasesIndex: () => fromFiles("the cases index", (files) => files.cases),
     loadCase: (label, model) =>
       fromFiles(`case ${label} ${model}`, (files) => files.case_results[label]?.[model]),
+    loadMemoIndex,
+    async loadMemos(kind, model, scenario, objective) {
+      const { files } = await loadMemoIndex();
+      // The cell's files are read from the index's list, never built from the names alone.
+      const paths = files.filter((path) => {
+        const cell = memoPathCell(path);
+        return (
+          cell !== null &&
+          cell.kind === kind &&
+          cell.model === model &&
+          cell.scenario === scenario &&
+          cell.objective === objective
+        );
+      });
+      if (paths.length === 0) return { found: false };
+      const parts = await Promise.all(
+        paths.map((path) => getRows<MemoRow>(dataPath(`${MEMOS_ROOT}${path}`))),
+      );
+      return { found: true, rows: parts.flat(), paths };
+    },
+    loadAwareness: (model) => fromFiles(`awareness ${model}`, (files) => files.awareness[model]),
   };
 }
 
 export const defaultData: DataApi = createDataApi();
-export const { loadIndex, loadGrid, loadThinking, loadCasesIndex, loadCase } = defaultData;
+export const {
+  loadIndex,
+  loadGrid,
+  loadThinking,
+  loadCasesIndex,
+  loadCase,
+  loadMemoIndex,
+  loadMemos,
+  loadAwareness,
+} = defaultData;

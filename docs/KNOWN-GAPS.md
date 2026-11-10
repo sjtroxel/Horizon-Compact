@@ -7,7 +7,39 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-10, about 1:15 PM (C4 BUILT AND REVIEWED; C5 NEXT)
+> ## START HERE — where things stand, 2026-11-10, about 3:50 PM, HANDOFF (C5 BUILT AND REVIEWED; HIS COMMIT NEXT)
+>
+> **C5, the memo reader, the real cases and the studies (the Phase 6 IMPLEMENTATION doc §27, review §27a), built by
+> Sonnet and reviewed by Opus: passed after one change.** The change: the model switch now drops `run` on `/memos/`
+> (a run id belongs to one model's set), with a test that fails on the old behavior. No real-case memo text and no
+> link to one; the matcher notes shown exactly where KNOWN-GAPS OPEN 2026-10-31 puts them (that entry stays open:
+> Phase 6.5 carries the other half). The public page is unchanged (`web/dist/`, 8 files). The commit's hooks and the
+> name guard were run before the commit (§27a). **Uncommitted: his commit, `phase 6: c5 memos, cases and studies`,
+> carries C5, the review's change and these doc edits together (`docs/ROADMAP.md`'s Phase 6 row too).** Given at
+> handoff, not confirmed run: **check `git log -1` first**; if it is C5 and pushed, the checks owed are CI and Deploy
+> (`gh run list --limit 2`), and the public page should still be the same 8 placeholder files.
+>
+> **Next: §14 step 8, his words** (§11; how to approach it is still his to decide). **Then C6, whose prompt (Opus)
+> does §17's split by path first:** the explorer is at 90.1 KB of 100 KB gzipped (§27a).
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-10, about 2:30 PM (C4 COMMITTED; C5'S PROMPT WRITTEN) *(superseded by the block above)*
+>
+> **C4 (the Phase 6 IMPLEMENTATION doc §26, review §26a) committed `f564687`**, then two fixes to test timing that only
+> GitHub's runners showed: `4872fec` (Vitest's per-test limit 5 s to 20 s; the Deploy runner is about twice as slow)
+> and `b218424` (two shell tests now wait for `document.title`, which an effect sets). **CI `42891985599` and Deploy
+> `42891985597` green.** The public page is unchanged (`web/dist/`, 8 files).
+>
+> **Next: §14 step 7, C5 (the memo reader, the real cases and the studies): Sonnet builds in a fresh session, Opus
+> reviews.** The prompt is `scratch/p6-c5-build-prompt.md`. It has two parts: two additions to C1's builder (the case
+> memo counts; the awareness reports, parsed with a byte-for-byte round trip), then the views. The site shows no
+> real-case memo text (decision 5, §22). This block's edit is uncommitted and rides in C5's commit; the build leaves
+> it as it is.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-10, about 1:15 PM (C4 BUILT AND REVIEWED; C5 NEXT) *(superseded by the block above)*
 >
 > **C4, the scenario view and the section for results against the thesis (the Phase 6 IMPLEMENTATION doc §26, review
 > §26a), built by Sonnet and reviewed by Opus: passed after one fix.** The fix: the protocol's reading "A and B split,

@@ -63,12 +63,15 @@ export function ShareStrip({
   names,
   hidden,
   label,
+  wording,
 }: {
   file: GridFile;
   goals: readonly string[];
   names: Names;
   hidden: ReadonlySet<string>;
   label: string;
+  /** Only this wording's runs, and its count (the studies view sets the grid beside the sub-study's wording). */
+  wording?: string | undefined;
 }) {
   const ends = L.axisEnds[file.scenario_id];
   return (
@@ -83,7 +86,7 @@ export function ShareStrip({
             data-off={off ? "true" : "false"}
             aria-hidden={off ? true : undefined}
           >
-            <GoalLabel goal={goal} names={names} count={goalRunCount(file, goal)} />
+            <GoalLabel goal={goal} names={names} count={goalRunCount(file, goal, wording)} />
             <svg className="x-plot" width="100%" height={STRIP_H}>
               {[0, 0.5, 1].map((v) => (
                 <line
@@ -95,7 +98,7 @@ export function ShareStrip({
                   y2={STRIP_H}
                 />
               ))}
-              {runsOfGoal(file, goal).map((run) => (
+              {runsOfGoal(file, goal, wording).map((run) => (
                 <circle
                   key={run.run_id}
                   className="x-dot"

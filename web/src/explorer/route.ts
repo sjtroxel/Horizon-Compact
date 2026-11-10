@@ -74,3 +74,59 @@ export function withModel(path: string, model: string): string {
 export function hrefOf(route: Route, model: string): string {
   return withModel(pathOf(route), model);
 }
+
+/** The two sets of memos the reader holds: the main grid's, and the thinking sub-study's. */
+export const MEMO_KINDS = ["grid", "thinking"] as const;
+export type MemoKind = (typeof MEMO_KINDS)[number];
+
+/** What the memo reader's query string asks for, each parameter as the URL has it (null when absent). The model is
+ * the explorer's one `?model=`, read by `modelFromSearch`. */
+export interface MemoQuery {
+  kind: string | null;
+  scenario: string | null;
+  objective: string | null;
+  run: string | null;
+}
+
+export function readMemoQuery(search: string): MemoQuery {
+  const params = new URLSearchParams(search);
+  return {
+    kind: params.get("kind"),
+    scenario: params.get("scenario"),
+    objective: params.get("objective"),
+    run: params.get("run"),
+  };
+}
+
+/**
+ * The query string after the model switch on the page at `pathname`. Every parameter is kept except the memo
+ * reader's `run`: a run id belongs to one model's set, so it is dropped, and the reader opens the same set's first
+ * run for the new model (Opus review of C5, section 27a).
+ */
+export function searchAfterModelSwitch(pathname: string, search: string, model: string): string {
+  const params = new URLSearchParams(search);
+  if (pathname === pathOf({ kind: "memos" })) params.delete("run");
+  return searchWithModel(params.toString(), model);
+}
+
+/** A choice of memos: a set, a scenario and a goal, and one run in it when there is one. */
+export interface MemoSelection {
+  kind: string;
+  scenario: string;
+  objective: string;
+  run?: string | null;
+}
+
+/**
+ * The address of a memo (or of a set of them) in the reader. It keeps every parameter: the kind, the scenario, the
+ * goal, the run when there is one, and the model (dropped for the default, like every link).
+ */
+export function memoHref(selection: MemoSelection, model: string): string {
+  const params = new URLSearchParams();
+  params.set("kind", selection.kind);
+  params.set("scenario", selection.scenario);
+  params.set("objective", selection.objective);
+  if (selection.run !== undefined && selection.run !== null) params.set("run", selection.run);
+  if (model !== DEFAULT_MODEL) params.set("model", model);
+  return `${pathOf({ kind: "memos" })}?${params.toString()}`;
+}

@@ -16,8 +16,9 @@ import {
   unitBox,
   unitSlot,
   wholePointsDown,
+  formatDistance,
 } from "./format";
-import { realGrids, realIndex, WEB_ROOT } from "./fixtures";
+import { realCaseFiles, realGrids, realIndex, WEB_ROOT } from "./fixtures";
 
 /** Every comparison the real files carry, with where it came from. */
 const everyComparison = [
@@ -172,6 +173,16 @@ describe("the rule: no number is computed outside format.ts", () => {
     "chartData.ts",
     "parts.tsx",
     "models.ts",
+    // C5: the memo reader, the real cases, the studies and what they read.
+    "MemoReader.tsx",
+    "Cases.tsx",
+    "Studies.tsx",
+    "distanceChart.tsx",
+    "caseData.ts",
+    "memoData.ts",
+    "views.tsx",
+    "route.ts",
+    "links.ts",
   ];
   it("holds no Math call, no reduce and no running total in the views, the charts or the templates", () => {
     for (const file of files) {
@@ -183,5 +194,30 @@ describe("the rule: no number is computed outside format.ts", () => {
       expect(source, file).not.toMatch(/\.reduce\(/);
       expect(source, file).not.toMatch(/[^=!<>]\+=|\+\+/);
     }
+  });
+});
+
+describe("formatDistance (C5)", () => {
+  it("writes a distance as the file has it to three places, and an axis tick to one", () => {
+    expect(formatDistance(0.5456778377115402)).toBe("0.546");
+    expect(formatDistance(1)).toBe("1.000");
+    expect(formatDistance(0.5, 1)).toBe("0.5");
+    expect(formatDistance(0)).toBe("0.000");
+  });
+
+  it("is pinned to the source field for every distance, interval end and gap in the real case files", () => {
+    let checked = 0;
+    for (const { file } of realCaseFiles) {
+      for (const reading of file.readings) {
+        for (const d of reading.distances) {
+          for (const value of [d.distance, d.low, d.high]) {
+            expect(formatDistance(value)).toBe(value.toFixed(3));
+            expect(Number(formatDistance(value))).toBeCloseTo(value, 3);
+            checked++;
+          }
+        }
+      }
+    }
+    expect(checked).toBe(10 * 2 * 5 * 3);
   });
 });

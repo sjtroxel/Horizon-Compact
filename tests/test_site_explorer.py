@@ -8,12 +8,17 @@ that is Phase 6's reproduction check, and CI runs it because CI runs pytest.
 
 from __future__ import annotations
 
+import builtins
+import contextlib
 import copy
 import hashlib
+import io
 import json
+import os
 import tomllib
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -21,8 +26,10 @@ import pytest
 from horizon_compact.cli import CLEAN_EXIT, REFUSED_EXIT, main
 from horizon_compact.site import explorer
 from horizon_compact.site.explorer import (
+    AWARENESS_CALLS,
     EXPECTED_TO_CUT_LESS,
     MAX_SAFE_INTEGER,
+    MEMO_COUNT_FIELDS,
     PRIMARY_OUTCOME_NAMES,
     PRIMARY_PAIRS,
     SECOND_CUT_MORE_SIGN,
@@ -31,6 +38,7 @@ from horizon_compact.site.explorer import (
     explorer_data_matches,
     write_explorer_data,
 )
+from horizon_compact.sweep.awareness import _record_key, awareness_prefix, awareness_report
 
 REPO = Path(__file__).resolve().parent.parent
 REAL_RESULTS = REPO / "experiment" / "results"
@@ -188,6 +196,21 @@ who = "shareholders"
 when = "the next four quarters"
 
 [[objectives]]
+id = "B"
+who = "everyone with a stake"
+when = "the next four quarters"
+
+[[objectives]]
+id = "C"
+who = "shareholders"
+when = "the next twenty years"
+
+[[objectives]]
+id = "D"
+who = "everyone with a stake"
+when = "the next twenty years"
+
+[[objectives]]
 id = "E"
 """
 
@@ -195,6 +218,85 @@ id = "E"
 def _write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=1), encoding="utf-8")
+
+
+SENTINEL_MEMO = "FIXTURE MEMO TEXT THAT MUST NEVER REACH THE OUTPUT"
+
+
+def _memo_summary(label: str, model: str) -> Obj:
+    """A fictional memo summary in version 2's shape: more in ``counts`` than the builder copies."""
+    return {
+        "summary_version": 2,
+        "case": label,
+        "exploratory": True,
+        "exploratory_label": "exploratory: fixture label",
+        "model_key": model,
+        "sweep_id": f"case-{model}-dddd4444",
+        "counts": {
+            "runs": 30,
+            "with_text": 29,
+            "without_text": 1,
+            "flagged_by_lists": 7,
+            "echoes_case_text": 9,
+            "held": 4,
+            "held_by_reason": {"dossier_withheld": 3, "name_confirmed": 1},
+            "overruled": 0,
+            "published": 26,
+        },
+        "provenance": {"head": "fixture-head"},
+    }
+
+
+def awareness_text(
+    model: str,
+    *,
+    sweep: str | None = None,
+    replies: dict[tuple[str, str], list[str] | None] | None = None,
+    objectives: str = OBJECTIVES,
+    templates: tuple[str, ...] = ("w1", "w2", "w3"),
+    seed: int = 3046959125,
+) -> str:
+    """A report from the real ``awareness_report``, over a fake store and plan, plus the file's one newline
+    (the command prints the report, and print adds it). ``replies`` maps (objective, template) to the text
+    blocks of that call's record, or to None for a call with no record."""
+    sweep = sweep or f"awareness-{model}-ab12cd34"
+    plan = SimpleNamespace(
+        experiment="company",
+        model_key=model,
+        sweep_id=sweep,
+        content_hash="a31d1f1184a5" + "0" * 52,
+        seed=seed,
+        templates=list(templates),
+        runs=[
+            SimpleNamespace(objective_id=o, wording_id=t, run_id=f"r-{o}{t}")
+            for o in objectives
+            for t in templates
+        ],
+    )
+    prefix = awareness_prefix(plan)  # type: ignore[arg-type]
+    records: dict[str, str] = {}
+    for run in plan.runs:
+        blocks = (replies or {}).get(
+            (run.objective_id, run.wording_id),
+            [f"A reply for {run.objective_id} {run.wording_id}."],
+        )
+        if blocks is None:
+            continue
+        record = {
+            "text_blocks": blocks,
+            "status": "replied",
+            "stop_reason": "end_turn",
+            "usage": {"output_tokens": 100 + len(records)},
+        }
+        records[_record_key(prefix, run.run_id)] = json.dumps(record)
+    store = SimpleNamespace(get=records.get)
+    experiment = SimpleNamespace(objectives=[SimpleNamespace(id=o) for o in objectives])
+    report = awareness_report(store, experiment, plan)  # type: ignore[arg-type]
+    return report + "\n"
+
+
+def _awareness_path(tmp_path: Path, model: str) -> Path:
+    return tmp_path / "docs" / "phases" / "evidence" / "phase-4" / f"awareness-{model}.md"
 
 
 def make_tree(tmp_path: Path, verdicts: Verdicts | None = None) -> Path:
@@ -224,6 +326,17 @@ def make_tree(tmp_path: Path, verdicts: Verdicts | None = None) -> Path:
             _write_json(
                 root / "cases" / label / f"{model}.json", _case_result(label, model, "dddd4444")
             )
+            _write_json(
+                root / "cases" / label / f"{model}-memos-summary.json", _memo_summary(label, model)
+            )
+            # The text the builder must never open: a sentinel in a real case's memo file.
+            (root / "cases" / label / f"{model}-memos.jsonl").write_text(
+                json.dumps({"run_id": "r-fixture", "memo": SENTINEL_MEMO}) + "\n", encoding="utf-8"
+            )
+    for model in MODELS:
+        path = _awareness_path(tmp_path, model)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(awareness_text(model), encoding="utf-8", newline="\n")
     return root
 
 
@@ -251,6 +364,7 @@ def test_the_build_returns_compact_json_files_ending_in_one_newline(tmp_path: Pa
     assert f"grid/{MAIN_MODEL}/s1.json" in files and f"thinking/{MAIN_MODEL}/s1.json" in files
     assert f"cases/case-one/{OTHER_MODEL}.json" in files
     assert not any("memo" in path for path in files)
+    assert f"awareness/{MAIN_MODEL}.json" in files and f"awareness/{OTHER_MODEL}.json" in files
     for path, text in files.items():
         assert text.endswith("}\n") and not text.endswith("\n\n"), path
         compact = json.dumps(json.loads(text), ensure_ascii=False, separators=(",", ":"))
@@ -278,6 +392,9 @@ def test_the_index_names_models_scenarios_objectives_and_sources(tmp_path: Path)
     assert index["scenarios"][2]["primary_outcome"] == "close rate"
     assert index["objectives"] == [
         {"id": "A", "who": "shareholders", "when": "the next four quarters"},
+        {"id": "B", "who": "everyone with a stake", "when": "the next four quarters"},
+        {"id": "C", "who": "shareholders", "when": "the next twenty years"},
+        {"id": "D", "who": "everyone with a stake", "when": "the next twenty years"},
         {"id": "E", "who": None, "when": None},
     ]
     grid_file = _grid_path(root)
@@ -287,7 +404,7 @@ def test_the_index_names_models_scenarios_objectives_and_sources(tmp_path: Path)
     paths = [s["path"] for s in index["sources"]]
     assert paths == sorted(paths)
     assert "experiment/company/objectives.toml" in paths
-    assert not any("memos" in p or "reident" in p for p in paths)
+    assert not any(p.endswith("-memos.jsonl") or "reident" in p for p in paths)
     assert len(index["verdicts"]) == len(MODELS) * len(SCENARIOS)
     assert len(index["verdicts"][0]["comparisons"]) == 5
 
@@ -893,7 +1010,7 @@ def test_the_command_writes_then_reports_unchanged(
     argv = ["site", "explorer", "--results", str(root), "--out", str(out)]
     assert main(argv) == CLEAN_EXIT
     first = capsys.readouterr().out
-    assert first.count("wrote ") == 1 + 1 + 8 + 1 + 4 and "unchanged" not in first
+    assert first.count("wrote ") == 1 + 1 + 8 + 1 + 4 + 2 and "unchanged" not in first
     assert "index.json" in first and "bytes" in first
     assert main(argv) == CLEAN_EXIT
     second = capsys.readouterr().out
@@ -910,6 +1027,435 @@ def test_the_command_refuses_with_the_reason(
     err = capsys.readouterr().err
     assert err.startswith("refused: ") and "results_version" in err
     assert not (tmp_path / "explorer-data").exists()
+
+
+# --- the case memo counts (C5, decision 5: counts, never text) ------------------------------------
+
+
+@contextlib.contextmanager
+def _recording_opens() -> Iterator[list[str]]:
+    """Every path opened or read through the standard routes while the block runs."""
+    seen: list[str] = []
+    real_open = builtins.open
+    real_read_bytes = Path.read_bytes
+    real_read_text = Path.read_text
+    real_path_open = Path.open
+
+    def note(target: Any) -> None:
+        with contextlib.suppress(TypeError):
+            seen.append(os.fspath(target))
+
+    def open_(file: Any, *args: Any, **kwargs: Any) -> Any:
+        note(file)
+        return real_open(file, *args, **kwargs)
+
+    def read_bytes(self: Path) -> bytes:
+        note(self)
+        return real_read_bytes(self)
+
+    def read_text(self: Path, *args: Any, **kwargs: Any) -> str:
+        note(self)
+        return real_read_text(self, *args, **kwargs)
+
+    def path_open(self: Path, *args: Any, **kwargs: Any) -> Any:
+        note(self)
+        return real_path_open(self, *args, **kwargs)
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(builtins, "open", open_)
+        patch.setattr(io, "open", open_)
+        patch.setattr(Path, "read_bytes", read_bytes)
+        patch.setattr(Path, "read_text", read_text)
+        patch.setattr(Path, "open", path_open)
+        yield seen
+
+
+def test_the_recorder_sees_a_memo_file_being_opened(tmp_path: Path) -> None:
+    """The negative control for the test below: opening one by any of the routes is recorded."""
+    memo = tmp_path / "x-memos.jsonl"
+    memo.write_text("{}\n")
+    with _recording_opens() as seen:
+        memo.read_bytes()
+        memo.read_text()
+        with memo.open() as handle:
+            handle.read()
+        with open(memo) as handle:  # noqa: PTH123 - the route under test
+            handle.read()
+    assert [p for p in seen if p.endswith("-memos.jsonl")] != []
+    assert len([p for p in seen if p.endswith("-memos.jsonl")]) >= 4
+
+
+def test_the_builder_never_opens_a_case_memo_file(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    assert (
+        len(list(root.glob("cases/*/*-memos.jsonl"))) == 4
+    )  # the sentinels are there to be left alone
+    with _recording_opens() as seen:
+        files = build_explorer_data(root)
+    assert not [p for p in seen if p.endswith("-memos.jsonl")]
+    summaries = [p for p in seen if p.endswith("-memos-summary.json")]
+    assert len(set(summaries)) == 4  # every case and model, and nothing else of the kind
+    assert all(SENTINEL_MEMO not in text for text in files.values())
+
+
+def test_a_case_result_carries_exactly_the_six_count_fields(tmp_path: Path) -> None:
+    files = build_explorer_data(make_tree(tmp_path))
+    for label in ("case-one", "case-two"):
+        for model in MODELS:
+            counts = json.loads(files[f"cases/{label}/{model}.json"])["memo_counts"]
+            assert set(counts) == set(MEMO_COUNT_FIELDS)
+            assert counts == {
+                "runs": 30,
+                "with_text": 29,
+                "without_text": 1,
+                "published": 26,
+                "held": 4,
+                "held_by_reason": {"dossier_withheld": 3, "name_confirmed": 1},
+            }
+
+
+def test_the_memo_summaries_join_the_sources_with_their_sha256(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    index = _index(build_explorer_data(root))
+    for label in ("case-one", "case-two"):
+        for model in MODELS:
+            path = root / "cases" / label / f"{model}-memos-summary.json"
+            shown = f"experiment/results/cases/{label}/{model}-memos-summary.json"
+            sha = hashlib.sha256(path.read_bytes()).hexdigest()
+            assert {"path": shown, "sha256": sha} in index["sources"]
+    assert not any(s["path"].endswith("-memos.jsonl") for s in index["sources"])
+
+
+def _summary_path(root: Path, label: str = "case-one", model: str = MAIN_MODEL) -> Path:
+    return root / "cases" / label / f"{model}-memos-summary.json"
+
+
+def test_it_refuses_a_memo_summary_of_another_version(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    _edit(_summary_path(root), lambda d: d.__setitem__("summary_version", 1))
+    _refuses(root, "has summary_version 1, not 2")
+
+
+def test_it_refuses_a_memo_summary_of_another_case(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    _edit(_summary_path(root), lambda d: d.__setitem__("case", "case-two"))
+    _refuses(root, "is for case 'case-two', not 'case-one'")
+
+
+def test_it_refuses_a_memo_summary_of_another_model(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    _edit(_summary_path(root), lambda d: d.__setitem__("model_key", OTHER_MODEL))
+    _refuses(root, f"has model_key '{OTHER_MODEL}', not '{MAIN_MODEL}'")
+
+
+@pytest.mark.parametrize("field", list(MEMO_COUNT_FIELDS))
+def test_it_refuses_a_memo_summary_missing_one_count(tmp_path: Path, field: str) -> None:
+    root = make_tree(tmp_path)
+    _edit(_summary_path(root), lambda d: d["counts"].pop(field))
+    _refuses(root, f"lacks {field}")
+
+
+def test_it_refuses_a_memo_summary_with_no_counts_or_a_missing_file(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    _edit(_summary_path(root), lambda d: d.pop("counts"))
+    _refuses(root, "has no counts block")
+    _summary_path(root).unlink()
+    _refuses(root, "cannot be read")
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        (lambda c: c.__setitem__("runs", "30"), "runs is not a count"),
+        (lambda c: c.__setitem__("held", True), "held is not a count"),
+        (lambda c: c.__setitem__("published", -1), "published is not a count"),
+        (lambda c: c.__setitem__("held_by_reason", [1]), "held_by_reason is not a map"),
+        (lambda c: c.__setitem__("held_by_reason", {"x": "y"}), "held_by_reason is not a map"),
+    ],
+)
+def test_it_refuses_a_count_that_is_not_a_count(
+    tmp_path: Path, change: Callable[[Obj], None], message: str
+) -> None:
+    root = make_tree(tmp_path)
+    _edit(_summary_path(root), lambda d: change(d["counts"]))
+    _refuses(root, message)
+
+
+# --- the awareness reports (C5, protocol 9.6) -----------------------------------------------------
+
+
+def _parse(text: str, model: str = MAIN_MODEL, **kwargs: Any) -> dict[str, Any]:
+    arguments: dict[str, Any] = {
+        "model_key": model,
+        "models": list(MODELS),
+        "objectives": list(OBJECTIVES),
+    }
+    arguments.update(kwargs)
+    return explorer._parse_awareness(text, "report.md", **arguments)
+
+
+def _round_trips(text: str, **kwargs: Any) -> dict[str, Any]:
+    doc = _parse(text, **kwargs)
+    assert explorer._render_awareness(doc) + "\n" == text
+    return doc
+
+
+def test_a_report_the_real_writer_wrote_is_parsed_in_order_and_round_trips() -> None:
+    text = awareness_text(MAIN_MODEL)
+    assert not text.endswith("\n\n") and text.endswith("\n")
+    doc = _round_trips(text)
+    assert doc["model_key"] == MAIN_MODEL and doc["sweep_id"] == f"awareness-{MAIN_MODEL}-ab12cd34"
+    assert (doc["experiment"], doc["content_hash"], doc["scenario"], doc["seed"]) == (
+        "company",
+        "a31d1f1184a5",
+        "s1",
+        3046959125,
+    )
+    assert (doc["calls_recorded"], doc["calls_total"]) == (15, 15)
+    assert [(c["objective_id"], c["template_id"]) for c in doc["calls"]] == [
+        (o, t) for o in OBJECTIVES for t in ("w1", "w2", "w3")
+    ]
+    first = doc["calls"][0]
+    assert first == {
+        "objective_id": "A",
+        "template_id": "w1",
+        "recorded": True,
+        "status": "replied",
+        "stop_reason": "end_turn",
+        "output_tokens": 100,
+        "reply": "A reply for A w1.",
+        "empty_reply": False,
+    }
+
+
+def test_a_call_with_no_record_is_kept_as_not_recorded_and_round_trips() -> None:
+    for missing in (
+        ("B", "w2"),
+        ("A", "w1"),
+        ("E", "w3"),
+    ):  # the middle, the first and the last call
+        text = awareness_text(MAIN_MODEL, replies={missing: None})
+        doc = _round_trips(text)
+        assert (doc["calls_recorded"], doc["calls_total"]) == (14, 15)
+        gap = next(c for c in doc["calls"] if (c["objective_id"], c["template_id"]) == missing)
+        assert gap == {"objective_id": missing[0], "template_id": missing[1], "recorded": False}
+        assert sum(1 for c in doc["calls"] if c["recorded"]) == 14
+
+
+def test_a_reply_with_no_text_is_kept_as_the_writers_words_and_flagged() -> None:
+    for blocks in ([], [""], ["  ", "\n"]):
+        doc = _round_trips(awareness_text(MAIN_MODEL, replies={("C", "w1"): blocks}))
+        call = next(c for c in doc["calls"] if (c["objective_id"], c["template_id"]) == ("C", "w1"))
+        assert call["reply"] == "(no text)" and call["empty_reply"] is True
+        assert [c["empty_reply"] for c in doc["calls"]].count(True) == 1
+    # The known ambiguity: a reply whose text is literally "(no text)" cannot be told from an empty one.
+    doc = _round_trips(awareness_text(MAIN_MODEL, replies={("C", "w1"): ["(no text)"]}))
+    assert [c["empty_reply"] for c in doc["calls"]].count(True) == 1
+
+
+def test_a_multi_paragraph_reply_keeps_its_blank_lines_and_its_odd_lines() -> None:
+    reply = (
+        f"First paragraph, with a curly quote {chr(0x2019)} and a non-breaking hyphen {chr(0x2011)}.\n\n"
+        "## A line that looks like a heading\n"
+        "> a line that begins with a quote mark\n\n\n"
+        "   indented, with trailing spaces   \n"
+        "Last line."
+    )
+    other = "A second text block."
+    for last in (
+        False,
+        True,
+    ):  # the final call ends the file: its reply must close without a blank line
+        key = ("E", "w3") if last else ("B", "w2")
+        doc = _round_trips(awareness_text(MAIN_MODEL, replies={key: [reply, other]}))
+        call = next(c for c in doc["calls"] if (c["objective_id"], c["template_id"]) == key)
+        assert call["reply"] == reply + "\n" + other + "" or call["reply"] == reply + "\n\n" + other
+        assert "\n\n\n" in call["reply"] and call["reply"].count("\n") >= 8
+        assert call["empty_reply"] is False
+        assert len(doc["calls"]) == 15
+
+
+def test_a_reply_that_ends_in_blank_lines_still_round_trips() -> None:
+    doc = _round_trips(awareness_text(MAIN_MODEL, replies={("A", "w3"): ["Ends here.\n\n"]}))
+    call = next(c for c in doc["calls"] if (c["objective_id"], c["template_id"]) == ("A", "w3"))
+    assert call["reply"].startswith("Ends here.")
+
+
+def _report() -> str:
+    return awareness_text(MAIN_MODEL)
+
+
+@pytest.mark.parametrize(
+    ("damage", "message"),
+    [
+        (
+            lambda t: t.replace("### Template w2", "### Template w9", 1),
+            "expected '### Template w2'",
+        ),
+        (
+            lambda t: (
+                t.replace("## Objective B", "## Objective @")
+                .replace("## Objective C", "## Objective B")
+                .replace("## Objective @", "## Objective C")
+            ),
+            "expected '## Objective B'",
+        ),
+        (lambda t: t.replace("## Objective E", "## Objective F"), "expected '## Objective E'"),
+        (
+            lambda t: t.replace("### Template w3", "## Extra heading", 1),
+            "expected '### Template w3'",
+        ),
+        (
+            lambda t: t[: t.index("### Template w2")] + t[t.index("### Template w3") :],
+            "expected '### Template w2'",
+        ),
+        (
+            lambda t: t + "\n## Objective F\n\n### Template w1\n\n_not recorded_\n",
+            "text after the last call",
+        ),
+        (
+            lambda t: t.replace("Calls recorded: 15 of 15", "Calls recorded: 14 of 15"),
+            "says 14 of 15 calls recorded but holds 15 of 15",
+        ),
+        (
+            lambda t: t.replace("15 of 15", "15 of 16"),
+            "says 15 of 16 calls recorded but holds 15 of 15",
+        ),
+        (lambda t: t.replace("\n", "\r\n"), "expected"),
+        (lambda t: t.rstrip("\n"), "must end in exactly one newline"),
+        (lambda t: t + "\n", "must end in exactly one newline"),
+        (
+            lambda t: t.replace("\n> A reply for A w1.", "\n>A reply for A w1.", 1),
+            "neither '>' nor '> text'",
+        ),
+        (
+            lambda t: t.replace("# Awareness probe:", "# Awareness note:", 1),
+            "expected the '# Awareness probe:' title",
+        ),
+        (
+            lambda t: t.replace("content hash `a31d1f1184a5`", "content hash `a31d1f1184`", 1),
+            "expected the experiment, model",
+        ),
+        (
+            lambda t: t.replace("(protocol 9.6)", "(protocol 9.7)", 1),
+            "expected the experiment, model",
+        ),
+        (lambda t: t.replace("scenario s1,", "scenario s1 ,", 1), "expected the experiment, model"),
+        (lambda t: t.replace("status `replied`", "status replied", 1), "expected a status line"),
+        (lambda t: t.replace("\n\n> A reply for A w1.", "\n> A reply for A w1.", 1), "expected ''"),
+        (lambda t: t.replace("### Template w1\n\n", "### Template w1\n", 1), "expected ''"),
+        (
+            lambda t: t.replace("100 output tokens", "0100 output tokens", 1),
+            "does not survive the round trip",
+        ),
+        (
+            lambda t: t.replace("`awareness-haiku-5-5-ab12cd34`", "`grid-haiku-5-5-ab12cd34`", 1),
+            "not awareness-haiku-5-5-<hex>",
+        ),
+    ],
+)
+def test_it_refuses_a_report_the_writer_did_not_write(
+    damage: Callable[[str], str], message: str
+) -> None:
+    text = damage(_report())
+    assert text != _report()
+    with pytest.raises(ExplorerDataRefusal) as info:
+        _parse(text)
+    assert message in str(info.value)
+
+
+def test_it_refuses_a_report_for_a_model_that_is_not_in_the_index() -> None:
+    with pytest.raises(ExplorerDataRefusal, match=r"not in index\.json's models"):
+        _parse(_report(), models=[OTHER_MODEL])
+
+
+def test_it_refuses_a_report_whose_model_is_not_the_one_its_file_is_named_for() -> None:
+    with pytest.raises(
+        ExplorerDataRefusal, match=f"is for model '{MAIN_MODEL}', not '{OTHER_MODEL}'"
+    ):
+        _parse(_report(), model=OTHER_MODEL)
+
+
+def test_the_builder_reads_each_report_by_its_exact_path_and_nothing_beside_it(
+    tmp_path: Path,
+) -> None:
+    root = make_tree(tmp_path)
+    folder = _awareness_path(tmp_path, MAIN_MODEL).parent
+    (folder / "awareness-extra-model.md").write_text("not a report at all", encoding="utf-8")
+    (folder / "awareness-haiku-5-5-copy.md").write_text("nor this", encoding="utf-8")
+    with _recording_opens() as seen:
+        files = build_explorer_data(root)
+    reports = sorted({Path(p).name for p in seen if "awareness-" in Path(p).name})
+    assert reports == sorted(f"awareness-{m}.md" for m in MODELS)
+    assert set(files) >= {f"awareness/{m}.json" for m in MODELS}
+
+
+def test_the_index_names_each_awareness_file_and_both_reports_are_sources(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    index = _index(build_explorer_data(root))
+    assert index["files"]["awareness"] == {m: f"awareness/{m}.json" for m in MODELS}
+    for model in MODELS:
+        report = _awareness_path(tmp_path, model)
+        shown = f"docs/phases/evidence/phase-4/awareness-{model}.md"
+        sha = hashlib.sha256(report.read_bytes()).hexdigest()
+        assert {"path": shown, "sha256": sha} in index["sources"]
+
+
+def test_the_awareness_file_is_the_parse_and_the_text_is_unedited(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    text = awareness_text(MAIN_MODEL, replies={("D", "w2"): ["Para one.\n\nPara two."]})
+    _awareness_path(tmp_path, MAIN_MODEL).write_text(text, encoding="utf-8", newline="\n")
+    body = json.loads(build_explorer_data(root)[f"awareness/{MAIN_MODEL}.json"])
+    call = next(c for c in body["calls"] if (c["objective_id"], c["template_id"]) == ("D", "w2"))
+    assert call["reply"] == "Para one.\n\nPara two."
+    assert list(body) == [
+        "model_key",
+        "sweep_id",
+        "experiment",
+        "content_hash",
+        "scenario",
+        "seed",
+        "calls_recorded",
+        "calls_total",
+        "calls",
+    ]
+
+
+def test_it_refuses_a_report_with_a_missing_call_in_the_builder(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    text = awareness_text(MAIN_MODEL, replies={("B", "w2"): None})
+    _awareness_path(tmp_path, MAIN_MODEL).write_text(text, encoding="utf-8", newline="\n")
+    _refuses(root, "says 14 of 15 calls recorded, not 15 of 15")
+
+
+def test_it_refuses_a_report_that_does_not_hold_fifteen_calls(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    text = awareness_text(MAIN_MODEL, objectives="AB")
+    _awareness_path(tmp_path, MAIN_MODEL).write_text(text, encoding="utf-8", newline="\n")
+    with pytest.raises(ExplorerDataRefusal, match=f"holds 6 calls, not {AWARENESS_CALLS}"):
+        explorer._read_awareness(root, [MAIN_MODEL], ["A", "B"])
+
+
+def test_it_refuses_a_report_written_for_another_model(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    other = awareness_text(OTHER_MODEL)
+    _awareness_path(tmp_path, MAIN_MODEL).write_text(other, encoding="utf-8", newline="\n")
+    _refuses(root, f"is for model '{OTHER_MODEL}', not '{MAIN_MODEL}'")
+
+
+def test_it_refuses_a_missing_report(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    _awareness_path(tmp_path, OTHER_MODEL).unlink()
+    _refuses(root, f"awareness-{OTHER_MODEL}.md cannot be read")
+
+
+def test_a_reply_holding_an_arn_refuses_the_whole_build(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    text = awareness_text(
+        MAIN_MODEL, replies={("A", "w1"): ["see arn:aws:iam::000000000000:role/x"]}
+    )
+    _awareness_path(tmp_path, MAIN_MODEL).write_text(text, encoding="utf-8", newline="\n")
+    _refuses(root, "looks like it holds an ARN")
 
 
 # --- the real data: the committed output is reproduced ----------------------------------------------------
@@ -954,9 +1500,8 @@ def test_the_sources_name_every_input_with_its_real_sha256(real: dict[str, str])
         path = REPO / source["path"]
         assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"], source["path"]
     paths = {s["path"] for s in _index(real)["sources"]}
-    assert (
-        len(paths) == 3 + 1 + 1 + 10
-    )  # three results files, cases.json, objectives.toml, ten cases
+    # three results files, cases.json, objectives.toml, ten cases, their ten memo summaries, two reports
+    assert len(paths) == 3 + 1 + 1 + 10 + 10 + 2
 
 
 def _same(out: Any, src: Any, where: str, counter: list[int]) -> None:
@@ -1018,6 +1563,7 @@ def test_every_leaf_in_the_case_files_is_the_source_value_but_the_two_added_note
         for reading in out["readings"]:
             assert isinstance(reading.pop("all_distances_equal"), bool)
             assert isinstance(reading.pop("one_observable_line"), bool)
+        assert isinstance(out.pop("memo_counts"), dict)
         _same(out, _source(path), path, counter)
         seen += 1
     assert seen == 10
@@ -1156,6 +1702,75 @@ def test_the_matcher_facts_measured_on_2026_10_31_hold_in_the_real_output(
         u1 = next(r for r in closure_19["readings"] if r["reading"] == "u1")
         assert u1["one_observable_line"] is True
         assert len(u1["observable_lines"]) == 1
+
+
+def _real_summary(label: str, model: str) -> Obj:
+    return _source(f"cases/{label}/{model}-memos-summary.json")
+
+
+def test_every_real_case_memo_count_is_the_summarys_and_nothing_else(real: dict[str, str]) -> None:
+    counter = [0]
+    seen = 0
+    for path, text in real.items():
+        if not path.startswith("cases/") or path == "cases/index.json":
+            continue
+        label, model = path.removeprefix("cases/").removesuffix(".json").split("/")
+        summary = _real_summary(label, model)
+        assert summary["summary_version"] == 2 and summary["case"] == label
+        assert summary["model_key"] == model
+        out = json.loads(text)["memo_counts"]
+        assert list(out) == list(MEMO_COUNT_FIELDS), path
+        _same(out, {k: summary["counts"][k] for k in MEMO_COUNT_FIELDS}, path, counter)
+        assert list(out["held_by_reason"]) == list(summary["counts"]["held_by_reason"]), path
+        seen += 1
+    assert seen == 10 and counter[0] >= 10 * 10
+
+
+def test_the_real_build_never_opens_a_real_case_memo_file() -> None:
+    with _recording_opens() as seen:
+        build_explorer_data(REAL_RESULTS)
+    assert [p for p in seen if p.endswith("-memos.jsonl")] == []
+    assert len({p for p in seen if p.endswith("-memos-summary.json")}) == 10
+    reports = sorted({Path(p).name for p in seen if Path(p).name.startswith("awareness-")})
+    assert reports == ["awareness-gpt-oss-openrouter.md", "awareness-haiku-5-5.md"]
+
+
+def _real_report(model: str) -> str:
+    path = REPO / "docs" / "phases" / "evidence" / "phase-4" / f"awareness-{model}.md"
+    return path.read_bytes().decode("utf-8")
+
+
+@pytest.mark.parametrize("model", ["haiku-5-5", "gpt-oss-openrouter"])
+def test_each_real_awareness_report_round_trips_and_holds_fifteen_replies(
+    real: dict[str, str], model: str
+) -> None:
+    doc = json.loads(real[f"awareness/{model}.json"])
+    text = _real_report(model)
+    assert explorer._render_awareness(doc) + "\n" == text  # the parse lost nothing
+    assert (doc["calls_recorded"], doc["calls_total"]) == (15, 15)
+    assert [(c["objective_id"], c["template_id"]) for c in doc["calls"]] == [
+        (o, t) for o in "ABCDE" for t in ("w1", "w2", "w3")
+    ]
+    assert all(c["recorded"] for c in doc["calls"])
+    # None of today's replies is the writer's "(no text)", so none is flagged; the ambiguity is not live.
+    assert not any(c["empty_reply"] for c in doc["calls"])
+    assert not any(c["reply"] == "(no text)" for c in doc["calls"])
+    # An independent check, without the renderer: every line of every reply is in the report as a quote line.
+    lines = set(text.split("\n"))
+    for call in doc["calls"]:
+        for row in call["reply"].split("\n"):
+            assert (f"> {row}" if row else ">") in lines, (
+                call["objective_id"],
+                call["template_id"],
+            )
+        assert call["status"] and call["stop_reason"] and call["output_tokens"] > 0
+
+
+def test_the_real_index_names_both_awareness_files(real: dict[str, str]) -> None:
+    index = _index(real)
+    assert index["files"]["awareness"] == {
+        m["model_key"]: f"awareness/{m['model_key']}.json" for m in index["models"]
+    }
 
 
 def test_every_real_case_carries_its_exploratory_label(real: dict[str, str]) -> None:

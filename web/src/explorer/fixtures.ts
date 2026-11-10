@@ -3,7 +3,16 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createDataApi } from "./data";
-import type { CasesIndex, DataApi, DataIndex, GridFile } from "./data";
+import type {
+  AwarenessFile,
+  CaseFile,
+  CasesIndex,
+  DataApi,
+  DataIndex,
+  GridFile,
+  MemoIndex,
+  MemoRow,
+} from "./data";
 
 // `import.meta.url` is not a file: URL under the jsdom environment, so the folder comes from `dirname`.
 export const WEB_ROOT = `${resolve(import.meta.dirname, "../..")}/`;
@@ -26,7 +35,12 @@ export function fileFetcher(requested: string[] = []): (path: string) => Promise
         : null;
     if (file === null || !existsSync(file)) return { ok: false, status: 404 } as Response;
     const text = readFileSync(file, "utf8");
-    return { ok: true, status: 200, json: async () => JSON.parse(text) as unknown } as Response;
+    return {
+      ok: true,
+      status: 200,
+      json: async () => JSON.parse(text) as unknown,
+      text: async () => text,
+    } as Response;
   };
 }
 
@@ -52,3 +66,50 @@ export function allGridFiles(): Array<{ label: string; file: GridFile }> {
 }
 
 export const realGrids = allGridFiles();
+
+/** The memo extract's index, as committed. */
+export const realMemoIndex: MemoIndex = JSON.parse(
+  readFileSync(`${WEB_ROOT}explorer-memos/index.json`, "utf8"),
+) as MemoIndex;
+
+/** The rows of one memo file of the extract, in the file's order. `relative` is a path from the index's `files`. */
+export function readMemoRows(relative: string): MemoRow[] {
+  return readFileSync(`${WEB_ROOT}explorer-memos/${relative}`, "utf8")
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .map((line) => JSON.parse(line) as MemoRow);
+}
+
+/** Every case result the real index lists, one per case and model. */
+export const realCaseFiles: Array<{ label: string; model: string; file: CaseFile }> = Object.entries(
+  realIndex.files.case_results,
+).flatMap(([label, byModel]) =>
+  Object.entries(byModel).map(([model, relative]) => ({ label, model, file: readData<CaseFile>(relative) })),
+);
+
+export function readAwareness(model: string): AwarenessFile {
+  return readData<AwarenessFile>(realIndex.files.awareness[model]!);
+}
+
+type Edit = (body: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+/**
+ * The loaders over the real files, with some JSON files edited on the way (a path under /data/, to a function that
+ * changes the parsed body), for a test that needs a file the real data does not have. Nothing on disk changes.
+ */
+export function editedApi(edits: Record<string, Edit>, requested: string[] = []): DataApi {
+  const base = fileFetcher(requested);
+  return createDataApi(async (path) => {
+    const response = await base(path);
+    const edit = edits[path];
+    if (edit === undefined || !response.ok) return response;
+    const body = await response.json();
+    edit(body);
+    return {
+      ok: true,
+      status: 200,
+      json: async () => body as unknown,
+      text: async () => JSON.stringify(body),
+    } as Response;
+  });
+}

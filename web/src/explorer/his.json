@@ -9,6 +9,12 @@
   },
   "againstTitle": "[his: the title of the section for results against the thesis; he may revise it so it names the rule's source]",
   "againstIntro": "[his: the introductory sentence of the section for results against the thesis]",
+  "memosIntro": "[his: the introductory sentence of the memo reader, saying what a memo is and that the reader holds the fictional company's memos]",
+  "casesIntro": "[his: the title's introduction for the real-cases page, saying these are the protocol applied to real decisions, in his words]",
+  "caseMemosHeld": "[his: why the site shows no real-case memo text, in his words, placed beside the counts of memos published and held]",
+  "studiesIntro": "[his: the introduction to the studies page, the thinking sub-study and the awareness probes, in his words]",
+  "studiesThinkingTitle": "[his: the title of the thinking sub-study section]",
+  "studiesAwarenessTitle": "[his: the title of the awareness probes section]",
   "pages": {
     "story": {
       "title": "[his: the title of the guided story, the page at the site's root]",

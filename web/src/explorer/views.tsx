@@ -1,25 +1,30 @@
 import { AgainstThesis } from "./AgainstThesis";
+import { CaseView, CasesView } from "./Cases";
 import { explorerHis, explorerLabels } from "./copy";
 import type { CasesIndex, DataApi, DataIndex } from "./data";
 import { His, Title } from "./parts";
 import type { Route } from "./route";
 import { hrefOf } from "./route";
+import { MemosView } from "./MemoReader";
 import { ScenarioView } from "./ScenarioView";
+import { StudiesView } from "./Studies";
 
 export interface ViewProps {
   route: Route;
   index: DataIndex;
   casesIndex: CasesIndex;
   model: string;
+  /** The URL's query string (with its "?", or empty): the memo reader's choices are in it. */
+  search: string;
   data: DataApi;
 }
 
 /**
- * Each route's view. The scenario view and the section for results against the thesis are C4; the rest are still
- * C3's stubs, each holding its title and little else: the memo reader, the cases and the studies are C5, the story is
- * C6 (it shows the section under its stub until then).
+ * Each route's view. The scenario view and the section for results against the thesis are C4; the memo reader, the
+ * real cases and the studies are C5. The story is still C3's stub, C6's to build (it shows the section for results
+ * against the thesis under its stub until then).
  */
-export function View({ route, index, casesIndex, model, data }: ViewProps) {
+export function View({ route, index, casesIndex, model, search, data }: ViewProps) {
   switch (route.kind) {
     case "story":
       return (
@@ -34,42 +39,16 @@ export function View({ route, index, casesIndex, model, data }: ViewProps) {
       // Keyed by scenario, so the goal toggles start over on a new scenario and carry across a model switch.
       return <ScenarioView key={route.id} id={route.id} index={index} model={model} data={data} />;
     case "cases":
+      return <CasesView index={index} casesIndex={casesIndex} model={model} data={data} />;
+    case "case":
+      // Keyed by label, so a new case starts its load over.
       return (
-        <>
-          <Title route={route} />
-          <His text={explorerHis.scopeSentence} />
-          <ul className="stub-list">
-            {casesIndex.cases.map((c) => (
-              <li key={c.label}>
-                <a className="mono" href={hrefOf({ kind: "case", label: c.label }, model)}>
-                  {c.label}
-                </a>
-                {c.exploratory && <span className="tag">{explorerLabels.exploratory}</span>}
-              </li>
-            ))}
-          </ul>
-        </>
+        <CaseView key={route.label} label={route.label} index={index} casesIndex={casesIndex} data={data} />
       );
-    case "case": {
-      const entry = casesIndex.cases.find((c) => c.label === route.label);
-      return (
-        <>
-          <Title route={route} />
-          <p>
-            <span className="mono">{route.label}</span>
-            {entry?.exploratory && <span className="tag">{explorerLabels.exploratory}</span>}
-          </p>
-        </>
-      );
-    }
     case "studies":
+      return <StudiesView index={index} data={data} />;
     case "memos":
-      return (
-        <>
-          <Title route={route} />
-          <His text={explorerHis.scopeSentence} />
-        </>
-      );
+      return <MemosView index={index} model={model} search={search} data={data} />;
     case "not_found":
       return (
         <>

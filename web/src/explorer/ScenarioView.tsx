@@ -21,7 +21,7 @@ import { His, ProtocolReading, Title } from "./parts";
 import { againstWords } from "./againstWords";
 import { readingFor } from "./protocol";
 import { resultSentence } from "./sentences";
-import { withModel } from "./route";
+import { memoHref, withModel } from "./route";
 
 const names: Names = L.objectiveNames;
 
@@ -38,7 +38,7 @@ interface Loaded {
 
 /** A `details` element closed by default whose content is built only once it is opened (the allocation panels and
  * the run table are thousands of nodes, and a closed section shows none of them). */
-function Details({ summary, hint, children }: { summary: string; hint: string; children: ReactNode }) {
+export function Details({ summary, hint, children }: { summary: string; hint: string; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <details className="x-details" onToggle={(event) => setOpen(event.currentTarget.open)}>
@@ -228,7 +228,11 @@ function FailuresTable({ file }: { file: GridFile }) {
   );
 }
 
-function RunsTable({ file }: { file: GridFile }) {
+/**
+ * Every valid run of the file as a table. Each run id is a link to that run's memo in the reader (`kind` says which
+ * set of memos: the main grid's, or the thinking sub-study's), on the file's own model.
+ */
+export function RunsTable({ file, kind }: { file: GridFile; kind: "grid" | "thinking" }) {
   return (
     <div className="x-table-wrap" role="region" aria-label={L.runsHeading} tabIndex={0}>
       <table className="x-table">
@@ -247,7 +251,14 @@ function RunsTable({ file }: { file: GridFile }) {
           {file.descriptive.per_run.map((run) => (
             <tr key={run.run_id}>
               <th scope="row" className="mono">
-                {run.run_id}
+                <a
+                  href={memoHref(
+                    { kind, scenario: file.scenario_id, objective: run.objective_id, run: run.run_id },
+                    file.model_key,
+                  )}
+                >
+                  {run.run_id}
+                </a>
               </th>
               <td>
                 {names[run.objective_id] ?? run.objective_id} ({run.objective_id})
@@ -286,7 +297,7 @@ function DetailsBody({ file, index }: { file: GridFile; index: DataIndex }) {
       <FailuresTable file={file} />
       <h3>{L.runsHeading}</h3>
       <p className="chart-key">{L.runsKey}</p>
-      <RunsTable file={file} />
+      <RunsTable file={file} kind="grid" />
     </>
   );
 }

@@ -5,21 +5,24 @@
  */
 import type { ChoiceSplit, DescriptiveCell, GridComparison, GridFile, LineSummary, PerRun } from "./data";
 
-/** The valid runs of one goal, in the file's order. */
-export function runsOfGoal(file: GridFile, goal: string): PerRun[] {
-  return file.descriptive.per_run.filter((run) => run.objective_id === goal);
-}
-
-/** A goal over every wording kept: the descriptive cell with no wording and no choice. */
-export function goalCell(file: GridFile, goal: string): DescriptiveCell | undefined {
-  return file.descriptive.cells.find(
-    (cell) => cell.objective_id === goal && cell.wording_id === null && cell.choice === null,
+/** The valid runs of one goal, in the file's order; of one wording only when `wording` is given. */
+export function runsOfGoal(file: GridFile, goal: string, wording?: string): PerRun[] {
+  return file.descriptive.per_run.filter(
+    (run) => run.objective_id === goal && (wording === undefined || run.wording_id === wording),
   );
 }
 
-/** The number of runs of a goal the chart shows: `descriptive.cells[]` (no wording, no choice) `.runs`. */
-export function goalRunCount(file: GridFile, goal: string): number {
-  return goalCell(file, goal)?.runs ?? 0;
+/** A goal over every wording kept: the descriptive cell with no wording and no choice. With `wording`, the cell of
+ * that wording alone (and no choice). */
+export function goalCell(file: GridFile, goal: string, wording?: string): DescriptiveCell | undefined {
+  return file.descriptive.cells.find(
+    (cell) => cell.objective_id === goal && cell.wording_id === (wording ?? null) && cell.choice === null,
+  );
+}
+
+/** The number of runs of a goal the chart shows: `descriptive.cells[]` (the wording, or none; no choice) `.runs`. */
+export function goalRunCount(file: GridFile, goal: string, wording?: string): number {
+  return goalCell(file, goal, wording)?.runs ?? 0;
 }
 
 /** A goal's choice split over every wording kept (a choice scenario only). */

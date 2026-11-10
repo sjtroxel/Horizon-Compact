@@ -7,7 +7,7 @@ import type { CasesIndex, DataApi, DataIndex } from "./data";
 import { Footer } from "./Footer";
 import { ModelSwitch } from "./ModelSwitch";
 import { pageMeta } from "./page-meta.mjs";
-import { modelFromSearch, parseRoute, pathOf, searchWithModel, withModel } from "./route";
+import { modelFromSearch, parseRoute, pathOf, searchAfterModelSwitch, withModel } from "./route";
 import type { Route } from "./route";
 import { View } from "./views";
 
@@ -21,7 +21,7 @@ function readLocation(): Where {
 }
 
 /** The anchor a click landed on, if the browser should leave it to us: a plain primary-button click on a link to
- * this site, not opening a new tab or window, not a download, not a jump within the same page. */
+ * this site, not opening a new tab or window, not a download, not a file, not a jump within the same page. */
 function interceptedAnchor(event: MouseEvent<HTMLElement>): HTMLAnchorElement | null {
   if (event.defaultPrevented || event.button !== 0) return null;
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
@@ -31,6 +31,10 @@ function interceptedAnchor(event: MouseEvent<HTMLElement>): HTMLAnchorElement | 
   if (!anchor || !anchor.hasAttribute("href") || anchor.hasAttribute("download")) return null;
   if (anchor.target !== "" && anchor.target !== "_self") return null;
   if (anchor.origin !== window.location.origin) return null;
+  // A file is the browser's: the data under /data/ (a memo file, say) and any path whose last segment has an
+  // extension (.json, .jsonl, .pdf). A page path of ours has none.
+  if (anchor.pathname.startsWith("/data/")) return null;
+  if (/\.[A-Za-z0-9]+$/.test(anchor.pathname.split("/").pop() ?? "")) return null;
   const samePage = anchor.pathname === window.location.pathname && anchor.search === window.location.search;
   if (samePage && anchor.hash !== "") return null; // an in-page jump is the browser's
   return anchor;
@@ -150,7 +154,11 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
   // back should leave the page, not undo a toggle.
   const chooseModel = useCallback((modelKey: string) => {
     const { pathname, search, hash } = window.location;
-    window.history.replaceState(null, "", `${pathname}${searchWithModel(search, modelKey)}${hash}`);
+    window.history.replaceState(
+      null,
+      "",
+      `${pathname}${searchAfterModelSwitch(pathname, search, modelKey)}${hash}`,
+    );
     setWhere(readLocation());
   }, []);
 
@@ -221,6 +229,7 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
             index={catalog.index}
             casesIndex={catalog.casesIndex}
             model={model}
+            search={where.search}
             data={data}
           />
         ) : failed ? (

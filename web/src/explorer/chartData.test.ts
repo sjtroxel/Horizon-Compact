@@ -170,3 +170,28 @@ describe("the order of the sentences", () => {
     expect(goalRunCount(file, "Z")).toBe(0);
   });
 });
+
+describe("a wording's runs and counts (C5, the studies view)", () => {
+  const grid = realGrids.find((g) => g.label === "grid haiku-5-5 s1")!.file;
+  const sealed = realIndex.models.find((m) => m.model_key === "haiku-5-5")!.sealed_wording;
+
+  it("takes a goal's count from the descriptive cell of that wording, and the rows from per_run", () => {
+    for (const goal of realIndex.objectives.map((o) => o.id)) {
+      const cell = grid.descriptive.cells.find(
+        (c) => c.objective_id === goal && c.wording_id === sealed && c.choice === null,
+      )!;
+      expect(goalRunCount(grid, goal, sealed), goal).toBe(cell.runs);
+      expect(goalCell(grid, goal, sealed)).toBe(cell);
+      const rows = runsOfGoal(grid, goal, sealed);
+      expect(rows.every((r) => r.wording_id === sealed && r.objective_id === goal)).toBe(true);
+      expect(rows.length, goal).toBe(cell.runs); // the data agrees with its own count; the view uses the field
+    }
+  });
+
+  it("leaves a call with no wording as it was: every wording kept", () => {
+    expect(goalRunCount(grid, "A")).toBe(goalCell(grid, "A")!.runs);
+    expect(runsOfGoal(grid, "A").length).toBeGreaterThan(runsOfGoal(grid, "A", sealed).length);
+    expect(goalCell(grid, "A")!.wording_id).toBeNull();
+    expect(goalRunCount(grid, "A", "w9")).toBe(0);
+  });
+});

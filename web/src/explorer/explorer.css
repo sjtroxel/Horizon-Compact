@@ -826,3 +826,340 @@
     transition: none;
   }
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+   C5: the memo reader, the real cases and the studies. */
+
+/* A memo or a reply is a document: a bordered sheet in the body face, never a quote, never speech. No blockquote, no
+   quotation marks, no italics. The text keeps its line breaks and its spaces exactly (pre-wrap). */
+.memo-card {
+  margin: 1.25rem 0 0.75rem;
+  padding: 1rem 1.25rem 0.75rem;
+  border: 1px solid var(--axis);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.view .memo-label {
+  max-width: none;
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--grid);
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.memo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  margin: 0 0 0.9rem;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+}
+.memo-meta > div {
+  display: flex;
+  gap: 0.4rem;
+}
+.memo-meta dt {
+  font-weight: 600;
+}
+.memo-meta dd {
+  margin: 0;
+}
+.memo-meta .mono,
+.memo-sources .mono,
+.memo-runs .mono,
+.memo-file .mono {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.memo-text {
+  max-width: 65ch;
+  font-family: var(--serif);
+  font-size: var(--s0);
+  line-height: 1.55;
+  color: var(--ink);
+  font-style: normal;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.view .memo-none {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink2);
+}
+.memo-sources {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--grid);
+}
+.memo-sources p {
+  margin: 0 0 0.25rem;
+  max-width: none;
+  overflow-wrap: anywhere;
+}
+.memo-sources dl {
+  margin: 0;
+}
+.memo-sources dt {
+  font-weight: 600;
+}
+.memo-sources dd {
+  margin: 0 0 0.25rem;
+}
+.memo-choosers {
+  display: grid;
+  gap: 0.75rem 2rem;
+  margin: 1rem 0 0;
+  font-family: var(--sans);
+}
+@media (min-width: 40rem) {
+  .memo-choosers {
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+  }
+}
+.chooser-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: var(--s-1);
+  font-weight: 600;
+  color: var(--ink2);
+}
+.memo-choosers ul,
+.memo-runs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.memo-choosers li {
+  margin: 0 0 0.2rem;
+}
+.memo-choosers a[aria-current="true"],
+.memo-runs a[aria-current="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid var(--ink);
+}
+.memo-prevnext {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 2rem;
+  font-family: var(--sans);
+}
+.memo-runs {
+  columns: 1;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+}
+@media (min-width: 40rem) {
+  .memo-runs {
+    columns: 2;
+  }
+}
+.memo-runs li {
+  margin: 0 0 0.2rem;
+  break-inside: avoid;
+}
+.memo-file {
+  margin-top: 1.5rem;
+}
+.memo-file span {
+  display: block;
+}
+
+/* The exploratory label: first on every case surface, as the file writes it. Plain, quiet and impossible to miss. */
+.exploratory-label {
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.3rem 0.75rem;
+  border-left: 3px solid var(--ink);
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  font-weight: 600;
+  color: var(--ink);
+  max-width: none;
+}
+.case-framing {
+  margin-top: 1rem;
+}
+.case-cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+}
+.case-card {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+  font-family: var(--sans);
+}
+.case-card h2 {
+  margin: 0;
+}
+.case-description {
+  margin: 0.25rem 0 0.5rem;
+  font-family: var(--serif);
+}
+.case-readings {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+}
+.x-facts {
+  margin: 0.5rem 0 1rem;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+}
+.x-facts dt {
+  display: inline;
+  font-weight: 600;
+  color: var(--ink2);
+}
+.x-facts dt::after {
+  content: ": ";
+}
+.x-facts dd {
+  display: inline;
+  margin: 0;
+}
+.x-facts dd::after {
+  content: "";
+  display: block;
+}
+.x-facts > div {
+  display: block;
+}
+.x-facts-list {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+}
+.case-model {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--axis);
+}
+.case-reading {
+  margin: 0 0 2rem;
+}
+.case-reading h3 {
+  margin-top: 1.25rem;
+}
+.nearest p {
+  margin: 0.25rem 0 0;
+  font-family: var(--sans);
+}
+
+/* The distance chart: one row per goal; the dot, the interval, the rule. Colors carry no verdict. */
+.distance-figure {
+  margin: 0.75rem 0;
+}
+.distance-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.15rem;
+  padding: 0.4rem 0;
+}
+@media (min-width: 40rem) {
+  .distance-row {
+    grid-template-columns: 12rem minmax(0, 1fr) 13rem;
+    align-items: center;
+    gap: 0 0.75rem;
+  }
+}
+.distance-numbers {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+.x-rule {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.d-range {
+  stroke: var(--goal);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.d-dot {
+  fill: var(--goal);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+.distance-axis > span {
+  display: none;
+}
+@media (min-width: 40rem) {
+  .distance-axis > span {
+    display: block;
+  }
+}
+.tick.edge {
+  fill: var(--ink);
+}
+
+/* The studies: the grid's card beside the sub-study's at 60rem and wider, stacked below that. */
+.studies-part {
+  margin-top: 2.5rem;
+}
+.studies-part:focus,
+.studies-part:focus-visible {
+  outline: none;
+}
+.layout-pair {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 60rem) {
+  .layout-pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.view .study-card-title {
+  max-width: none;
+  font-weight: 600;
+  color: var(--ink);
+}
+.sent.paired {
+  display: grid;
+  gap: 0.5rem 1.5rem;
+}
+@media (min-width: 40rem) {
+  .sent.paired {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+.paired-grid {
+  align-self: start;
+  padding: 0.5rem 0.75rem;
+  background: var(--grid);
+  border-radius: 4px;
+}
+.probe-instruction p {
+  margin: 0.25rem 0;
+  font-family: var(--sans);
+  font-style: normal;
+}
+.awareness-model {
+  margin-top: 2rem;
+}
+.awareness-goal h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1.25rem 0 0;
+}
+.reply-card {
+  margin-top: 0.5rem;
+}
