@@ -93,7 +93,8 @@ describe("the shell", () => {
     const missing = await shellAt("/scenario/s9/");
     expect(h1Text(missing.container)).toBe(explorerLabels.notFoundTitle);
     expect(missing.queryByRole("group")).toBeNull(); // no model switch on a page that does not exist
-    expect(document.title).toBe(explorerLabels.notFoundTitle);
+    // The title is set in an effect after the heading renders: wait for it (a slow runner read the last view's title).
+    await waitFor(() => expect(document.title).toBe(explorerLabels.notFoundTitle));
   });
 });
 
@@ -157,7 +158,7 @@ describe("the links", () => {
     await waitFor(() =>
       expect(h1Text(view.container)).toBe(pageMeta({ kind: "story" }, explorerHis.pages).title),
     );
-    expect(document.title).toBe(pageMeta({ kind: "story" }, explorerHis.pages).title);
+    await waitFor(() => expect(document.title).toBe(pageMeta({ kind: "story" }, explorerHis.pages).title));
   });
 });
 
