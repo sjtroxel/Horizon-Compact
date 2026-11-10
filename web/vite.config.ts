@@ -159,6 +159,10 @@ export default defineConfig(({ mode }) => {
       environment: "jsdom",
       include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
       css: false,
+      // The explorer's tests render every scenario view from the real data, and axe-core walks the open details:
+      // up to 2.8 s locally, and the Deploy runner was about twice as slow (5.8 s on f564687, over Vitest's default
+      // 5 s). 20 s leaves room on a slow runner and still fails a test that hangs.
+      testTimeout: 20_000,
     },
   };
 });
