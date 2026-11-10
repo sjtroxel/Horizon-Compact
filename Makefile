@@ -75,6 +75,8 @@ tf-check: ## Terraform fmt -check and validate (no credentials, no AWS call)
 
 # The page in web/ (Phase 1.5): Prettier check, strict tsc, Vitest (run once), the production build, then the check on
 # the built files (asset budget, no inline script or style, no other host). No network call and no AWS call.
+# Since Phase 6 C3 it builds and checks both modes: the placeholder in dist/ (what Deploy syncs), then the explorer in
+# dist-explorer/ (never synced).
 # One Vitest check, `his words are written`, fails while any of his values in web/src/copy.ts is still a `[his:` placeholder.
 web-check: ## Check the page in web/ (format, types, tests, build, built files)
 	npm --prefix web run check

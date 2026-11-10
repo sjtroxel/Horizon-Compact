@@ -420,8 +420,8 @@ My recommendation is (a) in each, for the reason given.
    **[count done and decision 5 settled 2026-11-09, §22; C2's code built 2026-11-09 by Sonnet, §23, reviewed by Opus,
    §23a, committed `75048aa`; his run of `scratch/p6-c2-memos.sh` done the same day, §23a; the extract rides in his
    commit `phase 6: c2 grid memo extract`]**
-4. **[Claude builds, his picks]** **The previews** (§7): form, then palette, then layout.
-5. **[Sonnet builds, Opus reviews]** **C3, build modes and the shell:** the two modes, the placeholder-mode check, the
+4. **[done 2026-11-10: form, palette and layout picked by him, §24-§24.2]** **[Claude builds, his picks]** **The previews** (§7): form, then palette, then layout.
+5. **[built 2026-11-10 by Sonnet, §25; reviewed by Opus, §25a: passed, no code change]** **[Sonnet builds, Opus reviews]** **C3, build modes and the shell:** the two modes, the placeholder-mode check, the
    paths and their HTML files, the local preview script.
 6. **[Sonnet builds, Opus reviews]** **C4, the scenario view and the section for results against the thesis.**
 7. **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
@@ -922,3 +922,300 @@ size). By status: gpt-oss 1,158 `valid`, 3 `valid_rescaled`, 33 `schema_invalid`
 `valid`, 10 `sum_mismatch`; thinking 100 `valid`. The valid counts (1,161, 980, 100) equal the results files'
 per-run counts. (3) Claude's `make check` with the extract present: green, **3,423 passed, 0 skipped** (the four
 committed-output tests' first run), Vitest 37, `check-dist: ok`, `hc protocol check` ok. (4) His commit next.
+
+## 24. Step 4, the previews: decision 1, chart form (2026-11-10)
+
+**Built (Opus, `dataviz` loaded first):** six throwaway static pages in `scratch/p6-previews/` (untracked), from the
+committed `web/explorer-data/` (Haiku 5.5 S1 and S3, gpt-oss-120b S1, the comparisons of all four Haiku scenarios),
+captured headless (chrome-headless-shell 1234, over the DevTools protocol) light and dark at 1280 and 390: no console
+error, no page-level horizontal scroll in any of the 24 captures. Pages 1-5 are §7's candidates (i)-(v); page 6 was
+added on his reading of them. Palette provisional (§7 decision 2 owns it): `planning/06` §7.2 rule 1's scheme, four
+hues run through the skill's validator in both modes over all pairs (band, chroma, CVD and normal-vision pass;
+contrast WARN, relieved by visible labels), E in the site's muted gray. Every label Claude-drafted and unapproved.
+
+**His reading of (i)-(v), 2026-11-10, about 7:47 AM:** hard to understand, any of them, without a finance or
+statistics background. Claude's read: the five were built to §7 as written, in a statistician's register (intervals,
+thresholds, differences), and a reader who has run the experiment and cannot read them cold is evidence that most
+visitors could not either. Easiest: (iv) the unit chart and (i) the strip; hardest: (iii), which Claude had
+recommended.
+
+**Page 6, the simpler version:** one mark for both kinds of decision, **a dot is one run**: on a line from "none
+kept" to "all 125 kept" for a share scenario (S1), grouped under the choice made with "n of 60" for a choice scenario
+(S3). No ticks, no intervals, no threshold band. The goals by plain names, their literal descriptions listed once at
+the top. Under each chart, "What the runs show": one plain sentence per comparison, the Roundtable pair first, each
+with its run counts and the official verdict word beneath. Sentence numbers are the comparison's `difference`,
+absolute, rounded down to whole points (display formatting only).
+
+**His pick, 2026-11-10, about 8:18 AM: page 6.** On Claude's list of what it would still fix: repetitive sentences
+can be fine (his read); whether "points" reads to a general reader, and the plain goal names against `planning/06`
+§6.2 (letters and literal descriptions), are open and are word questions for §11, not form.
+
+**Found building the previews (both bear on the build, neither changes his pick):**
+
+1. **§7 (iii) misstates the verdict rule.** It says an interval outside the band reads "split". Protocol §6.3: a
+   split needs the interval to exclude zero **and** the difference to be at least the threshold on the same side.
+   Haiku S2 A vs B (interval +2.0 to +43.2, threshold 10) is a split whose interval crosses the band's edge. Any
+   interval view draws the protocol's rule, and the verdict word stays the authority: the floor and the constant
+   check (§6.5) are not geometry.
+2. **The results carry no per-objective mean or interval for the primary outcome.** The intervals are on
+   differences; per-wording means exist only inside the comparisons' `per_wording`, so E, in no comparison, has
+   none. A per-row mean or interval would be computed in the front end, which §5 forbids. Page 6 draws neither.
+3. A preview header first hard-coded "60 per objective"; gpt-oss-120b S1 has 292 valid of 300 and an A vs B of 40 v
+   39. Every count on the site is read from the data, never written in.
+
+**Where the precise views live: decided 2026-11-10, about 8:31 AM (his, as Claude recommended).** Page 6's form is
+what every reader sees. Under each decision, a "See the details" section, **closed by default**, holds the comparison
+interval chart ((iii), drawn to protocol §6.3's rule) and the full allocation ((ii), small multiples), so a "no split"
+always has its full allocation one click away and a reviewer can check every verdict against its interval.
+
+### 24.1 Decision 2, palette (2026-11-10)
+
+**Rule kept:** `planning/06` §7.2 rule 1, hue for who counts (warm for shareholders, blue for everyone with a stake),
+lightness for horizon (lighter for four quarters, darker for twenty years), E in the site's muted gray (`--muted`).
+**Searched, not eyeballed:** `scratch/p6-previews/search.mjs` steps lightness and chroma per hue pair and keeps only
+palettes the `dataviz` validator passes over **all pairs** (band, chroma floor, CVD at the target of 8, normal-vision
+floor) in that mode, refusing out-of-gamut colors rather than clipping them. **Only warm-against-blue pairs pass in
+dark mode:** purple and teal, gold and indigo, pink and teal and orange-red and cyan fail there (dark teal cannot
+reach the chroma floor inside the dark band; the band is too narrow for two lightness steps of some hues); plum and
+green was dropped as near the banned red-green pair. Three candidates, each applied to page 6 and captured light and
+dark at 1280 and 390 (no error, no horizontal scroll): A amber and blue (hues 70 and 255), B orange and blue (55 and
+250), C muted amber and blue (65 and 250, chroma near the floor).
+
+**Flagged, not checkable by the validator:** a red-leaning warm for shareholders against blue for everyone else can
+read to a US reader as a party pairing, which is moral color by another route. B is nearest red; A is furthest.
+
+**His pick, 2026-11-10, about 8:53 AM: A, amber and blue** (as Claude recommended).
+
+| Objective | Light (surface `#f6f2e9`) | Dark (surface `#0f1520`) |
+|---|---|---|
+| A, shareholders, four quarters | `#daa668` | `#b68446` |
+| B, all stakeholders, four quarters | `#5fa1f3` | `#4f91e2` |
+| C, shareholders, twenty years | `#81520a` | `#84550f` |
+| D, all stakeholders, twenty years | `#07519d` | `#1d60ad` |
+| E, no stated objective | `#8a8270` (`--muted`) | `#7d8696` (`--muted`) |
+
+Validator, all pairs: light worst CVD ΔE 21.6, normal-vision 24.3; dark worst CVD 16.0, normal-vision 16.0. Contrast
+WARN in both modes (light: A 1.95, B 2.39; dark: C 2.86, D 2.90), relieved as the skill requires: every series is
+named by a visible label beside its marks, and every chart has its table. No text wears a series color. E's gray is
+outside the validated four by design (it is the neutral, not a series hue) and must stay distinct from all four; a palette test in the
+build is to check E against each (not built yet).
+
+### 24.2 Decision 3, layout (2026-11-10); step 4 done
+
+**Built:** three layouts on page 6 with palette A, each with a working model switch and the details section closed
+by default, captured light and dark at 1280 and 390 (no error, no horizontal scroll): (1) stacked, one page-level
+switch, chart then sentences; (2) side by side, one page-level switch, sentences in a column beside the chart at 60rem
+and wider, stacked below that; (3) the Roundtable pair's sentence set large above each chart, a switch on each chart.
+Plus layout 2 on gpt-oss-120b with both details sections open. In all three the model's name, the valid and attempted
+run counts and the scope line sit in the chart's own frame (`figcaption`), so a crop of the chart keeps them.
+Claude's read of (3): its large sentence sits outside the frame, so a crop of it loses the model, and a switch per
+chart lets the two decisions show different models at once.
+
+**His pick, 2026-11-10, about 10:00 AM: layout 2**, as Claude recommended, with the Roundtable pair's sentence
+leading the sentence column. Asked whether it holds on a phone: at 390 the column stacks under the chart (chart,
+sentences, details), the page switch stays pinned at the top; checked on the capture.
+
+**The lead sentence (his):** not the large serif of layout 3 ("ugly"); **Source Sans 3 600, 1.125rem, ink text on a
+pale yellow wash** (`--leadwash`: light `#f7e6b5`, dark `#3a301a`; his variant b over a gray-rule variant a). Contrast
+measured: ink on the wash 14.05:1 light, 10.63:1 dark; the run-count line in `--ink2` on it 7.13:1 and 6.43:1.
+Yellow **text** was not used: `#e9a23b` on the light surface is 1.94:1. **Raised and set aside (his call):** the
+light wash sits near A's light amber and could read as coded to shareholders; his judgment is that it does not need
+to be worried about. The wash is not a series color, carries no verdict, and appears only on the lead sentence.
+
+**Step 4 is done.** Its three picks: page 6's form with the precise views in a closed "See the details" section (§24),
+palette A (§24.1), layout 2 with the yellow-wash lead sentence (this section). The previews stay in
+`scratch/p6-previews/`, untracked. **Next: §14 step 5, C3 (build modes and the shell), Sonnet builds and Opus
+reviews**, its build prompt written from §6 and this section.
+
+## 25. As built, C3: build modes and the shell (2026-11-10, Sonnet; Opus review §25a)
+
+Built from `scratch/p6-c3-build-prompt.md`. Front-end and build-script work in `web/` only: no AWS call, no model
+call, no `terraform`, no `hc` command that reads S3. Nothing under `src/horizon_compact/analysis/`, `experiment/`,
+`web/explorer-data/`, `web/explorer-memos/`, `web/src/data/` or any Python was touched, and no file the placeholder
+entry imports was edited. Not committed (his commit). KNOWN-GAPS, ROADMAP and every other part of this doc were left
+as they were; the two edits of this step are this section and the prefix on §14 step 5.
+
+**What was built.**
+
+- **Two modes.** `vite build` with no mode is today's placeholder build (`index.html`, `src/main.tsx`, `dist/`),
+  unchanged. `vite build --mode explorer` has its own entry `web/explorer.html` (script `/src/explorer/main.tsx`) and
+  writes `web/dist-explorer/`, which Deploy never syncs. `vite.config.ts` is now `defineConfig(({ mode }) => ...)`;
+  in explorer mode it sets `outDir` and `rollupOptions.input` and adds the data-copy plugin; everything else is shared
+  (font preloads, `assetsInlineLimit: 0`, no module-preload polyfill, `cssCodeSplit: false`, no source maps, the
+  preview headers with the content security policy word for word).
+- **Scripts** (`web/package.json`): `build:explorer`, `preview:explorer` and `check` as decided; `check` keeps its
+  five steps in order and gains `npm run build:explorer && node scripts/check-dist.mjs --mode explorer`.
+- **The paths** (`scripts/write-paths.mjs`, after the explorer build): 13 HTML files, one per path (`/`, `/scenario/s1/`
+  to `/s4/`, `/cases/`, the five case labels read from `explorer-data/cases/index.json`, `/studies/`, `/memos/`), each
+  with its own `<title>`, description, canonical address and `noindex`, the same script and stylesheet tags; the built
+  `explorer.html` is then deleted. A path segment from data must match `^[a-z0-9][a-z0-9-]*$` before a folder is made
+  from it. An unknown path gets the root page and the client's plain not-found view.
+- **The data** reaches the explorer by `fetch` from `/data/`, never by import. In explorer mode a plugin copies
+  `explorer-data/` to `dist-explorer/data/` and `explorer-memos/` to `dist-explorer/data/memos/` after the bundle is
+  written, byte for byte, and fails the build if either source is missing or empty; the dev server serves the same
+  files at the same paths. `src/explorer/data.ts` holds `loadIndex`, `loadGrid`, `loadThinking`, `loadCasesIndex` and
+  `loadCase` over `createDataApi(fetcher)`: each path comes from the index's `files` block, `dataPath` refuses
+  anything not under `/data/`, and what comes back is the parsed JSON, reshaped by nothing.
+- **Routing** (`route.ts`): plain links and the History API. The shell intercepts a primary-button click with no
+  modifier key on a same-origin link with no `target`, `download` or in-page hash, calls `pushState`, re-renders,
+  retitles the document, scrolls to the top and focuses the new `h1`; `popstate` does the same. Every link is a real
+  `<a href>`.
+- **The shell** (`Shell.tsx`, `ModelSwitch.tsx`, `views.tsx`, `explorer.css`, `Footer.tsx`, `main.tsx`): header with
+  the name, navigation of real links with `aria-current`, one sticky model switch (buttons with `aria-pressed`, the
+  models in `index.json`'s order, never "both"; choice kept in `?model=`, Haiku 5.5 when absent or unknown), a skip
+  link, `main`, footer. Every route renders a stub: its `h1` from his words, and for a scenario its id and primary
+  outcome from `index.json` inside the card frame (`figure` with the model and scope line in its `figcaption`); a case
+  stub shows its label and "exploratory". Palette A as `--o-a` to `--o-e`, `--leadwash`, the card frame and layout 2's
+  grid (60rem) are in `explorer.css`; `styles.css` is untouched. No inline script, `<style>` or `style` attribute.
+- **Words** (`copy.ts`, `his.json`): `explorerHis` (his: the landing question, the scope sentence, and a title and
+  description for each kind of page, every value a `[his: ...]` placeholder naming what goes there) and
+  `explorerLabels` (Claude-drafted, unapproved until §14 step 8); the file's top comment says both are unapproved.
+- **The checks** (`scripts/check-dist.mjs`, `scripts/leaks.mjs`): the placeholder-mode and explorer-mode checks of
+  decisions 8 and 9, and the module-graph test of decision 10.
+
+**Files.** New: `web/explorer.html`; `web/scripts/write-paths.mjs`, `leaks.mjs` (+ `.d.mts` for each, for the tests);
+`web/src/explorer/` (`main.tsx`, `Shell.tsx`, `ModelSwitch.tsx`, `views.tsx`, `Footer.tsx`, `route.ts`, `data.ts`,
+`copy.ts`, `his.json`, `page-meta.mjs` + `.d.mts`, `explorer.css`, `fixtures.ts`, and the tests `route`, `data`,
+`copy`, `Shell`, `ModelSwitch`, `modules`, `leaks`, `write-paths`). Changed: `web/vite.config.ts`,
+`web/package.json`, `web/scripts/check-dist.mjs`, `web/.prettierignore` (`dist-explorer/`), `.gitignore`
+(`web/dist-explorer/`), a comment in the Makefile. Nothing new at the repository root.
+
+**Proof, measured 2026-11-10.**
+
+1. **The public page did not change.** `npm --prefix web run build` before any change and again after the last one
+   (and after `make check` rebuilt it): the listings are identical, `diff` empty, 8 files. Saved in
+   `scratch/p6-c3-dist-before.txt` and `-after.txt`:
+
+   ```
+   088f423f09136bc96b5a7cc7232d671a1ad06a5ff1cf90cd1e24a8d9809d471c  dist/assets/big-shoulders-display-latin-800-normal-DDUD9Xuh.woff2
+   a1a01dda969bcbc1e37739245099aefcd156676ed8e39930f98147c64ad6ca98  dist/assets/index-UP0ANYtT.js
+   e66067814f1c672d33a457e4f4d102c818b481420e2234cf685ebdbf2f443904  dist/assets/newsreader-latin-400-normal-BFBkh4jY.woff2
+   0f73f35e08cde0a2f10c109c6e01d71459d97e4099ecd9a50f1b6c0209e4de2b  dist/assets/source-sans-3-latin-400-normal-DQi5PRDE.woff2
+   14527d193b0e30bc32ef931549a246cdfd286573bb12869b7e052b8101a39d38  dist/assets/source-sans-3-latin-600-normal-DeckBYAU.woff2
+   ff40cd1a2bbe5f76de6f67b5a1412fde8ff6410a965876620ce5494aff4b3cb3  dist/assets/style-8pjkDroo.css
+   df02743b357d29c06582728ea877a8aa5e1a942a546cec0f6344602255c4c3e3  dist/favicon.svg
+   49db14b8fdb1f6b1cda00af8cc4f3d8d4b1abdb4ce00d0e8a29fc6e9886f2aa3  dist/index.html
+   ```
+
+2. **`npm --prefix web run check`, last lines of each mode** (from `make check`):
+
+   ```
+   dist: 8 files
+   JavaScript, gzipped, in all: 75899 bytes (74.1 KB); budget 100.0 KB
+   fonts: 4 files, 68400 bytes (66.8 KB); budget 150.0 KB; WOFF2 only
+   official run ids read: 2290; looked for in every file
+   official sweep ids read: 13; looked for in every file
+   check-dist: ok
+   ...
+   write-paths: wrote 13 HTML files
+   dist-explorer: 87 files (20 outside data/)
+   JavaScript, gzipped, in all: 72605 bytes (70.9 KB); budget 100.0 KB
+   fonts: 4 files, 68400 bytes (66.8 KB); budget 150.0 KB; WOFF2 only
+   HTML files: 13, one per path
+   data/: 67 files, 67 expected, byte for byte
+   official run ids read: 2290; looked for in every file outside data/
+   check-dist: ok
+   ```
+
+3. **`make check`: green** (exit 0). Python **3,423 passed**, unchanged. Vitest **87 passed in 11 files**, up from 37
+   (50 new: module graph 6, route 9, data 8, explorer words 4, check negative control 5, write-paths 3, model switch
+   3, shell 12). The existing `his words are written` test (`src/copy.test.ts`) is untouched and passes.
+4. **The checks fail when they should** (run by hand, then undone by a rebuild; the Vitest negative control runs the
+   same functions). Planted in `dist/`: an official run id, an official sweep id, a byte copy of `index.json` and a
+   file with `explorer` in its name: 7 failures, each named; clean again after removal. Planted in `dist-explorer/`:
+   a run id in a page, a `style` attribute, a changed data file and a deleted data file: 4 failures, each named.
+5. **Headless captures** (chrome-headless-shell 1234 over the DevTools protocol, `scratch/p6-c3-shoot.mjs`; the preview
+   was `npm --prefix web run preview:explorer`, served with the content security policy header and `X-Robots-Tag`).
+   `scratch/p6-c3-shots/`: `/` and `/scenario/s1/` at 1280 and 390, light and dark (8), and one after clicking the
+   second model's button. For all nine: **no console error or warning, no failed request, no
+   `securitypolicyviolation`** (listener installed before the page's scripts), no horizontal overflow, the app
+   mounted, the model switch `position: sticky`. After the click the URL was `/scenario/s1/?model=gpt-oss-openrouter`
+   and the pressed button was `gpt-oss-openrouter`. A click on "Scenario s2" from `/` went to `/scenario/s2/` with the
+   title changed, `h1` focused and one navigation entry in the performance log (no reload); `/nowhere/` showed
+   "Page not found". Report: `scratch/p6-c3-shots-report.json`.
+
+**The decided points, as built.** All ten as written, with these choices the prompt left open: (3) the titles and
+descriptions reach the build through one shared module, `src/explorer/page-meta.mjs` (path of a route, its title and
+description, the list of routes), a plain `.mjs` with a `.d.mts`, imported by the route code and by `write-paths.mjs`,
+so the two cannot drift; his words live in `his.json` for the same reason (Node reads it; TypeScript imports it), and
+`copy.ts` exports them as `explorerHis`. A scenario's or a case's own id follows its title: `Title (s1)`. (5) Choosing
+a model replaces the history entry and does not push one, so Back leaves the page and does not undo a toggle; Back and
+Forward move focus to the new heading as a click does. (8) The data-copy check compares sha256; the run and sweep
+ids are looked for as plain strings in every file read as latin1, binary included, so a changed id shape cannot hide
+one. (9) Each explorer page is also checked for one canonical link that is its own address, a title, a description
+and `noindex`.
+
+**What did not fit, and what was done instead.**
+
+1. **The existing `Footer` does not fit "without change".** `components/Footer.tsx` takes the repository address from
+   `Provenance.tsx`, which imports the placeholder's run data; importing it put that data (sweep
+   `skeleton-haiku-5-5-f1467906`) into the explorer's bundle, 2,338 bytes gzipped more (74,943 against 72,605) and
+   the wrong data. The placeholder's
+   files cannot be edited without changing its bytes, so `src/explorer/Footer.tsx` repeats the same markup and words
+   with its own constant. A test now fails if the explorer's import graph reaches `src/data.ts` or the placeholder
+   JSON. Duplication, on purpose.
+2. **The models have no display names in the data.** `index.json`'s `models` carries `model_key`, `sweep_id` and the
+   alphas, nothing else, so the switch's buttons read `gpt-oss-openrouter` and `haiku-5-5`, not "gpt-oss-120b" and
+   "Haiku 5.5". A name map keyed by model key would write the keys into the front end, which the prompt forbids, and
+   the builder (Python) was out of scope. **For review:** add a display-name field to the builder's output, or approve
+   a labels map at §14 step 8. Also, the buttons follow the index's order, gpt-oss first, so the default (Haiku) is
+   the second button.
+3. **His words are in `his.json`, not in `copy.ts`.** The prompt put `explorerHis` in `copy.ts`; the build's plain-Node
+   script needs the same titles, and Node 22.13, the floor in `engines`, cannot be relied on to import TypeScript (type
+   stripping is unflagged only from 22.18). The object is still
+   `explorerHis`, exported from `copy.ts`. (Cost: no comments inside the JSON; the file's reasons are in `copy.ts`.)
+4. **Types for fields no view reads yet are `unknown`** (`cells`, `objective_rates`, `pair_rates`, `position`,
+   `descriptive`, the case files' `readings`, `dimensions` and the like). The comparisons, verdicts, the
+   against-thesis entries, the files block, the models, objectives and scenarios are typed from the real files; C4
+   and C5 type the rest when they first read it.
+5. **A real HTTP 404 is not possible from the preview or the static host as built.** An unknown path is served the
+   root page (status 200) and the client shows the not-found view. A true 404 status is Phase 6.5's (a CloudFront
+   custom error response), not this step's.
+6. **Not built, not in the prompt:** the palette test that checks E's gray against the four series colors (§24.1 says
+   it is still to build), `og:` tags and cards (C7), and any gate that fails on unwritten explorer words. **That gate
+   is Phase 6.5's go-live.** `explorerLabels` has a test that none of its values is a `[his:` placeholder, and
+   `explorerHis` has one that every value is written text or a placeholder naming what goes there.
+7. **Small additions:** a `dev:explorer` script (`vite --mode explorer`, serving the data and any page path from the
+   explorer's entry); a skip link; the `.d.mts` files and `fixtures.ts` the tests need. Under the jsdom environment
+   `import.meta.url` is not a `file:` URL, so `fixtures.ts` takes the web folder from `import.meta.dirname`.
+8. **Navigation to a case from the cases list** is a plain link list in the stub, so every case path is reachable
+   without the data views; C5 replaces it.
+
+
+## 25a. Review of C3 (2026-11-10, Opus)
+
+**Passed; no code change.** One decision for him before C4 (the models' display names and order) and one note
+carried to C5.
+
+**Reproduced, not taken on report:** `make check` green on Claude's own run (Python 3,423, unchanged; Vitest 87 in 11
+files; doctor ok). After it, the sha256 of the 8 files in `web/dist/` equal `scratch/p6-c3-dist-before.txt` line for
+line (the listings differ only in the `web/` prefix of the path). Both check-dist summaries as in §25 (2,290 run ids,
+13 sweep ids, 13 HTML files, `data/` 67 of 67 byte for byte, JavaScript 74.1 KB and 70.9 KB gzipped). The captures
+read: the nav, the sticky switch, the card frame and the footer in both modes and both widths.
+
+**The rule this step exists for holds.** `web/index.html`, `src/main.tsx` and everything it imports are untouched
+(no tracked file under `web/src/` is modified); the explorer is reachable only from `explorer.html`; the module-graph
+test walks both entries, finds no `import(`, no `import.meta.env` and no "explorer" in anything the placeholder
+reaches, and keeps the placeholder's run data out of the explorer. Deploy still runs `check` and syncs `web/dist`
+only. The explorer's own `Footer.tsx` was diffed against `components/Footer.tsx`: the component bodies are identical
+and its repository address equals `Provenance.tsx`'s.
+
+**Checked and accepted:** the leak checks read the ids from the committed data, not a list (§25 decided point 8);
+the dev server's `/data/` handler refuses a path that climbs out of its folder; `dataPath` refuses absolute, host,
+`..` and backslash paths; `write-paths` refuses a data segment that is not `^[a-z0-9][a-z0-9-]*$` and escapes his
+words in the head; palette A's values equal §24.1's table; `his.json` in place of `copy.ts` (§25 item 3) is the
+right call. A subfolder `index.html` is not served by CloudFront at `/scenario/s1/` without a function or rewrite;
+that is already Phase 6.5's (§3 finding 6).
+
+**For his decision, before C4's prompt: the models' display names and order** (§25 item 2). The data has only
+`model_key`, so the buttons and the card's caption read `haiku-5-5` and `gpt-oss-openrouter`, in the index's order
+(gpt-oss first, the default second). Recommendation: (a) a display-name map in `explorerLabels`, keyed by model key,
+in the order shown (Haiku 5.5 first, as the default), with a test that its keys equal `index.json`'s model keys
+exactly, so a model added to or dropped from the data fails the test rather than showing a bare key. The names are
+words, approved with the other labels at §14 step 8 (§11). The alternative, (b) a display-name field in C1's Python
+builder, changes `explorer-data/` and reopens a reviewed step for what is a word choice. C3's prompt said the names
+come from the data; that assumed a field that does not exist, and (a) replaces it.
+
+**Carried to C5:** the shell intercepts every same-origin link, so a link to a file (`/data/...`, a download) would
+be turned into a `pushState` and the not-found view. No such link exists today. If C5's memo reader links to a raw
+file, the interception must leave paths under `/data/` and paths with a file extension to the browser, with a test.

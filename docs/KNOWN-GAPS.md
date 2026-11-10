@@ -7,7 +7,39 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-09, about 2:10 PM, HANDOFF (PHASE 6 STEPS 0-3 DONE; STEP 4, THE PREVIEWS, NEXT)
+> ## START HERE — where things stand, 2026-11-10, about 11:15 AM (C3 BUILT AND REVIEWED; HIS COMMIT, THEN C4)
+>
+> **C3, build modes and the shell, built (Sonnet, the Phase 6 IMPLEMENTATION doc §25) and reviewed (Opus, §25a):
+> passed, no code change.** `make check` green (Python 3,423, Vitest 87); `web/dist/` byte for byte the placeholder
+> (8 files, sha256 unchanged), so the public page does not change. Uncommitted: C3's code and every doc edit of step 4
+> and C3 go in one commit, `phase 6: c3 build modes and shell`.
+>
+> **Open for his decision before C4's prompt (§25a):** the models' display names and order. Recommended: a name map in
+> the explorer's labels keyed by model key, Haiku 5.5 first, with a test tying its keys to `index.json`. **Next: §14
+> step 6, C4 (the scenario view and the section for results against the thesis): Sonnet builds, Opus reviews.**
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-10, about 10:05 AM (PHASE 6 STEP 4, THE PREVIEWS, DONE; C3 NEXT) *(superseded by the block above)*
+>
+> **Step 4 done 2026-11-10 (Opus built the previews in `scratch/p6-previews/`, untracked; every pick his; the Phase 6
+> IMPLEMENTATION doc §24-§24.2).** Form: the five §7 candidates read as too technical for a general reader (his read),
+> so a sixth, simpler page: a dot is one run, on a "none kept" to "all 125 kept" line for a share scenario and grouped
+> under the choice for a choice scenario, plain goal names, one plain sentence per comparison with its run counts and
+> official verdict; the interval chart and the full allocation in a "See the details" section, closed by default.
+> Palette A, amber and blue (only warm-against-blue pairs passed the validator in dark mode). Layout 2, side by side,
+> one page-level model switch, the Roundtable pair's sentence leading in sans on a pale yellow wash. **Two findings
+> for the build (§24):** §7's wording of the verdict geometry misstates protocol §6.3 (a split also needs the
+> difference at the threshold); the results carry no per-objective mean or interval for the primary outcome, so none
+> is drawn. The plain goal names and "points" are open word questions for §11.
+>
+> **Next: §14 step 5, C3 (build modes and the shell): Sonnet builds, Opus reviews.** The prompt is written:
+> `scratch/p6-c3-build-prompt.md` (a fresh Sonnet session). The doc edits of this step (this block, `ROADMAP.md`, the IMPLEMENTATION doc §14 and §24-§24.2) are
+> uncommitted and **ride in C3's commit** (his decision, 2026-11-10); the C3 build must leave them as they are.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-09, about 2:10 PM, HANDOFF (PHASE 6 STEPS 0-3 DONE; STEP 4, THE PREVIEWS, NEXT) *(superseded by the block above)*
 >
 > **First, tomorrow:** `git log -1 --oneline` should be `phase 6: c2 grid memo extract` (his commit of the extract
 > and this record, given at handoff). If it is not, `git status` will show `web/explorer-memos/` and three docs

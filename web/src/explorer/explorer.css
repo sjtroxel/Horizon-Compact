@@ -1,0 +1,238 @@
+/* The explorer's own styles. The main bundle imports ../styles.css first for the fonts and the site's tokens; this
+   file adds to them and overrides the few placeholder rules that do not fit (the giant name heading). Nothing here
+   is remote: no @import, and every url() would have to be a built file. */
+
+/* Palette A, amber and blue (his pick, 2026-11-10; Phase 6 IMPLEMENTATION doc section 24.1), validated in both modes.
+   Hue is who counts (warm for shareholders, blue for everyone with a stake), lightness is horizon (lighter for four
+   quarters, darker for twenty years), and E, no stated objective, is the site's muted gray. --leadwash is the pale
+   yellow behind the lead sentence (section 24.2); it is not a series color and carries no verdict. */
+:root {
+  --o-a: #daa668;
+  --o-b: #5fa1f3;
+  --o-c: #81520a;
+  --o-d: #07519d;
+  --o-e: var(--muted);
+  --leadwash: #f7e6b5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --o-a: #b68446;
+    --o-b: #4f91e2;
+    --o-c: #84550f;
+    --o-d: #1d60ad;
+    --leadwash: #3a301a;
+  }
+}
+
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -4rem;
+  z-index: 5;
+  padding: 0.5rem 0.75rem;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  border-radius: 4px;
+}
+.skip:focus {
+  top: 0.5rem;
+}
+
+/* The header and its navigation share main's column and gutter. */
+.site-header {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1rem 16px 0.5rem;
+}
+@media (min-width: 40rem) {
+  .site-header {
+    padding: 1.25rem 2.5rem 0.5rem;
+  }
+}
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.site-name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.75rem;
+  line-height: 1;
+  letter-spacing: 0.005em;
+  text-decoration: none;
+  color: var(--ink);
+}
+.site-header nav {
+  margin-top: 0.75rem;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+}
+.site-header ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.site-header nav a {
+  display: inline-block;
+  padding: 0.25rem 0;
+  color: var(--ink2);
+  text-decoration: none;
+}
+.site-header nav a:hover {
+  color: var(--ink);
+}
+.site-header nav a[aria-current="page"],
+.site-header nav a[aria-current="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 2px 0 var(--accent);
+}
+
+/* The one model switch, pinned to the top on scroll (layout 2). */
+.switch-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface);
+  border-bottom: 1px solid var(--grid);
+}
+.switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0.5rem 16px;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+}
+@media (min-width: 40rem) {
+  .switch {
+    padding: 0.5rem 2.5rem;
+  }
+}
+.switch-label {
+  color: var(--ink2);
+  margin-right: 0.4rem;
+}
+.switch button {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--axis);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  min-height: 2rem;
+  cursor: pointer;
+}
+.switch button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+  font-weight: 600;
+}
+
+/* A view: a page title in the sans face, not the placeholder's giant name. */
+.view {
+  padding-top: 1.5rem;
+  padding-bottom: 4rem;
+  min-height: 60vh;
+}
+.view h1 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: var(--s2);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  scroll-margin-top: 5rem;
+}
+.view h1:focus {
+  outline: none;
+}
+.view h1:focus-visible {
+  outline: 2px solid var(--series);
+  outline-offset: 4px;
+}
+.view p {
+  max-width: 65ch;
+}
+
+/* The card frame: the chart (C4) sits inside a figure, and the figcaption under it carries the model, the run
+   counts and the scope line, so a crop of the card keeps them (section 24.2). */
+.card {
+  margin: 0;
+  padding: 1rem 1rem 0.75rem;
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.card figcaption {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--grid);
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+}
+.card figcaption p {
+  margin: 0.25rem 0 0;
+  color: inherit;
+}
+.model-name {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Layout 2: the card and a column of sentences side by side at 60rem and wider, stacked below that. */
+.layout-2 {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 60rem) {
+  .layout-2 {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+
+.stub {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  font-family: var(--sans);
+}
+.stub dt {
+  color: var(--ink2);
+  font-size: var(--s-1);
+}
+.stub dd {
+  margin: 0;
+}
+.stub-list {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--sans);
+}
+.stub-list li {
+  margin: 0 0 0.5rem;
+}
+.tag {
+  margin-left: 0.75rem;
+  padding: 0.0625rem 0.5rem;
+  border: 1px solid var(--axis);
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+}

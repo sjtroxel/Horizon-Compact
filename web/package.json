@@ -8,11 +8,14 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:explorer": "vite --mode explorer",
     "build": "vite build",
+    "build:explorer": "vite build --mode explorer && node scripts/write-paths.mjs",
     "preview": "vite preview",
+    "preview:explorer": "npm run build:explorer && vite preview --mode explorer --outDir dist-explorer --host 127.0.0.1 --port 4173 --strictPort",
     "test": "vitest run",
     "format": "prettier --write .",
-    "check": "prettier --check . && tsc --noEmit && vitest run && vite build && node scripts/check-dist.mjs"
+    "check": "prettier --check . && tsc --noEmit && vitest run && vite build && node scripts/check-dist.mjs && npm run build:explorer && node scripts/check-dist.mjs --mode explorer"
   },
   "dependencies": {
     "react": "19.3.1",

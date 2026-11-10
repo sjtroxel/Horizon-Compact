@@ -1,0 +1,30 @@
+{
+  "landingQuestion": "[his: the landing question, the one sentence the guided story opens with]",
+  "scopeSentence": "[his: the scope sentence in its public wording, saying what this experiment tests and what it does not show]",
+  "pages": {
+    "story": {
+      "title": "[his: the title of the guided story, the page at the site's root]",
+      "description": "[his: one or two sentences describing the guided story for a search result or a shared link]"
+    },
+    "scenario": {
+      "title": "[his: the title of a scenario view; the scenario's id follows it]",
+      "description": "[his: one or two sentences describing a scenario view for a search result or a shared link]"
+    },
+    "cases": {
+      "title": "[his: the title of the real-cases page]",
+      "description": "[his: one or two sentences describing the real-cases page for a search result or a shared link]"
+    },
+    "case": {
+      "title": "[his: the title of one real case's page; the case's label follows it]",
+      "description": "[his: one or two sentences describing one real case's page for a search result or a shared link]"
+    },
+    "studies": {
+      "title": "[his: the title of the studies page, the thinking sub-study and the awareness probes]",
+      "description": "[his: one or two sentences describing the studies page for a search result or a shared link]"
+    },
+    "memos": {
+      "title": "[his: the title of the memo reader]",
+      "description": "[his: one or two sentences describing the memo reader for a search result or a shared link]"
+    }
+  }
+}
