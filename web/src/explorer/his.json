@@ -1,6 +1,14 @@
 {
   "landingQuestion": "[his: the landing question, the one sentence the guided story opens with]",
   "scopeSentence": "[his: the scope sentence in its public wording, saying what this experiment tests and what it does not show]",
+  "scenarioBriefs": {
+    "s1": "[his: the scenario in brief for s1, the decision about the people whose work AI tools can now do, in his words]",
+    "s2": "[his: the scenario in brief for s2, who bears the fall in operating income, in his words]",
+    "s3": "[his: the scenario in brief for s3, the plant that loses money, to close, retool or sell, in his words]",
+    "s4": "[his: the scenario in brief for s4, the long-term program to fund or decline, in his words]"
+  },
+  "againstTitle": "[his: the title of the section for results against the thesis; he may revise it so it names the rule's source]",
+  "againstIntro": "[his: the introductory sentence of the section for results against the thesis]",
   "pages": {
     "story": {
       "title": "[his: the title of the guided story, the page at the site's root]",

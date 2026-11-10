@@ -423,7 +423,7 @@ My recommendation is (a) in each, for the reason given.
 4. **[done 2026-11-10: form, palette and layout picked by him, §24-§24.2]** **[Claude builds, his picks]** **The previews** (§7): form, then palette, then layout.
 5. **[built 2026-11-10 by Sonnet, §25; reviewed by Opus, §25a: passed, no code change]** **[Sonnet builds, Opus reviews]** **C3, build modes and the shell:** the two modes, the placeholder-mode check, the
    paths and their HTML files, the local preview script.
-6. **[Sonnet builds, Opus reviews]** **C4, the scenario view and the section for results against the thesis.**
+6. **[built 2026-11-10 by Sonnet, §26; reviewed by Opus, §26a]** **[Sonnet builds, Opus reviews]** **C4, the scenario view and the section for results against the thesis.**
 7. **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
 8. **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[Sonnet builds, Opus reviews]** **C6, the guided story.**
@@ -1000,6 +1000,13 @@ named by a visible label beside its marks, and every chart has its table. No tex
 outside the validated four by design (it is the neutral, not a series hue) and must stay distinct from all four; a palette test in the
 build is to check E against each (not built yet).
 
+*Dated note, 2026-11-10 (C4 built the test; §26 item 1, §26a):* E's gray does **not** clear the validator's
+normal-vision floor of 15 against every one of the four: light C 14.79; dark A 13.01 and B 11.77 (the rest 16.87 to
+23.75). **His decision, 2026-11-10: accept it as it is**, because no view built puts two goals in one plot area: every
+row, panel and toggle carries its goal in text, so a reader never has to tell E from another goal by color alone.
+`palette.test.ts` pins the distances and the three pairs. **Reopen** if a later view (the story, C6; the share cards)
+draws goals in one plot area.
+
 ### 24.2 Decision 3, layout (2026-11-10); step 4 done
 
 **Built:** three layouts on page 6 with palette A, each with a working model switch and the details section closed
@@ -1219,3 +1226,290 @@ come from the data; that assumed a field that does not exist, and (a) replaces i
 **Carried to C5:** the shell intercepts every same-origin link, so a link to a file (`/data/...`, a download) would
 be turned into a `pushState` and the not-found view. No such link exists today. If C5's memo reader links to a raw
 file, the interception must leave paths under `/data/` and paths with a file extension to the browser, with a test.
+
+
+## 26. As built, C4: the scenario view and the section for results against the thesis (2026-11-10, Sonnet; Opus review §26a)
+
+Built from `scratch/p6-c4-build-prompt.md`, with the `dataviz` skill loaded before any chart code. Front-end work in
+`web/` only: no AWS call, no model call, no `terraform`, no `hc` command that reads S3. Nothing under
+`src/horizon_compact/`, `experiment/`, `web/explorer-data/`, `web/explorer-memos/`, `web/src/data/` or any Python was
+touched, and no file the placeholder entry imports was edited (`git status` shows only `web/src/explorer/` and the
+`KNOWN-GAPS.md` edit that was already uncommitted). `KNOWN-GAPS.md`, `ROADMAP.md` and every other part of this doc were
+left as they were; the two edits of this step are this section and the prefix on §14 step 6. Not committed (his
+commit).
+
+**What was built.**
+
+- **The scenario view**, `/scenario/<id>/`, in layout 2 (`ScenarioView.tsx`, `charts.tsx`, `chartData.ts`). Top to
+  bottom: his title; the scenario in brief (his, a placeholder per scenario) with the link to the full text; the five
+  goals listed once (plain name, color swatch, the letter beside it, the literal `who` and `when` from `index.json`; E
+  says it was told no goal); the goal toggles (buttons with `aria-pressed`, all on, in component state, keyed by
+  scenario so they reset on a new scenario and carry across a model switch); the card (`figure`: the chart, then a
+  `figcaption` with the model's name, "N valid runs of M attempted", "on the fictional company" and his scope
+  sentence) beside the column of sentences at 60rem and wider, stacked below; the closed "See the details"; the repeats
+  line and the link to the section for results against the thesis.
+- **The chart.** A share scenario (s1, s2) is page 6's strip: a row per goal, every valid run a dot at its `primary`
+  from 0 to 1, the goal's plain name and run count beside the row, axis ends in words per scenario from the labels, no
+  ticks, interval, threshold or mean. A choice scenario (s3, s4) is page 6's unit chart: columns in the order of the
+  split's `counts`, ten dots to a row, "n of N" under each group from the split. Each dot has an SVG `<title>`; each
+  chart is `role="img"` with an `aria-label`. Plot areas are SVG at 100% width with percentage coordinates and a fixed
+  height, so a dot stays round at any width and every label is HTML text.
+- **The sentence column.** C vs D first as the lead (Source Sans 3 600 at 1.125rem, ink on `--leadwash`, the flag
+  "The pair the Roundtable's claim is about"), then A vs C, B vs D, A vs B, then A vs D flagged secondary. Each is an
+  element `.result-sentence` with `data-template`, the output of one function in `sentences.ts`, followed by a small
+  line: the comparison's own run counts (`format.ts`), the kept and dropped wordings when one was dropped, "official
+  verdict:" and the word, and a small link to the section when the rule lists the comparison. Under each, the
+  protocol's quoted reading where §1.5 has a row, or a label saying it wrote none. Above the first, one line stating
+  the confidence level from `alpha` (§20: beside the first verdict a reader meets).
+- **The details** (`<details>`, closed by default, content built only once opened): the comparison interval chart
+  drawn to protocol §6.3 (the verdict word beside each row is the authority; the key says the geometry does not decide
+  it and names the 99.7% level and the Bonferroni family of 16); each comparison as the file has it (`headline`
+  verbatim, kept and dropped wordings with the dropped cells' `unsuccessful` of `attempted`, the sealed wording's
+  result labeled as outside the family, the first attempt and the final result); the full allocation as small
+  multiples (a panel per goal, a row per lever in canonical order, every run a dot) with a `summary` table per goal;
+  the failures and refusals table (a row per goal and wording, every status shown, zero as zero); the runs table.
+- **The section for results against the thesis** (`AgainstThesis.tsx`, `againstWords.ts`): mounted on `/` under the
+  story's stub as `section#against-the-thesis` (`tabindex="-1"`), no path of its own. His title and introduction
+  (placeholders); the rule in plain words, its three dated sources, the date it was written (2026-11-09), the
+  disclosure and the data's `rule` citation as written, all above the list; each entry in the file's order with its
+  model, scenario and pair, the clause that listed it, verdict, difference, interval, valid runs, wordings kept and
+  dropped, `headline` verbatim, the same `IntervalChart` component and size as the details (a test compares the two
+  rows' markup), the protocol's reading where there is one or the label that there is none; for a C vs D entry both
+  readings; beside any s4 entry the note that its direction is the one a reviewer could dispute; whole scenarios
+  listed; the drafted sentence when the list is empty.
+- **The shell** (`Shell.tsx`): after a navigation, and on a first load once the data has rendered, focus and scroll go
+  to the element the hash names (inside `main`), otherwise to the top and the `h1`. A hash naming nothing, and a
+  malformed escape, fall back to the `h1`. A first load without a hash is left to the browser.
+- **The data API** (`data.ts`): a cache by path (one fetch per file, a failed one forgotten); the typed fields this
+  step reads (`CellStatus`, `ObjectiveRate`, `Descriptive`, `PerRun`, `ChoiceSplit`, `GridComparison` with
+  `per_wording`, `sealed` and `first_attempt`, and so on); `position`, `pair_rates`, `distances` and `secondaries`
+  stay `unknown`. **The comment on `valid_runs` is fixed**: it is `[wording_id, valid runs of the first objective,
+  valid runs of the second]`, not "attempted and valid" as C3's comment said (§25a's review missed it).
+- **The models' names** (his decision, §25a (a)): `explorerLabels.models`, Haiku 5.5 first; `ModelSwitch` and the
+  card's caption take their order and names from it (`models.ts`); its comment is updated.
+- **`format.ts`**: the only place a number from the data becomes anything else. Percent and points formats (each names
+  its precision), the lead's whole points rounded down after `+ 1e-9`, the confidence level from `alpha`, the integer
+  sums of `valid_runs` and of `objective_rates[].attempted`, and the pixel helpers (axis position, a deterministic
+  jitter from an FNV-1a hash of the run id, the unit chart's slots). A test fails if any other view, chart or template
+  file holds a `Math.` call, a `.reduce(` or a running total.
+
+**Files.** New in `web/src/explorer/`: `ScenarioView.tsx`, `AgainstThesis.tsx`, `charts.tsx`, `chartData.ts`,
+`format.ts`, `sentences.ts`, `protocol.ts`, `againstWords.ts`, `parts.tsx` (`His`, `HisHeading`, `Title`,
+`ProtocolReading`, moved out of `views.tsx` so the views do not import each other), `models.ts`, `links.ts`, and the
+tests `format`, `sentences`, `protocol`, `palette`, `chartData`, `links`, `ScenarioView` and `AgainstThesis`. Changed:
+`data.ts`, `copy.ts`, `his.json` (`scenarioBriefs`, `againstTitle`, `againstIntro`), `views.tsx`, `Shell.tsx`,
+`ModelSwitch.tsx`, `explorer.css`, `fixtures.ts` (`realGrids`), and the tests `copy`, `data`, `Shell`, `ModelSwitch`.
+Nothing new at the repository root.
+
+**Proof, measured 2026-11-10.**
+
+1. **The public page did not change.** `find web/dist -type f | sort | xargs sha256sum` before any change
+   (`scratch/p6-c4-dist-before.txt`) and after the last `make check` (`scratch/p6-c4-dist-after.txt`): the diff is
+   empty, 8 files, the same eight hashes as §25's listing.
+2. **`npm --prefix web run check`, last lines of each mode** (from `make check`):
+
+   ```
+   dist: 8 files
+   JavaScript, gzipped, in all: 75899 bytes (74.1 KB); budget 100.0 KB
+   check-dist: ok
+   ...
+   dist-explorer: 87 files (20 outside data/)
+   JavaScript, gzipped, in all: 82655 bytes (80.7 KB); budget 100.0 KB
+   fonts: 4 files, 68400 bytes (66.8 KB); budget 150.0 KB; WOFF2 only
+   HTML files: 13, one per path
+   data/: 67 files, 67 expected, byte for byte
+   official run ids read: 2290; looked for in every file outside data/
+   check-dist: ok
+   ```
+
+   The explorer's JavaScript went from 70.9 KB to 80.7 KB gzipped; the budget is 100 KB and no chunks were split.
+3. **`make check`: green** (exit 0). Python **3,423 passed**, unchanged. Vitest **206 passed in 19 files**, up from 87 in
+   11 (119 more: eight new files holding 100, and 19 net in `copy`, `data` and `Shell`). The module-graph test is
+   unchanged and passes. The log is `scratch/p6-c4-check.log`.
+4. **The tests can fail** (three mutations made by hand, then undone): the hash handling disabled (2 tests failed), the
+   lower/higher word swapped in the split sentence (2 failed), and the allocation dots drawn on 0 to 1 whatever the
+   lever's scale (**not caught** by the first set of tests; a test was added, and fails under that mutation).
+5. **Headless captures** (chrome-headless-shell 1234 over the DevTools protocol, `scratch/p6-c4-shoot.mjs`, a copy of
+   C3's method with the cache disabled so each capture is a first load; the preview was `vite preview --mode explorer`
+   with the content security policy header). `scratch/p6-c4-shots/`, 24 captures and one click record: every scenario view on both models
+   at 1280 light (8); s1 and s3 on Haiku at 390 light and dark and at 1280 dark (6); s2 on gpt-oss-120b with the
+   details open at 1280 (the not-assessable row and the dropped wordings); s4 on Haiku with the details open at 1280
+   and 390 (the wide-scale levers); `/#against-the-thesis` at 1280 light and dark and at 390 light; s1 with goals A
+   and C toggled off; and three figure-only crops. **For all 24: no console error or warning, no failed request, no
+   `securitypolicyviolation` (listener installed before the page's scripts), no horizontal overflow, the app
+   mounted, five result sentences on every scenario view, the details open where opened.** A click from a scenario
+   view on "See the results that go against the thesis" went to `/#against-the-thesis`, focus on `against-the-thesis`,
+   no reload. Report: `scratch/p6-c4-shots/report.json`. *(With the cache on, a reused tab printed Chrome's
+   "preloaded but not used within a few seconds" notice for the two preloaded fonts on captures left open past three
+   seconds; a fresh browser on the same pages, with the details opened and five seconds' wait, printed none and
+   fetched each font once, so it is the reused tab and not the page.)*
+6. **The crop test (§12):** a capture clipped to the `figure`'s box, for s1 (share) and s3 (choice) on Haiku at 1280, and
+   s3 at 390 (`crop-*-figure.png`), shows the model's name, "300 valid runs of 300 attempted · on the fictional
+   company" and the scope line (his placeholder) in each; the DOM test asserts the same text inside the `figure` for
+   s1 and s3.
+7. **The scenario text link.** `git ls-tree prereg-v1 experiment/company/scenarios/s1.toml` (and `s2` to `s4`) lists
+   all four files at the tag; `scenarioTextUrl` builds `https://github.com/sjtroxel/horizon-compact/blob/prereg-v1/
+   experiment/company/scenarios/<id>.toml`. The file is the rendered `sN.toml` the harness reads (`hc scenarios
+   render` writes it from `sN.source.toml`), not the source. A test checks each path exists in the working tree.
+
+**The decided points, as built.** All ten as written, with these choices the prompt left open.
+
+(1) The names are the data's models re-ordered by the labels' list; a model the labels do not know would follow, in
+the data's order, under its key, and the test that ties the list's keys to `index.json` is what stops that. (2) The
+toggles hide a row with opacity (and `aria-hidden` and `pointer-events: none`), keeping its space: no layout moves.
+The grid file is held at reduced opacity (`data-stale`) while another model's loads, and swapped when it arrives; a
+first load, and a load of a new scenario, shows the loading line. Switching back to a model fetched before shows it at
+once. (3) `not_assessable`: "Too many runs failed in every wording to compare “X” and “Y” on <outcome> (<the
+`downgrade_reason`>). Wordings dropped: w1, w2 and w3." The outcome phrases carry no number ("the share of the
+affected people who were kept", where the previews wrote "of the 125"). (4) The interval chart is `role="group"`, not
+`role="img"`, so the verdict words stay readable to a screen reader; the geometry is aria-hidden SVG and every number
+is in text beside or below it. (5) `readingFor` takes the scenario's C vs D verdict, so an A vs B split gets "A and B
+split, C and D do not" only when C vs D is a no split or inconclusive; the section looks that verdict up in
+`index.verdicts`. (6) `against_thesis.clause` is `no_split` or `reversed_split` in the builder, and the labels say
+which. (7) Words: see the list below. (8) The palette test is `palette.test.ts`, with the finding below. (10) Nothing
+was split.
+
+**What did not fit, and what was done instead.**
+
+1. **E's gray is under the validator's normal-vision floor against three of the four series colors.** §24.1 left a
+   test to build "against each"; built to the skill's floor (OKLab ΔE ×100 of 15, unsimulated, the validator's
+   `NORMAL_FLOOR`), it **fails on his palette A**: E against C in light **14.79**; E against A **13.01** and against B
+   **11.77** in dark (the rest: light A 16.87, B 19.03, D 23.75; dark C 17.93, D 17.07). The test pins these numbers and
+   the three pairs under the floor and passes; it does not hide them, and it fails if the palette changes so that
+   the list is no longer true. **The palette was not changed** (his pick). Mitigation as built: every row, panel,
+   toggle and list item names its goal in text, so no goal rests on color alone. That is not what the skill asks of
+   this check: it calls a normal-vision pair under 15 a hard fail that secondary encoding does not excuse (the
+   contrast WARN is the one labels relieve). E was outside the validated four by design (§24.1) and was never run
+   through the validator, so this is the first time it has been measured. **For his and Opus's decision:** accept
+   E's gray as it is, move E, or move A and B in dark.
+2. **s4's lever shares pass 100%.** A lever's share on s4 is a share of the year's $20.4 million, and with cuts a lever
+   can take many times that (Haiku's "Retaining as cash" reaches 401%, gpt-oss-120b's 1,406%). A 0 to 100% axis would
+   draw dots off the plot; the prompt did not foresee it, and a test over the real files caught it. **Done instead:**
+   each lever has one scale, shared by all five goals' panels (so they stay comparable), 0 to 100% unless the data's
+   own highest `summary.maximum` for that lever is higher; a row on a wider scale says "scale 0 to N%" under its label,
+   and the key says every other row runs 0 to 100%. `axisExtent` in `format.ts` is the only arithmetic, and tests pin
+   it. The strip's outcome (`primary`) stays within 0 to 1 in every real file (tested).
+3. **The prompt's example count is off.** It says A vs B on gpt-oss-120b `s1` counts "20 and 39"; the file's
+   `valid_runs` are w1 20 and 19, w3 20 and 20, which sum to **40 and 39**. The test pins 40 and 39, with B at 56 dots.
+4. **The details build only once opened.** The allocation panels and the run table are thousands of nodes (s4 on Haiku:
+   293 runs by 15 levers by 5 goals), and a closed section shows none. Cost: the browser's find-in-page does not search
+   a closed section's text, since it is not in the page. If Opus would rather have it all in the page, closed, the
+   `Details` component's `open &&` is the one line to change, with the test time that costs.
+5. **Hidden goals leave their space.** A row faded out by its toggle keeps its height, so the chart does not jump; the
+   cost is a blank band where a goal was. Collapsing the row would need a height transition, and the prompt said
+   opacity only.
+6. **"The protocol wrote no reading for this pair" repeats** under the sentence of every pair without a row: A vs C, B vs D
+   and A vs D always, and A vs B and C vs D when their verdict has none (three or four lines on most views). The prompt
+   asked for it ("show nothing quoted and say, in a label"); it is the smallest muted line. A decision for review
+   whether to say it once.
+7. **Lever labels are one flat map keyed by lever key**, as the prompt said, so a key two scenarios share
+   (`eliminate_roles`, `cut_wages_hours`, `cut_rnd`, `cut_env_projects`, `raise_prices`, `suppliers`) has one
+   label. The scenario files word them per scenario ("Cutting existing research and development (a cut)" on s4,
+   "Cutting research and development, borne by the Company's future products and its engineering staff" on s2); the
+   label is the short common form. The model saw the long wording; the allocation panels do not.
+8. **C3's tests that named the stub or the keys were changed, not left.** `Shell.test.tsx` and `ModelSwitch.test.tsx`
+   called the buttons by key (`haiku-5-5`), which decision 1 replaces with the names; one `Shell` test asserted the
+   stub's id and primary outcome, and the stub is gone, so it now asserts the title's id and the loaded card's
+   caption. The stub's `.stub` rules and the labels `primaryOutcome` and `sealedNote`/`intervalLabel` (written and
+   then unused) are removed.
+9. **No focus ring on the section.** Focus moves to `#against-the-thesis` by script on a first load with the hash,
+   and Chrome showed a ring around the whole section; the section is a landmark, not a control, so its outline is
+   off (its links and buttons keep theirs). The heading is not the focus target here: the prompt says the element
+   the hash names.
+10. **A click on an in-page hash link from `/` itself** is left to the browser (C3's rule: a same-page link with a
+    hash), which scrolls but does not move focus. No such link exists on `/` yet; **C6** places the section as the
+    story's beat 7 and may link to it from the same page, in which case the shell must handle it.
+11. **`explorerHis` placeholders** for the four briefs and the section's title and introduction follow the existing
+    pattern (`[his: ...]`, each naming what goes there); the section's title placeholder carries his note that he may
+    revise it to name the rule's source.
+
+**Claude-drafted words, for §14 step 8 (one list, grouped by object).** Unapproved until he approves each word for word
+(§11). Where a value is a function, its text is in the file.
+
+- `sentences.ts`, the result-sentence templates: `split`, `no_split`, `inconclusive` (all three from page 6) and
+  `not_assessable` (new, this step).
+- `againstWords.ts`, the rule and what is around it: `ruleHeading`, `ruleParagraphs` (five), `sourcesHeading`,
+  `sources` (three), `writtenLine`, `disclosure`, `citationLabel`, `entriesHeading`, `wholeHeading`, `wholeLine`,
+  `emptyList`, `entryPair`, `clauseNoSplit`, `clauseReversed`, `alsoAgainstAuthor`, `s4Note`, and the field labels
+  `none`, `differenceLabel`, `intervalLabel`, `validRunsLabel`, `verdictLabel`.
+- `explorerLabels`, the goals: `objectiveNames` (A to E: "Shareholders, short term", "Everyone with a stake, short
+  term", "Shareholders, long term", "Everyone with a stake, long term", "No goal stated" — an open word question,
+  §24), `goalsHeading`, `goalsKey`, `goalTold`, `goalUnstated`, `toggleGroup`.
+- `explorerLabels`, the scenario and the chart: `sceneBriefHeading`, `sceneFullText`, `sceneFullTextNote`,
+  `chartLabel`, `shareKey` (s1, s2), `choiceKey`, `axisEnds` (s1, s2: title, low, mid, high), `choices` (close, retool,
+  sell, fund, decline), `runCount`, `nOfN`, `dotTitleShare`, `dotTitleChoice`, `capValidOfAttempted`, `capCompany`,
+  `loadingScenario`, and the models' names (`models`, "Haiku 5.5" and "gpt-oss-120b").
+- `explorerLabels`, the sentence column: `outcomePhrases` (s1 to s4), `whatRunsShow`, `verdictNote`, `roundtableFlag`,
+  `secondaryFlag`, `officialVerdict`, `verdictWords` (the four), `runsPair`, `noRunsCompared`, `keptWordings`,
+  `droppedWordings`, `noReading`, `protocolReadingLabel`, `repeatsLine`, `againstLink`, `againstMarker`. "Points" as the
+  unit of a difference is an open word question (§24).
+- `explorerLabels`, the details: `detailsHint`, `intervalHeading`, `intervalKey`, `intervalAxis`,
+  `intervalRowNotAssessable`, `intervalChartLabel`, `perComparisonHeading`, `headlineLabel`, `differenceLabel`,
+  `keptLabel`, `droppedLabel`, `droppedCell`, `noneWord`, `noNumbers`, `sealedLabel`, `sealedWordingIs`,
+  `firstAttemptLabel`, `firstAttemptNote`, `finalLabel`, `allocationHeading`, `allocationKey`, `leverScale`, `levers`
+  (23 keys, the short common wording of each lever), `summaryHeading`, `th` (the table headers), `failuresHeading`,
+  `failuresKey`, `runsHeading`, `runsKey`, `tableFailures`.
+- **Not Claude's, and not in the list:** the protocol's five readings (`protocol.ts`) are quoted verbatim and tested
+  against the file; `explorerHis.scenarioBriefs`, `againstTitle` and `againstIntro` are his and still placeholders.
+
+## 26a. Review of C4 (2026-11-10, Opus)
+
+**Passed after one fix.** The fix, and his two decisions on §26's open items, are below; the rest of §26 is
+accepted as built.
+
+**Reproduced, not taken on report:** `make check` green on Claude's own run after the fix (Python 3,423, unchanged;
+Vitest 208 in 19 files, the 206 of §26 and two added here; doctor ok). The sha256 of the 8 files in `web/dist/`
+equal `scratch/p6-c4-dist-before.txt` line for line. Both check-dist modes ok; the explorer's JavaScript is 80.8 KB
+gzipped (82,748 bytes; §26 measured 82,655 before the fix's label). The captures read, among them s2 and s3 on Haiku
+5.5 and the section at 1280. On the capture of `/#against-the-thesis` the top of the story's scope line is hidden
+under the sticky model bar: an artifact of a full-page capture taken after the scroll, not a fault of the page.
+
+**The fix: a pro-Roundtable reading shown where the protocol does not allow it.** `readingFor` gave A vs B the row
+"A and B split, C and D do not" when the same scenario's C vs D was **inconclusive** as well as when it was a no
+split. Protocol §6.3: a no split "has to be shown, never assumed from the absence of a split", and that row's
+reading says the objectives pulled apart "not at twenty years", which is the pattern the statement's "in the long
+term" predicts. It was live on the page: **Haiku 5.5 s2** (A vs B split, C vs D inconclusive) quoted it under A vs B,
+and Haiku 5.5's thinking sub-study on s1 has the same pattern. It was a reading in the Roundtable's favor that the
+data does not show. C4's test pinned the wrong case (`readingFor("A", "B", "split", "inconclusive")` expected the row).
+**Changed:** the row applies only when C vs D is a no split (`protocol.ts`, its comment citing §6.3); the unit test
+now expects null there; a test over every real grid and thinking file checks that the row appears only where that
+file's C vs D is a no split, and fails if no file is left with the inconclusive pattern to test it on; a view test
+renders Haiku 5.5 s2 and checks the reading is nowhere on it. **The tests can fail:** with the old condition put
+back, all three fail; with the fix, they pass. The prompt's point 5 named the row without saying what "do not" means,
+so the gap was the prompt's (Opus) as much as the build's.
+
+**His decisions, 2026-11-10, on §26's open items:**
+
+1. **E's gray (§26 item 1): accepted as it is**, recorded as a dated note in §24.1. No chart built puts two goals in
+   one plot area (a row or a panel per goal, each named in text), so no reader has to tell E from another goal by
+   color alone. Reopen if C6's story or C7's cards draw goals in one plot area.
+2. **"The protocol wrote no reading for this pair" (§26 item 6): said once.** The scenario view no longer prints it
+   under each pair; one line under "What the runs show" (`explorerLabels.readingsNote`, Claude-drafted, for step 8)
+   says the protocol wrote readings before the results for C vs D and A vs B only, quoted under the sentence they
+   apply to. A view test checks that the line appears once and the per-pair line not at all. The section for results
+   against the thesis keeps its per-entry line: each entry stands alone there, one line each. `noReading` stays, used
+   only there.
+
+**Checked and accepted:**
+
+- **The rule of §5.** `format.ts` holds only display formats, integer sums of run counts and pixel helpers; a test
+  fails on a `Math.` call, a `.reduce(` or a running total in any view, chart or template file. `axisExtent` (s4's
+  wide lever scales, §26 item 2) picks the largest of the file's own `summary.maximum` for a lever; the "scale 0 to
+  N%" it shows is that field formatted, not a number derived. Accepted.
+- **The sentences.** The split sentence's direction follows the sign of `difference` (first minus second, which the
+  file's field is), and its points are `wholePointsDown` (s3 on Haiku: C vs D reads 86, from 0.8667). The no-split
+  sentence says "this one measure, not every choice they made" (protocol §1.5 and §6.3). The not-assessable sentence
+  quotes the file's `downgrade_reason`; its one live case (gpt-oss-120b s2, A vs C) reads "every wording has a cell
+  over the 10% failure limit", matching protocol §6.3 and §7.2. Its wording is for step 8.
+- **The protocol's quotes** are tested as substrings of the frozen file and as one row each of the §1.5 table.
+- **The interval key** states §6.3's split rule, and the verdict word beside each row is the authority. The level
+  "99.7%" is protocol §6.4's own prose for 0.003125.
+- **The goals' descriptions** follow protocol §1.4's frame ("create value for [who], over [when]"), with `who` and
+  `when` taken from `index.json`, which match §1.4's table.
+- **§26 items 2 to 5 and 7 to 11 accepted as built:** s4's per-lever shared scale; the prompt's "20 and 39" was
+  Opus's error (40 and 39 is right); details built only when opened (find-in-page cost accepted for now; §14 step 11
+  can revisit); hidden goals keep their space; one flat lever-label map (a word question for step 8); C3's tests
+  updated for the names; no focus ring on the section landmark; the same-page hash link left to C6 (carried below).
+
+**Carried to C6:** if the story links to `#against-the-thesis` from `/` itself, the shell must move focus on that
+click (§26 item 10), with a test. **Carried to C6 and C7:** the E's-gray note above.

@@ -204,20 +204,6 @@
   }
 }
 
-.stub {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.25rem 1rem;
-  margin: 0;
-  font-family: var(--sans);
-}
-.stub dt {
-  color: var(--ink2);
-  font-size: var(--s-1);
-}
-.stub dd {
-  margin: 0;
-}
 .stub-list {
   margin: 1rem 0 0;
   padding: 0;
@@ -235,4 +221,608 @@
   font-family: var(--sans);
   font-size: var(--s-1);
   color: var(--ink2);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+   The scenario view and the section for results against the thesis (C4). Class names are prefixed or distinctive
+   because the placeholder's styles.css, which this file loads after, already uses .panel, .panels, .plot, .dot,
+   .row, .key, .meta, .zero and the bare table, th, td and section selectors. */
+
+.muted {
+  color: var(--ink2);
+}
+.fine {
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+  line-height: 1.4;
+}
+.view .fine {
+  margin: 0.25rem 0 0;
+}
+.letter {
+  color: var(--ink2);
+  font-weight: 400;
+}
+
+/* One goal, one color: a wrapper with a goal class sets --goal, and swatches and dots read it. */
+.goal-a {
+  --goal: var(--o-a);
+}
+.goal-b {
+  --goal: var(--o-b);
+}
+.goal-c {
+  --goal: var(--o-c);
+}
+.goal-d {
+  --goal: var(--o-d);
+}
+.goal-e {
+  --goal: var(--o-e);
+}
+.swatch {
+  display: inline-block;
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--goal);
+  box-shadow: 0 0 0 1.5px var(--surface);
+}
+
+.view h2 {
+  font-family: var(--sans);
+  font-size: var(--s1);
+  margin: 0 0 0.4rem;
+}
+.view h3 {
+  font-size: var(--s0);
+  margin: 1.75rem 0 0.4rem;
+}
+.view h4 {
+  font-family: var(--sans);
+  font-size: var(--s0);
+  margin: 0 0 0.4rem;
+}
+.x-section {
+  margin: 0 0 2rem;
+}
+.x-section > h2 {
+  margin-top: 0;
+}
+.chart-key {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--ink2);
+  margin: 0 0 0.75rem;
+}
+
+.x-goals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+}
+.x-goals li {
+  margin: 0 0 0.5rem;
+  color: var(--ink2);
+  max-width: 70ch;
+  line-height: 1.4;
+}
+.x-goals .swatch {
+  margin-right: 0.4rem;
+  vertical-align: 0.0625rem;
+}
+.x-goals b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* The goal toggles: a pressed button is a filled swatch and a semibold name, an unpressed one a hollow swatch. */
+.x-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+}
+.x-toggles-label {
+  color: var(--ink2);
+  margin-right: 0.4rem;
+}
+.x-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--axis);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  min-height: 2rem;
+  cursor: pointer;
+}
+.x-toggle[aria-pressed="true"] {
+  border-color: var(--ink);
+  font-weight: 600;
+}
+.x-toggle[aria-pressed="false"] {
+  color: var(--ink2);
+}
+.x-toggle[aria-pressed="false"] .swatch {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--goal);
+}
+
+.x-loaded {
+  transition: opacity var(--t-fast) var(--ease);
+}
+.x-loaded[data-stale="true"] {
+  opacity: 0.6;
+}
+
+/* The chart: a row per goal, the goal's label beside its plot at 40rem and wider, above it below that. */
+.chart {
+  font-family: var(--sans);
+  font-size: var(--s-1);
+}
+.goal-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.15rem;
+  padding: 0.35rem 0;
+  transition: opacity var(--t-fast) var(--ease);
+}
+.goal-row[data-off="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+@media (min-width: 40rem) {
+  .goal-row {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0 0.75rem;
+  }
+}
+.goal-label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 0.4rem;
+  line-height: 1.25;
+}
+.goal-label .swatch {
+  align-self: center;
+}
+.goal-name {
+  color: var(--ink);
+  font-weight: 600;
+}
+.goal-count {
+  grid-column: 2;
+  color: var(--ink2);
+}
+.x-panel .goal-count {
+  margin-left: 0.5rem;
+  font-weight: 400;
+}
+.x-plot {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+.gridline {
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+.x-dot {
+  fill: var(--goal);
+  fill-opacity: 0.85;
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+.axis-ends {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 0.25rem;
+  color: var(--ink2);
+  border-top: 1px solid var(--axis);
+  padding-top: 0.25rem;
+}
+@media (min-width: 40rem) {
+  .axis-ends {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 0 0.75rem;
+  }
+}
+.axis-words {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem;
+}
+.axis-words span:first-child {
+  text-align: left;
+}
+.axis-words span:nth-child(2) {
+  text-align: center;
+}
+.axis-words span:last-child {
+  text-align: right;
+}
+.axis-title {
+  display: none;
+}
+@media (min-width: 40rem) {
+  .axis-title {
+    display: block;
+  }
+}
+
+/* Choice scenarios: columns are the choices, ten dots to a row, "n of N" under each group. */
+.unit-cols {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.unit-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* the dots at the top, "n of N" on one line across the row */
+  gap: 0.15rem;
+}
+.unit-svg {
+  display: block;
+  width: 100%;
+  max-width: 8.5rem;
+  height: auto;
+}
+.unit-head {
+  color: var(--ink);
+  font-weight: 600;
+}
+.units-head {
+  border-bottom: 1px solid var(--grid);
+  padding-bottom: 0.25rem;
+}
+.n-of-n {
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The sentence column. The lead is the Roundtable pair's: Source Sans 3 semibold at 1.125rem, ink on the wash. */
+.x-sentences h2 {
+  font-size: var(--s0);
+}
+.x-sentence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--sans);
+}
+.sent {
+  margin: 0 0 1rem;
+}
+.sent .result-sentence {
+  margin: 0;
+  max-width: none;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.sent .flag {
+  display: block;
+  font-size: var(--s-1);
+  font-weight: 600;
+  color: var(--ink2);
+}
+.sent.lead {
+  padding: 0.6rem 0.75rem;
+  border-radius: 4px;
+  background: var(--leadwash);
+}
+.sent.lead .result-sentence {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+.reading {
+  margin: 0.5rem 0 0;
+  padding: 0 0 0 0.75rem;
+  border-left: 3px solid var(--axis);
+}
+.reading p {
+  margin: 0 0 0.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  max-width: none;
+}
+.reading p.fine {
+  font-size: var(--s-1);
+}
+.reading .pattern {
+  font-weight: 600;
+}
+
+/* The interval chart: the difference as a dot, its interval as a line, zero as a rule, the threshold as a band. */
+.interval-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.15rem;
+  padding: 0.4rem 0;
+}
+@media (min-width: 40rem) {
+  .interval-row {
+    grid-template-columns: 13rem minmax(0, 1fr) 7.5rem;
+    align-items: center;
+    gap: 0 0.75rem;
+  }
+}
+.interval-label b {
+  color: var(--ink);
+}
+.interval-names {
+  display: block;
+  color: var(--ink2);
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+.interval-verdict {
+  display: flex;
+  flex-direction: column;
+}
+.verdict-word {
+  color: var(--ink);
+  font-weight: 600;
+}
+.band {
+  fill: var(--grid);
+}
+.x-zero {
+  stroke: var(--ink2);
+  stroke-width: 1;
+}
+.interval {
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.diff {
+  fill: var(--ink);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+.axisline {
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+.tick {
+  fill: var(--ink2);
+  font-family: var(--sans);
+  font-size: 11px;
+}
+.interval-axis > span {
+  display: none;
+}
+@media (min-width: 40rem) {
+  .interval-axis > span {
+    display: block;
+  }
+}
+.view .axis-caption {
+  max-width: none;
+  margin: 0;
+  text-align: right;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+}
+
+/* "See the details" */
+.x-details {
+  margin: 2rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--grid);
+}
+.x-details summary {
+  font-family: var(--sans);
+  cursor: pointer;
+  padding: 0.35rem 0;
+}
+.x-summary-title {
+  font-weight: 600;
+}
+.x-compare {
+  margin: 0 0 1.25rem;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+}
+.x-compare h4,
+.x-entry h4 {
+  margin-bottom: 0.25rem;
+}
+.x-compare dl,
+.x-entry dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.1rem 1rem;
+  margin: 0.25rem 0 0;
+}
+@media (min-width: 40rem) {
+  .x-compare dl,
+  .x-entry dl {
+    grid-template-columns: 9rem minmax(0, 1fr);
+  }
+}
+.x-compare dt,
+.x-entry dt {
+  color: var(--ink2);
+  font-size: var(--s-1);
+}
+.x-compare dd,
+.x-entry dd {
+  margin: 0 0 0.35rem;
+}
+@media (min-width: 40rem) {
+  .x-compare dd,
+  .x-entry dd {
+    margin: 0;
+  }
+}
+
+.x-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.75rem 2rem;
+}
+@media (min-width: 60rem) {
+  .x-panels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.x-panel .panel-title,
+.x-panel h4 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.4rem;
+}
+.lever-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.1rem;
+  padding: 0.2rem 0;
+}
+@media (min-width: 40rem) {
+  .lever-row {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0 0.75rem;
+  }
+}
+.lever-label {
+  line-height: 1.25;
+  color: var(--ink);
+}
+.view .lever-scale {
+  display: block;
+  margin: 0;
+}
+.lever-axis {
+  color: var(--ink2);
+  border-top: 1px solid var(--axis);
+}
+
+.x-table-wrap {
+  overflow-x: auto;
+  margin: 0.5rem 0 1rem;
+}
+.x-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+}
+.x-table th,
+.x-table td {
+  padding: 0.3rem 0.5rem;
+  white-space: normal;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--grid);
+}
+.x-table th:first-child,
+.x-table td:first-child {
+  padding-left: 0;
+}
+.x-table thead th {
+  font-weight: 600;
+  color: var(--ink2);
+  border-bottom: 1px solid var(--axis);
+}
+.x-table tbody th {
+  font-weight: 400;
+}
+.x-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.x-table .mono {
+  white-space: nowrap;
+}
+.x-table caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 0.5rem 0 0.25rem;
+}
+
+.x-after {
+  margin-top: 2rem;
+  font-family: var(--sans);
+  font-size: var(--s-1);
+  color: var(--ink2);
+}
+.marker {
+  color: inherit;
+}
+
+/* The section for results against the thesis, mounted on the story at /. */
+.x-against {
+  scroll-margin-top: 4.5rem;
+  margin-top: 3rem;
+}
+/* Focus is moved here by script (a link or a hash), to a landmark that is not a control: no ring around the whole
+   section. The section's own heading and the links and buttons inside it keep their rings. */
+.x-against:focus,
+.x-against:focus-visible {
+  outline: none;
+}
+.view .x-against > h2 {
+  font-size: var(--s2);
+  scroll-margin-top: 4.5rem;
+}
+.x-sources {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+  max-width: 65ch;
+}
+.x-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.x-entry {
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+  font-family: var(--sans);
+}
+.x-note {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem;
+  background: var(--grid);
+  border-radius: 4px;
+  font-size: var(--s-1);
+  line-height: 1.4;
+  max-width: none;
+}
+.x-empty {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goal-row,
+  .x-loaded {
+    transition: none;
+  }
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isPlaceholder, PLACEHOLDER_MARK } from "../copy";
 import { explorerHis, explorerLabels } from "./copy";
 import { allRoutes } from "./page-meta.mjs";
-import { realCasesIndex, realIndex } from "./fixtures";
+import { realCasesIndex, realGrids, realIndex } from "./fixtures";
 
 /** Every string in a nested object; a function is called with a sample argument and its text is read. */
 function strings(value: unknown, path = ""): Array<[string, string]> {
@@ -59,5 +59,74 @@ describe("the explorer's words", () => {
     for (const word of ["insight", "powered by", "unlock", "seamless", "delve", "leverage", "robust"]) {
       expect(text).not.toContain(word);
     }
+  });
+});
+
+// Keyed maps are tested against the data, never the other way round: a key the data has and the labels lack fails
+// here, so no bare key reaches the page.
+describe("the labels keyed by the data", () => {
+  const scenarios = realIndex.scenarios.map((s) => s.scenario_id);
+
+  it("name every model in the index, in an order of their own, and no model the index lacks", () => {
+    const labelled = explorerLabels.models.map((m) => m.key);
+    expect(new Set(labelled)).toEqual(new Set(realIndex.models.map((m) => m.model_key)));
+    expect(labelled).toHaveLength(new Set(labelled).size);
+    expect(labelled[0]).toBe("haiku-5-5"); // the default comes first
+    for (const model of explorerLabels.models) expect(model.name.trim()).not.toBe("");
+  });
+
+  it("name every goal in the index", () => {
+    for (const objective of realIndex.objectives) {
+      expect(explorerLabels.objectiveNames[objective.id], objective.id).toBeTruthy();
+    }
+  });
+
+  it("hold an outcome phrase for every scenario", () => {
+    for (const id of scenarios) expect(explorerLabels.outcomePhrases[id], id).toBeTruthy();
+  });
+
+  it("hold axis words and a key for every share scenario", () => {
+    for (const s of realIndex.scenarios.filter((x) => x.kind === "share")) {
+      const ends = explorerLabels.axisEnds[s.scenario_id];
+      expect(ends, s.scenario_id).toBeDefined();
+      for (const word of [ends!.title, ends!.low, ends!.mid, ends!.high]) expect(word.trim()).not.toBe("");
+      expect(explorerLabels.shareKey[s.scenario_id], s.scenario_id).toBeTruthy();
+    }
+  });
+
+  it("hold a label for every choice and every lever in every real file", () => {
+    const choices = new Set<string>();
+    const levers = new Set<string>();
+    const leversOfS4 = new Set<string>();
+    for (const { file } of realGrids) {
+      for (const split of file.descriptive.choice_splits)
+        for (const [choice] of split.counts) choices.add(choice);
+      for (const run of file.descriptive.per_run) {
+        if (run.choice !== null) choices.add(run.choice);
+        for (const [lever] of run.shares) levers.add(lever);
+      }
+      for (const cell of file.descriptive.cells) {
+        if (cell.choice !== null) choices.add(cell.choice);
+        for (const line of cell.lines) {
+          levers.add(line.key);
+          if (file.scenario_id === "s4") leversOfS4.add(line.key);
+        }
+      }
+    }
+    expect(leversOfS4.size).toBe(15); // s4 is the scenario with the long menu
+    for (const choice of choices) expect(explorerLabels.choices[choice], `choice ${choice}`).toBeTruthy();
+    for (const lever of levers) expect(explorerLabels.levers[lever], `lever ${lever}`).toBeTruthy();
+  });
+
+  it("hold the four verdict words", () => {
+    for (const verdict of ["split", "no_split", "inconclusive", "not_assessable"]) {
+      expect(explorerLabels.verdictWords[verdict], verdict).toBeTruthy();
+    }
+  });
+
+  it("carry a written brief or a placeholder for every scenario, and the section's title and introduction", () => {
+    for (const id of scenarios) expect(explorerHis.scenarioBriefs[id], id).toBeTruthy();
+    expect(explorerHis.againstTitle).toBeTruthy();
+    expect(explorerHis.againstIntro).toBeTruthy();
   });
 });

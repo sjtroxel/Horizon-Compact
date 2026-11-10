@@ -103,12 +103,38 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
     if (title !== null) document.title = title;
   }, [title]);
 
-  // After a navigation the new view's heading takes focus, so a keyboard or screen-reader user lands on it.
-  useEffect(() => {
-    if (navigations === 0 || route === null) return;
+  // After arriving somewhere, focus goes to the element the URL's hash names (the section for results against the
+  // thesis, say) and scrolls to it; with no hash, or a hash naming nothing, to the top and the new view's heading, so
+  // a keyboard or screen-reader user lands on it.
+  const reveal = useCallback(() => {
+    let id = "";
+    try {
+      id = decodeURIComponent(window.location.hash.slice(1));
+    } catch {
+      id = ""; // a malformed percent escape names nothing
+    }
+    const target = id === "" ? null : document.getElementById(id);
+    if (target !== null && main.current?.contains(target)) {
+      if (typeof target.scrollIntoView === "function") target.scrollIntoView();
+      target.focus({ preventScroll: true });
+      return;
+    }
     window.scrollTo(0, 0);
     main.current?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
-    // Runs once per navigation, not on every render, so `route` is read but not a dependency.
+  }, []);
+
+  const ready = route !== null;
+  const arrived = useRef(false);
+  useEffect(() => {
+    // A first load with a hash, once the data has rendered. A first load without one is left to the browser.
+    if (!ready || arrived.current) return;
+    arrived.current = true;
+    if (window.location.hash !== "") reveal();
+  }, [ready, reveal]);
+  useEffect(() => {
+    if (navigations === 0 || !ready) return;
+    reveal();
+    // Runs once per navigation, not on every render, so `ready` is read but not a dependency.
   }, [navigations]);
 
   const onClick = useCallback((event: MouseEvent<HTMLElement>) => {
@@ -190,7 +216,13 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
       )}
       <main id="main" className="view" ref={main}>
         {catalog && route ? (
-          <View route={route} index={catalog.index} casesIndex={catalog.casesIndex} model={model} />
+          <View
+            route={route}
+            index={catalog.index}
+            casesIndex={catalog.casesIndex}
+            model={model}
+            data={data}
+          />
         ) : failed ? (
           <p role="alert">{explorerLabels.loadFailed}</p>
         ) : (

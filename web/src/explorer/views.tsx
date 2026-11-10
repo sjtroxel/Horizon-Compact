@@ -1,41 +1,25 @@
-import { isPlaceholder, explorerHis, explorerLabels } from "./copy";
-import type { CasesIndex, DataIndex } from "./data";
-import { pageMeta } from "./page-meta.mjs";
-import type { PageRoute } from "./page-meta.mjs";
+import { AgainstThesis } from "./AgainstThesis";
+import { explorerHis, explorerLabels } from "./copy";
+import type { CasesIndex, DataApi, DataIndex } from "./data";
+import { His, Title } from "./parts";
 import type { Route } from "./route";
 import { hrefOf } from "./route";
-
-/** A sentence of his; while it is still a marked placeholder it shows in the secondary ink. */
-function His({ text, className }: { text: string; className?: string }) {
-  const classes = [className, isPlaceholder(text) ? "placeholder" : undefined].filter(Boolean).join(" ");
-  return <p className={classes || undefined}>{text}</p>;
-}
-
-/** The view's title: his words for the kind of page, and the scenario's id or the case's label after it. */
-function Title({ route }: { route: PageRoute }) {
-  const title = pageMeta(route, explorerHis.pages).title;
-  return (
-    <h1
-      tabIndex={-1}
-      className={isPlaceholder(explorerHis.pages[route.kind].title) ? "placeholder" : undefined}
-    >
-      {title}
-    </h1>
-  );
-}
+import { ScenarioView } from "./ScenarioView";
 
 export interface ViewProps {
   route: Route;
   index: DataIndex;
   casesIndex: CasesIndex;
   model: string;
+  data: DataApi;
 }
 
 /**
- * The stub of each route (C3). Each holds its title and little else: the views are C4 (the scenario view), C5 (the
- * memo reader, the cases, the studies) and C6 (the story). Nothing here draws a chart, a comparison or a sentence.
+ * Each route's view. The scenario view and the section for results against the thesis are C4; the rest are still
+ * C3's stubs, each holding its title and little else: the memo reader, the cases and the studies are C5, the story is
+ * C6 (it shows the section under its stub until then).
  */
-export function View({ route, index, casesIndex, model }: ViewProps) {
+export function View({ route, index, casesIndex, model, data }: ViewProps) {
   switch (route.kind) {
     case "story":
       return (
@@ -43,30 +27,12 @@ export function View({ route, index, casesIndex, model }: ViewProps) {
           <Title route={route} />
           <His text={explorerHis.landingQuestion} />
           <His text={explorerHis.scopeSentence} />
+          <AgainstThesis index={index} />
         </>
       );
-    case "scenario": {
-      const scenario = index.scenarios.find((s) => s.scenario_id === route.id);
-      return (
-        <>
-          <Title route={route} />
-          <div className="layout-2">
-            <figure className="card">
-              <dl className="stub">
-                <dt>{explorerLabels.scenario}</dt>
-                <dd className="mono">{route.id}</dd>
-                <dt>{explorerLabels.primaryOutcome}</dt>
-                <dd>{scenario?.primary_outcome}</dd>
-              </dl>
-              <figcaption>
-                <span className="model-name">{model}</span>
-                <His text={explorerHis.scopeSentence} />
-              </figcaption>
-            </figure>
-          </div>
-        </>
-      );
-    }
+    case "scenario":
+      // Keyed by scenario, so the goal toggles start over on a new scenario and carry across a model switch.
+      return <ScenarioView key={route.id} id={route.id} index={index} model={model} data={data} />;
     case "cases":
       return (
         <>

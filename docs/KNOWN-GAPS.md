@@ -7,16 +7,33 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-10, about 11:15 AM (C3 BUILT AND REVIEWED; HIS COMMIT, THEN C4)
+> ## START HERE — where things stand, 2026-11-10, about 1:15 PM (C4 BUILT AND REVIEWED; C5 NEXT)
 >
-> **C3, build modes and the shell, built (Sonnet, the Phase 6 IMPLEMENTATION doc §25) and reviewed (Opus, §25a):
-> passed, no code change.** `make check` green (Python 3,423, Vitest 87); `web/dist/` byte for byte the placeholder
-> (8 files, sha256 unchanged), so the public page does not change. Uncommitted: C3's code and every doc edit of step 4
-> and C3 go in one commit, `phase 6: c3 build modes and shell`.
+> **C4, the scenario view and the section for results against the thesis (the Phase 6 IMPLEMENTATION doc §26, review
+> §26a), built by Sonnet and reviewed by Opus: passed after one fix.** The fix: the protocol's reading "A and B split,
+> C and D do not" was shown where C vs D was only inconclusive (live on Haiku 5.5 s2); it now applies only to a C vs D
+> no split (protocol §6.3), with tests that fail on the old rule. **His decisions, 2026-11-10:** E's gray accepted under
+> the validator's normal-vision floor (a dated note in §24.1; reopen if C6 or C7 puts goals in one plot area); the
+> "no reading" line said once per scenario view. `make check` green: Python 3,423, Vitest 208. The public page is
+> unchanged (`web/dist/`, 8 files, sha256 as before). **Uncommitted: his commit, `phase 6: c4 scenario view`, carries
+> C4's code, the review's fix and these doc edits together.**
 >
-> **Open for his decision before C4's prompt (§25a):** the models' display names and order. Recommended: a name map in
-> the explorer's labels keyed by model key, Haiku 5.5 first, with a test tying its keys to `index.json`. **Next: §14
-> step 6, C4 (the scenario view and the section for results against the thesis): Sonnet builds, Opus reviews.**
+> **Next: §14 step 7, C5 (the memo reader, the real cases and the studies): Sonnet builds in a fresh session, Opus
+> reviews.** Its prompt is not written yet (Opus writes it). Carried to C5 from §25a: the shell must leave `/data/`
+> paths and file links to the browser.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-10, about 12:30 PM (C3 COMMITTED; C4'S PROMPT WRITTEN) *(superseded by the block above)*
+>
+> **C3, build modes and the shell (the Phase 6 IMPLEMENTATION doc §25, review §25a), committed `9cdf31b`; CI
+> `42870506647` and Deploy `42870506687` green.** The public page is unchanged (`web/dist/`, 8 files, sha256 as
+> before). **His decision, 2026-11-10:** the models' display names as §25a (a) recommends, a name map in the
+> explorer's labels, Haiku 5.5 first, its keys tested against `index.json`.
+>
+> **Next: §14 step 6, C4 (the scenario view and the section for results against the thesis): Sonnet builds in a fresh
+> session, Opus reviews.** The prompt is `scratch/p6-c4-build-prompt.md`. This block's edit is uncommitted and rides
+> in C4's commit; the build leaves it as it is.
 >
 > *The block below is superseded.*
 

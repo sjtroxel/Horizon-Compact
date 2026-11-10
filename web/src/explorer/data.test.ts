@@ -51,6 +51,32 @@ describe("the loaders", () => {
     expect(requested.filter((p) => p === "/data/index.json")).toHaveLength(1);
   });
 
+  it("keep each file in memory by its path, so switching back does not fetch it again", async () => {
+    const requested: string[] = [];
+    const api = createDataApi(fixtureFetcher(FIXTURE_FILES, requested));
+    const first = await api.loadGrid("m1", "s1");
+    await api.loadThinking();
+    expect(await api.loadGrid("m1", "s1")).toBe(first); // the same object, not a second fetch
+    await api.loadThinking();
+    await api.loadCase("c1", "m1");
+    await api.loadCase("c1", "m1");
+    expect(requested.filter((p) => p === "/data/grid/m1/s1.json")).toHaveLength(1);
+    expect(requested.filter((p) => p === "/data/thinking/m1/s1.json")).toHaveLength(1);
+    expect(requested.filter((p) => p === "/data/cases/c1/m1.json")).toHaveLength(1);
+  });
+
+  it("forgets a failed fetch, so the next ask tries again", async () => {
+    let calls = 0;
+    const api = createDataApi(async (path) => {
+      calls += 1;
+      if (calls === 1) return { ok: false, status: 503 } as Response;
+      return { ok: true, status: 200, json: async () => ({ path }) } as Response;
+    });
+    await expect(api.loadIndex()).rejects.toThrow(/503/);
+    expect(await api.loadIndex()).toEqual({ path: "/data/index.json" });
+    expect(calls).toBe(2);
+  });
+
   it("change nothing between the parsed JSON and the returned object", async () => {
     const api = createDataApi(fixtureFetcher(FIXTURE_FILES, []));
     expect(await api.loadGrid("m1", "s1")).toEqual({

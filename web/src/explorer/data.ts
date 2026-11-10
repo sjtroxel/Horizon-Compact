@@ -2,10 +2,11 @@
  * Loaders for the explorer's data (Phase 6 IMPLEMENTATION doc section 6, C3 decision 4). Each is a `fetch` of a file
  * under `/data/` on the site's own origin (the content security policy's `connect-src 'self'`), at a path taken from
  * the index's `files` block, never from a list written here. They reshape nothing and compute nothing: no mean, no
- * interval, no rounding (section 5's rule). What comes back is the parsed JSON, as the builder wrote it.
+ * interval, no rounding (section 5's rule). What comes back is the parsed JSON, as the builder wrote it. A file once
+ * fetched is kept in memory by its path, so switching back to a model or a scenario does not fetch it again.
  *
- * The types cover what the shell and C4 read, from the real files. A field no view reads yet is `unknown`; the step
- * that first reads it types it.
+ * The types cover what the shell, C4 and the views read, from the real files. A field no view reads yet is
+ * `unknown`; the step that first reads it types it.
  */
 
 export interface ModelEntry {
@@ -36,6 +37,13 @@ export interface DroppedWording {
   cells: Array<{ objective_id: string; unsuccessful: number; attempted: number }>;
 }
 
+/**
+ * One entry per kept wording: `[wording_id, valid runs of the first objective, valid runs of the second]`. Not
+ * "attempted and valid": the two numbers are the two sides of the comparison. A comparison that is not assessable
+ * has none.
+ */
+export type ValidRuns = Array<[string, number, number]>;
+
 export interface Comparison {
   first: string;
   second: string;
@@ -45,13 +53,56 @@ export interface Comparison {
   difference: number | null;
   low: number | null;
   high: number | null;
-  /** One entry per wording: its id, the runs attempted and the runs valid, as the builder wrote them. */
-  valid_runs: Array<[string, number, number]>;
+  valid_runs: ValidRuns;
   kept_wordings: string[];
   dropped_wordings: DroppedWording[];
   final_verdict: Verdict;
   downgrade_reason: string | null;
   headline: string;
+}
+
+export interface PerWording {
+  wording_id: string;
+  first_value: number;
+  second_value: number;
+  n_first: number;
+  n_second: number;
+  difference: number;
+  direction: string;
+}
+
+/** The sealed wording's own result, outside the family of 16. */
+export interface SealedBlock {
+  label: string;
+  sealed_wording: string;
+  final_verdict: Verdict;
+  difference: number | null;
+  low: number | null;
+  high: number | null;
+  relation: string;
+  relation_reason: string;
+}
+
+/** The result before any wording was dropped for failures. Its dropped wordings are bare ids. */
+export interface FirstAttempt {
+  final_verdict: Verdict;
+  difference: number | null;
+  low: number | null;
+  high: number | null;
+  kept_wordings: string[];
+  dropped_wordings: string[];
+}
+
+/** A comparison as a grid file carries it: the index's fields and the ones the details need. */
+export interface GridComparison extends Comparison {
+  scenario_id: string;
+  kind: ScenarioEntry["kind"];
+  threshold: number;
+  method: string | null;
+  alpha: number;
+  per_wording: PerWording[];
+  sealed: SealedBlock;
+  first_attempt: FirstAttempt;
 }
 
 export interface VerdictBlock {
@@ -67,12 +118,13 @@ export interface AgainstThesisEntry {
   scenario_id: string;
   first: string;
   second: string;
-  clause: string;
+  /** Which clause of the rule listed it: a "no split", or a split in the direction the thesis did not expect. */
+  clause: "no_split" | "reversed_split";
   roundtable_pair: boolean;
   difference: number | null;
   low: number | null;
   high: number | null;
-  valid_runs: Array<[string, number, number]>;
+  valid_runs: ValidRuns;
   kept_wordings: string[];
   dropped_wordings: DroppedWording[];
   final_verdict: Verdict;
@@ -82,7 +134,8 @@ export interface AgainstThesisEntry {
 export interface AgainstThesis {
   rule: string;
   entries: AgainstThesisEntry[];
-  scenarios: unknown[];
+  /** Scenarios on which every primary comparison of a model is "no split". Empty today. */
+  scenarios: Array<{ model_key: string; scenario_id: string }>;
 }
 
 export interface DataFiles {
@@ -106,6 +159,88 @@ export interface DataIndex {
   files: DataFiles;
 }
 
+/** One cell of the grid: one goal under one wording, with every status counted (zero included). */
+export interface CellStatus {
+  model_key: string;
+  scenario_id: string;
+  objective_id: string;
+  wording_id: string;
+  attempted: number;
+  valid: number;
+  rescaled: number;
+  refused: number;
+  /** `[failure type, runs]`; empty when none failed. The types are the file's own words. */
+  failed_by_type: Array<[string, number]>;
+}
+
+/** Runs attempted for one goal, over every wording of the scenario. */
+export interface ObjectiveRate {
+  objective_id: string;
+  attempted: number;
+  failed: number;
+  refused: number;
+}
+
+export interface SummaryStats {
+  n: number;
+  mean: number;
+  sd: number | null;
+  median: number;
+  minimum: number;
+  maximum: number;
+}
+
+export interface LineSummary {
+  key: string;
+  kind: string;
+  summary: SummaryStats;
+}
+
+/**
+ * A descriptive cell. With `wording_id` and `choice` both null it is one goal over every wording kept in the file:
+ * `runs` is the goal's count in the chart, and `lines` are its levers in canonical order.
+ */
+export interface DescriptiveCell {
+  objective_id: string;
+  wording_id: string | null;
+  choice: string | null;
+  runs: number;
+  lines: LineSummary[];
+  groups: unknown[];
+}
+
+/** For a choice scenario: how many runs of a goal (and wording, or all wordings when null) made each choice. */
+export interface ChoiceSplit {
+  objective_id: string;
+  wording_id: string | null;
+  runs: number;
+  counts: Array<[string, number]>;
+}
+
+/** One valid run. `primary` is the scenario's primary outcome; `choice` is null on a share scenario. */
+export interface PerRun {
+  run_id: string;
+  objective_id: string;
+  wording_id: string;
+  repeat: number;
+  choice: string | null;
+  primary: number;
+  /** `[lever key, share]`, in the lever order of the scenario. */
+  shares: Array<[string, number]>;
+  secondary: unknown;
+}
+
+export interface Descriptive {
+  scenario_id: string;
+  /** Valid runs in the file. */
+  runs: number;
+  cells: DescriptiveCell[];
+  choice_splits: ChoiceSplit[];
+  secondaries: unknown;
+  distances: unknown;
+  per_run: PerRun[];
+}
+
 /** One scenario's file for one model: the grid's, or the thinking sub-study's (same shape). */
 export interface GridFile {
   model_key: string;
@@ -114,12 +249,12 @@ export interface GridFile {
   primary_outcome: string;
   kind: ScenarioEntry["kind"];
   threshold: number;
-  comparisons: Comparison[];
-  cells: unknown[];
-  objective_rates: unknown[];
-  pair_rates: unknown[];
+  comparisons: GridComparison[];
+  cells: CellStatus[];
+  objective_rates: ObjectiveRate[];
+  pair_rates: unknown;
   position: unknown;
-  descriptive: unknown;
+  descriptive: Descriptive;
 }
 
 export interface CaseEntry {
@@ -192,23 +327,27 @@ export interface DataApi {
   loadCase(label: string, model: string): Promise<CaseFile>;
 }
 
-/** The loaders over a fetch function; tests pass one that serves fixtures. The index is fetched once. */
+/** The loaders over a fetch function; tests pass one that serves fixtures. Each file is fetched once. */
 export function createDataApi(fetcher: Fetcher = (path) => fetch(path)): DataApi {
-  async function getJson<T>(path: string): Promise<T> {
-    const response = await fetcher(path);
-    if (!response.ok) throw new Error(`explorer data: ${path} answered ${response.status}`);
-    return (await response.json()) as T;
+  // One fetch per path, kept for the life of the page. A failed fetch is forgotten, so the next ask tries again.
+  const cache = new Map<string, Promise<unknown>>();
+  function getJson<T>(path: string): Promise<T> {
+    const kept = cache.get(path);
+    if (kept !== undefined) return kept as Promise<T>;
+    const loading = (async () => {
+      const response = await fetcher(path);
+      if (!response.ok) throw new Error(`explorer data: ${path} answered ${response.status}`);
+      return (await response.json()) as T;
+    })();
+    cache.set(path, loading);
+    loading.catch(() => {
+      if (cache.get(path) === loading) cache.delete(path);
+    });
+    return loading;
   }
 
-  let index: Promise<DataIndex> | null = null;
   function loadIndex(): Promise<DataIndex> {
-    if (index === null) {
-      index = getJson<DataIndex>(INDEX_PATH);
-      index.catch(() => {
-        index = null; // a failed load is tried again, not remembered
-      });
-    }
-    return index;
+    return getJson<DataIndex>(INDEX_PATH);
   }
 
   async function fromFiles<T>(describe: string, pick: (files: DataFiles) => string | undefined): Promise<T> {
