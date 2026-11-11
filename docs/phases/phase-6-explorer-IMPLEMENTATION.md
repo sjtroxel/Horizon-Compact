@@ -346,6 +346,18 @@ approved every label in it, changed and unchanged, and `againstWords.ts`, 2026-1
 unapproved: the four result-sentence templates in `sentences.ts`, which he has not yet been shown; C6's and C7's
 words come with those builds.
 
+**Dated note, 2026-11-11 (§14 step 8, the templates; step 8 done):** Claude showed him the four result-sentence
+templates in `sentences.ts` one at a time, each with a real example from the committed data. **He approved all four,
+2026-11-11, about 9:18 AM**, with two changes. `split`: "points" became "percentage points" (a business reader can
+take "47 points lower" for "47% lower"). `not_assessable`: rewritten as one sentence, "X and Y can't be compared on
+[outcome]: in every wording, more than 1 in 10 of one goal's runs failed or were refused." The old one said the same
+fact three times and carried the analysis's internal reason text ("a cell over the 10% failure limit"); the claim
+"every wording" holds because `analysis/failures.py` reaches that verdict only when every wording is dropped, and a
+test checks it against every real not-assessable comparison. `no_split` and `inconclusive` approved as written. **For
+C6:** he asked for ratio words ("half as many") where they hold. Not in a template, which fills itself for every
+split; in the guided story, only where checked, saying the ratio comes from the plain averages and not from the
+analysis, and by one rule applied to results in either direction (`planning/06` §1).
+
 ## 12. What "polished" means here, as checks
 
 Phase 1.5 §8 carries over in full (type scale, spacing, focus states, both modes, both widths, no layout shift, no
@@ -449,7 +461,7 @@ My recommendation is (a) in each, for the reason given.
    paths and their HTML files, the local preview script.
 6. **[built 2026-11-10 by Sonnet, §26; reviewed by Opus, §26a]** **[Sonnet builds, Opus reviews]** **C4, the scenario view and the section for results against the thesis.**
 7. **[built 2026-11-10 by Sonnet, §27; reviewed by Opus, §27a: passed after one change]** **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
-8. **[his words and the labels approved 2026-11-11, §11's dated notes; the four result-sentence templates still to show him]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
+8. **[done 2026-11-11: his words, the labels and the four result-sentence templates approved, §11's dated notes]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[Sonnet builds, Opus reviews]** **C6, the guided story.**
 10. **[Sonnet builds, Opus reviews]** **C7, the share cards.**
 11. **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace

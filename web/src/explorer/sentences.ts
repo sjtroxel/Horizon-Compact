@@ -1,9 +1,9 @@
 /**
  * The result-sentence templates (Phase 6 IMPLEMENTATION doc sections 11 and 12, C4 decided point 3).
  *
- * CLAUDE-DRAFTED AND UNAPPROVED. Every template below is Claude's wording, from page 6 of the throwaway previews;
- * he approves each word for word at section 14 step 8 (section 11). `not_assessable` is new in C4 and has no
- * preview behind it.
+ * APPROVED WORD FOR WORD (his, 2026-11-11, section 14 step 8; section 11's dated note). Claude drafted them; his
+ * changes on that pass: "points" became "percentage points" in `split`, and `not_assessable` was rewritten as one
+ * sentence (it had said the same fact three times and carried the analysis's internal reason text).
  *
  * Every result sentence the explorer shows is the output of one of these functions, with its template id on the
  * element (`data-template`). A test renders every scenario view for both models and rejects any result sentence that
@@ -27,17 +27,8 @@ export interface Sentence {
 
 const quote = (name: string) => `“${name}”`;
 
-/** "w1", "w1 and w2", "w1, w2 and w3" */
-function listed(ids: readonly string[]): string {
-  if (ids.length <= 1) return ids.join("");
-  return `${ids.slice(0, -1).join(", ")} and ${ids[ids.length - 1]}`;
-}
-
 /** The fields of a comparison a sentence reads. */
-export type SentenceInput = Pick<
-  Comparison,
-  "first" | "second" | "final_verdict" | "difference" | "downgrade_reason" | "dropped_wordings"
->;
+export type SentenceInput = Pick<Comparison, "first" | "second" | "final_verdict" | "difference">;
 
 /**
  * The sentence for one comparison. `names` maps a goal's letter to its plain name, and `outcome` is the scenario's
@@ -57,7 +48,7 @@ export function resultSentence(
       const points = wholePointsDown(comparison.difference ?? 0);
       return {
         id: "split",
-        text: `${x} and ${y} came out different: ${outcome} was about ${points} points ${direction} under ${x}.`,
+        text: `${x} and ${y} came out different: ${outcome} was about ${points} percentage points ${direction} under ${x}.`,
       };
     }
     case "no_split":
@@ -70,14 +61,12 @@ export function resultSentence(
         id: "inconclusive",
         text: `The runs can’t tell whether ${x} and ${y} differ on ${outcome}.`,
       };
-    case "not_assessable": {
-      const reason = comparison.downgrade_reason === null ? "" : ` (${comparison.downgrade_reason})`;
-      const dropped = comparison.dropped_wordings.map((w) => w.wording_id);
-      const tail = dropped.length === 0 ? "" : ` Wordings dropped: ${listed(dropped)}.`;
+    case "not_assessable":
+      // Only ever reached when every wording was dropped for failures (analysis/failures.py), so "every wording"
+      // holds; the wording-by-wording counts are in the details.
       return {
         id: "not_assessable",
-        text: `Too many runs failed in every wording to compare ${x} and ${y} on ${outcome}${reason}.${tail}`,
+        text: `${x} and ${y} can’t be compared on ${outcome}: in every wording, more than 1 in 10 of one goal’s runs failed or were refused.`,
       };
-    }
   }
 }

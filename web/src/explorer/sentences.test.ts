@@ -15,8 +15,6 @@ function input(over: Partial<SentenceInput>): SentenceInput {
     second: "D",
     final_verdict: "split",
     difference: -0.398,
-    downgrade_reason: null,
-    dropped_wordings: [],
     ...over,
   };
 }
@@ -25,16 +23,16 @@ describe("the result-sentence templates", () => {
   it("split: names the direction by the sign of first minus second, and the points rounded down", () => {
     expect(resultSentence(input({ difference: -0.398 }), names, outcome)).toEqual({
       id: "split",
-      text: "“Shareholders, long term” and “Everyone with a stake, long term” came out different: the rate of doing the thing was about 39 points lower under “Shareholders, long term”.",
+      text: "“Shareholders, long term” and “Everyone with a stake, long term” came out different: the rate of doing the thing was about 39 percentage points lower under “Shareholders, long term”.",
     });
     expect(resultSentence(input({ difference: 0.25 }), names, outcome).text).toContain(
-      "about 25 points higher under",
+      "about 25 percentage points higher under",
     );
   });
 
   it("split: corrects float noise before rounding down", () => {
     expect(resultSentence(input({ difference: 0.29999999999999993 }), names, outcome).text).toContain(
-      "about 30 points higher",
+      "about 30 percentage points higher",
     );
   });
 
@@ -56,28 +54,26 @@ describe("the result-sentence templates", () => {
     });
   });
 
-  it("not_assessable: names the reason and the dropped wordings, and claims no run count", () => {
+  it("not_assessable: one sentence, the rule in plain words, no run count and no internal reason text", () => {
     const { id, text } = resultSentence(
-      input({
-        final_verdict: "not_assessable",
-        difference: null,
-        downgrade_reason: "every wording has a cell over the 10% failure limit",
-        dropped_wordings: [
-          { wording_id: "w1", cells: [] },
-          { wording_id: "w2", cells: [] },
-          { wording_id: "w3", cells: [] },
-        ],
-      }),
+      input({ final_verdict: "not_assessable", difference: null }),
       names,
       outcome,
     );
     expect(id).toBe("not_assessable");
-    expect(text).toContain("every wording has a cell over the 10% failure limit");
-    expect(text).toContain("Wordings dropped: w1, w2 and w3.");
-    expect(text).not.toMatch(/\b\d+ (runs?|valid)/);
-    expect(
-      resultSentence(input({ final_verdict: "not_assessable", downgrade_reason: null }), names, outcome).text,
-    ).not.toMatch(/\(|Wordings dropped/);
+    expect(text).toBe(
+      "“Shareholders, long term” and “Everyone with a stake, long term” can’t be compared on the rate of doing the thing: in every wording, more than 1 in 10 of one goal’s runs failed or were refused.",
+    );
+    expect(text).not.toMatch(/\b\d+ (runs?|valid)|cell|failure limit|Wordings dropped|\(/);
+  });
+
+  it("not_assessable says every wording, which holds for every real not-assessable comparison", () => {
+    for (const { label, file } of realGrids) {
+      for (const c of file.comparisons) {
+        if (c.final_verdict !== "not_assessable" || c.first === null) continue;
+        expect(c.downgrade_reason, label).toBe("every wording has a cell over the 10% failure limit");
+      }
+    }
   });
 
   it("uses a goal's letter when the names do not know it", () => {
@@ -101,7 +97,7 @@ describe("the result-sentence templates", () => {
     const file = realGrids.find((g) => g.label === "grid gpt-oss-openrouter s2")!.file;
     const c = file.comparisons.find((x): x is Comparison & typeof x => x.final_verdict === "not_assessable")!;
     expect(resultSentence(c, names, explorerLabels.outcomePhrases["s2"]!).text).toBe(
-      "Too many runs failed in every wording to compare “Shareholders, short term” and “Shareholders, long term” on the share of the shortfall borne by the workforce (every wording has a cell over the 10% failure limit). Wordings dropped: w1, w2 and w3.",
+      "“Shareholders, short term” and “Shareholders, long term” can’t be compared on the share of the shortfall borne by the workforce: in every wording, more than 1 in 10 of one goal’s runs failed or were refused.",
     );
   });
 });

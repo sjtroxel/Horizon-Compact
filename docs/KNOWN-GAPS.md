@@ -7,7 +7,19 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-11, about 4:25 AM (STEP 8 APPROVED BUT FOR THE SENTENCE TEMPLATES; C6 NEXT)
+> ## START HERE — where things stand, 2026-11-11, about 9:20 AM (STEP 8 DONE; C6 NEXT)
+>
+> **Step 8's commit `1e7660c` (his) pushed; CI `43003864454` and Deploy `43003864014` green.** **The four
+> result-sentence templates (`web/src/explorer/sentences.ts`) approved by him word for word, 2026-11-11, about
+> 9:18 AM, with two changes:** `split` now says "percentage points"; `not_assessable` rewritten as one plain sentence
+> (the Phase 6 IMPLEMENTATION doc §11, third dated note). `no_split` and `inconclusive` as written. **§14 step 8 is
+> done.** Uncommitted: the templates, their tests and these doc edits, for his commit. **Next: C6, the guided story,
+> whose prompt (Opus) does §17's split by path first** (the explorer's JavaScript at 91.1 KB of 100 KB gzipped, measured 2026-11-11 9:20 AM). C6
+> carries `planning/06` §6.4's name line, which has no field in `his.json`, and §11's note on ratio words.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-11, about 4:25 AM (STEP 8 APPROVED BUT FOR THE SENTENCE TEMPLATES; C6 NEXT) *(superseded by the block above)*
 >
 > **C5 committed `6b809d7` (his) and pushed; CI `42909014486` and Deploy `42909014440` green.** **§14 step 8, his half:
 > at his request, Claude drafted every value in `web/src/explorer/his.json`; he approved them as written** (the Phase 6
