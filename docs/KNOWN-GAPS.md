@@ -7,7 +7,19 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-11, about 9:20 AM (STEP 8 DONE; C6 NEXT)
+> ## START HERE — where things stand, 2026-11-11, about 10:00 AM (C6 PART A BUILT AND REVIEWED; PART B NEXT)
+>
+> **C6 part A, the split by path, built by Sonnet (the Phase 6 IMPLEMENTATION doc §28) and reviewed by Opus (§28a):
+> passed, no code change.** Every view is a lazy chunk; `check-dist --mode explorer` checks the 100 KB budget per path
+> from Vite's manifest. `make check` green (Python 3,483, Vitest 397); `web/dist/` unchanged, 8 files. Largest path
+> `/studies/` 90.7 KB; the floor on every path is the entry, 82.2 KB, which is mostly React. **The prompt's 85 KB stop
+> line is withdrawn** (§28a: set too close to React's floor); the budget stays 100 KB per path, not raised. Part A and
+> these doc edits are for his commit. **Next: part B, the guided story**, in the same Sonnet session, with §28a's
+> three carried points (`scratch/p6-c6-part-b-note.md`).
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-11, about 9:20 AM (STEP 8 DONE; C6 NEXT) *(superseded by the block above)*
 >
 > **Step 8's commit `1e7660c` (his) pushed; CI `43003864454` and Deploy `43003864014` green.** **The four
 > result-sentence templates (`web/src/explorer/sentences.ts`) approved by him word for word, 2026-11-11, about
@@ -15,7 +27,9 @@ case by its type and a neutral label. The names live only in the private longlis
 > (the Phase 6 IMPLEMENTATION doc §11, third dated note). `no_split` and `inconclusive` as written. **§14 step 8 is
 > done.** Uncommitted: the templates, their tests and these doc edits, for his commit. **Next: C6, the guided story,
 > whose prompt (Opus) does §17's split by path first** (the explorer's JavaScript at 91.1 KB of 100 KB gzipped, measured 2026-11-11 9:20 AM). C6
-> carries `planning/06` §6.4's name line, which has no field in `his.json`, and §11's note on ratio words.
+> carries `planning/06` §6.4's name line, which has no field in `his.json`. **C6's prompt written, 2026-11-11, about
+> 9:50 AM: `scratch/p6-c6-build-prompt.md`** (a fresh Sonnet session builds, Opus reviews); it builds no ratio (§11's
+> correction of the same morning). These doc edits ride in C6's commit.
 >
 > *The block below is superseded.*
 

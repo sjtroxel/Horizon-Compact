@@ -357,6 +357,14 @@ test checks it against every real not-assessable comparison. `no_split` and `inc
 C6:** he asked for ratio words ("half as many") where they hold. Not in a template, which fills itself for every
 split; in the guided story, only where checked, saying the ratio comes from the plain averages and not from the
 analysis, and by one rule applied to results in either direction (`planning/06` §1).
+**Corrected 2026-11-11, about 9:50 AM (Opus, writing C6's prompt):** the "For C6" sentence above was wrong. A ratio
+is a number computed outside the frozen analysis, which §18 forbids, and it would fail §15 row 5 (every number traces
+to the published JSON). C6 builds no ratio. What does trace, if his words for the story want a contrast that hits
+home: on a choice scenario, the count of runs that made each choice (in the files' `descriptive` cells), and on a
+share scenario, each goal's average from `descriptive.cells`, each with its run count. A share scenario's two averages
+do not subtract to the analysis's difference (on gpt-oss-120b's `s1`, A vs B: about 10% and about 64% kept, a
+difference of about 47 points by the analysis), so words that put both beside the verdict have to say which is which.
+His call, at C6's words pass.
 
 ## 12. What "polished" means here, as checks
 
@@ -462,7 +470,7 @@ My recommendation is (a) in each, for the reason given.
 6. **[built 2026-11-10 by Sonnet, §26; reviewed by Opus, §26a]** **[Sonnet builds, Opus reviews]** **C4, the scenario view and the section for results against the thesis.**
 7. **[built 2026-11-10 by Sonnet, §27; reviewed by Opus, §27a: passed after one change]** **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
 8. **[done 2026-11-11: his words, the labels and the four result-sentence templates approved, §11's dated notes]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
-9. **[Sonnet builds, Opus reviews]** **C6, the guided story.**
+9. **[part A built 2026-11-11 by Sonnet, §28; reviewed by Opus, §28a, passed; part B not started]** **[Sonnet builds, Opus reviews]** **C6, the guided story.**
 10. **[Sonnet builds, Opus reviews]** **C7, the share cards.**
 11. **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
     script per view; fixes before the close.
@@ -493,6 +501,7 @@ free for a public repository.
 
 - **The JavaScript budget.** React is most of today's 74 KB; the explorer's views and story may push past 100 KB
   gzipped. If they do, the views split by path (one chunk each), and the budget is checked per path, not raised.
+  *Done 2026-11-11 (C6, §28): split by path; `check-dist` checks the budget per path.*
 - **Whether decision 1's rule reads cleanly on every scenario.** Settled in §19: each scenario's direction is taken
   from the protocol's definition of its outcome; S4's is the one a reviewer could dispute, and the page says so.
 - **How long the previews take.** Three decisions, three to six previews each, capped, in a fixed order (the scope
@@ -1836,3 +1845,148 @@ reloads, even though the data layer forgets the failed fetch: minor, no change.
 §17 already decides the remedy (split by path, budget checked per path, never raised), and `check-dist` today counts
 all JavaScript as one total, so the split also changes the check. C6's prompt does the split first, as its own part,
 with `web/dist/` unchanged and the per-path budget tested, before the story is built.
+
+## 28. As built, C6 part A: the split by path (2026-11-11, Sonnet; Opus review pending). Part B, the story, not started
+
+Built from `scratch/p6-c6-build-prompt.md`, part A only. **Part B was not started**, because the prompt says "If any path
+is over 85 KB after part A, stop and report it in §28 before part B", and five of the six kinds of path are (table
+below). No AWS call, no model call, no `terraform`, no `hc` command, no change to the Python. `docs/KNOWN-GAPS.md`,
+`docs/ROADMAP.md` and the rest of this doc were left as they were, except the two one-line edits at §17 and §14 step 9
+and this section. Not committed (his commit). The `dataviz` skill was loaded as the prompt asked; part A draws no chart.
+
+**What was built.**
+
+- **Lazy views** (`views.tsx`): `React.lazy` for the story, the scenario view, both case views (one module, two lazy
+  components, one chunk), the studies and the memo reader; `not_found` stays inline. The story is C3's stub moved into
+  `Story.tsx` unchanged (it takes the index and nothing else). `copy.ts`, `route.ts`, `data.ts`, the shell, header, model
+  switch and footer stay in the entry chunk. `manualChunks` was not touched.
+- **Shell** (`Shell.tsx`, new `ViewBoundary.tsx`): one `Suspense` boundary around the routed view, its fallback the
+  loading line as `role="status"`; an error boundary (`ViewBoundary`) outside it showing `explorerLabels.loadFailed` as
+  `role="alert"`, cleared by a navigation to another path (`resetKey` is the pathname), so one chunk that will not
+  load does not take the other views down. **Focus and hash:** the two effects that ran `reveal()` from `ready` and
+  `navigations` are replaced by an `Arrived` marker rendered after the view inside the `Suspense` boundary. React
+  commits nothing in a boundary that is still waiting for a lazy chunk, so the marker's effect runs only once the view
+  has mounted. The first arrival reveals only if the address has a hash (a first load without one is still left to the
+  browser); each later arrival is a navigation and always reveals; a model switch changes neither.
+- **Manifest** (`vite.config.ts`): `build.manifest: true` in explorer mode only. Placeholder mode's config is
+  unchanged. The manifest is `dist-explorer/.vite/manifest.json`; **Phase 6.5's deploy must not sync `.vite/`** (it
+  names no data, but it is a build artifact, and `dist-explorer/` is not synced in Phase 6 at all).
+- **`view-modules.mjs`** (with `.d.mts`): route kind to the view's source path. `view-modules.test.ts` reads
+  `views.tsx` and fails if its `import("./...")` specifiers are not exactly the map's files, if the map's kinds are not
+  the kinds a page is written for, or if `views.tsx` imports a view statically.
+- **`web/scripts/dist-closure.mjs`** (with `.d.mts`): the pure closure functions (`staticClosure`, `pathFiles`,
+  `reachedFromEntry`, `entryKeyOf`), no file reads. `dist-closure.test.ts` runs them over a fixture manifest: a shared
+  chunk counted once, a dynamic import not followed, a cycle walked once, a missing key failing (a view and an import),
+  a non-JavaScript file dropped, a view reached statically from the entry (directly and through a shared chunk), and the
+  one-entry rule.
+- **`check-dist.mjs --mode explorer`:** reads the manifest and, for each HTML file written, adds the gzipped size of
+  each distinct JavaScript file the path loads (the entry chunk and its static imports, and the path's view chunk and its
+  static imports; never a dynamic import). It fails if any path is over 100 KB, if the manifest is missing, if a mapped
+  view has no chunk, or if a mapped view is reachable from the entry by static imports. It prints one line per route
+  kind (the kind's largest path) and keeps the all-JavaScript line, now labeled "a total, not a budget". Placeholder
+  mode's checks and output are unchanged.
+
+**Files.** New: `web/src/explorer/Story.tsx`, `ViewBoundary.tsx`, `view-modules.mjs`, `view-modules.d.mts`,
+`view-modules.test.ts`, `dist-closure.test.ts`, `ShellLoadFailure.test.tsx`; `web/scripts/dist-closure.mjs`,
+`dist-closure.d.mts`. Changed: `views.tsx`, `Shell.tsx`, `fixtures.ts` (a `warmViews` helper), `Shell.test.tsx`,
+`ShellC5.test.tsx`, `format.test.ts` (the no-computation list gained `Story.tsx` and `ViewBoundary.tsx`),
+`web/vite.config.ts`, `web/scripts/check-dist.mjs`, and this doc.
+
+**Tests.** The new ones: the closure (8), the map against `views.tsx` (3), a view chunk that rejects (2: the alert with
+the header and footer still there, and a navigation to another path clearing it; **mutation-checked**: with the
+boundary's render made to ignore its failure, both fail, then restored) and, in the shell, a click from `/scenario/s2/`
+to the section for results against the thesis landing focus on it (1). **Three existing shell tests gained a `waitFor`
+and lost no assertion**: "a plain click pushes state...", "scrolls to and focuses the section after a click...", and
+the second half of "falls back to the heading...". They passed before only because an earlier test in the file had
+already resolved the lazy view; each failed when run alone, and passes alone now. Both shell test files call
+`warmViews` in `beforeAll`, so a test's wait is for React and not for the first transform of a view's graph. The
+module-graph test from C3 passes unchanged and lost nothing. Every `Shell.test.tsx` focus and hash test was also run
+alone, to prove none depends on order.
+
+**Part A's proof (measured).**
+
+- **Dist diff, empty:** `find web/dist -type f | sort | xargs sha256sum` before (`scratch/p6-c6-dist-before.txt`) and
+  after part A (`scratch/p6-c6-dist-after-a.txt`): `diff` prints nothing, 8 files.
+- **`make check` exit 0** (log: `scratch/p6-c6-check-a.log`): Python 3,483 passed; Vitest 397 passed (383 before);
+  `check-dist: ok` in both modes.
+- **Per-path JavaScript, gzipped, from `check-dist --mode explorer`** (budget 100.0 KB; the prompt's stop line 85 KB):
+
+  | Kind of path | Largest path | Bytes | KB |
+  |---|---|---|---|
+  | memos | `/memos/` | 85,064 | 83.1 |
+  | case | `/cases/closure-07/` | 87,424 | 85.4 |
+  | cases | `/cases/` | 87,424 | 85.4 |
+  | story | `/` | 88,271 | 86.2 |
+  | scenario | `/scenario/s1/` | 90,742 | 88.6 |
+  | studies | `/studies/` | 92,876 | 90.7 |
+
+  The all-chunks total is 100,163 bytes (97.8 KB), against 91.1 KB as one bundle before: the split costs about 6.7 KB in
+  all (per-file overhead, and gzip finding less to share across files), and no path loads all of it.
+- **The five slowest Vitest tests** (locally; none is new): `ScenarioView.test.tsx` "never shows a result sentence's
+  text anywhere else..." 3.2 s; "has no axe violations on a share scenario with the details open..." 2.7 s; "has no axe
+  violations on a choice scenario with the details open" 2.3 s; `App.test.tsx` "has no axe violations" 2.1 s;
+  `ScenarioView.test.tsx` "renders every scenario for both models without error" 1.5 s. The slowest new test took 0.7 s.
+
+**Why the stop.** The floor is the entry chunk, 82.2 KB gzipped by Vite's own report: React, the shell, `data.ts`, and
+`copy.ts` (every label and the model names, which every view reads and which therefore stays with the entry). Each view
+adds 1.3 to 3.7 KB of its own plus the shared chunks it uses (the charts and the section for results against the thesis
+are in `againstWords-*.js`, 3.6 KB; `chartData`, `parts` and `links` are 0.4 to 1.0 KB each), so every path but
+`/memos/` is over 85 KB, with 9.3 to 14.6 KB left to the 100 KB budget (16.9 KB on `/memos/`). **Two things are worth knowing before part B.**
+(1) `/studies/` is the largest because `Studies.tsx` imports `Details` and `RunsTable` from `ScenarioView.tsx`, so the
+studies path also loads the scenario chunk (3.4 KB); moving those two into their own module would take that out and
+was not done, because the prompt did not ask for it. (2) Part B's code, its labels in `copy.ts` and its keys in
+`his.json` all land in the entry or the story's chunk; the story path starts at 86.2 KB with the stub and is the one
+that grows. **Not measured, a guess:** 6 to 10 KB more, which would put it at 92 to 96 KB, under the budget and over the
+stop line. The decision for Opus and him is whether to read the 85 KB line as the prompt's own trip-wire (set before the
+entry's size was known) and go on under the 100 KB budget, or to cut the entry first.
+
+**What did not fit, and what was done instead.**
+
+1. **Part B was not started** (the stop above). Nothing of it exists: no `ChartCard.tsx`, no `his.json` keys, no
+   `explorerLabels` additions, no change to the model switch on `/`, no captures in `scratch/p6-c6-shots/`, and no
+   `dist` diff after part B.
+2. **The headless captures the prompt asks for** are part B's proof and are not made; part A's check is the Vitest
+   suite and `check-dist`. A scenario page and a memo page loading from their chunks is covered by the shell tests, not by
+   a browser capture.
+3. **For part B, carried:** the story's later beats load their data after the first render, so the section for results
+   against the thesis moves down the page as the beats above it fill in. `/#against-the-thesis` (and the link every
+   scenario view carries to it) reveals the section when the story mounts. The browser's scroll anchoring may keep it in
+   view; Safari may not. Measure it in the headless capture before part B closes; a re-scroll after the data has loaded
+   would add a second `scrollIntoView` and so change the existing first-load test's count (`toHaveLength(1)`).
+
+## 28a. Review of C6 part A (2026-11-11, Opus)
+
+**Passed, no code change. The stop at 85 KB is withdrawn; part B goes on under the 100 KB per-path budget, with two
+additions (below).** Read against `scratch/p6-c6-build-prompt.md` part A: the shell, `views.tsx`, `ViewBoundary.tsx`,
+`dist-closure.mjs`, `view-modules.mjs`, the `check-dist.mjs` diff and the changed tests.
+
+**Checked independently, not taken from §28.** `make check` exit 0 (Python 3,483, Vitest 397, `check-dist: ok` in both
+modes). The per-path lines from `check-dist --mode explorer` match §28's table byte for byte, and the all-chunks total
+is 100,163 bytes. `web/dist/` against `scratch/p6-c6-dist-before.txt`: `diff` prints nothing, 8 files. The changed
+shell tests: each change wraps an existing assertion in `waitFor` or adds one; none is removed or loosened.
+
+**The code.** The `Arrived` marker is a sibling of the view inside the one `Suspense` boundary, so React commits it only
+with the view: its effect cannot run before the hash's target exists, and a model switch does not change its token.
+`check-dist` fails both ways a view could fail to split (no chunk of its own, or reached from the entry by static
+imports). One behavior to know, not a defect: `React.lazy` keeps a rejected import, so a view chunk that failed to load
+shows the failure line again on a return to that path until the page is reloaded; a reload retries.
+
+**Why the stop line is withdrawn (Opus's error in the prompt).** The floor on every path is the entry chunk, 82.2 KB,
+and it is React: the placeholder page, React and almost nothing else, is 74.1 KB gzipped on its own (`check-dist`,
+placeholder mode), so the explorer's own code in the entry is about 8 KB. §17 already said React was most of the
+bundle; an 85 KB line over that floor left about 11 KB per path, too tight to tell a failed split from a working one.
+The split worked: no path loads every view, and the largest path, 90.7 KB, is under the budget. Cutting the entry
+(splitting `copy.ts` by view) would save a few KB of the 8 for a large change, and is not done. **The budget stays 100
+KB per path, enforced by `check-dist` on every build; it is not raised.**
+
+**Carried to part B (decided here).**
+
+1. **`Details` and `RunsTable` move out of `ScenarioView.tsx`** with C4's `Card` (into `ChartCard.tsx`, or a module of
+   their own beside it), so `/studies/` stops loading the scenario chunk (about 3.4 KB, §28 "Why the stop" (1)).
+2. **The hash on `/` waits for the story's data.** On a first load of `/` with a hash, and on a navigation to `/` with
+   one, the reveal runs once, after every beat's data has loaded (or failed), not when the story mounts; so the
+   section for results against the thesis is where the reveal finds it, and there is still exactly one
+   `scrollIntoView` (the existing first-load test's count holds). Every other path is unchanged. A test: with the
+   beats' data delayed, a first load of `/#against-the-thesis` scrolls once, after the data, to the section.
+3. **The stop line for part B is the budget itself:** any path over 100 KB fails `check-dist`, and is reported in §28,
+   not worked around. If the story path is over 95 KB, say so in §28 with the bytes.

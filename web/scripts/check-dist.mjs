@@ -10,10 +10,12 @@
 import { readFileSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 import { gzipSync } from "node:zlib";
+import { VIEW_MODULES } from "../src/explorer/view-modules.mjs";
+import { entryKeyOf, pathFiles, reachedFromEntry } from "./dist-closure.mjs";
 import { findDataCopies, findLeaks, loadDataHashes, loadOfficialIds, walk } from "./leaks.mjs";
 
 const SITE_ORIGIN = "https://horizon-compact.vercel.app";
-const JS_BUDGET = 100 * 1024; // gzipped, all JavaScript
+const JS_BUDGET = 100 * 1024; // gzipped: all JavaScript in placeholder mode; what one path loads in explorer mode
 const FONT_BUDGET = 150 * 1024; // all font files
 const EXPECTED_RUN_IDS = 2290; // the official runs of the grid and the thinking sub-study (Phase 6 doc section 5.3)
 const EXPECTED_SWEEP_IDS = 13; // two grids, the thinking sub-study, ten case sweeps
@@ -38,10 +40,12 @@ const rel = (path) => path.slice(DIST.length);
 const DATA = join(DIST, "data") + "/";
 const files = explorer ? all.filter((f) => !f.startsWith(DATA)) : all;
 
-// JavaScript, gzipped, in all.
+// JavaScript, gzipped, in all. The placeholder page is one bundle, so its total is its budget. The explorer is split by
+// path (Phase 6 doc section 17): its total is only reported, and the budget is checked for what each path loads, below.
 const js = files.filter((f) => extname(f) === ".js");
 const jsGzip = js.reduce((sum, f) => sum + gzipSync(readFileSync(f)).length, 0);
-if (jsGzip > JS_BUDGET) fail(`JavaScript is ${jsGzip} bytes gzipped, over the ${JS_BUDGET} budget`);
+if (!explorer && jsGzip > JS_BUDGET)
+  fail(`JavaScript is ${jsGzip} bytes gzipped, over the ${JS_BUDGET} budget`);
 
 // Fonts: .woff2 only, under budget.
 const fontExtensions = new Set([".woff", ".woff2", ".ttf", ".otf", ".eot"]);
@@ -195,10 +199,75 @@ if (explorer) {
 }
 
 const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
+
+// The JavaScript each path loads (explorer mode): the entry chunk and its static imports, and the path's view chunk and
+// its static imports, read from Vite's manifest. Each distinct file counts once. Never a dynamic import.
+const perKind = new Map(); // route kind -> { path, bytes } of its largest path
+const gzipOf = new Map();
+const gzipBytes = (file) => {
+  if (!gzipOf.has(file)) gzipOf.set(file, gzipSync(readFileSync(join(DIST, file))).length);
+  return gzipOf.get(file);
+};
+
+/** The route kind a page's path is: "/" is the story, "/scenario/s1/" a scenario, "/cases/pre-25/" a case. */
+function kindOfPath(path) {
+  const [first, second] = path.split("/").filter(Boolean);
+  if (first === undefined) return "story";
+  if (first === "cases") return second === undefined ? "cases" : "case";
+  return first === "scenario" || first === "studies" || first === "memos" ? first : null;
+}
+
+function checkPathBudgets() {
+  const manifestPath = join(DIST, ".vite", "manifest.json");
+  let manifest;
+  try {
+    manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  } catch {
+    fail(`${rel(manifestPath)} is missing or not JSON (the explorer build writes it: build.manifest)`);
+    return;
+  }
+  let entryKey;
+  try {
+    entryKey = entryKeyOf(manifest);
+  } catch (error) {
+    fail(error.message);
+    return;
+  }
+  for (const [kind, source] of Object.entries(VIEW_MODULES)) {
+    if (manifest[source] === undefined) fail(`the ${kind} view, ${source}, has no chunk in the manifest`);
+    else if (reachedFromEntry(manifest, entryKey, source))
+      fail(`the ${kind} view, ${source}, is reachable from the entry by static imports: it was not split`);
+  }
+  for (const file of htmlFiles) {
+    const path = pathOfPage(file);
+    const kind = kindOfPath(path);
+    const source = kind === null ? undefined : VIEW_MODULES[kind];
+    if (source === undefined || manifest[source] === undefined) {
+      fail(`${path}: no view chunk to add up (route kind ${kind})`);
+      continue;
+    }
+    const loaded = pathFiles(manifest, entryKey, source);
+    const bytes = loaded.reduce((sum, name) => sum + gzipBytes(name), 0);
+    if (bytes > JS_BUDGET)
+      fail(`${path} loads ${bytes} bytes of JavaScript gzipped, over the ${JS_BUDGET} budget`);
+    if (perKind.get(kind) === undefined || bytes > perKind.get(kind).bytes)
+      perKind.set(kind, { path, bytes });
+  }
+}
+if (explorer) checkPathBudgets();
 console.log(
   `${explorer ? "dist-explorer" : "dist"}: ${all.length} files${explorer ? ` (${files.length} outside data/)` : ""}`,
 );
-console.log(`JavaScript, gzipped, in all: ${jsGzip} bytes (${kb(jsGzip)}); budget ${kb(JS_BUDGET)}`);
+console.log(
+  explorer
+    ? `JavaScript, gzipped, all chunks together: ${jsGzip} bytes (${kb(jsGzip)}); a total, not a budget`
+    : `JavaScript, gzipped, in all: ${jsGzip} bytes (${kb(jsGzip)}); budget ${kb(JS_BUDGET)}`,
+);
+for (const [kind, { path, bytes }] of perKind) {
+  console.log(
+    `JavaScript a ${kind} path loads, largest ${path}: ${bytes} bytes (${kb(bytes)}); budget ${kb(JS_BUDGET)}`,
+  );
+}
 console.log(
   `fonts: ${fonts.length} files, ${fontBytes} bytes (${kb(fontBytes)}); budget ${kb(FONT_BUDGET)}; WOFF2 only`,
 );

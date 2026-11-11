@@ -91,6 +91,20 @@ export function readAwareness(model: string): AwarenessFile {
   return readData<AwarenessFile>(realIndex.files.awareness[model]!);
 }
 
+/**
+ * Loads every view module once, as the lazy views in views.tsx will ask for them (C6): a test that renders the shell
+ * calls this in `beforeAll`, so what it then waits for is React and not the first transform of each view's graph.
+ */
+export async function warmViews(): Promise<void> {
+  await Promise.all([
+    import("./Story"),
+    import("./ScenarioView"),
+    import("./Cases"),
+    import("./Studies"),
+    import("./MemoReader"),
+  ]);
+}
+
 type Edit = (body: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /**

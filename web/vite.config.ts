@@ -147,9 +147,12 @@ export default defineConfig(({ mode }) => {
       sourcemap: false,
       // Explorer mode is its own entry and its own folder, which Deploy never syncs (C3 decision 1). Placeholder
       // mode, with no --mode, keeps Vite's defaults: index.html in, dist/ out.
+      // The explorer also writes Vite's manifest (dist-explorer/.vite/manifest.json), which check-dist reads to add up
+      // the JavaScript each path loads (C6). It stays in dist-explorer/, which Deploy never syncs.
       ...(explorer
         ? {
             outDir: "dist-explorer",
+            manifest: true,
             rollupOptions: { input: join(root, "explorer.html") },
           }
         : {}),

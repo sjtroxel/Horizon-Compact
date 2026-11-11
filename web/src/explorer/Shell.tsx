@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import { Logo } from "../components/Logo";
 import { explorerHis, explorerLabels } from "./copy";
@@ -9,6 +9,7 @@ import { ModelSwitch } from "./ModelSwitch";
 import { pageMeta } from "./page-meta.mjs";
 import { modelFromSearch, parseRoute, pathOf, searchAfterModelSwitch, withModel } from "./route";
 import type { Route } from "./route";
+import { Arrived, ViewBoundary } from "./ViewBoundary";
 import { View } from "./views";
 
 interface Where {
@@ -127,19 +128,26 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
     main.current?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
   }, []);
 
-  const ready = route !== null;
-  const arrived = useRef(false);
-  useEffect(() => {
-    // A first load with a hash, once the data has rendered. A first load without one is left to the browser.
-    if (!ready || arrived.current) return;
-    arrived.current = true;
-    if (window.location.hash !== "") reveal();
-  }, [ready, reveal]);
-  useEffect(() => {
-    if (navigations === 0 || !ready) return;
-    reveal();
-    // Runs once per navigation, not on every render, so `ready` is read but not a dependency.
-  }, [navigations]);
+  // `arrive` runs from the `Arrived` marker inside the view's `Suspense` boundary, so it runs once the routed view has
+  // mounted: a view is a lazy chunk, and the hash's target does not exist before it does. The first arrival is a first
+  // load (it reveals only when the address has a hash; without one the browser is left alone); each later one is a
+  // navigation (`token` counts them) and always reveals. A model switch changes neither.
+  const firstArrival = useRef(true);
+  const handled = useRef(0);
+  const arrive = useCallback(
+    (token: number) => {
+      if (firstArrival.current) {
+        firstArrival.current = false;
+        handled.current = token;
+        if (window.location.hash !== "") reveal();
+        return;
+      }
+      if (token === handled.current) return;
+      handled.current = token;
+      reveal();
+    },
+    [reveal],
+  );
 
   const onClick = useCallback((event: MouseEvent<HTMLElement>) => {
     const anchor = interceptedAnchor(event);
@@ -224,14 +232,19 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
       )}
       <main id="main" className="view" ref={main}>
         {catalog && route ? (
-          <View
-            route={route}
-            index={catalog.index}
-            casesIndex={catalog.casesIndex}
-            model={model}
-            search={where.search}
-            data={data}
-          />
+          <ViewBoundary resetKey={where.pathname} fallback={<p role="alert">{explorerLabels.loadFailed}</p>}>
+            <Suspense fallback={<p role="status">{explorerLabels.loading}</p>}>
+              <View
+                route={route}
+                index={catalog.index}
+                casesIndex={catalog.casesIndex}
+                model={model}
+                search={where.search}
+                data={data}
+              />
+              <Arrived token={navigations} onArrive={arrive} />
+            </Suspense>
+          </ViewBoundary>
         ) : failed ? (
           <p role="alert">{explorerLabels.loadFailed}</p>
         ) : (

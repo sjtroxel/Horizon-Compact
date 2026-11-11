@@ -1,13 +1,18 @@
-import { AgainstThesis } from "./AgainstThesis";
-import { CaseView, CasesView } from "./Cases";
-import { explorerHis, explorerLabels } from "./copy";
+import { lazy } from "react";
+import { explorerLabels } from "./copy";
 import type { CasesIndex, DataApi, DataIndex } from "./data";
-import { His, Title } from "./parts";
 import type { Route } from "./route";
 import { hrefOf } from "./route";
-import { MemosView } from "./MemoReader";
-import { ScenarioView } from "./ScenarioView";
-import { StudiesView } from "./Studies";
+
+// Each route's view is its own chunk, loaded on the first visit to it (Phase 6 IMPLEMENTATION doc section 17, C6 part
+// A). The specifiers below are checked against view-modules.mjs by a test, which is what `check-dist` reads to know
+// which chunk belongs to which path: add a view here and there together.
+const Story = lazy(() => import("./Story").then((m) => ({ default: m.Story })));
+const ScenarioView = lazy(() => import("./ScenarioView").then((m) => ({ default: m.ScenarioView })));
+const CasesView = lazy(() => import("./Cases").then((m) => ({ default: m.CasesView })));
+const CaseView = lazy(() => import("./Cases").then((m) => ({ default: m.CaseView })));
+const StudiesView = lazy(() => import("./Studies").then((m) => ({ default: m.StudiesView })));
+const MemosView = lazy(() => import("./MemoReader").then((m) => ({ default: m.MemosView })));
 
 export interface ViewProps {
   route: Route;
@@ -22,19 +27,13 @@ export interface ViewProps {
 /**
  * Each route's view. The scenario view and the section for results against the thesis are C4; the memo reader, the
  * real cases and the studies are C5. The story is still C3's stub, C6's to build (it shows the section for results
- * against the thesis under its stub until then).
+ * against the thesis under its stub until then). A view is a lazy component: the shell holds the `Suspense` and the
+ * error boundary around this one.
  */
 export function View({ route, index, casesIndex, model, search, data }: ViewProps) {
   switch (route.kind) {
     case "story":
-      return (
-        <>
-          <Title route={route} />
-          <His text={explorerHis.landingQuestion} />
-          <His text={explorerHis.scopeSentence} />
-          <AgainstThesis index={index} />
-        </>
-      );
+      return <Story index={index} />;
     case "scenario":
       // Keyed by scenario, so the goal toggles start over on a new scenario and carry across a model switch.
       return <ScenarioView key={route.id} id={route.id} index={index} model={model} data={data} />;

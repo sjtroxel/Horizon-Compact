@@ -1,14 +1,17 @@
 import { cleanup, fireEvent, render, waitFor, within } from "@testing-library/react";
 import axe from "axe-core";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { explorerLabels as L } from "./copy";
-import { readMemoRows, realApi, realCasesIndex, realIndex } from "./fixtures";
+import { readMemoRows, realApi, realCasesIndex, realIndex, warmViews } from "./fixtures";
 import { modelName } from "./models";
 import { memoHref } from "./route";
 import { Shell } from "./Shell";
 
 const MODELS = realIndex.models.map((m) => m.model_key);
 const OTHER = MODELS.find((key) => key !== "haiku-5-5")!;
+
+// A view is a lazy chunk (C6): load the modules once up front, so a test's wait is for React, not for a transform.
+beforeAll(warmViews);
 
 beforeEach(() => {
   window.history.replaceState(null, "", "/");

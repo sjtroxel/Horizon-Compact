@@ -1,14 +1,17 @@
 import { act, cleanup, fireEvent, render, waitFor, within } from "@testing-library/react";
 import axe from "axe-core";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { explorerHis, explorerLabels } from "./copy";
-import { realApi, realIndex } from "./fixtures";
+import { realApi, realIndex, warmViews } from "./fixtures";
 import { modelName } from "./models";
 import { pageMeta } from "./page-meta.mjs";
 import { Shell } from "./Shell";
 
 const MODELS = realIndex.models.map((m) => m.model_key);
 const OTHER = MODELS.find((key) => key !== "haiku-5-5")!;
+
+// A view is a lazy chunk (C6): load the modules once up front, so a test's wait is for React, not for a transform.
+beforeAll(warmViews);
 
 beforeEach(() => {
   window.history.replaceState(null, "", "/");
@@ -110,9 +113,10 @@ describe("the links", () => {
     expect(window.location.pathname).toBe("/scenario/s2/");
     expect(window.history.length).toBe(before + 1);
     const expected = pageMeta({ kind: "scenario", id: "s2" }, explorerHis.pages).title;
-    expect(h1Text(view.container)).toBe(expected);
-    expect(document.title).toBe(expected);
-    expect(document.activeElement).toBe(view.container.querySelector("h1"));
+    // The view is a lazy chunk: the heading, the title and the focus follow once it has loaded.
+    await waitFor(() => expect(h1Text(view.container)).toBe(expected));
+    await waitFor(() => expect(document.title).toBe(expected));
+    await waitFor(() => expect(document.activeElement).toBe(view.container.querySelector("h1")));
     expect(window.scrollTo).toHaveBeenCalled();
   });
 
@@ -265,11 +269,25 @@ describe("a hash in the address", () => {
 
     expect(clicks.seen).toEqual([true]); // the shell took the click: a different page, so not the browser's jump
     expect(window.location.pathname + window.location.hash).toBe("/#against-the-thesis");
+    // The story is a lazy chunk: the section is there, and focused, once it has loaded.
+    await waitFor(() => expect(document.activeElement?.id).toBe("against-the-thesis"));
     const section = view.container.querySelector("#against-the-thesis")!;
     expect(section).not.toBeNull();
     expect(document.activeElement).toBe(section);
     expect(scrolledTo).toEqual([section]);
     expect(document.activeElement).not.toBe(view.container.querySelector("h1"));
+  });
+
+  it("does the same from the second scenario, and keeps focus on the section once the story has mounted", async () => {
+    const view = await shellAt("/scenario/s2/");
+    const link = await view.findByRole("link", { name: explorerLabels.againstLink });
+    const clicks = watchClicks();
+    fireEvent.click(link);
+    clicks.stop();
+    expect(window.location.pathname + window.location.hash).toBe("/#against-the-thesis");
+    await waitFor(() => expect(document.activeElement?.id).toBe("against-the-thesis"));
+    expect(scrolledTo).toEqual([view.container.querySelector("#against-the-thesis")]);
+    expect(view.container.querySelectorAll("h1")).toHaveLength(1);
   });
 
   it("keeps the model on that link, and the hash after it", async () => {
@@ -304,7 +322,7 @@ describe("a hash in the address", () => {
     fireEvent.click(link);
     clicks.stop();
     expect(window.location.pathname + window.location.hash).toBe("/studies/#no-such-element");
-    expect(document.activeElement).toBe(view.container.querySelector("h1"));
+    await waitFor(() => expect(document.activeElement).toBe(view.container.querySelector("h1")));
     expect(scrolledTo).toEqual([]);
   });
 

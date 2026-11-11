@@ -183,6 +183,9 @@ describe("the rule: no number is computed outside format.ts", () => {
     "views.tsx",
     "route.ts",
     "links.ts",
+    // C6: the story and the boundary around the lazy views.
+    "Story.tsx",
+    "ViewBoundary.tsx",
   ];
   it("holds no Math call, no reduce and no running total in the views, the charts or the templates", () => {
     for (const file of files) {
