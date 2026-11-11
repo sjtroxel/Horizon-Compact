@@ -98,6 +98,13 @@ describe("the module graph", () => {
     expect(found).not.toContain("src/data/placeholder.json");
   });
 
+  it("reaches no share-card code from the explorer entry: the cards are drawn by the build, never by a page (C7)", () => {
+    for (const file of names(explorer.files)) {
+      expect(file, file).not.toMatch(/(^|\/)(cards|card-render|write-cards|load-ts)\.m?[tj]s$/);
+      expect(file, file).not.toMatch(/fonts-ttf/);
+    }
+  });
+
   it("imports no data file into the explorer: the data is fetched, never bundled", () => {
     for (const file of names(explorer.files)) {
       expect(file, file).not.toMatch(/explorer-(data|memos)/);

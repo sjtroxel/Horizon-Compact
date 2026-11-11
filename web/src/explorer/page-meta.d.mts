@@ -18,6 +18,11 @@ export interface PageWords {
 export type Pages = Record<PageRoute["kind"], PageWords>;
 
 export const SITE_ORIGIN: string;
+export const CARD_WIDTH: number;
+export const CARD_HEIGHT: number;
+export const SAFE_SEGMENT: RegExp;
+export function routeOfPath(path: string): PageRoute | null;
+export function cardSlug(route: Route): string;
 export function pathOf(route: Route): string;
 export function pageMeta(route: Route, pages: Pages): PageWords;
 export function allRoutes(scenarioIds: readonly string[], caseLabels: readonly string[]): PageRoute[];

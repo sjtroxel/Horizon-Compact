@@ -7,7 +7,36 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-11, about 1:05 PM (C6 COMMITTED; ITS WORDS APPROVED; C7 NEXT)
+> ## START HERE — where things stand, 2026-11-11, about 4:10 PM, HANDOFF (C7 BUILT AND REVIEWED; WORDS PASS NEXT)
+>
+> **C7, the share cards, built by Sonnet (the Phase 6 IMPLEMENTATION doc §29) and reviewed by Opus (§29a): passed after
+> one fix** (the story card printed the name twice; it now leaves off the title, which every preview shows as text).
+> 13 PNG cards, 1200 by 630, and the `og:`/`twitter:` tags on every path; the built JavaScript is byte-identical to
+> HEAD's; `web/dist/` unchanged. `make check` green after the fix (Python 3,483, Vitest 526); name guard dry run clean.
+> Opus kept the case descriptions on the case cards (§29a point 2). **His commit `phase 6: c7 share cards` was given at
+> handoff, with these doc edits in it, and not confirmed run: check `git log -1`, then CI and Deploy
+> (`gh run list --limit 2`).** The cards are not served until Phase 6.5 (Deploy syncs `dist/` only).
+>
+> **Next: the words pass on the card labels** (`explorerCardLabels` in `copy.ts`, listed in §29; Claude drafts, he
+> approves, as for C6) with §29a's three notes: the alternative text, the case cards' doubled "Label:", and short or full
+> model names. **Then §14 step 11**, his review against §12. **Open and his:** any of Opus's calls in §29a (each costs a
+> small change and a re-check).
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-11, about 2:45 PM (C6'S WORDS COMMITTED; C7'S PROMPT WRITTEN) *(superseded by the block above)*
+>
+> **C6's words pass committed `ce659dc` (his) and pushed.** **C7's prompt written: `scratch/p6-c7-build-prompt.md`**
+> (a fresh Sonnet session builds, Opus reviews): a PNG card per path (13), 1200 by 630, drawn as SVG from the data and
+> rasterized by `@resvg/resvg-js` with committed static TTFs; `og:` and `twitter:` tags in each path's HTML; nothing at
+> runtime and nothing in the placeholder build changes. Opus's decided points in it: no chart on a card (words and
+> counts, as §10 says); the scenario card shows both models side by side; the story card states no result and no run
+> count (`planning/06` §6.1); every string on a card is a tracked, tagged value (the guard for binary files). The card
+> labels are Claude-drafted, for a words pass after review. This edit rides in C7's commit.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-11, about 1:05 PM (C6 COMMITTED; ITS WORDS APPROVED; C7 NEXT) *(superseded by the block above)*
 >
 > **C6 committed `618ad2e` (his) and pushed; CI `43072940335` and Deploy `43072940442` green.** **C6's words pass done:**
 > at his request Claude drafted the story's 15 `his.json` values and he approved them, with changes, and every story

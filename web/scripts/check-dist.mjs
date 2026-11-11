@@ -6,10 +6,12 @@
 //   node scripts/check-dist.mjs --mode explorer  the explorer, in dist-explorer/ (never synced)
 //
 // Placeholder mode also fails if anything of the explorer reached dist/: a copy of a data file, an official run id
-// or sweep id, or any path with "explorer" in it. The public page must not change until Phase 6.5's go-live.
-import { readFileSync, statSync } from "node:fs";
+// or sweep id, any path with "explorer" in it, a cards/ folder or an og:image tag. The public page must not change
+// until Phase 6.5's go-live. Explorer mode checks each page's link-preview tags and the share cards they name (C7).
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join } from "node:path";
 import { gzipSync } from "node:zlib";
+import { CARD_HEIGHT, CARD_WIDTH, cardSlug, routeOfPath } from "../src/explorer/page-meta.mjs";
 import { VIEW_MODULES } from "../src/explorer/view-modules.mjs";
 import { entryKeyOf, pathFiles, reachedFromEntry } from "./dist-closure.mjs";
 import { findDataCopies, findLeaks, loadDataHashes, loadOfficialIds, walk } from "./leaks.mjs";
@@ -61,6 +63,48 @@ const isHost = (value) => /^(?:[a-z][a-z0-9+.-]*:)?\/\//i.test(value) || /^[a-z]
 // The path a page is served at: dist/index.html is "/", scenario/s1/index.html is "/scenario/s1/".
 const pathOfPage = (file) => "/" + rel(file).replace(/index\.html$/, "");
 
+// The link-preview tags of one explorer page (C7): each exactly once, each saying what the page says elsewhere, and the
+// image named being the page's own card, which is checked to exist further down.
+const namedCards = new Set(); // the card file names the pages name, so a file in cards/ that no page names is found
+function checkPreviewTags(html, name, file) {
+  const path = pathOfPage(file);
+  const route = routeOfPath(path);
+  if (route === null) {
+    fail(`${name}: no route for the path ${path}`);
+    return;
+  }
+  const tagValue = (attribute, key) => {
+    const tags = (html.match(/<meta\b[^>]*>/gi) ?? []).filter((tag) =>
+      new RegExp(`\\b${attribute}\\s*=\\s*"${key}"`, "i").test(tag),
+    );
+    if (tags.length !== 1) {
+      fail(`${name} has ${tags.length} ${key} tags; it must have exactly 1`);
+      return undefined;
+    }
+    return /\bcontent\s*=\s*"([^"]*)"/i.exec(tags[0])?.[1];
+  };
+  const title = /<title>([^<]+)<\/title>/.exec(html)?.[1];
+  const description = /<meta\b[^>]*\bname\s*=\s*"description"[^>]*\bcontent\s*=\s*"([^"]*)"/i.exec(html)?.[1];
+  const expectations = [
+    ["property", "og:type", "website"],
+    ["property", "og:title", title],
+    ["property", "og:description", description],
+    ["property", "og:url", `${SITE_ORIGIN}${path}`],
+    ["property", "og:image", `${SITE_ORIGIN}/cards/${cardSlug(route)}.png`],
+    ["property", "og:image:width", String(CARD_WIDTH)],
+    ["property", "og:image:height", String(CARD_HEIGHT)],
+    ["name", "twitter:card", "summary_large_image"],
+  ];
+  for (const [attribute, key, expected] of expectations) {
+    const value = tagValue(attribute, key);
+    if (value !== undefined && value !== expected)
+      fail(`${name} ${key} is "${value}", expected "${expected}"`);
+  }
+  const alt = tagValue("property", "og:image:alt");
+  if (alt !== undefined && alt === "") fail(`${name} has an empty og:image:alt`);
+  namedCards.add(`${cardSlug(route)}.png`);
+}
+
 function checkPage(file) {
   const name = rel(file);
   const html = readFileSync(file, "utf8");
@@ -88,6 +132,9 @@ function checkPage(file) {
     if (!/<meta\b[^>]*\bname\s*=\s*"robots"[^>]*\bcontent\s*=\s*"noindex"/i.test(html)) {
       fail(`${name} is not noindex`);
     }
+    checkPreviewTags(html, name, file);
+  } else if (/\b(og|twitter):[a-z:]+/i.test(html)) {
+    fail(`${name} has link-preview tags: the placeholder page must not (Phase 6 doc section 10)`);
   }
   for (const match of rest.matchAll(/\b(src|href)\s*=\s*"([^"]*)"/gi)) {
     const [, attribute, value] = match;
@@ -182,7 +229,37 @@ if (explorer) {
       fail(`dist-explorer/${name} differs from its source, ${source.slice(WEB.length)}`);
     }
   }
+  // The share cards (C7): each is named by its page, each is a 1200 by 630 PNG (read from the IHDR chunk, which follows the
+  // 8-byte signature: a 4-byte length, "IHDR", then the width and height as 32-bit big-endian numbers), and none is
+  // left over. Their size is reported on a line of its own and is not part of the JavaScript budget.
+  const CARDS = join(DIST, "cards") + "/";
+  const cardFiles = all.filter((f) => f.startsWith(CARDS));
+  let cardBytes = 0;
+  for (const file of cardFiles) {
+    const name = rel(file).slice("cards/".length);
+    const bytes = readFileSync(file);
+    cardBytes = cardBytes + bytes.length;
+    if (name.includes("/") || extname(name) !== ".png") fail(`cards/${name} is not a PNG directly in cards/`);
+    else if (!namedCards.has(name)) fail(`cards/${name} is named by no page`);
+    const isPng =
+      bytes.length >= 24 &&
+      bytes.subarray(1, 4).toString("latin1") === "PNG" &&
+      bytes.subarray(12, 16).toString("latin1") === "IHDR";
+    if (!isPng) fail(`cards/${name} is not a PNG with an IHDR chunk`);
+    else if (bytes.readUInt32BE(16) !== CARD_WIDTH || bytes.readUInt32BE(20) !== CARD_HEIGHT) {
+      fail(
+        `cards/${name} is ${bytes.readUInt32BE(16)} by ${bytes.readUInt32BE(20)}, not ${CARD_WIDTH} by ${CARD_HEIGHT}`,
+      );
+    }
+  }
+  for (const name of namedCards) {
+    if (!existsSync(join(CARDS, name)))
+      fail(`a page names cards/${name} as its og:image, and the file is missing`);
+  }
   summary.push(`HTML files: ${htmlFiles.length}, one per path`);
+  summary.push(
+    `cards/: ${cardFiles.length} files, ${cardBytes} bytes (${(cardBytes / 1024).toFixed(1)} KB), ${CARD_WIDTH} by ${CARD_HEIGHT}, one per path; not in the JavaScript budget, and no budget of their own`,
+  );
   summary.push(`data/: ${present.size} files, ${expected.size} expected, byte for byte`);
   summary.push(`official run ids read: ${ids.runIds.size}; looked for in every file outside data/`);
 } else {
@@ -194,6 +271,10 @@ if (explorer) {
   for (const { file, id } of leaks.sweeps) fail(`${rel(file)} holds the official sweep id ${id}`);
   for (const file of all)
     if (/explorer/i.test(rel(file))) fail(`${rel(file)}: a path with "explorer" in it in dist/`);
+  if (existsSync(join(DIST, "cards"))) fail("dist/ has a cards/ folder: the share cards are the explorer's");
+  for (const file of files) {
+    if (/\bog:image\b/.test(readFileSync(file, "latin1"))) fail(`${rel(file)} mentions og:image`);
+  }
   summary.push(`official run ids read: ${ids.runIds.size}; looked for in every file`);
   summary.push(`official sweep ids read: ${ids.sweepIds.size}; looked for in every file`);
 }

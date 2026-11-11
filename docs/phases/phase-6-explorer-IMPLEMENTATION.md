@@ -486,7 +486,7 @@ My recommendation is (a) in each, for the reason given.
 7. **[built 2026-11-10 by Sonnet, §27; reviewed by Opus, §27a: passed after one change]** **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
 8. **[done 2026-11-11: his words, the labels and the four result-sentence templates approved, §11's dated notes]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[built 2026-11-11 by Sonnet, §28; reviewed by Opus, §28a (part A, passed) and §28b (part B, passed after one fix)]** **[Sonnet builds, Opus reviews]** **C6, the guided story.**
-10. **[Sonnet builds, Opus reviews]** **C7, the share cards.**
+10. **[built 2026-11-11 by Sonnet, §29; reviewed by Opus, §29a: passed after one fix; words pass next]** **[Sonnet builds, Opus reviews]** **C7, the share cards.**
 11. **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
     script per view; fixes before the close.
 12. **[Claude]** **C8, the close:** the DoD audit, the version (decision 9), `ROADMAP.md`, `KNOWN-GAPS.md`.
@@ -2236,3 +2236,336 @@ correction in the main flow.
 five figures and the page is about 13,800 px tall at 1280: the crop test asks for the caption on every figure, so the
 remedy is a design call, his. On `/` the story fetches every grid and case file at once, about 116 KB gzipped of data
 (1.37 MB raw), outside the JavaScript budget; no budget covers data, and a first-screen render does not wait on it.
+
+## 29. As built, C7: the share cards (2026-11-11, Sonnet; Opus review §29a)
+
+Built from `scratch/p6-c7-build-prompt.md`, on the explorer C3 to C6 built (§25-§28) and reviewed (§25a-§28b). No AWS
+call, no model call, no `terraform`, no `hc` command, no change to the Python, `experiment/` or `docs/phases/evidence/`;
+nothing under `web/explorer-data/`, `web/explorer-memos/`, `web/src/data/`, any view or chart component, or any file the
+placeholder entry imports was edited, and nothing under `methods-appendix/` was opened. `docs/KNOWN-GAPS.md` and
+`docs/ROADMAP.md` were left as they were; the edits to this doc are this section and §14 step 10's marker. Not committed
+(his commit, after Opus's review). The `dataviz` skill was not loaded: no chart is drawn (§10, and the prompt's decision).
+
+**What was built.** Each of the 13 paths has a 1200 by 630 PNG card in `dist-explorer/cards/<slug>.png`, drawn as SVG from
+the data files the views read and rasterized by `@resvg/resvg-js` 2.6.2 with the four committed TTFs; and each path's HTML
+has the `og:` and `twitter:` tags that name it. Nothing runs at runtime: no view, no route and no script a page loads
+changed, and no file the placeholder entry reaches did.
+
+- **`web/src/explorer/cards.ts`** (TypeScript; imported by no view, a test asserts it): a pure function per kind of path
+  (`buildCard`) from the data files to a card. A card is blocks in reading order, each a row of cells, each cell a stack of
+  paragraphs, each paragraph a list of **runs**. Every run carries its source: `his` (a `his.json` key; a page title also
+  carries the route's own id, as `pageMeta` writes it), `label` (an `explorerLabels` or card-label output, with the data
+  fields that fill its arguments and, for `verdictWords` and `readingLabels`, the data field that selects the word) or
+  `data` (a file and a dotted path; a model's name goes through `modelName`, a model's attempted runs through
+  `attemptedRuns`). `layoutCard` wraps by measurement and places the lines; `cardSvg` writes the SVG, whose only text is
+  one `<text data-block="n">` per laid-out line. A card that does not fit throws (`assertFits`): the build never draws a
+  card cut off, and a word of his that is still a placeholder throws too. `collectCardFiles` reads the index and the files
+  it lists (the one list the build and the tests share).
+- **`web/scripts/card-render.mjs`** (plain Node; the part that needs resvg): `makeMeasure` (a line's width from resvg's
+  bounding box of a one-line SVG, memoised), `rasterize`, `assertFonts`. System fonts off, only the files in
+  `web/fonts-ttf/` loaded. **`web/scripts/load-ts.mjs`**: loads a `.ts` module through Vite (below).
+  **`web/scripts/write-cards.mjs`**: after `write-paths.mjs` in `build:explorer`; for every route of `allRoutes` (the list
+  `write-paths` uses) builds, lays out, checks, rasterizes and writes `cards/<slug>.png`; clears the folder first, so a
+  card for a route that no longer exists cannot stay. The slug (`story`, `scenario-s1`, `cases`, `case-closure-07`,
+  `studies`, `memos`) is checked against the safe-segment rule and for uniqueness.
+- **`page-meta.mjs`** (plain, shared by the bundle and the scripts) gained `CARD_WIDTH`, `CARD_HEIGHT`, `SAFE_SEGMENT`
+  (moved here from `write-paths.mjs`), `cardSlug` and `routeOfPath` (the inverse of `pathOf`, which `check-dist` uses).
+  None is used by the bundle, so none is in it.
+- **`write-paths.mjs`**: `renderPage` takes the card (`{ slug, alt }`) as a fourth argument and writes `og:type` (website),
+  `og:title`, `og:description`, `og:url`, `og:image` (absolute), `og:image:width`, `og:image:height`, `og:image:alt` and
+  `twitter:card` (`summary_large_image`), each once and escaped; it refuses a card with no safe slug or no alternative text.
+  The page's `noindex` stays. `writePaths` is async now, because it reads the alt text from the labels through the same
+  loader.
+- **`check-dist.mjs`**: explorer mode checks, per page, that each tag is there exactly once and says what the page says
+  elsewhere (type, title, description, address, the page's own card, 1200, 630, `summary_large_image`, a non-empty alt);
+  that each named card exists; that each PNG is 1200 by 630 (read from the IHDR chunk, no new dependency); that no file in
+  `cards/` is without a page or sits in a subfolder or is not a PNG; and prints the cards' total on a line of its own (no
+  budget). Placeholder mode fails on a `cards/` folder, on any `og:`/`twitter:` tag in the page, and on `og:image` anywhere in
+  `dist/`. The existing checks (no `.ttf` in a build, the run ids, the per-path JavaScript, the CSP rules) are unchanged.
+- **Packaging:** `@resvg/resvg-js` pinned exactly at `2.6.2` in `devDependencies` (`package-lock.json` gained the
+  platform packages npm lists for it); `build:explorer` runs `write-cards.mjs` last; `web/fonts-ttf/` holds the four TTFs
+  and the three `OFL-*.txt` files.
+
+**Files.** New: `web/src/explorer/cards.ts`, `cards.test.ts`; `web/scripts/card-render.mjs` (+ `.d.mts`), `load-ts.mjs`
+(+ `.d.mts`), `write-cards.mjs` (+ `.d.mts`); `web/fonts-ttf/` (4 TTFs, 3 licence files). Changed: `web/package.json`,
+`web/package-lock.json`, `web/scripts/write-paths.mjs` (+ `.d.mts`), `web/scripts/check-dist.mjs`,
+`web/src/explorer/page-meta.mjs` (+ `.d.mts`), `web/src/explorer/copy.ts` (one new export, below),
+`web/src/explorer/write-paths.test.ts`, `format.test.ts` (the no-computation list), `modules.test.ts`; this doc.
+
+**Tests (Vitest; 65 in `cards.test.ts`, 19 in `write-paths.test.ts`).** Each is under 2 s; the build-once test is 0.7 s
+alone and 1.3 s inside the whole parallel suite. The five slowest in the suite are all existing tests (3.7 s, 2.7 s,
+2.6 s, 2.3 s, 1.9 s: the scenario view's result-sentence test and four axe walks); the slowest new
+test is the build-once test above, then the second whole build (0.8 s), the 13 rasterizations (0.7 s). `testTimeout`
+is not raised. The tests read the data and his words off disk with code of their own, so a card is checked against the
+files and not against the card module's reading of them.
+
+- *The text-source test, per card (13):* every run equals its source (`his` against `his.json`, `label` against the
+  label's output for its arguments, `data` against the field), and the SVG's `<text>` content, block by block, is exactly
+  the runs in order: no `<text>` of another shape, no `<tspan>`, `<title>`, `<desc>`, `<image>`, `<style>` or script.
+  **Mutation-checked:** a card drawn with one extra hard-coded string, a text element with no block, a hidden `<tspan>`, a
+  changed id in a title, a `his` run with words added, and a `label` run changed: each fails.
+- *Every number is traceable:* in a `data` run each digit sequence is in that field (a model's name: in the model's name;
+  `attemptedRuns`: the sum recomputed with `reduce` in the test); in a `his` run it is in his value; in a `label` run it is
+  an argument's, and the label's own fixed words (arguments blanked) hold no digit but a model's.
+- *Per kind:* the story card is exactly the five lines of the prompt's table, with no verdict word, no template sentence,
+  no run count and no digit outside the models' names. Each scenario card has both models' run lines (the main model
+  first), one row per `SENTENCE_ORDER` pair whose cells are `verdictWords[final_verdict]` of each model's own file, the
+  Roundtable flag on C vs D and no other row, the scope sentence last, and "inconclusive" and "not assessable" in place. The
+  cases card is the prompt's lines in order, and its other branch (rows, when a reading is not "no good match", and the
+  "differs by reading" line) is tested on edited copies of the files. Each case card is the prompt's lines exactly; the
+  description equals `Description`'s rendered text (the component is rendered in the test); the exploratory label is
+  verbatim and above every reading label, **by `y`**; and no reading's reason, no distance or interval end (to three
+  places), no observable line, no company choice, no sweep id, no memo count, no dossier or re-identification reason appears.
+  The studies card has no verdict word and no digit; the memos card has none of the extract's memo strings (all
+  1,000-plus checked by their first 60 characters) and its label's fixed part is tied to `memoCardLabel`'s.
+- *Layout:* no line wider than its box (and each line's width re-measured), nothing below the lower margin, every line 22 px
+  or larger, and the whole card's text drawn on its own has a bounding box inside 1200 by 630; wrapping is greedy and
+  by measurement (tested at three box widths, including a word wider than its box).
+- *Fonts:* each family and weight resolves to a committed TTF with system fonts off, four faces draw four different widths,
+  and a family that is not there ("Newsreader", the site's own name) **throws**; with no font files a card renders no text and
+  is byte-identical to the same card with its text removed.
+- *Rasterizing:* each PNG is 1200 by 630; the same SVG twice gives the same bytes; **the same build twice gives the same
+  bytes in all 13 files**, and a written file equals what the module draws.
+- *`write-paths`:* every page has each tag once, with the right slug, an absolute address and his words, escaped; the
+  placeholder page (`web/index.html`) has no `og:`, no `twitter:` and no `cards/`; `routeOfPath` is the inverse of `pathOf`.
+- *The rest:* the palette constants equal their `styles.css` tokens and every color in every SVG is one of the six; no goal color
+  is used; the card labels state no result, no ratio and no digit; `cards.ts` and the three build scripts are in the
+  no-computation test's list; the module-graph test says nothing the explorer entry reaches touches the card code or a font.
+- *`check-dist`'s new rules were checked by hand against a broken build, not by Vitest:* a card deleted, a card no page
+  names, a PNG 631 high, a tag twice, a wrong `og:image`, a missing `twitter:card`, a `.ttf` in the build, and in the placeholder
+  build a `cards/` folder and an `og:image` tag: each fails with its own message, and the clean build passes.
+
+**Proof (measured, 2026-11-11).**
+
+- **The dist diff is empty:** `find web/dist -type f | sort | xargs sha256sum` before (`scratch/p6-c7-dist-before.txt`) and
+  after (`scratch/p6-c7-dist-after.txt`, taken after the full `npm run check`, which rebuilds it): identical, 8 files.
+- **`make check` exit 0** (log `scratch/p6-c7-makecheck.log`): Python 3,483 passed; Vitest 526 passed in 32 files;
+  `check-dist: ok` in both modes. `npm --prefix web run check` (log `scratch/p6-c7-check-web.log`), last lines, explorer mode:
+
+  ```
+  JavaScript a case path loads, largest /cases/closure-07/: 88832 bytes (86.8 KB); budget 100.0 KB
+  JavaScript a cases path loads, largest /cases/: 88832 bytes (86.8 KB); budget 100.0 KB
+  JavaScript a story path loads, largest /: 94265 bytes (92.1 KB); budget 100.0 KB
+  JavaScript a memos path loads, largest /memos/: 86180 bytes (84.2 KB); budget 100.0 KB
+  JavaScript a scenario path loads, largest /scenario/s1/: 92655 bytes (90.5 KB); budget 100.0 KB
+  JavaScript a studies path loads, largest /studies/: 90140 bytes (88.0 KB); budget 100.0 KB
+  fonts: 4 files, 68400 bytes (66.8 KB); budget 150.0 KB; WOFF2 only
+  HTML files: 13, one per path
+  cards/: 13 files, 1215335 bytes (1186.9 KB), 1200 by 630, one per path; not in the JavaScript budget, and no budget of their own
+  data/: 69 files, 69 expected, byte for byte
+  check-dist: ok
+  ```
+
+  Placeholder mode: `dist: 8 files`, JavaScript 75,899 bytes (74.1 KB), `check-dist: ok`.
+- **The per-path JavaScript did not move.** `/` is 94,265 bytes, §28b's figure after the words pass. Proof for every path:
+  `git archive HEAD web`, built with `vite build --mode explorer` in a scratch folder, and the 13 emitted `.js` and `.css`
+  files compared by sha256 with this build's: identical, names (which carry a content hash) included. The first version put
+  the card labels among `explorerLabels`' keys and moved every path by about 300 bytes gzipped (`/` 94,568); they are a separate
+  export now, which the bundler leaves out (decided point 2).
+- **The cards:** 13 files, 1,215,335 bytes in all (1,186.9 KB), each 64,814 to 124,589 bytes (`story` 81,732; `scenario-s1` 117,197,
+  `-s2` 124,589, `-s3` 117,703, `-s4` 121,976; `cases` 118,797; `case-closure-07` 68,255, `-closure-19` 69,382, `-pre-11` 81,534,
+  `-pre-25` 89,924, `-pre-224` 88,360; `studies` 64,814; `memos` 71,072). Resvg's PNG writer is not size-optimised; no budget
+  covers them (§10, the prompt).
+- **The build's time:** `build:explorer` takes 0.73 to 0.77 s without the cards (Vite and `write-paths`) and 1.47 to 1.48 s with
+  them; `write-cards` alone writes the 13 in about 0.7 s.
+- **Every card looked at.** The 13 PNGs are in `scratch/p6-c7-cards/`, and I opened each. For each: the text is legible at full
+  size; nothing is clipped, no text overlaps another, the footer line (the scope sentence) is clear of the content above it; the
+  reading order is the prompt's table (name, title, then the card's own lines, the scope sentence last). The contact sheet at
+  600 px wide, 2 by 7, is `scratch/p6-c7-cards/contact.png`. **At that width, body text is 11 px and the scope sentence is the
+  hardest to read; the table's verdict words (semibold) and the titles read well.** What I checked per kind: *story*: hero name,
+  title, question, "Two models" line; no result. *Scenario (4):* header row, brief, the two run lines side by side, the model
+  headers over the two verdict columns, five rows with the Roundtable flag under C vs D only, "not assessable" fitting its
+  column on `s2`. *Cases:* the three distinct exploratory labels first (the long two wrap to three lines each, a rule beside
+  each), "no good match" line, the five case names. *Case (5):* the label first, then the description (or "Description:
+  withheld" on `pre-11`), then one line per model. *Studies* and *memos:* the description, and on memos the label's fixed part.
+- **The tags as a scraper sees them** (`<head>` of the written HTML), `/`:
+
+  ```
+  <title>Horizon Compact: does the goal change the decision?</title>
+  <meta name="description" content="An experiment: the same AI model makes the same company decisions under five different goals. See whether its choices change, and by how much." />
+  <link rel="canonical" href="https://horizon-compact.vercel.app/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Horizon Compact: does the goal change the decision?" />
+  <meta property="og:description" content="An experiment: ... and by how much." />
+  <meta property="og:url" content="https://horizon-compact.vercel.app/" />
+  <meta property="og:image" content="https://horizon-compact.vercel.app/cards/story.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="A card for the project’s front page: its name, its question, the two models it tests, and what it does not measure. It shows no result." />
+  <meta name="twitter:card" content="summary_large_image" />
+  ```
+
+  `/scenario/s1/`: title "Scenario (s1)", `og:url` `.../scenario/s1/`, `og:image` `.../cards/scenario-s1.png`; `/cases/closure-07/`: title
+  "Real case (closure-07)", `og:url` `.../cases/closure-07/`, `og:image` `.../cards/case-closure-07.png`; each with the same nine tags and its own
+  kind's alternative text (the full `<head>`s are in `dist-explorer/` after `npm --prefix web run build:explorer`).
+- **The fonts** (each a static TTF, OFL 1.1, under the hooks' 1,024 KB limit: sizes 121 KB, 118 KB, 421 KB, 415 KB):
+
+  | File in `web/fonts-ttf/` | Source | Version | sha256 of the file |
+  |---|---|---|---|
+  | `Newsreader16pt-Regular.ttf` | `productiontype/Newsreader` at `cfcb4f7af0e52c25e8df2a2431814c8e5fe2e155` (the default branch's head on 2026-11-11), `fonts/static/ttf/` | 1.003 | `0636887c9f72f77ce188f0b31029be58e65adae5a47e6d2887ad5020c2c75036` |
+  | `SourceSans3-Regular.ttf` | `adobe-fonts/source-sans` release `3.052R` (2023-04-04), `TTF-source-sans-3.052R.zip` | 3.052 | `4644c81b86ec9caaa76b634889968ed3c4f4f52f054855933acc7c2b21e53b0f` |
+  | `SourceSans3-Semibold.ttf` | the same release and zip | 3.052 | `a3f4f8dcf343a8f24dc61951de93f3ba1558b15cd250ba24af8a40e957081b7d` |
+  | `BigShouldersDisplay-ExtraBold.ttf` | `xotypeco/big_shoulders` at `8ba99c9e347396d828b263b8b818269cb99eb27c` (the default branch's head), `Big-Shoulders/fonts/ttf/` | 2.002 | `9850b5a13ed25975abbf7ec175d76b26e0e115016d9945b782b08179c27ea4f2` |
+
+  The licence texts are each repository's own (`OFL.txt` for Newsreader and Big Shoulders at the same commits;
+  `LICENSE.md` for Source Sans at the tag `3.052R`). **They are not byte-identical to upstream:** the commit hooks'
+  `trailing-whitespace` and `end-of-file-fixer` rewrote the three `OFL-*.txt` files in the dry run (whitespace only), so
+  the committed files differ from the downloaded ones. Upstream sha256 / committed sha256: Newsreader `fdfad381...` /
+  `865f0949...`; Source Sans `89ad2c4f...` / `f1ffbe26...`; Big Shoulders `338f9c05...` / `bf3b5640...`. The TTFs are
+  untouched by the hooks. Every family had a static TTF of the weight asked: nothing was substituted and nothing was
+  instanced by me. (Newsreader's static files come in three optical sizes, 6, 16 and 72 pt, and no plain "Newsreader"; see
+  decided point 4.)
+- **The TypeScript-loading route: Vite's `runnerImport`** (`vite@8.3.5`, typed and marked `@experimental` in
+  `node_modules/vite/dist/node/index.d.ts`; the Vite 8 guide in context7 documents `ModuleRunner` and the environment API but
+  not `runnerImport`, so what is relied on here is the installed version's own type). `load-ts.mjs` calls it with
+  `configFile: false` (no plugins, no React), `root` set to `web/` and `logLevel: "error"`; it starts and closes its own
+  server, takes about 90 ms a call, evaluates `copy.ts` and its `his.json` import with Vite's transforms, and so gives
+  the card text the very modules the views use. It works from `npm run` and from Vitest (a test runs `writeCards` through
+  it). The fallback (an SSR build into a temporary folder) was not needed.
+- **`npm ci` installs the resvg binary on Linux:** in a clean folder with only this `package.json` and `package-lock.json`,
+  `npm ci` (2.5 s) installed `@resvg/resvg-js` 2.6.2 with `-linux-x64-gnu` (and `-musl`), and `require("@resvg/resvg-js")`
+  rendered a PNG. The lock also lists the arm64, macOS and Windows packages. CI and Deploy's `make check` run `npm --prefix web ci` on
+  `ubuntu-latest`; the one ARM runner in `deploy.yml` builds the Python image and runs no web step.
+- **The commit hooks, which `make check` does not run** (dry run on a throwaway copy of the index, every file staged, 28
+  files): `check-added-large-files`, `check-merge-conflict`, `detect-private-key` pass; `end-of-file-fixer` and
+  `trailing-whitespace` rewrote the three licence files (above), and pass on a second run; the name guard's `pre-commit`
+  mode exits 0 and says "not scanned, binary" for the four TTFs, as it must. His index was left as it was.
+
+**Decided points as built.**
+
+1. **Where each card's words come from: runs tagged with their source** (the prompt's "text runs, each tagged"). A label's arguments are themselves data fields or labels (a pair's heading is
+   `storyPairHeading` filled from the comparison's `first` and `second` and `objectiveNames` selected by them), so even
+   the letters on a row are fields. The test that the SVG's text is exactly the runs is the guard for the binary file
+   that the name guard cannot read.
+2. **The card labels are a separate export of `copy.ts`, `explorerCardLabels`, not more keys of `explorerLabels`.** The prompt
+   says "in `explorerLabels`" and "nothing a page loads changes"; both cannot hold, because a key of `explorerLabels` is in
+   every path's JavaScript (measured: about 300 bytes gzipped on every path, `/` 94,568). A separate `export const` that no
+   view imports is left out by Rollup (measured: all 13 built `.js` and `.css` files are byte-identical to HEAD's). It
+   stays one block, headed Claude-drafted and unapproved. `cards.ts` reads `{ ...explorerLabels, ...explorerCardLabels }`, so
+   a card label and an existing label are found the same way. If Opus prefers them inside `explorerLabels`, it is a move
+   that costs the 300 bytes.
+3. **Layout (my calls, within the prompt's table).** The scope sentence is pinned to the card's foot on every card with a thin
+   line above it (it was the one block every card has, and it left the cards top-heavy and uneven when it followed the
+   content); the three cards with room (story, studies, memos) set the name large (72 px) above the title, and the four
+   with a table or long label put the name left and the title right on one row to make room. The 22 px floor holds for every
+   line of text (a test); titles are 40 px, the name 38 or 72, his questions and descriptions 32 px, the brief and a case's
+   description 24 px.
+4. **Fonts.** The site's own families are named "Newsreader", "Source Sans 3" and "Big Shoulders Display"; the SVG names the
+   TTFs' own family names. Newsreader's static files are per optical size, so the family is **"Newsreader 16pt"** (the text
+   size, which I take to be what the site's WOFF2 holds; **I did not verify that and did not compare outlines**, and the card
+   uses 400 only). Source Sans 3 Semibold names itself "Source
+   Sans 3 Semibold" (family) and "Source Sans 3" (typographic family); resvg matches the latter, so the SVG asks for "Source Sans 3"
+   at 600. Big Shoulders Display's static ExtraBold reads a weight class of 733 in its OS/2 table (read by hand from the file; an odd
+   value, not checked against upstream's source) and resolves at 800 in resvg; it is the only face in its family. **resvg does not fail on a family it
+   cannot find: it draws with the first font loaded** (found when the first font check passed for a face that was not there).
+   `assertFonts` therefore draws a probe string with the fonts in one order and then the reverse order: a found face is the
+   same width both times, a missing one follows the order. The build stops on a miss; a test covers it.
+5. **Measuring.** Wrapping finds the most words that fit by a binary search over candidate lines, each measured by resvg's
+   bounding box (ink width of the drawn line), memoised; the tests re-measure every final line. Pixel positions are plain
+   arithmetic in `cards.ts` and the scripts, rule 3 of `format.ts`'s header; none uses `Math.`, `.reduce(`, `+=` or `++`, which
+   the no-computation test checks for them.
+6. **The model strip and the table's headers.** Each model's name and its "valid runs of attempted" form one semibold line
+   (the name, a colon, `capValidOfAttempted`'s output), the main model on the left; the five rows then show each model's
+   verdict word under that model's short name. A row's label is `storyPairHeading`, which is long enough (about 75 characters
+   for B vs D) that the label column is 740 px and each verdict column 160 px, enough for "not assessable".
+7. **`og:image:alt` is one text per kind of path**, not per path (the prompt: "a label per kind of path").
+
+**Claude-drafted labels, for the words pass (one list).** All in `explorerCardLabels`, none approved. None states a result,
+none holds a ratio or a digit (a test).
+
+- `cardName`: "Horizon Compact" (the name, which the views write as a literal in `Shell.tsx`; here it needs a tag, so it is a label).
+- `cardTwoModels(first, second)`: "Two models: {first} and {second}".
+- `cardMemoLabel`: "Written by a model under one goal, for a fictional company. This is the model’s output, not the project’s view." (the fixed
+  part of `memoCardLabel`; a test ties the two).
+- `cardAlt` (the `og:image:alt` of each kind of page):
+  - `story`: "A card for the project’s front page: its name, its question, the two models it tests, and what it does not measure. It shows no result."
+  - `scenario`: "A card for one company decision: the scenario in brief, how many valid runs each of the two models made, and the study’s verdict for each comparison, side by side. The verdicts are the study’s own."
+  - `cases`: "A card for the real cases: how they were chosen, and what each model’s reading of every case was. It names no company."
+  - `case`: "A card for one real case: how it was chosen, its short description with the company’s name removed, and what each model’s reading of it was."
+  - `studies`: "A card for the two side studies: what they ask, and what the study measures and does not. It shows no result."
+  - `memos`: "A card for the memo reader: what a memo is, and that it is the model’s own writing and not the project’s view. It shows no memo text."
+
+The cards also use these existing, approved labels: `allNoGoodMatch`, `capValidOfAttempted`, `roundtableFlag`,
+`storyPairHeading`, `objectiveNames`, `verdictWords`, `readingLabelIs`, `readingLabels`, `storyLabelVaries`,
+`caseDescriptionStatus`, and his words: the question, the scope sentence, the briefs, and each page's title and
+description. **No new `his.json` key.**
+
+**Rule zero, flagged.** Nothing is exposed that the cases page does not already show: a case card holds the case's label, its
+exploratory label (verbatim), its description or its status, and each model's label, and the tests assert that no nearest
+goal, distance, interval, dossier field, matcher reason, observable line, company choice, memo count or sweep id appears.
+**One thing for Opus to weigh:** a case card carries the published description (sector, revenue band, period, place), the
+text `/cases/` shows, now in an image that a link preview puts in front of readers who never open the page. It is the
+level-0 text of Phase 5.5 and is public in the explorer data, so it adds no information, but a preview is shared more
+widely than a page. If it should not be on the card, it is one block in `caseCard` and one line in the test; the card would
+then show the label and each model's label only. The `/` card shows no case at all. Four of the five case cards carry a
+description: a sector, a revenue band, a period and "in the US" or "outside the US". None names a company, and the place
+is the country level only. The name guard cannot read
+a PNG: the text-source test is the guard, and it reads the same tracked values the cases page does. The pages stay `noindex`.
+
+**What did not fit, and what was done instead.**
+
+- *"Newsreader 400" as a static TTF:* no plain static "Newsreader" exists; the 16pt optical size is the text size and was used
+  (decided point 4). I did not stop, because a static TTF of the weight does exist and nothing was instanced.
+- *The labels "in `explorerLabels`":* in a separate export instead, for the reason in decided point 2.
+- *Newsreader and Source Sans outlines vs the site's WOFF2:* not compared; the family names and sizes are the same, and I
+  looked at every card. Whether the card's serif is exactly the page's serif is for the review.
+- *Card size:* 1.2 MB for 13 PNGs; resvg writes full-colour PNGs. No budget applies; quantizing them would need another tool or
+  dependency, which the prompt did not allow.
+- *The checks' negative controls* are by hand, not Vitest tests: `check-dist` is a script run by `npm run check`, and the repo has no
+  test harness for it. The positive path is exercised on every `make check`.
+- *Legibility at 600 px wide:* body text is 11 px there and the scope sentence is the weakest. The prompt's 22 px floor holds; raising it
+  would push the scenario card past its height (its table and brief fill it), so it is Opus's and his call.
+- *The commit hooks fixed the three licence files' whitespace,* so they are not upstream's bytes (above).
+- *The cards are not served anywhere yet:* Deploy syncs `dist/` only, so each page's `og:image` address answers 404 until Phase 6.5's
+  go-live, as the pages themselves are not public until then. The tags are tested for their address, not for a response.
+
+## 29a. Review of C7 (2026-11-11, Opus)
+
+**Passed after one fix.** Read against `scratch/p6-c7-build-prompt.md`: §29 in full, the diff of every changed file, the
+story card code in `cards.ts`, the card labels in `copy.ts`, and all 13 cards and the contact sheet, opened.
+
+**Checked independently, not taken from §29.** `make check` exit 0 before the fix (Python 3,483, Vitest 526 in 32 files,
+`check-dist: ok` in both modes). The scenario `s2` card against the data: each model's five `final_verdict`s through
+`verdictWords` and Haiku's 87 valid runs are the file's own (87 of 90 attempted is what `attemptedRuns` gives and the
+scenario view shows). `explorerCardLabels` is imported by `cards.ts` alone and by no view. `scratch/` and
+`web/dist-explorer/` are ignored by git, so no card (a binary file holding case descriptions) can be committed.
+
+**The fix: the story card printed the name twice.** The prompt's table (Opus's) asked for the name and then the page
+title, and the story's title begins with the name ("Horizon Compact: does the goal change...."). The story card now shows
+the name, the question, the two models and the scope sentence; the title is left off, since every link preview shows
+`og:title` as text beside the image. The only departure from §10's "the view's title" is on this card, for this reason.
+The story test is re-pinned to the four lines; the memos test's reference to the story's two-models line moved from
+index 3 to 2. The other cards' titles do not repeat the name and are unchanged.
+
+**The points §29 raised, decided (Opus's calls, his to override).**
+
+1. *The card labels as a separate export:* **kept.** Inside `explorerLabels` every path grew by about 300 bytes for words
+   no page shows; the separate export keeps the built JavaScript byte-identical to HEAD's, which §29 proved by sha256.
+2. *The description on the case cards:* **kept.** It is the same level-0 text `/cases/` shows and the tracked explorer
+   data already holds, so the card adds reach, not information; identifiability was judged on that text in Phase 5.5;
+   and without it a case card says nothing about its case (every reading is "no good match"). A case card appears only
+   when someone shares that case's own address.
+3. *The licence files' whitespace:* **left as the hooks wrote them.** The change is whitespace only, the OFL asks that the
+   licence travel with the fonts and not that its bytes be upstream's, and §29 records both sha256s. Excluding
+   `web/fonts-ttf/` from the two hooks would also work; it is not worth a config change.
+4. *"Newsreader 16pt":* **accepted, unverified.** Fontsource's static Newsreader comes from Google Fonts' static instance,
+   which is likely the family's default optical size, 16; no difference shows in the cards. Not compared outline by
+   outline.
+5. *600 px legibility:* **accepted at the 22 px floor.** A feed shows a card at about 500 to 550 px, where 22 px reads as
+   about 10 px; the titles, the verdict words and the question carry the card at that size, and the scope sentence is
+   there for a reader who opens it. Raising the floor would overflow the scenario cards.
+6. *`assertFonts` and the hand-checked `check-dist` controls:* sound as built; no harness added for `check-dist`.
+
+**Carried to the words pass (his), with the card labels §29 lists.**
+
+- *The alternative text* (`cardAlt`) describes each card from outside ("A card for...", "It shows no result"). A screen
+  reader user should get what the card says, not a note about it. Opus's recommendation: say the content plainly, and
+  drop "A card for" and "It shows no result".
+- *A case card's model lines* read "Haiku 5.5: Label: no good match" (a model's name, then the approved `readingLabelIs`).
+  A card label without the second "Label:" would read better.
+- *The two-models line* uses the site's short names ("Haiku 5.5", "gpt-oss-120b"); the story's words, which he approved,
+  say "Claude Haiku 5.5" and "OpenAI's gpt-oss-120b". On a card seen outside the site, the maker's name may be worth
+  having.
+
+**Proof after the fix:** `cards.test.ts` 65 passed; the story card rebuilt and opened (name, question, two models, scope
+sentence; nothing clipped); `scratch/p6-c7-cards/story.png` replaced. The contact sheet still shows the old story card.

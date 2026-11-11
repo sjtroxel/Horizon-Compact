@@ -189,6 +189,11 @@ describe("the rule: no number is computed outside format.ts", () => {
     "ChartCard.tsx",
     "RunDetails.tsx",
     "caseParts.tsx",
+    // C7: the share cards and the build scripts that draw them (their pixel positions are rule 3's, no data value).
+    "cards.ts",
+    "../../scripts/write-cards.mjs",
+    "../../scripts/card-render.mjs",
+    "../../scripts/load-ts.mjs",
   ];
   it("holds no Math call, no reduce and no running total in the views, the charts or the templates", () => {
     for (const file of files) {

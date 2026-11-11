@@ -455,3 +455,35 @@ export const explorerLabels = {
   storyStudiesLink: "The side studies",
   storyMemosLink: "Read the memos the models wrote",
 };
+
+/**
+ * C7: the share cards' labels (Phase 6 IMPLEMENTATION doc section 10; section 29 lists them). CLAUDE-DRAFTED AND NOT YET
+ * APPROVED: they wait for the words pass after Opus's review. Each describes what a card or a link preview shows; none
+ * states a result, and none holds a ratio. The cards also use labels of `explorerLabels` (`allNoGoodMatch`,
+ * `capValidOfAttempted`, `roundtableFlag`, `storyPairHeading`, `readingLabelIs`, `storyLabelVaries`, `verdictWords`,
+ * `objectiveNames`, `readingLabels`, `caseDescriptionStatus`) and his words, unchanged.
+ *
+ * A separate export, not more keys of `explorerLabels`, so that no view imports it and the bundler leaves it out: the
+ * explorer's JavaScript is the same size as before C7 (the build's check-dist lines show it), and nothing a page loads
+ * changes. Only the build (cards.ts, write-paths.mjs) reads it.
+ */
+export const explorerCardLabels = {
+  cardName: "Horizon Compact",
+  cardTwoModels: (first: string, second: string) => `Two models: ${first} and ${second}`,
+  cardMemoLabel:
+    "Written by a model under one goal, for a fictional company. This is the model\u2019s output, not the project\u2019s view.",
+  // The alternative text of each kind of page's link-preview image (og:image:alt).
+  cardAlt: {
+    story:
+      "A card for the project\u2019s front page: its name, its question, the two models it tests, and what it does not measure. It shows no result.",
+    scenario:
+      "A card for one company decision: the scenario in brief, how many valid runs each of the two models made, and the study\u2019s verdict for each comparison, side by side. The verdicts are the study\u2019s own.",
+    cases:
+      "A card for the real cases: how they were chosen, and what each model\u2019s reading of every case was. It names no company.",
+    case: "A card for one real case: how it was chosen, its short description with the company\u2019s name removed, and what each model\u2019s reading of it was.",
+    studies:
+      "A card for the two side studies: what they ask, and what the study measures and does not. It shows no result.",
+    memos:
+      "A card for the memo reader: what a memo is, and that it is the model\u2019s own writing and not the project\u2019s view. It shows no memo text.",
+  } as Record<string, string>,
+};
