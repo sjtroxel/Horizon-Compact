@@ -16,9 +16,30 @@ import hisJson from "./his.json";
 
 export { PLACEHOLDER_MARK, isPlaceholder } from "../copy";
 
+export interface StoryHis {
+  setupTitle: string;
+  setupIntro: string;
+  s1Title: string;
+  s1Intro: string;
+  comparisonsTitle: string;
+  comparisonsIntro: string;
+  secondTitle: string;
+  secondIntro: string;
+  othersTitle: string;
+  othersIntro: string;
+  casesTitle: string;
+  casesIntro: string;
+  methodsTitle: string;
+  methodsText: string;
+}
+
 export interface ExplorerHis {
   landingQuestion: string;
   scopeSentence: string;
+  /** The opening screen's line explaining the name (planning/06 section 6.4): his words, a placeholder until he writes them. */
+  storyName: string;
+  /** The guided story's titles and introductions for beats 2 to 6, 8 and 9 (beat 7 keeps `againstTitle` and `againstIntro`). */
+  story: StoryHis;
   /** The scenario in brief, per scenario id: his words, a placeholder until he writes them. */
   scenarioBriefs: Record<string, string>;
   /** The section for results against the thesis: his title and his introductory sentence. */
@@ -417,4 +438,20 @@ export const explorerLabels = {
   awarenessNotRecorded: "This call was not recorded.",
   awarenessEmpty: "The reply had no text.",
   studiesLoading: "Loading the studies",
+
+  // ------------------------------------------------------------------------------------------------------------
+  // C6: the guided story. Claude-drafted, UNAPPROVED until the words pass after Opus's review of part B. Each label
+  // describes what a part shows; none states a result.
+  storyRoundtableTest:
+    "This is the test of the Business Roundtable\u2019s claim (protocol section 1.5): the two goals that look twenty years ahead, one for shareholders and one for everyone with a stake.",
+  storyPairHeading: (firstName: string, first: string, secondName: string, second: string) =>
+    `${firstName} (${first}) vs ${secondName} (${second})`,
+  storyOpenScenario: (id: string, model: string) => `Open scenario ${id} on ${model}, with every detail`,
+  storyTableCaption: (id: string) => `Scenario ${id}: every verdict, for each model`,
+  storyComparisonColumn: "Comparison",
+  storyLabelVaries: "differs by reading; see the case",
+  storyAllCases: "All the real cases, in full",
+  storyProtocolLink: "The protocol, as pre-registered (on GitHub, at the pre-registered tag)",
+  storyStudiesLink: "The side studies",
+  storyMemosLink: "Read the memos the models wrote",
 };

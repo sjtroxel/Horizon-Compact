@@ -140,6 +140,31 @@ describe("the labels keyed by the data", () => {
   });
 });
 
+describe("the story's words (C6)", () => {
+  it("carry the name line and a title and introduction for beats 2 to 6, 8 and 9, each a placeholder or written", () => {
+    const keys = [
+      "setupTitle",
+      "setupIntro",
+      "s1Title",
+      "s1Intro",
+      "comparisonsTitle",
+      "comparisonsIntro",
+      "secondTitle",
+      "secondIntro",
+      "othersTitle",
+      "othersIntro",
+      "casesTitle",
+      "casesIntro",
+      "methodsTitle",
+      "methodsText",
+    ];
+    expect(Object.keys(explorerHis.story).sort()).toEqual([...keys].sort());
+    for (const text of [explorerHis.storyName, ...Object.values(explorerHis.story)]) {
+      expect(text.trim()).not.toBe("");
+    }
+  });
+});
+
 describe("the labels keyed by the C5 data", () => {
   it("hold a word for every label the matcher can write, and every one in the real case files", () => {
     // matcher.py: Label = match | tie | no_good_match | not_enough_disclosed.

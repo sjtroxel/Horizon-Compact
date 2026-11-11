@@ -22,18 +22,20 @@ export interface ViewProps {
   /** The URL's query string (with its "?", or empty): the memo reader's choices are in it. */
   search: string;
   data: DataApi;
+  /** Called once when the story has every beat's data (loaded or failed); the shell reveals a hash after it. */
+  onStorySettled?: (() => void) | undefined;
 }
 
 /**
  * Each route's view. The scenario view and the section for results against the thesis are C4; the memo reader, the
- * real cases and the studies are C5. The story is still C3's stub, C6's to build (it shows the section for results
- * against the thesis under its stub until then). A view is a lazy component: the shell holds the `Suspense` and the
+ * real cases and the studies are C5. The story is C6's (nine beats, part B). A view is a lazy component: the shell holds the `Suspense` and the
  * error boundary around this one.
  */
-export function View({ route, index, casesIndex, model, search, data }: ViewProps) {
+export function View({ route, index, casesIndex, model, search, data, onStorySettled }: ViewProps) {
   switch (route.kind) {
     case "story":
-      return <Story index={index} />;
+      // The story ignores `model`: it shows both models by design.
+      return <Story index={index} casesIndex={casesIndex} data={data} onSettled={onStorySettled} />;
     case "scenario":
       // Keyed by scenario, so the goal toggles start over on a new scenario and carry across a model switch.
       return <ScenarioView key={route.id} id={route.id} index={index} model={model} data={data} />;

@@ -25,10 +25,11 @@ export function HisHeading({ text, level, id }: { text: string; level: 2 | 3; id
 }
 
 /** The view's title: his words for the kind of page, and the scenario's id or the case's label after it. */
-export function Title({ route }: { route: PageRoute }) {
+export function Title({ route, id }: { route: PageRoute; id?: string }) {
   const title = pageMeta(route, explorerHis.pages).title;
   return (
     <h1
+      id={id}
       tabIndex={-1}
       className={isPlaceholder(explorerHis.pages[route.kind].title) ? "placeholder" : undefined}
     >

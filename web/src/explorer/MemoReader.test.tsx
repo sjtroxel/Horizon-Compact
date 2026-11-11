@@ -9,7 +9,7 @@ import { WEB_ROOT, readMemoRows, realApi, realGrids, realIndex, realMemoIndex } 
 import { MemoCard, MemosView } from "./MemoReader";
 import { modelName } from "./models";
 import { memoHref } from "./route";
-import { RunsTable } from "./ScenarioView";
+import { RunsTable } from "./RunDetails";
 
 afterEach(cleanup);
 

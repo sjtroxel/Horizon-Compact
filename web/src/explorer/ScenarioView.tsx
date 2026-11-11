@@ -8,20 +8,20 @@
  * Nothing here computes a number. Every figure is a field of the grid file or the index, shown through format.ts.
  */
 import { useEffect, useId, useState } from "react";
-import type { ReactNode } from "react";
 import { orderedComparisons, findComparison, goalClass } from "./chartData";
-import { AllocationPanels, ChoiceUnits, IntervalChart, ShareStrip, rowOfComparison } from "./charts";
+import { ChartCard, GoalsList } from "./ChartCard";
+import { AllocationPanels, IntervalChart, rowOfComparison } from "./charts";
 import type { Names } from "./charts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { DataApi, DataIndex, GridComparison, GridFile } from "./data";
-import { attemptedRuns, comparisonRuns, confidenceLevel, formatDifference, formatPercent } from "./format";
+import { comparisonRuns, confidenceLevel, formatDifference } from "./format";
 import { scenarioTextUrl } from "./links";
-import { modelName } from "./models";
 import { His, ProtocolReading, Title } from "./parts";
 import { againstWords } from "./againstWords";
 import { readingFor } from "./protocol";
+import { Details, RunsTable } from "./RunDetails";
 import { resultSentence } from "./sentences";
-import { memoHref, withModel } from "./route";
+import { withModel } from "./route";
 
 const names: Names = L.objectiveNames;
 
@@ -34,21 +34,6 @@ interface Loaded {
   model: string;
   id: string;
   file: GridFile;
-}
-
-/** A `details` element closed by default whose content is built only once it is opened (the allocation panels and
- * the run table are thousands of nodes, and a closed section shows none of them). */
-export function Details({ summary, hint, children }: { summary: string; hint: string; children: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <details className="x-details" onToggle={(event) => setOpen(event.currentTarget.open)}>
-      <summary>
-        <span className="x-summary-title">{summary}</span>
-        <span className="muted"> &middot; {hint}</span>
-      </summary>
-      {open && <div className="x-details-body">{children}</div>}
-    </details>
-  );
 }
 
 function listOrNone(items: readonly string[]): string {
@@ -228,54 +213,6 @@ function FailuresTable({ file }: { file: GridFile }) {
   );
 }
 
-/**
- * Every valid run of the file as a table. Each run id is a link to that run's memo in the reader (`kind` says which
- * set of memos: the main grid's, or the thinking sub-study's), on the file's own model.
- */
-export function RunsTable({ file, kind }: { file: GridFile; kind: "grid" | "thinking" }) {
-  return (
-    <div className="x-table-wrap" role="region" aria-label={L.runsHeading} tabIndex={0}>
-      <table className="x-table">
-        <thead>
-          <tr>
-            <th scope="col">{L.th.runId}</th>
-            <th scope="col">{L.th.goal}</th>
-            <th scope="col">{L.th.wording}</th>
-            <th scope="col" className="num">
-              {L.th.repeat}
-            </th>
-            <th scope="col">{L.th.value}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {file.descriptive.per_run.map((run) => (
-            <tr key={run.run_id}>
-              <th scope="row" className="mono">
-                <a
-                  href={memoHref(
-                    { kind, scenario: file.scenario_id, objective: run.objective_id, run: run.run_id },
-                    file.model_key,
-                  )}
-                >
-                  {run.run_id}
-                </a>
-              </th>
-              <td>
-                {names[run.objective_id] ?? run.objective_id} ({run.objective_id})
-              </td>
-              <td>{run.wording_id}</td>
-              <td className="num">{run.repeat}</td>
-              <td>
-                {run.choice === null ? formatPercent(run.primary) : (L.choices[run.choice] ?? run.choice)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 function DetailsBody({ file, index }: { file: GridFile; index: DataIndex }) {
   const goals = index.objectives.map((o) => o.id);
   const comparisons = orderedComparisons(file);
@@ -299,38 +236,6 @@ function DetailsBody({ file, index }: { file: GridFile; index: DataIndex }) {
       <p className="chart-key">{L.runsKey}</p>
       <RunsTable file={file} kind="grid" />
     </>
-  );
-}
-
-function Card({
-  file,
-  goals,
-  hidden,
-}: {
-  file: GridFile;
-  goals: readonly string[];
-  hidden: ReadonlySet<string>;
-}) {
-  const label = L.chartLabel(file.scenario_id, modelName(file.model_key));
-  return (
-    <figure className="card">
-      <p className="chart-key">
-        {file.kind === "share" ? (L.shareKey[file.scenario_id] ?? "") : L.choiceKey}
-      </p>
-      {file.kind === "share" ? (
-        <ShareStrip file={file} goals={goals} names={names} hidden={hidden} label={label} />
-      ) : (
-        <ChoiceUnits file={file} goals={goals} names={names} hidden={hidden} label={label} />
-      )}
-      <figcaption>
-        <span className="model-name">{modelName(file.model_key)}</span>
-        {" · "}
-        {L.capValidOfAttempted(file.descriptive.runs, attemptedRuns(file.objective_rates))}
-        {" · "}
-        {L.capCompany}
-        <His text={explorerHis.scopeSentence} />
-      </figcaption>
-    </figure>
   );
 }
 
@@ -398,15 +303,7 @@ export function ScenarioView({ id, index, model, data }: ScenarioViewProps) {
       <section className="x-section" aria-labelledby={goalsId}>
         <h2 id={goalsId}>{L.goalsHeading}</h2>
         <p className="chart-key">{L.goalsKey}</p>
-        <ul className="x-goals">
-          {index.objectives.map((o) => (
-            <li key={o.id} className={goalClass(o.id)}>
-              <span className="swatch" aria-hidden="true" />
-              <b>{names[o.id] ?? o.id}</b> <span className="letter">({o.id})</span>:{" "}
-              {o.who === null || o.when === null ? L.goalUnstated : L.goalTold(o.who, o.when)}
-            </li>
-          ))}
-        </ul>
+        <GoalsList index={index} />
       </section>
       {hasFailed ? (
         <p role="alert">{L.loadFailed}</p>
@@ -432,7 +329,7 @@ export function ScenarioView({ id, index, model, data }: ScenarioViewProps) {
             ))}
           </div>
           <div className="layout-2">
-            <Card file={current.file} goals={goals} hidden={hidden} />
+            <ChartCard file={current.file} goals={goals} hidden={hidden} />
             <div className="x-sentences" aria-labelledby={sentencesId} role="region">
               <h2 id={sentencesId}>{L.whatRunsShow}</h2>
               {modelEntry !== undefined && (

@@ -18,6 +18,7 @@ import {
   orderedReadings,
   showsNearest,
 } from "./caseData";
+import { Description, ExploratoryLabel } from "./caseParts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { CaseEntry, CaseFile, CasesIndex, CompanyReading, DataApi, DataIndex } from "./data";
 import { DistanceChart } from "./distanceChart";
@@ -71,24 +72,6 @@ function useCaseFiles(
     // `wanted` stands for the two lists.
   }, [data, wanted]);
   return state;
-}
-
-/** The exploratory label, verbatim, in the one place every case surface puts it first. */
-function ExploratoryLabel({ text }: { text: string }) {
-  return (
-    <p className="exploratory-label" data-exploratory-label="">
-      {text}
-    </p>
-  );
-}
-
-function Description({ entry }: { entry: CaseEntry }) {
-  const { description } = entry;
-  return description.status === "published" && description.text !== undefined ? (
-    <p className="case-description">{description.text}</p>
-  ) : (
-    <p className="case-description">{L.caseDescriptionStatus(description.status)}</p>
-  );
 }
 
 function Shortfall({ casesIndex }: { casesIndex: CasesIndex }) {

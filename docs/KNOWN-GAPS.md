@@ -7,7 +7,20 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-11, about 10:00 AM (C6 PART A BUILT AND REVIEWED; PART B NEXT)
+> ## START HERE — where things stand, 2026-11-11, about 11:30 AM (C6 BUILT AND REVIEWED; HIS COMMIT NEXT)
+>
+> **C6 part B, the guided story at `/`, built by Sonnet (the Phase 6 IMPLEMENTATION doc §28.B) and reviewed by Opus
+> (§28b): passed after one fix** (a beat whose top was on the first screen, in the observer's bottom band, could get the
+> entrance class and fade out on load; now only a beat wholly below the screen gets it, with a test that fails on the old
+> rule). `make check` green (Python 3,483, Vitest 443); `web/dist/` unchanged, 8 files; the story path `/` 91.8 KB of the
+> 100 KB budget, `/studies/` down to 87.8 KB. Name guard dry run clean (21 files). The case descriptions stay on the
+> landing page (§28b: the same public text as `/cases/`). **Uncommitted: his commit `phase 6: c6 part b guided story`
+> carries part B, the fix and these doc edits.** **Next: the words pass** on the story's 15 `his.json` placeholders and
+> 10 labels (§28.B's list, §28b's three notes), then C7, the share cards.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-11, about 10:00 AM (C6 PART A BUILT AND REVIEWED; PART B NEXT) *(superseded by the block above)*
 >
 > **C6 part A, the split by path, built by Sonnet (the Phase 6 IMPLEMENTATION doc §28) and reviewed by Opus (§28a):
 > passed, no code change.** Every view is a lazy chunk; `check-dist --mode explorer` checks the 100 KB budget per path

@@ -27,7 +27,7 @@ import { modelName, orderedModels } from "./models";
 import { His, HisHeading, Title } from "./parts";
 import { AWARENESS_INSTRUCTION } from "./protocol";
 import { memoHref } from "./route";
-import { Details, RunsTable } from "./ScenarioView";
+import { Details, RunsTable } from "./RunDetails";
 import { resultSentence } from "./sentences";
 
 const names: Names = L.objectiveNames;

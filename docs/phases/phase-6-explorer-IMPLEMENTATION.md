@@ -470,7 +470,7 @@ My recommendation is (a) in each, for the reason given.
 6. **[built 2026-11-10 by Sonnet, §26; reviewed by Opus, §26a]** **[Sonnet builds, Opus reviews]** **C4, the scenario view and the section for results against the thesis.**
 7. **[built 2026-11-10 by Sonnet, §27; reviewed by Opus, §27a: passed after one change]** **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
 8. **[done 2026-11-11: his words, the labels and the four result-sentence templates approved, §11's dated notes]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
-9. **[part A built 2026-11-11 by Sonnet, §28; reviewed by Opus, §28a, passed; part B not started]** **[Sonnet builds, Opus reviews]** **C6, the guided story.**
+9. **[built 2026-11-11 by Sonnet, §28; reviewed by Opus, §28a (part A, passed) and §28b (part B, passed after one fix)]** **[Sonnet builds, Opus reviews]** **C6, the guided story.**
 10. **[Sonnet builds, Opus reviews]** **C7, the share cards.**
 11. **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
     script per view; fixes before the close.
@@ -1846,7 +1846,7 @@ reloads, even though the data layer forgets the failed fetch: minor, no change.
 all JavaScript as one total, so the split also changes the check. C6's prompt does the split first, as its own part,
 with `web/dist/` unchanged and the per-path budget tested, before the story is built.
 
-## 28. As built, C6 part A: the split by path (2026-11-11, Sonnet; Opus review pending). Part B, the story, not started
+## 28. As built, C6: the split by path and the guided story (2026-11-11, Sonnet; reviewed §28a and §28b)
 
 Built from `scratch/p6-c6-build-prompt.md`, part A only. **Part B was not started**, because the prompt says "If any path
 is over 85 KB after part A, stop and report it in §28 before part B", and five of the six kinds of path are (table
@@ -1954,6 +1954,191 @@ entry's size was known) and go on under the 100 KB budget, or to cut the entry f
    view; Safari may not. Measure it in the headless capture before part B closes; a re-scroll after the data has loaded
    would add a second `scrollIntoView` and so change the existing first-load test's count (`toHaveLength(1)`).
 
+### 28.B Part B: the guided story (2026-11-11, Sonnet; Opus review pending)
+
+Built from `scratch/p6-c6-part-b-prompt.md` (which supersedes `scratch/p6-c6-part-b-note.md`) on top of
+`scratch/p6-c6-build-prompt.md`'s part B, after Opus's review of part A (§28a). No AWS call, no model call, no
+`terraform`, no `hc` command, no change to the Python, `experiment/` or `docs/phases/evidence/`. `docs/KNOWN-GAPS.md`,
+`docs/ROADMAP.md` and §28a were left as they were; the edits to this doc are this section, §28's title and §14 step 9's
+marker. Not committed (his commit). The `dataviz` skill was loaded; the story adds no new chart form (it reuses
+`ShareStrip`, `ChoiceUnits` and `IntervalChart`), and the headless pass found one layout fault in a reused chart, below.
+
+**What was built.**
+
+- **`Story.tsx`: the nine beats**, each a `<section>` with the id the prompt names, in the order of §9 (`beat-question`,
+  `beat-setup`, `beat-s1`, `beat-comparisons`, `beat-second-model`, `beat-other-scenarios`, `against-the-thesis`,
+  `beat-cases`, `beat-methods`), inside one `div.story`. Beat 1's heading is the page's `h1` (`Title` gained an optional
+  `id` so the section can name it); every other beat has an `h2` that is his title (`HisHeading`). The main model is
+  `orderedModels(index.models)[0]` (a test asserts it is `haiku-5-5`) and the walked scenario is the index's first
+  (`s1`, asserted). The story ignores `?model=`; a link out of a beat about one model carries that model.
+  1. *Question:* the `h1`, `landingQuestion`, and the new `storyName` placeholder. 2. *Setup:* his title and intro, the
+  goals key, the five goals from `GoalsList` (the scenario view's own markup, now shared), the scope sentence. Neither
+  beat holds a verdict word, a template sentence or a chart (a test). 3. *`s1`, main model:* the brief, the link to the
+  full text, `ChartCard` with every goal and no toggles, a link to `/scenario/s1/`. 4. *Comparisons:* `verdictNote` and
+  `intervalKey` once (from the model's `alpha`) and `readingsNote` once, then a block per comparison in
+  `SENTENCE_ORDER`: the pair by plain name and letter, the template sentence, a one-row `IntervalChart` in a figure with
+  the card's caption, the valid runs, the verdict word, the analysis's `headline` verbatim, and the protocol's reading
+  where `readingFor` gives one (the "no reading" label only on C vs D when it is null). C vs D carries
+  `storyRoundtableTest`. 5. *Second model:* both models' five-row `IntervalChart` in a figure with the caption, the five
+  template sentences under each; side by side at 60rem and wider, the main model first. 6. *Other scenarios:* for each of
+  `s2` to `s4`, the brief, a table (rows the five comparisons, a column a model), each cell the verdict word and the
+  valid runs, inconclusive and not assessable in place, no color, the scope sentence in the caption, a link to each
+  model's scenario view. 7. *Results against the starting expectation:* `AgainstThesis`, unchanged. 8. *Real cases:* the
+  exploratory label(s) first, then (if and only if `everyReadingNoGoodMatch` over every file of both models) C5's
+  sentence, one row per case in the index's order (label, exploratory label verbatim, the description or its status,
+  each model's `labelUnderEveryReading` through the reading-label map, a link to the case), the shortfall by type, a link
+  to `/cases/`. No memo text, no link to a memo (tests). 9. *Methods:* his title and text, a link to `protocolUrl()`,
+  the studies page, and the memo reader.
+- **Loading.** The story reads each model's grid file for every scenario and every case file for both models through
+  the cached `DataApi`, one slot per file (`useStoryData`). A beat that needs files shows `loading` until they all
+  arrive, or `loadFailed` as a `role="alert"` in that beat alone if any failed. Beats 1, 2 and 7 need only the index and
+  render at once. The story reports `onSettled` once when every file has loaded or failed.
+- **The hash on `/` waits for the data** (`Shell.tsx`, §28a carried point 2). `arrive` (the `Arrived` marker's callback)
+  now has a branch for the story: with a hash it sets `waiting` and returns; the story's `onSettled` (`storySettled`) runs
+  `reveal()` once. If the story is already on screen and settled (a navigation from `/` to `/?model=...#...`, which is not
+  an in-page jump) `reveal()` runs at once; on every other path, and on `/` with no hash, `reveal()` runs at arrival as
+  before. There is still exactly one `scrollIntoView`.
+- **No model switch on `/`** (`Shell.tsx`): the switch is shown for every route but the story and not-found.
+- **Motion** (`useEntrance`). Every beat is in the document from the first render. With `IntersectionObserver` present and
+  `prefers-reduced-motion` not set, each beat after the first is observed; the observer's callback adds `beat-enter` to a
+  beat that is not intersecting and whose top is below the screen, and removes it (and unobserves) when the beat
+  intersects. A beat already scrolled past is left alone. CSS: opacity and an 8 px rise over 200 ms; off under
+  `prefers-reduced-motion` and in print. No sticky positioning, no scroll-linked animation, no library.
+- **The moves** (§28a carried point 1). `Details` and `RunsTable` moved to the new `RunDetails.tsx`; C4's `Card` moved to
+  `ChartCard.tsx` as `ChartCard`, with its caption factored out as `CardCaption` (same markup; the five figures of beat 4
+  and the two of beat 5 use it too) and `GoalsList` beside it. `ScenarioView.tsx` and `Studies.tsx` import from the new
+  modules, so `/studies/` no longer loads the scenario chunk. **One move the prompt did not name:** `ExploratoryLabel` and
+  `Description` moved from `Cases.tsx` to `caseParts.tsx`, because the story needs both and would otherwise import the
+  cases view; `Cases.tsx` imports them from there, unchanged in behaviour.
+
+**Files.** New: `ChartCard.tsx`, `RunDetails.tsx`, `caseParts.tsx`, `Story.test.tsx`, `ShellStory.test.tsx`. Changed:
+`Story.tsx` (built; it was the stub), `Shell.tsx`, `views.tsx` (the story gets `casesIndex`, `data`, `onSettled`),
+`parts.tsx` (`Title`'s optional `id`), `ScenarioView.tsx`, `Studies.tsx`, `Cases.tsx`, `copy.ts` (the `StoryHis` type and
+the new labels), `his.json` (new keys), `explorer.css`, `copy.test.ts`, `format.test.ts` (the no-computation list gained
+`ChartCard.tsx`, `RunDetails.tsx`, `caseParts.tsx`), `MemoReader.test.tsx` (an import), and this doc. In `scratch/`:
+`p6-c6-shoot.mjs`, `p6-c6-hash-debug.mjs`, `p6-c6-shots/`, `p6-c6-dist-after-b.txt`, `p6-c6-check-b.log`.
+
+**Tests.** `Story.test.tsx` (34): the story renders from the real files with no console error and reports once; the
+nine ids in order and every `aria-labelledby`; main model `haiku-5-5` and `s1` walked; beats 1 and 2 state no result;
+beat 3's brief, link, card, every goal and no toggle; **the crop test on every figure** (model, valid of attempted, scope
+sentence); beat 4's order, pair headings, template sentences, one-row charts, runs, verdicts, headlines verbatim, the
+Roundtable label on C vs D only, the readings as `readingFor` gives them, the interval level and `verdictNote` once;
+beat 5's two columns in model order with five rows and five template sentences each, and the same plot width and height;
+beat 6's cell for every comparison of every model in `s2` to `s4` (30 cells), each verdict word the file's
+`final_verdict` through `verdictWords`, inconclusive and not assessable both present, the scope sentence in each caption,
+no style and no goal class; beat 7; beat 8's document order (a test of it), the every-reading predicate, one row a case
+in the index's order, the shortfall, and no memo link or memo markup; beat 9's links; every result sentence a template's
+output and its text nowhere else as a bare string; no `style` or script; every fetch under `/data/` and none for memos,
+the thinking study or awareness; the `his.json` story keys; axe-core at 1280 and at 390 (one test each); the loading
+test (beats 1 and 2 at once, the loading line, then filled) and the failure test (one alert, in the right beat, still
+settled); and the three motion tests (no observer, reduced motion, and the class until a simulated intersection, beat 1
+never observed). `ShellStory.test.tsx` (11): no switch on `/` and a switch on each other kind of path; the same story
+under `?model=` (text equal); and **the hash tests**: a first load with the beats' data delayed scrolls once, after the
+data, to the section (and not before: nothing scrolled and nothing focused while the beats were empty); once when a
+beat failed; a navigation from `/memos/` with the data delayed; a navigation to `/` when the story is already on screen;
+and `/` with no hash as before. `copy.test.ts` gained the check that `storyName` and every `story` key exist.
+**Mutation-checked:** with the shell's story branch made to reveal at arrival, the first-load and navigation hash tests
+fail (and the other five pass); with the Roundtable label moved to another pair, beat 5's columns reversed and one
+verdict cell blanked, three story tests fail. Every existing shell test of focus and hashes passes unchanged (none
+gained a `waitFor` or lost an assertion).
+
+**Proof (measured).**
+
+- **Dist diff, empty:** `scratch/p6-c6-dist-after-a.txt` against `scratch/p6-c6-dist-after-b.txt` (`find web/dist -type f
+  | sort | xargs sha256sum`): `diff` prints nothing, 8 files.
+- **`make check` exit 0** (`scratch/p6-c6-check-b.log`, run last, after every change): Python 3,483 passed; Vitest 443 passed (397 after
+  part A); `check-dist: ok` in both modes.
+- **Per-path JavaScript, gzipped, `check-dist --mode explorer`** (budget 100.0 KB; none over, none past the 95 KB line):
+
+  | Kind of path | Largest path | After part A | After part B |
+  |---|---|---|---|
+  | memos | `/memos/` | 85,064 | 85,972 (84.0 KB) |
+  | case | `/cases/closure-07/` | 87,424 | 88,628 (86.6 KB) |
+  | cases | `/cases/` | 87,424 | 88,628 (86.6 KB) |
+  | story | `/` | 88,271 | **93,991 (91.8 KB)** |
+  | scenario | `/scenario/s1/` | 90,742 | 92,441 (90.3 KB) |
+  | studies | `/studies/` | **92,876** | **89,931 (87.8 KB)** |
+
+  The all-chunks total is 105,039 bytes (102.6 KB), a total and not a budget. `/studies/` lost the scenario chunk, as planned.
+  The scenario path and the cases paths rose a little: each now loads one more small chunk (`RunDetails`, `caseParts`),
+  and gzip shares less across files.
+- **Data the story loads on `/`** (not JavaScript, not counted in the budget): 8 grid files, 1,325,593 bytes raw
+  (99,551 gzipped), and 10 case files, 44,524 bytes raw (16,811 gzipped), all fetched at once when the story mounts.
+- **The five slowest Vitest tests** (locally): `ScenarioView.test.tsx` "never shows a result sentence's text anywhere else in the view..." 3.3 s; "has no axe violations on a share scenario with the details open..." 2.7 s; `App.test.tsx` "the rendered page has no axe violations" 2.4 s; "has no axe violations on a choice scenario with the details open" 2.3 s; "renders every scenario for both models without error" 1.7 s. None is new. The slowest new test is the story's axe test at 1280, 1.6 s; the first draft of "shows no model switch on /..." took 2.4 s (five shells in one test) and was split into one test a path.
+- **Headless captures** (`scratch/p6-c6-shoot.mjs`, a copy of C5's method; `scratch/p6-c6-shots/`, `report.json`): 11
+  captures. `/` full page at 1280 light and dark and 390 light and dark, **each scrolled through to the end first** (then
+  no beat held `beat-enter`), and at 1280 with reduced motion emulated (confirmed on in the page); `/?model=gpt-oss-
+  openrouter` (same page, no switch); a scenario page and a memo page; the two crops; and a first load of
+  `/#against-the-thesis` over a 400 ms network. **Zero console errors, failed requests or `securitypolicyviolation`s, and
+  no horizontal overflow, in all 11.** **axe-core, run in the browser (contrast included, which jsdom cannot): 0
+  violations on the story at 1280 and 390, light and dark, and with reduced motion.** *Lazy chunks seen:* `/` loads the
+  entry, `Story-*.js` and five shared chunks (`againstWords`, `chartData`, `parts`, `sentences`, `caseParts`);
+  `/scenario/s1/` the entry, `ScenarioView-*.js` and shared chunks including `RunDetails`; `/memos/` the entry,
+  `MemoReader-*.js` and `parts`. *The entrance, before scrolling, at 1280:* beats 3 to 9 carry `beat-enter`, beats 1 and
+  2 do not. *The hash:* one `scrollIntoView` (of `against-the-thesis`), at about 3.7 s when every beat had loaded (none
+  waiting), the section's top at 64 px and unchanged 2.5 s, 5 s and 8 s later, focus on it; the old behavior (reveal at
+  mount) was not captured, only mutation-checked. *The crop test:* the capture clipped to beat 3's chart card and to the
+  C vs D figure of beat 4 each contain the model name, "300 valid runs of 300 attempted", the company line and the whole
+  scope sentence. *A fault found and fixed:* in beat 5's side-by-side layout each chart is half the page, and the
+  scenario view's three-column interval row left its plot about 130 px wide with overlapping tick labels; at 60rem and
+  wider the story's rows now stack (label, plot, verdict).
+
+**Decided points as built.**
+
+1. **The reveal waits in the shell, not in the story.** The story only reports that it is settled; the shell keeps the
+   decision of what to do, so every path other than `/` with a hash is the code it was.
+2. **The entrance is driven by the observer's own first callback**, not by measuring boxes at mount: a beat on the first
+   screen is intersecting at that callback and never gets the class, and nothing depends on layout in a test beyond a
+   simulated entry. A beat that is above the screen at the callback (a reload that restores a scroll position) is left
+   visible.
+3. **A failed file fails its beat alone, and a beat shows the failure rather than part of its content.** Beat 5 needs
+   both models' `s1` and beat 6 needs all six other files, so one failed file empties that beat (the failure line says
+   the data did not load); the rest of the story is unaffected.
+4. **Beat 4 says the "no reading" label only for C vs D**, where the protocol's table has a row for every verdict but a
+   not assessable one; every other pair without a row is covered once by `readingsNote`, as C4 does (§26a).
+5. **Beat 5 at 60rem and wider** stacks each interval row; below 60rem, where each column is the full width, the rows are
+   the scenario view's.
+6. **Beat 8 puts the exploratory label and the load line first and fills the rows when the files arrive**, so the label is
+   in the page before any reading in every state.
+7. **`labelUnderEveryReading` that is null** (the readings of a file disagree) shows `storyLabelVaries`. No file does today.
+8. **The shortfall line is composed from C5's own labels** (`shortfallHeading`, `caseTypes`, `shortfallFound`,
+   `shortfallShort`), so it adds no label.
+
+**Claude-drafted labels and new `his.json` keys, for the words pass (one list).** Labels, in `explorerLabels`, all
+unapproved: `storyRoundtableTest` ("This is the test of the Business Roundtable's claim (protocol section 1.5): the two
+goals that look twenty years ahead, one for shareholders and one for everyone with a stake."), `storyPairHeading`
+(function: "X (A) vs Y (B)"), `storyOpenScenario` ("Open scenario s1 on Haiku 5.5, with every detail"),
+`storyTableCaption` ("Scenario s2: every verdict, for each model"), `storyComparisonColumn` ("Comparison"),
+`storyLabelVaries` ("differs by reading; see the case"), `storyAllCases` ("All the real cases, in full"),
+`storyProtocolLink` ("The protocol, as pre-registered (on GitHub, at the pre-registered tag)"), `storyStudiesLink`
+("The side studies") and `storyMemosLink` ("Read the memos the models wrote"). **His, all placeholders** (each names what
+goes there and states no result), in `his.json`: `storyName`, and `story.setupTitle`, `setupIntro`, `s1Title`, `s1Intro`,
+`comparisonsTitle`, `comparisonsIntro`, `secondTitle`, `secondIntro`, `othersTitle`, `othersIntro`, `casesTitle`,
+`casesIntro`, `methodsTitle`, `methodsText`. **Two things for that pass.** (a) `storyRoundtableTest` names the Roundtable
+and the two goals but does not say what its claim is; the vocabulary rule may want it said once. (b) Beat 4 now carries
+`intervalKey`, which names the Bonferroni correction, in the main flow and not behind the details (it is the approved
+text, reused; the vocabulary rule may want it shortened here).
+
+**Rule zero, flagged.** Nothing new is exposed: every case field shown is one C5 already shows on `/cases/` and
+`/cases/<label>/`, through the same components (`Description`, `ExploratoryLabel`, the reading-label map), and beat 8
+holds no memo text and no link to a case memo (tests). **The description text is the one field worth a second look:**
+it is the case file's published coarse description (industry, type of event, revenue band, half-year, US or not), now on
+the landing page and not only on `/cases/`. It was reviewed at §27a; a description detailed enough to identify a company
+is what the name guard cannot catch, so it is Opus's call whether the landing page should show it or only the label. The
+`storyName` placeholder names two historical or institutional agreements (the Mayflower Compact, the UN Global
+Compact), not companies. The name guard and the commit hooks were **not** run here (the prompt did not ask).
+
+**What did not fit, and what was done instead.**
+
+1. **Beat 4 repeats the long scope-sentence caption under each of its five figures**, because the prompt asks for the
+   card's caption and the crop test needs it. The page is about 13,600 px tall at 1280 (19,500 at 390). Not changed; a
+   design call for the review against §12.
+2. **The two axe tests "per width" cannot differ in jsdom** (it has no layout; `window.innerWidth` is set, but nothing
+   reads it). They are split as asked, and the real check at both widths is the in-browser axe run above.
+3. **The old reveal was not captured in a browser**, only mutation-checked in Vitest (above).
+4. **A failed file empties a whole beat, not just its row** (decided point 3); a finer failure is possible, at the cost
+   of per-cell failure lines in two tables. Not done.
+
 ## 28a. Review of C6 part A (2026-11-11, Opus)
 
 **Passed, no code change. The stop at 85 KB is withdrawn; part B goes on under the 100 KB per-path budget, with two
@@ -1990,3 +2175,49 @@ KB per path, enforced by `check-dist` on every build; it is not raised.**
    beats' data delayed, a first load of `/#against-the-thesis` scrolls once, after the data, to the section.
 3. **The stop line for part B is the budget itself:** any path over 100 KB fails `check-dist`, and is reported in §28,
    not worked around. If the story path is over 95 KB, say so in §28 with the bytes.
+
+## 28b. Review of C6 part B (2026-11-11, Opus)
+
+**Passed after one fix.** Read against `scratch/p6-c6-part-b-prompt.md` and `scratch/p6-c6-build-prompt.md` part B:
+`Story.tsx` in full, the `Shell.tsx` and `views.tsx` diffs, the three moved modules (`ChartCard.tsx`, `RunDetails.tsx`,
+`caseParts.tsx`) against what they replaced, the CSS, the new words and keys, the new tests, and the headless captures.
+
+**Checked independently, not taken from §28.B.** `make check` exit 0 before the fix (Python 3,483, Vitest 443,
+`check-dist: ok` in both modes); the per-path lines match §28.B's table byte for byte (`/` 93,991; `/studies/` 89,931;
+all chunks 105,039). The moves are verbatim: `Card`, `Details`, `RunsTable`, the goals list, `ExploratoryLabel` and
+`Description` each carry the same markup they had. The commit's hooks, which `make check` does not run: the name guard's
+`pre-commit` mode against a throwaway copy of the index with every file staged (21 files, these doc edits included) passed, and its `commit-msg`
+mode on the suggested message passed; no changed file lacks its final newline or has trailing whitespace. His index was
+left as it was.
+
+**The hash.** The shell's branch is right in each case read: a first load or a navigation to `/` with a hash waits and
+reveals once on the story's report; a navigation to `/` with the story already settled reveals at once; any other path
+clears the settled flag, so the next story to mount starts over; a navigation away while waiting clears the wait. The
+story's report cannot come before the arrival (its data settles in a promise, after the commit). One `scrollIntoView`
+in each test, and the existing shell tests are unchanged.
+
+**The fix: the entrance class on a beat already on the first screen.** `useEntrance` gave the class to any beat not yet
+intersecting whose top was below 0. With the observer's root margin (the bottom 10 % of the screen does not count), a
+beat whose top sat in that bottom band, on the first screen and already seen, got the class at the observer's first
+callback and faded out on load, against §9 ("anything on the first screen never gets it"). It does not happen at 1280
+by 800 with today's placeholders (beat 3 starts near 1,150 px), but it would on a taller screen or once his shorter
+words replace the placeholders. The class now goes only on a beat whose top is at or below the bottom of the screen
+(`window.innerHeight`). The motion test gained an assertion (a beat at `innerHeight - 20`, not intersecting, keeps no
+class) that fails on the old rule and passes on the new one (mutation-checked). `make check` green after the fix (Python 3,483, Vitest 443; `/` 94,005 bytes, 91.8 KB; `web/dist/` unchanged).
+
+**Rule zero: the case descriptions on the landing page stay.** Beat 8 shows each case's coarse description, the same
+text `/cases/` shows. It is the published level-0 text, already public in the repository's explorer data
+and read at §27a; putting it on `/` reaches more readers but adds no information. The landing page is not where
+identification risk changes; the description's level is, and that was decided in Phase 5.5. No memo text and no link to
+a case memo (tests). `storyName`'s placeholder names two agreements, not companies.
+
+**For the words pass (with §28.B's list).** (a) `noReading` ("The protocol wrote no reading for this pair.") appears in
+the story only on C vs D when its verdict is not assessable, and the protocol did write readings for C vs D: there the
+words should say "for this verdict". Not shown today (C vs D on `s1` is a split for both models). (b) and (c) as §28.B
+says: `storyRoundtableTest` may need the claim said once in plain words, and `intervalKey` names the Bonferroni
+correction in the main flow.
+
+**Left for the review against §12 (§14 step 11), not changed here.** Beat 4 repeats the scope sentence under each of its
+five figures and the page is about 13,800 px tall at 1280: the crop test asks for the caption on every figure, so the
+remedy is a design call, his. On `/` the story fetches every grid and case file at once, about 116 KB gzipped of data
+(1.37 MB raw), outside the JavaScript budget; no budget covers data, and a first-screen render does not wait on it.

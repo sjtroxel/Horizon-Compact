@@ -132,22 +132,49 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
   // mounted: a view is a lazy chunk, and the hash's target does not exist before it does. The first arrival is a first
   // load (it reveals only when the address has a hash; without one the browser is left alone); each later one is a
   // navigation (`token` counts them) and always reveals. A model switch changes neither.
+  //
+  // The story is the one exception for a hash: its beats fill in as their data arrives, and the ones above the target
+  // move it down the page, so a reveal at mount would land in the wrong place. For an arrival on `/` with a hash the
+  // reveal waits for the story's report that every beat has loaded or failed (`storySettled`), and runs once then.
+  // Every other path, and `/` with no hash, reveals at arrival as before.
+  const routeKind = useRef<Route["kind"] | null>(null);
+  routeKind.current = route?.kind ?? null;
   const firstArrival = useRef(true);
   const handled = useRef(0);
+  const settled = useRef(false); // the story on screen has everything it loads
+  const waiting = useRef(false); // a reveal is waiting for that
   const arrive = useCallback(
     (token: number) => {
+      let reveals: boolean;
       if (firstArrival.current) {
         firstArrival.current = false;
         handled.current = token;
-        if (window.location.hash !== "") reveal();
+        reveals = window.location.hash !== "";
+      } else if (token === handled.current) {
+        return;
+      } else {
+        handled.current = token;
+        reveals = true;
+      }
+      waiting.current = false;
+      if (routeKind.current !== "story") {
+        settled.current = false; // the next story to mount starts over
+        if (reveals) reveal();
         return;
       }
-      if (token === handled.current) return;
-      handled.current = token;
-      reveal();
+      if (!reveals) return;
+      if (window.location.hash === "" || settled.current) reveal();
+      else waiting.current = true;
     },
     [reveal],
   );
+  const storySettled = useCallback(() => {
+    settled.current = true;
+    if (waiting.current) {
+      waiting.current = false;
+      reveal();
+    }
+  }, [reveal]);
 
   const onClick = useCallback((event: MouseEvent<HTMLElement>) => {
     const anchor = interceptedAnchor(event);
@@ -227,7 +254,7 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
           </nav>
         )}
       </header>
-      {catalog && route && route.kind !== "not_found" && (
+      {catalog && route && route.kind !== "not_found" && route.kind !== "story" && (
         <ModelSwitch models={catalog.index.models} current={model} onChoose={chooseModel} />
       )}
       <main id="main" className="view" ref={main}>
@@ -241,6 +268,7 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
                 model={model}
                 search={where.search}
                 data={data}
+                onStorySettled={storySettled}
               />
               <Arrived token={navigations} onArrive={arrive} />
             </Suspense>
