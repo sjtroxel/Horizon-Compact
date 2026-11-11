@@ -366,6 +366,21 @@ do not subtract to the analysis's difference (on gpt-oss-120b's `s1`, A vs B: ab
 difference of about 47 points by the analysis), so words that put both beside the verdict have to say which is which.
 His call, at C6's words pass.
 
+**Dated note, 2026-11-11 (C6's words pass, after §28b):** at his request on this pass (the same way as step 8), Claude
+drafted the story's 15 `his.json` values (`storyName` and the 14 `story` keys) and showed them three sections at a
+time; **he approved them, about 12:38 PM to 1:03 PM**, with these changes: the main model named "Claude Haiku 5.5" in
+`s1Intro`; "OpenAI's gpt-oss-120b" in `secondIntro`; `casesIntro` rewritten to point to the exploratory label below it
+rather than repeat it (his choice of three; the fact stays on the page, verbatim, in every case's label, the condition
+of 2026-10-18). `storyName` explains both halves of the name. `comparisonsIntro` states the Roundtable's claim once, in
+plain words after its 2024 page. **At his request, two outside links in beat 4** (`links.ts`, checked live 2026-11-11):
+Wikipedia's Business Roundtable article and the Roundtable's own 2024 page. **The labels:** Sonnet's long C vs D label
+was dropped for the approved `roundtableFlag` (the claim now stated in the intro); `storyProtocolLink` shortened to
+"The protocol, fixed before the runs (on GitHub)"; the approved `noReading` changed from "for this pair" to "for this
+verdict" (in the story it shows only on C vs D when not assessable, and the protocol wrote readings for C vs D); the
+two link labels added; the rest as Sonnet drafted them. **He approved every story label.** No ratio was used. The story
+test that rejects a verdict word in a story line now covers written lines, not only placeholders. These are
+Claude-drafted words, and this note is the record of that.
+
 ## 12. What "polished" means here, as checks
 
 Phase 1.5 §8 carries over in full (type scale, spacing, focus states, both modes, both widths, no layout shift, no

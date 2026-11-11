@@ -37,3 +37,12 @@ export function selectionLogUrl(path: string): string {
 /** The ids of the studies page's two parts, so a link from another page can name one. */
 export const STUDIES_THINKING_ID = "thinking-sub-study";
 export const STUDIES_AWARENESS_ID = "awareness-probes";
+
+/**
+ * Two outside pages on the Business Roundtable, linked from the story's comparisons (his request, 2026-11-11): a
+ * third-party overview, and the Roundtable's own 2024 page, the source of the claim the C vs D comparison tests.
+ * Both checked live 2026-11-11.
+ */
+export const ROUNDTABLE_OVERVIEW_URL = "https://en.wikipedia.org/wiki/Business_Roundtable";
+export const ROUNDTABLE_CLAIM_URL =
+  "https://www.businessroundtable.org/five-years-on-corporate-purpose-and-profit";

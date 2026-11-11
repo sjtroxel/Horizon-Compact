@@ -1,6 +1,6 @@
 {
   "landingQuestion": "If the same AI model makes the same company decision, does it choose differently when it is told to serve shareholders or everyone the company affects, over one year or twenty?",
-  "storyName": "[his: the sentence or two on the opening screen that explains the name Horizon Compact: a compact is an agreement made for the general good (the Mayflower Compact of 1620 is the old example), and the UN Global Compact is what the word means for companies today (planning/06 section 6.4); it says what the name means and states no result]",
+  "storyName": "Horizon is how far ahead a decision looks: here, one year or twenty. A compact is an agreement about whose good a group works for. The Mayflower Compact of 1620 promised laws \"for the general good\", and today thousands of companies have signed the UN Global Compact, a pledge on labor, human rights, the environment and corruption.",
   "scopeSentence": "This experiment measures how two AI models decide for a made-up company, and for a few real decisions with the companies' names removed, when only the goal they are given changes. It does not measure how real executives decide, and it predicts nothing about any company.",
   "scenarioBriefs": {
     "s1": "AI tools can now do the work of 125 office and finance staff. The model decides what happens to each person: severance, retraining for a plant job at their current pay, or retraining at the plant's pay.",
@@ -17,20 +17,20 @@
   "studiesThinkingTitle": "Does thinking first change the decision?",
   "studiesAwarenessTitle": "Can the model tell what is being tested?",
   "story": {
-    "setupTitle": "[his: the title of the second part of the story, the setup: one made-up company, five goals, the same decision]",
-    "setupIntro": "[his: one or two sentences introducing the setup: one made-up company, one model at a time, five goals, and the same decision every time; it describes the setup and states no result]",
-    "s1Title": "[his: the title of the third part, the first scenario on the main model]",
-    "s1Intro": "[his: one or two sentences introducing the first scenario and the chart of every run below it; it says what the chart shows and states no result]",
-    "comparisonsTitle": "[his: the title of the fourth part, the five comparisons on the first scenario, one at a time]",
-    "comparisonsIntro": "[his: one or two sentences introducing the comparisons: each puts two goals side by side, and one of them is the test of the Business Roundtable's claim; it says what the reader will see and states no result]",
-    "secondTitle": "[his: the title of the fifth part, the same comparisons on the second model, beside the first]",
-    "secondIntro": "[his: one or two sentences introducing the second model: the same scenario, the same five comparisons, drawn at the same size, never combined with the first; it states no result]",
-    "othersTitle": "[his: the title of the sixth part, the other three scenarios in one table]",
-    "othersIntro": "[his: one or two sentences introducing the table of every verdict on the other three scenarios, including the ones the runs could not settle; it states no result]",
-    "casesTitle": "[his: the title of the part on the real cases]",
-    "casesIntro": "[his: one or two sentences introducing the real cases: the same test applied to a few real decisions with the companies' names removed, chosen after the pre-registered search found none; it states no result]",
-    "methodsTitle": "[his: the title of the last part, how the study was done]",
-    "methodsText": "[his: one or two sentences pointing to the protocol and the other pages for how the study was done; the methods page itself is Phase 6.5's, so for now they lead to the protocol in the repository]"
+    "setupTitle": "One company, five goals, the same decision",
+    "setupIntro": "Each model makes the same decision for the same made-up company many times. From one run to the next, the only thing that changes is the goal it is given: one of the five below.",
+    "s1Title": "The first decision: 125 jobs and new AI tools",
+    "s1Intro": "This is the first scenario, run on the study's main model, Claude Haiku 5.5. Each dot in the chart is one run, grouped by the goal the model was given.",
+    "comparisonsTitle": "Five comparisons, one at a time",
+    "comparisonsIntro": "Each comparison puts two goals side by side and asks whether the model chose differently under them. The first one tests a claim made by the Business Roundtable, a group of chief executives of large US companies: that in the long term, the interests of shareholders and of everyone else with a stake in the company go together.",
+    "secondTitle": "The same decision on a second model",
+    "secondIntro": "Here is the same scenario run on a second model, OpenAI's gpt-oss-120b, beside the first and drawn at the same scale. The two models' results are shown side by side and never added together.",
+    "othersTitle": "Three more decisions",
+    "othersIntro": "The other three scenarios give the same company different decisions to make. The tables show every verdict for both models, including the comparisons the runs could not settle.",
+    "casesTitle": "Real decisions, names removed",
+    "casesIntro": "The same test, applied to a few real business decisions described only in broad terms. They are exploratory and kept apart from the main results; the note below says how they were chosen.",
+    "methodsTitle": "How the study was done",
+    "methodsText": "The study's written plan, the protocol, was fixed and published before any official run. It says what was measured, how, and what each result would mean. The links below lead to it, to the side studies and to the models' own memos."
   },
   "pages": {
     "story": {

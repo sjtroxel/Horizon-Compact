@@ -157,7 +157,7 @@ export const explorerLabels = {
   noRunsCompared: "no runs compared",
   keptWordings: (ids: string) => `wordings kept: ${ids}`,
   droppedWordings: (ids: string) => `dropped for failures: ${ids}`,
-  noReading: "The protocol wrote no reading for this pair.",
+  noReading: "The protocol wrote no reading for this verdict.",
   readingsNote:
     "Before any results, the study\u2019s written plan (the protocol) said what a few outcomes would mean, for C vs D and for A vs B only. Where one applies, it is quoted under that sentence; the other sentences have none.",
   protocolReadingLabel: "The protocol\u2019s reading, written before the results:",
@@ -440,10 +440,10 @@ export const explorerLabels = {
   studiesLoading: "Loading the studies",
 
   // ------------------------------------------------------------------------------------------------------------
-  // C6: the guided story. Claude-drafted, UNAPPROVED until the words pass after Opus's review of part B. Each label
-  // describes what a part shows; none states a result.
-  storyRoundtableTest:
-    "This is the test of the Business Roundtable\u2019s claim (protocol section 1.5): the two goals that look twenty years ahead, one for shareholders and one for everyone with a stake.",
+  // C6: the guided story. Claude-drafted; approved by him in the words pass of 2026-11-11 (Phase 6 IMPLEMENTATION doc
+  // section 11, fourth dated note). Each label describes what a part shows; none states a result.
+  storyRoundtableOverview: "Who the Business Roundtable is (Wikipedia)",
+  storyRoundtableClaim: "The claim in the Roundtable\u2019s own words (its 2024 statement)",
   storyPairHeading: (firstName: string, first: string, secondName: string, second: string) =>
     `${firstName} (${first}) vs ${secondName} (${second})`,
   storyOpenScenario: (id: string, model: string) => `Open scenario ${id} on ${model}, with every detail`,
@@ -451,7 +451,7 @@ export const explorerLabels = {
   storyComparisonColumn: "Comparison",
   storyLabelVaries: "differs by reading; see the case",
   storyAllCases: "All the real cases, in full",
-  storyProtocolLink: "The protocol, as pre-registered (on GitHub, at the pre-registered tag)",
+  storyProtocolLink: "The protocol, fixed before the runs (on GitHub)",
   storyStudiesLink: "The side studies",
   storyMemosLink: "Read the memos the models wrote",
 };

@@ -7,7 +7,18 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-11, about 11:30 AM (C6 BUILT AND REVIEWED; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-11-11, about 1:05 PM (C6 COMMITTED; ITS WORDS APPROVED; C7 NEXT)
+>
+> **C6 committed `618ad2e` (his) and pushed; CI `43072940335` and Deploy `43072940442` green.** **C6's words pass done:**
+> at his request Claude drafted the story's 15 `his.json` values and he approved them, with changes, and every story
+> label (the Phase 6 IMPLEMENTATION doc §11, fourth dated note). Two outside links on the Business Roundtable added to
+> beat 4 at his request. `casesIntro` now points to the exploratory label below it; the fact stays on the page in every
+> case's label. **Uncommitted: the words, the labels, the links and these doc edits, for his commit.** **Next: C7, the
+> share cards** (§14 step 10; Opus writes the prompt, Sonnet builds).
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-11, about 11:30 AM (C6 BUILT AND REVIEWED; HIS COMMIT NEXT) *(superseded by the block above)*
 >
 > **C6 part B, the guided story at `/`, built by Sonnet (the Phase 6 IMPLEMENTATION doc §28.B) and reviewed by Opus
 > (§28b): passed after one fix** (a beat whose top was on the first screen, in the observer's bottom band, could get the

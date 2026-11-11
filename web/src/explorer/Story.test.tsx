@@ -4,12 +4,12 @@ import axe from "axe-core";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { everyReadingNoGoodMatch } from "./caseData";
 import { SENTENCE_ORDER, findComparison, orderedComparisons } from "./chartData";
-import { explorerHis, explorerLabels as L, isPlaceholder } from "./copy";
+import { explorerHis, explorerLabels as L } from "./copy";
 import type { DataApi, GridFile } from "./data";
 import { createDataApi } from "./data";
 import { fileFetcher, realApi, realCaseFiles, realCasesIndex, realGrids, realIndex } from "./fixtures";
 import { attemptedRuns, comparisonRuns, confidenceLevel } from "./format";
-import { protocolUrl } from "./links";
+import { ROUNDTABLE_CLAIM_URL, ROUNDTABLE_OVERVIEW_URL, protocolUrl } from "./links";
 import { modelName, orderedModels } from "./models";
 import { PROTOCOL_READINGS, readingFor } from "./protocol";
 import { resultSentence, TEMPLATE_IDS } from "./sentences";
@@ -182,8 +182,24 @@ describe("the story, from the real files", () => {
     });
 
     it("names C vs D as the test of the Roundtable's claim, and no other pair", () => {
-      const labelled = blocks().filter((b) => b.textContent!.includes(L.storyRoundtableTest));
+      const labelled = blocks().filter((b) => b.textContent!.includes(L.roundtableFlag));
       expect(labelled.map((b) => b.dataset["pair"])).toEqual(["C-D"]);
+    });
+
+    it("links to the two outside pages on the Roundtable, in a new tab, before the first comparison", () => {
+      const section = beat(container, "beat-comparisons");
+      const list = section.querySelector<HTMLElement>('[data-sources="roundtable"]')!;
+      const links = [...list.querySelectorAll("a")];
+      expect(links.map((a) => [a.getAttribute("href"), a.textContent])).toEqual([
+        [ROUNDTABLE_OVERVIEW_URL, L.storyRoundtableOverview],
+        [ROUNDTABLE_CLAIM_URL, L.storyRoundtableClaim],
+      ]);
+      for (const a of links) {
+        expect(a.getAttribute("target")).toBe("_blank");
+        expect(a.getAttribute("rel")).toBe("noopener noreferrer");
+      }
+      const first = blocks()[0]!;
+      expect(list.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
     it("quotes the protocol's reading wherever readingFor gives one, as written, and writes none of its own", () => {
@@ -431,9 +447,10 @@ describe("the story, from the real files", () => {
     for (const key of keys) {
       const text = explorerHis.story[key];
       expect(text.trim(), key).not.toBe("");
-      if (isPlaceholder(text))
-        expect(text, key).not.toMatch(/\b(split|no split|inconclusive|found that|showed that)\b/i);
+      // Placeholder or written, no story line states a result (planning/06 section 6.1).
+      expect(text, key).not.toMatch(/\b(split|no split|inconclusive|found that|showed that)\b/i);
     }
+    expect(explorerHis.storyName).not.toMatch(/\b(split|no split|inconclusive|found that|showed that)\b/i);
   });
 
   it("has no axe violations with every beat's data loaded, at 1280 wide", async () => {

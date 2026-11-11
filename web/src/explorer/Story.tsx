@@ -29,7 +29,7 @@ import type { Names } from "./charts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { CaseFile, CasesIndex, DataApi, DataIndex, GridComparison, GridFile } from "./data";
 import { comparisonRuns, confidenceLevel } from "./format";
-import { protocolUrl, scenarioTextUrl } from "./links";
+import { ROUNDTABLE_CLAIM_URL, ROUNDTABLE_OVERVIEW_URL, protocolUrl, scenarioTextUrl } from "./links";
 import { modelName, orderedModels } from "./models";
 import { His, HisHeading, ProtocolReading, Title } from "./parts";
 import { readingFor } from "./protocol";
@@ -295,6 +295,18 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
         title={explorerHis.story.comparisonsTitle}
         intro={explorerHis.story.comparisonsIntro}
       >
+        <ul className="x-sources story-links" data-sources="roundtable">
+          <li>
+            <a href={ROUNDTABLE_OVERVIEW_URL} target="_blank" rel="noopener noreferrer">
+              {L.storyRoundtableOverview}
+            </a>
+          </li>
+          <li>
+            <a href={ROUNDTABLE_CLAIM_URL} target="_blank" rel="noopener noreferrer">
+              {L.storyRoundtableClaim}
+            </a>
+          </li>
+        </ul>
         {mainWalked.status === "loaded" ? (
           <Comparisons file={mainWalked.values[0]!} alpha={mainEntry?.alpha} />
         ) : (
@@ -392,7 +404,7 @@ function Comparisons({ file, alpha }: { file: GridFile; alpha: number | undefine
                 )}
               </h3>
               <div className={lead ? "sent lead" : "sent"}>
-                {lead && <span className="flag">{L.storyRoundtableTest}</span>}
+                {lead && <span className="flag">{L.roundtableFlag}</span>}
                 {c.role === "secondary" && <span className="flag">{L.secondaryFlag}</span>}
                 <TemplateSentence comparison={c} file={file} />
               </div>
