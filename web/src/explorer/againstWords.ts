@@ -1,8 +1,8 @@
 /**
  * The words around the section for results against the thesis (Phase 6 IMPLEMENTATION doc section 19, "On the page").
  *
- * CLAUDE-DRAFTED AND UNAPPROVED. Drafted by Claude (Sonnet, C4) from section 19; he approves the rule's text word for
- * word at section 14 step 8 (section 11). His own words for the section, its title and its introductory sentence,
+ * CLAUDE-DRAFTED, APPROVED (his, 2026-11-11, section 11's dated note). Drafted by Claude (Sonnet, C4) from section 19;
+ * "the thesis" became "the starting expectation" at section 14 step 8, to match his title. His own words for the section, its title and its introductory sentence,
  * are `explorerHis.againstTitle` and `explorerHis.againstIntro`, not here. The citation `against_thesis.rule` is
  * shown as the data has it.
  */
@@ -13,8 +13,8 @@ export const againstWords = {
 
   ruleHeading: "The rule that decides what is listed here",
   ruleParagraphs: [
-    "A result is listed here by a rule, not by judgment. The thesis is the one written down before the results existed: that a longer horizon, or a wider set of people who count, makes the model cut less.",
-    "The rule reads each primary comparison on its own, model by model, never pooled. It lists a comparison when its verdict is “no split”, or when its verdict is “split” and the goal expected to cut less cut more. The second goal of each pair is the one the thesis expects to cut less.",
+    "A result is listed here by a rule, not by judgment. The starting expectation (the planning documents call it the thesis) is the one written down before the results existed: that a longer horizon, or a wider set of people who count, makes the model cut less.",
+    "The rule reads each main comparison on its own, model by model, never pooled. It lists a comparison when its verdict is “no split”, or when its verdict is “split” and the goal expected to cut less cut more. The second goal of each pair is the one expected to cut less.",
     "Which way “cut more” runs on each scenario comes from the protocol’s own definition of its primary outcome, not from a choice made after the results.",
     "Not listed, and shown in full on the scenario views: a split in the expected direction, an inconclusive result and a result that could not be assessed, none of which is against anything. The secondary comparison (A vs D) and the thinking sub-study are not read.",
     "A scenario on which every primary comparison of a model is “no split” is listed whole. No threshold for “everything cuts” was written before the results, and one chosen now would be chosen after them.",
@@ -41,9 +41,9 @@ export const againstWords = {
   clauseNoSplit: "Listed because its verdict is “no split”.",
   clauseReversed: "Listed because its verdict is “split” and the goal expected to cut less cut more.",
   alsoAgainstAuthor:
-    "This pair is also against the project author’s thesis: a “no split” here is consistent with the Roundtable’s claim and against what the author expected.",
+    "This pair is also against the author’s starting expectation: a “no split” here is consistent with the Roundtable’s claim and against what the author expected.",
   s4Note:
-    "A note on scenario s4: it offers a cut and an expansion rather than a cut alone, so reading “cut more” as “fund less” is the one direction a reviewer could dispute. The rule reads it that way because the thesis was that new capability is used to cut payroll rather than to expand what is possible.",
+    "A note on scenario s4: it offers a cut and an expansion rather than a cut alone, so reading “cut more” as “fund less” is the one direction a reviewer could dispute. The rule reads it that way because the starting expectation was that new capability is used to cut payroll rather than to expand what is possible.",
   none: "none",
   differenceLabel: "Difference",
   intervalLabel: "Interval",

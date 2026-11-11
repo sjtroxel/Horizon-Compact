@@ -326,6 +326,26 @@ templates (from `planning/06` §4's allowed column, filled from the structured f
 label, chart labels and axis text, the matcher notes' wording, and the share cards' fixed text. Recorded in this doc
 as Phase 1.5 §20 recorded its labels.
 
+**Dated note, 2026-11-11 (§14 step 8, his half):** at his request on this pass, Claude drafted every value in
+`web/src/explorer/his.json` (the landing question, the scope sentence, the four scenario briefs, the title and
+introduction of the section for results against the thesis, the memo, cases, held-memo and studies introductions, the
+two studies titles, and each page's title and description), in plain language, with the watermark flag given. **He
+approved them as written, 2026-11-11, about 4:04 AM.** They are Claude-drafted, and this note is the record of that.
+The results section's title names the rule's source as "the project's starting expectation" (decision 1). `planning/06`
+§6.4's name line has no field in `his.json`; it is C6's, in the guided story. `copy.test.ts`'s studies test now
+requires those six values written, not placeholders. The labels half (`explorerLabels`) is recorded separately.
+
+**Dated note, 2026-11-11 (§14 step 8, the labels):** Claude made a plain-language pass on the labels a reader sees
+outside the closed details sections: 24 values in `explorerLabels` (`copy.ts`) and 4 in `againstWords.ts` ("the
+thesis" became "the starting expectation", introduced once as the planning documents' "thesis", to match his title).
+Each term the vocabulary rule asks to explain is explained in place or moved to the details: the Bonferroni correction
+(now named only in the details key), the protocol, the pilot, the dossier, the rubric, the distance and its interval,
+the tie-break, the tool call, the sha256. Every disclosure the matcher notes carried is kept (KNOWN-GAPS OPEN
+2026-10-31). Three tests that pinned the old wording assert the same meaning in the new words. **He read `copy.ts` and
+approved every label in it, changed and unchanged, and `againstWords.ts`, 2026-11-11, about 4:21 AM.** Still
+unapproved: the four result-sentence templates in `sentences.ts`, which he has not yet been shown; C6's and C7's
+words come with those builds.
+
 ## 12. What "polished" means here, as checks
 
 Phase 1.5 §8 carries over in full (type scale, spacing, focus states, both modes, both widths, no layout shift, no
@@ -429,7 +449,7 @@ My recommendation is (a) in each, for the reason given.
    paths and their HTML files, the local preview script.
 6. **[built 2026-11-10 by Sonnet, §26; reviewed by Opus, §26a]** **[Sonnet builds, Opus reviews]** **C4, the scenario view and the section for results against the thesis.**
 7. **[built 2026-11-10 by Sonnet, §27; reviewed by Opus, §27a: passed after one change]** **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
-8. **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
+8. **[his words and the labels approved 2026-11-11, §11's dated notes; the four result-sentence templates still to show him]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[Sonnet builds, Opus reviews]** **C6, the guided story.**
 10. **[Sonnet builds, Opus reviews]** **C7, the share cards.**
 11. **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace

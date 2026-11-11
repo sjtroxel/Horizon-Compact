@@ -212,7 +212,7 @@ describe("the labels keyed by the C5 data", () => {
       expect(explorerLabels.memoMessages[why], why).toBeTruthy();
   });
 
-  it("hold a title for each part of the studies page, and the introductions, as placeholders that name what goes there", () => {
+  it("hold a title for each part of the studies page, and the introductions, each written", () => {
     for (const key of [
       "memosIntro",
       "casesIntro",
@@ -221,7 +221,8 @@ describe("the labels keyed by the C5 data", () => {
       "studiesThinkingTitle",
       "studiesAwarenessTitle",
     ] as const) {
-      expect(isPlaceholder(explorerHis[key]), key).toBe(true);
+      expect(explorerHis[key].trim(), key).not.toBe("");
+      expect(isPlaceholder(explorerHis[key]), key).toBe(false);
     }
   });
 

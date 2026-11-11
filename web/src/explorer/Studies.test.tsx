@@ -66,11 +66,11 @@ describe("the studies page", () => {
 });
 
 describe("the thinking sub-study", () => {
-  it("is labeled as a sub-study on s1, on Haiku 5.5 only, outside the family of 16, before anything it shows", async () => {
+  it("is labeled as a sub-study on s1, on Haiku 5.5 only, not one of the 16 main comparisons, before anything it shows", async () => {
     const { container } = await studies();
     const label = container.querySelector("[data-label=sub-study]")!;
     expect(label.textContent).toBe(L.studiesSubStudyLabel);
-    for (const part of ["sub-study", "s1", "Haiku 5.5", "outside the family of 16"])
+    for (const part of ["sub-study", "s1", "Haiku 5.5", "not one of the 16 main comparisons"])
       expect(label.textContent).toContain(part);
     expect(before(label, container.querySelector(".layout-pair")!)).toBe(true);
     expect(before(label, container.querySelector(".x-sentence-list")!)).toBe(true);
@@ -169,7 +169,7 @@ describe("the thinking sub-study", () => {
         L.studiesGridSealed(SEALED, verdictWord(gridPair.sealed.final_verdict)),
       );
       expect(beside.dataset["gridSealed"]).toBe(gridPair.sealed.final_verdict);
-      expect(beside.textContent).toContain("outside the family of 16");
+      expect(beside.textContent).toContain("not one of the 16 main comparisons");
       // Both are in the same list item, side by side at 40rem and wider.
       expect(li.classList.contains("paired")).toBe(true);
     }

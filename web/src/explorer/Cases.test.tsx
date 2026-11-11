@@ -51,12 +51,12 @@ const before = (a: Element, b: Element) =>
 const readingName = (id: string) => L.readingNames[id] ?? L.readingAlternative(id);
 
 describe("/cases/", () => {
-  it("shows his introduction and the framing: the protocol applied to real decisions, not a validation", async () => {
+  it("shows his introduction and the framing: the protocol applied to real decisions, not proof of the method", async () => {
     const { container } = await list();
     expect(container.textContent).toContain(explorerHis.casesIntro);
     const framing = container.querySelector(".case-framing")!;
     expect(framing.textContent).toBe(L.casesFraming);
-    expect(framing.textContent).toMatch(/not a validation/);
+    expect(framing.textContent).toMatch(/do not prove the study’s method right/);
     expect(framing.textContent).not.toMatch(/validates|proves|confirms/);
   });
 

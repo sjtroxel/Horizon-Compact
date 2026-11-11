@@ -1,44 +1,44 @@
 {
-  "landingQuestion": "[his: the landing question, the one sentence the guided story opens with]",
-  "scopeSentence": "[his: the scope sentence in its public wording, saying what this experiment tests and what it does not show]",
+  "landingQuestion": "If the same AI model makes the same company decision, does it choose differently when it is told to serve shareholders or everyone the company affects, over one year or twenty?",
+  "scopeSentence": "This experiment measures how two AI models decide for a made-up company, and for a few real decisions with the companies' names removed, when only the goal they are given changes. It does not measure how real executives decide, and it predicts nothing about any company.",
   "scenarioBriefs": {
-    "s1": "[his: the scenario in brief for s1, the decision about the people whose work AI tools can now do, in his words]",
-    "s2": "[his: the scenario in brief for s2, who bears the fall in operating income, in his words]",
-    "s3": "[his: the scenario in brief for s3, the plant that loses money, to close, retool or sell, in his words]",
-    "s4": "[his: the scenario in brief for s4, the long-term program to fund or decline, in his words]"
+    "s1": "AI tools can now do the work of 125 office and finance staff. The model decides what happens to each person: severance, retraining for a plant job at their current pay, or retraining at the plant's pay.",
+    "s2": "Orders are falling, and the company's operating profit will drop. The model decides who absorbs the drop: workers, through job cuts or lower pay, or others, such as shareholders, customers, suppliers and the company's future products.",
+    "s3": "Plant 6 and its 190 employees lose money once the plant's share of company overhead is counted. The model chooses to close the plant, retool it or sell it, and decides where its people go.",
+    "s4": "The company's engineers have designed a ten-year program to build machines for new customers. It may pay off, or it may not. The model decides whether to fund it, and whether to cut anything else to free up this year's money."
   },
-  "againstTitle": "[his: the title of the section for results against the thesis; he may revise it so it names the rule's source]",
-  "againstIntro": "[his: the introductory sentence of the section for results against the thesis]",
-  "memosIntro": "[his: the introductory sentence of the memo reader, saying what a memo is and that the reader holds the fictional company's memos]",
-  "casesIntro": "[his: the title's introduction for the real-cases page, saying these are the protocol applied to real decisions, in his words]",
-  "caseMemosHeld": "[his: why the site shows no real-case memo text, in his words, placed beside the counts of memos published and held]",
-  "studiesIntro": "[his: the introduction to the studies page, the thinking sub-study and the awareness probes, in his words]",
-  "studiesThinkingTitle": "[his: the title of the thinking sub-study section]",
-  "studiesAwarenessTitle": "[his: the title of the awareness probes section]",
+  "againstTitle": "Where the results went against the project's starting expectation",
+  "againstIntro": "Before any run, the project expected a longer horizon, or a wider group of people who count, to make the model cut less. This section lists every main comparison where that did not happen: the two goals made the same choice, or the goal expected to cut less cut more.",
+  "memosIntro": "A memo is the model's short written explanation of one decision, one memo per run. Every memo here was written for the made-up company. They are the model's words, not the project's view, and none has been edited.",
+  "casesIntro": "Here the same test is applied to a few real business decisions, described only in broad terms, with the companies' names removed. Each case asks which goal's runs came closest to what the real company did. That is a comparison, not a judgment of the company or of what it was trying to do. The cases are exploratory: they were chosen after the pre-registered search found none.",
+  "caseMemosHeld": "The model's memos on the real cases are not shown on this site. They can repeat details from the source filings that the short descriptions here leave out on purpose. The counts show how many memos were written and how many are held.",
+  "studiesIntro": "Two smaller checks sit beside the main results. In one, the model was allowed to think step by step before it decided, to see whether that changes its choice. In the other, the model was asked what it thought the exercise was testing. Neither one is used to adjust the main results.",
+  "studiesThinkingTitle": "Does thinking first change the decision?",
+  "studiesAwarenessTitle": "Can the model tell what is being tested?",
   "pages": {
     "story": {
-      "title": "[his: the title of the guided story, the page at the site's root]",
-      "description": "[his: one or two sentences describing the guided story for a search result or a shared link]"
+      "title": "Horizon Compact: does the goal change the decision?",
+      "description": "An experiment: the same AI model makes the same company decisions under five different goals. See whether its choices change, and by how much."
     },
     "scenario": {
-      "title": "[his: the title of a scenario view; the scenario's id follows it]",
-      "description": "[his: one or two sentences describing a scenario view for a search result or a shared link]"
+      "title": "Scenario",
+      "description": "One company decision, made many times under each of five goals, with every result's spread and run count shown."
     },
     "cases": {
-      "title": "[his: the title of the real-cases page]",
-      "description": "[his: one or two sentences describing the real-cases page for a search result or a shared link]"
+      "title": "Real cases",
+      "description": "The same test applied to a few real business decisions, with the companies' names removed, to see which goal's runs came closest to what each company did."
     },
     "case": {
-      "title": "[his: the title of one real case's page; the case's label follows it]",
-      "description": "[his: one or two sentences describing one real case's page for a search result or a shared link]"
+      "title": "Real case",
+      "description": "One real business decision, described only in broad terms, and which goal's runs came closest to what the company did."
     },
     "studies": {
-      "title": "[his: the title of the studies page, the thinking sub-study and the awareness probes]",
-      "description": "[his: one or two sentences describing the studies page for a search result or a shared link]"
+      "title": "Side studies",
+      "description": "Two smaller checks: whether thinking step by step changes the model's decision, and whether the model can tell what the exercise is testing."
     },
     "memos": {
-      "title": "[his: the title of the memo reader]",
-      "description": "[his: one or two sentences describing the memo reader for a search result or a shared link]"
+      "title": "Memo reader",
+      "description": "Read the model's own explanation of each decision it made for the made-up company, by goal, scenario and run."
     }
   }
 }

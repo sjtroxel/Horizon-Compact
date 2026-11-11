@@ -7,7 +7,21 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-10, about 3:50 PM, HANDOFF (C5 BUILT AND REVIEWED; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-11-11, about 4:25 AM (STEP 8 APPROVED BUT FOR THE SENTENCE TEMPLATES; C6 NEXT)
+>
+> **C5 committed `6b809d7` (his) and pushed; CI `42909014486` and Deploy `42909014440` green.** **§14 step 8, his half:
+> at his request, Claude drafted every value in `web/src/explorer/his.json`; he approved them as written** (the Phase 6
+> IMPLEMENTATION doc §11, dated note 2026-11-11). `make check` green; the explorer's JavaScript 90.8 KB of 100 KB
+> gzipped. **The labels approved too** (his, about 4:21 AM): Claude's plain-language pass on 28 labels seen outside the
+> details (`copy.ts`, `againstWords.ts`), then his read of `copy.ts` and approval of all of it (§11's second dated
+> note). In his commit `phase 6: step 8 words and labels`. **Next: show him the four result-sentence templates
+> (`web/src/explorer/sentences.ts`) for approval word for word, the last of step 8; then C6, the guided story, whose
+> prompt (Opus) does §17's split by path first** (90.8 KB of 100 KB). C6 carries `planning/06` §6.4's name line, which
+> has no field in `his.json`.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-10, about 3:50 PM, HANDOFF (C5 BUILT AND REVIEWED; HIS COMMIT NEXT) *(superseded by the block above)*
 >
 > **C5, the memo reader, the real cases and the studies (the Phase 6 IMPLEMENTATION doc §27, review §27a), built by
 > Sonnet and reviewed by Opus: passed after one change.** The change: the model switch now drops `run` on `/memos/`

@@ -1,9 +1,9 @@
 /**
  * Every word the explorer shows lives here or in his.json, except data values and the name "Horizon Compact".
  *
- * BOTH OBJECTS ARE UNAPPROVED. `explorerHis` is a set of marked placeholders (`[his: ...]`) naming what he writes;
- * `explorerLabels` is Claude-drafted and unapproved until the Phase 6 IMPLEMENTATION doc section 14, step 8, where he
- * approves it word for word. The gate that fails on an unwritten explorer word is Phase 6.5's go-live, not this
+ * BOTH OBJECTS ARE APPROVED (his, 2026-11-11, the Phase 6 IMPLEMENTATION doc section 11's dated notes). Both are
+ * Claude-drafted: `explorerHis` at his request on that pass, `explorerLabels` from C3 to C5 with a plain-language pass
+ * at step 8. A change to either is his approval again, word for word. The gate that fails on an unwritten explorer word is Phase 6.5's go-live, not this
  * file's tests: the placeholder page's test `his words are written` (src/copy.test.ts) is not widened to these.
  *
  * His words live in his.json (not in this file) because the build's write-paths script, which is plain Node, reads
@@ -44,7 +44,7 @@ export const explorerLabels = {
   navStory: "The story",
   navScenario: (id: string) => `Scenario ${id}`,
   navCases: "Real cases",
-  navStudies: "Studies",
+  navStudies: "Side studies",
   navMemos: "Memos",
   modelSwitch: "Model",
   seeDetails: "See the details",
@@ -122,7 +122,7 @@ export const explorerLabels = {
   } as Record<string, string>,
   whatRunsShow: "What the runs show",
   verdictNote: (level: string) =>
-    `Each verdict is the analysis\u2019s own, at the ${level} confidence level (a Bonferroni correction over the family of 16 comparisons). The interval behind each one is in the details.`,
+    `Each verdict is the analysis\u2019s own, at a ${level} confidence level. That is stricter than usual because the study makes 16 main comparisons, and with that many, some would look like a difference by chance alone. The numbers behind each verdict are in the details.`,
   roundtableFlag: "The pair the Roundtable\u2019s claim is about",
   secondaryFlag: "Secondary comparison",
   officialVerdict: "official verdict:",
@@ -138,12 +138,12 @@ export const explorerLabels = {
   droppedWordings: (ids: string) => `dropped for failures: ${ids}`,
   noReading: "The protocol wrote no reading for this pair.",
   readingsNote:
-    "Before the results, the protocol wrote down what some outcomes would mean, for C vs D and for A vs B only. Where one applies, it is quoted under that sentence; the other sentences have none.",
+    "Before any results, the study\u2019s written plan (the protocol) said what a few outcomes would mean, for C vs D and for A vs B only. Where one applies, it is quoted under that sentence; the other sentences have none.",
   protocolReadingLabel: "The protocol\u2019s reading, written before the results:",
   repeatsLine:
-    "How many repeats each cell got was set by protocol section 8.2 from each model\u2019s pilot, before the grid ran.",
-  againstLink: "See the results that go against the thesis",
-  againstMarker: "listed in the section for results against the thesis",
+    "How many times each goal and wording was run was set from a small trial run of each model, before the main runs began (protocol section 8.2).",
+  againstLink: "See where the results went against the starting expectation",
+  againstMarker: "listed under results against the starting expectation",
 
   // The details.
   detailsHint: "how sure the runs are, and everything the model chose",
@@ -222,7 +222,7 @@ export const explorerLabels = {
   tableFailures: (type: string, runs: number) => `${type}: ${runs}`,
 
   // ------------------------------------------------------------------------------------------------------------
-  // C5: the memo reader, the real cases and the studies. Claude-drafted, unapproved.
+  // C5: the memo reader, the real cases and the studies. Claude-drafted, approved 2026-11-11.
 
   // The memo reader.
   memoKindLabel: "Set of memos",
@@ -241,12 +241,13 @@ export const explorerLabels = {
   memoSource: "Text from",
   memoSources: {
     memo: "the memo the model wrote with its decision",
-    reply_text: "the model’s reply text, because it made no tool call",
+    reply_text:
+      "the model’s plain reply, because it answered in text instead of filling in the decision form",
   } as Record<string, string>,
   memoLeftNone: "This run left no memo.",
   memoSourceHeading: "Source records",
   memoSourceNote: (path: string, sha: string) =>
-    `The object key and sha256 of this run’s final record and of its final attempt, for checking against the raw-object manifest (${path}, sha256 ${sha}).`,
+    `Where this run’s raw records are stored, with a fingerprint (sha256) of each, so anyone can check them against the published list of raw records (${path}, sha256 ${sha}).`,
   memoFinalRecord: "Final record",
   memoAttemptRecord: "Final attempt",
   memoFileLink: "The file these memos are read from",
@@ -271,12 +272,12 @@ export const explorerLabels = {
 
   // The real cases.
   casesFraming:
-    "These cases are the protocol applied to real decisions. They are readings, not tests, and they are not a validation of the protocol.",
+    "These cases apply the same study plan to real decisions. They are readings, not tests, and they do not prove the study\u2019s method right.",
   casesLabelLead: "Every case below carries this label, as its file writes it:",
   allNoGoodMatch: "Every reading of every case below is labelled no good match, for every model.",
   shortfallHeading: "What the selection found, and what it did not",
   shortfallNote:
-    "The protocol asks for cases of three types and says a type that yields fewer than its places is a reported shortfall, never filled by judgment (protocol section 12.1).",
+    "The study plan asks for cases of three types. A type that finds too few cases is reported as short, and its places are never filled by judgment (protocol section 12.1).",
   caseTypes: {
     closure: "Closure or restructuring",
     retool: "Invest or retool",
@@ -302,12 +303,12 @@ export const explorerLabels = {
   caseDossierHeading: "The dossier",
   caseDossierStatus: (published: boolean) => `Dossier: ${published ? "published" : "withheld"}`,
   caseReasonLabel: "Reason, as the file states it",
-  caseReidentHeading: "The re-identification check",
+  caseReidentHeading: "The check that the company cannot be identified",
   caseReidentStatus: (status: string) => `Status: ${status}`,
   caseThresholdLabel: "Threshold",
   caseProbesHeading: "Recognition probes",
   caseProbesKey:
-    "Before any decision run each model was asked which company the dossier described (protocol section 12.8). A call passes when it does not name the company.",
+    "Before any decision run, each model was asked which company the case\u2019s background file (the dossier) described (protocol section 12.8). A call passes when the model does not name the company.",
   caseProbeSet: "Set",
   caseProbeModel: "Model",
   caseProbeCalls: "Calls",
@@ -324,7 +325,7 @@ export const explorerLabels = {
   caseRunCounts: (runs: number) => `${runs} runs, by their final status:`,
   caseFinalStatus: (status: string, runs: number) => `${status}: ${runs}`,
   caseReadingNote:
-    "The primary reading is the rubric’s own. An alternative reading matches the runs again with one uncertain call in the rubric read the other way.",
+    "The primary reading follows the scoring guide (the rubric) as written. Where the guide had to make an uncertain call about what the company did, an alternative reading matches the runs again with that call made the other way.",
   readingNames: { primary: "Primary reading" } as Record<string, string>,
   readingAlternative: (id: string) => `Alternative reading ${id}`,
   readingLabels: {
@@ -335,31 +336,31 @@ export const explorerLabels = {
   } as Record<string, string>,
   readingLabelIs: (label: string) => `Label: ${label}`,
   readingReason: "Reason, as the matcher wrote it",
-  readingLines: "Lines observable in this reading",
+  readingLines: "Lines of the company’s decision that could be seen in this reading",
   distanceKey:
-    "One row per goal. The dot is the distance between that goal’s runs and the company’s decision: a shorter distance is nearer. The line is its interval. A distance above the rule is no good match.",
+    "One row per goal. The dot shows how far that goal’s runs were from what the company did: 0 is the same, and a larger number is further away. The line around the dot is the range the true distance likely falls in. Past the marked rule, a goal is no good match.",
   distanceAxis: "Distance from the company’s decision, 0 to 1",
   distanceRule: (distance: string) => `no good match above ${distance}`,
   distanceRowNumbers: (distance: string, low: string, high: string) =>
     `distance ${distance}, interval ${low} to ${high}`,
   distanceRuns: (runs: number, choiceOnly: number, undistanced: number) =>
-    `${runs} runs distanced, ${choiceOnly} on the choice alone, ${undistanced} left out`,
+    `${runs} runs measured, ${choiceOnly} on the choice alone, ${undistanced} left out`,
   distanceChartLabel: (caseLabel: string, model: string, reading: string) =>
     `Distances for ${caseLabel}, ${model}, ${reading}`,
-  distanceLevel: (level: string) => `${level} bootstrap interval`,
+  distanceLevel: (level: string) => `${level} range, from resampling the runs (a bootstrap interval)`,
   nearestLine: (goal: string, letter: string) => `Nearest goal: ${goal} (${letter})`,
   gapLine: (second: string, estimate: string, low: string, high: string) =>
     `Gap to the next nearest, goal ${second}: ${estimate} (interval ${low} to ${high})`,
   tiedWith: (ids: string) => `Tied with: ${ids}`,
   tieNote:
-    "Every distance in this reading is equal, so the nearest goal is the matcher’s tie-break by letter, not a finding. No nearest goal is shown.",
+    "Every goal is the same distance from the company’s decision in this reading. The matching program then picks the earliest letter, but that is a tie-break, not a finding, so no nearest goal is shown.",
   oneLineNote:
-    "This reading has one observable line, which the distance still averages with the choice term, so its distances are pulled toward a match by construction and are not comparable with other cases’ readings.",
+    "Only one line of the company’s decision could be seen in this reading. The distance still averages that line with the choice itself (close, retool or sell), which pulls every goal toward a match just from how it is worked out. These distances cannot be compared with other cases’ readings.",
   dependsLabel: "Depends on the reading",
   dependsYes: "yes",
   dependsNo: "no",
   dependsTieNote:
-    "This flag inherits the tie-break in a reading where every distance is equal, so by itself it does not mean the company’s reading changes the result.",
+    "This answer comes from the tie-break in a reading where every goal is the same distance away. On its own, it does not mean that how the company’s decision was read changes the result.",
   dependsSameLabel: (label: string) => `The label is ${label} under every reading.`,
   alternativesLine: (matched: number, unmatched: string) =>
     `Alternative readings matched: ${matched}. Calls left unmatched: ${unmatched}.`,
@@ -386,9 +387,9 @@ export const explorerLabels = {
 
   // The studies.
   studiesSubStudyLabel:
-    "A sub-study on scenario s1, on Haiku 5.5 only. It is outside the family of 16 comparisons and is not part of the main grid.",
+    "A sub-study on scenario s1, on Haiku 5.5 only. It is not one of the 16 main comparisons and is not part of the main grid.",
   studiesSettings:
-    "Settings: the sealed wording w2 only, all five goals, thinking on at effort high. The exact request is in protocol section 9.5.",
+    "Settings: all five goals, each in wording w2 only (the wording locked in before the runs), with the model\u2019s step-by-step thinking turned on at high effort. The exact request is in protocol section 9.5.",
   studiesSettingsLink: "Protocol section 9.5, at the pre-registered tag",
   studiesGridCard: "Main grid, scenario s1, wording w2 only",
   studiesThinkingCard: "Thinking sub-study, scenario s1, wording w2",
@@ -397,7 +398,7 @@ export const explorerLabels = {
   studiesLevel: (level: string) => `Each verdict uses the analysis’s ${level} interval.`,
   studiesComparisonsHeading: "The five comparisons in the sub-study",
   studiesGridSealed: (wording: string, verdict: string) =>
-    `The main grid on wording ${wording} alone, also outside the family of 16: ${verdict}`,
+    `The main grid on wording ${wording} alone, also not one of the 16 main comparisons: ${verdict}`,
   studiesMemosLink: "Read the sub-study’s memos",
   studiesRunsHeading: "Every run of the sub-study",
   studiesRunsKey: "Each run id opens that run’s memo in the reader.",
@@ -406,7 +407,7 @@ export const explorerLabels = {
   awarenessInstructionLabel:
     "The instruction the model was given in place of the decision, word for word from protocol section 9.6:",
   awarenessSettings:
-    "One call for each of the five goals under each of three templates, 15 to a model, on scenario s1.",
+    "One call for each of the five goals under each of three phrasings of the question (templates), 15 to a model, on scenario s1.",
   awarenessLink: "Protocol section 9.6, at the pre-registered tag",
   awarenessGoalHeading: (goal: string, letter: string) => `${goal} (${letter})`,
   awarenessCardLabel: (model: string, letter: string, goal: string, template: string) =>
