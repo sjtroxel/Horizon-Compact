@@ -3006,3 +3006,30 @@ N runs") do. The review script accepts those two forms; Sonnet's figures are unc
 
 **Not run:** the commit hooks and the name guard dry run are left for the hand-over of the commit (nothing new names a real
 company; the new text is labels, his approved words and one placeholder).
+
+## 31b. The words pass on the step 11 labels (2026-11-12, Claude-drafted, his approval)
+
+He approved Claude's recommendations on §31's ten new labels and §31a's four notes as proposed, and the metadata line
+Claude drafted at his request ("not too advanced, not too elementary ... not too much ai-ey"), as written.
+
+| key | approved words |
+|---|---|
+| `aboutSummary` | About these results (kept) |
+| `jumpMenuLabel` | Parts of the story |
+| `findingMore` | The details behind this result (the old words promised a protocol reading on every finding; only some have one) |
+| `chartTitles.share.s1`, `.s2`, `.distance` | kept as §31 lists them |
+| `chartTitles.choice` | The choice the model made, by goal |
+| `chartTitles.interval(outcome)` | The difference in <outcome> between goals (beat 5's charts have five pairs, not two goals) |
+| `storySecondTableCaption(id)` | Scenario <id>: every verdict, for each model. A split shows its difference, first goal minus second, in percentage points. |
+| `gapPoints` | <points> points (kept: the caption says "percentage points" once; the cells are narrow) |
+| `story.metaLine` (his.json) | The study's plan was published on October 13, 2026, before any official run. It tests two AI models on four decisions. |
+
+The date is the `prereg-v1` tag's (2026-10-13); two models and four scenarios are `index.json`'s. §31a's notes: A (the
+rounded sentence beside the exact value at the dot) left; B fixed by `storySecondTableCaption` taking the scenario id; D
+("Three more decisions" at the scenario headings' size) left. **C, the dark title band, lightened** from `#141c2a` to
+`#253046`, so it sits a visible step above the header band (1.17:1; it was 1.11:1 and the darker of the two) and further
+from the surface (1.38:1). Its text pairs, dark: title 10.81, the line under it 6.54, the jump menu's hover 8.31, the
+title's focus ring 4.01. A new `palette.test.ts` test holds the title band lighter than the header band by at least
+1.15:1 in dark mode (mutation-checked: the old color fails it). Checked in the browser
+(`scratch/p6-step11-words/`): 52 loads clean, axe contrast included; layout shift 0.001; the axes aligned; the crop test
+and the number trace clean; the dark captures read as three layers.

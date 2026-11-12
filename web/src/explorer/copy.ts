@@ -83,21 +83,21 @@ export const explorerLabels = {
   navStudies: "Side studies",
   navMemos: "Memos",
   modelSwitch: "Model",
-  // Step 11 redesign (2026-11-12): Claude-drafted, unapproved until a words pass.
+  // Step 11 redesign (2026-11-12): Claude-drafted; approved by him in the words pass of 2026-11-12 (section 31b).
   aboutSummary: "About these results",
-  jumpMenuLabel: "Jump to a part of the story",
-  findingMore: "The runs, the analysis headline and the protocol\u2019s reading",
+  jumpMenuLabel: "Parts of the story",
+  findingMore: "The details behind this result",
   chartTitles: {
     share: {
       s1: "The share of the affected people kept, by goal",
       s2: "The share of the shortfall borne by the workforce, by goal",
     } as Record<string, string>,
-    choice: "The choice made, by goal",
-    interval: (outcome: string) => `The difference in ${outcome}, between two goals`,
+    choice: "The choice the model made, by goal",
+    interval: (outcome: string) => `The difference in ${outcome} between goals`,
     distance: "The distance from the company\u2019s decision, by goal",
   },
-  storySecondTableCaption:
-    "Scenario s1, every verdict, for each model. Where a pair split, the gap is the first goal minus the second, in percentage points.",
+  storySecondTableCaption: (id: string) =>
+    `Scenario ${id}: every verdict, for each model. A split shows its difference, first goal minus second, in percentage points.`,
   gapPoints: (points: string) => `${points} points`,
 
   seeDetails: "See the details",

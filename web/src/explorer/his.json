@@ -35,7 +35,7 @@
     "casesIntro": "The same test, applied to a few real business decisions described only in broad terms. They are exploratory and kept apart from the main results; the note below says how they were chosen.",
     "methodsTitle": "How the study was done",
     "methodsText": "The study's written plan, the protocol, was fixed and published before any official run. It says what was measured, how, and what each result would mean. The links below lead to it, to the side studies and to the models' own memos.",
-    "metaLine": "[his: the line under the story's title: when the study was pre-registered, how many models, how many decisions]"
+    "metaLine": "The study's plan was published on October 13, 2026, before any official run. It tests two AI models on four decisions."
   },
   "pages": {
     "story": {

@@ -159,7 +159,7 @@ const BANDS = {
     "--band-ink2": "#c6bfae",
     "--band-mark": "#e9c98f",
     "--band-line": "#7b8aa3",
-    "--titleband": "#141c2a",
+    "--titleband": "#253046",
   },
 } as const;
 
@@ -210,6 +210,13 @@ describe("the header band and the title band", () => {
       }
     });
   }
+
+  it("keeps the title band apart from the header band in dark mode: lighter than it, by a visible step (his words pass, section 31b)", () => {
+    const own = dark(css);
+    const [band, title] = [own["--band"]!, own["--titleband"]!];
+    expect(relativeLuminance(title)).toBeGreaterThan(relativeLuminance(band));
+    expect(contrast(title, band)).toBeGreaterThanOrEqual(1.15);
+  });
 
   it("can see a contrast fail: the same computation rejects a pair known to be too close", () => {
     expect(contrast("#8a8270", "#f6f2e9")).toBeLessThan(4.5); // the site's muted gray on the surface

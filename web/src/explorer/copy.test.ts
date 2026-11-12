@@ -278,15 +278,18 @@ describe("the step 11 words (the redesign batch, 2026-11-12)", () => {
     });
   });
 
-  it("holds his approved short scope line and scenario headings word for word, and the metadata line as a named placeholder", () => {
+  it("holds his approved short scope line, scenario headings and metadata line word for word", () => {
     expect(explorerHis.scopeShort).toBe(
       "How an AI model decides, not how real executives do; it predicts nothing about any company.",
     );
     expect(explorerHis.story.s2Title).toBe("The second decision: who absorbs a drop in profit");
     expect(explorerHis.story.s3Title).toBe("The third decision: close, retool or sell Plant 6");
     expect(explorerHis.story.s4Title).toBe("The fourth decision: fund a ten-year program, or not");
-    expect(isPlaceholder(explorerHis.story.metaLine)).toBe(true);
-    expect(explorerHis.story.metaLine).toContain("pre-registered");
+    // Approved 2026-11-12 (section 31b): Claude drafted at his request, he approved it as written.
+    expect(explorerHis.story.metaLine).toBe(
+      "The study's plan was published on October 13, 2026, before any official run. It tests two AI models on four decisions.",
+    );
+    expect(isPlaceholder(explorerHis.story.metaLine)).toBe(false);
   });
 
   it("keeps the new labels free of a result: a chart title names the measure and none says a verdict word", () => {

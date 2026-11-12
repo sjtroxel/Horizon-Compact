@@ -362,7 +362,7 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
               id={walked}
               files={bothWalked.values}
               cell="gap"
-              caption={L.storySecondTableCaption}
+              caption={L.storySecondTableCaption(walked)}
             />
           </>
         ) : (

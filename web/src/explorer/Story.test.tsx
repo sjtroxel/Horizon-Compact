@@ -340,7 +340,7 @@ describe("the story, from the real files", () => {
     it("sets the verdicts in a table, a row per comparison in the sentence column's order and a column per model, the main model first", () => {
       const table = section().querySelector<HTMLElement>("table.story-table")!;
       expect(table.dataset["scenario"]).toBe("s1");
-      expect(table.querySelector("caption")!.textContent).toBe(L.storySecondTableCaption);
+      expect(table.querySelector("caption")!.textContent).toBe(L.storySecondTableCaption("s1"));
       expect([...table.querySelectorAll("thead th")].map((th) => th.textContent)).toEqual([
         L.storyComparisonColumn,
         ...MODELS.map(modelName),

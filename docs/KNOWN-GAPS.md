@@ -7,15 +7,25 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-12, about 11:15 AM (STEP 11 REDESIGN BUILT AND REVIEWED; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-11-12, about 1:00 PM (STEP 11'S WORDS PASS DONE; HIS COMMIT NEXT)
+>
+> **The words pass on the redesign's labels done (the Phase 6 IMPLEMENTATION doc §31b):** he approved Claude's
+> recommendations as proposed and the metadata line under the story's title as Claude drafted it; the dark title band
+> lightened one step and checked in the browser (52 loads clean). **Uncommitted: the words, the color, two tests, §31b and
+> this file (with the 11:05 edit below), for his commit.** **Next:** his visual review of the other pages (scenario, cases,
+> studies, memos), the second half of §14 step 11.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-12, about 11:05 AM (STEP 11 REDESIGN COMMITTED; WORDS PASS NEXT) *(superseded by the block above)*
 >
 > **The step 11 redesign batch built by Sonnet (the Phase 6 IMPLEMENTATION doc §31) and reviewed by Opus (§31a): passed
 > after one fix** (the dot strip's axis words sat in the label column, about 196 px left of the plot, at chart widths of
 > 30rem and up; one CSS rule, checked in the browser). Opus's browser pass on the fixed build (`scratch/p6-step11-review/`):
 > 52 loads clean, layout shift 0.001, number trace 0 untraced, crop test 0 missing on 36 figures. `web/dist/` unchanged.
-> **Uncommitted, all of it, for his one commit:** the batch, the fix, §31 and §31a, and the earlier doc edits (this file,
-> §0, §14 step 11, §30). **Next:** his commit; then the words pass (§31's new labels, `story.metaLine` his to write, and
-> §31a's four notes); then his visual review of the other pages.
+> **Committed `266be34` (his) and pushed; CI `43264322132` and Deploy `43264322008` green.** The batch, the fix, §31,
+> §31a and the morning's doc edits are in it. **Next:** the words pass (§31's new labels, `story.metaLine` his to write,
+> and §31a's four notes); then his visual review of the other pages. This block's edit rides in the next commit.
 >
 > *The block below is superseded.*
 
