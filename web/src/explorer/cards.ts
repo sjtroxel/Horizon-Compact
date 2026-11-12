@@ -26,7 +26,7 @@ import { CARD_HEIGHT, CARD_WIDTH, pageMeta } from "./page-meta.mjs";
 import type { PageRoute } from "./page-meta.mjs";
 
 // ---------------------------------------------------------------------------------------------------------------------
-// The look: the site's light palette and its three families (styles.css), copied as constants. palette.test.ts and
+// The look: the site's light palette and its two families (styles.css), copied as constants. palette.test.ts and
 // cards.test.ts tie each one to its CSS value.
 
 export const PALETTE = {
@@ -39,12 +39,13 @@ export const PALETTE = {
 } as const;
 
 /**
- * The families as the TTF files name them. Newsreader's static files are one per optical size: the 16pt one is the
- * text size, the same design as the site's WOFF2 (Google Fonts' default instance). The site says "Newsreader".
+ * The families as the TTF files name them. Two: the name's face, and Source Sans 3 for everything else, as on the site
+ * (the explorer sets every word in Source Sans 3: the Phase 6 IMPLEMENTATION doc section 0 item 6's dated note of
+ * 2026-11-12, carried to the cards at step 11). The serif styles of C7 use Source Sans 3 400 now, and the Newsreader TTF
+ * and its licence file are gone from web/fonts-ttf/.
  */
 export const FAMILIES = {
   display: "Big Shoulders Display",
-  serif: "Newsreader 16pt",
   sans: "Source Sans 3",
 } as const;
 
@@ -66,9 +67,9 @@ export const STYLES: Readonly<Record<StyleName, TextStyle>> = {
   hero: { family: FAMILIES.display, weight: 800, size: 72, lineHeight: 1.0, fill: PALETTE.accent },
   name: { family: FAMILIES.display, weight: 800, size: 38, lineHeight: 1.1, fill: PALETTE.accent },
   title: { family: FAMILIES.sans, weight: 600, size: 40, lineHeight: 1.15, fill: PALETTE.ink },
-  headline: { family: FAMILIES.serif, weight: 400, size: 32, lineHeight: 1.3, fill: PALETTE.ink },
-  prose: { family: FAMILIES.serif, weight: 400, size: 24, lineHeight: 1.28, fill: PALETTE.ink },
-  note: { family: FAMILIES.serif, weight: 400, size: 22, lineHeight: 1.28, fill: PALETTE.ink2 },
+  headline: { family: FAMILIES.sans, weight: 400, size: 32, lineHeight: 1.3, fill: PALETTE.ink },
+  prose: { family: FAMILIES.sans, weight: 400, size: 24, lineHeight: 1.28, fill: PALETTE.ink },
+  note: { family: FAMILIES.sans, weight: 400, size: 22, lineHeight: 1.28, fill: PALETTE.ink2 },
   cell: { family: FAMILIES.sans, weight: 400, size: 22, lineHeight: 1.28, fill: PALETTE.ink },
   strong: { family: FAMILIES.sans, weight: 600, size: 22, lineHeight: 1.28, fill: PALETTE.ink },
   flag: { family: FAMILIES.sans, weight: 600, size: 22, lineHeight: 1.28, fill: PALETTE.ink2 },

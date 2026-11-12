@@ -58,6 +58,9 @@ describe("/cases/", () => {
     expect(framing.textContent).toBe(L.casesFraming);
     expect(framing.textContent).toMatch(/do not prove the study’s method right/);
     expect(framing.textContent).not.toMatch(/validates|proves|confirms/);
+    // The full scope sentence, once, near the top; and a model's line reads its name, a colon and its labels.
+    expect(container.textContent!.split(explorerHis.scopeSentence)).toHaveLength(2);
+    expect(container.querySelector(".case-readings li[data-model]")!.textContent).not.toContain("Label:");
   });
 
   it("puts the exploratory label first: before any sentence about the readings, any count and any card's readings", async () => {
@@ -209,8 +212,10 @@ describe.each(LABELS)("/cases/%s/", (label) => {
 
   it("opens with the exploratory label, verbatim, before every reading, distance and count", async () => {
     const { container } = await page(label);
-    const heading = container.querySelector("h1")!;
-    const exploratory = heading.nextElementSibling!;
+    // The title is on its band (the redesign, section 31); the label is the first thing after the band.
+    const band = container.querySelector(".title-band")!;
+    expect(band.querySelector("h1")).not.toBeNull();
+    const exploratory = band.nextElementSibling!;
     expect(exploratory.className).toBe("exploratory-label");
     expect(exploratory.textContent).toBe(entry.exploratory_label);
     for (const later of [
@@ -340,6 +345,33 @@ describe.each(LABELS)("/cases/%s/", (label) => {
         );
       }
     }
+  });
+
+  it("frames every distance chart by a rule, with the measure as its title, and keeps the model, each row's run count and the scope line inside the figure, so a crop keeps them (step 11)", async () => {
+    const { container } = await page(label);
+    const figures = [...container.querySelectorAll<HTMLElement>("figure.distance-figure")];
+    expect(figures.length).toBeGreaterThan(0);
+    for (const figure of figures) {
+      expect(figure.querySelector(".frame-title")!.textContent).toBe(L.chartTitles.distance);
+      expect(figure.getAttribute("aria-labelledby")).toBe(figure.querySelector(".frame-title")!.id);
+      expect(figure.querySelector(".frame-unit")!.textContent).toContain("range");
+      const caption = figure.querySelector("figcaption")!.textContent!;
+      // The finding that the case pages' charts lacked the scope line: they carry the short one now.
+      expect(caption).toContain(explorerHis.scopeShort);
+      expect(MODELS.some((m) => caption.includes(modelName(m)))).toBe(true);
+      // The run count of each goal's row is in the figure, beside its distance.
+      const rows = figure.querySelectorAll(".distance-row[data-goal]");
+      expect(rows).toHaveLength(5);
+      for (const row of rows) expect(row.textContent).toMatch(/\d+ runs measured/);
+      expect(figure.textContent).not.toContain(explorerHis.scopeSentence);
+    }
+    // The full sentence is on the page once, near the top, after the exploratory label.
+    expect(container.textContent!.split(explorerHis.scopeSentence)).toHaveLength(2);
+    const sentence = [...container.querySelectorAll("p")].find(
+      (p) => p.textContent === explorerHis.scopeSentence,
+    )!;
+    expect(before(container.querySelector(".exploratory-label")!, sentence)).toBe(true);
+    expect(before(sentence, container.querySelector("figure")!)).toBe(true);
   });
 
   it("shows the matcher notes exactly where their conditions hold, and a nearest goal exactly where it is not a tie", async () => {

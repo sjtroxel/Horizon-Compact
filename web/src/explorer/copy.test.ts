@@ -146,6 +146,9 @@ describe("the story's words (C6)", () => {
       "setupTitle",
       "setupIntro",
       "s1Title",
+      "s2Title",
+      "s3Title",
+      "s4Title",
       "s1Intro",
       "comparisonsTitle",
       "comparisonsIntro",
@@ -157,6 +160,7 @@ describe("the story's words (C6)", () => {
       "casesIntro",
       "methodsTitle",
       "methodsText",
+      "metaLine",
     ];
     expect(Object.keys(explorerHis.story).sort()).toEqual([...keys].sort());
     for (const text of [explorerHis.storyName, ...Object.values(explorerHis.story)]) {
@@ -257,5 +261,49 @@ describe("the labels keyed by the C5 data", () => {
       expect(file.model_key).toBe(model);
       expect(file.calls).toHaveLength(15);
     }
+  });
+});
+
+describe("the step 11 words (the redesign batch, 2026-11-12)", () => {
+  it("keys the scenarios' short names by the data's scenario ids, so a scenario added or dropped fails here", () => {
+    expect(Object.keys(explorerLabels.scenarioNames).sort()).toEqual(
+      realIndex.scenarios.map((s) => s.scenario_id).sort(),
+    );
+    // His approved names (the Phase 6 IMPLEMENTATION doc section 30).
+    expect(explorerLabels.scenarioNames).toEqual({
+      s1: "Jobs and AI tools",
+      s2: "Falling orders",
+      s3: "Plant 6",
+      s4: "Ten-year program",
+    });
+  });
+
+  it("holds his approved short scope line and scenario headings word for word, and the metadata line as a named placeholder", () => {
+    expect(explorerHis.scopeShort).toBe(
+      "How an AI model decides, not how real executives do; it predicts nothing about any company.",
+    );
+    expect(explorerHis.story.s2Title).toBe("The second decision: who absorbs a drop in profit");
+    expect(explorerHis.story.s3Title).toBe("The third decision: close, retool or sell Plant 6");
+    expect(explorerHis.story.s4Title).toBe("The fourth decision: fund a ten-year program, or not");
+    expect(isPlaceholder(explorerHis.story.metaLine)).toBe(true);
+    expect(explorerHis.story.metaLine).toContain("pre-registered");
+  });
+
+  it("keeps the new labels free of a result: a chart title names the measure and none says a verdict word", () => {
+    const labels = [
+      explorerLabels.aboutSummary,
+      explorerLabels.jumpMenuLabel,
+      explorerLabels.findingMore,
+      ...Object.values(explorerLabels.chartTitles.share),
+      explorerLabels.chartTitles.choice,
+      explorerLabels.chartTitles.interval("the outcome"),
+      explorerLabels.chartTitles.distance,
+    ];
+    for (const text of labels) {
+      expect(text.trim()).not.toBe("");
+      for (const word of ["no split", "inconclusive", "not assessable"]) expect(text).not.toContain(word);
+      expect(text).not.toMatch(/\bsplit\b/i);
+    }
+    expect(Object.keys(explorerLabels.chartTitles.share).sort()).toEqual(["s1", "s2"]);
   });
 });

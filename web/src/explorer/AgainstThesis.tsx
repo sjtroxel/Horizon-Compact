@@ -8,16 +8,14 @@
  */
 import { useId } from "react";
 import { againstWords } from "./againstWords";
-import { IntervalChart } from "./charts";
-import type { IntervalRow, Names } from "./charts";
+import { IntervalFrame, NoteLine } from "./ChartCard";
+import type { IntervalRow } from "./charts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { AgainstThesisEntry, DataIndex } from "./data";
 import { comparisonRuns, formatPoints } from "./format";
 import { modelName } from "./models";
 import { His, HisHeading, ProtocolReading } from "./parts";
 import { readingFor } from "./protocol";
-
-const names: Names = L.objectiveNames;
 
 function listOrNone(items: readonly string[]): string {
   return items.length === 0 ? againstWords.none : items.join(", ");
@@ -83,7 +81,11 @@ function Entry({ entry, index }: { entry: AgainstThesisEntry; index: DataIndex }
         <dd className="headline">{entry.headline}</dd>
       </dl>
       {scenario !== undefined && (
-        <IntervalChart rows={[rowOf(entry, scenario.threshold)]} names={names} label={L.intervalChartLabel} />
+        <IntervalFrame
+          rows={[rowOf(entry, scenario.threshold)]}
+          outcome={L.outcomePhrases[entry.scenario_id] ?? ""}
+          note={<NoteLine model={modelName(entry.model_key)} middle={L.runsPair(runs.first, runs.second)} />}
+        />
       )}
       <ProtocolReading readingKey={reading} />
       {entry.roundtable_pair && <p className="x-note">{againstWords.alsoAgainstAuthor}</p>}

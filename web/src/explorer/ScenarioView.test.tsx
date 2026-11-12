@@ -28,7 +28,7 @@ async function view(id: string, model: string, data: DataApi = realApi()) {
 
 /** Opens the "See the details" section the way a click does: the browser sets `open` and fires `toggle`. */
 function openDetails(container: HTMLElement) {
-  const details = container.querySelector("details")!;
+  const details = container.querySelector<HTMLDetailsElement>("details.x-details")!;
   details.open = true;
   fireEvent(details, new Event("toggle"));
   return details;
@@ -94,10 +94,14 @@ describe("the scenario view, from the real files", () => {
     }
   });
 
-  it("states the confidence level beside the first verdict, from alpha", async () => {
+  it("states the confidence level once, in the closed 'about these results' section, from alpha (and not under the sentences)", async () => {
     const { container } = await view("s1", "haiku-5-5");
-    const note = container.querySelector(".x-sentences .chart-key")!;
-    expect(note.textContent).toBe(L.verdictNote("99.7%"));
+    const about = container.querySelector<HTMLDetailsElement>("details.about")!;
+    expect(about.open).toBe(false);
+    expect(about.querySelector("summary")!.textContent).toBe(L.aboutSummary);
+    expect(about.querySelector(".about-body p")!.textContent).toBe(L.verdictNote("99.7%"));
+    expect(container.textContent!.split(L.verdictNote("99.7%"))).toHaveLength(2);
+    expect(container.querySelector(".x-sentences .chart-key")).toBeNull();
   });
 });
 
@@ -212,7 +216,9 @@ describe("the protocol's readings in the view", () => {
     expect(bd.querySelector("blockquote")).toBeNull();
     expect(container.textContent).not.toContain(L.noReading);
     expect(container.querySelectorAll(".readings-note")).toHaveLength(1);
-    expect(container.querySelector(".x-sentences .readings-note")!.textContent).toBe(L.readingsNote);
+    // Said once, in the 'about these results' section (the step 11 redesign moved it there from the sentence column).
+    expect(container.querySelector(".about .readings-note")!.textContent).toBe(L.readingsNote);
+    expect(container.querySelector(".x-sentences .readings-note")).toBeNull();
   });
 
   it("quotes no pulled-apart reading under A vs B where C vs D is only inconclusive (Haiku 5.5 s2)", async () => {
@@ -342,7 +348,18 @@ describe("the chart", () => {
       expect(figure.textContent).toContain(
         L.capValidOfAttempted(file.descriptive.runs, attemptedRuns(file.objective_rates)),
       );
-      expect(figure.textContent).toContain(explorerHis.scopeSentence);
+      // The note line carries the short scope line; the full sentence is on the page once, not under the chart.
+      expect(figure.querySelector("figcaption")!.textContent).toContain(explorerHis.scopeShort);
+      expect(figure.textContent).not.toContain(explorerHis.scopeSentence);
+      expect(container.textContent!.split(explorerHis.scopeSentence)).toHaveLength(2);
+      // Framed by a rule: a title naming the measure (never a result) and the unit or how-to-read line, then the chart.
+      const share = file.kind === "share";
+      expect(figure.querySelector(".frame-title")!.textContent).toBe(
+        share ? L.chartTitles.share[id] : L.chartTitles.choice,
+      );
+      expect(figure.querySelector(".frame-unit")!.textContent).toBe(share ? L.shareKey[id] : L.choiceKey);
+      expect(figure.getAttribute("aria-labelledby")).toBe(figure.querySelector(".frame-title")!.id);
+      expect(figure.querySelector(".frame-title")!.nextElementSibling!.className).toBe("frame-unit");
       unmount();
     }
   });
@@ -400,7 +417,7 @@ describe("the goal toggles", () => {
 describe("the details", () => {
   it("are closed on load and build nothing until opened", async () => {
     const { container } = await view("s4", "haiku-5-5");
-    const details = container.querySelector("details")!;
+    const details = container.querySelector<HTMLDetailsElement>("details.x-details")!;
     expect(details.open).toBe(false);
     expect(details.hasAttribute("open")).toBe(false);
     expect(container.querySelector(".x-details-body")).toBeNull();
@@ -419,7 +436,16 @@ describe("the details", () => {
       // The interval chart: five rows, the verdict word beside each, the confidence level stated.
       const rows = container.querySelectorAll(".intervals .interval-row:not(.interval-axis)");
       expect(rows).toHaveLength(5);
-      expect(container.querySelector(".x-details-body .chart-key")!.textContent).toBe(L.intervalKey("99.7%"));
+      // The interval key is said once, in the 'about these results' section, not again under this chart; the chart
+      // has its own title and unit line, and a note line with the model, the valid runs and the short scope line.
+      expect(container.querySelector(".about")!.textContent).toContain(L.intervalKey("99.7%"));
+      expect(container.querySelector(".x-details-body")!.textContent).not.toContain(L.intervalKey("99.7%"));
+      const intervalFigure = container.querySelector(".x-details-body figure")!;
+      expect(intervalFigure.querySelector(".frame-title")!.textContent).toBe(
+        L.chartTitles.interval(L.outcomePhrases[id]!),
+      );
+      expect(intervalFigure.querySelector(".frame-unit")!.textContent).toBe(L.intervalAxis);
+      expect(intervalFigure.querySelector("figcaption")!.textContent).toContain(explorerHis.scopeShort);
       rows.forEach((row, i) => {
         const c = file.comparisons.find(
           (x) => `${x.first}-${x.second}` === sentenceItems(container)[i]!.dataset["pair"],

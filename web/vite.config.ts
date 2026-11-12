@@ -6,15 +6,18 @@ import type { Plugin } from "vite";
 import { defineConfig } from "vitest/config";
 
 // The two fonts the first screen needs: the name's face and the prose face. Vite does not preload fonts that CSS
-// refers to, so without this a cold load paints the fallback faces and reflows when the real ones arrive.
-const PRELOADED_FONTS = [
-  /(^|\/)big-shoulders-display-latin-800-normal-[^/]*\.woff2$/,
-  /(^|\/)newsreader-latin-400-normal-[^/]*\.woff2$/,
-];
+// refers to, so without this a cold load paints the fallback faces and reflows when the real ones arrive. The
+// placeholder page's prose face is Newsreader 400; the explorer sets everything in Source Sans 3 (Phase 6
+// IMPLEMENTATION doc section 0 item 6's dated note of 2026-11-12), so in explorer mode its prose face is Source Sans 3 400.
+const NAME_FONT = /(^|\/)big-shoulders-display-latin-800-normal-[^/]*\.woff2$/;
+const PRELOADED_FONTS = {
+  placeholder: [NAME_FONT, /(^|\/)newsreader-latin-400-normal-[^/]*\.woff2$/],
+  explorer: [NAME_FONT, /(^|\/)source-sans-3-latin-400-normal-[^/]*\.woff2$/],
+} as const;
 
 /** At build time, finds the two emitted font files and adds a preload link for each. `crossorigin` is required even
  * on the same origin: fonts are fetched in CORS mode, and without it the browser fetches each one twice. */
-function preloadFonts(): Plugin {
+function preloadFonts(explorer: boolean): Plugin {
   let base = "/";
   return {
     name: "preload-first-screen-fonts",
@@ -25,7 +28,7 @@ function preloadFonts(): Plugin {
       order: "post",
       handler(_html, context) {
         if (!context.bundle) return undefined; // the dev server has no built files
-        return PRELOADED_FONTS.map((pattern) => {
+        return PRELOADED_FONTS[explorer ? "explorer" : "placeholder"].map((pattern) => {
           const matches = Object.keys(context.bundle ?? {}).filter((name) => pattern.test(name));
           if (matches.length !== 1) {
             throw new Error(
@@ -68,6 +71,27 @@ const headers = {
   // Removed at Phase 6.5's go-live, with the CloudFront header of the same name.
   "X-Robots-Tag": "noindex",
 };
+
+/**
+ * Explorer mode only. The explorer imports the site's stylesheet for its tokens, and that stylesheet declares the
+ * Newsreader face for the placeholder page's prose. The explorer sets all its text in Source Sans 3, so it must not ship
+ * or request Newsreader at all: this removes that one @font-face rule from the stylesheet as the explorer's build reads
+ * it (the file on disk is not edited, and the placeholder build never runs this), so the font file is not emitted.
+ * It throws if the rule is not found, so a change to the stylesheet cannot quietly bring the font back.
+ */
+function dropNewsreader(): Plugin {
+  const rule = /@font-face\s*\{[^}]*font-family:\s*"Newsreader"[^}]*\}\s*/;
+  return {
+    name: "explorer-drop-newsreader",
+    enforce: "pre",
+    transform(code, id) {
+      if (!/[\\/]src[\\/]styles\.css(\?|$)/.test(id)) return undefined;
+      if (!rule.test(code))
+        throw new Error("explorer-drop-newsreader: no Newsreader @font-face in styles.css");
+      return { code: code.replace(rule, ""), map: null };
+    },
+  };
+}
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 const DATA_SOURCES = [
@@ -138,7 +162,7 @@ function explorerData(): Plugin {
 export default defineConfig(({ mode }) => {
   const explorer = mode === "explorer";
   return {
-    plugins: [react(), preloadFonts(), ...(explorer ? [explorerData()] : [])],
+    plugins: [react(), preloadFonts(explorer), ...(explorer ? [dropNewsreader(), explorerData()] : [])],
     build: {
       // Nothing is inlined as a data: URI (the policy allows data: for images only), and no preload polyfill.
       assetsInlineLimit: 0,

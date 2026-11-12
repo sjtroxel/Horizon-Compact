@@ -5,7 +5,7 @@ import { findComparison, goalRunCount, orderedComparisons, runsOfGoal } from "./
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { AwarenessFile, DataApi } from "./data";
 import { editedApi, readAwareness, realApi, realGrids, realIndex } from "./fixtures";
-import { comparisonRuns, confidenceLevel } from "./format";
+import { comparisonRuns, confidenceLevel, wordingRuns } from "./format";
 import { AWARENESS_ANCHOR, THINKING_ANCHOR, protocolUrl } from "./links";
 import { modelName } from "./models";
 import { AWARENESS_INSTRUCTION, PROTOCOL_READINGS } from "./protocol";
@@ -54,6 +54,20 @@ describe("the studies page", () => {
     expect(before(sub, probes)).toBe(true);
   });
 
+  it("carries the full scope sentence once, near the top, and each figure carries the short one in its note line", async () => {
+    const { container } = await studies();
+    expect(container.textContent!.split(explorerHis.scopeSentence)).toHaveLength(2);
+    const figures = [...container.querySelectorAll("figure.card")];
+    expect(figures).toHaveLength(2);
+    for (const figure of figures) {
+      expect(figure.querySelector("figcaption")!.textContent).toContain(explorerHis.scopeShort);
+      expect(figure.textContent).not.toContain(explorerHis.scopeSentence);
+      expect(figure.getAttribute("aria-labelledby")).toBe(figure.querySelector(".frame-title")!.id);
+      expect(figure.querySelector(".frame-unit")!.textContent).toBe(L.shareKey["s1"]);
+    }
+    expect(before(container.querySelector("h1")!, figures[0]!)).toBe(true);
+  });
+
   it("fetches only paths under /data/, and renders without a console error", async () => {
     const errors = vi.spyOn(console, "error").mockImplementation(() => {});
     const requested: string[] = [];
@@ -72,7 +86,7 @@ describe("the thinking sub-study", () => {
     expect(label.textContent).toBe(L.studiesSubStudyLabel);
     for (const part of ["sub-study", "s1", "Haiku 5.5", "not one of the 16 main comparisons"])
       expect(label.textContent).toContain(part);
-    expect(before(label, container.querySelector(".layout-pair")!)).toBe(true);
+    expect(before(label, container.querySelector(".studies-figures")!)).toBe(true);
     expect(before(label, container.querySelector(".x-sentence-list")!)).toBe(true);
   });
 
@@ -86,9 +100,9 @@ describe("the thinking sub-study", () => {
 
   it("sets the grid's wording w2 beside the sub-study, like for like: the same strip, the same size", async () => {
     const { container } = await studies();
-    const [left, right] = [...container.querySelectorAll<HTMLElement>(".layout-pair figure")];
-    expect(left!.querySelector(".study-card-title")!.textContent).toBe(L.studiesGridCard);
-    expect(right!.querySelector(".study-card-title")!.textContent).toBe(L.studiesThinkingCard);
+    const [left, right] = [...container.querySelectorAll<HTMLElement>(".studies-figures figure")];
+    expect(left!.querySelector(".frame-title")!.textContent).toBe(L.studiesGridCard);
+    expect(right!.querySelector(".frame-title")!.textContent).toBe(L.studiesThinkingCard);
     expect(container.textContent).toContain(L.studiesGridNote);
     // The same component at the same size: a strip with a row for every goal and the same plot height.
     for (const card of [left!, right!]) {
@@ -98,12 +112,14 @@ describe("the thinking sub-study", () => {
     const heights = (card: HTMLElement) =>
       [...card.querySelectorAll("svg.x-plot")].map((s) => s.getAttribute("height"));
     expect(heights(left!)).toEqual(heights(right!));
-    expect(container.querySelector(".layout-pair")!.children).toHaveLength(2);
+    expect(container.querySelector(".studies-figures")!.children).toHaveLength(2);
+    // The figures sit beside the words that explain them (the step 11 redesign), at 60rem and wider.
+    expect(container.querySelector(".beside-studies")!.children).toHaveLength(2);
   });
 
   it("draws the grid's runs of wording w2 only, with each goal's count from the descriptive cell of that wording", async () => {
     const { container } = await studies();
-    const [left, right] = [...container.querySelectorAll<HTMLElement>(".layout-pair figure")];
+    const [left, right] = [...container.querySelectorAll<HTMLElement>(".studies-figures figure")];
     for (const goal of GOALS) {
       const gridRow = left!.querySelector<HTMLElement>(`.goal-row[data-goal=${goal}]`)!;
       const subRow = right!.querySelector<HTMLElement>(`.goal-row[data-goal=${goal}]`)!;
@@ -121,6 +137,15 @@ describe("the thinking sub-study", () => {
     expect(right!.querySelector("figcaption")!.textContent).toContain(
       L.capValidOfAttempted(thinking.descriptive.runs, 100),
     );
+    // The grid's figure draws wording w2 alone, so its note line states w2's valid runs of those attempted (cells of the
+    // file), not the whole grid's: it was the one figure with no such line before the redesign.
+    const w2 = wordingRuns(grid, SEALED);
+    expect(w2.valid).toBe(GOALS.reduce((sum, goal) => sum + goalRunCount(grid, goal, SEALED), 0));
+    expect(left!.querySelector("figcaption")!.textContent).toContain(
+      L.capValidOfAttempted(w2.valid, w2.attempted),
+    );
+    expect(left!.querySelector("figcaption")!.textContent).toContain(explorerHis.scopeShort);
+    expect(right!.querySelector("figcaption")!.textContent).toContain(explorerHis.scopeShort);
   });
 
   it("states the interval level from alpha, without the family, and shows no protocol reading", async () => {

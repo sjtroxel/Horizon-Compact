@@ -101,7 +101,7 @@ describe("the model switch keeps the query on every new view", () => {
   ])("%s", async (path) => {
     const view = await shellAt(path);
     const before = new URLSearchParams(window.location.search);
-    const group = view.getByRole("group", { name: L.modelSwitch });
+    const group = view.getByRole("region", { name: L.modelSwitch });
     fireEvent.click(within(group).getByRole("button", { name: modelName(OTHER) }));
     const switched = new URLSearchParams(window.location.search);
     expect(switched.get("model")).toBe(OTHER);
@@ -117,7 +117,7 @@ describe("the model switch keeps the query on every new view", () => {
   it("re-reads the reader for the other model, on the same scenario and goal", async () => {
     const view = await shellAt("/memos/?kind=grid&scenario=s3&objective=B");
     const rows = readMemoRows("grid/gpt-oss-openrouter/s3/B.jsonl");
-    const group = view.getByRole("group", { name: L.modelSwitch });
+    const group = view.getByRole("region", { name: L.modelSwitch });
     fireEvent.click(within(group).getByRole("button", { name: modelName(OTHER) }));
     await waitFor(() =>
       expect(view.container.querySelector<HTMLElement>("article.memo-card")!.dataset["run"]).toBe(
@@ -136,7 +136,7 @@ describe("the model switch keeps the query on every new view", () => {
         haikuRows[3]!.run_id,
       ),
     );
-    const group = view.getByRole("group", { name: L.modelSwitch });
+    const group = view.getByRole("region", { name: L.modelSwitch });
     fireEvent.click(within(group).getByRole("button", { name: modelName(OTHER) }));
     const switched = new URLSearchParams(window.location.search);
     expect(switched.has("run")).toBe(false);
@@ -155,7 +155,7 @@ describe("the model switch keeps the query on every new view", () => {
 
   it("shows the thinking kind's refusal on gpt-oss-120b, and the card again on Haiku 5.5, keeping ?kind=thinking", async () => {
     const view = await shellAt("/memos/?kind=thinking");
-    const group = view.getByRole("group", { name: L.modelSwitch });
+    const group = view.getByRole("region", { name: L.modelSwitch });
     fireEvent.click(within(group).getByRole("button", { name: modelName(OTHER) }));
     await waitFor(() => expect(view.container.querySelector("[data-refusal=thinking_model]")).not.toBeNull());
     expect(new URLSearchParams(window.location.search).get("kind")).toBe("thinking");

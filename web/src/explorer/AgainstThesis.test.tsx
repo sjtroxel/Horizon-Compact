@@ -112,7 +112,7 @@ describe("the section, with today's file", () => {
     const data = realApi();
     const scenario = render(<ScenarioView id="s1" index={realIndex} model="haiku-5-5" data={data} />);
     await scenario.findByRole("figure");
-    const details = scenario.container.querySelector("details")!;
+    const details = scenario.container.querySelector<HTMLDetailsElement>("details.x-details")!;
     details.open = true;
     fireEvent(details, new Event("toggle"));
     const rows = [...scenario.container.querySelectorAll(".intervals .interval-row")];

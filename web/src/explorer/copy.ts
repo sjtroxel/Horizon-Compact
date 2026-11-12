@@ -20,6 +20,10 @@ export interface StoryHis {
   setupTitle: string;
   setupIntro: string;
   s1Title: string;
+  /** The headings of the other three scenarios in the story, at the same level and style as `s1Title`. */
+  s2Title: string;
+  s3Title: string;
+  s4Title: string;
   s1Intro: string;
   comparisonsTitle: string;
   comparisonsIntro: string;
@@ -31,11 +35,15 @@ export interface StoryHis {
   casesIntro: string;
   methodsTitle: string;
   methodsText: string;
+  /** The line under the story's title: when the study was pre-registered, how many models and decisions (his; the date is not in the data). */
+  metaLine: string;
 }
 
 export interface ExplorerHis {
   landingQuestion: string;
   scopeSentence: string;
+  /** The short scope line under every chart, and in each chart's note line (approved 2026-11-12). */
+  scopeShort: string;
   /** The opening screen's line explaining the name (planning/06 section 6.4): his words, a placeholder until he writes them. */
   storyName: string;
   /** The guided story's titles and introductions for beats 2 to 6, 8 and 9 (beat 7 keeps `againstTitle` and `againstIntro`). */
@@ -63,11 +71,35 @@ export const explorerLabels = {
   skipToContent: "Skip to the content",
   navLabel: "Sections",
   navStory: "The story",
-  navScenario: (id: string) => `Scenario ${id}`,
+  // The scenarios' short names, for the navigation and under each scenario page's title (approved 2026-11-12). Keyed by
+  // scenario id; a test ties these keys to index.json's scenario ids. The ids stay in the paths, the page titles and the cards.
+  scenarioNames: {
+    s1: "Jobs and AI tools",
+    s2: "Falling orders",
+    s3: "Plant 6",
+    s4: "Ten-year program",
+  } as Record<string, string>,
   navCases: "Real cases",
   navStudies: "Side studies",
   navMemos: "Memos",
   modelSwitch: "Model",
+  // Step 11 redesign (2026-11-12): Claude-drafted, unapproved until a words pass.
+  aboutSummary: "About these results",
+  jumpMenuLabel: "Jump to a part of the story",
+  findingMore: "The runs, the analysis headline and the protocol\u2019s reading",
+  chartTitles: {
+    share: {
+      s1: "The share of the affected people kept, by goal",
+      s2: "The share of the shortfall borne by the workforce, by goal",
+    } as Record<string, string>,
+    choice: "The choice made, by goal",
+    interval: (outcome: string) => `The difference in ${outcome}, between two goals`,
+    distance: "The distance from the company\u2019s decision, by goal",
+  },
+  storySecondTableCaption:
+    "Scenario s1, every verdict, for each model. Where a pair split, the gap is the first goal minus the second, in percentage points.",
+  gapPoints: (points: string) => `${points} points`,
+
   seeDetails: "See the details",
   scenario: "Scenario",
   exploratory: "exploratory",
@@ -131,7 +163,6 @@ export const explorerLabels = {
   dotTitleChoice: (goal: string, wording: string, repeat: number, choice: string) =>
     `${goal}, wording ${wording}, repeat ${repeat}: ${choice}`,
   capValidOfAttempted: (valid: number, attempted: number) => `${valid} valid runs of ${attempted} attempted`,
-  capCompany: "on the fictional company",
   loadingScenario: "Loading this scenario",
 
   // The sentence column. `outcomePhrases` fill the result-sentence templates (sentences.ts), one per scenario.

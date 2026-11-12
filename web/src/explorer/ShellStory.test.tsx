@@ -31,14 +31,14 @@ const filled = (container: HTMLElement) =>
 describe("the model switch and the story", () => {
   it("shows no model switch on /", async () => {
     const home = await shellAt("/");
-    expect(home.queryByRole("group", { name: L.modelSwitch })).toBeNull();
+    expect(home.queryByRole("region", { name: L.modelSwitch })).toBeNull();
   });
 
   it.each(["/scenario/s1/", "/cases/", "/studies/", "/memos/"])(
     "shows a model switch on %s",
     async (path) => {
       const view = await shellAt(path);
-      expect(view.getByRole("group", { name: L.modelSwitch })).toBeTruthy();
+      expect(view.getByRole("region", { name: L.modelSwitch })).toBeTruthy();
     },
   );
 

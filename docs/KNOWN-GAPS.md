@@ -7,7 +7,36 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-12, about 8:55 AM (C7'S WORDS APPROVED; STEP 11 NEXT)
+> ## START HERE — where things stand, 2026-11-12, about 11:15 AM (STEP 11 REDESIGN BUILT AND REVIEWED; HIS COMMIT NEXT)
+>
+> **The step 11 redesign batch built by Sonnet (the Phase 6 IMPLEMENTATION doc §31) and reviewed by Opus (§31a): passed
+> after one fix** (the dot strip's axis words sat in the label column, about 196 px left of the plot, at chart widths of
+> 30rem and up; one CSS rule, checked in the browser). Opus's browser pass on the fixed build (`scratch/p6-step11-review/`):
+> 52 loads clean, layout shift 0.001, number trace 0 untraced, crop test 0 missing on 36 figures. `web/dist/` unchanged.
+> **Uncommitted, all of it, for his one commit:** the batch, the fix, §31 and §31a, and the earlier doc edits (this file,
+> §0, §14 step 11, §30). **Next:** his commit; then the words pass (§31's new labels, `story.metaLine` his to write, and
+> §31a's four notes); then his visual review of the other pages.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-12, about 9:30 AM (STEP 11: REDESIGN PROMPT WRITTEN; SONNET BUILDS NEXT) *(superseded by the block above)*
+>
+> **C7's words committed `1a68fde` (his); CI `43241488666` and Deploy `43241488525` green.** **§14 step 11, the review
+> against §12, is under way (the Phase 6 IMPLEMENTATION doc §30):** the scripted half is done (no console error, CSP
+> violation or off-origin request in 52 loads; the number trace clean; three findings: the case charts lose the scope
+> sentence in a crop, the model switch is outside every landmark, a layout shift at 1280). His read: "kind of sloppy";
+> his first pass on `/` decided **fix all eleven**, Source Sans 3 throughout (dated note in §0), and approved the words
+> for the short scope line and the scenario names. **The reference study is done** (Pew, Our World in Data, The
+> Pudding, Anthropic's Economic Index; §30): he approved all eight recommended changes and the two skips, knowing it
+> makes this a redesign. **The prompt is written: `scratch/p6-step11-redesign-prompt.md`** (parts A to E: type and
+> color and the shell; the chart frame; the story; the other pages; the cards). **Next: a fresh Sonnet session builds
+> it; Opus reviews (§31a), re-running `scratch/p6-step11-shoot.mjs`.** Then the other pages' first pass.
+> **Uncommitted, his choice: these doc edits (this file and the Phase 6 IMPLEMENTATION doc §0, §14 step 11, §30) ride
+> in the redesign's commit. Discard nothing uncommitted before that commit.**
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-12, about 8:55 AM (C7'S WORDS APPROVED; STEP 11 NEXT) *(superseded by the block above)*
 >
 > **C7 committed `e5c33bf` (his) and pushed; CI `43109023726` and Deploy `43109024155` green.** (`ce659dc`'s two runs are
 > stuck "queued" with no jobs; GitHub refuses both cancel and delete, 403. Left alone: `e5c33bf`'s runs cover that code.)

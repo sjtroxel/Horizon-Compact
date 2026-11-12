@@ -10,7 +10,7 @@
  *
  * Each output is pinned to its source field by format.test.ts.
  */
-import type { Comparison, ObjectiveRate } from "./data";
+import type { Comparison, GridFile, ObjectiveRate } from "./data";
 
 const MINUS = "−"; // a real minus sign, not a hyphen
 
@@ -93,6 +93,24 @@ export function attemptedRuns(rates: readonly ObjectiveRate[]): number {
   return total;
 }
 
+/**
+ * The valid and the attempted runs of one wording across the goals: integer sums of the descriptive cells' `runs` (the
+ * cells with that wording and no choice) and of the cell statuses' `attempted`. For a figure that draws one wording of a
+ * grid (the studies' grid, cut to w2), whose note line must state that wording's runs and not the whole file's.
+ */
+export function wordingRuns(
+  file: Pick<GridFile, "cells" | "descriptive">,
+  wording: string,
+): { valid: number; attempted: number } {
+  let valid = 0;
+  for (const cell of file.descriptive.cells) {
+    if (cell.wording_id === wording && cell.choice === null) valid += cell.runs;
+  }
+  let attempted = 0;
+  for (const cell of file.cells) if (cell.wording_id === wording) attempted += cell.attempted;
+  return { valid, attempted };
+}
+
 /** A value on an axis from `low` to `high`, as the percentage of the plot's width an SVG coordinate takes. */
 export function axisPercent(value: number, low: number, high: number): string {
   return `${((value - low) / (high - low)) * 100}%`;
@@ -110,6 +128,24 @@ export function axisExtent(values: readonly number[], floor = 1): number {
 /** The width, as a percentage of the plot's width, of the stretch of the axis from `from` to `to`. */
 export function axisSpan(from: number, to: number, low: number, high: number): string {
   return `${((to - from) / (high - low)) * 100}%`;
+}
+
+/**
+ * Which side of an interval its words go on, by the room each side has on the axis: "right" of the high end, or "left"
+ * of the low end, whichever has more axis left (ties go right). A pixel-position decision (rule 3 above): it chooses
+ * where text is drawn and nothing is read from it.
+ */
+export function wordsSide(low: number, high: number, axisLow: number, axisHigh: number): "left" | "right" {
+  return axisHigh - high >= low - axisLow ? "right" : "left";
+}
+
+/** How text sits on a point of an axis so it stays on the plot: from its start near the low end, to its end near the
+ * high end, centred between. A pixel-position decision, as `wordsSide`. */
+export function edgeAnchor(value: number, axisLow: number, axisHigh: number): "start" | "middle" | "end" {
+  const at = (value - axisLow) / (axisHigh - axisLow);
+  if (at < 0.08) return "start";
+  if (at > 0.92) return "end";
+  return "middle";
 }
 
 /**

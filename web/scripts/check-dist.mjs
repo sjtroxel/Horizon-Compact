@@ -54,6 +54,9 @@ const fontExtensions = new Set([".woff", ".woff2", ".ttf", ".otf", ".eot"]);
 const fonts = files.filter((f) => fontExtensions.has(extname(f)));
 for (const f of fonts) if (extname(f) !== ".woff2") fail(`font file that is not WOFF2: ${rel(f)}`);
 const fontBytes = fonts.reduce((sum, f) => sum + statSync(f).size, 0);
+// The explorer sets every word in Source Sans 3 (the name keeps Big Shoulders): no Newsreader file in its build.
+if (explorer)
+  for (const f of files) if (/newsreader/i.test(rel(f))) fail(`${rel(f)}: the explorer ships no Newsreader`);
 if (fontBytes > FONT_BUDGET) fail(`fonts are ${fontBytes} bytes, over the ${FONT_BUDGET} budget`);
 
 // HTML: no inline script, no style element, no style attribute, nothing that points at a host.
@@ -142,12 +145,15 @@ function checkPage(file) {
     if (!allowed) fail(`${name} ${attribute}="${value}" is not the favicon or a built asset`);
   }
 
-  // Preloads: exactly two, the name's face (Big Shoulders Display 800) and the prose face (Newsreader 400), each as a
-  // font with `crossorigin` (without it the browser fetches the font twice), each naming a file that is in the build.
+  // Preloads: exactly two, the name's face (Big Shoulders Display 800) and the prose face (Newsreader 400 on the
+  // placeholder page; Source Sans 3 400 in the explorer, which sets all its text in Source Sans 3), each as a font with
+  // `crossorigin` (without it the browser fetches the font twice), each naming a file that is in the build.
   const preloads = (html.match(/<link\b[^>]*>/gi) ?? []).filter((tag) => /\brel\s*=\s*"preload"/i.test(tag));
   const wanted = [
     /\/big-shoulders-display-latin-800-normal-[^/"]*\.woff2$/,
-    /\/newsreader-latin-400-normal-[^/"]*\.woff2$/,
+    explorer
+      ? /\/source-sans-3-latin-400-normal-[^/"]*\.woff2$/
+      : /\/newsreader-latin-400-normal-[^/"]*\.woff2$/,
   ];
   if (preloads.length !== wanted.length) {
     fail(`${name} has ${preloads.length} preload link(s); it must have exactly ${wanted.length}`);

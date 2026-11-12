@@ -10,12 +10,13 @@
  * Nothing here computes a number: every figure is a field of a data file, shown through format.ts.
  */
 import { useEffect, useId, useState } from "react";
+import { CardCaption, Frame, NoteLine } from "./ChartCard";
 import { goalClass, findComparison, orderedComparisons } from "./chartData";
 import { ShareStrip } from "./charts";
 import type { Names } from "./charts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { AwarenessFile, DataApi, DataIndex, GridFile } from "./data";
-import { attemptedRuns, comparisonRuns, confidenceLevel } from "./format";
+import { comparisonRuns, confidenceLevel, wordingRuns } from "./format";
 import {
   AWARENESS_ANCHOR,
   STUDIES_AWARENESS_ID,
@@ -44,18 +45,26 @@ function StripCard({
   title,
   file,
   wording,
-  counts,
   goals,
 }: {
   title: string;
   file: GridFile;
   wording?: string | undefined;
-  counts: string | null;
   goals: readonly string[];
 }) {
+  // A figure that draws one wording of the grid states that wording's runs, not the whole file's.
+  const counts = wording === undefined ? null : wordingRuns(file, wording);
+  const note =
+    counts === null ? (
+      <CardCaption file={file} />
+    ) : (
+      <NoteLine
+        model={modelName(file.model_key)}
+        middle={L.capValidOfAttempted(counts.valid, counts.attempted)}
+      />
+    );
   return (
-    <figure className="card">
-      <p className="chart-key study-card-title">{title}</p>
+    <Frame title={title} unit={L.shareKey[file.scenario_id] ?? null} note={note}>
       <ShareStrip
         file={file}
         goals={goals}
@@ -64,19 +73,7 @@ function StripCard({
         label={title}
         wording={wording}
       />
-      <figcaption>
-        <span className="model-name">{modelName(file.model_key)}</span>
-        {counts !== null && (
-          <>
-            {" · "}
-            {counts}
-          </>
-        )}
-        {" · "}
-        {L.capCompany}
-        <His text={explorerHis.scopeSentence} />
-      </figcaption>
-    </figure>
+    </Frame>
   );
 }
 
@@ -95,25 +92,24 @@ function Thinking({ loaded, index }: { loaded: Loaded; index: DataIndex }) {
       aria-labelledby={headingId}
     >
       <HisHeading text={explorerHis.studiesThinkingTitle} level={2} id={headingId} />
-      <p className="x-note" data-label="sub-study">
-        {L.studiesSubStudyLabel}
-      </p>
-      <p className="fine">
-        {L.studiesSettings}{" "}
-        <a href={protocolUrl(THINKING_ANCHOR)} target="_blank" rel="noopener noreferrer">
-          {L.studiesSettingsLink}
-        </a>
-      </p>
-      <div className="layout-pair">
-        <StripCard title={L.studiesGridCard} file={grid} wording={sealed} counts={null} goals={goals} />
-        <StripCard
-          title={L.studiesThinkingCard}
-          file={thinking}
-          counts={L.capValidOfAttempted(thinking.descriptive.runs, attemptedRuns(thinking.objective_rates))}
-          goals={goals}
-        />
+      <div className="beside beside-studies">
+        <div className="beside-text">
+          <p className="x-note" data-label="sub-study">
+            {L.studiesSubStudyLabel}
+          </p>
+          <p className="fine">
+            {L.studiesSettings}{" "}
+            <a href={protocolUrl(THINKING_ANCHOR)} target="_blank" rel="noopener noreferrer">
+              {L.studiesSettingsLink}
+            </a>
+          </p>
+          <p className="chart-key">{L.studiesGridNote}</p>
+        </div>
+        <div className="studies-figures">
+          <StripCard title={L.studiesGridCard} file={grid} wording={sealed} goals={goals} />
+          <StripCard title={L.studiesThinkingCard} file={thinking} goals={goals} />
+        </div>
       </div>
-      <p className="chart-key">{L.studiesGridNote}</p>
       <h3>{L.studiesComparisonsHeading}</h3>
       {alpha !== undefined && <p className="chart-key">{L.studiesLevel(confidenceLevel(alpha))}</p>}
       <ol className="x-sentence-list">
@@ -282,6 +278,7 @@ export function StudiesView({ index, data }: StudiesViewProps) {
     <>
       <Title route={{ kind: "studies" }} />
       <His text={explorerHis.studiesIntro} />
+      <His text={explorerHis.scopeSentence} />
       {failed ? (
         <p role="alert">{L.loadFailed}</p>
       ) : loaded === null ? (

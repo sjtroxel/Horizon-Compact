@@ -5,8 +5,8 @@ import { explorerHis, explorerLabels } from "./copy";
 import { defaultData } from "./data";
 import type { CasesIndex, DataApi, DataIndex } from "./data";
 import { Footer } from "./Footer";
-import { ModelSwitch } from "./ModelSwitch";
-import { pageMeta } from "./page-meta.mjs";
+import { ModelSwitch, ModelSwitchSpace } from "./ModelSwitch";
+import { pageMeta, routeOfPath } from "./page-meta.mjs";
 import { modelFromSearch, parseRoute, pathOf, searchAfterModelSwitch, withModel } from "./route";
 import type { Route } from "./route";
 import { Arrived, ViewBoundary } from "./ViewBoundary";
@@ -43,6 +43,12 @@ function interceptedAnchor(event: MouseEvent<HTMLElement>): HTMLAnchorElement | 
 
 function titleOf(route: Route): string {
   return route.kind === "not_found" ? explorerLabels.notFoundTitle : pageMeta(route, explorerHis.pages).title;
+}
+
+/** Whether a path is one of the kinds of page that carry the model switch (known from the path alone, before the data). */
+function pageHasSwitch(pathname: string): boolean {
+  const route = routeOfPath(pathname);
+  return route !== null && route.kind !== "story";
 }
 
 interface Catalog {
@@ -197,6 +203,11 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
     setWhere(readLocation());
   }, []);
 
+  // The navigation is drawn from the first render, from the scenarios' names (a test ties their keys to the data's
+  // scenario ids), and from the data's own list once it has arrived: the same links either way, so the header never grows.
+  const scenarioIds = catalog
+    ? catalog.index.scenarios.map((s) => s.scenario_id)
+    : Object.keys(explorerLabels.scenarioNames);
   const link = (path: string) => withModel(path, model);
   const current = (path: string): "page" | "true" | undefined => {
     if (route === null || route.kind === "not_found") return undefined;
@@ -211,13 +222,13 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
         {explorerLabels.skipToContent}
       </a>
       <header className="site-header">
-        <div className="brand-row">
-          <Logo size={36} />
-          <a className="site-name" href={link("/")}>
-            Horizon Compact
-          </a>
-        </div>
-        {catalog && (
+        <div className="site-header-inner">
+          <div className="brand-row">
+            <Logo size={36} />
+            <a className="site-name" href={link("/")}>
+              Horizon Compact
+            </a>
+          </div>
           <nav aria-label={explorerLabels.navLabel}>
             <ul>
               <li>
@@ -225,12 +236,12 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
                   {explorerLabels.navStory}
                 </a>
               </li>
-              {catalog.index.scenarios.map((s) => {
-                const path = pathOf({ kind: "scenario", id: s.scenario_id });
+              {scenarioIds.map((id) => {
+                const path = pathOf({ kind: "scenario", id });
                 return (
-                  <li key={s.scenario_id}>
+                  <li key={id}>
                     <a href={link(path)} aria-current={current(path)}>
-                      {explorerLabels.navScenario(s.scenario_id)}
+                      {explorerLabels.scenarioNames[id] ?? id}
                     </a>
                   </li>
                 );
@@ -252,11 +263,15 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
               </li>
             </ul>
           </nav>
-        )}
+        </div>
       </header>
-      {catalog && route && route.kind !== "not_found" && route.kind !== "story" && (
-        <ModelSwitch models={catalog.index.models} current={model} onChoose={chooseModel} />
-      )}
+      {catalog && route
+        ? route.kind !== "not_found" &&
+          route.kind !== "story" && (
+            <ModelSwitch models={catalog.index.models} current={model} onChoose={chooseModel} />
+          )
+        : // Before the data: the same box, for the kinds of page that have the switch, so nothing moves when it arrives.
+          pageHasSwitch(where.pathname) && <ModelSwitchSpace />}
       <main id="main" className="view" ref={main}>
         {catalog && route ? (
           <ViewBoundary resetKey={where.pathname} fallback={<p role="alert">{explorerLabels.loadFailed}</p>}>

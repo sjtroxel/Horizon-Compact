@@ -9,12 +9,12 @@
  */
 import { useEffect, useId, useState } from "react";
 import { orderedComparisons, findComparison, goalClass } from "./chartData";
-import { ChartCard, GoalsList } from "./ChartCard";
-import { AllocationPanels, IntervalChart, rowOfComparison } from "./charts";
+import { AboutResults, CardCaption, ChartCard, GoalsList, IntervalFrame } from "./ChartCard";
+import { AllocationPanels, rowOfComparison } from "./charts";
 import type { Names } from "./charts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { DataApi, DataIndex, GridComparison, GridFile } from "./data";
-import { comparisonRuns, confidenceLevel, formatDifference } from "./format";
+import { comparisonRuns, formatDifference } from "./format";
 import { scenarioTextUrl } from "./links";
 import { His, ProtocolReading, Title } from "./parts";
 import { againstWords } from "./againstWords";
@@ -216,12 +216,14 @@ function FailuresTable({ file }: { file: GridFile }) {
 function DetailsBody({ file, index }: { file: GridFile; index: DataIndex }) {
   const goals = index.objectives.map((o) => o.id);
   const comparisons = orderedComparisons(file);
-  const alpha = index.models.find((m) => m.model_key === file.model_key)?.alpha ?? comparisons[0]?.alpha;
   return (
     <>
       <h3>{L.intervalHeading}</h3>
-      {alpha !== undefined && <p className="chart-key">{L.intervalKey(confidenceLevel(alpha))}</p>}
-      <IntervalChart rows={comparisons.map(rowOfComparison)} names={names} label={L.intervalChartLabel} />
+      <IntervalFrame
+        rows={comparisons.map(rowOfComparison)}
+        outcome={L.outcomePhrases[file.scenario_id] ?? ""}
+        note={<CardCaption file={file} />}
+      />
       <h3>{L.perComparisonHeading}</h3>
       {comparisons.map((c) => (
         <Detail key={`${c.first}-${c.second}`} comparison={c} />
@@ -277,7 +279,7 @@ export function ScenarioView({ id, index, model, data }: ScenarioViewProps) {
   const stale = current !== null && current.model !== model;
   const hasFailed = failed !== null && failed.id === id && failed.model === model;
   const brief = explorerHis.scenarioBriefs[id];
-  const modelEntry = index.models.find((m) => m.model_key === current?.file.model_key);
+  const modelEntry = index.models.find((m) => m.model_key === model);
 
   const toggle = (goal: string) =>
     setHidden((before) => {
@@ -289,7 +291,11 @@ export function ScenarioView({ id, index, model, data }: ScenarioViewProps) {
 
   return (
     <>
-      <Title route={{ kind: "scenario", id }} />
+      <Title route={{ kind: "scenario", id }}>
+        <p className="scenario-name">{L.scenarioNames[id] ?? id}</p>
+      </Title>
+      <His text={explorerHis.scopeSentence} />
+      <AboutResults alpha={modelEntry?.alpha} />
       <section className="x-section" aria-labelledby={briefId}>
         <h2 id={briefId}>{L.sceneBriefHeading}</h2>
         {brief !== undefined && <His text={brief} />}
@@ -332,10 +338,6 @@ export function ScenarioView({ id, index, model, data }: ScenarioViewProps) {
             <ChartCard file={current.file} goals={goals} hidden={hidden} />
             <div className="x-sentences" aria-labelledby={sentencesId} role="region">
               <h2 id={sentencesId}>{L.whatRunsShow}</h2>
-              {modelEntry !== undefined && (
-                <p className="chart-key">{L.verdictNote(confidenceLevel(modelEntry.alpha))}</p>
-              )}
-              <p className="chart-key readings-note">{L.readingsNote}</p>
               <ol className="x-sentence-list">
                 {orderedComparisons(current.file).map((c) => (
                   <Sentence

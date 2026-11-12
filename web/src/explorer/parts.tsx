@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { isPlaceholder, explorerHis, explorerLabels } from "./copy";
 import { PROTOCOL_READINGS } from "./protocol";
 import type { ReadingKey } from "./protocol";
@@ -8,6 +9,11 @@ import type { PageRoute } from "./page-meta.mjs";
 export function His({ text, className }: { text: string; className?: string }) {
   const classes = [className, isPlaceholder(text) ? "placeholder" : undefined].filter(Boolean).join(" ");
   return <p className={classes || undefined}>{text}</p>;
+}
+
+/** A word or line of his inside a sentence or a note line, not a paragraph of its own; a placeholder shows in the secondary ink. */
+export function HisInline({ text }: { text: string }) {
+  return <span className={isPlaceholder(text) ? "placeholder" : undefined}>{text}</span>;
 }
 
 /** A heading of his, by level; a placeholder shows in the secondary ink. */
@@ -24,17 +30,26 @@ export function HisHeading({ text, level, id }: { text: string; level: 2 | 3; id
   );
 }
 
-/** The view's title: his words for the kind of page, and the scenario's id or the case's label after it. */
-export function Title({ route, id }: { route: PageRoute; id?: string }) {
+/**
+ * The view's title block, on the light band under the site header (Phase 6 IMPLEMENTATION doc section 30, study item 6):
+ * his words for the kind of page, and the scenario's id or the case's label after it, then whatever line or menu the page
+ * puts under its title (`children`). The band spans the page; its contents keep the page's column.
+ */
+export function Title({ route, id, children }: { route: PageRoute; id?: string; children?: ReactNode }) {
   const title = pageMeta(route, explorerHis.pages).title;
   return (
-    <h1
-      id={id}
-      tabIndex={-1}
-      className={isPlaceholder(explorerHis.pages[route.kind].title) ? "placeholder" : undefined}
-    >
-      {title}
-    </h1>
+    <div className="title-band">
+      <div className="title-inner">
+        <h1
+          id={id}
+          tabIndex={-1}
+          className={isPlaceholder(explorerHis.pages[route.kind].title) ? "placeholder" : undefined}
+        >
+          {title}
+        </h1>
+        {children}
+      </div>
+    </div>
   );
 }
 

@@ -148,6 +148,7 @@ export function CasesView({ index, casesIndex, model, data }: CasesViewProps) {
     <>
       <Title route={{ kind: "cases" }} />
       <His text={explorerHis.casesIntro} />
+      <His text={explorerHis.scopeSentence} />
       <p className="x-note case-framing">{L.casesFraming}</p>
       <section className="x-section exploratory-lead">
         <p>{L.casesLabelLead}</p>
@@ -361,6 +362,7 @@ export function CaseView({ label, index, casesIndex, data }: CaseViewProps) {
     <>
       <Title route={{ kind: "case", label }} />
       <ExploratoryLabel text={entry.exploratory_label} />
+      <His text={explorerHis.scopeSentence} />
       <section className="x-section">
         <h2>{L.caseDescriptionHeading}</h2>
         <p className="fine">

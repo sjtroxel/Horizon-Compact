@@ -12,7 +12,7 @@ describe("ModelSwitch", () => {
     const { getByRole } = render(
       <ModelSwitch models={realIndex.models} current="haiku-5-5" onChoose={() => {}} />,
     );
-    const group = getByRole("group", { name: explorerLabels.modelSwitch });
+    const group = getByRole("region", { name: explorerLabels.modelSwitch });
     const names = within(group)
       .getAllByRole("button")
       .map((b) => b.textContent);

@@ -20,18 +20,19 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import { AgainstThesis } from "./AgainstThesis";
-import { CardCaption, ChartCard, GoalsList } from "./ChartCard";
+import { AboutResults, CardCaption, ChartCard, GoalsList, IntervalFrame } from "./ChartCard";
+import { againstWords } from "./againstWords";
 import { Description, ExploratoryLabel } from "./caseParts";
 import { everyReadingNoGoodMatch, labelUnderEveryReading } from "./caseData";
 import { SENTENCE_ORDER, findComparison, orderedComparisons } from "./chartData";
-import { IntervalChart, rowOfComparison } from "./charts";
+import { rowOfComparison } from "./charts";
 import type { Names } from "./charts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { CaseFile, CasesIndex, DataApi, DataIndex, GridComparison, GridFile } from "./data";
-import { comparisonRuns, confidenceLevel } from "./format";
+import { attemptedRuns, comparisonRuns, formatPoints } from "./format";
 import { ROUNDTABLE_CLAIM_URL, ROUNDTABLE_OVERVIEW_URL, protocolUrl, scenarioTextUrl } from "./links";
 import { modelName, orderedModels } from "./models";
-import { His, HisHeading, ProtocolReading, Title } from "./parts";
+import { His, HisHeading, HisInline, ProtocolReading, Title } from "./parts";
 import { readingFor } from "./protocol";
 import { hrefOf } from "./route";
 import { resultSentence } from "./sentences";
@@ -210,23 +211,50 @@ const runsLine = (comparison: GridComparison): string => {
 // ----------------------------------------------------------------------------------------------------------------
 // The beats
 
+/** The sections the jump menu links to, in the story's order: each one's id and the title that is its link text (his words). */
+const JUMPS: ReadonlyArray<readonly [string, string]> = [
+  ["beat-setup", explorerHis.story.setupTitle],
+  ["beat-s1", explorerHis.story.s1Title],
+  ["beat-comparisons", explorerHis.story.comparisonsTitle],
+  ["beat-second-model", explorerHis.story.secondTitle],
+  ["beat-other-scenarios", explorerHis.story.othersTitle],
+  [againstWords.sectionId, explorerHis.againstTitle],
+  ["beat-cases", explorerHis.story.casesTitle],
+  ["beat-methods", explorerHis.story.methodsTitle],
+];
+
+/** Beat 1: the page's title block (title, his metadata line, the jump menu) on the title band, then the question. */
 function Question() {
   const titleId = useId();
   return (
-    <section id="beat-question" className="x-section story-beat" aria-labelledby={titleId}>
-      <Title route={{ kind: "story" }} id={titleId} />
-      <His text={explorerHis.landingQuestion} />
-      <His text={explorerHis.storyName} />
+    <section id="beat-question" className="x-section story-beat story-open" aria-labelledby={titleId}>
+      <Title route={{ kind: "story" }} id={titleId}>
+        <His className="meta-line" text={explorerHis.story.metaLine} />
+        <nav className="jump-menu" aria-label={L.jumpMenuLabel}>
+          <ul>
+            {JUMPS.map(([id, title]) => (
+              <li key={id}>
+                <a href={`#${id}`}>{title}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </Title>
+      <div className="story-lede">
+        <His text={explorerHis.landingQuestion} />
+        <His text={explorerHis.storyName} />
+      </div>
     </section>
   );
 }
 
-function Setup({ index }: { index: DataIndex }) {
+function Setup({ index, alpha }: { index: DataIndex; alpha: number | undefined }) {
   return (
     <Beat id="beat-setup" title={explorerHis.story.setupTitle} intro={explorerHis.story.setupIntro}>
       <p className="chart-key">{L.goalsKey}</p>
       <GoalsList index={index} />
       <His text={explorerHis.scopeSentence} />
+      <AboutResults alpha={alpha} />
     </Beat>
   );
 }
@@ -266,28 +294,32 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
   return (
     <div className="story" ref={root}>
       <Question />
-      <Setup index={index} />
+      <Setup index={index} alpha={mainEntry?.alpha} />
 
       <Beat id="beat-s1" title={explorerHis.story.s1Title} intro={explorerHis.story.s1Intro}>
-        {explorerHis.scenarioBriefs[walked] !== undefined && (
-          <His text={explorerHis.scenarioBriefs[walked]} />
-        )}
-        <p>
-          <a href={scenarioTextUrl(walked)} target="_blank" rel="noopener noreferrer">
-            {L.sceneFullText}
-          </a>{" "}
-          <span className="muted">({L.sceneFullTextNote})</span>
-        </p>
-        {mainWalked.status === "loaded" ? (
-          <ChartCard file={mainWalked.values[0]!} goals={goals} hidden={NOTHING_HIDDEN} />
-        ) : (
-          <Wait status={mainWalked.status} />
-        )}
-        <p>
-          <a href={hrefOf({ kind: "scenario", id: walked }, main)}>
-            {L.storyOpenScenario(walked, modelName(main))}
-          </a>
-        </p>
+        <div className="beside">
+          <div className="beside-text">
+            {explorerHis.scenarioBriefs[walked] !== undefined && (
+              <His text={explorerHis.scenarioBriefs[walked]} />
+            )}
+            <p>
+              <a href={scenarioTextUrl(walked)} target="_blank" rel="noopener noreferrer">
+                {L.sceneFullText}
+              </a>{" "}
+              <span className="muted">({L.sceneFullTextNote})</span>
+            </p>
+            <p>
+              <a href={hrefOf({ kind: "scenario", id: walked }, main)}>
+                {L.storyOpenScenario(walked, modelName(main))}
+              </a>
+            </p>
+          </div>
+          {mainWalked.status === "loaded" ? (
+            <ChartCard file={mainWalked.values[0]!} goals={goals} hidden={NOTHING_HIDDEN} />
+          ) : (
+            <Wait status={mainWalked.status} />
+          )}
+        </div>
       </Beat>
 
       <Beat
@@ -308,7 +340,7 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
           </li>
         </ul>
         {mainWalked.status === "loaded" ? (
-          <Comparisons file={mainWalked.values[0]!} alpha={mainEntry?.alpha} />
+          <Comparisons file={mainWalked.values[0]!} />
         ) : (
           <Wait status={mainWalked.status} />
         )}
@@ -320,11 +352,19 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
         intro={explorerHis.story.secondIntro}
       >
         {bothWalked.status === "loaded" ? (
-          <div className="layout-pair">
-            {bothWalked.values.map((file) => (
-              <ModelColumn key={file.model_key} file={file} />
-            ))}
-          </div>
+          <>
+            <div className="layout-pair">
+              {bothWalked.values.map((file) => (
+                <ModelColumn key={file.model_key} file={file} />
+              ))}
+            </div>
+            <VerdictTable
+              id={walked}
+              files={bothWalked.values}
+              cell="gap"
+              caption={L.storySecondTableCaption}
+            />
+          </>
         ) : (
           <Wait status={bothWalked.status} />
         )}
@@ -337,7 +377,7 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
       >
         {otherGrids.status === "loaded" ? (
           others.map((id) => (
-            <VerdictTable
+            <ScenarioTable
               key={id}
               id={id}
               files={models.map((model) =>
@@ -373,101 +413,98 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
   );
 }
 
-/** Beat 4: the five comparisons on the first scenario, one at a time, in the sentence column's order. */
-function Comparisons({ file, alpha }: { file: GridFile; alpha: number | undefined }) {
+/** Beat 4: the five comparisons on the first scenario as numbered findings, in the sentence column's order. Each is led
+ * by its result sentence (the template's output) in bold, with its chart beside it at desktop width; the verdict is said
+ * in the sentence and on the chart, and the rest (run counts, the official verdict, the analysis headline, the
+ * protocol's reading) is in a closed section under it. The numbers 1 to 5 are the list's own, drawn by the stylesheet. */
+function Comparisons({ file }: { file: GridFile }) {
   const cdVerdict = findComparison(file, "C", "D")?.final_verdict ?? null;
+  const outcome = L.outcomePhrases[file.scenario_id] ?? "";
   return (
-    <>
-      {alpha !== undefined && (
-        <>
-          <p className="chart-key">{L.verdictNote(confidenceLevel(alpha))}</p>
-          <p className="chart-key">{L.intervalKey(confidenceLevel(alpha))}</p>
-        </>
-      )}
-      <p className="chart-key readings-note">{L.readingsNote}</p>
-      <ol className="story-comparisons">
-        {orderedComparisons(file).map((c) => {
-          const lead = c.first === "C" && c.second === "D";
-          const reading = readingFor(c.first, c.second, c.final_verdict, cdVerdict);
-          return (
-            <li
-              key={`${c.first}-${c.second}`}
-              className="story-comparison"
-              data-pair={`${c.first}-${c.second}`}
-            >
-              <h3>
-                {L.storyPairHeading(
-                  names[c.first] ?? c.first,
-                  c.first,
-                  names[c.second] ?? c.second,
-                  c.second,
-                )}
-              </h3>
-              <div className={lead ? "sent lead" : "sent"}>
-                {lead && <span className="flag">{L.roundtableFlag}</span>}
-                {c.role === "secondary" && <span className="flag">{L.secondaryFlag}</span>}
-                <TemplateSentence comparison={c} file={file} />
+    <ol className="story-comparisons findings" role="list">
+      {orderedComparisons(file).map((c) => {
+        const lead = c.first === "C" && c.second === "D";
+        const reading = readingFor(c.first, c.second, c.final_verdict, cdVerdict);
+        return (
+          <li
+            key={`${c.first}-${c.second}`}
+            className="story-comparison finding"
+            data-pair={`${c.first}-${c.second}`}
+          >
+            <div className="beside">
+              <div className="beside-text">
+                <div className={lead ? "sent lead" : "sent"}>
+                  {lead && <span className="flag">{L.roundtableFlag}</span>}
+                  {c.role === "secondary" && <span className="flag">{L.secondaryFlag}</span>}
+                  <TemplateSentence comparison={c} file={file} />
+                </div>
+                <details className="finding-more">
+                  <summary>{L.findingMore}</summary>
+                  <p className="fine">
+                    {runsLine(c)}
+                    {" · "}
+                    {L.officialVerdict} {verdictWord(c.final_verdict)}
+                  </p>
+                  <p className="fine">
+                    {L.headlineLabel}: <span className="headline">{c.headline}</span>
+                  </p>
+                  {reading !== null ? (
+                    <ProtocolReading readingKey={reading} />
+                  ) : (
+                    lead && <ProtocolReading readingKey={null} />
+                  )}
+                </details>
               </div>
-              <figure className="card">
-                <IntervalChart rows={[rowOfComparison(c)]} names={names} label={L.intervalChartLabel} />
-                <CardCaption file={file} />
-              </figure>
-              <p className="fine">
-                {runsLine(c)}
-                {" · "}
-                {L.officialVerdict} {verdictWord(c.final_verdict)}
-              </p>
-              <p className="fine">
-                {L.headlineLabel}: <span className="headline">{c.headline}</span>
-              </p>
-              {reading !== null ? (
-                <ProtocolReading readingKey={reading} />
-              ) : (
-                lead && <ProtocolReading readingKey={null} />
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </>
+              <IntervalFrame
+                rows={[rowOfComparison(c)]}
+                outcome={outcome}
+                note={<CardCaption file={file} />}
+              />
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
-/** Beat 5: one model's five comparisons as one chart in a figure, and the five result sentences under it. */
+/** Beat 5: one model's five comparisons as one chart in its frame. The sentences are on the scenario pages. */
 function ModelColumn({ file }: { file: GridFile }) {
   const comparisons = orderedComparisons(file);
   return (
     <div className="story-model" data-model={file.model_key}>
       <h3>{modelName(file.model_key)}</h3>
-      <figure className="card">
-        <IntervalChart rows={comparisons.map(rowOfComparison)} names={names} label={L.intervalChartLabel} />
-        <CardCaption file={file} />
-      </figure>
-      <ol className="x-sentence-list">
-        {comparisons.map((c) => (
-          <li key={`${c.first}-${c.second}`} className="sent" data-pair={`${c.first}-${c.second}`}>
-            <TemplateSentence comparison={c} file={file} />
-          </li>
-        ))}
-      </ol>
+      <IntervalFrame
+        rows={comparisons.map(rowOfComparison)}
+        outcome={L.outcomePhrases[file.scenario_id] ?? ""}
+        note={<CardCaption file={file} />}
+      />
     </div>
   );
 }
 
-/** Beat 6, one scenario: its brief and a table of every verdict, a column to a model. Words, in place, no color. */
-function VerdictTable({ id, files }: { id: string; files: readonly GridFile[] }) {
-  const brief = explorerHis.scenarioBriefs[id];
+/**
+ * A table of every verdict for one scenario, a column to a model, in the sentence column's order. Words, in place, no
+ * color. `cell` says what a cell holds beside the verdict word: "gap" (the second model's table) the gap in points where
+ * the verdict is a split, which is where the result sentence states one, and nothing otherwise; "runs" (beat 6) the
+ * comparison's run counts. Under it, one note line: each model, its valid runs of those attempted, the short scope line.
+ */
+function VerdictTable({
+  id,
+  files,
+  cell,
+  caption,
+}: {
+  id: string;
+  files: readonly GridFile[];
+  cell: "gap" | "runs";
+  caption: string;
+}) {
   return (
-    <div className="story-scenario" data-scenario={id}>
-      <h3>
-        {L.scenario} {id}
-      </h3>
-      {brief !== undefined && <His text={brief} />}
-      <div className="x-table-wrap" role="region" aria-label={L.storyTableCaption(id)} tabIndex={0}>
-        <table className="x-table story-table" data-scenario={id}>
-          <caption>
-            {L.storyTableCaption(id)} <span className="caption-scope">{explorerHis.scopeSentence}</span>
-          </caption>
+    <>
+      <div className="x-table-wrap" role="region" aria-label={caption} tabIndex={0}>
+        <table className="x-table story-table" data-scenario={id} data-cell={cell}>
+          <caption>{caption}</caption>
           <thead>
             <tr>
               <th scope="col">{L.storyComparisonColumn}</th>
@@ -502,7 +539,16 @@ function VerdictTable({ id, files }: { id: string; files: readonly GridFile[] })
                       ) : (
                         <>
                           <span className="verdict-word">{verdictWord(c.final_verdict)}</span>
-                          <span className="fine story-cell-runs">{runsLine(c)}</span>
+                          {cell === "runs" ? (
+                            <span className="fine story-cell-runs">{runsLine(c)}</span>
+                          ) : (
+                            c.final_verdict === "split" &&
+                            c.difference !== null && (
+                              <span className="story-cell-gap">
+                                {L.gapPoints(formatPoints(c.difference))}
+                              </span>
+                            )
+                          )}
                         </>
                       )}
                     </td>
@@ -513,6 +559,40 @@ function VerdictTable({ id, files }: { id: string; files: readonly GridFile[] })
           </tbody>
         </table>
       </div>
+      <TableNote files={files} />
+    </>
+  );
+}
+
+/** The note line under a table: each model, its valid runs of those attempted, then the short scope line. */
+function TableNote({ files }: { files: readonly GridFile[] }) {
+  return (
+    <p className="table-note">
+      {files.map((file) => (
+        <span key={file.model_key}>
+          <span className="model-name">{modelName(file.model_key)}</span>
+          {" · "}
+          {L.capValidOfAttempted(file.descriptive.runs, attemptedRuns(file.objective_rates))}
+          {" · "}
+        </span>
+      ))}
+      <HisInline text={explorerHis.scopeShort} />
+    </p>
+  );
+}
+
+const scenarioTitle = (id: string): string =>
+  (explorerHis.story as unknown as Record<string, string>)[`${id}Title`] ?? `${L.scenario} ${id}`;
+
+/** Beat 6, one scenario: its heading (his, the same level and style as the first scenario's), its brief, its table. */
+function ScenarioTable({ id, files }: { id: string; files: readonly GridFile[] }) {
+  const headingId = useId();
+  const brief = explorerHis.scenarioBriefs[id];
+  return (
+    <section className="story-scenario" data-scenario={id} aria-labelledby={headingId}>
+      <HisHeading text={scenarioTitle(id)} level={2} id={headingId} />
+      {brief !== undefined && <His text={brief} />}
+      <VerdictTable id={id} files={files} cell="runs" caption={L.storyTableCaption(id)} />
       <ul className="x-sources story-links">
         {files.map((file) => (
           <li key={file.model_key}>
@@ -522,7 +602,7 @@ function VerdictTable({ id, files }: { id: string; files: readonly GridFile[] })
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }
 
@@ -574,9 +654,7 @@ function CasesBeat({
                     return (
                       <li key={model} data-model={model}>
                         <b>{modelName(model)}</b>:{" "}
-                        {label === null
-                          ? L.storyLabelVaries
-                          : L.readingLabelIs(L.readingLabels[label] ?? label)}
+                        {label === null ? L.storyLabelVaries : (L.readingLabels[label] ?? label)}
                       </li>
                     );
                   })}
@@ -590,17 +668,30 @@ function CasesBeat({
         </>
       )}
       <h3>{L.shortfallHeading}</h3>
-      <dl className="x-facts story-shortfall">
-        {Object.keys(shortfall.cases_by_type).map((type) => (
-          <div key={type} data-type={type}>
-            <dt>{typeWord(type)}</dt>
-            <dd>
-              {L.shortfallFound}: {shortfall.cases_by_type[type]}; {L.shortfallShort}:{" "}
-              {shortfall.short_by_type[type]}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <div className="x-table-wrap" role="region" aria-label={L.shortfallTableLabel} tabIndex={0}>
+        <table className="x-table story-shortfall">
+          <thead>
+            <tr>
+              <th scope="col">{L.shortfallType}</th>
+              <th scope="col" className="num">
+                {L.shortfallFound}
+              </th>
+              <th scope="col" className="num">
+                {L.shortfallShort}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.keys(shortfall.cases_by_type).map((type) => (
+              <tr key={type} data-type={type}>
+                <th scope="row">{typeWord(type)}</th>
+                <td className="num">{shortfall.cases_by_type[type]}</td>
+                <td className="num">{shortfall.short_by_type[type]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <p>
         <a href={hrefOf({ kind: "cases" }, main)}>{L.storyAllCases}</a>
       </p>

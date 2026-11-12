@@ -55,7 +55,10 @@ Read the scope doc with these changes. Each is measured or cited; none lowers a 
    (`web/scripts/check-dist.mjs`) holding a JavaScript budget of 100 KB gzipped (about 74 KB used today) and a font
    budget of 150 KB. The look Phase 1.5 chose (Big Shoulders Display for the name, Source Sans 3 for headings,
    Newsreader for prose, the ink-and-paper colors, his footer) is the explorer's starting point; the previews (§7)
-   decide the chart form, palette and layout on real data, as `planning/06` §7.3 says.
+   decide the chart form, palette and layout on real data, as `planning/06` §7.3 says. *Dated note, 2026-11-12 (his,
+   at the review against §12, §30): the explorer drops Newsreader; **Source Sans 3 throughout** (Big Shoulders stays for
+   the name). In the explorer's own CSS only: the placeholder page shares `styles.css` and stays byte-identical until
+   Phase 6.5.*
 7. **The deploy path publishes every `web/` change.** Deploy's site half builds `web/` on any push under `web/` and
    syncs it to the distribution behind `horizon-compact.vercel.app`. So scope decision 2 (results reach the public URL
    only at go-live) is not held by where the explorer is previewed; it has to be held in the build (§3 finding 3,
@@ -487,7 +490,7 @@ My recommendation is (a) in each, for the reason given.
 8. **[done 2026-11-11: his words, the labels and the four result-sentence templates approved, §11's dated notes]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[built 2026-11-11 by Sonnet, §28; reviewed by Opus, §28a (part A, passed) and §28b (part B, passed after one fix)]** **[Sonnet builds, Opus reviews]** **C6, the guided story.**
 10. **[built 2026-11-11 by Sonnet, §29; reviewed by Opus, §29a: passed after one fix; words pass done 2026-11-12, §29b]** **[Sonnet builds, Opus reviews]** **C7, the share cards.**
-11. **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
+11. **[in progress 2026-11-12, §30: scripted half done; his first pass on `/` decided; reference study next, then one fix batch]** **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
     script per view; fixes before the close.
 12. **[Claude]** **C8, the close:** the DoD audit, the version (decision 9), `ROADMAP.md`, `KNOWN-GAPS.md`.
 
@@ -2595,3 +2598,411 @@ the name-map test); `check-dist: ok` in both modes. **Mutation-checked:** puttin
 `web/dist/` is byte-identical to C7's (`scratch/p6-c7-dist-after.txt`, 8 files); the story path's JavaScript is 94,265
 bytes, as at C7 (the card labels are not in the bundle). The story card and the case card `closure-07` were rebuilt and
 opened: nothing clipped.
+
+## 30. The review against §12 (§14 step 11), 2026-11-12: in progress
+
+**The scripted half (Claude), on the explorer preview** (`scratch/p6-step11-shoot.mjs`; captures, crops and
+`report.json` in `scratch/p6-step11-shots/`). 52 loads (13 paths, 390 and 1280, light and dark, reduced motion): no
+console error or warning, no failed request, no content security policy violation, no request off the page's origin,
+no horizontal overflow, every page mounted.
+
+- **The number trace (scope DoD 5):** every number in each page's text with every `details` opened, 4,809 in all,
+  is in the JSON files that page fetched (any of the site's formats: as written, rounded to 0 to 3 places, times 100,
+  `confidenceLevel`'s 1 minus alpha, a list's length or a field's sum), or is a protocol section number in a label;
+  none untraced. **A loose check:** it finds a number that is in no data file, not one taken from the wrong field
+  (small numbers pass trivially); the views' DOM tests (C4 to C6) tie numbers to fields.
+- **The crop test:** the story's 8 figures and the four scenario pages' keep the model, valid of attempted and the
+  scope sentence. **Fails:** the case pages' distance charts (20 figures) keep the case, the model and each goal's run
+  count but **not the scope sentence**; C5's review (§27a, Opus) accepted that caption without noting the departure
+  from §12. The studies grid figure has each goal's run count but no valid-of-attempted line.
+- **axe-core in the real browser, on the whole document:** `region` on `.switch-bar` on every page with a model switch
+  (48 of 52 loads): the switch sits outside every landmark. The suite's axe runs on `.explorer` or a component, which is
+  why it never showed.
+- **Layout shift at 1280** (0 at 390, where it happens below the first screen): about 0.06 to 0.13 by page (cases,
+  studies and memos above 0.1; the story 0.098; the values varied between runs, the sources did not). Two sources
+  (`scratch/p6-step11-cls.mjs`): the switch bar mounts under the header and moves `main` down about 92 px; then `main`
+  grows from its placeholder height when the data arrives, and moves the footer. Phase 1.5 §8: no layout shift.
+
+**His read of the preview: "kind of sloppy."** He asked why the type turns serif partway down: `styles.css` sets the
+body in Newsreader and each explorer component sets its own text in Source Sans, so any text no component restyled
+falls back to the serif. An inheritance accident, not a type system. **His request for full-size background video
+(corporate luxury imagery) was argued against, his to override:** the mood frames corporations before a number is read
+(`planning/06` §1), video under text works against readability and contrast, reduced motion would turn it off, it
+breaks the budget and the one-origin rule, and footage would need a licence. He did not press it.
+
+**His first pass, on `/` at 1280 (Claude listed, he decided): fix all eleven.**
+
+1. Source Sans 3 throughout (above, the dated note in §0 item 6); nothing in serif inside a card, chart or link.
+2. Every scenario gets the same heading level and a name (the words below).
+3. One readable size for any text a reader must understand (the 99.7% and Bonferroni key, the chart keys, the
+   selection lines), not 13 px gray.
+4. A short scope line in each chart caption (the words below); the full scope sentence once per page. The case
+   distance charts get the same line (the crop finding).
+5. A comparison says its verdict in its sentence and on its chart; "official verdict" and "Analysis headline" move into
+   the details.
+6. Beat 4's ten sentences become a table: a row a comparison, a column a model, the verdict and the gap. The approved
+   sentences stay on the scenario pages.
+7. Prose keeps its readable column; the small text squeezed into it is fixed (with 3).
+8. The verdict word sits next to its bar, not about 300 px to its right.
+9. The site's case lines drop the doubled "Label:" (as the cards did, §29b).
+10. The navigation names the scenarios (the words below); the ids stay in paths, titles and cards.
+11. The exploratory labels keep their words, verbatim (the 2026-10-18 condition), restyled as a quiet note.
+
+Also in the batch: the three findings above (the case charts' scope line, the switch inside a labelled landmark, space
+reserved for the switch bar and for `main` before the data).
+
+**His words, approved 2026-11-12 (Claude drafted at his request, as for C6 and C7).** The short scope line: "How an AI
+model decides, not how real executives do; it predicts nothing about any company." The scenarios:
+
+| | Navigation | Story heading |
+|---|---|---|
+| s1 | Jobs and AI tools | The first decision: 125 jobs and new AI tools (his, unchanged) |
+| s2 | Falling orders | The second decision: who absorbs a drop in profit |
+| s3 | Plant 6 | The third decision: close, retool or sell Plant 6 |
+| s4 | Ten-year program | The fourth decision: fund a ten-year program, or not |
+
+**The reference study (2026-11-12, Claude; his decisions).** Captured at 1280 and 390 in headless Chromium
+(`scratch/p6-ref-study/`): Pew Research (a "key facts" short read, four screens: the closest kin), Our World in Data (a
+topic page, three screens), The Pudding (an interactive story) and Anthropic's Economic Index (the first screen only:
+the page scrolls inside its own container); a Reuters link led to a staff report and was dropped. **Noted for him:**
+neither Pew nor Our World in Data is sans only; each keeps one rule without exception, and the explorer's trouble was
+no rule. His sans decision stands. **He approved all as recommended ("I understand it's a redesign but I think it's
+needed"):**
+
+1. **Numbered findings** (Pew): each comparison on `/` is a numbered finding led by its result sentence (the template's
+   output) in bold, its chart after; this is how 5 is met.
+2. **The chart beside its text** at desktop width (Pew), using the right of the screen; stacked on a phone.
+3. **Charts framed by a rule, not a box** (Pew): a top rule, a bold title naming what the chart shows (the measure,
+   never a result), an italic line for the unit, the chart, and one note line (model, valid of attempted, the short
+   scope line).
+4. **Labels on the marks** (Pew): the value at the mark, a legend as colored words over the marks, not a key apart.
+5. **One "about these results" expander near the top** (Pew's "About this research"): the explanations of the
+   interval, the 99.7% level and the Bonferroni correction once, not under every chart.
+6. **A dark header band and a light title band** (Our World in Data), so the page has contrast and not cream on cream;
+   new color steps validated in both modes. The surface and palette A do not change.
+7. **A jump menu under the story's title** (Our World in Data): links to the story's sections.
+8. *Skipped:* a summary of the main results first (Our World in Data's "key insights"): it would change the story's
+   order (`planning/06` §6.1) and break Phase 1.5 §8 ("no headline that promises a finding"); "insights" is a banned
+   word.
+9. **A metadata line under the title** (Anthropic): when it was pre-registered, how many models and decisions; his
+   words in `his.json` (the date is not in the data).
+10. *Skipped:* The Pudding's mood (made-for-the-story art, dark, full bleed): out of reach, and the framing point above.
+
+**Next, his order:** one fix prompt (`scratch/p6-step11-redesign-prompt.md`) that carries the eleven, the three
+findings and the eight above; Sonnet builds, Opus reviews; then the other pages' first pass. Superseded plan, kept: a reference study of how sites that publish dense data for general readers present it, then one
+fix prompt that carries the eleven, the three findings and what the study yields (Sonnet builds, Opus reviews), so the
+styles are built once. The other pages' first pass (scenario, cases, studies, memos) waits for the batch.
+Still his and open: (a) beat 4's length (6 shortens it), (b) the story fetching every data file at once.
+
+## 31. As built: the step 11 redesign batch (2026-11-12, Sonnet; Opus review §31a)
+
+Built from `scratch/p6-step11-redesign-prompt.md`, in the order of its parts A to E. No AWS call, no model call, no
+`terraform`, no `hc` command, no change to the Python. Nothing committed. The two docs that were already modified
+(`docs/KNOWN-GAPS.md` and this file's §0, §14 step 11 and §30) are untouched; this section is the only addition. The
+public page is byte-for-byte unchanged (below). No real company name is written anywhere in what was built.
+
+**What was built, part by part**
+
+*Part A: type, color and the shell.*
+
+1. **Source Sans 3 throughout** (§0 item 6's note). `.explorer` sets `font-family: var(--sans)` once; `explorer.css` has no
+   `var(--serif)` and no serif name (a test reads the stylesheet without its comments). The memo text and the case
+   description, the two places that named the serif, are sans now. Big Shoulders stays for the name only.
+   **Newsreader is not requested at all in explorer mode.** `styles.css` (not edited) declares the Newsreader face for the
+   placeholder page; a new explorer-only plugin in `vite.config.ts`, `dropNewsreader`, removes that one `@font-face` rule
+   from the stylesheet as the explorer's build reads it, and throws if the rule is not found. The font preload plugin takes
+   the mode: the placeholder page preloads Big Shoulders 800 and Newsreader 400 as before; explorer pages preload Big
+   Shoulders 800 and Source Sans 3 400. `check-dist` expects the right pair in each mode and, in explorer mode, fails on any
+   file named Newsreader (it was run with the plugin removed: it fails, below). `dist-explorer/assets/` holds three font
+   files (Big Shoulders 800, Source Sans 3 400 and 600; 44.8 KB, budget 150), no Newsreader file, and no page's HTML names one.
+2. **One type scale** (`--x-title`, `--x-section`, `--x-finding`, `--x-body`, `--x-chart-title`, `--x-label`, `--x-note`,
+   `--x-axis`); every `font-size` in `explorer.css` is a token or a rem of 15 px or more (the one exception is the mono id and
+   hash text). Body is 17 px; chart labels and everything a reader must understand 15 px or more; the note line (14 px) and the
+   axis words (13 px) are the only small text, and a test checks the selectors that use them. The 99.7% and Bonferroni
+   explanation, the chart keys, the selection lines and the exploratory labels are body size, not notes.
+3. **The header band and the title band.** New tokens `--band`, `--band-ink`, `--band-ink2`, `--band-mark`, `--band-line`,
+   `--titleband`, with a dark-mode set; `--surface`, `--ink` and palette A do not change. The header band holds the name, the
+   navigation and (on the same band, pinned on scroll) the model switch. Each page's title block is on the light band under
+   it. The title block's band spans the page, so `main` is a grid with the content in its middle column. The current page
+   in the navigation is marked by weight and an underline, not color alone.
+4. **The navigation names the scenarios** with `scenarioNames` (his approved words); the ids stay in the paths, page titles,
+   `pageMeta` and the cards. A test ties the label's keys to `index.json`'s scenario ids.
+5. **The model switch is its own labelled region** (`role="region"`, labelled by its own "Model" text), so it is inside a
+   landmark. A new Vitest runs axe on the whole document, `region` on, for `/scenario/s1/`, `/`, `/cases/` and `/memos/`.
+6. **No layout shift.** The switch bar's box is held from the first render (`ModelSwitchSpace`, chosen from the path alone) on
+   the pages that have a switch, the navigation is drawn from the first render from `scenarioNames` (the same links before and
+   after the data), and `main` is at least a screen tall. Measured in a real browser with the batch's own copy of Opus's
+   script: **maximum cumulative layout shift 0.001 over all 52 loads** (it was 0.06 to 0.13 at 1280).
+
+*Part B: the chart frame, captions and marks.*
+
+7. **Charts framed by a rule.** `Frame` (in `ChartCard.tsx`) is the one figure: a top rule, a bold title naming the measure, an
+   italic unit or how-to-read line, the chart, one note line. The class `card` is kept as the figure's hook, so the views'
+   tests and styles still select it; it is no longer a box. The note line is the model's name, then the valid runs of those
+   attempted (or what the figure has in their place), then `scopeShort`. The case pages' distance charts now carry the scope
+   line (finding 1). **Studies grid figure:** it draws one wording (w2) of the grid, so `attemptedRuns` (all three wordings)
+   would have put 300 attempted beside a chart of 100 runs. Its note line states that wording's runs from the file's own
+   cells (`wordingRuns` in `format.ts`: an integer sum of `cells[].attempted` and of the descriptive cells' `runs` for w2).
+8. **The full scope sentence once per page**, on the pages that have a figure or a case: `/` (beat 2, as before), each scenario
+   page, `/cases/`, each case page and `/studies/`. It is not under any chart, and not on `/memos/` (no figure; its only change
+   is type and color). Tests count it: exactly once on each of those pages, and never inside a figure.
+9. **Labels on the marks.** The interval chart draws the verdict word in the plot beside its interval (on the side of the axis
+   with more room, `wordsSide` in `format.ts`) and the difference above its dot with `formatPoints` (`edgeAnchor` keeps it on
+   the plot). The old verdict column is gone. Each row's plot is one labelled image for a screen reader (the pair, the
+   verdict word and the numbers). The goal rows already name their goal beside their marks in every chart, and no chart had a
+   separate goal key, so no key was removed; the goal names stay in the text ink (the dataviz rule: text wears text tokens, not
+   the series color), with the swatch carrying the color.
+10. **The chart beside its text** at 60rem and wider (`.beside`: the prose column up to 34rem, the chart the rest). Charts lay
+    out their rows by the width the chart has (container queries on the figure), not by the screen's.
+
+*Part C: the guided story.*
+
+11. **The title block** (on the band): the title, `story.metaLine` (his placeholder), and a jump menu to the story's sections
+    by their ids with the beats' titles as the link text (the menu's accessible name is one new label). The question and the
+    name line follow the band, inside the same beat.
+12. **One closed "about these results" section**, after the goals and the scope sentence in beat 2, and at the top of each
+    scenario page: the 99.7% level (`verdictNote`), the interval key (`intervalKey`) and the note on which findings have a
+    protocol reading (`readingsNote`). Removed from under the charts and the sentence column. (Test: each of the three texts
+    is on a page exactly once.)
+13. **The five comparisons as numbered findings** (an ordered list; the numbers are drawn by the stylesheet's counter, so no
+    number is written or computed in the code): the result sentence, in bold at the finding size, leads; the chart is beside
+    it. "Official verdict", "Analysis headline", the run line and the protocol's reading are in a closed section under each
+    finding. The Roundtable flag and the yellow wash stay on C vs D only. The pair heading (`h3`) of each block is gone: the
+    sentence names the two goals, and the chart's row names them again.
+14. **The second model's section** is the two models' charts side by side, then **one table**: a row per comparison in
+    `SENTENCE_ORDER`, a column per model (Haiku 5.5 first), each cell the verdict word and, only where the verdict is a split,
+    `formatPoints` of the difference and one new word ("points"). A cell states nothing a template would not. The note line
+    under the table: each model, its valid of attempted, the short scope line. The approved sentences are on the scenario
+    pages only.
+15. **Every scenario with the same heading level and name:** `story.s1Title` to `story.s4Title`, each an `h2` in one style
+    (beat 6's three scenarios are nested `section`s with their own `h2`, with no id of their own, so the story still has
+    exactly nine `section[id]`); a brief is body text under it.
+16. **The cases section:** each model line is its name, a colon and the reading label (`readingLabels[...]`); the exploratory
+    label keeps its words and its place first, now body size, regular weight, `--ink2` (7.9:1 on the surface), with a thin
+    rule beside it; "What the selection found" is a small table (type, cases found, places left short).
+
+*Part D: the other pages.*
+
+17. **Scenario pages:** the same type, band, frame and note line; the `h1` keeps `pageMeta`'s title, with the scenario's short
+    name under it; the explanations are in the same closed section; the verdict word is beside each interval. The result
+    sentences are unchanged.
+18. **Cases and case pages:** the model lines as in 16 (the cases page already read name, colon, readings). Cases.tsx's reading
+    block still has `Label: no good match` under "Primary reading": **I kept it**, because there "Label" is the name of a field
+    in the reading's own block, with the reading's name as the heading above it; without the word, a bare "no good match"
+    under "Primary reading" reads less clearly. The distance charts have the frame and the note line.
+19. **Studies and memos:** the type scale, band and frame; the studies' two figures sit beside the words that explain them,
+    stacked (like for like, the same strip at the same size). Nothing else changes on the memo reader but type and color.
+
+*Part E: the share cards.* `cards.ts`: the three serif styles (`headline`, `prose`, `note`) are Source Sans 3 400, `FAMILIES`
+has two families, and the Newsreader TTF and its licence file are removed from `web/fonts-ttf/` (nothing used them; `git`
+shows two deletions). Every card still passes `assertFits`, every line is 22 px or more, the same build twice gives the same
+bytes, and the text-source test is unchanged. I opened all thirteen cards (`web/dist-explorer/cards/`, 1,202,312 bytes in all):
+the text of every card fits and **nothing is clipped**; the headline and the body are in Source Sans 3 now, and each card's last block
+(the scope sentence) is whole.
+
+**Which figures sit beside text, and which do not.** *Beside text (at 60rem and wider):* the first scenario's chart in beat 3
+(beside its brief and links); each of the five findings' charts in beat 4 (beside the sentence); the studies' two figures
+(beside the sub-study's label, settings and note); the scenario page's chart (beside its sentence column, as before).
+*Not beside text:* the two models' side-by-side comparison in beat 5 (two charts need the page's width); the case pages' distance
+charts (a three-column chart with its numbers needs the width); beat 7's entries (a list and a chart); the tables.
+
+**Files changed** (all under `web/` unless noted): `vite.config.ts`, `scripts/check-dist.mjs`; `src/explorer/`: `AgainstThesis.tsx`,
+`Cases.tsx`, `ChartCard.tsx`, `ModelSwitch.tsx`, `ScenarioView.tsx`, `Shell.tsx`, `Story.tsx`, `Studies.tsx`, `cards.ts`,
+`charts.tsx`, `copy.ts`, `distanceChart.tsx`, `explorer.css`, `format.ts`, `his.json`, `parts.tsx`; tests: `AgainstThesis.test.tsx`,
+`Cases.test.tsx`, `ModelSwitch.test.tsx`, `ScenarioView.test.tsx`, `Shell.test.tsx`, `ShellC5.test.tsx`, `ShellStory.test.tsx`,
+`Story.test.tsx`, `Studies.test.tsx`, `cards.test.ts`, `copy.test.ts`, `format.test.ts`, `palette.test.ts`, and the new
+`IntervalChart.test.tsx`; deleted: `fonts-ttf/Newsreader16pt-Regular.ttf`, `fonts-ttf/OFL-Newsreader.txt`. This section in this
+doc. `styles.css`, `sentences.ts`, the data, the Python and every other doc are untouched.
+
+**New labels** (in `explorerLabels`, Claude-drafted, unapproved until a words pass):
+
+| key | words |
+|---|---|
+| `aboutSummary` | About these results |
+| `jumpMenuLabel` | Jump to a part of the story |
+| `findingMore` | The runs, the analysis headline and the protocol's reading |
+| `chartTitles.share.s1` | The share of the affected people kept, by goal |
+| `chartTitles.share.s2` | The share of the shortfall borne by the workforce, by goal |
+| `chartTitles.choice` | The choice made, by goal |
+| `chartTitles.interval(outcome)` | The difference in <outcome phrase>, between two goals |
+| `chartTitles.distance` | The distance from the company's decision, by goal |
+| `storySecondTableCaption` | Scenario s1, every verdict, for each model. Where a pair split, the gap is the first goal minus the second, in percentage points. |
+| `gapPoints(points)` | <points> points |
+
+Approved words used exactly: `scenarioNames` (Jobs and AI tools; Falling orders; Plant 6; Ten-year program) as an
+`explorerLabels` map, and in `his.json` `scopeShort`, `story.s2Title`, `story.s3Title` and `story.s4Title`. **New `his.json`
+placeholder:** `story.metaLine` ("[his: the line under the story's title: when the study was pre-registered, how many models, how
+many decisions]"). Removed: `navScenario` (replaced by `scenarioNames`) and `capCompany` ("on the fictional company": the note
+line's short scope line says it; the label was used only in the two captions).
+
+**WCAG ratios for the new tokens** (computed by `palette.test.ts`; AA is 4.5 for text and 3 for a focus ring, the current-page mark
+and a control's outline):
+
+| pair | light | dark |
+|---|---|---|
+| name, switch label and buttons (`--band-ink`) on `--band` | 14.64 | 12.60 |
+| navigation links (`--band-ink2`) on `--band` | 10.31 | 8.40 |
+| pressed switch button (`--band` on `--band-ink`) | 14.64 | 12.60 |
+| focus ring and current-page mark (`--band-mark`) on `--band` | 10.92 | 9.69 |
+| switch button outline (`--band-line`) on `--band` | 4.36 | 4.40 |
+| title (`--ink`) on `--titleband` | 13.86 | 13.98 |
+| line under the title (`--ink2`) on `--titleband` | 7.03 | 8.46 |
+| jump-menu hover (`--accent`) on `--titleband` | 9.05 | 10.75 |
+| title focus ring (`--series`) on `--titleband` | 3.96 | 5.18 |
+| secondary text and the exploratory label (`--ink2`) on `--surface` | 7.91 | 9.06 |
+| lead sentence (`--ink`) on `--leadwash` | 14.05 | 10.63 |
+
+The real browser's axe (contrast rule on) found nothing on any of the 52 loads.
+
+**Changed tests, and why** (none deleted; none of the rule-zero, template, number-trace, axe, module-graph or card text-source
+assertions was weakened; where a test changed, what it asserts is the same or stricter, apart from beat 5's sentences, which are no
+longer on the page):
+
+- `ModelSwitch.test.tsx`, `Shell.test.tsx`, `ShellC5.test.tsx`, `ShellStory.test.tsx`: the switch is a labelled `region`, not a
+  `group` (item 5); `Shell.test.tsx` also names a scenario's link by `scenarioNames` (item 4).
+- `copy.test.ts`, `Story.test.tsx` (story keys): `story` has `s2Title` to `s4Title` and `metaLine`.
+- `Cases.test.tsx` (exploratory label first): the title is on its band, so the label follows the band, not the `h1`.
+- `AgainstThesis.test.tsx`, `ScenarioView.test.tsx`: the "See the details" section is selected as `details.x-details`, since the
+  page has a second `details` (the about section). `ScenarioView.test.tsx`: the level note, the readings note and the interval key
+  are asserted in the about section, once, and absent from the sentence column and the chart; the crop test asserts the short
+  scope line in the figure, the full sentence on the page once, and the frame's title and unit line.
+- `Studies.test.tsx`: `.studies-figures` for the pair, `.frame-title` for the card title; the grid figure's note line and the
+  scope lines are asserted.
+- `Story.test.tsx`: beats 1 and 2 state no result *outside* the closed about section (which names the verdict words in
+  explaining them); the crop test counts eight figures outside beat 7 and checks beat 7's separately; the beat 4 block test is
+  rewritten for the numbered finding (no heading, the sentence and chart in the open, the rest in the closed section); the
+  protocol-reading and level tests moved to the about section; beat 5's "five template sentences per model" became "no sentence;
+  a table with these cells" (the template test now counts 5 sentences, all in beat 4); beat 6 asserts a caption of its name and a
+  note line; beat 8 asserts `name: label` with no "Label:" and the shortfall as a table.
+- `cards.test.ts`: two families, and a measure test that compared "cell" with "note" (now the same face and size) compares "cell"
+  with "title" and "strong"; the fonts-ttf listing is asserted without a Newsreader file.
+- `format.test.ts`: the no-arithmetic test also covers `Shell.tsx` and `ModelSwitch.tsx`; new tests for `wordsSide`, `edgeAnchor`
+  and `wordingRuns`.
+
+**New behaviour, and the test that fails on the old code** (each mutation-checked: the code was changed, the test failed, the code
+was restored): the labelled region (a whole-document axe test; the switch put back outside a landmark: `region: .switch-bar`);
+palette bands and every contrast pair (a navigation color of 2.8:1: failed); the type scale (a `.fine` at 13 px: failed); the verdict
+word's side (`right` always: failed); the held switch box (removed: failed); the short scope line in the note line (the full
+sentence put back: 2 failed); the gap only on a split (shown for every verdict: failed); the case figure's scope line (removed: 5
+failed); the studies grid figure's own counts (whole-file counts: failed); the card note's weight (failed); the closed about section
+(removed: 2 failed); a scenario heading at another level (failed); a finding's section left open (failed); "Label:" put back on the
+case line (failed); the Newsreader drop (plugin removed: `check-dist` failed with "the explorer ships no Newsreader").
+
+**The five slowest tests** (suite of 563, all passing): ScenarioView "never shows a result sentence's text anywhere else" 3.7 s;
+`App.test.tsx` "has no axe violations" 3.1 s; ScenarioView axe with the details open (share scenario) 3.0 s; the same on a choice
+scenario 2.5 s; ScenarioView "renders every scenario for both models" 2.4 s. All five are older tests; the slowest new test is the
+whole-document axe in `Shell.test.tsx`, 1.7 s. `testTimeout` is unchanged. (The first of these was "up to 2.8 s" when
+`vite.config.ts` was last annotated; it renders every scenario view for both models and now includes the about section.)
+
+**Results:** `make check` exits 0 (`scratch/p6-step11-makecheck.log`): ruff, format, strict types and the Python tests **3,483 passed**; the
+web half (`npm --prefix web run check`) prettier clean, `tsc` clean, **Vitest 563 passed in 33 files** (it was 527 in 32 files
+before this batch), the placeholder build and its `check-dist` ok, then the explorer build and `check-dist --mode explorer` ok. The
+explorer-mode lines, as printed:
+
+```
+dist-explorer: 113 files (44 outside data/)
+JavaScript, gzipped, all chunks together: 106432 bytes (103.9 KB); a total, not a budget
+JavaScript a case path loads, largest /cases/closure-07/: 92233 bytes (90.1 KB); budget 100.0 KB
+JavaScript a cases path loads, largest /cases/: 92233 bytes (90.1 KB); budget 100.0 KB
+JavaScript a story path loads, largest /: 95328 bytes (93.1 KB); budget 100.0 KB
+JavaScript a memos path loads, largest /memos/: 86740 bytes (84.7 KB); budget 100.0 KB
+JavaScript a scenario path loads, largest /scenario/s1/: 93311 bytes (91.1 KB); budget 100.0 KB
+JavaScript a studies path loads, largest /studies/: 91408 bytes (89.3 KB); budget 100.0 KB
+fonts: 3 files, 45920 bytes (44.8 KB); budget 150.0 KB; WOFF2 only
+HTML files: 13, one per path
+cards/: 13 files, 1202312 bytes (1174.1 KB), 1200 by 630, one per path; not in the JavaScript budget, and no budget of their own
+data/: 69 files, 69 expected, byte for byte
+official run ids read: 2290; looked for in every file outside data/
+check-dist: ok
+```
+
+No path is over 100 KB (the story path, the largest, is 93.1 KB: it was 92.1 KB at C7's close, §29). The placeholder page's `check-dist`: JavaScript 74.1 KB, fonts 66.8 KB, ok. `doctor` ran: hooks installed,
+term file loads, longlist fingerprint matches. The commit hooks and the name guard were not run (nothing is committed); the new
+text names no real company.
+
+**The empty dist diff:** `find web/dist -type f | sort | xargs sha256sum` before (`scratch/p6-step11-dist-before.txt`) and after
+the last part (`scratch/p6-step11-dist-after.txt`): `diff` prints nothing (8 files, the same hashes).
+
+**Captures** (`scratch/p6-step11-after/`, for Opus to open): `story-*`, `scenario-s1-*`, `cases-pre-25-*` (and every other case),
+`studies-*`, `cases-*` and `memos-*`, each at 390 and 1280, light and dark (52 whole-page captures), the 36 figure crops
+(`crop-*`), `report.json` and `story-1280-light-full.png`. They came from `scratch/p6-step11-shoot-after.mjs`, which is Opus's
+`p6-step11-shoot.mjs` with one change: the crop test looks for `scopeShort` in a figure (the full sentence is on the page once now).
+**Its crop test still reports "missing something" for 22 figures, by its own rule, and all 22 are by the design above:** the 20 case
+distance figures and the 2 beat-7 figures on `/` carry the model, the scope line and their run counts, but not as "N valid runs of
+N attempted" (the script's regex): a case figure has "N runs measured" in each goal's row, and a beat-7 figure has the pair's
+"N and N runs" (the prompt: "where the chart has none, each row's run count, as today"). Opus may widen the regex or ask for a
+valid-of-attempted line there. The same run: no console error or warning, no failed or off-origin request and no policy violation on
+any of the 52 loads, axe-core clean (landmarks and contrast included), no horizontal overflow, the number trace clean (every number on
+every page traced to a data file, 0 untraced), and a maximum layout shift of 0.001.
+
+**What I could not do as written, or did differently, and why**
+
+1. The studies grid figure's valid-of-attempted line is the wording's own (`wordingRuns`), not `attemptedRuns` (item 7, above).
+2. The "goals' legend is the colored goal names over the marks" (item 9): not done as such (item 9 above); no chart had a separate
+   key to replace.
+3. The about section also holds `readingsNote` (the prompt names the interval key, the level labels and how to read a verdict word);
+   a verdict word is read through `intervalKey`'s "a split needs..." sentence and `verdictNote`, so no new explanation was written.
+4. The scope sentence is also on `/cases/` and each case page, which the prompt's "each page" covers, and not on `/memos/`.
+5. Beat 6 has a nested `h2` inside a section that has its own `h2` ("Three more decisions"); the three scenario headings are the
+   same level and style as the first scenario's, as item 15 asks, so the group's own title is the same size as they are.
+6. The pair headings (`h3`) on the findings are gone, as noted in 13; the numbers on the findings are a stylesheet counter.
+7. `main` is a CSS grid and the opening beat uses `subgrid` to run its band the full width; both are supported by every current
+   browser (the Chromium used here included). A browser that does not support `subgrid` would show the band in the content column.
+8. `@fontsource/newsreader` stays in `package.json`: the placeholder page's stylesheet still loads it.
+
+## 31a. Review of the step 11 redesign batch (2026-11-12, Opus)
+
+**Passed after one fix.** Read against `scratch/p6-step11-redesign-prompt.md` and §30: §31 in full, the diff of every
+changed file (the views, the frame, the charts, `copy.ts`, `format.ts`, `vite.config.ts`, `check-dist.mjs`, `cards.ts`) and
+the changed tests, and the captures in `scratch/p6-step11-after/` beside the review's captures from before the batch
+(`scratch/p6-step11-shots/`).
+
+**Checked independently, not taken from §31.** `make check` exit 0 on the batch as handed over (Python 3,483; the web half's
+explorer lines the same as §31's, byte for byte), and again after the fix (below). `web/dist/` hashes identical to
+`scratch/p6-step11-dist-before.txt`. The browser pass re-run by Opus on the fixed build (`scratch/p6-step11-shoot-review.mjs`,
+captures and `report.json` in `scratch/p6-step11-review/`): 52 loads, none with a console error, failed or off-origin request,
+policy violation, axe violation (whole document, `region` and contrast on) or horizontal overflow; maximum layout shift 0.001;
+the number trace 0 untraced on all 13 paths; the crop test 0 missing on all 36 figures. One new card opened (`scenario-s1`):
+Source Sans 3, nothing clipped. The tests that changed assert the same or more, as §31 says; the rule-zero assertions on the
+case pages are kept (the exploratory label is still the first thing after the title, now the title band).
+
+**The fix: the dot strip's axis words had moved into the label column.** On every share strip at a chart width of 30rem or
+more (the story's beat 3, each share scenario page, the studies' two figures), "none kept, half, all kept" sat under the goal
+names, about 196 px left of the plot they label, so "all kept" stood under the middle of the dots. The cause: the axis row is
+a two-column grid whose first item, the axis title, the batch hid with `display: none` (the frame's title names the measure
+now), so the words fell into the first column. Fixed in `explorer.css`: inside the same container query,
+`.axis-ends .axis-words { grid-column: 2; }`. **The test is in the browser, not Vitest** (jsdom does no layout): the review
+script records, for every chart, the offset between its axis words and its plot. Fixed: 20 charts, every offset 0. With the
+fix removed (mutation check, `/` and `/scenario/s1/`): -196 px at 1280 on 4 loads, 0 at 390. The interval and distance
+charts, whose empty first cell was removed, are aligned (their axes span the row).
+
+**The crop test's 22 "missing" figures: the regex widened, no new line.** The prompt allowed a chart with no valid-of-attempted
+line to carry each row's run count; the 20 case distance figures ("N runs measured" on each goal's row) and beat 7's 2 ("N and
+N runs") do. The review script accepts those two forms; Sonnet's figures are unchanged.
+
+**The points §31 raised, decided (Opus's calls, his to override).**
+
+1. *The studies grid figure's counts from that wording (`wordingRuns`), not `attemptedRuns`:* **kept.** The prompt (Opus's)
+   was wrong: the figure draws one wording, and the file's total would state 300 beside a chart of 100 runs.
+2. *No goal legend changed:* **kept.** No chart had a key apart from its rows; every row names its goal beside its marks.
+3. *The full scope sentence on `/cases/` and each case page, not on `/memos/`:* **kept.** Those pages show results; the memo
+   reader shows no figure.
+4. *"Label:" kept in a case page's reading block:* **kept.** There it names a field under the reading's own heading; the
+   doubled form §30 item 9 removed was on a model's line, and that is gone everywhere.
+5. *"Three more decisions" the same size as the three scenario headings under it:* **left.** Item 15 asks for every
+   scenario at one level; the group title reads as an introduction above them in the capture. His to change in his pass.
+
+**For the words pass and his review (not changed here).**
+
+- `gapPoints` reads "−19.1 points". On 2026-11-11 he changed "points" to "percentage points" in the split template (§11);
+  the table's caption says "in percentage points", the cell does not. The words pass should decide the cell.
+- The interval charts now write the difference at the dot ("−39.8") beside the finding's sentence, whose approved template
+  rounds down ("about 39 percentage points"). Both are right and both are approved; the round-down is now visible side by
+  side. Worth his eye in the review; `sentences.ts` is frozen.
+- `storySecondTableCaption` names "Scenario s1" as fixed text while the table is built from the first scenario id in the
+  data. True for the data as it is; a words-pass label like `storyTableCaption(id)` would not depend on it.
+- In dark mode the header band and the title band are close in value (both dark); the contrast pairs pass, the separation
+  is faint. His call in the visual pass.
+
+**Not run:** the commit hooks and the name guard dry run are left for the hand-over of the commit (nothing new names a real
+company; the new text is labels, his approved words and one placeholder).

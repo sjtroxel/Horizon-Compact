@@ -25,11 +25,13 @@ import {
   axisPercent,
   axisSpan,
   dotY,
+  edgeAnchor,
   formatDifference,
   formatPercent,
   formatPoints,
   unitBox,
   unitSlot,
+  wordsSide,
 } from "./format";
 
 export type Names = Readonly<Record<string, string>>;
@@ -247,14 +249,16 @@ export function rowOfComparison(comparison: GridComparison): IntervalRow {
 
 const INTERVAL_AXIS = { low: -1, high: 1 } as const;
 const INTERVAL_TICKS = [-1, -0.5, 0, 0.5, 1] as const;
-const INTERVAL_H = 30;
-const INTERVAL_MID = 15;
+const INTERVAL_H = 50;
+const INTERVAL_MID = 32; // the interval's line; the difference is written above its dot, the verdict beside its end
+const WORDS_GAP = 12; // pixels between the end of an interval and its verdict word
 
 /**
- * One row per comparison: the difference as a dot, `low` to `high` as a line, zero as a rule and the threshold band
- * at plus and minus `threshold`. The verdict word beside each row is the authority. The geometry does not decide
- * a verdict and is not read as one: a split also needs the difference at the threshold (protocol 6.3), and the
- * floor and the constant check are not geometry. A row that is not assessable has no line and says so.
+ * One row per comparison: the difference as a dot with its value written above it, `low` to `high` as a line with the
+ * verdict word beside it, zero as a rule and the threshold band at plus and minus `threshold`. The verdict word is the
+ * authority. The geometry does not decide a verdict and is not read as one: a split also needs the difference at the
+ * threshold (protocol 6.3), and the floor and the constant check are not geometry. A row that is not assessable has no
+ * line and says so. The plot is one image for a screen reader, labelled with the pair, the verdict and the numbers.
  */
 export function IntervalChart({
   rows,
@@ -272,6 +276,9 @@ export function IntervalChart({
       {rows.map((row) => {
         const pair = `${row.first} vs ${row.second}`;
         const numbers = formatDifference(row.difference, row.low, row.high);
+        const verdict = L.verdictWords[row.verdict] ?? row.verdict;
+        const drawn = row.difference !== null && row.low !== null && row.high !== null;
+        const right = drawn ? wordsSide(row.low!, row.high!, low, high) === "right" : true;
         return (
           <div key={pair} className="interval-row">
             <div className="interval-label">
@@ -280,8 +287,15 @@ export function IntervalChart({
               <span className="interval-names">
                 {nameOf(names, row.first)} vs {nameOf(names, row.second)}
               </span>
+              {numbers === null && <span className="muted interval-none">{L.intervalRowNotAssessable}</span>}
             </div>
-            <svg className="x-plot" width="100%" height={INTERVAL_H} aria-hidden="true">
+            <svg
+              className="x-plot"
+              width="100%"
+              height={INTERVAL_H}
+              role="img"
+              aria-label={`${pair}: ${verdict}${numbers === null ? "" : `, ${numbers}`}`}
+            >
               <rect
                 className="band"
                 x={axisPercent(-row.threshold, low, high)}
@@ -296,12 +310,12 @@ export function IntervalChart({
                 y1={0}
                 y2={INTERVAL_H}
               />
-              {row.difference !== null && row.low !== null && row.high !== null && (
+              {drawn ? (
                 <>
                   <line
                     className="interval"
-                    x1={axisPercent(row.low, low, high)}
-                    x2={axisPercent(row.high, low, high)}
+                    x1={axisPercent(row.low!, low, high)}
+                    x2={axisPercent(row.high!, low, high)}
                     y1={INTERVAL_MID}
                     y2={INTERVAL_MID}
                   >
@@ -309,17 +323,40 @@ export function IntervalChart({
                   </line>
                   <circle
                     className="diff"
-                    cx={axisPercent(row.difference, low, high)}
+                    cx={axisPercent(row.difference!, low, high)}
                     cy={INTERVAL_MID}
                     r={5}
                   />
+                  <text
+                    className="diff-value"
+                    x={axisPercent(row.difference!, low, high)}
+                    y={INTERVAL_MID - 12}
+                    textAnchor={edgeAnchor(row.difference!, low, high)}
+                  >
+                    {formatPoints(row.difference!)}
+                  </text>
+                  <text
+                    className="verdict-word"
+                    x={axisPercent(right ? row.high! : row.low!, low, high)}
+                    dx={right ? WORDS_GAP : -WORDS_GAP}
+                    y={INTERVAL_MID + 5}
+                    textAnchor={right ? "start" : "end"}
+                  >
+                    {verdict}
+                  </text>
                 </>
+              ) : (
+                <text
+                  className="verdict-word"
+                  x={axisPercent(0, low, high)}
+                  dx={WORDS_GAP}
+                  y={INTERVAL_MID + 5}
+                  textAnchor="start"
+                >
+                  {verdict}
+                </text>
               )}
             </svg>
-            <div className="interval-verdict">
-              <span className="verdict-word">{L.verdictWords[row.verdict] ?? row.verdict}</span>
-              {numbers === null && <span className="muted">{L.intervalRowNotAssessable}</span>}
-            </div>
           </div>
         );
       })}
@@ -334,7 +371,13 @@ export function IntervalChart({
             y2={2}
           />
           {INTERVAL_TICKS.map((v) => (
-            <text key={v} className="tick" x={axisPercent(v, low, high)} y={18} textAnchor="middle">
+            <text
+              key={v}
+              className="tick"
+              x={axisPercent(v, low, high)}
+              y={18}
+              textAnchor={edgeAnchor(v, low, high)}
+            >
               {formatPoints(v, 0)}
             </text>
           ))}
@@ -344,9 +387,7 @@ export function IntervalChart({
             </text>
           ))}
         </svg>
-        <span />
       </div>
-      <p className="axis-caption">{L.intervalAxis}</p>
     </div>
   );
 }

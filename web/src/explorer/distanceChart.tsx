@@ -10,9 +10,12 @@
  */
 import { explorerLabels as L } from "./copy";
 import type { CaseReading } from "./data";
-import { axisPercent, confidenceLevel, formatDistance } from "./format";
+import { axisPercent, confidenceLevel, edgeAnchor, formatDistance } from "./format";
 import { goalClass } from "./chartData";
+import { Frame } from "./ChartCard";
 import type { Names } from "./charts";
+import { explorerHis } from "./copy";
+import { HisInline } from "./parts";
 
 const ROW_H = 30;
 const MID = 15;
@@ -48,8 +51,25 @@ export function DistanceChart({
   const { low, high } = AXIS;
   const rule = formatDistance(dStar);
   return (
-    <figure className="card distance-figure" data-reading={reading.reading}>
-      <p className="chart-key">{L.distanceLevel(confidenceLevel(alpha))}</p>
+    <Frame
+      title={L.chartTitles.distance}
+      unit={L.distanceLevel(confidenceLevel(alpha))}
+      className="distance-figure"
+      data-reading={reading.reading}
+      note={
+        <figcaption>
+          <span className="mono">{caseLabel}</span>
+          {" · "}
+          <span className="model-name">{model}</span>
+          {" · "}
+          {readingName}
+          {" · "}
+          {labelWord}
+          {" · "}
+          <HisInline text={explorerHis.scopeShort} />
+        </figcaption>
+      }
+    >
       <div
         className="chart distances"
         role="group"
@@ -120,7 +140,13 @@ export function DistanceChart({
               y2={2}
             />
             {TICKS.map((v) => (
-              <text key={v} className="tick" x={axisPercent(v, low, high)} y={18} textAnchor="middle">
+              <text
+                key={v}
+                className="tick"
+                x={axisPercent(v, low, high)}
+                y={18}
+                textAnchor={edgeAnchor(v, low, high)}
+              >
                 {formatDistance(v, 1)}
               </text>
             ))}
@@ -128,19 +154,9 @@ export function DistanceChart({
               {L.distanceRule(rule)}
             </text>
           </svg>
-          <span />
         </div>
         <p className="axis-caption">{L.distanceAxis}</p>
       </div>
-      <figcaption>
-        <span className="mono">{caseLabel}</span>
-        {" · "}
-        <span className="model-name">{model}</span>
-        {" · "}
-        {readingName}
-        {" · "}
-        {labelWord}
-      </figcaption>
-    </figure>
+    </Frame>
   );
 }

@@ -2,13 +2,13 @@ import { cleanup, render, waitFor, within } from "@testing-library/react";
 import type { RenderResult } from "@testing-library/react";
 import axe from "axe-core";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { everyReadingNoGoodMatch } from "./caseData";
+import { everyReadingNoGoodMatch, labelUnderEveryReading } from "./caseData";
 import { SENTENCE_ORDER, findComparison, orderedComparisons } from "./chartData";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { DataApi, GridFile } from "./data";
 import { createDataApi } from "./data";
 import { fileFetcher, realApi, realCaseFiles, realCasesIndex, realGrids, realIndex } from "./fixtures";
-import { attemptedRuns, comparisonRuns, confidenceLevel } from "./format";
+import { attemptedRuns, comparisonRuns, confidenceLevel, formatPoints } from "./format";
 import { ROUNDTABLE_CLAIM_URL, ROUNDTABLE_OVERVIEW_URL, protocolUrl } from "./links";
 import { modelName, orderedModels } from "./models";
 import { PROTOCOL_READINGS, readingFor } from "./protocol";
@@ -47,6 +47,8 @@ async function violations(container: HTMLElement) {
   return results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join("; ")}`);
 }
 
+const before = (a: Element, b: Element) =>
+  Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
 const beat = (container: HTMLElement, id: string) => container.querySelector<HTMLElement>(`section#${id}`)!;
 
 describe("the story, from the real files", () => {
@@ -112,12 +114,60 @@ describe("the story, from the real files", () => {
     expect(setup.textContent).toContain(explorerHis.scopeSentence);
   });
 
-  it("states no result in beats 1 and 2: no verdict word, no result sentence, no template", () => {
+  it("states no result in beats 1 and 2: no verdict word, no result sentence, no template (the closed 'about these results' section explains the words and states no result)", () => {
     for (const id of ["beat-question", "beat-setup"]) {
-      const section = beat(container, id);
+      const section = beat(container, id).cloneNode(true) as HTMLElement;
+      // The explanation of how to read a verdict names the words ("a split needs ...") and states no verdict of any pair.
+      section.querySelectorAll("details.about").forEach((about) => about.remove());
       expect(section.querySelectorAll("[data-template]"), id).toHaveLength(0);
       expect(section.querySelectorAll("svg"), id).toHaveLength(0);
       for (const word of Object.values(L.verdictWords)) expect(section.textContent, id).not.toContain(word);
+    }
+  });
+
+  it("opens with the title block on its band: the title, his metadata line, and a jump menu to the story's sections by id, with the beats' titles as the link text", () => {
+    const first = beat(container, "beat-question");
+    const band = first.querySelector(":scope > .title-band")!;
+    expect(band.querySelector("h1")).not.toBeNull();
+    const meta = band.querySelector(".meta-line")!;
+    expect(meta.textContent).toBe(explorerHis.story.metaLine);
+    expect(before(band.querySelector("h1")!, meta)).toBe(true);
+    const nav = within(band as HTMLElement).getByRole("navigation", { name: L.jumpMenuLabel });
+    expect(before(meta, nav)).toBe(true);
+    const links = [...nav.querySelectorAll("a")];
+    expect(links.map((a) => a.getAttribute("href"))).toEqual(BEATS.slice(1).map((id) => `#${id}`));
+    const titles = [
+      explorerHis.story.setupTitle,
+      explorerHis.story.s1Title,
+      explorerHis.story.comparisonsTitle,
+      explorerHis.story.secondTitle,
+      explorerHis.story.othersTitle,
+      explorerHis.againstTitle,
+      explorerHis.story.casesTitle,
+      explorerHis.story.methodsTitle,
+    ];
+    expect(links.map((a) => a.textContent)).toEqual(titles);
+    for (const a of links) expect(container.querySelector(a.getAttribute("href")!), a.href).not.toBeNull();
+    // The question and the name line follow the band, inside the same beat.
+    expect(before(band, first.querySelector(".story-lede")!)).toBe(true);
+    expect(first.querySelector(".story-lede")!.textContent).toContain(explorerHis.landingQuestion);
+  });
+
+  it("holds the explanations once, in a closed section after the goals and the scope sentence: the level, the interval key, how to read a verdict", () => {
+    const setup = beat(container, "beat-setup");
+    const about = setup.querySelector<HTMLDetailsElement>("details.about")!;
+    expect(about.open).toBe(false);
+    expect(about.querySelector("summary")!.textContent).toBe(L.aboutSummary);
+    const level = confidenceLevel(realIndex.models.find((m) => m.model_key === MAIN)!.alpha);
+    expect(about.textContent).toContain(L.verdictNote(level));
+    expect(about.textContent).toContain(L.intervalKey(level));
+    expect(about.textContent).toContain(L.readingsNote);
+    expect(before(setup.querySelector(".x-goals")!, about)).toBe(true);
+    const scope = [...setup.querySelectorAll("p")].find((p) => p.textContent === explorerHis.scopeSentence)!;
+    expect(before(scope, about)).toBe(true);
+    // Said once for the page: not again under any chart, finding or table.
+    for (const text of [L.verdictNote(level), L.intervalKey(level), L.readingsNote]) {
+      expect(container.textContent!.split(text), text.slice(0, 40)).toHaveLength(2);
     }
   });
 
@@ -133,7 +183,8 @@ describe("the story, from the real files", () => {
   });
 
   it("every figure keeps the model, the valid runs of those attempted and the scope sentence, so a crop keeps them", () => {
-    const figures = [...container.querySelectorAll("figure.card")];
+    const inAgainst = (figure: Element) => figure.closest("#against-the-thesis") !== null;
+    const figures = [...container.querySelectorAll("figure.card")].filter((f) => !inAgainst(f));
     // beat 3: 1; beat 4: 5; beat 5: 2.
     expect(figures).toHaveLength(1 + 5 + 2);
     for (const figure of figures) {
@@ -143,8 +194,23 @@ describe("the story, from the real files", () => {
       expect(figure.textContent).toContain(
         L.capValidOfAttempted(file.descriptive.runs, attemptedRuns(file.objective_rates)),
       );
-      expect(figure.textContent).toContain(explorerHis.scopeSentence);
-      expect(figure.querySelector("figcaption")).not.toBeNull();
+      // The note line carries the short scope line; the full sentence is on the page once, in beat 2.
+      expect(figure.querySelector("figcaption")!.textContent).toContain(explorerHis.scopeShort);
+      expect(figure.textContent).not.toContain(explorerHis.scopeSentence);
+      expect(figure.querySelector(".frame-title")!.textContent).not.toBe("");
+    }
+    expect(container.textContent!.split(explorerHis.scopeSentence)).toHaveLength(2);
+    expect(beat(container, "beat-setup").textContent).toContain(explorerHis.scopeSentence);
+    // Beat 7's figures have no valid-of-attempted line (an entry carries its pair's runs): the model, those runs and the
+    // short scope line, so a crop of one keeps them.
+    const against = [...container.querySelectorAll("figure.card")].filter(inAgainst);
+    expect(against).toHaveLength(realIndex.against_thesis.entries.length);
+    for (const figure of against) {
+      const li = figure.closest<HTMLElement>("li.x-entry")!;
+      const caption = figure.querySelector("figcaption")!.textContent!;
+      expect(caption).toContain(modelName(li.dataset["model"]!));
+      expect(caption).toContain(explorerHis.scopeShort);
+      expect(caption).toMatch(/\d+ and \d+ runs/);
     }
   });
 
@@ -158,26 +224,45 @@ describe("the story, from the real files", () => {
       expect(blocks().map((b) => b.dataset["pair"])).toEqual(SENTENCE_ORDER.map(([a, b]) => `${a}-${b}`));
     });
 
-    it("gives each block its goals by plain name and letter, its template sentence, a one-row chart, its runs, its verdict and its headline verbatim", () => {
+    it("leads each block with its template sentence, then its one-row chart in a frame, and keeps the rest in a closed section", () => {
+      expect(
+        beat(container, "beat-comparisons").querySelector("ol.findings"),
+        "the findings are one numbered list",
+      ).not.toBeNull();
       for (const block of blocks()) {
         const [first, second] = block.dataset["pair"]!.split("-") as [string, string];
         const c = findComparison(file, first, second)!;
-        expect(block.querySelector("h3")!.textContent).toBe(
-          L.storyPairHeading(L.objectiveNames[first]!, first, L.objectiveNames[second]!, second),
-        );
+        expect(block.querySelector("h3"), "no heading of its own: the sentence leads").toBeNull();
         const sentence = block.querySelector<HTMLElement>(".result-sentence")!;
         const expected = resultSentence(c, L.objectiveNames, L.outcomePhrases["s1"]!);
         expect(sentence.dataset["template"]).toBe(expected.id);
         expect(sentence.textContent).toBe(expected.text);
-        expect(block.querySelectorAll(".interval-row:not(.interval-axis)")).toHaveLength(1);
-        const fine = block.querySelector(".fine")!.textContent!;
+        const more = block.querySelector<HTMLDetailsElement>("details.finding-more")!;
+        expect(more.open).toBe(false);
+        expect(more.querySelector("summary")!.textContent).toBe(L.findingMore);
+        // The sentence and the chart are out in the open; the verdict is said in the sentence and on the chart only.
+        expect(more.contains(sentence)).toBe(false);
+        const figure = block.querySelector("figure.card")!;
+        expect(more.contains(figure)).toBe(false);
+        expect(figure.querySelectorAll(".interval-row:not(.interval-axis)")).toHaveLength(1);
+        expect(figure.querySelector(".verdict-word")!.textContent).toBe(L.verdictWords[c.final_verdict]);
+        expect(figure.querySelector(".frame-title")!.textContent).toBe(
+          L.chartTitles.interval(L.outcomePhrases["s1"]!),
+        );
+        expect(before(sentence, figure)).toBe(true);
+        // What moved into the closed section: the runs, the official verdict, the headline verbatim.
+        const fine = more.querySelector(".fine")!.textContent!;
         if (c.final_verdict === "not_assessable") expect(fine).toContain(L.noRunsCompared);
         else {
           const runs = comparisonRuns(c);
           expect(fine).toContain(L.runsPair(runs.first, runs.second));
         }
         expect(fine).toContain(`${L.officialVerdict} ${L.verdictWords[c.final_verdict]}`);
-        expect(block.textContent).toContain(c.headline);
+        expect(more.textContent).toContain(c.headline);
+        for (const text of [L.officialVerdict, L.headlineLabel])
+          expect(
+            block.querySelector(":scope > .beside")!.textContent!.replace(more.textContent!, ""),
+          ).not.toContain(text);
       }
     });
 
@@ -215,47 +300,93 @@ describe("the story, from the real files", () => {
           expect(quoted!.textContent).toContain(PROTOCOL_READINGS[key].reading);
         }
       }
-      const section = beat(container, "beat-comparisons");
-      expect(section.textContent).toContain(L.readingsNote);
-      expect(section.querySelectorAll(".protocol-none").length).toBeLessThanOrEqual(1);
+      // The protocol's reading sits in each finding's closed section; the note saying why only some have one is said
+      // once, in the 'about these results' section.
+      for (const block of blocks()) {
+        const quoted = block.querySelector("blockquote.reading");
+        if (quoted !== null) expect(block.querySelector("details.finding-more")!.contains(quoted)).toBe(true);
+      }
+      expect(container.querySelector("details.about")!.textContent).toContain(L.readingsNote);
+      expect(beat(container, "beat-comparisons").textContent).not.toContain(L.readingsNote);
+      expect(
+        beat(container, "beat-comparisons").querySelectorAll(".protocol-none").length,
+      ).toBeLessThanOrEqual(1);
     });
 
-    it("says the interval level from the file's alpha and the verdict note once, before the first block", () => {
+    it("does not repeat the interval key or the level under any finding: they are in the 'about these results' section", () => {
       const section = beat(container, "beat-comparisons");
       const level = confidenceLevel(realIndex.models.find((m) => m.model_key === MAIN)!.alpha);
-      const text = section.textContent!;
-      expect(text).toContain(L.verdictNote(level));
-      expect(text).toContain(L.intervalKey(level));
-      expect(text.split(L.verdictNote(level))).toHaveLength(2);
-      expect(text.indexOf(L.verdictNote(level))).toBeLessThan(text.indexOf(blocks()[0]!.textContent!));
+      expect(section.textContent).not.toContain(L.verdictNote(level));
+      expect(section.textContent).not.toContain(L.intervalKey(level));
+      expect(section.querySelectorAll(".chart-key")).toHaveLength(0);
     });
   });
 
   describe("beat 5, the second model", () => {
     const section = () => beat(container, "beat-second-model");
 
-    it("shows both models' s1 comparisons, the main model first, each five rows and five template sentences", () => {
+    it("shows both models' s1 comparisons as one five-row chart each, the main model first, with no sentence under them", () => {
       const columns = [...section().querySelectorAll<HTMLElement>(".story-model")];
       expect(columns.map((c) => c.dataset["model"])).toEqual(MODELS);
       for (const column of columns) {
-        const file = gridOf(column.dataset["model"]!, "s1");
         expect(column.querySelectorAll(".interval-row:not(.interval-axis)")).toHaveLength(5);
-        const sentences = [...column.querySelectorAll<HTMLElement>("li.sent")];
-        expect(sentences.map((li) => li.dataset["pair"])).toEqual(
-          SENTENCE_ORDER.map(([a, b]) => `${a}-${b}`),
-        );
-        for (const li of sentences) {
-          const [first, second] = li.dataset["pair"]!.split("-") as [string, string];
-          const expected = resultSentence(
-            findComparison(file, first, second)!,
-            L.objectiveNames,
-            L.outcomePhrases["s1"]!,
-          );
-          const element = li.querySelector<HTMLElement>(".result-sentence")!;
-          expect(element.dataset["template"]).toBe(expected.id);
-          expect(element.textContent).toBe(expected.text);
+        expect(column.querySelectorAll("figure.card")).toHaveLength(1);
+        // The approved sentences stay on the scenario pages; this section is a chart and a table.
+        expect(column.querySelectorAll(".result-sentence, li.sent")).toHaveLength(0);
+      }
+      expect(section().querySelectorAll(".result-sentence, [data-template]")).toHaveLength(0);
+    });
+
+    it("sets the verdicts in a table, a row per comparison in the sentence column's order and a column per model, the main model first", () => {
+      const table = section().querySelector<HTMLElement>("table.story-table")!;
+      expect(table.dataset["scenario"]).toBe("s1");
+      expect(table.querySelector("caption")!.textContent).toBe(L.storySecondTableCaption);
+      expect([...table.querySelectorAll("thead th")].map((th) => th.textContent)).toEqual([
+        L.storyComparisonColumn,
+        ...MODELS.map(modelName),
+      ]);
+      expect(table.querySelectorAll("thead th[scope=col]")).toHaveLength(1 + MODELS.length);
+      expect(
+        [...table.querySelectorAll("tbody tr")].map((tr) => (tr as HTMLElement).dataset["pair"]),
+      ).toEqual(SENTENCE_ORDER.map(([a, b]) => `${a}-${b}`));
+      // The charts sit above the table.
+      expect(before(section().querySelector(".layout-pair")!, table)).toBe(true);
+      let splits = 0;
+      for (const model of MODELS) {
+        for (const c of orderedComparisons(gridOf(model, "s1"))) {
+          const cell = table.querySelector<HTMLElement>(
+            `tr[data-pair=${c.first}-${c.second}] td[data-model="${model}"]`,
+          )!;
+          expect(cell.dataset["verdict"]).toBe(c.final_verdict);
+          expect(cell.querySelector(".verdict-word")!.textContent).toBe(L.verdictWords[c.final_verdict]);
+          // A cell states nothing a template would not: the gap only where the verdict is a split (the template for a
+          // split states one), written with formatPoints of the field, and the verdict word alone otherwise.
+          if (c.final_verdict === "split") {
+            splits += 1;
+            expect(cell.querySelector(".story-cell-gap")!.textContent).toBe(
+              L.gapPoints(formatPoints(c.difference!)),
+            );
+            expect(cell.textContent).toBe(
+              `${L.verdictWords["split"]}${L.gapPoints(formatPoints(c.difference!))}`,
+            );
+          } else {
+            expect(cell.textContent).toBe(L.verdictWords[c.final_verdict]);
+          }
         }
       }
+      expect(splits).toBeGreaterThan(0); // the real files have splits, so the gap path is exercised
+    });
+
+    it("gives the table a note line: each model, its valid runs of those attempted, and the short scope line", () => {
+      const note = section().querySelector(".table-note")!;
+      for (const model of MODELS) {
+        const file = gridOf(model, "s1");
+        expect(note.textContent).toContain(modelName(model));
+        expect(note.textContent).toContain(
+          L.capValidOfAttempted(file.descriptive.runs, attemptedRuns(file.objective_rates)),
+        );
+      }
+      expect(note.textContent).toContain(explorerHis.scopeShort);
     });
 
     it("draws the two models' charts at the same size", () => {
@@ -309,12 +440,35 @@ describe("the story, from the real files", () => {
       expect(seen.has("not_assessable")).toBe(true);
     });
 
-    it("captions each table with the scope sentence, carries no color and no style, and links to each model's view", () => {
+    it("gives every scenario the same heading level and style, with its name: the first's and the three after it", () => {
+      const first = beat(container, "beat-s1").querySelector(":scope > h2")!;
+      expect(first.textContent).toBe(explorerHis.story.s1Title);
+      const titles = [explorerHis.story.s2Title, explorerHis.story.s3Title, explorerHis.story.s4Title];
+      ["s2", "s3", "s4"].forEach((id, i) => {
+        const scenario = container.querySelector<HTMLElement>(`section.story-scenario[data-scenario=${id}]`)!;
+        const heading = scenario.querySelector(":scope > h2")!;
+        expect(heading.textContent).toBe(titles[i]);
+        expect(heading.tagName).toBe(first.tagName);
+        expect(scenario.getAttribute("aria-labelledby")).toBe(heading.id);
+        // The scenario's brief is body text under its heading, not a heading or anything larger.
+        expect(scenario.querySelector(":scope > p")!.textContent).toBe(explorerHis.scenarioBriefs[id]);
+        expect(scenario.querySelector("h3")).toBeNull();
+      });
+      expect(beat(container, "beat-other-scenarios").querySelectorAll("section.story-scenario")).toHaveLength(
+        3,
+      );
+    });
+
+    it("captions each table with its name, gives it a note line with the short scope line, carries no color and no style, and links to each model's view", () => {
       for (const id of ["s2", "s3", "s4"]) {
         const table = beat(container, "beat-other-scenarios").querySelector<HTMLElement>(
           `table[data-scenario=${id}]`,
         )!;
-        expect(table.querySelector("caption")!.textContent).toContain(explorerHis.scopeSentence);
+        expect(table.querySelector("caption")!.textContent).toBe(L.storyTableCaption(id));
+        expect(table.closest(".story-scenario")!.querySelector(".table-note")!.textContent).toContain(
+          explorerHis.scopeShort,
+        );
+        expect(table.textContent).not.toContain(explorerHis.scopeSentence);
         expect(table.querySelectorAll("[style], [class*=goal-]")).toHaveLength(0);
         const links = [...table.closest(".story-scenario")!.querySelectorAll("a")].map((a) =>
           a.getAttribute("href"),
@@ -365,23 +519,34 @@ describe("the story, from the real files", () => {
         ).toEqual(MODELS);
         expect(row.querySelector(`a[href="/cases/${entry.label}/"]`)).not.toBeNull();
       }
-      const first = realCasesIndex.cases[0]!;
-      const file = realCaseFiles.find((c) => c.label === first.label && c.model === MAIN)!.file;
-      expect(
-        within(rows[0]!).getAllByText(L.readingLabelIs(L.readingLabels[file.readings[0]!.label]!), {
-          exact: false,
-        }),
-      ).not.toHaveLength(0);
+      // A model's line reads its name, a colon and the reading label itself, with no "Label:" of its own.
+      for (const row of rows) {
+        for (const li of row.querySelectorAll<HTMLElement>("li[data-model]")) {
+          const model = li.dataset["model"]!;
+          const file = realCaseFiles.find((c) => c.label === row.dataset["case"] && c.model === model)!.file;
+          const label = labelUnderEveryReading(file);
+          expect(li.textContent).toBe(
+            `${modelName(model)}: ${label === null ? L.storyLabelVaries : L.readingLabels[label]}`,
+          );
+          expect(li.textContent).not.toContain("Label:");
+        }
+      }
     });
 
-    it("shows the shortfall from the cases index, and a link to /cases/", () => {
-      const facts = section().querySelector(".story-shortfall")!;
+    it("shows the shortfall from the cases index as a small table, and a link to /cases/", () => {
+      const table = section().querySelector("table.story-shortfall")!;
+      expect([...table.querySelectorAll("thead th")].map((th) => th.textContent)).toEqual([
+        L.shortfallType,
+        L.shortfallFound,
+        L.shortfallShort,
+      ]);
       for (const type of Object.keys(realCasesIndex.shortfall.cases_by_type)) {
-        const row = facts.querySelector(`[data-type=${type}]`)!;
-        expect(row.textContent).toContain(L.caseTypes[type]!);
-        expect(row.textContent).toContain(
-          `${L.shortfallFound}: ${realCasesIndex.shortfall.cases_by_type[type]}; ${L.shortfallShort}: ${realCasesIndex.shortfall.short_by_type[type]}`,
-        );
+        const row = table.querySelector(`tr[data-type=${type}]`)!;
+        expect([...row.children].map((c) => c.textContent)).toEqual([
+          L.caseTypes[type],
+          String(realCasesIndex.shortfall.cases_by_type[type]),
+          String(realCasesIndex.shortfall.short_by_type[type]),
+        ]);
       }
       expect(section().querySelector('a[href="/cases/"]')).not.toBeNull();
     });
@@ -402,8 +567,8 @@ describe("the story, from the real files", () => {
 
   it("every result sentence in the story is a template's output, and its text is nowhere else as a bare string", () => {
     const sentences = [...container.querySelectorAll<HTMLElement>(".result-sentence")];
-    // Beat 4: 5; beat 5: 2 x 5; beat 7 has none (it shows the analysis's own headline).
-    expect(sentences).toHaveLength(5 + 10);
+    // Beat 4: 5; beat 5 is a chart and a table now, so no sentence; beat 7 has none (it shows the analysis's own headline).
+    expect(sentences).toHaveLength(5);
     for (const element of sentences) {
       expect(TEMPLATE_IDS as readonly string[]).toContain(element.dataset["template"]);
     }
@@ -431,6 +596,9 @@ describe("the story, from the real files", () => {
       "setupTitle",
       "setupIntro",
       "s1Title",
+      "s2Title",
+      "s3Title",
+      "s4Title",
       "s1Intro",
       "comparisonsTitle",
       "comparisonsIntro",
@@ -442,6 +610,7 @@ describe("the story, from the real files", () => {
       "casesIntro",
       "methodsTitle",
       "methodsText",
+      "metaLine",
     ] as const;
     expect(Object.keys(explorerHis.story).sort()).toEqual([...keys].sort());
     for (const key of keys) {

@@ -106,7 +106,7 @@ describe("the links", () => {
     const view = await shellAt("/");
     const clicks = watchClicks();
     const before = window.history.length;
-    fireEvent.click(view.getByRole("link", { name: explorerLabels.navScenario("s2") }));
+    fireEvent.click(view.getByRole("link", { name: explorerLabels.scenarioNames["s2"]! }));
     clicks.stop();
 
     expect(clicks.seen).toEqual([true]); // the shell had already prevented the browser's navigation
@@ -169,7 +169,7 @@ describe("the links", () => {
 describe("the model switch in the shell", () => {
   it("writes ?model= without reloading, keeps the path, and carries the model on the links", async () => {
     const view = await shellAt("/scenario/s1/");
-    const group = view.getByRole("group", { name: explorerLabels.modelSwitch });
+    const group = view.getByRole("region", { name: explorerLabels.modelSwitch });
     const history = window.history.length;
     fireEvent.click(within(group).getByRole("button", { name: modelName(OTHER) }));
 
@@ -202,7 +202,7 @@ describe("the model switch in the shell", () => {
       [`?model=${OTHER}`, modelName(OTHER)],
     ] as const) {
       const view = await shellAt(`/scenario/s1/${search}`);
-      const group = view.getByRole("group", { name: explorerLabels.modelSwitch });
+      const group = view.getByRole("region", { name: explorerLabels.modelSwitch });
       const on = within(group)
         .getAllByRole("button")
         .filter((b) => b.getAttribute("aria-pressed") === "true");
@@ -238,6 +238,41 @@ describe("accessibility", () => {
       expect(await violations(view.container), path).toEqual([]);
       cleanup();
     }
+  });
+
+  it("has no axe violation on the whole document, the `region` rule on: every piece of content, the model switch included, is inside a landmark (step 11)", async () => {
+    // The earlier test runs axe on `.explorer`; the `region` rule is a document-level one and never ran there, which is why
+    // the model switch sitting outside every landmark was missed until the real-browser pass. This runs on the document.
+    document.documentElement.lang = "en"; // explorer.html says lang="en"; jsdom's empty document does not
+    for (const path of ["/scenario/s1/", "/", "/cases/", "/memos/"]) {
+      const view = await shellAt(path);
+      await waitFor(() =>
+        expect(view.container.querySelectorAll(".story-wait, [role=status]")).toHaveLength(0),
+      );
+      const results = await axe.run(document, {
+        rules: { "color-contrast": { enabled: false }, region: { enabled: true } },
+      });
+      const found = results.violations.map(
+        (v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join("; ")}`,
+      );
+      expect(found, path).toEqual([]);
+      // The rule was on, and it ran (it passed, it was not skipped).
+      expect(
+        results.passes.some((rule) => rule.id === "region"),
+        path,
+      ).toBe(true);
+      cleanup();
+    }
+  });
+
+  it("puts the model switch in its own labelled region on the pages that have it, and on none that do not", async () => {
+    const scenario = await shellAt("/scenario/s1/");
+    const region = await scenario.findByRole("region", { name: explorerLabels.modelSwitch });
+    expect(region.classList.contains("switch-bar")).toBe(true);
+    expect(within(region).getAllByRole("button")).toHaveLength(MODELS.length);
+    cleanup();
+    const story = await shellAt("/");
+    expect(story.queryByRole("region", { name: explorerLabels.modelSwitch })).toBeNull();
   });
 
   it("has one h1 per view", async () => {
@@ -354,7 +389,7 @@ describe("the scenario view in the shell", () => {
     expect(view.container.querySelector("figcaption")!.textContent).toContain("Haiku 5.5");
     expect(view.container.querySelectorAll(".goal-row[data-goal=B] circle")).toHaveLength(60);
 
-    const group = view.getByRole("group", { name: explorerLabels.modelSwitch });
+    const group = view.getByRole("region", { name: explorerLabels.modelSwitch });
     fireEvent.click(within(group).getByRole("button", { name: modelName(OTHER) }));
     await waitFor(() =>
       expect(view.container.querySelector("figcaption")!.textContent).toContain("gpt-oss-120b"),
@@ -371,7 +406,7 @@ describe("the scenario view in the shell", () => {
     fireEvent.click(view.getByRole("button", { name: /\(A\)/ }));
     expect(view.container.querySelector<HTMLElement>(".goal-row[data-goal=A]")!.dataset["off"]).toBe("true");
     const clicks = watchClicks();
-    fireEvent.click(view.getByRole("link", { name: explorerLabels.navScenario("s2") }));
+    fireEvent.click(view.getByRole("link", { name: explorerLabels.scenarioNames["s2"]! }));
     clicks.stop();
     await view.findByRole("figure");
     expect(view.container.querySelector<HTMLElement>(".goal-row[data-goal=A]")!.dataset["off"]).toBe("false");
@@ -384,5 +419,62 @@ describe("the scenario view in the shell", () => {
     const scenario = await shellAt("/scenario/s3/");
     await scenario.findByRole("figure");
     expect(await violations(scenario.container)).toEqual([]);
+  });
+});
+
+describe("no layout shift on load (step 11)", () => {
+  /** A data api whose files never arrive, so the shell stays in its first state. */
+  const never = (): ReturnType<typeof realApi> => {
+    const api = realApi();
+    const pending = new Promise<never>(() => {});
+    return { ...api, loadIndex: () => pending, loadCasesIndex: () => pending };
+  };
+
+  it("holds the model switch's box and the navigation from the first render, before any data, on the pages that have the switch", () => {
+    for (const path of ["/scenario/s2/", "/cases/", "/cases/pre-25/", "/studies/", "/memos/"]) {
+      window.history.replaceState(null, "", path);
+      const view = render(<Shell data={never()} />);
+      const space = view.container.querySelector(".switch-bar");
+      expect(space, path).not.toBeNull();
+      expect(space!.classList.contains("switch-space"), path).toBe(true);
+      expect(space!.getAttribute("aria-hidden"), path).toBe("true");
+      expect(space!.querySelectorAll("button"), path).toHaveLength(0);
+      // The navigation is drawn already, from the scenarios' names, with the same links it will have.
+      const nav = view.getByRole("navigation", { name: explorerLabels.navLabel });
+      expect(within(nav).getAllByRole("link").length, path).toBe(
+        5 + Object.keys(explorerLabels.scenarioNames).length - 1,
+      );
+      expect(view.container.querySelector("main")!.textContent, path).toContain(explorerLabels.loading);
+      cleanup();
+    }
+  });
+
+  it("holds no switch space on the story or a path with no page, and replaces the space with the real switch when the data arrives", async () => {
+    for (const path of ["/", "/nowhere/"]) {
+      window.history.replaceState(null, "", path);
+      const view = render(<Shell data={never()} />);
+      expect(view.container.querySelector(".switch-bar"), path).toBeNull();
+      cleanup();
+    }
+    const view = await shellAt("/scenario/s1/");
+    const bars = view.container.querySelectorAll(".switch-bar");
+    expect(bars).toHaveLength(1); // the one box, now with the buttons in it
+    expect(bars[0]!.classList.contains("switch-space")).toBe(false);
+  });
+
+  it("draws the same navigation links before and after the data, so the header never changes", async () => {
+    window.history.replaceState(null, "", "/scenario/s1/");
+    const early = render(<Shell data={never()} />);
+    const hrefs = (nav: HTMLElement) =>
+      within(nav)
+        .getAllByRole("link")
+        .map((a) => [a.getAttribute("href"), a.textContent]);
+    const before = hrefs(early.getByRole("navigation", { name: explorerLabels.navLabel }));
+    cleanup();
+    const late = await shellAt("/scenario/s1/");
+    await late.findByRole("figure");
+    const after = hrefs(late.getByRole("navigation", { name: explorerLabels.navLabel }));
+    expect(after).toEqual(before);
+    expect(after.map(([, text]) => text)).toContain(explorerLabels.scenarioNames["s1"]);
   });
 });

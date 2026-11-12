@@ -9,6 +9,7 @@ import {
   comparisonRuns,
   confidenceLevel,
   dotY,
+  edgeAnchor,
   formatDifference,
   formatPercent,
   formatPoints,
@@ -16,6 +17,8 @@ import {
   unitBox,
   unitSlot,
   wholePointsDown,
+  wordingRuns,
+  wordsSide,
   formatDistance,
 } from "./format";
 import { realCaseFiles, realGrids, realIndex, WEB_ROOT } from "./fixtures";
@@ -186,6 +189,9 @@ describe("the rule: no number is computed outside format.ts", () => {
     // C6: the story and the boundary around the lazy views.
     "Story.tsx",
     "ViewBoundary.tsx",
+    // Step 11 (the redesign batch): the shell, the switch and every figure's frame.
+    "Shell.tsx",
+    "ModelSwitch.tsx",
     "ChartCard.tsx",
     "RunDetails.tsx",
     "caseParts.tsx",
@@ -230,5 +236,40 @@ describe("formatDistance (C5)", () => {
       }
     }
     expect(checked).toBe(10 * 2 * 5 * 3);
+  });
+});
+
+describe("the redesign's pixel-position helpers and run sums (step 11)", () => {
+  it("puts an interval's words on the side of the axis with more room, ties to the right, and the choice is pure position", () => {
+    expect(wordsSide(-0.2, 0.1, -1, 1)).toBe("right"); // 0.9 of room on the right, 0.8 on the left
+    expect(wordsSide(-0.1, 0.2, -1, 1)).toBe("left"); // 0.8 on the right, 0.9 on the left
+    expect(wordsSide(-0.5, 0.5, -1, 1)).toBe("right"); // a tie goes right
+    expect(wordsSide(0.4, 0.9, -1, 1)).toBe("left");
+    expect(wordsSide(-0.9, -0.4, -1, 1)).toBe("right");
+  });
+
+  it("anchors text at an axis point so it stays on the plot: from its start near the low end, to its end near the high end", () => {
+    expect(edgeAnchor(-0.95, -1, 1)).toBe("start");
+    expect(edgeAnchor(0, -1, 1)).toBe("middle");
+    expect(edgeAnchor(0.95, -1, 1)).toBe("end");
+    expect(edgeAnchor(1, -1, 1)).toBe("end");
+    expect(edgeAnchor(-1, -1, 1)).toBe("start");
+  });
+
+  it("sums one wording's valid and attempted runs across the goals, as integers of the file's own cells", () => {
+    const grid = realGrids.find((g) => g.label === "grid haiku-5-5 s1")!.file;
+    const w2 = wordingRuns(grid, "w2");
+    let valid = 0;
+    let attempted = 0;
+    for (const cell of grid.cells) {
+      if (cell.wording_id === "w2") {
+        valid += cell.valid;
+        attempted += cell.attempted;
+      }
+    }
+    expect(w2.attempted).toBe(attempted);
+    expect(w2.valid).toBe(valid); // every valid run is a descriptive run in this file
+    expect(w2.attempted).toBeLessThan(attemptedRuns(grid.objective_rates)); // one wording of three
+    expect(wordingRuns(grid, "nope")).toEqual({ valid: 0, attempted: 0 });
   });
 });

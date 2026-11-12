@@ -569,7 +569,10 @@ describe("the layout", () => {
   it("measures a line by drawing it: a wider string is wider, and a line with nothing in it is 0", () => {
     expect(measure("Horizon", "cell")).toBeGreaterThan(0);
     expect(measure("Horizon Compact", "cell")).toBeGreaterThan(measure("Horizon", "cell"));
-    expect(measure("Horizon Compact", "cell")).not.toBe(measure("Horizon Compact", "note"));
+    // The style is part of the measure. ("note" and "cell" are the same face, weight and size now that the serif is gone,
+    // so a style that differs in size or weight is compared instead.)
+    expect(measure("Horizon Compact", "cell")).not.toBe(measure("Horizon Compact", "title"));
+    expect(measure("Horizon Compact", "cell")).not.toBe(measure("Horizon Compact", "strong"));
   });
 
   it("wraps at words, by measurement: no line wider than its box, and the words come back in order", () => {
@@ -627,15 +630,21 @@ describe("the layout", () => {
     expect(layout.bottom).toBeGreaterThan(BOTTOM_LIMIT);
   });
 
-  it("every style is one of the three families at a weight the committed fonts have", () => {
+  it("every style is one of the two families at a weight the committed fonts have, and no style is a serif (step 11)", () => {
     const families = new Set(Object.values(STYLES).map((s) => s.family));
     expect([...families].sort()).toEqual(Object.values(FAMILIES).sort());
     expect(FONT_FACES.map((f) => `${f.family} ${f.weight}`).sort()).toEqual([
       "Big Shoulders Display 800",
-      "Newsreader 16pt 400",
       "Source Sans 3 400",
       "Source Sans 3 600",
     ]);
+    // The three styles that were Newsreader in C7 are Source Sans 3 400 now, at their sizes.
+    for (const name of ["headline", "prose", "note"] as const) {
+      expect(STYLES[name].family, name).toBe(FAMILIES.sans);
+      expect(STYLES[name].weight, name).toBe(400);
+    }
+    expect(Object.values(STYLES).filter((s) => s.family === FAMILIES.display)).toHaveLength(2); // hero and name only
+    expect(FAMILIES).not.toHaveProperty("serif");
   });
 });
 
@@ -644,7 +653,7 @@ describe("the fonts and the palette", () => {
     const widths = assertFonts(FONT_FACES);
     expect(widths.size).toBe(FONT_FACES.length);
     for (const width of widths.values()) expect(width).toBeGreaterThan(0);
-    // Four different faces draw four different widths: none is standing in for another.
+    // Three different faces draw three different widths: none is standing in for another.
     expect(new Set(widths.values()).size).toBe(FONT_FACES.length);
     // One word in each style has a bounding box.
     for (const style of Object.keys(STYLES) as Array<keyof typeof STYLES>) {
@@ -689,12 +698,19 @@ describe("the fonts and the palette", () => {
     for (const color of used) expect(Object.values(PALETTE)).toContain(color);
   });
 
-  it("names its families as the site's CSS does, apart from Newsreader's optical size (16pt, the text size)", () => {
+  it("names its families as the site's CSS does, and ships no serif: the Newsreader TTF and its licence are not in fonts-ttf/", () => {
     const css = readFileSync(resolve(WEB_ROOT, "src/styles.css"), "utf8");
     expect(css).toContain(`font-family: "${FAMILIES.display}"`);
     expect(css).toContain(`font-family: "${FAMILIES.sans}"`);
-    expect(css).toContain('font-family: "Newsreader"');
-    expect(FAMILIES.serif).toBe("Newsreader 16pt");
+    const files = readdirSync(resolve(WEB_ROOT, "fonts-ttf"));
+    expect(files.filter((name) => /newsreader/i.test(name))).toEqual([]);
+    expect(files.sort()).toEqual([
+      "BigShouldersDisplay-ExtraBold.ttf",
+      "OFL-BigShouldersDisplay.txt",
+      "OFL-SourceSans3.txt",
+      "SourceSans3-Regular.ttf",
+      "SourceSans3-Semibold.ttf",
+    ]);
   });
 });
 
