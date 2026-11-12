@@ -257,7 +257,7 @@ describe("the story card", () => {
     expect(textOf(card)).toEqual([
       "Horizon Compact",
       explorerHis.landingQuestion,
-      `Two models: ${MODELS.map((key) => L.models.find((m) => m.key === key)!.name).join(" and ")}`,
+      `Two models: ${MODELS.map((key) => explorerCardLabels.cardModelNames[key]!).join(" and ")}`,
       explorerHis.scopeSentence,
     ]);
   });
@@ -378,14 +378,14 @@ describe("the cases card and the case cards (rule zero)", () => {
     (differing[path] as CaseFile).readings[0]!.label = "tie";
     expect((differing[path] as CaseFile).readings.length).toBeGreaterThan(1);
     for (const [edited, expected] of [
-      [allMatch, L.readingLabelIs(L.readingLabels.match!)],
+      [allMatch, L.readingLabels.match!],
       [differing, L.storyLabelVaries],
     ] as const) {
       const card = buildCard({ kind: "cases" }, edited);
       const text = textOf(card);
       expect(text).not.toContain(L.allNoGoodMatch);
       expect(text).toContain(`${L.models[0]!.name}: ${expected}`);
-      expect(text).toContain(`${L.models[1]!.name}: ${L.readingLabelIs(L.readingLabels.no_good_match!)}`);
+      expect(text).toContain(`${L.models[1]!.name}: ${L.readingLabels.no_good_match!}`);
       // The SVG is still exactly the runs (the runs read the edited files here, so the disk-reading source check is not
       // asked of them).
       expect(textProblems(card, cardSvg(layoutCard(card, measure)))).toEqual([]);
@@ -406,14 +406,18 @@ describe("the cases card and the case cards (rule zero)", () => {
         shown,
         ...MODELS.map((model) => {
           const same = sameLabel(caseFile(label, model));
-          const word = same === null ? L.storyLabelVaries : L.readingLabelIs(L.readingLabels[same]!);
+          const word = same === null ? L.storyLabelVaries : L.readingLabels[same]!;
           return `${L.models.find((m) => m.key === model)!.name}: ${word}`;
         }),
         explorerHis.scopeSentence,
       ]);
       // The label is above every reading label, by y.
       const labelY = layout.lines.find((l) => l.text.startsWith("exploratory:"))!.y;
-      const readingYs = layout.lines.filter((l) => l.text.includes("Label:")).map((l) => l.y);
+      const readingYs = layout.lines
+        .filter((l) => L.models.some((m) => l.text.startsWith(`${m.name}: `)))
+        .map((l) => l.y);
+      // A model's name, then its label: no "Label:" of the card's own (section 29b).
+      expect(lines.join(" ")).not.toContain("Label:");
       expect(readingYs).toHaveLength(MODELS.length);
       for (const y of readingYs) expect(labelY).toBeLessThan(y);
 
@@ -532,6 +536,13 @@ describe("the labels written for the cards", () => {
       for (const word of Object.values(L.verdictWords)) {
         expect(text.toLowerCase(), word).not.toMatch(new RegExp(`\\b${word}\\b`));
       }
+    }
+  });
+
+  it("gives a full name for every model the page names, and each full name holds the page's short name", () => {
+    expect(Object.keys(explorerCardLabels.cardModelNames).sort()).toEqual([...MODELS].sort());
+    for (const model of L.models) {
+      expect(explorerCardLabels.cardModelNames[model.key], model.key).toContain(model.name);
     }
   });
 

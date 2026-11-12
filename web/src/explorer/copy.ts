@@ -457,11 +457,12 @@ export const explorerLabels = {
 };
 
 /**
- * C7: the share cards' labels (Phase 6 IMPLEMENTATION doc section 10; section 29 lists them). CLAUDE-DRAFTED AND NOT YET
- * APPROVED: they wait for the words pass after Opus's review. Each describes what a card or a link preview shows; none
- * states a result, and none holds a ratio. The cards also use labels of `explorerLabels` (`allNoGoodMatch`,
- * `capValidOfAttempted`, `roundtableFlag`, `storyPairHeading`, `readingLabelIs`, `storyLabelVaries`, `verdictWords`,
- * `objectiveNames`, `readingLabels`, `caseDescriptionStatus`) and his words, unchanged.
+ * C7: the share cards' labels (Phase 6 IMPLEMENTATION doc section 10; section 29 lists them). Claude-drafted; HE APPROVED
+ * THEM on 2026-11-12, in the words pass after Opus's review (section 29b). Each describes what a card or a link preview
+ * shows; none states a result, and none holds a ratio. The cards also use labels of `explorerLabels` (`allNoGoodMatch`,
+ * `capValidOfAttempted`, `roundtableFlag`, `storyPairHeading`, `storyLabelVaries`, `verdictWords`, `objectiveNames`,
+ * `readingLabels`, `caseDescriptionStatus`) and his words, unchanged. A case card says a model's reading label after its
+ * name with no "Label:" of its own (`readingLabels`, not `readingLabelIs`, which the site keeps).
  *
  * A separate export, not more keys of `explorerLabels`, so that no view imports it and the bundler leaves it out: the
  * explorer's JavaScript is the same size as before C7 (the build's check-dist lines show it), and nothing a page loads
@@ -470,20 +471,25 @@ export const explorerLabels = {
 export const explorerCardLabels = {
   cardName: "Horizon Compact",
   cardTwoModels: (first: string, second: string) => `Two models: ${first} and ${second}`,
+  // The models' full names, for the story card's two-models line only (a card is seen away from the site, where the
+  // maker's name helps); the site and every other card use the short names of `explorerLabels.models`. A test ties
+  // these keys to those, and each full name holds its short name.
+  cardModelNames: {
+    "haiku-5-5": "Claude Haiku 5.5",
+    "gpt-oss-openrouter": "OpenAI\u2019s gpt-oss-120b",
+  } as Record<string, string>,
   cardMemoLabel:
     "Written by a model under one goal, for a fictional company. This is the model\u2019s output, not the project\u2019s view.",
-  // The alternative text of each kind of page's link-preview image (og:image:alt).
+  // The alternative text of each kind of page's link-preview image (og:image:alt): what the card says, plainly.
   cardAlt: {
     story:
-      "A card for the project\u2019s front page: its name, its question, the two models it tests, and what it does not measure. It shows no result.",
+      "Horizon Compact\u2019s question, the two AI models it tests, and what the experiment does not measure.",
     scenario:
-      "A card for one company decision: the scenario in brief, how many valid runs each of the two models made, and the study\u2019s verdict for each comparison, side by side. The verdicts are the study\u2019s own.",
-    cases:
-      "A card for the real cases: how they were chosen, and what each model\u2019s reading of every case was. It names no company.",
-    case: "A card for one real case: how it was chosen, its short description with the company\u2019s name removed, and what each model\u2019s reading of it was.",
-    studies:
-      "A card for the two side studies: what they ask, and what the study measures and does not. It shows no result.",
+      "One decision for the made-up company, in brief; how many valid runs each of the two models made; and the study\u2019s verdict on each pair of goals, for each model side by side.",
+    cases: "The real cases: how they were chosen, and each model\u2019s reading of every case.",
+    case: "One real case: how it was chosen, a short description with the company\u2019s name removed, and each model\u2019s reading of it.",
+    studies: "The two side studies and what each one asks, and what the experiment does not measure.",
     memos:
-      "A card for the memo reader: what a memo is, and that it is the model\u2019s own writing and not the project\u2019s view. It shows no memo text.",
+      "The memo reader: what a memo is, and a note that each memo is a model\u2019s own writing, not the project\u2019s view.",
   } as Record<string, string>,
 };

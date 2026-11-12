@@ -7,7 +7,18 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-11, about 4:10 PM, HANDOFF (C7 BUILT AND REVIEWED; WORDS PASS NEXT)
+> ## START HERE — where things stand, 2026-11-12, about 8:55 AM (C7'S WORDS APPROVED; STEP 11 NEXT)
+>
+> **C7 committed `e5c33bf` (his) and pushed; CI `43109023726` and Deploy `43109024155` green.** (`ce659dc`'s two runs are
+> stuck "queued" with no jobs; GitHub refuses both cancel and delete, 403. Left alone: `e5c33bf`'s runs cover that code.)
+> **The words pass on the card labels done:** he approved Claude's drafts as written (the Phase 6 IMPLEMENTATION doc
+> §29b): plain alternative text, no doubled "Label:" on the case cards, full model names on the story card only.
+> `make check` green (Python 3,483, Vitest 527); `web/dist/` unchanged. **Uncommitted: the labels, the card code, the
+> tests and these doc edits, for his commit.** **Next: §14 step 11**, his review against §12 on the preview.
+>
+> *The block below is superseded.*
+
+> ## START HERE — where things stood, 2026-11-11, about 4:10 PM, HANDOFF (C7 BUILT AND REVIEWED; WORDS PASS NEXT) *(superseded by the block above)*
 >
 > **C7, the share cards, built by Sonnet (the Phase 6 IMPLEMENTATION doc §29) and reviewed by Opus (§29a): passed after
 > one fix** (the story card printed the name twice; it now leaves off the title, which every preview shows as text).

@@ -486,7 +486,7 @@ My recommendation is (a) in each, for the reason given.
 7. **[built 2026-11-10 by Sonnet, §27; reviewed by Opus, §27a: passed after one change]** **[Sonnet builds, Opus reviews]** **C5, the memo reader, the real cases and the studies.**
 8. **[done 2026-11-11: his words, the labels and the four result-sentence templates approved, §11's dated notes]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[built 2026-11-11 by Sonnet, §28; reviewed by Opus, §28a (part A, passed) and §28b (part B, passed after one fix)]** **[Sonnet builds, Opus reviews]** **C6, the guided story.**
-10. **[built 2026-11-11 by Sonnet, §29; reviewed by Opus, §29a: passed after one fix; words pass next]** **[Sonnet builds, Opus reviews]** **C7, the share cards.**
+10. **[built 2026-11-11 by Sonnet, §29; reviewed by Opus, §29a: passed after one fix; words pass done 2026-11-12, §29b]** **[Sonnet builds, Opus reviews]** **C7, the share cards.**
 11. **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
     script per view; fixes before the close.
 12. **[Claude]** **C8, the close:** the DoD audit, the version (decision 9), `ROADMAP.md`, `KNOWN-GAPS.md`.
@@ -2569,3 +2569,29 @@ index 3 to 2. The other cards' titles do not repeat the name and are unchanged.
 
 **Proof after the fix:** `cards.test.ts` 65 passed; the story card rebuilt and opened (name, question, two models, scope
 sentence; nothing clipped); `scratch/p6-c7-cards/story.png` replaced. The contact sheet still shows the old story card.
+
+## 29b. The words pass on the card labels (2026-11-12, Claude-drafted, his approval)
+
+**He approved every proposal as written** ("all as proposed"), the way he did C6's words. Claude drafted; the words are his.
+
+- **The alternative text (`cardAlt`)** now says what each card shows, plainly: no "A card for...", and no "It shows no
+  result", "It names no company", "It shows no memo text" or "The verdicts are the study's own" (notes for us, not for a
+  reader). It stays one text per kind of page, so it names no model (the no-digit test) and no scenario's verdicts.
+- **The case cards' doubled "Label:"** is gone: a model's line is its name, ": " and the reading label itself
+  (`readingLabels`, picked by the data), so "Haiku 5.5: no good match". The site's `readingLabelIs` is unchanged. The cases
+  card's rows (when not every reading is "no good match") read the same way.
+- **The story card's two-models line** uses full names, "Two models: Claude Haiku 5.5 and OpenAI’s gpt-oss-120b", as
+  his approved story words do: a new card-only map, `cardModelNames`, picked by `index.json`'s model keys through the
+  label `select` the verdict words use. Every other card keeps the short names (the scenario table's columns). A new test
+  ties the map's keys to `explorerLabels.models` and checks each full name holds its short name.
+- **Left as they are, his call:** the straight apostrophes of `his.json` beside the labels' curly ones (one card shows
+  both; fixing it touches his approved words), and the memo card's "fictional company" (it is tied by a test to the site's
+  approved memo label). **Not in this pass:** the exploratory labels on the cases and case cards ("selected by §4.6.5 step
+  2...") mean little to an outsider; they stay verbatim by the 2026-10-18 condition; raise at step 11 only if he wants.
+
+**Proof (measured, 2026-11-12).** `make check` exit 0: Python 3,483 passed; Vitest 527 passed in 32 files (C7's 526 plus
+the name-map test); `check-dist: ok` in both modes. **Mutation-checked:** putting back `readingLabelIs` fails 6 tests
+(the cases card and the five case cards), and putting back the short name on the story card fails its test.
+`web/dist/` is byte-identical to C7's (`scratch/p6-c7-dist-after.txt`, 8 files); the story path's JavaScript is 94,265
+bytes, as at C7 (the card labels are not in the bundle). The story card and the case card `closure-07` were rebuilt and
+opened: nothing clipped.

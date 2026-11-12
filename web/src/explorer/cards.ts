@@ -301,8 +301,19 @@ function storyCard(files: CardFiles, route: PageRoute): Card {
   const twoModels = labelRun(files, {
     key: "cardTwoModels",
     args: [
-      { data: { file: "index.json", path: `models.${first.at}.model_key`, via: "modelName" } },
-      { data: { file: "index.json", path: `models.${second.at}.model_key`, via: "modelName" } },
+      // The full names (`cardModelNames`), picked by the data's model keys: this card is the one seen away from the site.
+      {
+        label: {
+          key: "cardModelNames",
+          select: { file: "index.json", path: `models.${first.at}.model_key` },
+        },
+      },
+      {
+        label: {
+          key: "cardModelNames",
+          select: { file: "index.json", path: `models.${second.at}.model_key` },
+        },
+      },
     ],
   });
   return {
@@ -424,11 +435,9 @@ function readingParagraph(files: CardFiles, path: string): Paragraph {
   if (file === undefined) throw new Error(`cards: ${path} is not among the files`);
   const same = labelUnderEveryReading(file);
   if (same === null) return paragraph("cell", [labelRun(files, { key: "storyLabelVaries" })]);
+  // The label itself, after the model's name and ": " (no "Label:" of its own: section 29b).
   return paragraph("cell", [
-    labelRun(files, {
-      key: "readingLabelIs",
-      args: [{ label: { key: "readingLabels", select: { file: path, path: "readings.0.label" } } }],
-    }),
+    labelRun(files, { key: "readingLabels", select: { file: path, path: "readings.0.label" } }),
   ]);
 }
 
