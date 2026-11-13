@@ -47,7 +47,7 @@ export function View({ route, index, casesIndex, model, search, data, onStorySet
         <CaseView key={route.label} label={route.label} index={index} casesIndex={casesIndex} data={data} />
       );
     case "studies":
-      return <StudiesView index={index} data={data} />;
+      return <StudiesView index={index} model={model} data={data} />;
     case "memos":
       return <MemosView index={index} model={model} search={search} data={data} />;
     case "not_found":

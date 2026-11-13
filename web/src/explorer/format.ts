@@ -23,6 +23,21 @@ export function formatPercent(share: number, digits = 1): string {
   return `${(share * 100).toFixed(digits)}%`;
 }
 
+/** A share as a whole percentage ("62%"): the display format for a coded lever share, which the case page shows without decimals. */
+export function formatWholePercent(share: number): string {
+  return formatPercent(share, 0);
+}
+
+/**
+ * A reason from a case file, shown under a status line that already says "withheld": without the file's own leading
+ * "withheld: " (exactly that prefix, nothing else), so the word is not said twice. The rest of the reason is verbatim; a
+ * reason without the prefix comes back unchanged.
+ */
+export function withoutWithheldPrefix(reason: string): string {
+  const prefix = "withheld: ";
+  return reason.startsWith(prefix) ? reason.slice(prefix.length) : reason;
+}
+
 /**
  * A difference or an interval end, in points (one point is 0.01), signed, to `digits` decimal places (one unless a
  * caller says otherwise). A value that rounds to zero carries no sign: "0.0", never "-0.0".

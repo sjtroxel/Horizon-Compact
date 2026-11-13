@@ -50,7 +50,11 @@ describe("the scenario view, from the real files", () => {
     for (const model of MODELS) {
       for (const id of SCENARIOS) {
         const { container, unmount } = await view(id, model);
-        expect(container.querySelector("h1")?.textContent, `${model} ${id}`).toContain(`(${id})`);
+        // The heading is the scenario's short name; the id is in the line under it (section 32, item 1).
+        expect(container.querySelector("h1")?.textContent, `${model} ${id}`).toBe(L.scenarioNames[id]);
+        expect(container.querySelector(".scenario-name")?.textContent, `${model} ${id}`).toBe(
+          L.scenarioIdLine(id),
+        );
         expect(container.querySelectorAll(".result-sentence"), `${model} ${id}`).toHaveLength(5);
         expect(container.querySelector("figcaption")?.textContent).toContain(modelName(model));
         expect(container.querySelectorAll(".goal-row[data-goal]"), `${model} ${id}`).toHaveLength(5);
@@ -190,7 +194,34 @@ describe("the counts under each sentence", () => {
             const runs = comparisonRuns(comparison);
             expect(small, `${model} ${id} ${first}-${second}`).toContain(L.runsPair(runs.first, runs.second));
           }
-          expect(small).toContain(`${L.officialVerdict} ${L.verdictWords[comparison.final_verdict]}`);
+          // The official verdict is not in the small line any more: it is inside the closed per-comparison section.
+          expect(small).not.toContain(L.officialVerdict);
+          const more = li.querySelector<HTMLDetailsElement>("details.finding-more")!;
+          expect(more.open).toBe(false);
+          expect(more.textContent).toContain(
+            `${L.officialVerdict} ${L.verdictWords[comparison.final_verdict]}`,
+          );
+        }
+        unmount();
+      }
+    }
+  });
+});
+
+describe("the label of each comparison's kind (step 11 pages, item 4)", () => {
+  it("says Primary comparison on a primary one with no other label, Secondary comparison on a secondary one, and keeps the Roundtable pair's own", async () => {
+    for (const model of MODELS) {
+      for (const id of SCENARIOS) {
+        const file = gridOf(model, id);
+        const { container, unmount } = await view(id, model);
+        for (const li of sentenceItems(container)) {
+          const [first, second] = li.dataset["pair"]!.split("-") as [string, string];
+          const comparison = findComparison(file, first, second)!;
+          const flags = [...li.querySelectorAll(".flag")].map((f) => f.textContent);
+          const where = `${model} ${id} ${first}-${second}`;
+          if (first === "C" && second === "D") expect(flags, where).toEqual([L.roundtableFlag]);
+          else if (comparison.role === "secondary") expect(flags, where).toEqual([L.secondaryFlag]);
+          else expect(flags, where).toEqual([L.primaryFlag]);
         }
         unmount();
       }
@@ -199,6 +230,13 @@ describe("the counts under each sentence", () => {
 });
 
 describe("the protocol's readings in the view", () => {
+  it("says the protocol's label and its sentence, without the pattern's own words (step 11 pages, item 3)", async () => {
+    const { container } = await view("s1", "haiku-5-5"); // C vs D: split
+    const quote = sentenceItems(container)[0]!.querySelector("blockquote")!;
+    expect(quote.textContent).toBe(`${L.protocolReadingLabel}${PROTOCOL_READINGS.cd_split.reading}`);
+    expect(quote.textContent).not.toContain(PROTOCOL_READINGS.cd_split.pattern);
+  });
+
   it("quotes the row for C vs D's verdict under the lead, as written", async () => {
     const { container } = await view("s1", "haiku-5-5"); // C vs D: split
     const lead = sentenceItems(container)[0]!;

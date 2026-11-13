@@ -79,7 +79,10 @@ describe("the shell", () => {
 
   it("shows a scenario's id in its title, then the chart card and its caption once the data has loaded", async () => {
     const view = await shellAt("/scenario/s3/");
-    expect(h1Text(view.container)).toContain("(s3)");
+    expect(h1Text(view.container)).toBe(explorerLabels.scenarioNames["s3"]);
+    expect(view.container.querySelector(".scenario-name")!.textContent).toBe(
+      explorerLabels.scenarioIdLine("s3"),
+    );
     const caption = await waitFor(() => {
       const found = view.container.querySelector("figure figcaption");
       expect(found).not.toBeNull();
@@ -114,7 +117,8 @@ describe("the links", () => {
     expect(window.history.length).toBe(before + 1);
     const expected = pageMeta({ kind: "scenario", id: "s2" }, explorerHis.pages).title;
     // The view is a lazy chunk: the heading, the title and the focus follow once it has loaded.
-    await waitFor(() => expect(h1Text(view.container)).toBe(expected));
+    // The heading is the scenario's short name; the document's title keeps his title and the id.
+    await waitFor(() => expect(h1Text(view.container)).toBe(explorerLabels.scenarioNames["s2"]));
     await waitFor(() => expect(document.title).toBe(expected));
     await waitFor(() => expect(document.activeElement).toBe(view.container.querySelector("h1")));
     expect(window.scrollTo).toHaveBeenCalled();
@@ -431,7 +435,7 @@ describe("no layout shift on load (step 11)", () => {
   };
 
   it("holds the model switch's box and the navigation from the first render, before any data, on the pages that have the switch", () => {
-    for (const path of ["/scenario/s2/", "/cases/", "/cases/pre-25/", "/studies/", "/memos/"]) {
+    for (const path of ["/scenario/s2/", "/studies/", "/memos/"]) {
       window.history.replaceState(null, "", path);
       const view = render(<Shell data={never()} />);
       const space = view.container.querySelector(".switch-bar");
@@ -445,6 +449,19 @@ describe("no layout shift on load (step 11)", () => {
         5 + Object.keys(explorerLabels.scenarioNames).length - 1,
       );
       expect(view.container.querySelector("main")!.textContent, path).toContain(explorerLabels.loading);
+      cleanup();
+    }
+  });
+
+  it("holds no switch space where the model changes nothing: the real cases and a case page (step 11 pages, item 20)", async () => {
+    for (const path of ["/cases/", "/cases/pre-25/"]) {
+      window.history.replaceState(null, "", path);
+      const early = render(<Shell data={never()} />);
+      expect(early.container.querySelector(".switch-bar"), `${path} before the data`).toBeNull();
+      cleanup();
+      const late = await shellAt(path);
+      expect(late.container.querySelector(".switch-bar"), `${path} after the data`).toBeNull();
+      expect(late.queryByRole("region", { name: explorerLabels.modelSwitch }), path).toBeNull();
       cleanup();
     }
   });

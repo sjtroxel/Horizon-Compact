@@ -13,12 +13,14 @@ import {
   formatDifference,
   formatPercent,
   formatPoints,
+  formatWholePercent,
   jitter,
   unitBox,
   unitSlot,
   wholePointsDown,
   wordingRuns,
   wordsSide,
+  withoutWithheldPrefix,
   formatDistance,
 } from "./format";
 import { realCaseFiles, realGrids, realIndex, WEB_ROOT } from "./fixtures";
@@ -43,6 +45,13 @@ function pointsFromDigits(difference: number): number {
 }
 
 describe("display formats", () => {
+  it("shows a coded lever share as a whole percentage, and a reason without the file's own leading 'withheld: ' (step 11 pages, items 9 and 11)", () => {
+    expect([0, 0.5, 0.624, 1].map(formatWholePercent)).toEqual(["0%", "50%", "62%", "100%"]);
+    expect(withoutWithheldPrefix("withheld: because")).toBe("because");
+    expect(withoutWithheldPrefix("because")).toBe("because");
+    expect(withoutWithheldPrefix("Withheld: because")).toBe("Withheld: because");
+  });
+
   it("shows a share as a percentage to one decimal place, and an axis label to none", () => {
     expect(formatPercent(0.624)).toBe("62.4%");
     expect(formatPercent(1 / 125)).toBe("0.8%");

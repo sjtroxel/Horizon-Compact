@@ -7,7 +7,7 @@ import { explorerHis, explorerLabels as L } from "./copy";
 import type { CaseFile, DataApi } from "./data";
 import { DistanceChart } from "./distanceChart";
 import { editedApi, realApi, realCaseFiles, realCasesIndex, realIndex } from "./fixtures";
-import { axisPercent, formatDistance, formatPercent } from "./format";
+import { axisPercent, formatDistance, formatWholePercent, withoutWithheldPrefix } from "./format";
 import { SELECTION_LOGS, selectionLogUrl } from "./links";
 import { modelName } from "./models";
 
@@ -48,7 +48,9 @@ async function violations(container: HTMLElement) {
 const before = (a: Element, b: Element) =>
   Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
 
-const readingName = (id: string) => L.readingNames[id] ?? L.readingAlternative(id);
+// A heading or a list says "Alternative reading" with no id; the distance chart's note line and accessible name keep it.
+const readingName = (id: string) => L.readingNames[id] ?? L.readingAlternativeName;
+const readingNameWithId = (id: string) => L.readingNames[id] ?? L.readingAlternative(id);
 
 describe("/cases/", () => {
   it("shows his introduction and the framing: the protocol applied to real decisions, not proof of the method", async () => {
@@ -237,10 +239,20 @@ describe.each(LABELS)("/cases/%s/", (label) => {
       expect(text).toContain(L.caseDescriptionWithheld);
     }
     expect(text).toContain(L.caseDossierStatus(entry.dossier.published));
-    expect(text).toContain(entry.dossier.reason); // verbatim
+    // The reason is the file's own, without its leading "withheld: " (the status line above says it), and said once.
+    expect(entry.dossier.reason.startsWith("withheld: ")).toBe(true);
+    const reason = withoutWithheldPrefix(entry.dossier.reason);
+    expect(text).toContain(`${L.caseReasonLabel}: ${reason}`);
+    expect(text).not.toContain(entry.dossier.reason);
+    expect(text.split(reason)).toHaveLength(2);
+    expect(entry.reidentification.reason).toBe(entry.dossier.reason); // the files say it twice; the page says it once
     expect(text).toContain(L.caseReidentStatus(entry.reidentification.status));
-    expect(text).toContain(entry.reidentification.reason);
+    expect(text).toContain(L.caseReidentReasonAbove);
     expect(text).toContain(`${L.caseThresholdLabel}: ${entry.reidentification.threshold}`);
+    const dossier = [...container.querySelectorAll("section")].find(
+      (s) => s.querySelector("h2")?.textContent === L.caseDossierHeading,
+    )!;
+    expect(dossier.textContent).toContain(reason);
   });
 
   it("shows the recognition probes, as the index has them", async () => {
@@ -260,7 +272,7 @@ describe.each(LABELS)("/cases/%s/", (label) => {
     expect(text).toContain(L.caseCompanyChoice(L.choices[file.company.choice]!));
     for (const alt of file.company_alternatives) {
       for (const [lever, share] of Object.entries(alt.shares)) {
-        expect(text).toContain(`${L.levers[lever]}: ${formatPercent(share)}`);
+        expect(text).toContain(`${L.levers[lever]}: ${formatWholePercent(share)}`);
       }
     }
     const dims = container.querySelectorAll(".x-facts")[0]!.textContent!;
@@ -282,16 +294,24 @@ describe.each(LABELS)("/cases/%s/", (label) => {
       const file = fileOf(label, model);
       const section = sections[i]!;
       expect(section.querySelector("h2")!.textContent).toBe(modelName(model));
-      expect(section.textContent).toContain(L.caseRunCounts(file.run_counts.runs));
-      for (const [status, runs] of Object.entries(file.run_counts.by_final_status)) {
-        expect(section.textContent).toContain(L.caseFinalStatus(status, runs));
+      const statuses = Object.entries(file.run_counts.by_final_status);
+      if (statuses.length === 1) {
+        expect(section.textContent).toContain(L.caseRunsAllOneStatus(file.run_counts.runs, statuses[0]![0]));
+        expect(section.textContent).not.toContain(L.caseRunCounts(file.run_counts.runs));
+      } else {
+        expect(section.textContent).toContain(L.caseRunCounts(file.run_counts.runs));
+        for (const [status, runs] of statuses) {
+          expect(section.textContent).toContain(L.caseFinalStatus(status, runs));
+        }
       }
       const readings = [...section.querySelectorAll<HTMLElement>(".case-reading")];
       expect(readings.map((r) => r.dataset["reading"])).toEqual(orderedReadings(file).map((r) => r.reading));
       for (const [j, reading] of orderedReadings(file).entries()) {
         const block = readings[j]!;
         expect(block.querySelector("h3")!.textContent).toBe(readingName(reading.reading));
-        expect(block.textContent).toContain(L.readingLabelIs(L.readingLabels[reading.label]!));
+        // The label is said by itself under the reading's name, with no "Label:" before it.
+        expect(block.querySelector("b")!.textContent).toBe(L.readingLabels[reading.label]);
+        expect(block.textContent).not.toContain("Label:");
         expect(block.querySelector(".reading-reason")!.textContent).toBe(
           `${L.readingReason}: ${reading.reason}`,
         );
@@ -341,7 +361,7 @@ describe.each(LABELS)("/cases/%s/", (label) => {
           expect(caption).toContain(part);
         }
         expect(figure.querySelector("[role=group]")!.getAttribute("aria-label")).toBe(
-          L.distanceChartLabel(label, modelName(model), readingName(reading.reading)),
+          L.distanceChartLabel(label, modelName(model), readingNameWithId(reading.reading)),
         );
       }
     }
@@ -362,7 +382,7 @@ describe.each(LABELS)("/cases/%s/", (label) => {
       // The run count of each goal's row is in the figure, beside its distance.
       const rows = figure.querySelectorAll(".distance-row[data-goal]");
       expect(rows).toHaveLength(5);
-      for (const row of rows) expect(row.textContent).toMatch(/\d+ runs measured/);
+      for (const row of rows) expect(row.textContent).toMatch(/\d+ runs compared/);
       expect(figure.textContent).not.toContain(explorerHis.scopeSentence);
     }
     // The full sentence is on the page once, near the top, after the exploratory label.
@@ -496,7 +516,7 @@ describe("the distance chart", () => {
       <DistanceChart
         caseLabel="closure-07"
         model={modelName(GPT)}
-        readingName={readingName(reading.reading)}
+        readingName={readingNameWithId(reading.reading)}
         labelWord={L.readingLabels[reading.label]!}
         reading={reading}
         dStar={file.thresholds.d_star}
@@ -544,7 +564,7 @@ describe("the distance chart", () => {
       expect(row.textContent).toContain(
         L.distanceRowNumbers(formatDistance(d.distance), formatDistance(d.low), formatDistance(d.high)),
       );
-      expect(row.textContent).toContain(L.distanceRuns(d.runs, d.choice_only_runs, d.undistanced_runs));
+      expect(row.textContent).toContain(L.distanceRunsPlain(d.runs, d.choice_only_runs, d.undistanced_runs));
     }
   });
 
@@ -574,4 +594,167 @@ describe("accessibility", () => {
     const one = await page("closure-19");
     expect(await violations(one.container)).toEqual([]);
   });
+});
+
+describe("step 11 pages: the cases and the case pages", () => {
+  it("every case file has exactly one alternative reading and one alternative company coding, so the plain name is never ambiguous (item 6)", () => {
+    for (const { label, model, file } of realCaseFiles) {
+      const where = `${label} ${model}`;
+      expect(
+        file.readings.filter((r) => r.reading !== "primary").map((r) => r.reading),
+        where,
+      ).toEqual(["u1"]);
+      expect(
+        file.company_alternatives.map((a) => a.reading),
+        where,
+      ).toEqual(["u1"]);
+    }
+  });
+
+  it("says Alternative reading, with no id, in every heading and list, and keeps the id in the distance chart's note line (item 6)", async () => {
+    const { container } = await page("closure-07");
+    const headings = [...container.querySelectorAll(".case-reading h3")].map((h) => h.textContent);
+    expect(headings).toEqual([
+      ...MODELS.map(() => [L.readingNames["primary"], L.readingAlternativeName]).flat(),
+    ]);
+    for (const h of container.querySelectorAll("h1, h2, h3, h4, .x-facts-list li"))
+      expect(h.textContent, "no id in a heading or list").not.toMatch(/Alternative reading u1/);
+    expect(container.querySelector(".distance-figure[data-reading=u1] figcaption")!.textContent).toContain(
+      "Alternative reading u1",
+    );
+    cleanup();
+    const cases = await list();
+    expect(cases.container.querySelector(".case-readings")!.textContent).not.toContain("u1");
+  });
+
+  it("sets each case's heading on /cases/ in the heading face, not monospace (item 5)", async () => {
+    const { container } = await list();
+    const links = [...container.querySelectorAll<HTMLAnchorElement>(".case-card h2 a")];
+    expect(links).toHaveLength(LABELS.length);
+    for (const a of links) expect(a.classList.contains("mono"), a.textContent!).toBe(false);
+  });
+
+  it("gives every grey note box the class that spaces it from what follows (item 7)", async () => {
+    const cases = await list();
+    for (const note of cases.container.querySelectorAll(".x-note"))
+      expect(note.classList.contains("case-note"), note.textContent!).toBe(true);
+    cleanup();
+    const one = await page("closure-07");
+    const notes = one.container.querySelectorAll(".x-note");
+    expect(notes.length).toBeGreaterThan(0);
+    for (const note of notes) expect(note.classList.contains("case-note"), note.textContent!).toBe(true);
+  });
+
+  it("strips only the exact prefix 'withheld: ' from a reason, and leaves a reason without it unchanged (item 9)", () => {
+    expect(withoutWithheldPrefix("withheld: its figures match fewer than 20 filers")).toBe(
+      "its figures match fewer than 20 filers",
+    );
+    expect(withoutWithheldPrefix("its figures match fewer than 20 filers")).toBe(
+      "its figures match fewer than 20 filers",
+    );
+    expect(withoutWithheldPrefix("Withheld: x")).toBe("Withheld: x");
+    expect(withoutWithheldPrefix("withheld:x")).toBe("withheld:x");
+    expect(withoutWithheldPrefix("not withheld: x")).toBe("not withheld: x");
+    expect(withoutWithheldPrefix("withheld: withheld: x")).toBe("withheld: x");
+  });
+
+  it("shows the identification check's own reason when it differs from the dossier's, because it then says something the dossier does not (item 10)", async () => {
+    const edited = {
+      ...realCasesIndex,
+      cases: realCasesIndex.cases.map((c) =>
+        c.label === "closure-07"
+          ? { ...c, reidentification: { ...c.reidentification, reason: "withheld: a different reason" } }
+          : c,
+      ),
+    };
+    const rendered = render(
+      <CaseView label="closure-07" index={realIndex} casesIndex={edited} data={realApi()} />,
+    );
+    await waitFor(() =>
+      expect(rendered.container.querySelectorAll(".case-model").length).toBe(MODELS.length),
+    );
+    expect(rendered.container.textContent).toContain(`${L.caseReasonLabel}: a different reason`);
+    expect(rendered.container.textContent).not.toContain(L.caseReidentReasonAbove);
+  });
+
+  it("shows a coded lever share as a whole percentage (item 11), and the matcher's quoted reason as it is", async () => {
+    expect([0, 0.5, 0.624, 0.006, 1].map(formatWholePercent)).toEqual(["0%", "50%", "62%", "1%", "100%"]);
+    const { container } = await page("closure-19");
+    const text = container.textContent!;
+    expect(text).toContain(`${L.levers["eliminated"]}: 100%`);
+    expect(text).not.toContain("100.0%");
+    for (const model of MODELS)
+      for (const reading of fileOf("closure-19", model).readings) expect(text).toContain(reading.reason);
+  });
+
+  it("says no split across the levers for a reading with no shares, in the new words (item 12)", async () => {
+    const { container } = await page("closure-19");
+    expect(container.textContent).toContain(L.caseNoSharesPlain);
+  });
+
+  it("says 'N runs, all <status>' when every run has one status, and keeps the list when there is more than one (item 13)", async () => {
+    const one = await page("closure-07");
+    const section = one.container.querySelector<HTMLElement>(`.case-model[data-model="${HAIKU}"]`)!;
+    const file = fileOf("closure-07", HAIKU);
+    const [[status]] = Object.entries(file.run_counts.by_final_status) as [[string, number]];
+    expect(Object.keys(file.run_counts.by_final_status)).toHaveLength(1);
+    expect(section.textContent).toContain(L.caseRunsAllOneStatus(file.run_counts.runs, status));
+    expect(section.querySelector(".x-facts-list")?.textContent ?? "").not.toContain(
+      L.caseFinalStatus(status, file.run_counts.runs),
+    );
+    cleanup();
+    const split = (body: CaseFile) => {
+      body.run_counts.by_final_status = { valid: body.run_counts.runs - 2, refused: 2 };
+    };
+    const many = await page("closure-07", editedApi({ [path("closure-07", HAIKU)]: split }));
+    const edited = many.container.querySelector<HTMLElement>(`.case-model[data-model="${HAIKU}"]`)!;
+    expect(edited.textContent).toContain(L.caseRunCounts(file.run_counts.runs));
+    expect(edited.textContent).toContain(L.caseFinalStatus("refused", 2));
+    expect(edited.textContent).not.toContain("all valid");
+  });
+});
+
+describe("the distance chart's value column (item 8)", () => {
+  const file = fileOf("closure-07", GPT);
+  const base = file.readings[1]!;
+  const at = (value: number) => ({
+    ...base,
+    distances: base.distances.map((d) => ({ ...d, distance: value, low: value, high: value })),
+  });
+  const draw = (reading: typeof base) =>
+    render(
+      <DistanceChart
+        caseLabel="closure-07"
+        model={modelName(GPT)}
+        readingName={readingNameWithId(reading.reading)}
+        labelWord={L.readingLabels[reading.label]!}
+        reading={reading}
+        dStar={file.thresholds.d_star}
+        alpha={file.thresholds.alpha}
+        names={L.objectiveNames}
+      />,
+    );
+
+  it.each([0, 0.5, 1])(
+    "keeps the dot at %s on the scale, and the value text in its own element outside the plot, after it",
+    (value) => {
+      const { container } = draw(at(value));
+      for (const row of container.querySelectorAll<HTMLElement>(".distance-row[data-goal]")) {
+        const dot = row.querySelector("circle.d-dot")!;
+        expect(dot.getAttribute("cx")).toBe(axisPercent(value, 0, 1));
+        const svg = row.querySelector("svg")!;
+        const numbers = row.querySelector<HTMLElement>(".distance-numbers")!;
+        // Not drawn in the plot: no text in the row's svg, and the value column is a sibling that follows it.
+        expect(svg.querySelector("text")).toBeNull();
+        expect(svg.contains(numbers)).toBe(false);
+        expect(
+          numbers.querySelector("svg, text, circle, line"),
+          "nothing is drawn in the value column",
+        ).toBeNull();
+        expect(numbers.parentElement).toBe(row);
+        expect(Boolean(svg.compareDocumentPosition(numbers) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+        expect(numbers.textContent).toContain(formatDistance(value));
+      }
+    },
+  );
 });

@@ -65,6 +65,22 @@ export function resolveMemoQuery(
   return { ok: true, kind, scenario, objective, run: query.run };
 }
 
+/**
+ * A cell's runs grouped by wording, for the reader's list of runs: one group a wording in the order each first appears,
+ * the runs of a group in the file's order. It regroups and counts nothing.
+ */
+export function groupRunsByWording<T extends { wording_id: string }>(
+  rows: readonly T[],
+): Array<{ wording: string; runs: T[] }> {
+  const groups: Array<{ wording: string; runs: T[] }> = [];
+  for (const row of rows) {
+    const group = groups.find((g) => g.wording === row.wording_id);
+    if (group === undefined) groups.push({ wording: row.wording_id, runs: [row] });
+    else group.runs.push(row);
+  }
+  return groups;
+}
+
 /** The scenarios the index lists for a kind and model, in its order. */
 export function scenariosOf(cells: readonly Cell[], kind: string, model: string): string[] {
   const found: string[] = [];

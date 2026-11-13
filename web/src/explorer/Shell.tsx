@@ -45,10 +45,17 @@ function titleOf(route: Route): string {
   return route.kind === "not_found" ? explorerLabels.notFoundTitle : pageMeta(route, explorerHis.pages).title;
 }
 
+/**
+ * The kinds of page where the model changes what is shown: a scenario page, the memo reader and the studies (whose
+ * awareness replies follow it). The real cases show both models at once and the story shows both by design, so neither
+ * has the switch (Phase 6 IMPLEMENTATION doc section 32, item 20).
+ */
+const SWITCH_KINDS: ReadonlySet<string> = new Set(["scenario", "memos", "studies"]);
+
 /** Whether a path is one of the kinds of page that carry the model switch (known from the path alone, before the data). */
 function pageHasSwitch(pathname: string): boolean {
   const route = routeOfPath(pathname);
-  return route !== null && route.kind !== "story";
+  return route !== null && SWITCH_KINDS.has(route.kind);
 }
 
 interface Catalog {
@@ -266,8 +273,7 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
         </div>
       </header>
       {catalog && route
-        ? route.kind !== "not_found" &&
-          route.kind !== "story" && (
+        ? SWITCH_KINDS.has(route.kind) && (
             <ModelSwitch models={catalog.index.models} current={model} onChoose={chooseModel} />
           )
         : // Before the data: the same box, for the kinds of page that have the switch, so nothing moves when it arrives.

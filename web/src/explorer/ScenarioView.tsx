@@ -16,7 +16,7 @@ import { explorerHis, explorerLabels as L } from "./copy";
 import type { DataApi, DataIndex, GridComparison, GridFile } from "./data";
 import { comparisonRuns, formatDifference } from "./format";
 import { scenarioTextUrl } from "./links";
-import { His, ProtocolReading, Title } from "./parts";
+import { FindingMore, His, ProtocolReading, Title } from "./parts";
 import { againstWords } from "./againstWords";
 import { readingFor } from "./protocol";
 import { Details, RunsTable } from "./RunDetails";
@@ -78,6 +78,7 @@ function Sentence({
     <li className={lead ? "sent lead" : "sent"} data-pair={`${comparison.first}-${comparison.second}`}>
       {lead && <span className="flag">{L.roundtableFlag}</span>}
       {secondary && <span className="flag">{L.secondaryFlag}</span>}
+      {!lead && !secondary && <span className="flag">{L.primaryFlag}</span>}
       <p className="result-sentence" data-template={sentence.id}>
         {sentence.text}
       </p>
@@ -91,8 +92,6 @@ function Sentence({
             {L.droppedWordings(dropped.join(", "))}
           </>
         )}
-        {" · "}
-        {L.officialVerdict} {verdictWord}
         {listed && (
           <>
             {" · "}
@@ -104,6 +103,11 @@ function Sentence({
       </p>
       {/* Said once for the column (readingsNote), not under each pair without a row (his pick, section 26a). */}
       {reading !== null && <ProtocolReading readingKey={reading} />}
+      <FindingMore>
+        <p className="fine">
+          {L.officialVerdict} {verdictWord}
+        </p>
+      </FindingMore>
     </li>
   );
 }
@@ -291,8 +295,8 @@ export function ScenarioView({ id, index, model, data }: ScenarioViewProps) {
 
   return (
     <>
-      <Title route={{ kind: "scenario", id }}>
-        <p className="scenario-name">{L.scenarioNames[id] ?? id}</p>
+      <Title route={{ kind: "scenario", id }} heading={L.scenarioNames[id] ?? id}>
+        <p className="scenario-name">{L.scenarioIdLine(id)}</p>
       </Title>
       <His text={explorerHis.scopeSentence} />
       <AboutResults alpha={modelEntry?.alpha} />

@@ -11,7 +11,7 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { DataApi, DataIndex, MemoCell, MemoIndex, MemoRow } from "./data";
-import { memoCells, resolveMemoQuery, scenariosOf } from "./memoData";
+import { groupRunsByWording, memoCells, resolveMemoQuery, scenariosOf } from "./memoData";
 import { modelName } from "./models";
 import { His, Title } from "./parts";
 import { MEMO_KINDS, memoHref, readMemoQuery, withModel } from "./route";
@@ -231,7 +231,7 @@ export function MemosView({ index, model, search, data }: MemosViewProps) {
                 href={memoHref({ kind, scenario: s, objective }, model)}
                 current={s === scenario}
               >
-                {s}
+                {L.scenarioNames[s] ?? s}
               </Choice>
             ))}
           </ul>
@@ -323,15 +323,30 @@ export function MemosView({ index, model, search, data }: MemosViewProps) {
         </nav>
         <section className="x-section" aria-labelledby={runsId}>
           <h2 id={runsId}>{L.memoRunsHeading}</h2>
-          <ol className="memo-runs">
-            {rows.map((r) => (
-              <li key={r.run_id}>
-                <a href={open(r)} aria-current={r.run_id === row.run_id ? "true" : undefined}>
-                  <span className="mono">{r.run_id}</span> {L.memoRunLine(r.wording_id, r.repeat, r.status)}
-                </a>
+          {/* One line a wording; its repeats are short links showing the repeat number. A link's accessible name carries
+              the run id, the wording, the repeat and the status; a run whose status is not "valid" shows it beside its
+              number, and the current run is marked by a heavier outline and weight as well as by `aria-current`. */}
+          <ul className="memo-runs">
+            {groupRunsByWording(rows).map((group) => (
+              <li key={group.wording} className="memo-run-group">
+                <span className="memo-run-wording">{L.memoWordingGroup(group.wording)}</span>
+                <ol className="memo-run-links">
+                  {group.runs.map((r) => (
+                    <li key={r.run_id}>
+                      <a
+                        href={open(r)}
+                        aria-label={`${L.memoRun} ${r.run_id}: ${L.memoRunLine(r.wording_id, r.repeat, r.status)}`}
+                        aria-current={r.run_id === row.run_id ? "true" : undefined}
+                      >
+                        {r.repeat}
+                        {r.status !== "valid" && <span className="memo-run-status">{r.status}</span>}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
               </li>
             ))}
-          </ol>
+          </ul>
         </section>
         <p className="fine memo-file">
           {paths.map((path) => (

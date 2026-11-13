@@ -24,8 +24,8 @@ const SEALED = realIndex.models.find((m) => m.model_key === HAIKU)!.sealed_wordi
 const GOALS = realIndex.objectives.map((o) => o.id);
 const verdictWord = (v: string) => L.verdictWords[v]!;
 
-async function studies(data: DataApi = realApi()) {
-  const rendered = render(<StudiesView index={realIndex} data={data} />);
+async function studies(data: DataApi = realApi(), model = HAIKU) {
+  const rendered = render(<StudiesView index={realIndex} model={model} data={data} />);
   await waitFor(() => expect(rendered.container.querySelector(".awareness-model")).not.toBeNull());
   return rendered;
 }
@@ -112,9 +112,17 @@ describe("the thinking sub-study", () => {
     const heights = (card: HTMLElement) =>
       [...card.querySelectorAll("svg.x-plot")].map((s) => s.getAttribute("height"));
     expect(heights(left!)).toEqual(heights(right!));
-    expect(container.querySelector(".studies-figures")!.children).toHaveLength(2);
-    // The figures sit beside the words that explain them (the step 11 redesign), at 60rem and wider.
-    expect(container.querySelector(".beside-studies")!.children).toHaveLength(2);
+    // The two figures sit side by side across the page's width (step 11 pages, item 14), with the words that explain
+    // them above and the five comparisons below; no column of their own beside them to leave empty.
+    const figures = container.querySelector<HTMLElement>(".studies-figures")!;
+    const words = container.querySelector<HTMLElement>(".studies-words")!;
+    expect(figures.children).toHaveLength(2);
+    expect(container.querySelector(".beside, .beside-studies, .beside-text")).toBeNull();
+    expect(words.contains(figures)).toBe(false);
+    expect(before(words, figures)).toBe(true);
+    expect(before(figures, container.querySelector(".x-sentence-list")!)).toBe(true);
+    expect(words.textContent).toContain(L.studiesSubStudyLabel);
+    expect(words.textContent).toContain(L.studiesGridNote);
   });
 
   it("draws the grid's runs of wording w2 only, with each goal's count from the descriptive cell of that wording", async () => {
@@ -179,23 +187,48 @@ describe("the thinking sub-study", () => {
       expect(element.dataset["template"]).toBe(sentence.id);
       const runs = comparisonRuns(c);
       expect(li.textContent).toContain(L.runsPair(runs.first, runs.second));
-      expect(li.textContent).toContain(`${L.officialVerdict} ${verdictWord(c.final_verdict)}`);
-      expect(li.querySelector(".headline")!.textContent).toBe(`${L.headlineLabel}: ${c.headline}`); // verbatim
+      // The official verdict and the analysis headline are in the closed per-comparison section, not in the visible
+      // lines (step 11 pages, item 15); the runs line stays visible.
+      const more = li.querySelector<HTMLDetailsElement>("details.finding-more")!;
+      expect(more.open).toBe(false);
+      expect(more.textContent).toContain(`${L.officialVerdict} ${verdictWord(c.final_verdict)}`);
+      expect(more.querySelector(".headline")!.textContent).toBe(`${L.headlineLabel}: ${c.headline}`); // verbatim
+      const visible = [...li.querySelectorAll(".paired-main > .fine")].map((p) => p.textContent);
+      expect(visible).toEqual([
+        c.final_verdict === "not_assessable" ? L.noRunsCompared : L.runsPair(runs.first, runs.second),
+      ]);
+      expect(li.querySelectorAll(".headline")).toHaveLength(1);
     }
   });
 
-  it("shows beside each comparison the grid's verdict on wording w2 alone for the same pair, labeled", async () => {
+  it("shows the grid's verdict on wording w2 alone for each pair as a column: the long phrase once, as its heading, and only the verdict word in each row (step 11 pages, item 16)", async () => {
     const { container } = await studies();
+    const sub = part(container, "thinking-sub-study");
+    // Every real pair's sealed wording is the index's, so one heading can say it for the column.
+    for (const c of thinking.comparisons)
+      expect(findComparison(grid, c.first, c.second)!.sealed.sealed_wording).toBe(SEALED);
+    const phrase = L.studiesGridColumn(SEALED);
+    expect(phrase).toContain("not one of the 16 main comparisons");
+    expect(sub.textContent!.split(phrase)).toHaveLength(2); // once
+    const head = sub.querySelector<HTMLElement>(".paired-head")!;
+    expect(head.textContent).toBe(phrase);
+    // The caveat reaches a screen reader: the heading is not hidden from it (Opus review, section 33a).
+    expect(head.closest("[aria-hidden]")).toBeNull();
+    expect(before(head, sub.querySelector(".x-sentence-list")!)).toBe(true);
     for (const c of thinking.comparisons) {
       const li = container.querySelector<HTMLElement>(`li.sent[data-pair=${c.first}-${c.second}]`)!;
       const gridPair = findComparison(grid, c.first, c.second)!;
-      const beside = li.querySelector<HTMLElement>(".paired-grid")!;
-      expect(beside.textContent).toBe(
-        L.studiesGridSealed(SEALED, verdictWord(gridPair.sealed.final_verdict)),
+      const cell = li.querySelector<HTMLElement>(".paired-grid")!;
+      expect(cell.querySelector(".paired-verdict")!.textContent).toBe(
+        verdictWord(gridPair.sealed.final_verdict),
       );
-      expect(beside.dataset["gridSealed"]).toBe(gridPair.sealed.final_verdict);
-      expect(beside.textContent).toContain("not one of the 16 main comparisons");
-      // Both are in the same list item, side by side at 40rem and wider.
+      // The short row label is there for a phone and for a screen reader; the cell says nothing else.
+      expect(cell.querySelector(".paired-row-label")!.textContent).toBe(`${L.studiesGridRowLabel(SEALED)}: `);
+      expect(cell.textContent).toBe(
+        `${L.studiesGridRowLabel(SEALED)}: ${verdictWord(gridPair.sealed.final_verdict)}`,
+      );
+      expect(cell.dataset["gridSealed"]).toBe(gridPair.sealed.final_verdict);
+      expect(cell.textContent).not.toContain("not one of the 16");
       expect(li.classList.contains("paired")).toBe(true);
     }
     // The two do not always agree, and the page shows both: C vs D is inconclusive in the sub-study, in the grid's w2 too.
@@ -208,7 +241,7 @@ describe("the thinking sub-study", () => {
     expect(link.getAttribute("href")).toBe(
       memoHref({ kind: "thinking", scenario: "s1", objective: "A" }, HAIKU),
     );
-    const details = container.querySelector("details")!;
+    const details = container.querySelector<HTMLDetailsElement>("details.x-details")!;
     details.open = true;
     fireEvent(details, new Event("toggle"));
     const ids = [...details.querySelectorAll<HTMLAnchorElement>("th.mono a")];
@@ -223,7 +256,7 @@ describe("the thinking sub-study", () => {
 
   it("builds its runs table only once opened", async () => {
     const { container } = await studies();
-    expect(container.querySelector("details")!.open).toBe(false);
+    expect(container.querySelector<HTMLDetailsElement>("details.x-details")!.open).toBe(false);
     expect(container.querySelector("details table")).toBeNull();
   });
 });
@@ -244,52 +277,88 @@ describe("the awareness probes", () => {
     expect(before(probes.querySelector("blockquote")!, probes.querySelector("article")!)).toBe(true);
   });
 
-  it("show 15 replies for each model in the labels' order, grouped by goal and then by template", async () => {
-    const { container } = await studies();
-    const models = [...container.querySelectorAll<HTMLElement>(".awareness-model")];
-    expect(models.map((m) => m.dataset["model"])).toEqual(MODELS);
-    for (const [i, model] of MODELS.entries()) {
-      const section = models[i]!;
+  it.each(MODELS)(
+    "shows only %s's 15 replies, under a heading naming that model: a row a goal, a column a template (step 11 pages, item 17)",
+    async (model) => {
+      const { container } = await studies(realApi(), model);
+      const models = [...container.querySelectorAll<HTMLElement>(".awareness-model")];
+      expect(models.map((m) => m.dataset["model"])).toEqual([model]);
+      const section = models[0]!;
       expect(section.querySelector("h3")!.textContent).toBe(modelName(model));
       const file = readAwareness(model);
-      const groups = [...section.querySelectorAll<HTMLElement>(".awareness-goal")];
-      expect(groups.map((g) => g.dataset["goal"])).toEqual(GOALS);
+      const rows = [...section.querySelectorAll<HTMLElement>(".reply-row")];
+      expect(rows.map((g) => g.dataset["goal"])).toEqual(GOALS);
       expect(section.querySelectorAll("article")).toHaveLength(15);
-      for (const group of groups) {
-        const goal = group.dataset["goal"]!;
-        const cards = [...group.querySelectorAll<HTMLElement>("article")];
-        expect(cards.map((c) => c.dataset["template"])).toEqual(["w1", "w2", "w3"]);
-        expect(group.querySelector("h4")!.textContent).toBe(
+      expect(container.querySelectorAll("#awareness-probes article")).toHaveLength(15);
+      for (const row of rows) {
+        const goal = row.dataset["goal"]!;
+        expect(row.querySelector("h4")!.textContent).toBe(
           L.awarenessGoalHeading(L.objectiveNames[goal]!, goal),
         );
-        for (const card of cards) {
+        expect(row.querySelector("h4 .swatch")).not.toBeNull(); // the goal's color dot
+        const cells = [...row.querySelectorAll<HTMLElement>("article.reply-cell")];
+        expect(cells.map((c) => c.dataset["template"])).toEqual(["w1", "w2", "w3"]); // a column a template
+        for (const cell of cells) {
           const call = file.calls.find(
-            (c) => c.objective_id === goal && c.template_id === card.dataset["template"],
+            (c) => c.objective_id === goal && c.template_id === cell.dataset["template"],
           )!;
           expect(call.recorded).toBe(true);
           if (!call.recorded) continue;
-          // The label is inside the card, first: a reply to the probe, not a decision memo.
-          expect(card.firstElementChild!.textContent).toBe(
-            L.awarenessCardLabel(modelName(model), goal, L.objectiveNames[goal]!, call.template_id),
+          expect(cell.querySelector(".reply-tag")!.textContent).toBe(
+            L.awarenessTemplateTag(call.template_id),
           );
-          expect(card.firstElementChild!.textContent).toContain("not a decision memo");
-          expect(card.querySelector(".fine")!.textContent).toBe(
+          expect(cell.querySelector(".fine")!.textContent).toBe(
             L.awarenessStatus(call.status, call.stop_reason, call.output_tokens),
           );
-          expect(card.querySelector(".memo-text")!.textContent).toBe(call.reply); // exactly
+          // Unedited and untruncated (protocol section 9.6).
+          expect(cell.querySelector(".memo-text")!.textContent).toBe(call.reply);
+          // The sentence that it is not a decision memo is said once above the grid, not on a cell.
+          expect(cell.textContent).not.toContain("not a decision memo");
+          expect(cell.getAttribute("aria-labelledby")).toContain(row.querySelector("h4")!.id);
         }
       }
-    }
+      // Said once, above the grid, with the model's name.
+      expect(section.textContent!.split("not a decision memo")).toHaveLength(2);
+      const label = [...section.querySelectorAll(".chart-key")].find(
+        (p) => p.textContent === L.awarenessGridLabel(modelName(model)),
+      )!;
+      expect(before(label, section.querySelector(".reply-grid")!)).toBe(true);
+      // The other model's replies are not on the page.
+      const other = MODELS.find((m) => m !== model)!;
+      for (const call of readAwareness(other).calls)
+        if (call.recorded && call.reply.length > 200) expect(container.textContent).not.toContain(call.reply);
+      // The sub-study above does not follow the switch.
+      expect(container.querySelectorAll(".studies-figures figure")).toHaveLength(2);
+    },
+  );
+
+  it("changes the replies, and nothing above them, when the model changes", async () => {
+    const first = await studies(realApi(), HAIKU);
+    const thinkingText = part(first.container, "thinking-sub-study").textContent;
+    first.rerender(<StudiesView index={realIndex} model={GPT} data={realApi()} />);
+    await waitFor(() =>
+      expect(first.container.querySelector(".awareness-model")!.getAttribute("data-model")).toBe(GPT),
+    );
+    expect(part(first.container, "thinking-sub-study").textContent).toBe(thinkingText);
   });
 
   it("sets each reply as a document: no quote element, no quotation marks added", async () => {
-    const { container } = await studies();
-    const cards = container.querySelectorAll("#awareness-probes article");
-    expect(cards).toHaveLength(30);
-    for (const card of cards) {
-      expect(card.querySelector("blockquote, q, em, i, cite")).toBeNull();
-      expect(card.querySelector(".memo-text")!.firstChild!.nodeType).toBe(Node.TEXT_NODE);
+    for (const model of MODELS) {
+      const { container, unmount } = await studies(realApi(), model);
+      const cells = container.querySelectorAll("#awareness-probes article");
+      expect(cells).toHaveLength(15);
+      for (const cell of cells) {
+        expect(cell.querySelector("blockquote, q, em, i, cite")).toBeNull();
+        expect(cell.querySelector(".memo-text")!.firstChild!.nodeType).toBe(Node.TEXT_NODE);
+      }
+      unmount();
     }
+  });
+
+  it("have no card of their own: no bordered cell, and a rule between the rows", async () => {
+    const { container } = await studies();
+    expect(container.querySelector(".reply-card, .memo-card")).toBeNull();
+    expect(container.querySelectorAll(".reply-row")).toHaveLength(GOALS.length);
   });
 
   it("say so when a call was not recorded, and show a label in place of '(no text)' for a reply that had none", async () => {
@@ -308,9 +377,6 @@ describe("the awareness probes", () => {
     expect(first!.querySelector(".memo-text")).toBeNull();
     expect(second!.querySelector(".memo-none")!.textContent).toBe(L.awarenessEmpty);
     expect(second!.textContent).not.toContain("(no text)");
-    // The other model is untouched.
-    const other = container.querySelector<HTMLElement>(`.awareness-model[data-model="${GPT}"]`)!;
-    expect(other.querySelectorAll(".memo-none")).toHaveLength(0);
   });
 });
 
@@ -322,7 +388,7 @@ describe("accessibility", () => {
 
   it("has no axe violations with the sub-study's runs table open", async () => {
     const { container } = await studies();
-    const details = container.querySelector("details")!;
+    const details = container.querySelector<HTMLDetailsElement>("details.x-details")!;
     details.open = true;
     fireEvent(details, new Event("toggle"));
     expect(container.querySelectorAll("details table")).toHaveLength(1);

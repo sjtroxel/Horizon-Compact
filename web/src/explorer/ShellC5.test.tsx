@@ -93,12 +93,7 @@ describe("the shell leaves files to the browser (carried from review 25a)", () =
 });
 
 describe("the model switch keeps the query on every new view", () => {
-  it.each([
-    "/memos/?kind=grid&scenario=s2&objective=C",
-    "/studies/?note=kept",
-    "/cases/?note=kept",
-    "/cases/closure-19/?note=kept",
-  ])("%s", async (path) => {
+  it.each(["/memos/?kind=grid&scenario=s2&objective=C", "/studies/?note=kept"])("%s", async (path) => {
     const view = await shellAt(path);
     const before = new URLSearchParams(window.location.search);
     const group = view.getByRole("region", { name: L.modelSwitch });
@@ -186,7 +181,9 @@ describe("moving through the memos by link", () => {
   it("follows a choice of scenario and goal, each a link", async () => {
     const view = await shellAt("/memos/");
     const clicks = watchClicks();
-    fireEvent.click(view.getByRole("link", { name: "s2" }));
+    // The picker shows the scenario's short name (the navigation has a link of the same name, so look in the picker).
+    const picker = view.getByRole("group", { name: L.memoScenarioLabel });
+    fireEvent.click(within(picker).getByRole("link", { name: L.scenarioNames["s2"]! }));
     clicks.stop();
     await waitFor(() => expect(window.location.search).toBe("?kind=grid&scenario=s2&objective=A"));
     await waitFor(() =>

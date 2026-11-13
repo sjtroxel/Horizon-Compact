@@ -298,6 +298,9 @@ describe("the story, from the real files", () => {
         else {
           expect(quoted!.dataset["reading"]).toBe(key);
           expect(quoted!.textContent).toContain(PROTOCOL_READINGS[key].reading);
+          // The label and the sentence, without the pattern's own words (step 11 pages, item 3; one component for / and the scenario pages).
+          expect(quoted!.textContent).toBe(`${L.protocolReadingLabel}${PROTOCOL_READINGS[key].reading}`);
+          expect(quoted!.textContent).not.toContain(PROTOCOL_READINGS[key].pattern);
         }
       }
       // The protocol's reading sits in each finding's closed section; the note saying why only some have one is said

@@ -7,12 +7,33 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-12, about 1:00 PM (STEP 11'S WORDS PASS DONE; HIS COMMIT NEXT)
+> ## START HERE — where things stand, 2026-11-13, about 5:05 AM (THE PAGES BATCH BUILT AND REVIEWED; COMMIT, THEN WORDS PASS)
+>
+> **The step 11 pages batch built by Sonnet (the Phase 6 IMPLEMENTATION doc §33) and reviewed by Opus (§33a): passed
+> after one fix** (the studies' w2 column heading, the only place the page says that cut is not one of the 16 main
+> comparisons, was hidden from screen readers and phones; now shown, one test added). `make check` green (Python 3,483,
+> web 585); the browser pass clean on the fixed build; `/studies/` 5,911 px at 1280; `web/dist/` unchanged. **Uncommitted:**
+> the batch, the fix, §32, §33, §33a and this file. **Next:** his commit; then the words pass on §33's twelve new labels
+> and §33a's four notes; then the review's close and C8.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-13, about 3:45 AM (THE OTHER PAGES DECIDED; THEIR FIX BATCH NEXT) *(superseded by the block above)*
+>
+> **His review of the other pages done (the Phase 6 IMPLEMENTATION doc §32):** the scripted pass clean on all 52 loads;
+> Claude listed twenty findings by eye on the scenario, cases, case, studies and memos pages, and he took every
+> recommendation, with `/studies/` (13,111 px at 1280) to be cut drastically. **Next:** the fix prompt
+> (`scratch/p6-step11-pages-prompt.md`, written); Sonnet builds (§33), Opus reviews (§33a); then a words pass on the new
+> labels. These doc edits are uncommitted and ride with the fix batch unless he commits them first.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-12, about 1:00 PM (STEP 11'S WORDS PASS COMMITTED; OTHER PAGES NEXT) *(superseded by the block above)*
 >
 > **The words pass on the redesign's labels done (the Phase 6 IMPLEMENTATION doc §31b):** he approved Claude's
 > recommendations as proposed and the metadata line under the story's title as Claude drafted it; the dark title band
-> lightened one step and checked in the browser (52 loads clean). **Uncommitted: the words, the color, two tests, §31b and
-> this file (with the 11:05 edit below), for his commit.** **Next:** his visual review of the other pages (scenario, cases,
+> lightened one step and checked in the browser (52 loads clean). **Committed `e9814ae` (his) and pushed; CI `43285344205`
+> and Deploy `43285344203` green.** This block's edit rides in the next commit. **Next:** his visual review of the other pages (scenario, cases,
 > studies, memos), the second half of §14 step 11.
 >
 > *The block below is superseded.*

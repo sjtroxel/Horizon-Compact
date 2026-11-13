@@ -177,6 +177,9 @@ export const explorerLabels = {
     `Each verdict is the analysis\u2019s own, at a ${level} confidence level. That is stricter than usual because the study makes 16 main comparisons, and with that many, some would look like a difference by chance alone. The numbers behind each verdict are in the details.`,
   roundtableFlag: "The pair the Roundtable\u2019s claim is about",
   secondaryFlag: "Secondary comparison",
+  // Step 11 pages batch (2026-11-13): Claude-drafted, unapproved until the words pass.
+  primaryFlag: "Primary comparison",
+  scenarioIdLine: (id: string) => `Scenario ${id}`,
   officialVerdict: "official verdict:",
   verdictWords: {
     split: "split",
@@ -282,6 +285,8 @@ export const explorerLabels = {
   memoScenarioLabel: "Scenario",
   memoGoalLabel: "Goal",
   memoRunsHeading: "Runs in this set",
+  // Step 11 pages batch (2026-11-13): Claude-drafted, unapproved until the words pass.
+  memoWordingGroup: (wording: string) => `Wording ${wording}`,
   memoRunLine: (wording: string, repeat: number, status: string) =>
     `wording ${wording}, repeat ${repeat}, ${status}`,
   memoCardLabel: (model: string, letter: string, goal: string, thinking: boolean) =>
@@ -368,25 +373,29 @@ export const explorerLabels = {
   caseCompanyHeading: "The company’s decision, as the case codes it",
   caseCompanyChoice: (choice: string) => `Choice: ${choice}`,
   caseCompanyReading: (reading: string) => `Reading ${reading}`,
-  caseNoShares: "no lever shares in this reading",
+  // Step 11 pages batch (2026-11-13): plainer words for what the file says; Claude-drafted, unapproved until the words pass.
+  caseNoSharesPlain: "This reading has no split across the levers.",
+  caseReidentReasonAbove: "The reason is under The dossier, above.",
   caseDimensionsHeading: "What the case was matched on",
   caseObservable: "Matched on",
   caseExcluded: "Left out",
   caseDimensionChoice: "The choice itself (close, retool or sell)",
   caseModelHeading: (model: string) => model,
   caseRunCounts: (runs: number) => `${runs} runs, by their final status:`,
+  caseRunsAllOneStatus: (runs: number, status: string) => `${runs} runs, all ${status}`,
   caseFinalStatus: (status: string, runs: number) => `${status}: ${runs}`,
   caseReadingNote:
     "The primary reading follows the scoring guide (the rubric) as written. Where the guide had to make an uncertain call about what the company did, an alternative reading matches the runs again with that call made the other way.",
   readingNames: { primary: "Primary reading" } as Record<string, string>,
+  // The id stays in the distance chart's note line and its accessible name; a heading or a list says "Alternative reading".
   readingAlternative: (id: string) => `Alternative reading ${id}`,
+  readingAlternativeName: "Alternative reading",
   readingLabels: {
     match: "match",
     tie: "tie",
     no_good_match: "no good match",
     not_enough_disclosed: "not enough disclosed",
   } as Record<string, string>,
-  readingLabelIs: (label: string) => `Label: ${label}`,
   readingReason: "Reason, as the matcher wrote it",
   readingLines: "Lines of the company’s decision that could be seen in this reading",
   distanceKey:
@@ -395,8 +404,8 @@ export const explorerLabels = {
   distanceRule: (distance: string) => `no good match above ${distance}`,
   distanceRowNumbers: (distance: string, low: string, high: string) =>
     `distance ${distance}, interval ${low} to ${high}`,
-  distanceRuns: (runs: number, choiceOnly: number, undistanced: number) =>
-    `${runs} runs measured, ${choiceOnly} on the choice alone, ${undistanced} left out`,
+  distanceRunsPlain: (runs: number, choiceOnly: number, undistanced: number) =>
+    `${runs} runs compared, ${choiceOnly} of them on the choice alone; ${undistanced} left out, with nothing to compare`,
   distanceChartLabel: (caseLabel: string, model: string, reading: string) =>
     `Distances for ${caseLabel}, ${model}, ${reading}`,
   distanceLevel: (level: string) => `${level} range, from resampling the runs (a bootstrap interval)`,
@@ -449,8 +458,11 @@ export const explorerLabels = {
     "The scenario view shows the grid’s three wordings; here the grid is cut to w2, so it sits like for like beside the sub-study.",
   studiesLevel: (level: string) => `Each verdict uses the analysis’s ${level} interval.`,
   studiesComparisonsHeading: "The five comparisons in the sub-study",
-  studiesGridSealed: (wording: string, verdict: string) =>
-    `The main grid on wording ${wording} alone, also not one of the 16 main comparisons: ${verdict}`,
+  // Step 11 pages batch (2026-11-13): Claude-drafted, unapproved until the words pass. The column heading is the old
+  // sentence's words without its verdict; the row label is its short form, shown on a phone, where there is no column.
+  studiesGridColumn: (wording: string) =>
+    `The main grid on wording ${wording} alone, also not one of the 16 main comparisons`,
+  studiesGridRowLabel: (wording: string) => `Main grid, wording ${wording} alone`,
   studiesMemosLink: "Read the sub-study’s memos",
   studiesRunsHeading: "Every run of the sub-study",
   studiesRunsKey: "Each run id opens that run’s memo in the reader.",
@@ -462,8 +474,9 @@ export const explorerLabels = {
     "One call for each of the five goals under each of three phrasings of the question (templates), 15 to a model, on scenario s1.",
   awarenessLink: "Protocol section 9.6, at the pre-registered tag",
   awarenessGoalHeading: (goal: string, letter: string) => `${goal} (${letter})`,
-  awarenessCardLabel: (model: string, letter: string, goal: string, template: string) =>
-    `A reply to the awareness probe, not a decision memo. Written by ${model} under goal ${letter} (${goal}), template ${template}.`,
+  awarenessGridLabel: (model: string) =>
+    `A reply to the awareness probe, not a decision memo. Each reply below was written by ${model}, under the goal named for its row.`,
+  awarenessTemplateTag: (template: string) => `Template ${template}`,
   awarenessStatus: (status: string, stop: string, tokens: number) =>
     `status ${status}, stop reason ${stop}, ${tokens} output tokens`,
   awarenessNotRecorded: "This call was not recorded.",

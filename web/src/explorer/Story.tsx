@@ -32,7 +32,7 @@ import type { CaseFile, CasesIndex, DataApi, DataIndex, GridComparison, GridFile
 import { attemptedRuns, comparisonRuns, formatPoints } from "./format";
 import { ROUNDTABLE_CLAIM_URL, ROUNDTABLE_OVERVIEW_URL, protocolUrl, scenarioTextUrl } from "./links";
 import { modelName, orderedModels } from "./models";
-import { His, HisHeading, HisInline, ProtocolReading, Title } from "./parts";
+import { FindingMore, His, HisHeading, HisInline, ProtocolReading, Title } from "./parts";
 import { readingFor } from "./protocol";
 import { hrefOf } from "./route";
 import { resultSentence } from "./sentences";
@@ -438,8 +438,7 @@ function Comparisons({ file }: { file: GridFile }) {
                   {c.role === "secondary" && <span className="flag">{L.secondaryFlag}</span>}
                   <TemplateSentence comparison={c} file={file} />
                 </div>
-                <details className="finding-more">
-                  <summary>{L.findingMore}</summary>
+                <FindingMore>
                   <p className="fine">
                     {runsLine(c)}
                     {" · "}
@@ -453,7 +452,7 @@ function Comparisons({ file }: { file: GridFile }) {
                   ) : (
                     lead && <ProtocolReading readingKey={null} />
                   )}
-                </details>
+                </FindingMore>
               </div>
               <IntervalFrame
                 rows={[rowOfComparison(c)]}

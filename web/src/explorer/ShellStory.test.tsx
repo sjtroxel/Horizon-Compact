@@ -34,11 +34,17 @@ describe("the model switch and the story", () => {
     expect(home.queryByRole("region", { name: L.modelSwitch })).toBeNull();
   });
 
-  it.each(["/scenario/s1/", "/cases/", "/studies/", "/memos/"])(
-    "shows a model switch on %s",
+  it.each(["/scenario/s1/", "/studies/", "/memos/"])("shows a model switch on %s", async (path) => {
+    const view = await shellAt(path);
+    expect(view.getByRole("region", { name: L.modelSwitch })).toBeTruthy();
+  });
+
+  it.each(["/cases/", "/cases/closure-19/"])(
+    "shows no model switch on %s: the page shows both models",
     async (path) => {
       const view = await shellAt(path);
-      expect(view.getByRole("region", { name: L.modelSwitch })).toBeTruthy();
+      expect(view.queryByRole("region", { name: L.modelSwitch })).toBeNull();
+      expect(view.container.querySelector(".switch-bar")).toBeNull();
     },
   );
 

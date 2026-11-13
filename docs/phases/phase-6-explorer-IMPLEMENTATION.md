@@ -490,7 +490,7 @@ My recommendation is (a) in each, for the reason given.
 8. **[done 2026-11-11: his words, the labels and the four result-sentence templates approved, §11's dated notes]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[built 2026-11-11 by Sonnet, §28; reviewed by Opus, §28a (part A, passed) and §28b (part B, passed after one fix)]** **[Sonnet builds, Opus reviews]** **C6, the guided story.**
 10. **[built 2026-11-11 by Sonnet, §29; reviewed by Opus, §29a: passed after one fix; words pass done 2026-11-12, §29b]** **[Sonnet builds, Opus reviews]** **C7, the share cards.**
-11. **[in progress 2026-11-12, §30: scripted half done; his first pass on `/` decided; reference study next, then one fix batch]** **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
+11. **[in progress; 2026-11-12, §30-§31b: `/` decided, redesigned and its words approved; 2026-11-13, §32: the other pages decided (twenty findings, his), their fix batch next]** **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
     script per view; fixes before the close.
 12. **[Claude]** **C8, the close:** the DoD audit, the version (decision 9), `ROADMAP.md`, `KNOWN-GAPS.md`.
 
@@ -3033,3 +3033,355 @@ title's focus ring 4.01. A new `palette.test.ts` test holds the title band light
 1.15:1 in dark mode (mutation-checked: the old color fails it). Checked in the browser
 (`scratch/p6-step11-words/`): 52 loads clean, axe contrast included; layout shift 0.001; the axes aligned; the crop test
 and the number trace clean; the dark captures read as three layers.
+
+## 32. The review against §12, the other pages (§14 step 11, second half), 2026-11-13: decided
+
+**The scripted half (Claude), on the explorer preview built from `e9814ae`** (`scratch/p6-step11-shoot-review.mjs`, run
+again; captures and `report.json` in the session's scratch, slices of the four page kinds at 1280 and one case page at
+390 read by eye). 52 loads (13 paths, 390 and 1280, light and dark): no console error, no failed request, no content
+security policy violation, no request off the page's origin, no horizontal overflow, axe-core clean on the whole
+document, every page mounted, layout shift 0.001 at most. The number trace: 4,890 numbers, every one traced (20 of them
+protocol section references). The crop test: 36 figures, none missing the model, valid of attempted or the short scope
+line. Page heights at 1280: a scenario page about 2,700 px, `/cases/` 3,677, a case page 6,839 to 7,076, `/studies/`
+13,111, `/memos/` 2,895.
+
+**His first pass on the other pages (Claude listed twenty findings with a recommendation each; he took every
+recommendation, 2026-11-13 about 3:37 AM).** He singled out `/studies/`'s length: "measures taken to drastically
+change ... efficiency, maybe some tabbing", so 17 below is stronger than the recommendation as first written. Where the
+first list left a choice open (9's "Label:", 17, 19), Claude's resolution is written here, and is his to overrule.
+
+*Scenario pages (s1 to s4).*
+
+1. The `h1` is the scenario's short name ("Jobs and AI tools"), with "Scenario s1" in the line under it. The document
+   title, the path and the share cards keep the id (§30 item 10). Reverses §31 item 17's choice for the `h1` only.
+2. "official verdict: split" leaves each comparison's small line and goes into a closed per-comparison section, as on
+   `/` (`Story.tsx`'s `finding-more`, §30 item 5). The verdict is said by the sentence and beside the interval.
+3. The highlighted pair's box drops the repeated verdict after "The protocol's reading, written before the results:"
+   ("C and D: split"); the protocol's sentence ("Over twenty years, ...") stays.
+4. Every comparison carries its kind: "Primary comparison" on the primary ones that have no other label (a new label),
+   "Secondary comparison" as now; the Roundtable pair keeps its own label.
+
+*`/cases/`.*
+
+5. The case headings drop the monospace: the label in the sans heading face. Monospace stays for an id inside a note
+   line.
+6. "Alternative reading u1" reads "Alternative reading" wherever a reader sees it (the cases list and the case pages).
+   Checked: every case file has exactly one alternative reading, `u1`. The id may stay in a chart's note line.
+7. The grey note boxes get space below them (and above, where a heading follows), from the type scale's spacing steps.
+
+*Case pages (all five).*
+
+8. **The distance chart at 1280:** every value is near 1.0, so the dot sits at the plot's right edge and its three-line
+   label is pressed against it. The value text moves to its own column right of the plot, aligned by row; the dot keeps
+   its place on the scale. At 390 the stacked form stays (it reads well).
+9. "Reason, as the file states it: withheld: its ..." loses the doubled "withheld:" (the status is already said on the
+   line above); the reading blocks lose "Label:" before "no good match", as `/` did (§30 item 9). This reverses §31 item
+   18's kept call; Claude's resolution, his to overrule.
+10. The withheld reason is shown once, under "The dossier"; the identification check's section says its status and
+    points to that reason (a new label), and keeps its threshold.
+11. The coded decision's lever shares show as whole percentages (a display format in `format.ts`, pinned by a test).
+    The matcher's reason stays verbatim: it is quoted from the file.
+12. Two phrases get plain words in the words pass: "no lever shares in this reading" and "30 runs measured, 0 on the
+    choice alone, 0 left out". New labels; the meaning does not change.
+13. "150 runs, by their final status:" over a one-item list reads "150 runs, all valid" when every run has the same
+    status (a new label; the count is the data's, the list stays where there is more than one status).
+
+*`/studies/`.*
+
+14. The large empty column at 1280 goes: the two figures sit side by side across the page's width (like for like, the
+    same strip at the same size), with the words that explain them above and the five comparisons below. Stacked on a
+    phone.
+15. "official verdict:" and "Analysis headline:" go into a closed per-comparison section, as in 2.
+16. The five grey boxes that repeat "The main grid on wording w2 alone, also not one of the 16 main comparisons: X"
+    become a column: that phrase once as the column's heading, the verdict word in each row.
+17. **The awareness probe's replies, made drastically shorter** (30 full cards now, most of the page's 13,111 px):
+    (a) the section follows the model switch, so one model's 15 replies show at a time (the switch is the tab; it now
+    does something on this page, which answers 20 for `/studies/`); (b) the 15 replies are a grid at desktop width, a
+    row a goal and a column a template, the section's "a reply to the awareness probe, not a decision memo" said once
+    above the grid instead of on every card; each cell keeps its template, its status line and the full reply,
+    unedited (protocol §9.6: quoted in full); stacked by goal on a phone. Target: `/studies/` under 6,000 px at 1280,
+    the height reported. The Haiku-only thinking sub-study stays as it is under either model; its note already says
+    "on Haiku 5.5 only".
+
+*`/memos/`.*
+
+18. The scenario picker shows the short names (`scenarioNames`), not `s1` to `s4`.
+19. The runs list is grouped by wording: a line a wording ("Wording w1"), its repeats as short links (the repeat
+    number), each link's accessible name carrying the run id and its status. Claude's resolution of "leave it or
+    group", given his call on efficiency.
+
+*Every page.*
+
+20. The model switch shows only where it changes the page: the scenario pages, `/memos/` and `/studies/` (17). It goes
+    from `/cases/` and the case pages, and the space reserved before the data is reserved only on pages that have the
+    switch, so nothing moves. §27 item 4 is superseded.
+
+**Next:** one fix prompt (`scratch/p6-step11-pages-prompt.md`) carrying the twenty; Sonnet builds, Opus reviews
+(§33a); then a words pass on the new labels; then the review's close and C8.
+
+## 33. As built: the step 11 pages batch (2026-11-13, Sonnet; Opus review §33a)
+
+Built from `scratch/p6-step11-pages-prompt.md`, in the order of its parts A to D. No AWS call, no model call, no `terraform`,
+no `hc` command, no change to the Python. Nothing committed. The two docs that were already modified (`docs/KNOWN-GAPS.md` and
+this file's §14 step 11 and §32) are untouched; this section is the only addition. `styles.css`, `sentences.ts`, the data and
+every frozen path are untouched. The public page is byte for byte unchanged (below). No real company name is written anywhere
+in what was built.
+
+**What was built, item by item against §32's numbers**
+
+*Part A: the shell and the scenario pages.*
+
+- **20.** `Shell.tsx` has one set, `SWITCH_KINDS` (scenario, memos, studies). `pageHasSwitch` (the space held before the data)
+  and the render of the real switch both read it, so the space is held exactly where the switch will appear. `/cases/` and the
+  case pages have neither, before or after the data. `CasesView`'s links to case pages still carry the model in their query (its
+  test is unchanged and passes).
+- **1.** `Title` takes an optional `heading`; the scenario view passes `scenarioNames[id]`, so the `h1` reads "Jobs and AI tools"
+  and the line under it reads "Scenario s1" (new label `scenarioIdLine`). `page-meta.mjs`, the document title, the paths and the
+  cards are not touched. The `h1` of a scenario is no longer his placeholder-styled title, so it is not given the placeholder class.
+- **2.** `FindingMore` is lifted into `parts.tsx` (summary `findingMore`, the existing label); `Story.tsx`, the scenario view and
+  the studies all use the one component. On a scenario page it holds the official verdict (the headline is already in "See the
+  details"); the runs line, the kept and dropped wordings and the marker stay visible. The protocol's reading box stays visible.
+- **3.** `ProtocolReading` changed in one place: the label and the sentence, without the pattern's own words. `/` follows (checked
+  in the browser: the reading inside a finding's closed section reads "The protocol's reading, written before the results:" and its
+  sentence) and a test now pins it there too.
+- **4.** `primaryFlag` on a comparison that is neither the Roundtable pair nor secondary, in the `flag` style of the others.
+
+*Part B: the cases and case pages.*
+
+- **5.** The case heading link on `/cases/` is no longer `.mono`. Monospace stays on ids in note lines (the distance chart's).
+- **6.** `readingName` says "Alternative reading" (new label `readingAlternativeName`) in the cases list, the company's-decision
+  list and the reading headings. The chart's note line and accessible name keep the id (`readingAlternative(id)`, kept). Checked
+  on all ten case files: each has exactly `primary` and `u1` and exactly one `company_alternatives` entry (`u1`); a test pins it,
+  so a file with two fails the test instead of showing two identical names. No file had more than one: nothing to report.
+- **7.** New class `case-note` on the five grey boxes of `/cases/` and the case pages (and only those; the grey boxes on `/`
+  and the studies keep their spacing): 1 rem below, and 1.75 rem above a heading that directly follows. Measured in the browser
+  on all five case pages and `/cases/`: 16 px between a note and what follows it.
+- **8.** The value column was already a column at wide widths, but the plot ran to the edge of its cell and the column was 17 rem,
+  so the three-line text pressed on the dot at 1.0 and wrapped badly. Now: from a 52 rem figure the columns are 11.5 rem, the plot
+  and 18 rem, with 1.25 rem between them; the plot is inset half a rem each side (`.distances .x-plot`), so a dot at 0 or 1 sits
+  whole. The dot and its interval keep their places on the 0 to 1 scale (`axisPercent`, unchanged). The stacked form below stays.
+  Browser check (`scratch/p6-step11-pages-geometry.txt`): on every case page the dot's `cx` was set to 0%, 0.5%, 50%, 99.5%
+  and 100% in each of the 20 rows; no overlap with the goal's name or the value text in any of 500 positions at 1280; the
+  smallest gap was 23 px on each side; no horizontal overflow at 1280 or 390. The note line stays inside the figure.
+- **9.** `withoutWithheldPrefix` in `format.ts` strips exactly the leading "withheld: " and nothing else; used for the description's
+  reason, the dossier's reason (when it is withheld) and the identification check's reason (when its status is withheld). The
+  reading blocks say the reading's label by itself in bold under the reading's name; "Label:" is gone (`readingLabelIs` removed).
+  This reverses §31 item 18, as §32 says.
+- **10.** The reason is shown once, under "The dossier". The identification check shows its status, `caseReidentReasonAbove`, and
+  its threshold. One addition the prompt did not state: where the check's reason is **not** the dossier's, the check shows its own
+  reason and not the pointer (all five real cases have the same reason in both, so nothing differs today); a test pins both. The
+  alternative was to drop information the file holds.
+- **11.** `formatWholePercent` (`formatPercent(share, 0)`), pinned in `format.test.ts`; the matcher's quoted reasons are not
+  reformatted (a test checks every reading's reason is on the page verbatim). The real alternative reading's shares are 100% and 0%.
+- **12.** `caseNoSharesPlain` replaces `caseNoShares`; `distanceRunsPlain` replaces `distanceRuns`. Same numbers, and the "left out"
+  count is still the data's `undistanced_runs` (the matcher's doc says these are in addition to the measured ones).
+- **13.** `caseRunsAllOneStatus` when the final-status list has one entry and its count is the run count; the list form stays for
+  more than one (a test edits a file to two statuses and checks it).
+
+*Part C: the studies page.*
+
+- **14.** The words (`.studies-words`) come first, then the two figures side by side in one grid (`.studies-figures`, two equal
+  columns from 60 rem, stacked below), then the five comparisons. The `.beside` wrapper is gone from this page: no empty column.
+- **15.** Each comparison's official verdict and analysis headline are in the closed `FindingMore`; the runs line stays visible.
+- **16.** A column heading `studiesGridColumn` (the old sentence's words without the verdict) says the phrase once; each row's
+  cell holds only the verdict word. On a phone the heading is not shown and each row carries the short label
+  `studiesGridRowLabel` before its verdict; at desktop that short label is hidden from the eye and kept for a screen reader. A test
+  pins that every real pair's sealed wording is the index's, so one heading can say it for the column.
+- **17.** (a) `View` passes the model to `StudiesView`; the awareness section shows the current model's 15 replies under an `h3`
+  naming it (both models' files are still fetched, as before, so the switch is instant); the sub-study above does not follow the
+  model. (b) A grid: a row a goal (color dot and name), three columns, one a template; each cell is an `article` with its template
+  tag, its status line in the fine style and the reply text, unedited and untruncated (a test compares each cell's text with the
+  file's, for both models). The "not a decision memo" sentence is said once above the grid (`awarenessGridLabel`); no card border
+  per cell, a rule between rows; stacked by goal on a phone. (c) **Target met without hiding any reply text** (heights below).
+  The "Every run of the sub-study" `details` stays closed.
+
+*Part D: the memo reader.*
+
+- **18.** The scenario picker shows `scenarioNames`; the links and the query parameter are still the ids.
+- **19.** `groupRunsByWording` (in `memoData.ts`, regroups, counts nothing); one line a wording headed `memoWordingGroup`, its
+  repeats as short links showing the repeat number. Each link's accessible name is "Run <id>: wording <w>, repeat <n>, <status>"
+  (the existing `memoRun` and `memoRunLine` labels, so no new words); the current run has `aria-current` and a heavier outline, a
+  bold number and a tinted fill; a run whose status is not exactly "valid" shows its status beside its number (real sets have
+  `schema_invalid`, `sum_mismatch`, `valid_rescaled`, `truncated`, `unexpected_stop`). Links are at least 2 rem tall and wide.
+
+**Files changed** (22 source and test files, and this section; the two docs that were already modified are otherwise untouched). Source:
+`Cases.tsx`, `MemoReader.tsx`, `ScenarioView.tsx`, `Shell.tsx`, `Story.tsx`, `Studies.tsx`, `copy.ts`, `distanceChart.tsx`,
+`explorer.css`, `format.ts`, `memoData.ts`, `parts.tsx`, `views.tsx`. Tests: `Cases.test.tsx`, `MemoReader.test.tsx`,
+`ScenarioView.test.tsx`, `Shell.test.tsx`, `ShellC5.test.tsx`, `ShellStory.test.tsx`, `Studies.test.tsx`, `Story.test.tsx`,
+`format.test.ts`. Not in the tree: `scratch/p6-step11-shoot-review.mjs` had one regular expression extended (below). Added under
+`scratch/`: `p6-step11-pages-*` (dist hashes, check logs, heights, geometry, shots and the `-after/` captures).
+
+**New labels** (in `explorerLabels`, Claude-drafted, unapproved until a words pass):
+
+| key | words | replaces |
+|---|---|---|
+| `primaryFlag` | Primary comparison | |
+| `scenarioIdLine(id)` | Scenario <id> | |
+| `readingAlternativeName` | Alternative reading | (the heading half of `readingAlternative(id)`, which stays) |
+| `caseNoSharesPlain` | This reading has no split across the levers. | `caseNoShares` "no lever shares in this reading" |
+| `caseReidentReasonAbove` | The reason is under The dossier, above. | |
+| `caseRunsAllOneStatus(runs, status)` | <runs> runs, all <status> | |
+| `distanceRunsPlain(runs, choiceOnly, undistanced)` | <runs> runs compared, <choiceOnly> of them on the choice alone; <undistanced> left out, with nothing to compare | `distanceRuns` "N runs measured, N on the choice alone, N left out" |
+| `studiesGridColumn(wording)` | The main grid on wording <w> alone, also not one of the 16 main comparisons | `studiesGridSealed` (the same words, without the verdict) |
+| `studiesGridRowLabel(wording)` | Main grid, wording <w> alone | |
+| `awarenessGridLabel(model)` | A reply to the awareness probe, not a decision memo. Each reply below was written by <model>, under the goal named for its row. | `awarenessCardLabel` |
+| `awarenessTemplateTag(template)` | Template <t> | |
+| `memoWordingGroup(wording)` | Wording <w> | |
+
+Removed with no replacement: `readingLabelIs` ("Label: ..."). No `his.json` key added or changed.
+
+**Changed tests, and why** (every one is a place the design changed; no rule-zero, template, number-trace, axe or module-graph
+assertion was removed or weakened, and none was changed: the exploratory-label tests and the case tests that pin them are
+untouched):
+
+- `ScenarioView.test.tsx`: the `h1` is `scenarioNames[id]` with the id line under it (was `(id)` in the `h1`); the counts test
+  looks for the official verdict in the closed `details.finding-more`, and that the small line no longer has it (was in the small
+  line). Added: the kind label on every comparison of both models and four scenarios; the protocol reading's exact text.
+- `Shell.test.tsx`: the scenario heading (twice, as above); the layout-shift test's paths are the three kinds with the switch
+  (it had `/cases/` and a case page); added the cases-have-no-space test, before and after the data.
+- `ShellC5.test.tsx`: `/cases/` and a case page are out of the "model switch keeps the query" list (no switch there); the scenario
+  picker is found by its short name inside the picker (the navigation has a link of the same name).
+- `ShellStory.test.tsx`: the switch is on the scenario, studies and memos paths, and absent on `/cases/` and a case page.
+- `Cases.test.tsx`: the reading-name helpers (plain in headings, with the id in the chart's name); the dossier test (reason without
+  its prefix, once, pointer for the check; was verbatim twice); whole percentages; the final-status line (both forms); "Label:" gone
+  (this is the §31 item 18 reversal: the assertion that the block contains `readingLabelIs(...)` became the label in a `b` and no
+  "Label:"); the chart's accessible-name reading; "runs compared". Added: one alternative reading per file; no `.mono` heading; the
+  note class; the prefix rule; the check's own reason when it differs; percentages and the matcher's reason; no-shares words; the
+  value column at 0, 0.5 and 1.
+- `Studies.test.tsx`: `StudiesView` takes the model; the figures-beside-words test (was `.beside-studies`); the comparisons test
+  (verdict and headline in the closed section, one visible runs line); the grid-verdict test (a column); the three `details`
+  selectors (`details.x-details`, since each comparison now has a `details`); the awareness tests (was 30 cards for both models, now
+  15 cells for the current model, per model). Added: the switch changes the replies and not the sub-study; no card border per cell.
+- `MemoReader.test.tsx`: the runs-list test (grouped by wording); the scenario picker's text. Added: accessible names, status shown
+  when not valid, `aria-current` moving.
+- `Story.test.tsx`: one assertion pair added inside the existing reading test (label and sentence only, no pattern).
+- `format.test.ts`: `formatWholePercent` and `withoutWithheldPrefix` pinned.
+- The number of tests: 564 before, 585 now.
+
+**Mutation checks** (each was applied to the source with the test file as it is, the named tests failed, the source was put back):
+the switch kinds widened to the cases (2 failed); the primary flag removed (1); the pattern put back in the reading (1); the verdict
+moved out of the details (1); the `h1` heading override removed (1); whole percentages put back to one decimal (many); the prefix
+strip made loose (58); the one-status line forced off (1); the check's pointer replaced by the reason (5); the case heading given
+`.mono` back (1); the plain alternative name put back to the id (8); "Label:" put back (5); the note class dropped (1); an `svg`
+put inside the value column (3, after the test was strengthened: the first version of that test did not catch it); the awareness
+section pinned to the first model (2); a reply truncated to 100 characters (2); the row label made the long phrase (1); the
+verdict put back in the visible line (1); "not a decision memo" put on each cell (2); a `.beside` wrapper put on the words (1); the
+scenario names removed from the picker (1); the status beside a number removed (1); the accessible name removed (1); only the
+first wording group drawn (3); `aria-current` removed (2).
+
+**The five slowest tests** (a full parallel run, `--reporter=json`): `App.test.tsx` "the rendered page has no axe violations"
+6.1 s, `ScenarioView.test.tsx` "every result sentence is a template's output" 6.0 s, `Story.test.tsx` axe at 1280 4.0 s,
+`ScenarioView.test.tsx` "renders every scenario for both models" 4.0 s, `ScenarioView.test.tsx` axe with the details open 3.8 s. All
+five existed before this batch. Of the new or changed tests the slowest are `ShellStory.test.tsx` "shows no model switch on /"
+2.2 s (the first test of that file, which loads the story's chunk cold; its assertion is unchanged), and the memo run links'
+accessible-name test 1.4 s (thirty `getByRole` lookups); the rest are under 0.5 s.
+
+**`make check`**: exit 0 (3 min 1 s). Python: ruff all passed, 3,483 passed in 124 s; `dossier`, `scenarios` and `protocol` checks
+ok; web: 33 files, 585 tests passed; `check-dist` ok in both modes; `doctor`: hooks installed, term file loads, longlist matches.
+Log: `scratch/p6-step11-pages-makecheck.log`. (`npm --prefix web run check` was green at the end of every part, and again at the
+end; logs `scratch/p6-step11-pages-check{A,B,C,D,Final}.log`.)
+
+**`npm --prefix web run check`, explorer-mode lines**:
+
+```
+JavaScript a case path loads, largest /cases/closure-07/: 92552 bytes (90.4 KB); budget 100.0 KB
+JavaScript a cases path loads, largest /cases/: 92552 bytes (90.4 KB); budget 100.0 KB
+JavaScript a story path loads, largest /: 95507 bytes (93.3 KB); budget 100.0 KB
+JavaScript a memos path loads, largest /memos/: 87034 bytes (85.0 KB); budget 100.0 KB
+JavaScript a scenario path loads, largest /scenario/s1/: 93544 bytes (91.4 KB); budget 100.0 KB
+JavaScript a studies path loads, largest /studies/: 91698 bytes (89.5 KB); budget 100.0 KB
+fonts: 3 files, 45920 bytes (44.8 KB); budget 150.0 KB; WOFF2 only
+check-dist: ok
+```
+
+Every path is under 100 KB (the story, the largest, has 6.7 KB left). Fonts and the 13 cards are as before.
+
+**The dist diff**: `find web/dist -type f | sort | xargs sha256sum` before (`scratch/p6-step11-pages-dist-before.txt`) and after
+(`-after.txt`, eight files): `diff` is empty.
+
+**Page heights at 1280** (px; the before is §32's, the preview of `e9814ae`, rounded there; `/` was not measured then):
+
+| path | before | after |
+|---|---|---|
+| a scenario page | about 2,700 | 2,876 to 2,995 |
+| `/cases/` | 3,677 | 3,653 |
+| a case page | 6,839 to 7,076 | 6,671 to 6,932 |
+| `/studies/` Haiku 5.5 | 13,111 | **5,911** |
+| `/studies/` gpt-oss-120b | 13,111 | **5,245** |
+| `/memos/` | 2,895 | 2,227 |
+| `/` | not measured | 13,646 |
+
+`/studies/` at 390: before 21,345 (both models, as the page did not follow the switch), after **11,111** (Haiku 5.5) and **9,805**
+(gpt-oss-120b). The target (under 6,000 at 1280) is met for both models, by 89 px for Haiku 5.5, whose replies are longer; no reply
+text is hidden, shortened or collapsed, and the reply text stays at the body size (17 px, line height 1.45). A scenario page grew
+by the "Primary comparison" lines and the closed sections; the memo reader's runs list is much shorter (one line a wording).
+
+**The browser pass** (`scratch/p6-step11-shoot-review.mjs`, on the built preview, `scratch/p6-step11-pages-shoot.log`): 52 loads
+(13 paths, 390 and 1280, light and dark), 0 with a problem (no console error, failed request, content-security-policy violation,
+off-origin request, horizontal overflow, axe violation or unmounted page); layout shift at most 0.001; the axis words sit on the
+plot in all 20 charts; the crop test: every figure has the model, its run count (or valid of attempted) and the scope line, 0
+missing in 36 figures on the pages that have them; the number trace: 4,811 numbers on the 13 paths, 4,811 traced, 0 untraced.
+Captures at 390 and 1280, light and dark, of a scenario page (`scenario-s1`), a case page (`case-closure-07`), `/studies/` (both
+models: `studies-haiku`, `studies-gptoss`) and `/memos/` are in `scratch/p6-step11-pages-after/` (20 files); the memo set with
+non-valid runs, the studies' phone form and the case page's chart were also looked at by eye while building.
+One edit to the proof tool: the crop test's pattern for "a run count in the figure" listed the old wording ("N runs measured");
+the new wording of item 12 ("N runs compared") was added to the pattern (`scratch/p6-step11-shoot-review.mjs`, line 147); the
+first run of the pass reported the four distance figures of each case page as missing a run count for that reason alone.
+
+**Anything I could not do as written, or did differently, and why**
+
+1. Item 10: the check shows its own reason where it differs from the dossier's (above). Not in the prompt; the alternative drops
+   information the file holds.
+2. Item 2 puts only the official verdict in the scenario page's closed section, because "See the details" already holds the headline.
+3. Item 17's section shows one model, but both models' awareness files are still fetched on arrival (as before), so the switch does
+   not wait; fetching only the current model's would change a request the page makes today.
+4. The studies' target has 89 px of margin on Haiku 5.5. A different font fallback in a reader's browser could move that; the
+   levers left are smaller reply text (15 px, which §31 allows but I judged too small for the replies, the content of the section)
+   or tighter rows.
+5. A flaky pair worth Opus's eye: in one full `npm run check`, two tests (`ShellC5` "does not intercept a link under /data/..." and
+   `ShellStory` "shows no model switch on /") failed with "Unable to find role=heading" while a dozen Chrome processes of my own
+   screenshot scripts were still running and competing for the CPU; the same two files passed three times alone and the whole
+   suite passed in the four full runs after those processes were gone. The tests wait with the default timeout for a lazily loaded
+   view. I did not change any timeout.
+6. The `/` page's height was not recorded in §32, so no before is given for it; the batch changes it only by removing the pattern
+   words from the reading inside each finding's closed section (same line count).
+7. Not done, because not in the prompt: the studies' two grey notes and `/`'s grey notes keep the old spacing; the story's case
+   cards keep their monospace labels.
+
+## 33a. Review of the step 11 pages batch (2026-11-13, Opus)
+
+**Passed after one fix.** Read against §32 and the prompt: the whole source and test diff, the five case files' reasons
+(items 9 and 10), the matcher's definition of a left-out run (`analysis/matcher.py`: "nothing observable to distance on",
+which the new `distanceRunsPlain` words match), and Sonnet's captures by eye at 1280 and 390. `make check` run again
+before and after the fix: exit 0, Python 3,483, web 585, `check-dist` ok in both modes, `doctor` ok. `web/dist` byte for
+byte unchanged against `scratch/p6-step11-pages-dist-before.txt`. Removed test lines all read: each is a design change
+§32 asks for; no rule-zero, template, number-trace, axe or module-graph assertion is weakened.
+
+**The fix.** Item 16's column heading ("The main grid on wording w2 alone, also not one of the 16 main comparisons") was
+`aria-hidden` and `display: none` below 40rem, so the caveat that the w2 cut is not a main comparison reached neither a
+screen reader nor a phone; the short row label drops it, and nothing else on the page says it for the grid's cut. Now the
+heading is not hidden from a screen reader and shows on a phone as one plain line above the list (the rows keep the short
+label). `Studies.tsx`, `explorer.css`, and one assertion in `Studies.test.tsx` (no `aria-hidden` on or above the heading),
+mutation-checked (`aria-hidden` put back: 1 failed). Browser pass on the fixed build
+(`scratch/p6-step11-shoot-review.mjs`): 52 loads, 0 with a problem, layout shift 0.001 at most, the crop test 0 missing
+in 36 figures, the number trace 0 untraced. `/studies/` at 1280 unchanged (5,911 px, Haiku 5.5); at 390 it is 11,164
+(53 px more, the heading line).
+
+**Sonnet's flagged points, decided.** Item 10's addition (the check shows its own reason where it differs from the
+dossier's): kept; dropping a reason the file holds would be worse, and it never fires today. The crop-test pattern
+extended for "runs compared": correct, the pattern follows the words. The flaky pair under CPU load: not reproduced in two
+full runs here; left as it is, no timeout changed. Both awareness files still fetched: kept.
+
+**Notes, none blocking, for him or the words pass.**
+
+1. Item 3's change is in the shared `ProtocolReading`, so the section of results against the thesis also loses the
+   pattern words ("C and D: no split"); §19 asks for the protocol's sentence quoted as written, which it still is, and
+   the entry's verdict is in its list above. For the reading "A and B split, C and D do not", the pattern named the other
+   pair's condition; the protocol's sentence says it in words ("not at twenty years").
+2. On a scenario page, "The details behind this result" now holds one line, the official verdict. The summary promises
+   more than it holds; a words-pass question.
+3. At 1280 on `/studies/`, the right column's verdict sits beside the sub-study's sentence with the sub-study's own
+   verdict closed away, so "no split" sits next to "The runs can't tell" (B vs D). The heading says what the column is;
+   the short row label kept visible at desktop too would remove the doubt. His call: §32 item 16 said the verdict word
+   alone.
+4. `caseReidentReasonAbove` says "under The dossier" with a capital mid-sentence; for the words pass.

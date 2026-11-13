@@ -25,7 +25,7 @@ import {
   protocolUrl,
 } from "./links";
 import { modelName, orderedModels } from "./models";
-import { His, HisHeading, Title } from "./parts";
+import { FindingMore, His, HisHeading, Title } from "./parts";
 import { AWARENESS_INSTRUCTION } from "./protocol";
 import { memoHref } from "./route";
 import { Details, RunsTable } from "./RunDetails";
@@ -92,26 +92,32 @@ function Thinking({ loaded, index }: { loaded: Loaded; index: DataIndex }) {
       aria-labelledby={headingId}
     >
       <HisHeading text={explorerHis.studiesThinkingTitle} level={2} id={headingId} />
-      <div className="beside beside-studies">
-        <div className="beside-text">
-          <p className="x-note" data-label="sub-study">
-            {L.studiesSubStudyLabel}
-          </p>
-          <p className="fine">
-            {L.studiesSettings}{" "}
-            <a href={protocolUrl(THINKING_ANCHOR)} target="_blank" rel="noopener noreferrer">
-              {L.studiesSettingsLink}
-            </a>
-          </p>
-          <p className="chart-key">{L.studiesGridNote}</p>
-        </div>
-        <div className="studies-figures">
-          <StripCard title={L.studiesGridCard} file={grid} wording={sealed} goals={goals} />
-          <StripCard title={L.studiesThinkingCard} file={thinking} goals={goals} />
-        </div>
+      <div className="studies-words">
+        <p className="x-note" data-label="sub-study">
+          {L.studiesSubStudyLabel}
+        </p>
+        <p className="fine">
+          {L.studiesSettings}{" "}
+          <a href={protocolUrl(THINKING_ANCHOR)} target="_blank" rel="noopener noreferrer">
+            {L.studiesSettingsLink}
+          </a>
+        </p>
+        <p className="chart-key">{L.studiesGridNote}</p>
+      </div>
+      <div className="studies-figures">
+        <StripCard title={L.studiesGridCard} file={grid} wording={sealed} goals={goals} />
+        <StripCard title={L.studiesThinkingCard} file={thinking} goals={goals} />
       </div>
       <h3>{L.studiesComparisonsHeading}</h3>
       {alpha !== undefined && <p className="chart-key">{L.studiesLevel(confidenceLevel(alpha))}</p>}
+      {sealed !== undefined && (
+        // Not hidden from a screen reader, and shown on a phone too: it is the only place the page says the grid's w2
+        // cut is not one of the 16 main comparisons (Opus review, section 33a).
+        <div className="paired-head">
+          <span />
+          <p>{L.studiesGridColumn(sealed)}</p>
+        </div>
+      )}
       <ol className="x-sentence-list">
         {comparisons.map((c) => {
           const sentence = resultSentence(c, names, L.outcomePhrases[thinking.scenario_id] ?? "");
@@ -133,19 +139,22 @@ function Thinking({ loaded, index }: { loaded: Loaded; index: DataIndex }) {
                   {c.final_verdict === "not_assessable"
                     ? L.noRunsCompared
                     : L.runsPair(runs.first, runs.second)}
-                  {" · "}
-                  {L.officialVerdict} {verdictWord(c.final_verdict)}
                 </p>
-                <p className="fine headline">
-                  {L.headlineLabel}: {c.headline}
-                </p>
+                <FindingMore>
+                  <p className="fine">
+                    {L.officialVerdict} {verdictWord(c.final_verdict)}
+                  </p>
+                  <p className="fine headline">
+                    {L.headlineLabel}: {c.headline}
+                  </p>
+                </FindingMore>
               </div>
               {gridPair !== undefined && (
-                <p className="fine paired-grid" data-grid-sealed={gridPair.sealed.final_verdict}>
-                  {L.studiesGridSealed(
-                    gridPair.sealed.sealed_wording,
-                    verdictWord(gridPair.sealed.final_verdict),
-                  )}
+                <p className="paired-grid" data-grid-sealed={gridPair.sealed.final_verdict}>
+                  <span className="paired-row-label">
+                    {L.studiesGridRowLabel(gridPair.sealed.sealed_wording)}:{" "}
+                  </span>
+                  <span className="paired-verdict">{verdictWord(gridPair.sealed.final_verdict)}</span>
                 </p>
               )}
             </li>
@@ -169,19 +178,21 @@ function Thinking({ loaded, index }: { loaded: Loaded; index: DataIndex }) {
   );
 }
 
-/** One reply to the awareness probe, as a document with its label inside the card; the text exactly. */
-function ReplyCard({ file, call }: { file: AwarenessFile; call: AwarenessFile["calls"][number] }) {
-  const labelId = useId();
-  const goal = call.objective_id;
+/**
+ * One reply to the awareness probe, in its cell of the grid: its template, its status line and the reply text exactly
+ * (protocol section 9.6 quotes every reply in full). No card of its own; the row's rules separate the rows.
+ */
+function ReplyCell({ goalId, call }: { goalId: string; call: AwarenessFile["calls"][number] }) {
+  const tagId = useId();
   return (
     <article
-      className="memo-card reply-card"
-      aria-labelledby={labelId}
-      data-goal={goal}
+      className="reply-cell"
+      aria-labelledby={`${goalId} ${tagId}`}
+      data-goal={call.objective_id}
       data-template={call.template_id}
     >
-      <p className="memo-label" id={labelId}>
-        {L.awarenessCardLabel(modelName(file.model_key), goal, names[goal] ?? goal, call.template_id)}
+      <p className="reply-tag" id={tagId}>
+        {L.awarenessTemplateTag(call.template_id)}
       </p>
       {!call.recorded ? (
         <p className="memo-none">{L.awarenessNotRecorded}</p>
@@ -199,8 +210,30 @@ function ReplyCard({ file, call }: { file: AwarenessFile; call: AwarenessFile["c
   );
 }
 
-function Awareness({ files, index }: { files: AwarenessFile[]; index: DataIndex }) {
+/** One goal's row: its color dot and name, then its replies, a column to a template (stacked on a phone). */
+function ReplyRow({ file, goal }: { file: AwarenessFile; goal: { id: string } }) {
   const headingId = useId();
+  return (
+    <div className={`reply-row ${goalClass(goal.id)}`} data-goal={goal.id}>
+      <h4 id={headingId}>
+        <span className="swatch" aria-hidden="true" />
+        {L.awarenessGoalHeading(names[goal.id] ?? goal.id, goal.id)}
+      </h4>
+      <div className="reply-cells">
+        {file.calls
+          .filter((call) => call.objective_id === goal.id)
+          .map((call) => (
+            <ReplyCell key={call.template_id} goalId={headingId} call={call} />
+          ))}
+      </div>
+    </div>
+  );
+}
+
+/** The awareness probe's replies of the model the page is showing (the switch is the tab); the sub-study above does not follow it. */
+function Awareness({ files, index, model }: { files: AwarenessFile[]; index: DataIndex; model: string }) {
+  const headingId = useId();
+  const file = files.find((f) => f.model_key === model);
   return (
     <section
       className="x-section studies-part"
@@ -222,34 +255,29 @@ function Awareness({ files, index }: { files: AwarenessFile[]; index: DataIndex 
           {L.awarenessLink}
         </a>
       </p>
-      {files.map((file) => (
-        <div key={file.model_key} className="awareness-model" data-model={file.model_key}>
+      {file !== undefined && (
+        <div className="awareness-model" data-model={file.model_key}>
           <h3>{modelName(file.model_key)}</h3>
-          {index.objectives.map((o) => (
-            <div key={o.id} className={`awareness-goal ${goalClass(o.id)}`} data-goal={o.id}>
-              <h4>
-                <span className="swatch" aria-hidden="true" />
-                {L.awarenessGoalHeading(names[o.id] ?? o.id, o.id)}
-              </h4>
-              {file.calls
-                .filter((call) => call.objective_id === o.id)
-                .map((call) => (
-                  <ReplyCard key={call.template_id} file={file} call={call} />
-                ))}
-            </div>
-          ))}
+          <p className="chart-key">{L.awarenessGridLabel(modelName(file.model_key))}</p>
+          <div className="reply-grid">
+            {index.objectives.map((o) => (
+              <ReplyRow key={o.id} file={file} goal={o} />
+            ))}
+          </div>
         </div>
-      ))}
+      )}
     </section>
   );
 }
 
 export interface StudiesViewProps {
   index: DataIndex;
+  /** The model the switch shows: the awareness replies follow it; the thinking sub-study (Haiku 5.5 only) does not. */
+  model: string;
   data: DataApi;
 }
 
-export function StudiesView({ index, data }: StudiesViewProps) {
+export function StudiesView({ index, model, data }: StudiesViewProps) {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -286,7 +314,7 @@ export function StudiesView({ index, data }: StudiesViewProps) {
       ) : (
         <>
           <Thinking loaded={loaded} index={index} />
-          <Awareness files={loaded.awareness} index={index} />
+          <Awareness files={loaded.awareness} index={index} model={model} />
         </>
       )}
     </>

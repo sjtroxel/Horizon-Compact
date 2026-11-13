@@ -207,18 +207,65 @@ describe("the reader", () => {
     expect(realMemoIndex.files).toContain("grid/haiku-5-5/s2/C.jsonl");
   });
 
-  it("lists the cell's runs, one link each, and marks the shown one", async () => {
+  it("lists the cell's runs grouped by wording, one line a wording and its repeats as short links, and marks the shown one (step 11 pages, item 19)", async () => {
     const rows = rowsOf("grid/haiku-5-5/s1/A.jsonl");
     const { container } = await reader("?kind=grid&scenario=s1&objective=A");
-    const items = [...container.querySelectorAll<HTMLAnchorElement>(".memo-runs a")];
-    expect(items.map((a) => a.getAttribute("href"))).toEqual(
-      rows.map((r) => memoHref({ kind: "grid", scenario: "s1", objective: "A", run: r.run_id }, HAIKU)),
+    const wordings = [...new Set(rows.map((r) => r.wording_id))];
+    expect(wordings.length).toBeGreaterThan(1);
+    const groups = [...container.querySelectorAll<HTMLElement>(".memo-runs > li.memo-run-group")];
+    expect(groups.map((g) => g.querySelector(".memo-run-wording")!.textContent)).toEqual(
+      wordings.map((w) => L.memoWordingGroup(w)),
     );
+    const items = [...container.querySelectorAll<HTMLAnchorElement>(".memo-runs a")];
+    // Every run is still one link, now ordered wording by wording; the repeat number is the link's text.
+    expect(items).toHaveLength(rows.length);
+    for (const [g, wording] of wordings.entries()) {
+      const mine = rows.filter((r) => r.wording_id === wording);
+      const links = [...groups[g]!.querySelectorAll<HTMLAnchorElement>("a")];
+      expect(links.map((a) => a.getAttribute("href"))).toEqual(
+        mine.map((r) => memoHref({ kind: "grid", scenario: "s1", objective: "A", run: r.run_id }, HAIKU)),
+      );
+      expect(links.map((a) => a.textContent)).toEqual(mine.map((r) => String(r.repeat)));
+    }
     expect(items.filter((a) => a.getAttribute("aria-current") === "true")).toHaveLength(1);
     expect(items[0]!.getAttribute("aria-current")).toBe("true");
-    expect(items[0]!.textContent).toContain(
-      L.memoRunLine(rows[0]!.wording_id, rows[0]!.repeat, rows[0]!.status),
-    );
+  });
+
+  it("gives each run link an accessible name with the run id, the wording, the repeat and the status; the visible text is the repeat", async () => {
+    const rows = rowsOf("grid/haiku-5-5/s1/A.jsonl");
+    const { container } = await reader("?kind=grid&scenario=s1&objective=A");
+    for (const r of rows) {
+      const link = within(container).getByRole("link", {
+        name: `${L.memoRun} ${r.run_id}: ${L.memoRunLine(r.wording_id, r.repeat, r.status)}`,
+      });
+      expect(link.getAttribute("href")).toContain(`run=${r.run_id}`);
+      expect(link.textContent).toBe(String(r.repeat)); // all valid here: nothing but the number
+      const name = link.getAttribute("aria-label")!;
+      for (const part of [r.run_id, r.wording_id, String(r.repeat), r.status]) expect(name).toContain(part);
+      expect(name).toContain(link.textContent!); // the visible label is in the name
+    }
+  });
+
+  it("shows a run's status beside its number when it is not valid, and nothing beside a valid one", async () => {
+    const rows = rowsOf("grid/gpt-oss-openrouter/s2/C.jsonl");
+    const odd = rows.filter((r) => r.status !== "valid");
+    expect(odd.length).toBeGreaterThan(1);
+    expect(new Set(odd.map((r) => r.status)).size).toBeGreaterThan(1);
+    const { container } = await reader("?kind=grid&scenario=s2&objective=C", GPT);
+    for (const r of rows) {
+      const link = container.querySelector<HTMLAnchorElement>(`.memo-runs a[href*="run=${r.run_id}"]`)!;
+      const status = link.querySelector(".memo-run-status");
+      if (r.status === "valid") expect(status, r.run_id).toBeNull();
+      else expect(status!.textContent, r.run_id).toBe(r.status);
+    }
+  });
+
+  it("marks the shown run by aria-current, which moves with the choice", async () => {
+    const rows = rowsOf("grid/haiku-5-5/s1/A.jsonl");
+    const { container } = await reader(`?kind=grid&scenario=s1&objective=A&run=${rows[7]!.run_id}`);
+    const marked = [...container.querySelectorAll<HTMLAnchorElement>(".memo-runs a[aria-current=true]")];
+    expect(marked).toHaveLength(1);
+    expect(marked[0]!.getAttribute("href")).toContain(`run=${rows[7]!.run_id}`);
   });
 
   it("moves to the previous and the next run by links that keep every parameter and the model", async () => {
@@ -261,8 +308,14 @@ describe("the choosers are links, so every choice is a URL", () => {
   it("mark the current kind, scenario and goal with aria-current, and offer every scenario and goal", async () => {
     const { container } = await reader("?kind=grid&scenario=s2&objective=C");
     expect(current(group(container, L.memoKindLabel))).toEqual([L.memoKinds["grid"]]);
-    expect(current(group(container, L.memoScenarioLabel))).toEqual(["s2"]);
+    expect(current(group(container, L.memoScenarioLabel))).toEqual([L.scenarioNames["s2"]]);
     expect(current(group(container, L.memoGoalLabel))).toEqual([`${L.objectiveNames["C"]} (C)`]);
+    // The picker shows the scenarios' short names; the query parameter stays the id (step 11 pages, item 18).
+    expect(
+      within(group(container, L.memoScenarioLabel))
+        .getAllByRole("link")
+        .map((a) => a.textContent),
+    ).toEqual(["s1", "s2", "s3", "s4"].map((s) => L.scenarioNames[s]));
     expect(hrefs(group(container, L.memoScenarioLabel))).toEqual(
       ["s1", "s2", "s3", "s4"].map((s) => memoHref({ kind: "grid", scenario: s, objective: "C" }, HAIKU)),
     );

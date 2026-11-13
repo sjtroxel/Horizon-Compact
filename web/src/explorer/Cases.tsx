@@ -22,7 +22,7 @@ import { Description, ExploratoryLabel } from "./caseParts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { CaseEntry, CaseFile, CasesIndex, CompanyReading, DataApi, DataIndex } from "./data";
 import { DistanceChart } from "./distanceChart";
-import { formatDistance, formatPercent } from "./format";
+import { formatDistance, formatWholePercent, withoutWithheldPrefix } from "./format";
 import { SELECTION_LOGS, selectionLogUrl } from "./links";
 import { modelName, orderedModels } from "./models";
 import { His, Title } from "./parts";
@@ -33,7 +33,10 @@ const names: Readonly<Record<string, string>> = L.objectiveNames;
 /** The files of every case for every model, once loaded: label, then model key. */
 type Files = Record<string, Record<string, CaseFile>>;
 
-const readingName = (id: string) => L.readingNames[id] ?? L.readingAlternative(id);
+// A heading or a list says "Alternative reading" with no id: every case file has exactly one (`u1`), which a test pins, so
+// the name is never ambiguous. The distance chart's note line and accessible name keep the id.
+const readingName = (id: string) => L.readingNames[id] ?? L.readingAlternativeName;
+const readingNameWithId = (id: string) => L.readingNames[id] ?? L.readingAlternative(id);
 const labelWord = (label: string) => L.readingLabels[label] ?? label;
 const typeWord = (type: string) => L.caseTypes[type] ?? type;
 const dimensionWord = (key: string) => (key === "choice" ? L.caseDimensionChoice : (L.levers[key] ?? key));
@@ -149,7 +152,7 @@ export function CasesView({ index, casesIndex, model, data }: CasesViewProps) {
       <Title route={{ kind: "cases" }} />
       <His text={explorerHis.casesIntro} />
       <His text={explorerHis.scopeSentence} />
-      <p className="x-note case-framing">{L.casesFraming}</p>
+      <p className="x-note case-note case-framing">{L.casesFraming}</p>
       <section className="x-section exploratory-lead">
         <p>{L.casesLabelLead}</p>
         {labels.map((text) => (
@@ -157,7 +160,7 @@ export function CasesView({ index, casesIndex, model, data }: CasesViewProps) {
         ))}
       </section>
       {everyReadingNoGoodMatch(everyFile) && (
-        <p className="x-note" data-sentence="every-reading-no-good-match">
+        <p className="x-note case-note" data-sentence="every-reading-no-good-match">
           {L.allNoGoodMatch}
         </p>
       )}
@@ -167,9 +170,7 @@ export function CasesView({ index, casesIndex, model, data }: CasesViewProps) {
         {casesIndex.cases.map((entry) => (
           <li key={entry.label} className="case-card" data-case={entry.label}>
             <h2>
-              <a className="mono" href={hrefOf({ kind: "case", label: entry.label }, model)}>
-                {entry.label}
-              </a>
+              <a href={hrefOf({ kind: "case", label: entry.label }, model)}>{entry.label}</a>
             </h2>
             <ExploratoryLabel text={entry.exploratory_label} />
             <p className="fine">
@@ -216,8 +217,10 @@ function CompanyDecision({
   const shares = (reading: CompanyReading) => {
     const entries = Object.entries(reading.shares);
     return entries.length === 0
-      ? L.caseNoShares
-      : entries.map(([lever, share]) => `${L.levers[lever] ?? lever}: ${formatPercent(share)}`).join("; ");
+      ? L.caseNoSharesPlain
+      : entries
+          .map(([lever, share]) => `${L.levers[lever] ?? lever}: ${formatWholePercent(share)}`)
+          .join("; ");
   };
   return (
     <>
@@ -238,15 +241,25 @@ function ModelSection({ entry, file }: { entry: CaseEntry; file: CaseFile }) {
   const counts = file.memo_counts;
   const sameLabel = labelUnderEveryReading(file);
   const unmatched = file.alternative_readings.unmatched_calls;
+  // When every run ended in one status the list of one reads as "N runs, all <status>"; with more than one, the list stays.
+  const statuses = Object.entries(file.run_counts.by_final_status);
+  const oneStatus =
+    statuses.length === 1 && statuses[0]![1] === file.run_counts.runs ? statuses[0]![0] : null;
   return (
     <section className="x-section case-model" data-model={file.model_key}>
       <h2>{L.caseModelHeading(model)}</h2>
-      <p>{L.caseRunCounts(file.run_counts.runs)}</p>
-      <ul className="x-facts-list">
-        {Object.entries(file.run_counts.by_final_status).map(([status, runs]) => (
-          <li key={status}>{L.caseFinalStatus(status, runs)}</li>
-        ))}
-      </ul>
+      {oneStatus === null ? (
+        <>
+          <p>{L.caseRunCounts(file.run_counts.runs)}</p>
+          <ul className="x-facts-list">
+            {statuses.map(([status, runs]) => (
+              <li key={status}>{L.caseFinalStatus(status, runs)}</li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p>{L.caseRunsAllOneStatus(file.run_counts.runs, oneStatus)}</p>
+      )}
       {orderedReadings(file).map((reading) => (
         <div
           key={reading.reading}
@@ -256,7 +269,7 @@ function ModelSection({ entry, file }: { entry: CaseEntry; file: CaseFile }) {
         >
           <h3>{readingName(reading.reading)}</h3>
           <p>
-            <b>{L.readingLabelIs(labelWord(reading.label))}</b>
+            <b>{labelWord(reading.label)}</b>
           </p>
           <p className="fine reading-reason">
             {L.readingReason}: {reading.reason}
@@ -270,7 +283,7 @@ function ModelSection({ entry, file }: { entry: CaseEntry; file: CaseFile }) {
           <DistanceChart
             caseLabel={entry.label}
             model={model}
-            readingName={readingName(reading.reading)}
+            readingName={readingNameWithId(reading.reading)}
             labelWord={labelWord(reading.label)}
             reading={reading}
             dStar={file.thresholds.d_star}
@@ -294,12 +307,12 @@ function ModelSection({ entry, file }: { entry: CaseEntry; file: CaseFile }) {
             </div>
           )}
           {hasTieNote(reading) && (
-            <p className="x-note" data-note="tie">
+            <p className="x-note case-note" data-note="tie">
               {L.tieNote}
             </p>
           )}
           {hasOneLineNote(reading) && (
-            <p className="x-note" data-note="one-line">
+            <p className="x-note case-note" data-note="one-line">
               {L.oneLineNote}
             </p>
           )}
@@ -309,7 +322,7 @@ function ModelSection({ entry, file }: { entry: CaseEntry; file: CaseFile }) {
         {L.dependsLabel}: {file.depends_on_reading ? L.dependsYes : L.dependsNo}
       </p>
       {dependsOnReadingNote(file) && (
-        <p className="x-note" data-note="depends-tie">
+        <p className="x-note case-note" data-note="depends-tie">
           {L.dependsTieNote}
           {sameLabel !== null && ` ${L.dependsSameLabel(labelWord(sameLabel))}`}
         </p>
@@ -375,7 +388,7 @@ export function CaseView({ label, index, casesIndex, data }: CaseViewProps) {
             {entry.description.reason !== undefined && (
               <>
                 {" "}
-                · {L.caseReasonLabel}: {entry.description.reason}
+                · {L.caseReasonLabel}: {withoutWithheldPrefix(entry.description.reason)}
               </>
             )}
           </p>
@@ -385,15 +398,23 @@ export function CaseView({ label, index, casesIndex, data }: CaseViewProps) {
         <h2>{L.caseDossierHeading}</h2>
         <p>{L.caseDossierStatus(entry.dossier.published)}</p>
         <p className="fine">
-          {L.caseReasonLabel}: {entry.dossier.reason}
+          {L.caseReasonLabel}:{" "}
+          {entry.dossier.published ? entry.dossier.reason : withoutWithheldPrefix(entry.dossier.reason)}
         </p>
       </section>
       <section className="x-section">
         <h2>{L.caseReidentHeading}</h2>
         <p>{L.caseReidentStatus(entry.reidentification.status)}</p>
-        <p className="fine">
-          {L.caseReasonLabel}: {entry.reidentification.reason}
-        </p>
+        {entry.reidentification.reason === entry.dossier.reason ? (
+          <p className="fine">{L.caseReidentReasonAbove}</p>
+        ) : (
+          <p className="fine">
+            {L.caseReasonLabel}:{" "}
+            {entry.reidentification.status === "withheld"
+              ? withoutWithheldPrefix(entry.reidentification.reason)
+              : entry.reidentification.reason}
+          </p>
+        )}
         <p className="fine">
           {L.caseThresholdLabel}: {entry.reidentification.threshold}
         </p>
