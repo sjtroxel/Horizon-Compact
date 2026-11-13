@@ -687,9 +687,11 @@ describe("step 11 pages: the cases and the case pages", () => {
       for (const reading of fileOf("closure-19", model).readings) expect(text).toContain(reading.reason);
   });
 
-  it("says no split across the levers for a reading with no shares, in the new words (item 12)", async () => {
+  it("says only the choice is coded for a reading with no shares, in the new words (item 12)", async () => {
     const { container } = await page("closure-19");
     expect(container.textContent).toContain(L.caseNoSharesPlain);
+    // Never the verdict words: "split" means something else on the same page (section 33b).
+    expect(L.caseNoSharesPlain.toLowerCase()).not.toContain("split");
   });
 
   it("says 'N runs, all <status>' when every run has one status, and keeps the list when there is more than one (item 13)", async () => {

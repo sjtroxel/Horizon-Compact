@@ -7,7 +7,29 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-13, about 5:05 AM (THE PAGES BATCH BUILT AND REVIEWED; COMMIT, THEN WORDS PASS)
+> ## START HERE — where things stand, 2026-11-13, about 10:00 AM (PHASE 6 CLOSED, VERSION 0.6.0; PHASE 6.5 NEXT)
+>
+> **Phase 6 closed (the Phase 6 IMPLEMENTATION doc §34; C8 by Claude on his instruction, one commit for all of it).**
+> Step 11 closed (§34.1): every §12 check run on the finished site; one defect found and fixed (the story's s2 to s4
+> verdict tables at 390 hid the end of "inconclusive" behind a scroll). **DoD 1-10 met (§34.2)**; the public URL still
+> the placeholder, byte-identical to `2227a26`'s build (a fresh build of `2227a26` and the live page both checked).
+> **Version `0.6.0`.** Phase 6's half of OPEN 2026-10-31 done; the entry stays open for 6.5. **Uncommitted:** §33b's
+> words, §34, the table fix, the version, `ROADMAP.md` and this file, in his commit `phase 6: close, version 0.6.0`.
+> **Next:** his commit and push (CI and Deploy green to be read); then Phase 6.5 (methods and release): its scope doc
+> reviewed and its IMPLEMENTATION doc written, immediately before its build.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-13, about 9:10 AM (THE PAGES BATCH COMMITTED; ITS WORDS PASS DONE) *(superseded by the block above)*
+>
+> **The pages batch committed `7e944f3` (his) and pushed; CI `43413558343` and Deploy `43413557654` green.** **Its words
+> pass done (the Phase 6 IMPLEMENTATION doc §33b):** he took every recommendation; four labels reworded, the studies' row
+> label shown at every width (§33a note C). `make check` green; the browser pass clean. **Uncommitted:** the words, §33b and
+> this block. **Next:** his commit; then the review's close (§14 step 11) and C8.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-13, about 5:05 AM (THE PAGES BATCH BUILT AND REVIEWED; COMMIT, THEN WORDS PASS) *(superseded by the block above)*
 >
 > **The step 11 pages batch built by Sonnet (the Phase 6 IMPLEMENTATION doc §33) and reviewed by Opus (§33a): passed
 > after one fix** (the studies' w2 column heading, the only place the page says that cut is not one of the 16 main
@@ -3262,6 +3284,11 @@ results are shown (the explorer, the methods page), so a reader does not take a 
    `u1` distances with this note.
 
 **Closes when** Phase 6 and 6.5 carry both notes (their DoD audits name this entry).
+
+*Dated note, 2026-11-13 (Phase 6's close):* **Phase 6's half is done.** The explorer carries both notes exactly where
+their conditions hold (note 1, no nearest objective in a tied reading and the `depends_on_reading` note; note 2 on
+`closure-19`'s `u1`), pinned by `Cases.test.tsx`; its DoD audit names this entry (Phase 6 IMPLEMENTATION doc §34.2,
+DoD 8). **The entry stays open** until Phase 6.5's methods page carries them.
 
 ---
 

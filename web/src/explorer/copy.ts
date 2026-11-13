@@ -177,7 +177,7 @@ export const explorerLabels = {
     `Each verdict is the analysis\u2019s own, at a ${level} confidence level. That is stricter than usual because the study makes 16 main comparisons, and with that many, some would look like a difference by chance alone. The numbers behind each verdict are in the details.`,
   roundtableFlag: "The pair the Roundtable\u2019s claim is about",
   secondaryFlag: "Secondary comparison",
-  // Step 11 pages batch (2026-11-13): Claude-drafted, unapproved until the words pass.
+  // Step 11 pages batch (2026-11-13): Claude-drafted, approved in the words pass (section 33b).
   primaryFlag: "Primary comparison",
   scenarioIdLine: (id: string) => `Scenario ${id}`,
   officialVerdict: "official verdict:",
@@ -285,7 +285,7 @@ export const explorerLabels = {
   memoScenarioLabel: "Scenario",
   memoGoalLabel: "Goal",
   memoRunsHeading: "Runs in this set",
-  // Step 11 pages batch (2026-11-13): Claude-drafted, unapproved until the words pass.
+  // Step 11 pages batch (2026-11-13): Claude-drafted, approved in the words pass (section 33b).
   memoWordingGroup: (wording: string) => `Wording ${wording}`,
   memoRunLine: (wording: string, repeat: number, status: string) =>
     `wording ${wording}, repeat ${repeat}, ${status}`,
@@ -373,9 +373,10 @@ export const explorerLabels = {
   caseCompanyHeading: "The company’s decision, as the case codes it",
   caseCompanyChoice: (choice: string) => `Choice: ${choice}`,
   caseCompanyReading: (reading: string) => `Reading ${reading}`,
-  // Step 11 pages batch (2026-11-13): plainer words for what the file says; Claude-drafted, unapproved until the words pass.
-  caseNoSharesPlain: "This reading has no split across the levers.",
-  caseReidentReasonAbove: "The reason is under The dossier, above.",
+  // Step 11 pages batch (2026-11-13): plainer words for what the file says; Claude-drafted, approved in the words pass
+  // (section 33b). Never the verdict words (split, no split) here: they mean something else on the same page.
+  caseNoSharesPlain: "Only the choice is coded in this reading; it gives no shares.",
+  caseReidentReasonAbove: "Reason: the same as the dossier\u2019s, above.",
   caseDimensionsHeading: "What the case was matched on",
   caseObservable: "Matched on",
   caseExcluded: "Left out",
@@ -405,7 +406,7 @@ export const explorerLabels = {
   distanceRowNumbers: (distance: string, low: string, high: string) =>
     `distance ${distance}, interval ${low} to ${high}`,
   distanceRunsPlain: (runs: number, choiceOnly: number, undistanced: number) =>
-    `${runs} runs compared, ${choiceOnly} of them on the choice alone; ${undistanced} left out, with nothing to compare`,
+    `${runs} runs compared, ${choiceOnly} on the choice alone; ${undistanced}\u00a0had nothing to compare`,
   distanceChartLabel: (caseLabel: string, model: string, reading: string) =>
     `Distances for ${caseLabel}, ${model}, ${reading}`,
   distanceLevel: (level: string) => `${level} range, from resampling the runs (a bootstrap interval)`,
@@ -458,8 +459,9 @@ export const explorerLabels = {
     "The scenario view shows the grid’s three wordings; here the grid is cut to w2, so it sits like for like beside the sub-study.",
   studiesLevel: (level: string) => `Each verdict uses the analysis’s ${level} interval.`,
   studiesComparisonsHeading: "The five comparisons in the sub-study",
-  // Step 11 pages batch (2026-11-13): Claude-drafted, unapproved until the words pass. The column heading is the old
-  // sentence's words without its verdict; the row label is its short form, shown on a phone, where there is no column.
+  // Step 11 pages batch (2026-11-13): Claude-drafted, approved in the words pass (section 33b). The column heading is the
+  // old sentence's words without its verdict, said once for its caveat; the row label is its short form, shown in every row
+  // at every width, so the main grid's verdict is never read as the sub-study's (section 33b, note C).
   studiesGridColumn: (wording: string) =>
     `The main grid on wording ${wording} alone, also not one of the 16 main comparisons`,
   studiesGridRowLabel: (wording: string) => `Main grid, wording ${wording} alone`,
@@ -475,7 +477,7 @@ export const explorerLabels = {
   awarenessLink: "Protocol section 9.6, at the pre-registered tag",
   awarenessGoalHeading: (goal: string, letter: string) => `${goal} (${letter})`,
   awarenessGridLabel: (model: string) =>
-    `A reply to the awareness probe, not a decision memo. Each reply below was written by ${model}, under the goal named for its row.`,
+    `Replies to the awareness probe, not decision memos. Each was written by ${model} under the goal named for its row.`,
   awarenessTemplateTag: (template: string) => `Template ${template}`,
   awarenessStatus: (status: string, stop: string, tokens: number) =>
     `status ${status}, stop reason ${stop}, ${tokens} output tokens`,

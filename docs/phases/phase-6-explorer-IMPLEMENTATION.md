@@ -1,7 +1,10 @@
 # Phase 6 — Explorer: IMPLEMENTATION (v0.6)
 
 > **IMPLEMENTATION doc. APPROVED 2026-11-09, about 8:30 AM (his): all nine decisions in §13 as recommended, with
-> decision 2 changed to a local preview after his question (no second Vercel site; §13).** Drafted the same morning (Opus). Written the morning after Phase 1.5
+> decision 2 changed to a local preview after his question (no second Vercel site; §13).**
+> **CLOSED 2026-11-13** (his commit of §34): DoD 1-10 met, version `0.6.0`; the public page byte-identical to `2227a26`'s.
+>
+> Drafted the same morning (Opus). Written the morning after Phase 1.5
 > closed (`2227a26`), immediately before this phase is built, and five weeks after its scope doc. Sources: the scope
 > doc (`docs/phases/phase-6-explorer.md`) and Phase 6.5's (`phase-6.5-methods-and-release.md`); `planning/00` §4-§6,
 > `planning/04` §1.2-§1.3 and §2.5, `planning/06` §4-§9 (all of it binds this phase), `planning/07` §1, §7, §10 and
@@ -490,9 +493,9 @@ My recommendation is (a) in each, for the reason given.
 8. **[done 2026-11-11: his words, the labels and the four result-sentence templates approved, §11's dated notes]** **[his]** **The words** (§11): his titles and sentences; the templates and labels approved word for word.
 9. **[built 2026-11-11 by Sonnet, §28; reviewed by Opus, §28a (part A, passed) and §28b (part B, passed after one fix)]** **[Sonnet builds, Opus reviews]** **C6, the guided story.**
 10. **[built 2026-11-11 by Sonnet, §29; reviewed by Opus, §29a: passed after one fix; words pass done 2026-11-12, §29b]** **[Sonnet builds, Opus reviews]** **C7, the share cards.**
-11. **[in progress; 2026-11-12, §30-§31b: `/` decided, redesigned and its words approved; 2026-11-13, §32: the other pages decided (twenty findings, his), their fix batch next]** **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
+11. **[done 2026-11-13: §30-§31b, `/` decided, redesigned and its words approved; §32, the other pages decided (twenty findings, his); §33-§33b, built by Sonnet, reviewed by Opus (passed after one fix), committed `7e944f3`, its words approved; the step closed in §34.1 (one fix: the story's verdict tables at 390)]** **[his, Claude reading]** **The review against §12** on the preview, both widths, both modes; the number-trace
     script per view; fixes before the close.
-12. **[Claude]** **C8, the close:** the DoD audit, the version (decision 9), `ROADMAP.md`, `KNOWN-GAPS.md`.
+12. **[done 2026-11-13, §34: DoD 1-10 met; version `0.6.0`]** **[Claude]** **C8, the close:** the DoD audit, the version (decision 9), `ROADMAP.md`, `KNOWN-GAPS.md`.
 
 ## 15. Definition of done, and the proof of each
 
@@ -3385,3 +3388,88 @@ full runs here; left as it is, no timeout changed. Both awareness files still fe
    the short row label kept visible at desktop too would remove the doubt. His call: §32 item 16 said the verdict word
    alone.
 4. `caseReidentReasonAbove` says "under The dossier" with a capital mid-sentence; for the words pass.
+
+## 33b. The words pass on the step 11 pages labels (2026-11-13, Claude-drafted, his approval)
+
+He took every recommendation as proposed ("let's take all as recommended", about 8:49 AM).
+
+**Kept as §33 drafted them:** `primaryFlag`, `scenarioIdLine`, `readingAlternativeName`, `caseRunsAllOneStatus`,
+`studiesGridRowLabel`, `awarenessTemplateTag`, `memoWordingGroup`; `studiesGridColumn` keeps the approved words of the
+label it replaced.
+
+**Changed:**
+
+| key | §33's words | approved |
+|---|---|---|
+| `caseNoSharesPlain` | This reading has no split across the levers. | Only the choice is coded in this reading; it gives no shares. |
+| `caseReidentReasonAbove` | The reason is under The dossier, above. | Reason: the same as the dossier's, above. |
+| `distanceRunsPlain` | N runs compared, N of them on the choice alone; N left out, with nothing to compare | N runs compared, N on the choice alone; N had nothing to compare |
+| `awarenessGridLabel` | A reply to the awareness probe, not a decision memo. Each reply below was written by <model>, under the goal named for its row. | Replies to the awareness probe, not decision memos. Each was written by <model> under the goal named for its row. |
+
+Why: "split" is a verdict word on the same page and meant something else in the first; the second had a capital
+mid-sentence and now matches the "Reason:" lines around it; the third is shorter on twenty rows a case page; the fourth
+was singular above fifteen replies. A non-breaking space keeps the left-out count with its words when the line wraps
+(the words are as approved). A test now pins that `caseNoSharesPlain` never says "split".
+
+**§33a's notes:** A (the pattern words gone from the results against the thesis) and B (one line in a scenario
+comparison's closed section): no change. C: the short row label ("Main grid, wording w2 alone: no split") shows in every
+row at every width, the column heading kept for its caveat, so the grid's verdict is never read as the sub-study's; this
+partly reverses §32 item 16's "the verdict word alone", his call. D: done by the second change above.
+
+**Checked:** `make check` exit 0 (Python 3,483, web 585, `check-dist` ok in both modes, `doctor` ok; `web/dist/`
+byte for byte unchanged); the browser pass on the rebuilt preview: 52 loads, 0 with a problem, layout shift
+0.001 at most, the crop test 0 missing on every path, the number trace 0 untraced on every path; `/studies/` 5,911 px at
+1280 (unchanged), a case page unchanged at 6,671.
+
+## 34. The close (C8), 2026-11-13: step 11 closed, the DoD audit, the version
+
+Claude, on his instruction to finish the phase and commit once ("go ahead and finish phase 6 and i'll do the gitcommit
+all together then", about 9:06 AM). One commit carries §33b's words, this section and every edit below.
+
+### 34.1 Step 11 closed: §12's checks on the finished site
+
+Every check in §12 run or read on the build of this commit (the explorer preview, `vite preview`, local only, decision 2):
+
+| §12 check | Result |
+|---|---|
+| Phase 1.5 §8 (type scale, spacing, focus, both modes, both widths, no layout shift, no console error, `axe-core`, nothing generic) | `scratch/p6-step11-shoot-review.mjs`: 52 loads (13 paths, 390 and 1280, light and dark, reduced motion), 0 with a problem (no console error, failed request, CSP violation, off-origin request, horizontal overflow, `axe-core` violation or unmounted page); layout shift 0.001 at most. The type scale and the text and focus colors' contrast on each band pinned by `palette.test.ts` (§31) |
+| every chart passes the `dataviz` anti-patterns and the palette validator in both modes | palette A unchanged since §24.1's validator run (light worst CVD ΔE 21.6, dark 16.0), pinned by `palette.test.ts`; E's gray under the normal-vision floor against three hues, accepted by him 2026-11-10 while no chart puts goals in one plot area. **Re-checked for C6 and C7, as §24.1 and §26a asked:** the story's charts give each goal its own named row, like the scenario pages, and the cards are text only, with no goal color. The condition holds; nothing reopens |
+| every number traces to the data | the number trace: 4,811 numbers on the 13 paths, 4,811 traced, 0 untraced |
+| the crop test | 36 figures, 0 missing the model, the run count or the scope line |
+| the story read with reduced motion and at 390, beat by beat | read by Claude, all eleven pieces of a full-length capture (20,478 px; the review script's capture stops at 16,000), reduced motion emulated, no beat left mid-entrance. **One defect, fixed:** in beat 6 the three verdict tables (s2 to s4) were 375 px wide in a 358 px scroll box, so the second model's "inconclusive" was cut to "inconclusiv" behind a horizontal scroll nothing signalled. Cause: the pair column's `min-width: 11rem`, now applied from 30rem only (`explorer.css`). A probe of every table on all 13 paths at 390 afterwards: none wider than its box, no cell clipped. Looked at and **not** a defect: the zero rule shows between the glyphs of a value near 0 ("−2.0"); the halo keeps it off every letter, as designed (§31) |
+| every result sentence is a template's output | the template tests, in `make check` |
+
+Why the review script missed the table: it checks the document's horizontal overflow, and the table scrolled inside its
+own box. The probe that found it is in the session's scratch, not in the repository.
+
+### 34.2 The DoD audit (§15)
+
+| DoD | Met | Proof |
+|---|---|---|
+| 1. Every view, the story and the cards built and running on the preview, reading only precomputed data | yes | the explorer build of this commit, served by `vite preview`, every path mounted, no request off the page's origin (§34.1); `modules.test.ts` (the explorer imports no data file: the data is fetched, never bundled; the placeholder entry reaches no explorer code) and `view-modules.test.ts` (each view loaded by its path) |
+| 2. The public URL still shows Phase 1.5's placeholder | yes | `check-dist` in placeholder mode, in `make check`. **Byte-identical to `2227a26`'s build, checked today:** `2227a26`'s `web/` exported by `git archive`, installed from its own lockfile (`npm ci`) and built (`vite build`): its 8 files have the same sha256 as `web/dist/` of this tree. **And the live page:** each of the 8 files fetched from `horizon-compact.vercel.app` matches `web/dist/` |
+| 3. The palette passed the validator in both modes; nothing by color alone; the story works with reduced motion and at phone width | yes | §24.1 and `palette.test.ts`; `axe-core` clean on 52 loads; §34.1's beat-by-beat read and its fix |
+| 4. Every template and label approved word for word; his words in place | yes | §11's dated notes, §29b, §31b, §33b; `his.json`: 46 strings, none still a placeholder (`[his:`) |
+| 5. Every number on the preview traces to the published JSON | yes | the number trace, §34.1: 4,811 of 4,811, every path, not a sample |
+| 6. `make check` and CI green; every commit through the guard | yes, this commit's CI to be read after his push | `make check` exit 0 on this tree (below); every Phase 6 commit through the hooks; the last one, `7e944f3`: CI `43413558343` and Deploy `43413557654` green. The name guard's scan over every modified file: 0 findings |
+| 7. The explorer data reproduced byte for byte from the committed results | yes | `tests/test_site_explorer.py::test_the_committed_explorer_data_is_reproduced_byte_for_byte`, inside `pytest`, so in `make check` and CI |
+| 8. Every case surface carries its exploratory label and both matcher notes where their condition holds | yes | `Cases.test.tsx` (the label first and verbatim on `/cases/` and every case page; note 1, note 2 and the `depends_on_reading` note exactly where their conditions hold, and for files edited to meet them); `Story.test.tsx` (the label before any reading). **KNOWN-GAPS OPEN 2026-10-31: Phase 6's half is done**; the entry stays open for Phase 6.5's methods page |
+| 9. The section of results against the thesis filled by decision 1's rule, stated on the page | yes | the rule's tests in `tests/test_site_explorer.py` (each clause on each scenario's sign) and `AgainstThesis.test.tsx`; the section on `/` |
+| 10. Decision 5's counts recorded and his choice applied | yes | `docs/phases/evidence/phase-6/memo-echoes.json` (his run, 2026-11-09) and his choices in §22; no real-case memo text and no link to one on the site: `tests/test_site_explorer.py::test_the_builder_never_opens_a_case_memo_file` and `::test_the_real_output_holds_no_memo_and_no_account_marker`, `Cases.test.tsx` ("links to no memo file and shows no memo text"), `Story.test.tsx` ("no case memo text") |
+
+### 34.3 The version, the cost, and what Phase 6.5 inherits
+
+**Version `0.6.0`** (decision 9) in `pyproject.toml`, `src/horizon_compact/__init__.py` and `uv.lock` (`uv lock --check`
+agrees). `web/package.json` stays `0.0.0`, as at every close before.
+
+**Cost.** No model call in the phase. AWS: his one S3 read of about 2,290 objects for the memo extract (§16: well under
+a cent); nothing deployed to AWS; Vercel and GitHub Actions free. Not read from Cost Explorer: the phase has no spend
+item in its DoD, and the amount is inside the rounding of Phase 1.5's reading. If he wants it on the record, his Cost
+Explorer reading for 2026-11-09 to 2026-11-13, filtered to the `Project` tag, can be added as a dated note.
+
+**Carried to Phase 6.5** (its scope doc and its IMPLEMENTATION doc, when written): the go-live commit that switches
+Deploy to the explorer (decision 3); the full-text publication of the grid memos (decision 4); the methods page's half of
+KNOWN-GAPS OPEN 2026-10-31; the share cards' link previews, testable only once public (decision 2); the cold-read agent
+(§13 decision 2).
+
+**`make check`:** exit 0 on this tree: Python 3,483 passed; web 585 passed; `check-dist` ok in both modes; `doctor` ok.

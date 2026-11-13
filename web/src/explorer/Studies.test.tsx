@@ -222,7 +222,7 @@ describe("the thinking sub-study", () => {
       expect(cell.querySelector(".paired-verdict")!.textContent).toBe(
         verdictWord(gridPair.sealed.final_verdict),
       );
-      // The short row label is there for a phone and for a screen reader; the cell says nothing else.
+      // The short row label is in every row, at every width (section 33b, note C); the cell says nothing else.
       expect(cell.querySelector(".paired-row-label")!.textContent).toBe(`${L.studiesGridRowLabel(SEALED)}: `);
       expect(cell.textContent).toBe(
         `${L.studiesGridRowLabel(SEALED)}: ${verdictWord(gridPair.sealed.final_verdict)}`,
@@ -312,13 +312,13 @@ describe("the awareness probes", () => {
           );
           // Unedited and untruncated (protocol section 9.6).
           expect(cell.querySelector(".memo-text")!.textContent).toBe(call.reply);
-          // The sentence that it is not a decision memo is said once above the grid, not on a cell.
-          expect(cell.textContent).not.toContain("not a decision memo");
+          // The sentence that these are not decision memos is said once above the grid, not on a cell.
+          expect(cell.textContent).not.toContain("not decision memos");
           expect(cell.getAttribute("aria-labelledby")).toContain(row.querySelector("h4")!.id);
         }
       }
       // Said once, above the grid, with the model's name.
-      expect(section.textContent!.split("not a decision memo")).toHaveLength(2);
+      expect(section.textContent!.split("not decision memos")).toHaveLength(2);
       const label = [...section.querySelectorAll(".chart-key")].find(
         (p) => p.textContent === L.awarenessGridLabel(modelName(model)),
       )!;

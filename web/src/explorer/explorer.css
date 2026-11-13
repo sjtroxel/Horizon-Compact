@@ -1459,13 +1459,14 @@ text.diff-value {
   color: var(--ink);
 }
 /* The five comparisons as two columns: the sentence and its runs on the left; on the right the main grid's verdict on
-   wording w2, with the long phrase said once as the column's heading (step 11 pages, item 16). On a phone there is no
-   column, so each row carries the short label in front of its verdict, and the heading is not shown. */
+   wording w2, with the long phrase said once as the column's heading (step 11 pages, item 16). Every row carries the
+   short label in front of its verdict at every width, so the grid's verdict is never read as the sub-study's (section
+   33b, note C). */
 .sent.paired {
   display: grid;
   gap: 0.5rem 1.5rem;
 }
-/* On a phone the heading is one plain line above the list (the rows carry the short label); it is never hidden, since
+/* On a phone the heading is one plain line above the list; it is never hidden, since
    it is the only place the page says the w2 cut is not one of the 16 main comparisons (Opus review, section 33a). */
 .paired-head {
   margin: 0.5rem 0 0.75rem;
@@ -1509,15 +1510,6 @@ text.diff-value {
   .view .paired-grid {
     padding-left: 0.85rem;
     border-left: 2px solid var(--axis);
-  }
-  /* The heading says it: the row label is for a screen reader there, not for the eye. */
-  .paired-row-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
   }
 }
 .probe-instruction p {
@@ -1690,8 +1682,12 @@ text.diff-value {
 .story-model h3 {
   margin-top: 0;
 }
-.story-table th[scope="row"] {
-  min-width: 11rem;
+/* The pair's column keeps a floor only where there is room for it: at phone width a floor of 11rem pushed the second
+   model's column past the edge, hiding the end of "inconclusive" behind a scroll (C8, section 34). */
+@media (min-width: 30rem) {
+  .story-table th[scope="row"] {
+    min-width: 11rem;
+  }
 }
 .story-pair-names {
   display: block;
