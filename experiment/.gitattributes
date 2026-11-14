@@ -1,0 +1,3 @@
+# The published raw text (Phase 6.5 IMPLEMENTATION doc section 5.1) is checked byte for byte against its
+# manifest's sha256, so git must never convert its line endings on any clone.
+raw/** -text

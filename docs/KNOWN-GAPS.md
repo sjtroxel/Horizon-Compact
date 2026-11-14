@@ -7,7 +7,34 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-14, about 3:15 AM (PHASE 6.5 IMPLEMENTATION DOC DRAFTED, §0 TO §4; NOT APPROVED)
+> ## START HERE — where things stand, 2026-11-14, about 9:05 AM (PHASE 6.5 IMPLEMENTATION DOC APPROVED; STEP 1 BUILT)
+>
+> *Update, about 10:00 AM:* **step 1 built** (Opus, his choice; doc §5.1 as built): `hc site raw-pull` (his to run,
+> denied to Claude) and `hc site raw-verify`, `src/horizon_compact/site/rawtext.py`, 50 tests, seven mutations caught;
+> two commit hooks now exclude `experiment/raw/` and `experiment/.gitattributes` keeps its bytes exact. `make check`
+> green, 3,533 and 585. **Uncommitted:** C0 (docs) and C1 (the code), his two commits. **Next:** step 2, his pull.
+>
+> **The Phase 6.5 IMPLEMENTATION doc is APPROVED** (his, about 8:55 AM; `docs/phases/phase-6.5-methods-and-release-IMPLEMENTATION.md`).
+> **Decisions A-G, all as leaned:** A the raw text in the repository (`experiment/raw/`); B a CloudFront Function in
+> `main` (per-path HTML) and a real 404; C an Explainer served from the site (`media-src 'self'` in `bootstrap`) and a
+> Short held for Phase 7; D a plain paragraph on the memo echoes, no terms; E `/methods/` in the explorer; F the video
+> file in the repository, under 50 MiB; G the prompt-rebuild reader gets the site, the content files and each sample's
+> recorded settings, the seed included. **Step 0 done:** the scope doc amended (a dated header note pointing to §0;
+> dated notes on Delivers 3 and 6; DoD renumbered), `ROADMAP.md`'s row. **Uncommitted:** all of it, with last night's
+> options and corrections, in his commit C0 `phase 6.5: implementation doc approved`. **Next:** step 1, `hc raw pull`
+> and `hc raw verify` on fakes (Sonnet builds, Opus reviews; doc §5.1, §8).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-14, about 3:15 AM (PHASE 6.5 IMPLEMENTATION DOC DRAFTED, §0 TO §4; NOT APPROVED) *(superseded by the block above)*
+>
+> *Update, about 3:20 AM:* **committed `96ab718` (his) and pushed.** After it, uncommitted (his choice: fold into the
+> next commit later today): §2 now gives every decision options and Claude's lean (A: the repository; B: a CloudFront
+> Function plus a real 404, required because every path now serves the root page and its card to a link-preview
+> crawler; C as before; D: a plain paragraph; E: `/methods/` in the explorer); §0 item 1 corrected (the raw text is
+> about 10 MB packed, estimated on 355 development records, not "triple `.git`"; records are redacted at write time);
+> §0 item 5 gains the serving finding. `make check` green. **Next:** the checks' build, the video plan, go-live, the
+> steps and the DoD, fresh.
 >
 > **Phase 6.5's IMPLEMENTATION doc is started** (`docs/phases/phase-6.5-methods-and-release-IMPLEMENTATION.md`, Opus,
 > with him, overnight). **Written:** §0 the scope review (ten changes since 2026-10-04, among them: the Phase 4 raw

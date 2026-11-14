@@ -62,6 +62,10 @@ repos:
       - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
+        # The published raw text (Phase 6.5 §5.1) is the stored bytes, checked by sha256: never rewritten.
+        exclude: ^experiment/raw/
       - id: trailing-whitespace
+        # The published raw text (Phase 6.5 §5.1) is the stored bytes, checked by sha256: never rewritten.
+        exclude: ^experiment/raw/
 
 # Deliberately NOT included: no-commit-to-branch. He commits directly to main.

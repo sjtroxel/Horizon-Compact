@@ -1,11 +1,10 @@
 # Phase 6.5 — Methods and Release: IMPLEMENTATION (v0.6.5)
 
-> **IMPLEMENTATION doc. DRAFT, NOT APPROVED.** Started 2026-11-14, about 2:20 AM (Opus), the day after Phase 6 closed
-> (`21262a6`). **Written so far:** §0 (the scope review), §1 (the disclosure ledger, two passes), §2 (the decisions
-> it raises; none taken), §3 (the methods page's outline) and §4 (facts checked live, the video first). **Not yet
-> written:** the other facts checked live, each decision's options and recommendation (C's are listed), the checks'
-> build, the video plan, the go-live checklist, the steps, the commit order and the definition of done. Those follow
-> once he has seen §0 to §4.
+> **IMPLEMENTATION doc. APPROVED 2026-11-14, about 8:55 AM (his): decisions A-G all as leaned** (A-E about 8:30 AM,
+> §2; F and G about 8:55 AM, §6 and §5.6). Drafted 2026-11-14 from about 2:20 AM (Opus), the day after Phase 6 closed
+> (`21262a6`), and finished the same morning. The scope doc is amended at this approval (its header note of
+> 2026-11-14). Sections: §0 the scope review; §1 the disclosure ledger; §2 decisions A-E; §3 the methods page's
+> outline; §4 facts checked live; §5 the checks; §6 the video; §7 go-live; §8 steps and commits; §9 DoD; §10 cost.
 >
 > Sources so far: the scope doc (`docs/phases/phase-6.5-methods-and-release.md`, 2026-10-04); the Phase 6 scope doc and
 > IMPLEMENTATION doc (§0 and §34.3, what Phase 6 hands on); `KNOWN-GAPS.md`; `docs/phases/evidence/phase-4/raw-manifest.json`;
@@ -23,12 +22,24 @@
 Read the scope doc with these changes. Each is measured or cited; none lowers a rule.
 
 1. **The raw text to publish is about 105 MB.** Delivers 2 and DoD row 8 publish the full text of Phase 4's pilot and
-   official objects: 5,247 objects, 104,785,272 bytes by the manifest's own sum (measured 2026-11-14). The repository's
-   `.git` is about 50 MB today, so committing them would roughly triple it. Where they are published (the repository,
-   a GitHub release asset, or a path on the site) decides what the CI re-scoring job reads. Decision A (§2).
-   **Not yet seen by Claude:** what the objects hold beyond the prompt, the reply and the provenance. Claude's deny
-   list keeps it out of S3 (Phase 4 runs doc §5.4), so before anything is published, his read-only pull and a scan for
-   anything that must not be public (an account number, a key, a request header) come first.
+   official objects: 5,247 objects, 104,785,272 bytes by the manifest's own sum (measured 2026-11-14); 92 MB of it is
+   first attempts (2,450 objects of about 37 KB each), since every attempt carries its whole prompt and reply. Where
+   they are published (the repository, a GitHub release asset, or a path on the site) decides what the CI re-scoring
+   job reads. Decision A (§2).
+   **How much space they take, estimated, not measured** (*corrected the same morning: the first draft said committing
+   them would "roughly triple" the 50 MB `.git`, which set raw bytes against packed ones*). On the nearest stand-in,
+   355 development attempt records in `scratch/runs/` (9.7 MB, written by the same code, on the placeholder
+   experiment), git's own pack came to 10% of the raw bytes, gzip 17% and xz 5%. If the official records compress
+   alike, that is about 10 MB in git, 18 MB as a `.tar.gz`, 5 MB as `.tar.xz`. The real figure is measured on his pull
+   before decision A is taken.
+   **What a record holds** (read on the stand-in): the whole request (the prompt, the tool, the provider settings),
+   the whole raw reply (the reasoning text included where a model returns it), usage and cost, and provenance (git
+   sha, image digest, an ECS task ARN). **Private values are kept out at write time:** every sweep record is written
+   through `serialize_safely` (`smoke/record.py`; `sweep/runner.py` calls it), which replaces the AWS account number
+   with `<account-id>`, redacts e-mail addresses and refuses any record holding an API key. On the stand-in: 169 of
+   355 hold the placeholder, no twelve-digit number stands alone, no key shape appears. Claude has not seen an
+   official record (the deny list, Phase 4 runs doc §5.4), so the same checks run again over the real pull before
+   anything is published.
 2. **No real case can be re-scored or rebuilt from published inputs.** All five dossiers were withheld by the
    re-identification check (Phase 5.5 §6.6), and every raw case record carries its dossier. So Delivers 3's sample
    "one real case whose dossier was published" cannot exist; the re-scoring check and the prompt-reconstruction check
@@ -46,8 +57,13 @@ Read the scope doc with these changes. Each is measured or cited; none lowers a 
    and no explanation goes on the page that a measurement does not support.
 5. **The teardown test probably does not re-run.** Delivers 8 re-runs it "if `main` changed since Phase 1.5." The only
    commit under `infra/` since the Phase 1.5 teardown (`f49d530`) is its own evidence commit (`cf1fb71`). That holds
-   unless go-live adds infrastructure: Phase 6 left a true 404 status (a CloudFront Function, or a rule in the Vercel
-   rewrite) to this phase (Phase 6 IMPLEMENTATION doc, C3 notes). Decision B.
+   unless go-live adds infrastructure, and it has to (decision B). **Measured in `infra/terraform/main/site.tf`:** the
+   distribution answers every missing key with `/index.html` and status 200 (a private bucket answers 403, and both
+   403 and 404 map to the page). A path such as `/scenario/s1/` is not a key (the file is `scenario/s1/index.html`),
+   so it gets the root page. **A person is not hurt by that** (the app routes in the browser); **a link-preview
+   crawler is**, since it runs no script: every shared link would show the root page's title and card, which undoes
+   Phase 6's per-view cards (its decision 6, and its §3 finding 6, which named this as go-live's to fix). And an
+   unknown path returns 200, not 404.
 6. **The video is a deliverable to make work** (his, 2026-11-14: videos make the project digestible for casual
    readers, "as valuable as ever"). Scope DoD 5 still allows not publishing it, with the reason; that is his last
    resort, not a fallback this doc plans around. Open: the tool the scope doc calls "Gemini Notebook" (what it is
@@ -160,16 +176,31 @@ these searches uses. A grep miss is not proof of absence; the four readers' pass
 | 39 | Cost, measured: at most about $46 through Phase 5.5, an overstatement since it counts the shared AWS account's whole use, under the $60 re-plan point and the $80 ceiling; Phase 1.5 about $0.01, Phase 6 no model call. The final record, with the idle monthly bill, is Phase 7's (its DoD 4) | `evidence/phase-5.5/cost.md` (2026-11-03); Phase 1.5 IMPLEMENTATION doc §26; Phase 6 IMPLEMENTATION doc §34.3 | stated; this phase's own spend added at its close |
 | 40 | The rule that fills the section for results against the thesis, with its dated sources (already on `/`); the methods page links it | Phase 6 IMPLEMENTATION doc §19, decision 1 | stated |
 
-## 2. Decisions this raises (listed, none taken)
+## 2. Decisions this raises (all DECIDED 2026-11-14 (his), each as leaned)
 
-Each gets options and a recommendation when the doc's later sections are written; none is decided here, and none is
-for tonight.
+Each had its options and Claude's lean; **he took all five as leaned on the morning of 2026-11-14, rested** ("all as
+leaned"), and F and G (§6, §5.6) the same way at his approval of the doc. The options are kept as the record.
 
-- **A. Where the raw text is published** (§0 item 1): the repository, a GitHub release asset, or a path on the site.
-  What the re-scoring job reads follows from it, and so does the size of every future clone.
-- **B. A true 404 status at go-live** (§0 item 5): add it (and so re-run the teardown test), or keep today's
-  status-200 not-found view and say so.
-- **C. The video** (§0 item 6, §4): how, not whether. Options as they stand after §4, none taken:
+- **A. Where the raw text is published** (§0 item 1). **DECIDED 2026-11-14, about 8:30 AM (his): (a), as leaned.** GitHub, read live 2026-11-14: a file over 100 MiB is blocked,
+  repositories "ideally less than 1 GB", release assets have no total limit.
+  - (a) **Claude's lean: in the repository**, under `experiment/`, at the manifest's keys. The re-scoring job reads
+    them with no network and no credential; the name guard reads every byte on the way in; GitHub shows any one of
+    them to a reader with no download. About 10 MB packed, estimated (§0 item 1); a checkout carries the full 105 MB.
+    Permanent once pushed, which suits write-once records on a fictional company.
+  - (b) **A release asset**: one archive (about 18 MB gzipped, estimated) on a GitHub release, its sha256 committed.
+    The repository stays light; the job downloads it (one more moving part); a reader must download to read one.
+  - (c) **A path on the site**, served from the distribution: browsable, but CI would read the site, and Deploy
+    would sync 105 MB it does not sync today.
+- **B. Serving at go-live** (§0 item 5). **DECIDED 2026-11-14, about 8:30 AM (his): (a), as leaned.** Not whether, since the share cards need it; how:
+  - (a) **Claude's lean: a CloudFront Function** in `main` (on each viewer request, a path ending in `/` gets
+    `index.html`), with the error responses changed to serve a not-found page with status 404. One place; it works
+    from the Vercel URL and the distribution's own; `main` changes, so the teardown test re-runs (Delivers 8).
+  - (b) **Rules in the Vercel rewrite** (`infra/vercel/vercel.json`, his deploy) that send `/(.*)/` to
+    `/$1/index.html`. Smaller, but the distribution's own URL keeps the root-page behavior, and a real 404 still needs
+    a change in `main`.
+  - Either way the changes to `main` (B) and to `bootstrap` (C's `media-src`, if chosen) go in one apply each, and
+    one teardown test covers both.
+- **C. The video** (§0 item 6, §4): how, not whether. **DECIDED 2026-11-14, about 8:30 AM (his): (a), as leaned.**
   - (a) **Claude's lean:** an **Explainer** for the site, **served from the site** (`media-src 'self'` added to
     `bootstrap`, with decision B in the same apply); narration from the tool, with ElevenLabs only if the tool's
     narration fails the line-by-line check (replacing narration means re-cutting the video to it, real work). And a
@@ -180,12 +211,23 @@ for tonight.
   - (c) Both: served from the site, and the same file also on a host for sharing.
   Each option keeps the label (every tool named), the frame-by-frame check, and the rule that nothing in the video is
   the only place a fact appears.
-- **D. How much the methods page says about the memo echoes** (ledger 37): his call, since it is a judgment about a
-  public file that cannot be taken back.
-- **E. Where the methods page lives, and where its numbers come from** (§3). Recommended, to be argued when the
-  options are written: a route in the explorer's build (`/methods/`), so it inherits the security policy, fonts and
-  number trace; numbers that sit in a results file are read from it by the build, and figures from evidence files are
-  quoted with their source linked.
+- **D. How much the methods page says about the memo echoes** (ledger 37). **DECIDED 2026-11-14, about 8:30 AM (his): (a), as leaned.** Never the terms themselves, under any
+  option.
+  - (a) **Claude's lean: a plain paragraph**: what was counted (845 of 1,237 published memos hold a distinctive token,
+    an upper bound), that the explorer holds real-case memo text for that reason, that the repository copies stay as
+    published, and that his read found nothing pointing to a company (his judgment, stated as his), with a link to
+    `memo-echoes.json`, which is already public. A hostile reader finds the file anyway; the page saying it first is
+    the stronger position.
+  - (b) Only that real-case memo text is held from the site, and why, with no count.
+  - (c) (a) with the per-case counts in a table.
+- **E. Where the methods page lives, and where its numbers come from** (§3). **DECIDED 2026-11-14, about 8:30 AM (his): (a), as leaned.**
+  - (a) **Claude's lean: a route in the explorer's build** (`/methods/`), so it inherits the security policy, fonts,
+    `noindex` handling, share card and number trace. A number that sits in a results file is read from it by the
+    build; a figure from an evidence file is quoted with its source linked.
+  - (b) A separate static page in `web/`, outside the explorer: simpler to write, but its numbers are typed by hand
+    and nothing traces them.
+  - (c) A Markdown file in the repository, linked from the site: readable on GitHub, but outside the site's checks,
+    and the scope doc puts the page on the site.
 
 Ledger lines marked *check* are not decisions; they are reads to make before the page is drafted.
 
@@ -259,3 +301,202 @@ govern. This ties decision C to decision B: if both change `bootstrap`, they go 
 **Not yet checked live:** Gemini Notebook's terms for publishing what it generates; the site's own size limits for a
 video file (the build check, `web/scripts/check-dist.mjs`, has a JavaScript and a font budget and nothing for media);
 package and action versions (rechecked at each install, the 14-day rule, as in Phase 6).
+
+## 5. The checks, as they will be built
+
+### 5.1 The raw text, published (decision A; DoD row 8)
+
+- **Where:** `experiment/raw/`, each object at its manifest key (`official/...`, `pilot/...`), 5,247 files.
+- **The pull is his** (Claude's deny list keeps it out of S3): a new read-only command, `hc raw pull`, fetches each
+  object **at the manifest's `version_id`**, so a later write to the same key (none is expected; the bucket is
+  write-once by design) cannot change what is published. Claude writes the command; he runs it once.
+- **The verify is anyone's:** `hc raw verify` reads only `experiment/raw/` and the committed manifest, and fails on any
+  object missing, extra, or differing in bytes or sha256, and on any file that fails the write-time checks again (the
+  account placeholder only, no standalone twelve-digit number, no e-mail address, no key shape:
+  `smoke/record.py`'s `assert_clean`, reused). It runs inside `pytest`, so in `make check` and CI.
+- **Measured before the commit, not estimated:** the packed size (§0 item 1), and how long the name guard takes over
+  5,247 new files. `check-added-large-files` (`--maxkb=1024`) needs no exception: the largest object is 230,749 bytes.
+- **Rule zero:** these are the fictional company's records only (the `official/company/` and `pilot/company/`
+  prefixes); no case record is in the manifest, and `hc raw verify` refuses any key outside those two prefixes.
+
+**As built, step 1 (2026-11-14, Opus; he chose to stay on Opus rather than switch to Sonnet for the build, so this
+step had no separate reviewer).** `src/horizon_compact/site/rawtext.py`; the commands are **`hc site raw-pull`** and
+**`hc site raw-verify`**, beside `hc site raw-manifest`, not the `hc raw ...` this section first named.
+- The pull reads through `rawmanifest.S3RawReader` (no write call) at each entry's `version_id`; checks bytes,
+  sha256 and the write-time text checks **before** writing; writes once (the same bytes again a no-op, different
+  bytes refused). The account id comes from the bucket name, as the manifest builder takes it.
+- The verify reads only `experiment/raw/` and the manifest: the same key set (a leftover `.tmp` counts as extra),
+  each file's bytes and sha256, and the text checks without the account id.
+- The text checks are `smoke/record.py`'s three patterns, copied (that file is the sweep's writer and stays
+  untouched), with a test holding the copies equal to the originals.
+- **Two findings, fixed in this step:** `end-of-file-fixer` and `trailing-whitespace` rewrite files on commit, which
+  would change a record's bytes away from its sha256; both now exclude `^experiment/raw/`. And `experiment/.gitattributes`
+  (`raw/** -text`) keeps git from converting line endings on any clone. Neither touches the root (14 of 16).
+- `hc site raw-pull` is denied to Claude in `.claude/settings.json`, both forms, with its test.
+- Tests: `tests/test_site_rawtext.py`, 50 cases, fictional canaries only; the committed manifest loads and every one
+  of its 5,247 keys is the fictional company's. **Seven mutations** (reading the newest version instead of the pinned
+  one; skipping the text checks or the sha check in the pull; letting verify pass extra files; dropping the prefix
+  check; allowing an overwrite; skipping verify's text checks) **were each caught**, the file restored byte for byte.
+- `make check` exit 0: Python 3,533 passed, web 585.
+
+### 5.2 The re-scoring check (Delivers 2; DoD row 2)
+
+- **What it is:** a test that runs the frozen analysis (`hc analyze`'s own code, `--store local`, rooted at
+  `experiment/raw/`) for each of the three official sweeps and compares the output with the committed results files
+  **byte for byte**. Feasible as stated: the results files carry no timestamp or host value (read 2026-11-14), and
+  `hc analyze` already takes a local store.
+- **Published files only:** the test fails if anything opens an S3 client while it runs (`planning/02` §2.11).
+- **In `pytest`,** as Phase 6's explorer-data reproduction test is, so it runs in `make check` and on every CI run. The
+  chain a reader can then check end to end: raw records, to results files (this test), to the explorer's data
+  (Phase 6's test), to every number on the page (the number trace).
+- **Shown to fail once** (DoD 2): one number in a copy of a results file changed by hand, the test run, its failure
+  recorded in this doc, the copy discarded. As Phase 6's mutation checks were.
+- **Its time** is measured on the first run; if it makes `make check` slow, it gets a marker of its own that CI still
+  runs, never a skip.
+
+### 5.3 The prompt-reconstruction check (Delivers 3; DoD row 3)
+
+- **The question it answers:** can a stranger rebuild a prompt **from the methods page and the published inputs**
+  (`planning/05`'s Phase 6 row: "from the methods page alone"), without our code? If not, the methods page is missing
+  something.
+- **The samples, fixed by rule before the reader starts:** for each of the four scenarios, the first official run by
+  run id in Haiku's grid, and one in gpt-oss's; one run from the thinking sub-study; one awareness call. Ten prompts.
+  No real case (§0 item 2): the page says why.
+- **What the reader gets:** the methods page and the explorer (the local preview), the experiment's content files at
+  `prereg-v1` (objectives, wordings, dossier, scenarios), and, for each sample, its settings as the record states them
+  (model, scenario, objective, wording, and the menu and option order with its seed). **Not** the code, and **not**
+  the raw records, which hold the prompts. Decision G (below, decided as leaned) settled this list.
+- **Who reads:** a fresh Claude Code session, started by him in an empty scratch directory holding only those files,
+  with a brief Claude writes. Its isolation is the directory, not a guarantee; the record says so.
+- **The comparison is mechanical:** a script compares each rebuilt prompt with the record's `request` and its
+  `prompt_sha256`. A mismatch is a gap in the methods page, fixed there and re-checked with a new fresh session. The
+  record (briefs, replies, diffs) goes to `docs/phases/evidence/phase-6.5/`.
+
+### 5.4 The cold-read test (Delivers 4; DoD row 4)
+
+- **Claude in Chrome, in his browser,** on the local preview (his machine serves it; checked live before the brief
+  is written, §0 item 7). No context beyond the address.
+- **The brief:** read the site as a visitor would and report what it concludes, in its own words: what was tested,
+  what was found, what it means. Nothing about what a right answer is.
+- **Scored by Claude, against `planning/06` §4:** each conclusion is allowed, or a misreading. A misreading is fixed in
+  the site and re-tested with a fresh agent. The record goes to `docs/phases/evidence/phase-6.5/`.
+
+### 5.5 The public checks (Delivers 6, 7; DoD row 6)
+
+`planning/06` §9's seven checks on every surface (the explorer's pages, the methods page, the share cards, the story,
+the video and its captions), each recorded with its result; the four readers' notes (§5); the search check re-run on
+the four published case descriptions (§6.3; the record notes it is a second run, on another day); the memo name scan
+confirmed by construction on what is deployed (the explorer holds real-case memo text); the vocabulary recheck, its
+sources re-read live and the result dated on the page (M10).
+
+### 5.6 One more decision, G
+
+- **G. What the prompt-reconstruction reader gets** (§5.3). **DECIDED 2026-11-14, about 8:55 AM (his): (a), as leaned.**
+  - (a) **Claude's lean:** the site, the content files, and each sample's recorded settings, as listed in §5.3. It
+    tests what a careful stranger can do; a reader who must guess a seed is not testing the methods page.
+  - (b) The site and the content files only. Stricter, but no one can rebuild a seeded order without the seed, so
+    every sample fails for a reason the page cannot fix.
+  - (c) (a) plus the code. Then the check proves the code runs, which the re-scoring check already proves, and not
+    that the page explains it.
+
+## 6. The video (decision C)
+
+1. **The source pack** (the scope doc: "from the methods page and the published results only"): the methods page and
+   the explorer's pages, printed to PDF from the local preview by the headless browser Phase 6 used. Nothing else is
+   uploaded. Rule zero holds by construction: these are the pages the site will publish.
+2. **The notebook, set up as the sprint taught:** a new notebook; the source list checked to hold only the pack, every
+   "Chats from Gemini" entry unticked; notebook memory off. His Google account; he generates, Claude writes the
+   steering prompt and reads the producer notes against `planning/06` §4 before he renders.
+3. **Two pieces:** an **Explainer** for the site, and a **Short** from the same notebook, held for Phase 7's post.
+4. **The check, the gate before anything ships:**
+   - **Frames:** extracted every two seconds (ffmpeg); Claude reads every frame's on-screen text against the data
+     and §4. Made-up text, a number not on the site, or a claim past §4's allowed column fails the frame.
+   - **Narration:** transcribed locally (a local open-source speech-to-text tool, its version checked at install, run
+     in scratch, never shipped), checked line by line by Claude; he listens once through as well, since Claude cannot
+     hear tone or a mispronounced name.
+   - **A failure** is fixed by steering and regenerating, not by editing around it. If the narration fails and the
+     pictures pass, ElevenLabs narration over the same pictures is the fallback (its cost named first).
+5. **On the site** (M11): `<video>` with `preload="none"`, a poster frame, **captions** (a WebVTT file built from the
+   checked transcript), the transcript as text below it, and the label: AI-generated, every tool named.
+   `media-src 'self'` in `bootstrap` at go-live (§7).
+6. **Decision F: where the video file lives.** **DECIDED 2026-11-14, about 8:55 AM (his): (a), as leaned.**
+   - (a) **Claude's lean:** in the repository under `web/public/`, re-encoded to stay under GitHub's 50 MiB warning,
+     with a media budget added to `check-dist.mjs` and a named exception in `check-added-large-files`. Every deploy,
+     and the teardown test's re-apply, then brings it back with the rest of the site.
+   - (b) Uploaded to the site bucket by hand, outside the repository: no binary in git, but a deploy from scratch
+     loses it, which breaks "Terraform for everything" in spirit and the teardown test's "page back".
+   - Either way, **a binary file is the one surface the name guard cannot read** (CLAUDE.md); the frame check is its
+     rule-zero check.
+
+## 7. The go-live checklist (decision B; Delivers 8, 9)
+
+In order, each item checked off in this doc with its evidence:
+
+1. **Every check in §5 has passed** (Delivers 2-7). Nothing below starts before.
+2. **`main`:** the CloudFront Function (a path ending in `/` gets `index.html`) and a not-found page served with
+   status 404 (decision B). Can be applied before go-live: it serves the placeholder just as well.
+3. **`bootstrap`, his apply:** `media-src 'self'` added; the `X-Robots-Tag: noindex` header removed
+   (`infra/terraform/bootstrap/site.tf`).
+4. **The go-live commit:** Deploy builds the explorer, not the placeholder; the `noindex` meta tag removed; Deploy
+   syncs the cards and the video and never `.vite/` (Phase 6 C3 note); the placeholder build kept as a mode, unused.
+5. **The teardown test,** once, after 2 and 3 (`main` changed): destroy, re-apply, the rewrite updated, the page back,
+   the raw results intact.
+6. **The live site against the preview, view by view:** every path, both widths, the number trace and the crop check
+   run on the live URL; each path's HTML fetched with no script to confirm its own title and card (what a crawler
+   sees); an unknown path answers 404.
+7. **Link previews on the platforms themselves,** now possible (Phase 6 decision 2): each share card checked in at
+   least LinkedIn's post inspector.
+8. **The changelog starts** (M12) with go-live as its first entry.
+
+## 8. The steps and the commit order
+
+Sonnet builds code steps and Opus reviews each diff, as in every phase since 3; Opus builds the infrastructure, as in
+Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
+
+| Step | What | Who | Commit |
+|---|---|---|---|
+| 0 | **[done 2026-11-14]** This doc approved; the scope doc amended (one dated header note pointing to §0; dated notes on Delivers 3, DoD row 8's duplicate number, and Delivers 6's memo scan) | him; Opus | C0 |
+| 1 | **[done 2026-11-14]** `hc site raw-pull` and `hc site raw-verify` (§5.1), on fakes | Opus (his choice) | C1 |
+| 2 | His pull; Claude's verify; the packed size and the guard's time measured | him; Claude | C2 (the raw text) |
+| 3 | The re-scoring test, and its failure shown once (§5.2) | Sonnet; Opus reviews | C3 |
+| 4 | The methods page: the route, its data, its sections with placeholders for his titles (§3, decision E) | Sonnet; Opus reviews | C4 |
+| 5 | Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences; every ledger line placed, checked by script | him and Claude | C5 |
+| 6 | Serving in `main` (§7 item 2) | Opus; his apply | C6 |
+| 7 | The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |
+| 8 | The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |
+| 9 | The video (§6): pack, generation, check, captions, the file | him and Claude | C9 |
+| 10 | The public checks (§5.5) | Claude; him for the four readers | C10 |
+| 11 | Go-live (§7 items 3-8), the teardown test | Opus; his apply and deploy | C11 |
+| 12 | The close: DoD audit, version `0.6.5`, cost | Opus | C12 |
+
+Steps 7 and 8 come after 5 because they test the page's words; step 9 after them because the video is made from the
+fixed page.
+
+## 9. Definition of done
+
+The scope doc's rows, renumbered (its two rows 8 become 8 and 9), with what this doc adds:
+
+1. The methods page is complete against Delivers 1 and **every ledger line (§1) is on it**, checked by script; he has
+   approved it.
+2. The re-scoring check is in CI and passes; it failed once when one number was changed by hand, recorded.
+3. The prompt-reconstruction check passes for all ten samples, or every gap it found is fixed and re-checked; the
+   page says why no real case can be re-run.
+4. The cold-read test's conclusions all fit `planning/06` §4, after fixes, with its record committed.
+5. The video passed its frame and narration checks, is captioned and labeled, or he decided not to publish it, with
+   the reason.
+6. Every §9 check passes on every surface; every public case description fails to identify its company in a search;
+   the deployed site holds no real-case memo text; the vocabulary recheck is dated.
+7. The site is live at `horizon-compact.vercel.app` and matches the preview; each path serves its own HTML and card to
+   a client running no script; an unknown path answers 404.
+8. The full text of every Phase 4 pilot and official object is published, and `hc raw verify` passes against
+   `raw-manifest.json`.
+9. `make check` and CI are green, and every commit passed the guard.
+10. *Added:* KNOWN-GAPS OPEN 2026-10-31 closed (both matcher notes on the methods page).
+11. *Added:* the teardown test passed after the changes to `main`.
+
+## 10. Cost
+
+No experiment call. AWS: his S3 read of 5,247 objects (well under a cent), the CloudFront Function's invocations (at
+this traffic, cents a month at most; checked on the pricing page before step 6), hosting. Outside AWS: the fresh
+session and Claude in Chrome on his Claude plan; Gemini Notebook on his free Google account; ElevenLabs only as the
+fallback, its cost named first. The ceiling and re-plan point stand ($80, $60); cumulative is at most about $46.

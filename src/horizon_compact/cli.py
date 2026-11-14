@@ -1387,6 +1387,58 @@ def cmd_site_raw_manifest(args: argparse.Namespace) -> int:
     return CLEAN_EXIT
 
 
+def cmd_site_raw_pull(args: argparse.Namespace) -> int:
+    """Phase 4's raw objects to ``experiment/raw/``, each at its manifest version (Phase 6.5 IMPLEMENTATION
+    doc section 5.1). Reads the bucket through the manifest's reader, which has no write call. His to run."""
+    from horizon_compact.site.rawmanifest import RawManifestRefusal, S3RawReader, account_id
+    from horizon_compact.site.rawtext import RAW_ROOT, RawTextRefusal, load_manifest, pull_raw
+
+    top = Path(_git("rev-parse", "--show-toplevel"))
+    bucket = args.bucket or os.environ.get(RESULTS_BUCKET_ENV)
+    if not bucket:
+        raise SweepRefusal(f"site raw-pull needs --bucket or {RESULTS_BUCKET_ENV}")
+    manifest = Path(args.manifest) if args.manifest else top / RAW_MANIFEST_PATH
+    root = Path(args.root) if args.root else top / RAW_ROOT
+    try:
+        account = account_id(bucket)
+        entries = load_manifest(manifest)
+    except (RawTextRefusal, RawManifestRefusal) as exc:
+        raise SweepRefusal(str(exc)) from exc
+    session = _session(args, identify({}, _laptop_git))
+    reader = S3RawReader(_raw_s3_client(session), bucket)
+
+    def progress(done: int, total: int) -> None:
+        print(f"pulled {done} of {total} objects", file=sys.stderr)
+
+    try:
+        report = pull_raw(reader, entries, root, account, progress)
+    except RawTextRefusal as exc:
+        raise SweepRefusal(str(exc)) from exc
+    print(f"into {root}")
+    print(f"written:   {report.written}")
+    print(f"unchanged: {report.unchanged}")
+    print(f"bytes:     {report.total_bytes}")
+    return CLEAN_EXIT
+
+
+def cmd_site_raw_verify(args: argparse.Namespace) -> int:
+    """The published raw text against the committed manifest (Phase 6.5 IMPLEMENTATION doc section 5.1).
+    Reads committed files only; no AWS."""
+    from horizon_compact.site.rawtext import RAW_ROOT, RawTextRefusal, load_manifest, verify_raw
+
+    top = Path(_git("rev-parse", "--show-toplevel"))
+    manifest = Path(args.manifest) if args.manifest else top / RAW_MANIFEST_PATH
+    root = Path(args.root) if args.root else top / RAW_ROOT
+    try:
+        report = verify_raw(root, load_manifest(manifest))
+    except RawTextRefusal as exc:
+        raise SweepRefusal(str(exc)) from exc
+    print(
+        f"ok: {report.objects} objects, {report.total_bytes} bytes, each matching {manifest.name}"
+    )
+    return CLEAN_EXIT
+
+
 EXPLORER_RESULTS_PATH = Path("experiment") / "results"
 EXPLORER_DATA_PATH = Path("web") / "explorer-data"
 
@@ -3586,6 +3638,21 @@ def build_parser() -> argparse.ArgumentParser:
         "--out", default=None, help="default: docs/phases/evidence/phase-4/raw-manifest.json"
     )
 
+    site_raw_pull = site_actions.add_parser(
+        "raw-pull",
+        help="Every manifest object, at its version, to experiment/raw/. Reads only; his to run.",
+    )
+    site_raw_pull.add_argument("--bucket", default=None)
+    site_raw_pull.add_argument("--profile", default=None)
+    site_raw_pull.add_argument("--manifest", default=None, help="default: the committed manifest")
+    site_raw_pull.add_argument("--root", default=None, help="default: experiment/raw")
+    site_raw_verify = site_actions.add_parser(
+        "raw-verify",
+        help="The published raw text against the committed manifest. Reads committed files only.",
+    )
+    site_raw_verify.add_argument("--manifest", default=None, help="default: the committed manifest")
+    site_raw_verify.add_argument("--root", default=None, help="default: experiment/raw")
+
     site_explorer = site_actions.add_parser(
         "explorer",
         help="The committed results files to web/explorer-data/. Reads committed files only.",
@@ -4183,6 +4250,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         try:
             if args.action == "raw-manifest":
                 return cmd_site_raw_manifest(args)
+            if args.action == "raw-pull":
+                return cmd_site_raw_pull(args)
+            if args.action == "raw-verify":
+                return cmd_site_raw_verify(args)
             if args.action == "explorer":
                 return cmd_site_explorer(args)
             if args.action == "memos":

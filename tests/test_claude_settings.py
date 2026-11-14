@@ -22,6 +22,7 @@ READERS = (
     "case memos",  # K4, not built yet; denied ahead
     "case echoes",  # reads the private dossiers (Phase 6 decision 5): his to run, only counts reach the repo
     "site raw-manifest",  # reads every pilot and official object (Phase 1.5 step 3): his to run
+    "site raw-pull",  # reads every pilot and official object again, at its version (Phase 6.5 §5.1): his to run
     "site memos",  # reads the official sweeps' objects for the grid memo extract (Phase 6 C2): his to run
 )
 SPENDERS = (

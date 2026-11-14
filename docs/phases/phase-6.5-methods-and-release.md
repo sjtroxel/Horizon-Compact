@@ -9,6 +9,15 @@
 > Phase 1.5 (`docs/phases/evidence/phase-4/raw-manifest.json`, 5,247 objects); the full text of those objects is
 > published in this phase, beside the re-scoring check that reads it. Definition of done row 8.
 >
+> **Amended 2026-11-14 (his), at the IMPLEMENTATION doc's approval:** six weeks and every phase through 6 after this
+> doc was written, it was reviewed line by line. Read it through the IMPLEMENTATION doc's §0
+> (`docs/phases/phase-6.5-methods-and-release-IMPLEMENTATION.md`): the models are the fallback set; no real case can
+> be re-scored or rebuilt, since every dossier was withheld; the raw text is published in the repository (decision A);
+> go-live changes `main` (per-path HTML and a real 404, decision B) and `bootstrap` (`media-src` for the video,
+> decision C; `noindex` off), so the teardown test re-runs; the methods page is a route in the explorer (decision E);
+> its contents are the IMPLEMENTATION doc's disclosure ledger (§1), every line placed. Dated notes below mark the
+> lines this changes.
+>
 > **Split out of Phase 6 on 2026-10-04** (his, Phase 6 decision 1). Phase 6's scoping findings cover this half too
 > (`docs/phases/phase-6-explorer.md`).
 >
@@ -47,7 +56,9 @@ In order.
 3. **The prompt-reconstruction check** (Phase 6 decision 4): a fresh session, given only the public site and the
    published inputs, rebuilds sample prompts (at least one per scenario and one real case whose dossier was
    published), compared byte for byte with the logged prompts. Any mismatch is a gap in the methods page, fixed and
-   re-checked.
+   re-checked. *Dated note, 2026-11-14 (the IMPLEMENTATION doc §0 item 2, §5.3, decision G):* no dossier was
+   published, so no real-case sample exists; ten samples on the fictional company instead, and the reader gets each
+   sample's recorded settings, the seed included.
 4. **The cold-read test** (Phase 6 decision 6): a browser agent (Claude in Chrome, from his sprint) opens the preview
    build with no context and reports what it concludes. Every conclusion `planning/06` §4 does not allow is a
    misreading, fixed in the site and re-tested.
@@ -58,7 +69,8 @@ In order.
    appears.
 6. **The public checks** (`planning/06` §9) on every surface, including the story, the share cards and the video; the
    four-reader notes (`planning/06` §5) recorded; the search check on every public case description (`planning/06`
-   §6.3); the memo name scan confirmed on what is actually deployed.
+   §6.3); the memo name scan confirmed on what is actually deployed. *Dated note, 2026-11-14 (the IMPLEMENTATION
+   doc §0 item 10):* met by construction, since the explorer holds every real-case memo's text (Phase 6 decision 5).
 7. **The vocabulary recheck** (`planning/06` §11): the sources re-read live, any new Roundtable statement looked for,
    the result dated on the methods page.
 8. **The teardown test, again, if `main` changed** since Phase 1.5 (`planning/05` §5): destroy, re-apply, rewrite
@@ -100,7 +112,8 @@ In order.
 7. **The site is live** at `horizon-compact.vercel.app` and matches the preview.
 8. **The full text of every Phase 4 pilot and official object is published,** and every published file's bytes and
    sha256 match its line in `docs/phases/evidence/phase-4/raw-manifest.json` (added 2026-11-05, Phase 1.5 decision 8 (a)).
-8. **`make check` and CI are green,** and every commit passed the guard.
+9. **`make check` and CI are green,** and every commit passed the guard. *(Renumbered 2026-11-14: this doc had two
+   rows 8. The IMPLEMENTATION doc's §9 adds rows 10 and 11.)*
 
 ## Prerequisites
 
