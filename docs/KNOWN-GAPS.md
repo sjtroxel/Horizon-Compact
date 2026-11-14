@@ -7,15 +7,34 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-13, about 10:00 AM (PHASE 6 CLOSED, VERSION 0.6.0; PHASE 6.5 NEXT)
+> ## START HERE — where things stand, 2026-11-14, about 3:15 AM (PHASE 6.5 IMPLEMENTATION DOC DRAFTED, §0 TO §4; NOT APPROVED)
+>
+> **Phase 6.5's IMPLEMENTATION doc is started** (`docs/phases/phase-6.5-methods-and-release-IMPLEMENTATION.md`, Opus,
+> with him, overnight). **Written:** §0 the scope review (ten changes since 2026-10-04, among them: the Phase 4 raw
+> text is about 105 MB; no real case can be re-scored or rebuilt, so the planning's "including the anonymized dossiers"
+> promise is not kept for the cases; "no good match" was expected rare and all 20 case readings are no good match);
+> §1 the disclosure ledger (43 lines, two search passes, every line sourced, **none left at *check***); §3 the methods
+> page's outline (M0 to M12, every ledger line placed, checked by script); §4 facts checked live, the video first
+> (**the site's security policy blocks a self-hosted video until `media-src 'self'` is added to `bootstrap`**, which
+> re-runs the teardown test). **His decisions, none taken:** A where the raw text is published; B a true 404 at
+> go-live; C the video (how, not whether, his 2026-11-14; options listed in §2); D how much the page says about the
+> memo echoes; E where the methods page lives. **The scope doc is amended at the doc's approval** (a dated header note
+> pointing to §0, as Phase 6's was). **Uncommitted:** the new doc, this block, and the 11/13 run-id edits below, in his
+> commit `phase 6.5: implementation doc draft, scope review and ledger`. **Next:** the doc's remaining sections (the
+> decisions' options, the checks' build, the video plan, go-live, steps, DoD), then his approval.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-13, about 10:00 AM (PHASE 6 CLOSED, VERSION 0.6.0; PHASE 6.5 NEXT) *(superseded by the block above)*
 >
 > **Phase 6 closed (the Phase 6 IMPLEMENTATION doc §34; C8 by Claude on his instruction, one commit for all of it).**
 > Step 11 closed (§34.1): every §12 check run on the finished site; one defect found and fixed (the story's s2 to s4
 > verdict tables at 390 hid the end of "inconclusive" behind a scroll). **DoD 1-10 met (§34.2)**; the public URL still
 > the placeholder, byte-identical to `2227a26`'s build (a fresh build of `2227a26` and the live page both checked).
 > **Version `0.6.0`.** Phase 6's half of OPEN 2026-10-31 done; the entry stays open for 6.5. **Uncommitted:** §33b's
-> words, §34, the table fix, the version, `ROADMAP.md` and this file, in his commit `phase 6: close, version 0.6.0`.
-> **Next:** his commit and push (CI and Deploy green to be read); then Phase 6.5 (methods and release): its scope doc
+> words, §34, the table fix, the version and `ROADMAP.md`: **committed `21262a6` (his) and pushed; CI `43453226256` and
+> Deploy `43453226305` green**; the live page still the placeholder after that Deploy. This block's edit rides in the
+> next commit. **Next:** Phase 6.5 (methods and release): its scope doc
 > reviewed and its IMPLEMENTATION doc written, immediately before its build.
 >
 > *The block below is superseded.*
