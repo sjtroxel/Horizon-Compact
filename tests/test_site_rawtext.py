@@ -30,6 +30,7 @@ from horizon_compact.site.rawmanifest import (
 )
 from horizon_compact.site.rawtext import (
     ALLOWED_PREFIXES,
+    RAW_ROOT,
     Entry,
     RawTextRefusal,
     check_text,
@@ -322,6 +323,13 @@ def test_the_committed_manifest_loads_and_every_key_is_the_fictional_company_s()
     loaded = load_manifest(REPO / RAW_MANIFEST_PATH)
     assert len(loaded) == 5247  # Phase 1.5 doc section 19
     assert all(e.key.startswith(ALLOWED_PREFIXES) for e in loaded)
+
+
+def test_the_committed_raw_text_matches_the_committed_manifest() -> None:
+    # The published raw text itself (Phase 6.5 doc section 5.1, step 2): no skip if it is absent, so a clone
+    # or a CI checkout missing any of it fails here.
+    report = verify_raw(REPO / RAW_ROOT, load_manifest(REPO / RAW_MANIFEST_PATH))
+    assert (report.objects, report.total_bytes) == (5247, 104_785_272)  # Phase 1.5 doc section 19
 
 
 def test_the_allowed_prefixes_sit_inside_the_manifest_s() -> None:

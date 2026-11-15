@@ -1,0 +1,23 @@
+{
+  "attempts_this_session": 1128,
+  "cap_usd": 7.0,
+  "cost_usd_sweep_total": 1.574979,
+  "cost_usd_this_session": 1.574979,
+  "finished_at": "2026-10-14T12:22:45.909428+00:00",
+  "git_sha": "50f6f21c03aa0f664ccccfdca961cf04d8d52b14",
+  "image_digest": "sha256:ff978703e4b6ae30fd6d4b2cd7a65670a2754a6b6623a1dfc5f1683229436723",
+  "label": "official",
+  "record_version": 1,
+  "runner": "fargate",
+  "runs_finished_before": 0,
+  "runs_finished_this_session": 990,
+  "runs_total": 990,
+  "started_at": "2026-10-14T09:52:25.086417+00:00",
+  "status_counts_this_session": {
+    "schema_invalid": 14,
+    "sum_mismatch": 134,
+    "valid": 980
+  },
+  "stopped": "complete",
+  "sweep_id": "grid-haiku-5-5-0b99fabb"
+}

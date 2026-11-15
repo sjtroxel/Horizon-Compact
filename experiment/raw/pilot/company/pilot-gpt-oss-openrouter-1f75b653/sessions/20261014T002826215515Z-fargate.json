@@ -1,0 +1,24 @@
+{
+  "attempts_this_session": 95,
+  "cap_usd": 1.0,
+  "cost_usd_sweep_total": 0.036791,
+  "cost_usd_this_session": 0.036791,
+  "finished_at": "2026-10-14T01:36:51.690289+00:00",
+  "git_sha": "50f6f21c03aa0f664ccccfdca961cf04d8d52b14",
+  "image_digest": "sha256:ff978703e4b6ae30fd6d4b2cd7a65670a2754a6b6623a1dfc5f1683229436723",
+  "label": "pilot",
+  "record_version": 1,
+  "runner": "fargate",
+  "runs_finished_before": 0,
+  "runs_finished_this_session": 80,
+  "runs_total": 80,
+  "started_at": "2026-10-14T00:28:26.215515+00:00",
+  "status_counts_this_session": {
+    "api_error": 3,
+    "schema_invalid": 15,
+    "sum_mismatch": 1,
+    "valid": 76
+  },
+  "stopped": "complete",
+  "sweep_id": "pilot-gpt-oss-openrouter-1f75b653"
+}

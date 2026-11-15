@@ -1,0 +1,820 @@
+{
+  "content_hash": "a31d1f1184a502ce7e9cede35755cbb2c5083b658aed0c7f27e75c12d84df3c3",
+  "experiment": "company",
+  "label": "thinking",
+  "manifest_version": 3,
+  "model_key": "haiku-5-5",
+  "repeats": {
+    "s1": 20
+  },
+  "runs": [
+    {
+      "menu_order_seed": 10156924367552267466,
+      "objective_id": "C",
+      "repeat": 6,
+      "run_id": "r-eed22be6b01d",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 11757877010480769291,
+      "objective_id": "E",
+      "repeat": 6,
+      "run_id": "r-c14494f27b97",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 15201683158790970594,
+      "objective_id": "D",
+      "repeat": 19,
+      "run_id": "r-f575ec455ed3",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 10077301202700234232,
+      "objective_id": "D",
+      "repeat": 2,
+      "run_id": "r-c6ee82ef2cc2",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 4406693580041269288,
+      "objective_id": "D",
+      "repeat": 18,
+      "run_id": "r-cda32698e340",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 12871155452670802423,
+      "objective_id": "D",
+      "repeat": 13,
+      "run_id": "r-6c56c7bac62a",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 17010802422220176172,
+      "objective_id": "C",
+      "repeat": 11,
+      "run_id": "r-6a15475f8384",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 12307789169750308656,
+      "objective_id": "D",
+      "repeat": 8,
+      "run_id": "r-5fd29283c188",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 14099887883097654233,
+      "objective_id": "B",
+      "repeat": 3,
+      "run_id": "r-64040f26ed17",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 9737363416119104347,
+      "objective_id": "A",
+      "repeat": 4,
+      "run_id": "r-eb2ba171b3ac",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 8496154285434255945,
+      "objective_id": "C",
+      "repeat": 14,
+      "run_id": "r-89c5cb00761d",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 6736535331273447187,
+      "objective_id": "C",
+      "repeat": 3,
+      "run_id": "r-0f1a8ccb8582",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 2961604468792655843,
+      "objective_id": "D",
+      "repeat": 3,
+      "run_id": "r-3f158a351ca1",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 13720239219541011800,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-965b0f257a6d",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 6388362410826873417,
+      "objective_id": "A",
+      "repeat": 12,
+      "run_id": "r-17b3b8e9ff0c",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 984148708625483644,
+      "objective_id": "B",
+      "repeat": 6,
+      "run_id": "r-4747e2f6f5cf",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 16190782127135602679,
+      "objective_id": "D",
+      "repeat": 4,
+      "run_id": "r-6a07014bc5b4",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 7458310444269317094,
+      "objective_id": "D",
+      "repeat": 7,
+      "run_id": "r-e97a39b67534",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 8088587153271427819,
+      "objective_id": "E",
+      "repeat": 2,
+      "run_id": "r-00eed66e1f2d",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 5422038686504525383,
+      "objective_id": "B",
+      "repeat": 5,
+      "run_id": "r-b3bbcfb98413",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 6051380897943690999,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-659fb43fb964",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 8246672727776266242,
+      "objective_id": "E",
+      "repeat": 19,
+      "run_id": "r-7a51daac9428",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 12735995090006728656,
+      "objective_id": "A",
+      "repeat": 11,
+      "run_id": "r-b9115385e15a",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 16231379784150165308,
+      "objective_id": "E",
+      "repeat": 3,
+      "run_id": "r-b87066800600",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 6764997100957391027,
+      "objective_id": "B",
+      "repeat": 10,
+      "run_id": "r-09f9ca428fd6",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 4796010868638446853,
+      "objective_id": "B",
+      "repeat": 18,
+      "run_id": "r-d0c3c0d50083",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 9363298113384998997,
+      "objective_id": "B",
+      "repeat": 2,
+      "run_id": "r-35740a3ed8bb",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 10702990590682308958,
+      "objective_id": "D",
+      "repeat": 14,
+      "run_id": "r-366bc088a93d",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 4322686655474668834,
+      "objective_id": "A",
+      "repeat": 5,
+      "run_id": "r-23bb69e92eff",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 8900279847668929849,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-721799e6a936",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 5917668845999922942,
+      "objective_id": "C",
+      "repeat": 2,
+      "run_id": "r-abf61a271a9b",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 16946357367485667832,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-85b1ab22066e",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 2861265696869339238,
+      "objective_id": "E",
+      "repeat": 7,
+      "run_id": "r-805faf8e2339",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 10442687284349565417,
+      "objective_id": "C",
+      "repeat": 17,
+      "run_id": "r-d01e36ab1485",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 13783419540369015420,
+      "objective_id": "C",
+      "repeat": 4,
+      "run_id": "r-365ee4b4039a",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 14834139431060237865,
+      "objective_id": "C",
+      "repeat": 10,
+      "run_id": "r-c07bb0caef97",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 3673528315524143890,
+      "objective_id": "A",
+      "repeat": 17,
+      "run_id": "r-42b8030275cc",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 10609785017568714074,
+      "objective_id": "B",
+      "repeat": 4,
+      "run_id": "r-3794370b91e4",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 9513766421509127377,
+      "objective_id": "D",
+      "repeat": 15,
+      "run_id": "r-f2e4d444ea24",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 13257042454745315590,
+      "objective_id": "C",
+      "repeat": 13,
+      "run_id": "r-345f9be71590",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 9741779966786429084,
+      "objective_id": "E",
+      "repeat": 18,
+      "run_id": "r-8fb735d35c25",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 8776907096166251622,
+      "objective_id": "D",
+      "repeat": 6,
+      "run_id": "r-585f33d61066",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 15389953217555948522,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-5f230a018045",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 261105542020781921,
+      "objective_id": "D",
+      "repeat": 17,
+      "run_id": "r-cc3fffb81476",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 13260673808678131097,
+      "objective_id": "D",
+      "repeat": 11,
+      "run_id": "r-d31fa3aedc76",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 17063357127526770399,
+      "objective_id": "A",
+      "repeat": 7,
+      "run_id": "r-89d64865d89d",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 902510787864083241,
+      "objective_id": "B",
+      "repeat": 19,
+      "run_id": "r-5142045b96b1",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 356506673598283138,
+      "objective_id": "C",
+      "repeat": 19,
+      "run_id": "r-ccc8b3c94ee3",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 723874705872406912,
+      "objective_id": "E",
+      "repeat": 14,
+      "run_id": "r-f51fd3eceae8",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 889780407853841394,
+      "objective_id": "D",
+      "repeat": 9,
+      "run_id": "r-9fcfdf31c242",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 2238189828723575537,
+      "objective_id": "D",
+      "repeat": 12,
+      "run_id": "r-65e15fb65a01",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 18374431203340878053,
+      "objective_id": "B",
+      "repeat": 15,
+      "run_id": "r-a0949bb92112",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 17044092089117411914,
+      "objective_id": "B",
+      "repeat": 12,
+      "run_id": "r-3b10c541a251",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 18131595549244412914,
+      "objective_id": "A",
+      "repeat": 13,
+      "run_id": "r-dfaa4b34563a",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 15888333213772048719,
+      "objective_id": "A",
+      "repeat": 19,
+      "run_id": "r-2804f782c209",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 5527983964302792076,
+      "objective_id": "B",
+      "repeat": 9,
+      "run_id": "r-51068c08c5b9",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 12469319396559737240,
+      "objective_id": "A",
+      "repeat": 10,
+      "run_id": "r-274e5f5fb483",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 14619944426795740645,
+      "objective_id": "B",
+      "repeat": 7,
+      "run_id": "r-b91b77e295e0",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 732864875487551022,
+      "objective_id": "E",
+      "repeat": 15,
+      "run_id": "r-d611e7cf2dec",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 10847264817792141037,
+      "objective_id": "E",
+      "repeat": 8,
+      "run_id": "r-503c6e6466e4",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 11322037422886104387,
+      "objective_id": "E",
+      "repeat": 5,
+      "run_id": "r-e0099e2853f7",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 12677627294071980081,
+      "objective_id": "E",
+      "repeat": 11,
+      "run_id": "r-af527fff129b",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 17399009838252431071,
+      "objective_id": "A",
+      "repeat": 2,
+      "run_id": "r-0f9db6cd9102",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 3626322620178537136,
+      "objective_id": "E",
+      "repeat": 16,
+      "run_id": "r-90fa835e827f",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 279693300309986166,
+      "objective_id": "A",
+      "repeat": 8,
+      "run_id": "r-c620c198aff1",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 913192657018516349,
+      "objective_id": "E",
+      "repeat": 12,
+      "run_id": "r-273a41ae1a72",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 1112796389909104725,
+      "objective_id": "C",
+      "repeat": 8,
+      "run_id": "r-41b0d185ae6e",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 11302025323655610136,
+      "objective_id": "E",
+      "repeat": 13,
+      "run_id": "r-471921245562",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 3398416111824674869,
+      "objective_id": "B",
+      "repeat": 8,
+      "run_id": "r-84c377635747",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 3159741606119700243,
+      "objective_id": "B",
+      "repeat": 17,
+      "run_id": "r-dd7c08c2ab3a",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 6196118767666819775,
+      "objective_id": "E",
+      "repeat": 17,
+      "run_id": "r-314d4f38a138",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 4429384161553502937,
+      "objective_id": "B",
+      "repeat": 11,
+      "run_id": "r-b4726599e47b",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 4857019190382744034,
+      "objective_id": "A",
+      "repeat": 18,
+      "run_id": "r-c63135c33b94",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 701233937515891494,
+      "objective_id": "C",
+      "repeat": 5,
+      "run_id": "r-a4b980f613ec",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 9546809154283047939,
+      "objective_id": "E",
+      "repeat": 10,
+      "run_id": "r-9515d1c3f592",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 12813509140613569990,
+      "objective_id": "A",
+      "repeat": 6,
+      "run_id": "r-7c08dc559ef7",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 16538224521274370665,
+      "objective_id": "D",
+      "repeat": 5,
+      "run_id": "r-5ead97c1037f",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 13493730414542005739,
+      "objective_id": "E",
+      "repeat": 9,
+      "run_id": "r-d8d63c9e0a35",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 18058943598643143834,
+      "objective_id": "B",
+      "repeat": 13,
+      "run_id": "r-87407634d3f4",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 16831503911922227353,
+      "objective_id": "C",
+      "repeat": 9,
+      "run_id": "r-014421133e68",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 3297989107607524529,
+      "objective_id": "A",
+      "repeat": 9,
+      "run_id": "r-ea7a794476c8",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 7960096694222728811,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-6d04949c3729",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 9316891893152195335,
+      "objective_id": "C",
+      "repeat": 15,
+      "run_id": "r-dbc392114150",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 13177776041930054618,
+      "objective_id": "C",
+      "repeat": 7,
+      "run_id": "r-6711b7bda968",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 8449484821835447730,
+      "objective_id": "A",
+      "repeat": 15,
+      "run_id": "r-b980d5983fb1",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 17639226225890128685,
+      "objective_id": "A",
+      "repeat": 16,
+      "run_id": "r-01c015bfe9b6",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 10850629963268233800,
+      "objective_id": "C",
+      "repeat": 18,
+      "run_id": "r-78dc26d38121",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 5669893991187562838,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-0158be7598d3",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 3497859800211035630,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-4e37748d1d6e",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 7825438229435601460,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-590201a25fbd",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 11766290679395150118,
+      "objective_id": "A",
+      "repeat": 14,
+      "run_id": "r-39f0846d1b18",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 16101402222741497876,
+      "objective_id": "A",
+      "repeat": 3,
+      "run_id": "r-c61105d825d4",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 14833553935417067076,
+      "objective_id": "B",
+      "repeat": 16,
+      "run_id": "r-e54e03e96b5d",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 5935600133932715113,
+      "objective_id": "C",
+      "repeat": 12,
+      "run_id": "r-3df084517474",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 11465732550847552386,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-d18e935abc1c",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 427510059093547659,
+      "objective_id": "D",
+      "repeat": 16,
+      "run_id": "r-b34e697ce343",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 10633058776359381165,
+      "objective_id": "E",
+      "repeat": 4,
+      "run_id": "r-43e0233771f3",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 3562867587188529591,
+      "objective_id": "C",
+      "repeat": 16,
+      "run_id": "r-f9f2b55b4016",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 8204093119374089702,
+      "objective_id": "B",
+      "repeat": 14,
+      "run_id": "r-f31c2231c712",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 4211465971436296030,
+      "objective_id": "D",
+      "repeat": 10,
+      "run_id": "r-7d7bd8dfc6d1",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    }
+  ],
+  "scenarios": [
+    "s1"
+  ],
+  "seed": 3422206995,
+  "sweep_id": "thinking-haiku-5-5-418caa9c",
+  "templates": [
+    "w2"
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "content_hash": "a31d1f1184a502ce7e9cede35755cbb2c5083b658aed0c7f27e75c12d84df3c3",
+  "experiment": "company",
+  "label": "awareness",
+  "manifest_version": 3,
+  "model_key": "gpt-oss-openrouter",
+  "repeats": {
+    "s1": 1
+  },
+  "runs": [
+    {
+      "menu_order_seed": 13696557535916790498,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-13a0396084bf",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 13218053316056283716,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-daf61c1da259",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 7238727449923387956,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-ba938e8771de",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 5237364411977161093,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-a7d1ea10f2b5",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 745905004955326270,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-5fd3fad6ac3e",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 3618575583412846215,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-04824f400665",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 1654960077278027452,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-aa80eaecf9ad",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 8318660202746304121,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-a241893bde60",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 1049549577089849955,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-69416b3ee29a",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 8293444156490257030,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-6af7c0a00682",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 2803286066351589453,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-f576c341c2ea",
+      "scenario_id": "s1",
+      "wording_id": "w2"
+    },
+    {
+      "menu_order_seed": 16114248590670885439,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-acdcd11f6f0d",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 16832884394446811392,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-0d817b191637",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 1708908917136152564,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-fa12b1709723",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 15471173455146453507,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-8ae16c6d1988",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    }
+  ],
+  "scenarios": [
+    "s1"
+  ],
+  "seed": 3046959125,
+  "sweep_id": "awareness-gpt-oss-openrouter-6a05acef",
+  "templates": [
+    "w1",
+    "w2",
+    "w3"
+  ]
+}

@@ -1,0 +1,667 @@
+{
+  "content_hash": "a31d1f1184a502ce7e9cede35755cbb2c5083b658aed0c7f27e75c12d84df3c3",
+  "experiment": "company",
+  "label": "pilot",
+  "manifest_version": 3,
+  "model_key": "gpt-oss-openrouter",
+  "repeats": {
+    "s1": 2,
+    "s2": 2,
+    "s3": 2,
+    "s4": 2
+  },
+  "runs": [
+    {
+      "menu_order_seed": 8963994124012161442,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-2eba3e2ff252",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 4528875067832631361,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-a4ed6bcbf0f0",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 18137658755341606838,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-7df992561f60",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 12559866249483731822,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-cc6425f92c45",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 1594261100837027789,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-e8270326c442",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 3502055753041485011,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-a474f41c1d8a",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 13584139025321280405,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-c0d88b1eb077",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 18138180463180524125,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-747bd0105b16",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 8131325029129598169,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-3a05bdd7ddc1",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 6556658801505813377,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-c7837d16d96f",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 4941187955728511469,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-eb42e3bf1228",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 5549810481731657933,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-d463e2c57d9a",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 8215295034300304753,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-9eb5cc439b2a",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 13641585835066615700,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-8af604f689ea",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12409058449399279088,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-4005f0512e03",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 1651642986899029694,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-99ed91e28f72",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 13152321875636855406,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-3082b0a888ea",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 6194649536754468431,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-8a76f3dfd866",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 1686809732769191356,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-c07d060dddf9",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 9966237918333099985,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-adbe911c6bf8",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12945374931487845946,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-46bb634ae6de",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 9758459254742172920,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-06e7ccc8a24f",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 10444363813528219758,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-5217a18daa20",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 6239102393580113551,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-3cd2fc4e9b1b",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 13221497192637627115,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-58787161fddf",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 9887377958446999993,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-cb303a9c824e",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 9256425338683344995,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-112788dc63e0",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12421726132749552340,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-687ba69d4441",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 17761701958357880931,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-d8220524a318",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12556247192932443379,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-1300dde42ac1",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 11159239285392587023,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-90507d5662c3",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 13263405341364344462,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-e5c292c3fa99",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 1971523242708493745,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-0a0e0522ce8e",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12631315394521847221,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-e8c952c34af7",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 18389906406251359069,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-926e57f81493",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 13357657438558800262,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-cfdb3c1d0073",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 16551885374081963433,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-f7ab61b86ea7",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 17324176450505802099,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-c995d2927694",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 11731277868311699946,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-c9907f0c5483",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 10138425774140137671,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-1a639fd08ac9",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 6252085366686291090,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-5761ebc81fe8",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15198854218878496627,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-1c705eb74deb",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 2361025394805383648,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-8e7026d018d0",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 11519344908972649136,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-a00707301264",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 9310568979452659412,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-6c83cd039d04",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 13681259953712996183,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-d929ac662c93",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 9355480681015933186,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-28bc2f2b18df",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 17375542061629756386,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-a208004ae813",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15942447723427887796,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-7c33e1a79662",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 272214078005823878,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-39c62ebb1c2a",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 18196109794438562540,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-eb67677b686a",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 7228146872992990140,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-14c07eabf130",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12526498502208539702,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-377b14df2b26",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15968095465459666178,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-88690804f137",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 9871939614706598077,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-dbcfa1d61423",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 4336306687300663998,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-f23451021a53",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 13375069288243769875,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-46b922892dbc",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 3158942095555295437,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-129bed0166c5",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 2477267738365253748,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-88463e36bd58",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 3957561957093976673,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-4badff71e97c",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 8165383512797469095,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-131720386074",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15434183098489587646,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-74ae528ce51d",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 16472896682896796808,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-1e30cd582eb6",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 17297089304716863668,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-a9d0e92b7c1b",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 7588287920044525296,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-ea6a77ed3f91",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 8679448506672642673,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-0b4fff9a498d",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 4378485586328213096,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-462e8d150203",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15578100447218594506,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-784ddc33e86b",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 11722613864130614467,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-09c37a48a6d4",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 10969288313142553124,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-d033ad22644a",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 10429362516720355768,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-fcc918250032",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 18219803752958097509,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-a8e48e4df76b",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 3791555145673898697,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-e633a29dc84e",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 92254975660934253,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-9b097cbefa37",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 7479732696789862957,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-a32c386de3a0",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 6247163580130980116,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-adb391a414bb",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 1070235597374472968,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-ca5dd629ca96",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 1565204626447468942,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-30543eed6889",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 4396788993744690974,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-5814ceb10481",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 5985770429491931654,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-d25225b5faa5",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    }
+  ],
+  "scenarios": [
+    "s1",
+    "s2",
+    "s3",
+    "s4"
+  ],
+  "seed": 2323363371,
+  "sweep_id": "pilot-gpt-oss-openrouter-1f75b653",
+  "templates": [
+    "w1",
+    "w3"
+  ]
+}

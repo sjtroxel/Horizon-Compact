@@ -1,0 +1,13 @@
+{
+  "attempts": 1,
+  "cost_usd": 0.000356,
+  "final_attempt": 1,
+  "first_attempt_status": "valid",
+  "label": "pilot",
+  "model_attempts": 1,
+  "objective_id": "C",
+  "record_version": 1,
+  "run_id": "r-e8270326c442",
+  "status": "valid",
+  "sweep_id": "pilot-gpt-oss-openrouter-1f75b653"
+}

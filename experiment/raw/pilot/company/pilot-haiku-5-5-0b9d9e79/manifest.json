@@ -1,0 +1,667 @@
+{
+  "content_hash": "a31d1f1184a502ce7e9cede35755cbb2c5083b658aed0c7f27e75c12d84df3c3",
+  "experiment": "company",
+  "label": "pilot",
+  "manifest_version": 3,
+  "model_key": "haiku-5-5",
+  "repeats": {
+    "s1": 2,
+    "s2": 2,
+    "s3": 2,
+    "s4": 2
+  },
+  "runs": [
+    {
+      "menu_order_seed": 11772990876160808846,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-6b349e6ba803",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 1205655130925617357,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-aa08b4ca9920",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 8712073800580022152,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-01ec44aa7666",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 4580783851457396189,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-3957d57a5fd3",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 17749145131507816763,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-e127b6bc57e4",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 848731442246967251,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-950a78ff4aa3",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 10406079578160911638,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-8d63b5b4b66f",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 7459076517264634622,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-35d4ab5d5d21",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 3510885260201306670,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-e83ebdc24688",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 11025111274844354840,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-49cbf9159151",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 17201582861399932824,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-32965f1d3da6",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 3327738720025072393,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-57edf48cf5b3",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 14549746760051834262,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-c2c97085092b",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 2237891972347845821,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-3c0f73d03273",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 10896432178508699153,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-4e72ff79fe7b",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12897879420222114686,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-6aa775809b30",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 9578277623377529492,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-7f68c21083f5",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 9319675685924778081,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-35a6818a9a64",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 7797830307349059181,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-301038617fcd",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 17412639908967793832,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-786ac65bab3f",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 8226605397064178853,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-cb3333e5dbf1",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 2270606249412959287,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-2b6a42557c4a",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 13573747177356745071,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-df6fd2f91f26",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 17406533201654783277,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-4a588d25e235",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 2589766220410186880,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-cfef7f8a11ba",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 2434154492831453000,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-7199e4e0961c",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 3672048587216038817,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-b857ded108f0",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12106521847103237952,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-9dac1a05fc7e",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 14829857920825766547,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-cea11c660da1",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 12614184506325554712,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-e692deaeb7de",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 11979229180841395379,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-63c9c244f23a",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 14253079511772320642,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-99817d96cd28",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 16051384538576902681,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-52f526eb7b9a",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 406679246075505241,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-6f3db0179525",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 6287853125477621706,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-08e62049a5f7",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 8614702838494710800,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-b47471a20bac",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 10586995327259666649,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-3db062e5c261",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 4613531631415953490,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-3c415492b4dd",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 1043258146789430757,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-869b56e0ed3a",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 14129091283382224489,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-ab715294b126",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 15042036913965743337,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-37de4d39bfef",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 3293144140418925478,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-c08852ea5c8f",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 2663147785787233534,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-900b4318046d",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 1375110287394036264,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-44190ef5a191",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 1527028885678785924,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-519e5919b088",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15233667016371082059,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-b7d7a93ade5f",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 1430951402065592931,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-f635f61ea1ce",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 5758724771951847075,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-43144fe011bf",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 4957928116288427361,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-842835669d4c",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 17109876701119570294,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-eb422b1f3467",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 11345142810803710718,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-733b172c930f",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 2679249859181188216,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-483b56d22a0a",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 14634759975772980669,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-84c96e262690",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 15153134977164536312,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-78f86a517af6",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 17541948802498493170,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-4344b6e7cab0",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15631935973985535316,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-125755c36a5e",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 13205475396698532808,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-8a1994db1dbd",
+      "scenario_id": "s3",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 604685987356141230,
+      "objective_id": "E",
+      "repeat": 1,
+      "run_id": "r-860e1e389b54",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 13261764334787771072,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-5592cb350f5d",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 6424929981671290152,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-19d7837ecd56",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 3783284563446700223,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-62fb0b218f11",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 3940791266184611232,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-4fc5f8d6a2e4",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 7298716371114015528,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-3f07236874f9",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 11194833676032601438,
+      "objective_id": "E",
+      "repeat": 0,
+      "run_id": "r-b0f32256a5d4",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 3855290059844831512,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-61f60f47f343",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 7787389951870591017,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-68d8804c0f16",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15582944139463195631,
+      "objective_id": "A",
+      "repeat": 0,
+      "run_id": "r-bc716f54ff84",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 15964402892671214304,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-be5450302ed5",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 1314942299004309955,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-c28fdeb93ae0",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 3142006210073236380,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-88193951897f",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 2638264585074413729,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-0bca56b6919b",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 683586658777249362,
+      "objective_id": "D",
+      "repeat": 0,
+      "run_id": "r-0835d0a2109e",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 9018524648177080727,
+      "objective_id": "C",
+      "repeat": 1,
+      "run_id": "r-3924a72766be",
+      "scenario_id": "s2",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 3769366325283513107,
+      "objective_id": "B",
+      "repeat": 1,
+      "run_id": "r-f0d66d1aad69",
+      "scenario_id": "s2",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 12209532323479961413,
+      "objective_id": "D",
+      "repeat": 1,
+      "run_id": "r-6cdcb7320290",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 17325377671001193071,
+      "objective_id": "C",
+      "repeat": 0,
+      "run_id": "r-b3f5cf84b303",
+      "scenario_id": "s4",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 5909682961297698445,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-015e3db59789",
+      "scenario_id": "s3",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 10672902626658743934,
+      "objective_id": "B",
+      "repeat": 0,
+      "run_id": "r-31de88d7eeb8",
+      "scenario_id": "s4",
+      "wording_id": "w1"
+    },
+    {
+      "menu_order_seed": 10385348803360563311,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-a981eb3e1a8c",
+      "scenario_id": "s1",
+      "wording_id": "w3"
+    },
+    {
+      "menu_order_seed": 2056662861874821542,
+      "objective_id": "A",
+      "repeat": 1,
+      "run_id": "r-8513b9ea1634",
+      "scenario_id": "s1",
+      "wording_id": "w1"
+    }
+  ],
+  "scenarios": [
+    "s1",
+    "s2",
+    "s3",
+    "s4"
+  ],
+  "seed": 4096323239,
+  "sweep_id": "pilot-haiku-5-5-0b9d9e79",
+  "templates": [
+    "w1",
+    "w3"
+  ]
+}

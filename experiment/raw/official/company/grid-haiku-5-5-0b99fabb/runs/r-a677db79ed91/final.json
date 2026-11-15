@@ -1,0 +1,13 @@
+{
+  "attempts": 2,
+  "cost_usd": 0.002849,
+  "final_attempt": 2,
+  "first_attempt_status": "schema_invalid",
+  "label": "official",
+  "model_attempts": 2,
+  "objective_id": "A",
+  "record_version": 1,
+  "run_id": "r-a677db79ed91",
+  "status": "valid",
+  "sweep_id": "grid-haiku-5-5-0b99fabb"
+}

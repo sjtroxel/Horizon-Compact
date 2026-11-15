@@ -1,0 +1,13 @@
+{
+  "attempts": 3,
+  "cost_usd": 0.001571,
+  "final_attempt": 3,
+  "first_attempt_status": "sum_mismatch",
+  "label": "official",
+  "model_attempts": 3,
+  "objective_id": "D",
+  "record_version": 1,
+  "run_id": "r-2090a72a20f6",
+  "status": "sum_mismatch",
+  "sweep_id": "grid-gpt-oss-openrouter-fe599ad2"
+}

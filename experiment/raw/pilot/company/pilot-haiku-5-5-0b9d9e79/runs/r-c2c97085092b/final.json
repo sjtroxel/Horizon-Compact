@@ -1,0 +1,13 @@
+{
+  "attempts": 2,
+  "cost_usd": 0.002618,
+  "final_attempt": 2,
+  "first_attempt_status": "sum_mismatch",
+  "label": "pilot",
+  "model_attempts": 2,
+  "objective_id": "E",
+  "record_version": 1,
+  "run_id": "r-c2c97085092b",
+  "status": "valid",
+  "sweep_id": "pilot-haiku-5-5-0b9d9e79"
+}

@@ -339,6 +339,24 @@ step had no separate reviewer).** `src/horizon_compact/site/rawtext.py`; the com
   check; allowing an overwrite; skipping verify's text checks) **were each caught**, the file restored byte for byte.
 - `make check` exit 0: Python 3,533 passed, web 585.
 
+**As run, step 2 (2026-11-15).** His pull, `hc site raw-pull` with the project profile and the bucket from
+`bootstrap`'s output: `written: 5247`, `unchanged: 0`, `bytes: 104785272`, the manifest's total. Then, measured, not
+estimated:
+- `hc site raw-verify`: `ok: 5247 objects, 104785272 bytes`, in about 12 seconds.
+- **Packed size: 10.30 MiB** (a throwaway repository holding only `experiment/raw/` and its `.gitattributes`, after
+  `git repack -ad`); 125 MB on disk. §0 item 1's estimate of about 10 MB held.
+- **The name guard: about 3.5 minutes** over the 5,247 staged files (3 min 27 s and 3 min 30 s, staged into a
+  throwaway index, never his). C2's commit waits on it that long, once, and its push about as long again (the push guard reads each new commit's full content); later commits touch none of these files.
+- **Two false positives, found by the guard's first pass:** a short term from the private term file matched inside
+  the base64 `signature` of a thinking block in two Haiku 5.5 records, between `/` and `+`, which the guard counts
+  as word boundaries. The records cannot be reworded (their sha256 is in the manifest), so he added two `allow:`
+  lines to the private term file, each a short span around one match, occurring exactly once in
+  `experiment/raw/`. The second pass: exit 0. No text of either match is written in this repository.
+- **One gap in step 1, closed here:** §5.1 says the verify runs inside `pytest`, but every `verify_raw` test ran on
+  fakes. `test_the_committed_raw_text_matches_the_committed_manifest` now verifies the real `experiment/raw/` against
+  the committed manifest, with no skip when the files are absent; it failed on one byte changed and on one file
+  missing, each restored (sha256 checked). `tests/test_site_rawtext.py`: 51 cases.
+
 ### 5.2 The re-scoring check (Delivers 2; DoD row 2)
 
 - **What it is:** a test that runs the frozen analysis (`hc analyze`'s own code, `--store local`, rooted at
@@ -457,7 +475,7 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 |---|---|---|---|
 | 0 | **[done 2026-11-14]** This doc approved; the scope doc amended (one dated header note pointing to §0; dated notes on Delivers 3, DoD row 8's duplicate number, and Delivers 6's memo scan) | him; Opus | C0 |
 | 1 | **[done 2026-11-14]** `hc site raw-pull` and `hc site raw-verify` (§5.1), on fakes | Opus (his choice) | C1 |
-| 2 | His pull; Claude's verify; the packed size and the guard's time measured | him; Claude | C2 (the raw text) |
+| 2 | **[done 2026-11-15]** His pull; Claude's verify; the packed size and the guard's time measured | him; Claude | C2 (the raw text) |
 | 3 | The re-scoring test, and its failure shown once (§5.2) | Sonnet; Opus reviews | C3 |
 | 4 | The methods page: the route, its data, its sections with placeholders for his titles (§3, decision E) | Sonnet; Opus reviews | C4 |
 | 5 | Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences; every ledger line placed, checked by script | him and Claude | C5 |

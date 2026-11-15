@@ -1,0 +1,28 @@
+{
+  "attempts_this_session": 782,
+  "cap_usd": 3.0,
+  "cost_usd_sweep_total": 0.54217,
+  "cost_usd_this_session": 0.32139,
+  "finished_at": "2026-10-14T23:18:07.721747+00:00",
+  "git_sha": "50f6f21c03aa0f664ccccfdca961cf04d8d52b14",
+  "image_digest": "sha256:ff978703e4b6ae30fd6d4b2cd7a65670a2754a6b6623a1dfc5f1683229436723",
+  "label": "official",
+  "record_version": 1,
+  "runner": "fargate",
+  "runs_finished_before": 490,
+  "runs_finished_this_session": 710,
+  "runs_total": 1200,
+  "started_at": "2026-10-14T15:47:45.658799+00:00",
+  "status_counts_this_session": {
+    "api_error": 4,
+    "no_tool_call": 6,
+    "schema_invalid": 69,
+    "sum_mismatch": 7,
+    "truncated": 6,
+    "unexpected_stop": 1,
+    "valid": 687,
+    "valid_rescaled": 2
+  },
+  "stopped": "complete",
+  "sweep_id": "grid-gpt-oss-openrouter-fe599ad2"
+}

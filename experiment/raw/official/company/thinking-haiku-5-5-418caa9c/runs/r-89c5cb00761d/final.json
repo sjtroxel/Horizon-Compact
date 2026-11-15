@@ -1,0 +1,13 @@
+{
+  "attempts": 1,
+  "cost_usd": 0.00286,
+  "final_attempt": 1,
+  "first_attempt_status": "valid",
+  "label": "official",
+  "model_attempts": 1,
+  "objective_id": "C",
+  "record_version": 1,
+  "run_id": "r-89c5cb00761d",
+  "status": "valid",
+  "sweep_id": "thinking-haiku-5-5-418caa9c"
+}

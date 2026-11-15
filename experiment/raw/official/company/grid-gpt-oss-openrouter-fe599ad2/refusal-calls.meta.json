@@ -1,0 +1,19 @@
+{
+  "cases_shown": 2,
+  "hidden_from_the_screen": [
+    "run id",
+    "scenario",
+    "objective",
+    "wording",
+    "prompt",
+    "classifier flag"
+  ],
+  "kind": "refusal-calls",
+  "limit": "The objective, wording, scenario, run id, prompt and classifier flag were hidden from the screen. A reply can still name the objective in its own words, so the call is blind to everything the harness knows and not to what the reply says (protocol 4.7; code half section 3, finding 5).",
+  "made_at": "2026-10-15T00:10:38.535135+00:00",
+  "made_by": "sjtroxel",
+  "order": "shuffled, masked labels",
+  "record_version": 1,
+  "refusals_called": 0,
+  "sweep_id": "grid-gpt-oss-openrouter-fe599ad2"
+}
