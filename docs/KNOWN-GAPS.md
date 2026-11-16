@@ -7,7 +7,20 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-15, about 9:15 AM (PHASE 6.5 STEP 2: THE RAW TEXT PULLED AND VERIFIED)
+> ## START HERE — where things stand, 2026-11-16, about 8:10 AM (PHASE 6.5 STEP 3: THE RE-SCORING TEST BUILT AND REVIEWED)
+>
+> **C2 committed `4687410` (his) and pushed; CI `43735395010` and Deploy `43735395019` green.** **Step 3 (doc §5.2,
+> "As built, step 3" and "Reviewed, step 3"):** `hc analyze --runs-root` (visible help; refused with `--store s3`) and
+> `tests/test_analysis_rescoring.py`: the frozen analysis on `experiment/raw/` writes all three official results files
+> byte for byte, under a guard that fails on any AWS client; shown to fail on one results digit, on one raw
+> `validation` value, and on `--store s3`. Built by Sonnet, reviewed by Opus: passed, no change. **Added in review, his
+> decision:** the analysis reads each run's recorded `validation`, not the model's tool call, so a re-validation test
+> now runs the locked validator on every recorded tool call (2,524) and requires the recorded validation; it caught a
+> changed tool call the byte test could not. `make check` green, 3,545 and 585. **Uncommitted:** the step, his commit C3 `phase 6.5: c3 re-scoring test`. **Next:** step 4, the methods page (§3).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-15, about 9:15 AM (PHASE 6.5 STEP 2: THE RAW TEXT PULLED AND VERIFIED) *(superseded by the block above)*
 >
 > **C0 and C1 committed as one, `09d7ec4` (his), and pushed; CI `43609886539` and Deploy `43609886681` green.**
 > **Step 2 (doc §5.1, "As run, step 2"):** his pull wrote all 5,247 objects, 104,785,272 bytes, the manifest's total;

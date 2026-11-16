@@ -3,13 +3,14 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import random
 import re
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -553,6 +554,84 @@ def test_hc_analyze_takes_the_protocol_name_from_the_lock_when_not_given(
     assert cli.main(args) == 0
     results = tmp_path / "repo" / "experiment" / "results" / "prereg-v1"
     assert (results / DEVELOPMENT_MODEL / f"{plan.sweep_id}.json").is_file()
+
+
+def test_hc_analyze_reads_the_records_from_the_folder_it_is_given(
+    company: Experiment,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """--runs-root (Phase 6.5 doc section 5.2): the records are under a folder of the reader's choosing, not
+    under scratch/runs, and the default store is never asked for."""
+    plan = build(company)
+    records = LocalStore(tmp_path / "published")
+    play(company, plan, records, {})
+    monkeypatch.setattr(cli, "run_analysis_gate", lambda experiment: GateResult())
+
+    def never(args: object, session: object) -> None:
+        raise AssertionError("the default store was asked for with --runs-root given")
+
+    monkeypatch.setattr(cli, "_store", never)
+    args = analyze_args(plan, tmp_path, "--runs-root", str(tmp_path / "published"))
+    assert cli.main(args) == 0
+    written = (
+        tmp_path / "repo" / "experiment" / "results" / "prereg-test" / DEVELOPMENT_MODEL
+    ) / f"{plan.sweep_id}.json"
+    assert json.loads(written.read_bytes())["sweep_id"] == plan.sweep_id
+    assert f"wrote {written.relative_to(tmp_path / 'repo')}" in capsys.readouterr().out
+    # a folder that holds no such sweep is read as empty: nothing to analyze, nothing written
+    empty = analyze_args(plan, tmp_path, "--runs-root", str(tmp_path / "elsewhere"))
+    written.unlink()
+    assert cli.main(empty) == 2
+    assert not written.exists()
+
+
+def test_hc_analyze_refuses_runs_root_with_the_s3_store_and_opens_no_session(
+    company: Experiment,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    plan = build(company)
+    monkeypatch.setattr(cli, "run_analysis_gate", lambda experiment: GateResult())
+
+    def no_session(args: object, identity: object) -> None:
+        raise AssertionError("an AWS session was opened")
+
+    monkeypatch.setattr(cli, "_session", no_session)
+    args = analyze_args(
+        plan, tmp_path, "--runs-root", str(tmp_path), "--store", "s3"
+    )  # the last wins
+    assert cli.main(args) == 2
+    err = capsys.readouterr().err
+    assert "--runs-root" in err and "--store local" in err
+    assert not (tmp_path / "repo" / "experiment").exists()
+
+
+def test_hc_analyze_without_runs_root_still_asks_for_the_default_store(
+    company: Experiment,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    plan = build(company)
+    records = LocalStore(tmp_path / "bucket")
+    play(company, plan, records, {})
+    monkeypatch.setattr(cli, "run_analysis_gate", lambda experiment: GateResult())
+    real_store = cli._store
+    asked: list[object] = []
+
+    def spy(args: argparse.Namespace, session: object) -> LocalStore:
+        asked.append(args.runs_root)
+        return records
+
+    monkeypatch.setattr(cli, "_store", spy)
+    assert cli.main(analyze_args(plan, tmp_path)) == 0
+    assert asked == [None]
+    # and that default is still the repository's scratch/runs
+    top = Path(cli._git("rev-parse", "--show-toplevel"))
+    default = SimpleNamespace(store="local")
+    assert cast(LocalStore, real_store(cast(Any, default), None)).root == top / "scratch" / "runs"
 
 
 def test_hc_sweep_refusals_asks_in_the_terminal_and_writes_once(

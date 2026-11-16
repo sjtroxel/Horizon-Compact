@@ -372,6 +372,97 @@ estimated:
 - **Its time** is measured on the first run; if it makes `make check` slow, it gets a marker of its own that CI still
   runs, never a skip.
 
+**As built, step 3 (2026-11-16, Sonnet; reviewed by Opus the same day, below).**
+- **The option.** `hc analyze` takes `--runs-root` (`cli.py`). With `--store local` the store is a `LocalStore` on
+  that folder in place of `scratch/runs`; with `--store s3` it is refused (a `SweepRefusal` naming both options,
+  exit 2, before any session is opened, nothing written). Its help line is visible: "with --store local: the
+  folder holding the records (default scratch/runs); experiment/raw is the published text". Nothing else in
+  `cmd_analyze` changed except that the store choice is now an if/else, whose default branch calls `_store` as it
+  did. A reader's own `uv run hc analyze --experiment company --sweep <id> --store local --runs-root
+  experiment/raw` on a clone is itself the check: `write_results` is a no-op on the same text and refuses a
+  different one.
+- **The test file.** `tests/test_analysis_rescoring.py`, five tests, no skip, no marker. One per sweep
+  (parametrized over `grid-haiku-5-5-0b99fabb`, `grid-gpt-oss-openrouter-fe599ad2`, `thinking-haiku-5-5-418caa9c`)
+  calls `cli.main(["analyze", ..., "--store", "local", "--runs-root", <experiment/raw>, "--protocol", "prereg-v1",
+  "--root", <tmp>])` with the real gate unpatched and the default official role, asserts exit 0, and compares the
+  file written under the temporary root with the committed one by `read_bytes()`; nothing is written into the
+  repository's own `experiment/`. One test holds that the `*.json` files under `experiment/results/prereg-v1/`
+  are exactly these three. An autouse fixture makes `botocore.session.Session.create_client` (the chokepoint every
+  `boto3` client and resource passes through), `boto3.client`, `boto3.resource` and `cli._session` raise one
+  error class, `AwsClientOpened`; one test shows each of those doors raising it.
+- **Three tests in `tests/test_sweep_refusals.py`** for the option: it reads the folder it is given (a played
+  sweep under a `tmp_path` folder, with the default store made to fail if asked for; a folder with no such sweep
+  is refused and writes nothing); it is refused with `--store s3` and opens no session; the default is unchanged
+  (`_store` is still asked, and still means `scratch/runs`). **Eight tests added in the step.**
+- **Proof.** `make check` exit 0: **3,542 Python** (3,533 at step 1, one added by step 2, eight by this step) and
+  **585 web**. The new file takes **3.6 s** under `--durations` (grid-haiku 2.11 s, gpt-oss 1.32 s, thinking 0.16 s,
+  the guard test 0.01 s), inside a pytest run of 202 s (the whole `make check` 3 min 49 s), so `make check` is not
+  noticeably slower and the file needs no marker. The three sweeps came out identical to the committed files, as
+  Opus's read-only check had found.
+- **Mutations, each backed up to the scratchpad with its sha256 taken, run against the new file alone, and restored
+  from the backup with the sha256 matching and `git status --short experiment/` empty.**
+  1. *DoD 2.* One `estimate` of one pair-rate in `experiment/results/prereg-v1/haiku-5-5/grid-haiku-5-5-0b99fabb.json`,
+     its last digit. The edit went into the tracked file, not a copy, because that is what the test reads; the backup
+     is the copy it was restored from. Only the grid-haiku test failed; the other two sweeps and the rest passed.
+     Failing line: `assert b'{\n  "resul...uns": []\n}\n' == b'{\n  "resul...uns": []\n}\n'` with `At index 290772
+     diff: b'1' != b'2'`.
+  2. *The test reads the raw text.* In `runs/r-0065d100cd6a/attempt-1.json` of the grid-haiku sweep, `validation.amounts`:
+     one person moved from `kept_at_plant` to `moved_other_plants`, so the record still parses and still adds up.
+     Only the grid-haiku test failed, **on the bytes, not on a parse error**: the same `assert b'...' == b'...'`
+     with `At index 523036 diff: b'7' != b'0'`.
+  3. *The AWS guard fires.* A throwaway edit of the test to `--store s3`, reverted: `AwsClientOpened: the re-scoring
+     test opened an AWS client: it may read published files only`, raised from `cli._session`, not a credentials or
+     network error.
+- **`git diff --stat` of the step:** `cli.py`, `tests/test_sweep_refusals.py` and this doc modified, and
+  `tests/test_analysis_rescoring.py` new; nothing under `experiment/`, `src/horizon_compact/analysis/`, `uv.lock` or
+  `docs/phases/evidence/`.
+- **The hooks' dry run** (`uv run pre-commit run --files` the four files above): every hook passed or had no file to
+  check, the name guard included; `experiment/raw/` was not staged.
+- **What did not fit, and what was done instead.** (a) Mutation 2's first attempt changed `parsed_decision.amounts`
+  and **the test passed**: the frozen analysis reads each attempt's `validation` (`analysis/records.py`), not
+  `parsed_decision`, so that edit was restored (sha256 checked) and redone on `validation.amounts`. The raw-verify
+  test catches an edit to either field; the re-scoring test catches only what the analysis reads, which is the right
+  scope for it. (b) Mutation 3 as written ("`--store s3` in place of `--store local`") would stop at the new
+  `--runs-root` refusal before reaching a client, so the throwaway edit also dropped `--runs-root`, and the run reached
+  `_session`. (c) The spec said the failure is shown on "a copy" of a results file; mutation 1 edited the tracked file
+  (as the prompt directed) and restored it. (d) `make fmt` reported two docstring lines over the 110-column limit (W505) in the new file; they were rewrapped by hand.
+
+**Reviewed, step 3 (2026-11-16, Opus). Passed, no change to Sonnet's code or tests; one test added on his
+decision (below).**
+- **Re-run, not taken on report:** the eight new tests pass; `make check` exit 0, 3,542 Python and 585 web, the counts
+  above. The diff touches only `cli.py`, the two test files and this doc.
+- **The option:** the refusal comes after the gate and before any session, so `--store s3 --runs-root` opens nothing;
+  the default branch is the old two lines unchanged. `--runs-root` is read relative to the working directory, as
+  `site data`'s is, so the reader's command in step 4 is given from the clone's top folder.
+- **The guard** patches `botocore.session.Session.create_client` on the class, which every `boto3` client and
+  resource reaches, so a door not named in the fixture is still closed.
+- **What the test covers, stated exactly (Sonnet's finding (a), checked further).** The frozen analysis reads each
+  attempt's recorded `validation`, the harness's verdict written at run time, not the model's tool call. So this test
+  closes the link *recorded validation to results file*; the link *the model's tool call to the recorded validation*
+  has no test. Checked read-only today (a throwaway script outside the repository): the frozen `validate_decision`, run
+  again on every recorded tool call of the three sweeps (2,524 attempts carrying a validation), reproduces every recorded
+  `validation` exactly, in about a second; and every recorded `tool_calls` input equals the call inside `raw_response`
+  (the one apparent difference is a model's malformed `"{\n"` argument string, recorded as given and scored
+  `schema_invalid`). **His decision (2026-11-16): add the re-validation as a test.**
+- **Added in review (Opus, his decision):** `test_every_recorded_validation_is_the_frozen_validator_on_the_recorded_tool_call`
+  in the same file, parametrized over the three sweeps: for every attempt that carries a `validation`, the locked
+  `validate_decision` on the record's one tool call (on its scenario) must equal the recorded validation, and the count
+  checked must be the sweep's (1,128, 1,296, 100), so a glob that finds nothing fails. Under the same AWS guard; about
+  1.3 s for the three. **Mutation-checked:** in the grid-haiku record used for mutation 2, the tool call's
+  `amounts` changed (one person from `kept_at_plant` to `moved_other_plants`, still valid and balanced): only the
+  grid-haiku re-validation test failed (`Differing items: {'amounts': {... 'kept_at_plant': 161.0,
+  'moved_other_plants': 29.0 ...}} != {... 162.0 ... 28.0 ...}`), and the byte test passed, which is the link the
+  byte test could not see. Restored from a scratchpad backup, sha256 matching, `git status --short experiment/` empty. With it, `make check` exit 0: **3,545 Python** (three more) and **585 web**; the step added eleven.
+  The chain a reader can check now starts at the model's tool call: tool call, to recorded validation (this test), to
+  results file (the byte test). The link from the provider's `raw_response` to the recorded `tool_calls` matched on
+  every record in the read-only check above but has no test; it is the harness's extraction, recorded side by side
+  with its source in the same file.
+- **Minor, not fixed:** `experiment/.gitattributes` keeps `raw/**` byte-exact but not `results/**`; on a Windows
+  clone with `core.autocrlf` the byte comparison would fail while the reader's `hc analyze` (which compares text)
+  would pass. CI and his laptop are unaffected. And on a reader's clone `hc analyze` prints "wrote ..." even when the
+  file was already identical and nothing was written; step 4's page says what success looks like (exit 0, `git status`
+  clean).
+
 ### 5.3 The prompt-reconstruction check (Delivers 3; DoD row 3)
 
 - **The question it answers:** can a stranger rebuild a prompt **from the methods page and the published inputs**
@@ -476,7 +567,7 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 0 | **[done 2026-11-14]** This doc approved; the scope doc amended (one dated header note pointing to §0; dated notes on Delivers 3, DoD row 8's duplicate number, and Delivers 6's memo scan) | him; Opus | C0 |
 | 1 | **[done 2026-11-14]** `hc site raw-pull` and `hc site raw-verify` (§5.1), on fakes | Opus (his choice) | C1 |
 | 2 | **[done 2026-11-15]** His pull; Claude's verify; the packed size and the guard's time measured | him; Claude | C2 (the raw text) |
-| 3 | The re-scoring test, and its failure shown once (§5.2) | Sonnet; Opus reviews | C3 |
+| 3 | **[done 2026-11-16, §5.2; built by Sonnet, reviewed by Opus]** The re-scoring test, and its failure shown once (§5.2) | Sonnet; Opus reviews | C3 |
 | 4 | The methods page: the route, its data, its sections with placeholders for his titles (§3, decision E) | Sonnet; Opus reviews | C4 |
 | 5 | Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences; every ledger line placed, checked by script | him and Claude | C5 |
 | 6 | Serving in `main` (§7 item 2) | Opus; his apply | C6 |

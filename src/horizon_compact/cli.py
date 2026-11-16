@@ -1278,8 +1278,16 @@ def cmd_analyze(args: argparse.Namespace) -> int:
                     + [f"  {line}" for line in [*frozen.failures, *frozen.notes]]
                 )
             )
-    session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
-    store = _store(args, session)
+    if args.runs_root and args.store != "local":
+        raise SweepRefusal(
+            "--runs-root only applies with --store local: it names the folder holding the records, "
+            "and --store s3 reads the results bucket"
+        )
+    if args.runs_root:
+        store: Store = LocalStore(Path(args.runs_root))
+    else:
+        session = None if args.store == "local" else _session(args, identify({}, _laptop_git))
+        store = _store(args, session)
     prefix = sweep_prefix(experiment.name, args.sweep, args.role)
     try:
         runset = read_runs(store, prefix)
@@ -3608,6 +3616,12 @@ def build_parser() -> argparse.ArgumentParser:
     analyze.add_argument("--store", choices=("local", "s3"), default="s3")
     analyze.add_argument("--bucket", default=None)
     analyze.add_argument("--profile", default=None)
+    analyze.add_argument(
+        "--runs-root",
+        default=None,
+        help="with --store local: the folder holding the records (default scratch/runs); "
+        "experiment/raw is the published text",
+    )
     analyze.add_argument("--protocol", default=None, help="default: the lock's protocol name")
     analyze.add_argument("--root", default=None, help=argparse.SUPPRESS)
     analyze.add_argument("--experiment-dir", default=None, help=argparse.SUPPRESS)
