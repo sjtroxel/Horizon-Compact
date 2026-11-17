@@ -1464,8 +1464,9 @@ def cmd_site_explorer(args: argparse.Namespace) -> int:
     top = Path(_git("rev-parse", "--show-toplevel"))
     results = Path(args.results) if args.results else top / EXPLORER_RESULTS_PATH
     out = Path(args.out) if args.out else top / EXPLORER_DATA_PATH
+    raw = Path(args.raw) if args.raw else None
     try:
-        files = build_explorer_data(results)
+        files = build_explorer_data(results, raw)
         unchanged = explorer_data_matches(files, out)
         write_explorer_data(files, out)
     except ExplorerDataRefusal as exc:
@@ -3675,6 +3676,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--results", default=None, help="default: experiment/results under the repository root"
     )
     site_explorer.add_argument("--out", default=None, help="default: web/explorer-data")
+    site_explorer.add_argument("--raw", default=None, help=argparse.SUPPRESS)
 
     site_memos = site_actions.add_parser(
         "memos",

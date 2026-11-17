@@ -55,7 +55,7 @@ describe("the shell", () => {
     expect(h1Text(view.container)).toBe(pageMeta({ kind: "story" }, explorerHis.pages).title);
   });
 
-  it("links to the story, every scenario, the cases, the studies and the memos, and marks the current page", async () => {
+  it("links to the story, every scenario, the cases, the studies, the memos and the methods, and marks the current page", async () => {
     const view = await shellAt("/scenario/s2/");
     const nav = view.getByRole("navigation", { name: explorerLabels.navLabel });
     const hrefs = within(nav)
@@ -70,6 +70,7 @@ describe("the shell", () => {
       "/cases/",
       "/studies/",
       "/memos/",
+      "/methods/",
     ]);
     const current = within(nav)
       .getAllByRole("link")
@@ -236,6 +237,7 @@ describe("accessibility", () => {
       "/cases/pre-25/",
       "/studies/",
       "/memos/",
+      "/methods/",
       "/nowhere/",
     ]) {
       const view = await shellAt(path);
@@ -446,7 +448,7 @@ describe("no layout shift on load (step 11)", () => {
       // The navigation is drawn already, from the scenarios' names, with the same links it will have.
       const nav = view.getByRole("navigation", { name: explorerLabels.navLabel });
       expect(within(nav).getAllByRole("link").length, path).toBe(
-        5 + Object.keys(explorerLabels.scenarioNames).length - 1,
+        6 + Object.keys(explorerLabels.scenarioNames).length - 1,
       );
       expect(view.container.querySelector("main")!.textContent, path).toContain(explorerLabels.loading);
       cleanup();

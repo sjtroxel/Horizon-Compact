@@ -301,7 +301,9 @@ function kindOfPath(path) {
   const [first, second] = path.split("/").filter(Boolean);
   if (first === undefined) return "story";
   if (first === "cases") return second === undefined ? "cases" : "case";
-  return first === "scenario" || first === "studies" || first === "memos" ? first : null;
+  return first === "scenario" || first === "studies" || first === "memos" || first === "methods"
+    ? first
+    : null;
 }
 
 function checkPathBudgets() {

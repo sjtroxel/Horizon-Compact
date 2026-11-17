@@ -9,6 +9,8 @@ import {
   THINKING_ANCHOR,
   protocolUrl,
   scenarioTextPath,
+  mainFileUrl,
+  mainFolderUrl,
   scenarioTextUrl,
   selectionLogUrl,
 } from "./links";
@@ -62,6 +64,24 @@ describe("the links of the studies and the cases (C5)", () => {
       expect(selectionLogUrl(log.path)).toBe(
         `https://github.com/sjtroxel/horizon-compact/blob/main/${log.path}`,
       );
+    }
+  });
+});
+
+describe("the links to the repository's main branch (Phase 6.5 step 4)", () => {
+  it("name a folder and a file on GitHub at the main branch, and the selection logs still use the file form", () => {
+    expect(mainFolderUrl("experiment/raw")).toBe(
+      "https://github.com/sjtroxel/horizon-compact/tree/main/experiment/raw",
+    );
+    expect(mainFileUrl("docs/phases/evidence/phase-4/raw-manifest.json")).toBe(
+      "https://github.com/sjtroxel/horizon-compact/blob/main/docs/phases/evidence/phase-4/raw-manifest.json",
+    );
+    expect(selectionLogUrl("a/b.json")).toBe(mainFileUrl("a/b.json"));
+  });
+
+  it("point at a folder and a file the repository holds", () => {
+    for (const path of ["experiment/raw", "docs/phases/evidence/phase-4/raw-manifest.json"]) {
+      expect(existsSync(resolve(WEB_ROOT, "..", path)), path).toBe(true);
     }
   });
 });

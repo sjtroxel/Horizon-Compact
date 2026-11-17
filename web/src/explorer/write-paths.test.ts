@@ -99,7 +99,7 @@ describe("write-paths: the link-preview tags (C7)", () => {
     const slugs = routes.map(cardSlug);
     expect(new Set(slugs).size).toBe(routes.length);
     for (const slug of slugs) expect(slug).toMatch(SAFE_SEGMENT);
-    expect(slugs).toHaveLength(13);
+    expect(slugs).toHaveLength(14);
   });
 
   it("reads a path back to its route (the checks use it), and refuses a path no page is written for", () => {

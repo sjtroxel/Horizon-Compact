@@ -15,6 +15,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import tomllib
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -299,8 +300,189 @@ def _awareness_path(tmp_path: Path, model: str) -> Path:
     return tmp_path / "docs" / "phases" / "evidence" / "phase-4" / f"awareness-{model}.md"
 
 
+# --- the fixture raw text (Phase 6.5 step 4): fictional sweeps, with text that must never be copied -------
+
+SENTINEL_RAW = "FIXTURE RAW MODEL TEXT THAT MUST NEVER REACH THE METHODS DATA"
+SENTINEL_PROMPT = "FIXTURE PROMPT TEXT THAT MUST NEVER REACH THE METHODS DATA"
+SENTINEL_RAW_MEMO = "FIXTURE RAW MEMO TEXT THAT MUST NEVER REACH THE METHODS DATA"
+RAW_NEVER_COPIED = ("req_FIXTUREREQUEST", "gen-FIXTUREGENERATION", "FIXTURETASK", "<account-id>")
+# (model key, hex of the sweep id, kind): the three sweeps the builder reads, in the order it writes them.
+RAW_SWEEPS = (
+    (OTHER_MODEL, "aaaa1111", "grid"),
+    (MAIN_MODEL, "bbbb2222", "grid"),
+    (MAIN_MODEL, "cccc3333", "thinking"),
+)
+
+
+def _sweep_id(model: str, hexid: str, kind: str) -> str:
+    return f"{kind}-{model}-{hexid}"
+
+
+def _raw_settings(model: str, kind: str) -> Obj:
+    """The request-side fields of a fictional attempt: one value for each, as the real sweeps have."""
+    return {
+        "api": f"fixture-api-{model}",
+        "provider": "fixture-provider",
+        "route_kind": "fixture-route",
+        "model_id": f"fixture/{model}",
+        "invoke_id": f"fixture/{model}",
+        "max_tokens": 3072,
+        "temperature": "not set; a fixture sentence",
+        "effort": "high" if kind == "thinking" else "not set (a fixture sentence)",
+        "thinking": "off: a fixture sentence",
+        "region": "hosted by a fixture",
+        "inference_profile": None,
+        "harness_version": "0.0.5",
+        "image_digest": "sha256:" + "ab" * 32,
+        "git_sha": "cd" * 20,
+        "git_dirty": False,
+        "runner": "fargate",
+        "label": "official",
+    }
+
+
+def _raw_attempt(sweep: str, model: str, kind: str, run: str, attempt: int, served: Obj) -> Obj:
+    """A fictional attempt record: the request-side settings, a provider block with ids that must not be
+    copied, and every kind of text the builder must never copy."""
+    return {
+        **_raw_settings(model, kind),
+        "sweep_id": sweep,
+        "run_id": run,
+        "attempt": attempt,
+        "status": "valid",
+        "provider_details": {
+            "request_id": "req_FIXTUREREQUEST",
+            "generation_id": "gen-FIXTUREGENERATION",
+            **served,
+        },
+        "raw_response": {"content": SENTINEL_RAW},
+        "request": {"system": SENTINEL_PROMPT, "messages": [SENTINEL_PROMPT]},
+        "text_blocks": [SENTINEL_RAW],
+        "tool_calls": [{"input": {"memo": SENTINEL_RAW_MEMO}}],
+        "parsed_decision": {"memo": SENTINEL_RAW_MEMO},
+        "validation": {"memo": SENTINEL_RAW_MEMO},
+        "task_arn": "arn:aws:ecs:us-east-1:<account-id>:task/fixture/FIXTURETASK",
+        "image": "<account-id>.dkr.ecr.us-east-1.amazonaws.com/fixture@sha256:" + "ab" * 32,
+    }
+
+
+def _raw_session(started: str, finished: str, finished_runs: int, cost: float) -> Obj:
+    return {
+        "record_version": 1,
+        "started_at": started,
+        "finished_at": finished,
+        "stopped": "complete",
+        "runs_total": 2,
+        "runs_finished_this_session": finished_runs,
+        "status_counts_this_session": {"valid": finished_runs},
+        "cost_usd_sweep_total": cost,
+        "cap_usd": 3.0,
+        "attempts_this_session": 99,
+        "image_digest": "sha256:" + "ab" * 32,
+        "git_sha": "cd" * 20,
+        "task_arn": "arn:aws:ecs:us-east-1:<account-id>:task/fixture/FIXTURETASK",
+    }
+
+
+def _raw_sweep_dir(tmp_path: Path, model: str, hexid: str, kind: str) -> Path:
+    return tmp_path / "experiment" / "raw" / "official" / "company" / _sweep_id(model, hexid, kind)
+
+
+def _write_raw(tmp_path: Path) -> None:
+    """The fictional raw text beside the fixture results, with the manifest that hashes it."""
+    for model, hexid, kind in RAW_SWEEPS:
+        sweep = _sweep_id(model, hexid, kind)
+        base = _raw_sweep_dir(tmp_path, model, hexid, kind)
+        _write_json(
+            base / "manifest.json",
+            {
+                "sweep_id": sweep,
+                "model_key": model,
+                "label": kind,
+                "experiment": "company",
+                "manifest_version": 3,
+                "seed": 1234,
+                "repeats": {"s1": 20} if kind == "thinking" else dict.fromkeys(SCENARIOS, 20),
+                "templates": ["w2"] if kind == "thinking" else ["w1", "w2", "w3"],
+                "scenarios": ["s1"] if kind == "thinking" else list(SCENARIOS),
+                "runs": [{"run_id": "r-aaaaaaaaaaaa"}, {"run_id": "r-bbbbbbbbbbbb"}],
+            },
+        )
+        # The later session is written under the name that sorts first, so file order is not time order.
+        _write_json(
+            base / "sessions" / "a-late.json",
+            _raw_session("2026-10-14T15:00:00+00:00", "2026-10-14T16:00:00+00:00", 1, 0.5),
+        )
+        _write_json(
+            base / "sessions" / "b-early.json",
+            _raw_session("2026-10-14T09:00:00+00:00", "2026-10-14T10:00:00+00:00", 1, 0.25),
+        )
+        # Three attempts over two runs. The other model's providers differ between attempts, as one real
+        # sweep's do; the main model's records carry one served model and no served_by at all.
+        served: list[Obj]
+        if model == OTHER_MODEL:
+            served = [
+                {"served_by": "ProviderOne", "served_model": "fixture/alpha"},
+                {"served_by": "ProviderOne", "served_model": "fixture/alpha"},
+                {"served_by": "unknown", "served_model": "unknown"},
+            ]
+        else:
+            served = [{"served_model": f"fixture/{model}"}] * 3
+        for number, (run, attempt) in enumerate(
+            (("r-aaaaaaaaaaaa", 1), ("r-aaaaaaaaaaaa", 2), ("r-bbbbbbbbbbbb", 1))
+        ):
+            _write_json(
+                base / "runs" / run / f"attempt-{attempt}.json",
+                _raw_attempt(sweep, model, kind, run, attempt, served[number]),
+            )
+        # A final record per run: text the builder must never open.
+        for run in ("r-aaaaaaaaaaaa", "r-bbbbbbbbbbbb"):
+            _write_json(
+                base / "runs" / run / "final.json",
+                {"run_id": run, "memo": SENTINEL_RAW_MEMO},
+            )
+    # Other things under the raw root that the builder must leave alone: a sweep with no results file, a
+    # pilot, a case's sweep (another experiment beside ``company``), an awareness run. Each holds records
+    # shaped like a real one's, with the same sentinels.
+    raw = tmp_path / "experiment" / "raw"
+    for stray in (
+        raw / "official" / "company" / "grid-stray-model-9999",
+        raw / "pilot" / "company" / "pilot-alpha-model-8888",
+        raw / "official" / "case-alpha" / "grid-alpha-model-6666",
+    ):
+        _write_json(stray / "manifest.json", {"sweep_id": stray.name, "memo": SENTINEL_RAW_MEMO})
+        _write_json(stray / "sessions" / "s.json", {"memo": SENTINEL_RAW_MEMO})
+        _write_json(
+            stray / "runs" / "r-cccccccccccc" / "attempt-1.json",
+            _raw_attempt(stray.name, "stray-model", "grid", "r-cccccccccccc", 1, {}),
+        )
+    _write_json(
+        raw
+        / "official"
+        / "company"
+        / "awareness"
+        / "awareness-alpha-model-7777"
+        / "runs"
+        / "r-1.json",
+        {"reply": SENTINEL_RAW},
+    )
+    _write_json(
+        tmp_path / "docs" / "phases" / "evidence" / "phase-4" / "raw-manifest.json",
+        {
+            "schema": "horizon-compact/raw-manifest",
+            "kind": "raw-object-manifest",
+            "hash": "sha256",
+            "object_count": 21,
+            "total_bytes": 4321,
+            "objects": [
+                {"key": "official/company/x", "sha256": "ff" * 32, "memo": SENTINEL_RAW_MEMO}
+            ],
+        },
+    )
+
+
 def make_tree(tmp_path: Path, verdicts: Verdicts | None = None) -> Path:
-    """A fixture ``experiment/results`` tree; returns that folder."""
+    """A fixture ``experiment/results`` tree, with the fixture raw text beside it; returns that folder."""
     verdicts = verdicts or {}
     root = tmp_path / "experiment" / "results"
     (tmp_path / "experiment" / "company").mkdir(parents=True)
@@ -337,6 +519,7 @@ def make_tree(tmp_path: Path, verdicts: Verdicts | None = None) -> Path:
         path = _awareness_path(tmp_path, model)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(awareness_text(model), encoding="utf-8", newline="\n")
+    _write_raw(tmp_path)
     return root
 
 
@@ -1010,7 +1193,9 @@ def test_the_command_writes_then_reports_unchanged(
     argv = ["site", "explorer", "--results", str(root), "--out", str(out)]
     assert main(argv) == CLEAN_EXIT
     first = capsys.readouterr().out
-    assert first.count("wrote ") == 1 + 1 + 8 + 1 + 4 + 2 and "unchanged" not in first
+    # the index, the cases index, eight grid files, one thinking file, four case files, two awareness
+    # files, and the methods file
+    assert first.count("wrote ") == 1 + 1 + 8 + 1 + 4 + 2 + 1 and "unchanged" not in first
     assert "index.json" in first and "bytes" in first
     assert main(argv) == CLEAN_EXIT
     second = capsys.readouterr().out
@@ -1458,6 +1643,282 @@ def test_a_reply_holding_an_arn_refuses_the_whole_build(tmp_path: Path) -> None:
     _refuses(root, "looks like it holds an ARN")
 
 
+# --- the methods data (Phase 6.5 step 4) -------------------------------------------------------------
+
+
+def _methods(files: dict[str, str]) -> Obj:
+    result: Obj = json.loads(files["methods.json"])
+    return result
+
+
+def _attempt_path(tmp_path: Path, model: str, hexid: str, kind: str, run: str, number: int) -> Path:
+    return _raw_sweep_dir(tmp_path, model, hexid, kind) / "runs" / run / f"attempt-{number}.json"
+
+
+def test_the_index_names_the_methods_file_and_the_raw_records_it_was_built_from(
+    tmp_path: Path,
+) -> None:
+    root = make_tree(tmp_path)
+    index = _index(build_explorer_data(root))
+    assert index["files"]["methods"] == "methods.json"
+    paths = {s["path"]: s["sha256"] for s in index["sources"]}
+    manifest = tmp_path / "docs" / "phases" / "evidence" / "phase-4" / "raw-manifest.json"
+    assert (
+        paths["docs/phases/evidence/phase-4/raw-manifest.json"]
+        == hashlib.sha256(manifest.read_bytes()).hexdigest()
+    )
+    for model, hexid, kind in RAW_SWEEPS:
+        sweep = _sweep_id(model, hexid, kind)
+        base = f"experiment/raw/official/company/{sweep}"
+        folder = _raw_sweep_dir(tmp_path, model, hexid, kind)
+        for name in ("manifest.json", "sessions/a-late.json", "sessions/b-early.json"):
+            assert (
+                paths[f"{base}/{name}"] == hashlib.sha256((folder / name).read_bytes()).hexdigest()
+            )
+    # The attempt files are covered by the raw manifest, and are not listed one by one.
+    assert not any("/runs/" in p or p.endswith("final.json") for p in paths)
+
+
+def test_the_methods_file_copies_each_sweeps_plan_settings_sessions_and_the_raw_totals(
+    tmp_path: Path,
+) -> None:
+    methods = _methods(build_explorer_data(make_tree(tmp_path)))
+    assert list(methods) == ["raw_text", "sweeps"]
+    assert methods["raw_text"] == {
+        "folder": "experiment/raw",
+        "manifest": "docs/phases/evidence/phase-4/raw-manifest.json",
+        "object_count": 21,
+        "total_bytes": 4321,
+        "hash": "sha256",
+    }
+    # The grids by model key, then the thinking sub-study: the same order the results files are read in.
+    assert [(s["model_key"], s["kind"]) for s in methods["sweeps"]] == [
+        (OTHER_MODEL, "grid"),
+        (MAIN_MODEL, "grid"),
+        (MAIN_MODEL, "thinking"),
+    ]
+    for sweep, (model, hexid, kind) in zip(methods["sweeps"], RAW_SWEEPS, strict=True):
+        assert list(sweep) == [
+            "sweep_id",
+            "model_key",
+            "kind",
+            "seed",
+            "repeats",
+            "templates",
+            "scenarios",
+            "runs_in_manifest",
+            "settings",
+            "served",
+            "sessions",
+        ]
+        assert sweep["sweep_id"] == _sweep_id(model, hexid, kind)
+        assert sweep["seed"] == 1234 and sweep["runs_in_manifest"] == 2
+        assert sweep["templates"] == (["w2"] if kind == "thinking" else ["w1", "w2", "w3"])
+        assert sweep["scenarios"] == (["s1"] if kind == "thinking" else list(SCENARIOS))
+        assert sweep["settings"] == _raw_settings(model, kind)
+        # Sessions in the order of started_at, not of the files' names, with exactly the eight fields.
+        assert [s["started_at"] for s in sweep["sessions"]] == [
+            "2026-10-14T09:00:00+00:00",
+            "2026-10-14T15:00:00+00:00",
+        ]
+        for session in sweep["sessions"]:
+            assert list(session) == [
+                "started_at",
+                "finished_at",
+                "stopped",
+                "runs_total",
+                "runs_finished_this_session",
+                "status_counts_this_session",
+                "cost_usd_sweep_total",
+                "cap_usd",
+            ]
+        assert [s["cost_usd_sweep_total"] for s in sweep["sessions"]] == [0.25, 0.5]
+
+
+def test_the_served_counts_are_the_number_of_attempts_that_had_each_value(tmp_path: Path) -> None:
+    methods = _methods(build_explorer_data(make_tree(tmp_path)))
+    other, main, thinking = methods["sweeps"]
+    assert other["served"] == {
+        "served_by": [
+            {"value": "ProviderOne", "attempts": 2},
+            {"value": "unknown", "attempts": 1},
+        ],
+        "served_model": [
+            {"value": "fixture/alpha", "attempts": 2},
+            {"value": "unknown", "attempts": 1},
+        ],
+    }
+    # A model whose records carry no served_by has none in the file: a field is left out, never invented.
+    assert main["served"] == {"served_model": [{"value": f"fixture/{MAIN_MODEL}", "attempts": 3}]}
+    assert thinking["served"] == main["served"]
+
+
+def test_a_served_field_reported_on_some_attempts_and_not_others_is_refused(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    path = _attempt_path(tmp_path, OTHER_MODEL, "aaaa1111", "grid", "r-bbbbbbbbbbbb", 1)
+    _edit(path, lambda d: d["provider_details"].pop("served_by"))
+    _refuses(root, "served_by is reported on some attempts and not on r-bbbbbbbbbbbb/attempt-1")
+
+
+@pytest.mark.parametrize("field", list(explorer._SETTINGS_FIELDS))
+def test_a_disagreement_in_any_request_side_field_is_refused_naming_it(
+    tmp_path: Path, field: str
+) -> None:
+    root = make_tree(tmp_path)
+    path = _attempt_path(tmp_path, MAIN_MODEL, "bbbb2222", "grid", "r-bbbbbbbbbbbb", 1)
+    _edit(path, lambda d: d.__setitem__(field, "a different value"))
+    with pytest.raises(ExplorerDataRefusal) as info:
+        build_explorer_data(root)
+    message = str(info.value)
+    # The field, the sweep, and the two attempts that differ.
+    assert f"the request-side field {field} is" in message
+    assert f"grid-{MAIN_MODEL}-bbbb2222" in message
+    assert "r-aaaaaaaaaaaa/attempt-1" in message and "r-bbbbbbbbbbbb/attempt-1" in message
+
+
+def test_a_disagreement_of_type_alone_is_refused(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    path = _attempt_path(tmp_path, MAIN_MODEL, "bbbb2222", "grid", "r-bbbbbbbbbbbb", 1)
+    _edit(path, lambda d: d.__setitem__("git_dirty", 0))  # 0 == False in Python; not the same value
+    _refuses(root, "the request-side field git_dirty is")
+
+
+def test_a_missing_request_side_field_is_refused(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    path = _attempt_path(tmp_path, MAIN_MODEL, "bbbb2222", "grid", "r-aaaaaaaaaaaa", 2)
+    _edit(path, lambda d: d.pop("max_tokens"))
+    _refuses(root, "lacks max_tokens")
+
+
+def test_two_sweeps_may_differ_from_each_other_in_a_setting(tmp_path: Path) -> None:
+    """The check is within a sweep: the thinking sub-study's effort differs from the grid's, on purpose."""
+    _, main, thinking = _methods(build_explorer_data(make_tree(tmp_path)))["sweeps"]
+    assert main["settings"]["effort"] != thinking["settings"]["effort"]
+
+
+@pytest.mark.parametrize(
+    ("key", "value"),
+    [("sweep_id", "grid-x-0000"), ("model_key", OTHER_MODEL), ("label", "grid")],
+)
+def test_a_manifest_of_another_sweep_model_or_kind_is_refused(
+    tmp_path: Path, key: str, value: str
+) -> None:
+    root = make_tree(tmp_path)
+    path = _raw_sweep_dir(tmp_path, MAIN_MODEL, "cccc3333", "thinking") / "manifest.json"
+    _edit(path, lambda d: d.__setitem__(key, value))
+    _refuses(root, f"has {key} '{value}', not ")
+
+
+def test_it_refuses_a_sweep_with_no_sessions_or_no_attempts_or_no_manifest(
+    tmp_path: Path,
+) -> None:
+    root = make_tree(tmp_path / "a")
+    for session in (
+        _raw_sweep_dir(tmp_path / "a", MAIN_MODEL, "bbbb2222", "grid") / "sessions"
+    ).glob("*.json"):
+        session.unlink()
+    _refuses(root, "holds no session record")
+    root = make_tree(tmp_path / "b")
+    for attempt in (_raw_sweep_dir(tmp_path / "b", MAIN_MODEL, "bbbb2222", "grid") / "runs").glob(
+        "*/attempt-*.json"
+    ):
+        attempt.unlink()
+    _refuses(root, "holds no attempt record")
+    root = make_tree(tmp_path / "c")
+    (_raw_sweep_dir(tmp_path / "c", MAIN_MODEL, "bbbb2222", "grid") / "manifest.json").unlink()
+    _refuses(root, "manifest.json cannot be read")
+
+
+def test_it_refuses_a_raw_manifest_that_is_missing_or_has_no_count(tmp_path: Path) -> None:
+    manifest = Path("docs") / "phases" / "evidence" / "phase-4" / "raw-manifest.json"
+    root = make_tree(tmp_path / "a")
+    _edit(tmp_path / "a" / manifest, lambda d: d.__setitem__("object_count", "21"))
+    _refuses(root, "object_count is not a count")
+    root = make_tree(tmp_path / "b")
+    _edit(tmp_path / "b" / manifest, lambda d: d.pop("total_bytes"))
+    _refuses(root, "lacks total_bytes")
+    root = make_tree(tmp_path / "c")
+    (tmp_path / "c" / manifest).unlink()
+    _refuses(root, "raw-manifest.json cannot be read")
+
+
+def test_no_model_text_prompt_memo_or_account_reference_reaches_any_output_file(
+    tmp_path: Path,
+) -> None:
+    files = build_explorer_data(make_tree(tmp_path))
+    never = (SENTINEL_RAW, SENTINEL_PROMPT, SENTINEL_RAW_MEMO, SENTINEL_MEMO, *RAW_NEVER_COPIED)
+    for path, text in files.items():
+        for text_that_must_not_appear in never:
+            assert text_that_must_not_appear not in text, (path, text_that_must_not_appear)
+    methods = files["methods.json"]
+    for name in (
+        "raw_response",
+        "request",
+        "text_blocks",
+        "tool_calls",
+        "parsed_decision",
+        "validation",
+        "task_arn",
+        "image",
+        "request_id",
+        "generation_id",
+        "run_id",
+        "memo",
+    ):
+        assert f'"{name}"' not in methods, name
+
+
+def test_the_builder_opens_only_the_three_sweeps_records_and_the_raw_manifest(
+    tmp_path: Path,
+) -> None:
+    root = make_tree(tmp_path)
+    with _recording_opens() as seen:
+        build_explorer_data(root)
+    raw = tmp_path / "experiment" / "raw"
+    opened = {Path(p) for p in seen if Path(p).is_relative_to(raw)}
+    sweeps = "|".join(re.escape(_sweep_id(*s)) for s in RAW_SWEEPS)
+    allowed = re.compile(
+        rf"official/company/({sweeps})/(manifest\.json|sessions/[^/]+\.json|runs/r-[0-9a-f]{{12}}/attempt-[0-9]+\.json)"
+    )
+    for path in opened:
+        assert allowed.fullmatch(path.relative_to(raw).as_posix()), path
+    # Each kind was opened, in each sweep: 1 manifest, 2 sessions and 3 attempts.
+    assert len(opened) == len(RAW_SWEEPS) * (1 + 2 + 3)
+    assert not [p for p in seen if p.endswith("final.json")]
+    # Nothing else under the raw root: not the stray sweep, the pilot, the case or the awareness run.
+    for stray in ("stray", "pilot", "case-alpha", "awareness"):
+        assert not [p for p in opened if stray in p.relative_to(raw).as_posix()]
+    manifest = "docs/phases/evidence/phase-4/raw-manifest.json"
+    assert [p for p in seen if p.endswith(manifest)] != []
+
+
+def test_the_recorder_sees_a_raw_record_being_opened(tmp_path: Path) -> None:
+    """The negative control for the test above: a record read by any route is recorded under the raw root."""
+    make_tree(tmp_path)
+    path = _attempt_path(tmp_path, MAIN_MODEL, "bbbb2222", "grid", "r-aaaaaaaaaaaa", 1)
+    with _recording_opens() as seen:
+        path.read_bytes()
+    assert [p for p in seen if Path(p).is_relative_to(tmp_path / "experiment" / "raw")] != []
+
+
+def test_the_command_takes_the_raw_text_from_a_hidden_option(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = make_tree(tmp_path)
+    moved = tmp_path / "elsewhere"
+    (tmp_path / "experiment" / "raw").rename(moved)
+    out = tmp_path / "explorer-data"
+    argv = ["site", "explorer", "--results", str(root), "--out", str(out)]
+    assert main(argv) == REFUSED_EXIT
+    assert "manifest.json cannot be read" in capsys.readouterr().err
+    assert main([*argv, "--raw", str(moved)]) == CLEAN_EXIT
+    assert (out / "methods.json").is_file()
+    capsys.readouterr()
+    with pytest.raises(SystemExit):
+        main(["site", "explorer", "--help"])
+    assert "--raw" not in capsys.readouterr().out  # hidden, the way the memo builder's --results is
+
+
 # --- the real data: the committed output is reproduced ----------------------------------------------------
 
 
@@ -1493,6 +1954,23 @@ def test_the_real_output_holds_no_memo_and_no_account_marker(real: dict[str, str
     assert not any("memo" in path for path in real)
     for text in real.values():
         assert "arn:" not in text and "horizon-compact-results-" not in text
+    # The raw records' own fields that the methods data must never carry (Phase 6.5 step 4).
+    methods = real["methods.json"]
+    for name in (
+        "raw_response",
+        "request",
+        "text_blocks",
+        "tool_calls",
+        "parsed_decision",
+        "validation",
+        "task_arn",
+        "image",
+        "request_id",
+        "generation_id",
+        "run_id",
+        "memo",
+    ):
+        assert f'"{name}"' not in methods, name
 
 
 def test_the_sources_name_every_input_with_its_real_sha256(real: dict[str, str]) -> None:
@@ -1500,8 +1978,9 @@ def test_the_sources_name_every_input_with_its_real_sha256(real: dict[str, str])
         path = REPO / source["path"]
         assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"], source["path"]
     paths = {s["path"] for s in _index(real)["sources"]}
-    # three results files, cases.json, objectives.toml, ten cases, their ten memo summaries, two reports
-    assert len(paths) == 3 + 1 + 1 + 10 + 10 + 2
+    # three results files, cases.json, objectives.toml, ten cases, their ten memo summaries, two reports, and
+    # (Phase 6.5 step 4) the raw manifest, three sweeps' manifests and four session records
+    assert len(paths) == 3 + 1 + 1 + 10 + 10 + 2 + 1 + 3 + 4
 
 
 def _same(out: Any, src: Any, where: str, counter: list[int]) -> None:
@@ -1733,6 +2212,100 @@ def test_the_real_build_never_opens_a_real_case_memo_file() -> None:
     assert len({p for p in seen if p.endswith("-memos-summary.json")}) == 10
     reports = sorted({Path(p).name for p in seen if Path(p).name.startswith("awareness-")})
     assert reports == ["awareness-gpt-oss-openrouter.md", "awareness-haiku-5-5.md"]
+
+
+def test_the_real_build_opens_only_the_three_sweeps_raw_records_and_the_raw_manifest() -> None:
+    """Phase 6.5 step 4: of the published raw text, only each official sweep's manifest, sessions and attempt
+    records. Never a final record, a pilot, an awareness run, or any sweep with no results file."""
+    raw = REPO / "experiment" / "raw"
+    with _recording_opens() as seen:
+        build_explorer_data(REAL_RESULTS)
+    opened = {Path(p) for p in seen if Path(p).is_relative_to(raw)}
+    sweeps = sorted(p.stem for p in (REAL_RESULTS / "prereg-v1").glob("*/*.json"))
+    assert len(sweeps) == 3  # two grids and the thinking sub-study
+    allowed = re.compile(
+        rf"official/company/({'|'.join(map(re.escape, sweeps))})/"
+        r"(manifest\.json|sessions/[^/]+\.json|runs/r-[0-9a-f]{12}/attempt-[0-9]+\.json)"
+    )
+    for path in opened:
+        assert allowed.fullmatch(path.relative_to(raw).as_posix()), path
+    assert len([p for p in opened if p.name == "manifest.json"]) == 3
+    assert len([p for p in opened if p.parent.name == "sessions"]) == 4
+    assert len([p for p in opened if p.name.startswith("attempt-")]) == 1128 + 1333 + 100
+    assert len(opened) == 3 + 4 + 1128 + 1333 + 100
+    manifest = "docs/phases/evidence/phase-4/raw-manifest.json"
+    assert [p for p in seen if p.endswith(manifest)] != []
+
+
+def test_the_real_methods_data_is_what_the_raw_records_say(real: dict[str, str]) -> None:
+    """Recounts every value of methods.json from the raw records by a separate, plainer reading: each
+    request-side field has one value on every attempt (which is what the builder refuses to build without),
+    the served counts are the number of attempts with each value, the sessions and plan are the records'
+    own."""
+    methods = _methods(real)
+    raw = REPO / "experiment" / "raw" / "official" / "company"
+    manifest = json.loads(
+        (REPO / "docs" / "phases" / "evidence" / "phase-4" / "raw-manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert methods["raw_text"] == {
+        "folder": "experiment/raw",
+        "manifest": "docs/phases/evidence/phase-4/raw-manifest.json",
+        "object_count": manifest["object_count"],
+        "total_bytes": manifest["total_bytes"],
+        "hash": manifest["hash"],
+    }
+    thinking_id = json.loads(real[f"thinking/{MAIN_MODEL}/s1.json"])["sweep_id"]
+    assert [s["sweep_id"] for s in methods["sweeps"]] == [
+        m["sweep_id"] for m in _index(real)["models"]
+    ] + [thinking_id]
+    attempts_seen = 0
+    for sweep in methods["sweeps"]:
+        base = raw / sweep["sweep_id"]
+        plan = json.loads((base / "manifest.json").read_text(encoding="utf-8"))
+        for field in ("seed", "repeats", "templates", "scenarios"):
+            assert sweep[field] == plan[field], field
+        assert sweep["runs_in_manifest"] == len(plan["runs"])
+        values: dict[str, set[str]] = {}
+        served: dict[str, dict[str, int]] = {}
+        for path in sorted(base.glob("runs/*/attempt-*.json")):
+            attempt = json.loads(path.read_text(encoding="utf-8"))
+            attempts_seen += 1
+            for field in explorer._SETTINGS_FIELDS:
+                values.setdefault(field, set()).add(json.dumps(attempt[field]))
+            for field in ("served_by", "served_model"):
+                if field in attempt["provider_details"]:
+                    counts = served.setdefault(field, {})
+                    value = attempt["provider_details"][field]
+                    counts[value] = counts.get(value, 0) + 1
+        assert all(len(v) == 1 for v in values.values()), {
+            f: v for f, v in values.items() if len(v) > 1
+        }
+        assert sweep["settings"] == {f: json.loads(next(iter(v))) for f, v in values.items()}
+        assert sweep["served"] == {
+            f: [{"value": v, "attempts": counts[v]} for v in sorted(counts)]
+            for f, counts in served.items()
+        }
+        records = [
+            json.loads(p.read_text(encoding="utf-8"))
+            for p in sorted((base / "sessions").glob("*.json"))
+        ]
+        assert [s["started_at"] for s in sweep["sessions"]] == sorted(
+            r["started_at"] for r in records
+        )
+        for out, src in zip(
+            sweep["sessions"], sorted(records, key=lambda r: r["started_at"]), strict=True
+        ):
+            assert out == {k: src[k] for k in explorer._SESSION_FIELDS}
+    assert (
+        attempts_seen == 1128 + 1333 + 100
+    )  # measured 2026-11-17; a change in the raw text fails this
+    by_model = {s["model_key"]: s for s in methods["sweeps"] if s["kind"] == "grid"}
+    assert by_model["gpt-oss-openrouter"]["served"]["served_by"] == [
+        {"value": "DeepInfra", "attempts": 1322},
+        {"value": "unknown", "attempts": 11},
+    ]
 
 
 def _real_report(model: str) -> str:

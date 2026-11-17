@@ -13,6 +13,7 @@ const CasesView = lazy(() => import("./Cases").then((m) => ({ default: m.CasesVi
 const CaseView = lazy(() => import("./Cases").then((m) => ({ default: m.CaseView })));
 const StudiesView = lazy(() => import("./Studies").then((m) => ({ default: m.StudiesView })));
 const MemosView = lazy(() => import("./MemoReader").then((m) => ({ default: m.MemosView })));
+const MethodsView = lazy(() => import("./Methods").then((m) => ({ default: m.MethodsView })));
 
 export interface ViewProps {
   route: Route;
@@ -50,6 +51,9 @@ export function View({ route, index, casesIndex, model, search, data, onStorySet
       return <StudiesView index={index} model={model} data={data} />;
     case "memos":
       return <MemosView index={index} model={model} search={search} data={data} />;
+    case "methods":
+      // Both models are shown, one under the other: no model switch (the page is not in SWITCH_KINDS).
+      return <MethodsView index={index} data={data} />;
     case "not_found":
       return (
         <>

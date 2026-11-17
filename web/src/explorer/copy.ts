@@ -16,6 +16,18 @@ import hisJson from "./his.json";
 
 export { PLACEHOLDER_MARK, isPlaceholder } from "../copy";
 
+/**
+ * What the methods page shows, visibly marked, where his title or a section's body is not written yet (Phase 6.5 step
+ * 4; step 5 writes the words and the list of places that hold these shrinks, a test pins it). One constant, so a
+ * placeholder is never retyped: his.json holds the literal strings, and a test holds them equal to these.
+ */
+export const METHODS_PLACEHOLDER = { title: "[his title]", body: "[to be written]" } as const;
+
+/** Whether a text is one of the methods page's two placeholders. */
+export function isMethodsPlaceholder(text: string): boolean {
+  return text === METHODS_PLACEHOLDER.title || text === METHODS_PLACEHOLDER.body;
+}
+
 export interface StoryHis {
   setupTitle: string;
   setupIntro: string;
@@ -62,6 +74,8 @@ export interface ExplorerHis {
   studiesIntro: string;
   studiesThinkingTitle: string;
   studiesAwarenessTitle: string;
+  /** The methods page's section titles, by the outline's id (M0 to M12): his, placeholders until step 5. */
+  methods: { sectionTitles: Record<string, string> };
   pages: Pages;
 }
 
@@ -82,6 +96,7 @@ export const explorerLabels = {
   navCases: "Real cases",
   navStudies: "Side studies",
   navMemos: "Memos",
+  navMethods: "Methods",
   modelSwitch: "Model",
   // Step 11 redesign (2026-11-12): Claude-drafted; approved by him in the words pass of 2026-11-12 (section 31b).
   aboutSummary: "About these results",
@@ -500,6 +515,60 @@ export const explorerLabels = {
   storyProtocolLink: "The protocol, fixed before the runs (on GitHub)",
   storyStudiesLink: "The side studies",
   storyMemosLink: "Read the memos the models wrote",
+  storyMethodsLink: "How the study was done, in full",
+  // Phase 6.5 step 4: the methods page's table labels and link labels (Claude-drafted, for the words pass). The page's
+  // sentences are step 5's; these only name what a table shows.
+  methodsContentsLabel: "Sections of this page",
+  methodsLoading: "Loading the methods",
+  methodsSettingsCaption: (model: string) => `${model}: settings, the same on every attempt`,
+  methodsSettingLabels: {
+    api: "Interface used",
+    provider: "Provider",
+    route_kind: "Route",
+    model_id: "Model",
+    invoke_id: "Model name sent",
+    max_tokens: "Output limit, in tokens",
+    temperature: "Temperature",
+    effort: "Effort",
+    thinking: "Thinking",
+    region: "Where it ran",
+    inference_profile: "Inference profile",
+    harness_version: "Harness version",
+    image_digest: "Program image",
+    git_sha: "Code version",
+    git_dirty: "Uncommitted changes when run",
+    runner: "Runner",
+    label: "Kind of run",
+  } as Record<string, string>,
+  methodsSettingColumn: "Setting",
+  methodsValueColumn: "Value",
+  methodsNone: "none",
+  methodsYes: "yes",
+  methodsNo: "no",
+  methodsServedCaption: (model: string, field: string) => `${model}: ${field}`,
+  methodsServedLabels: {
+    served_by: "provider that served the attempt",
+    served_model: "model the provider reported",
+  } as Record<string, string>,
+  methodsServedColumn: "Reported as",
+  methodsAttemptsColumn: "Attempts",
+  methodsDatesCaption: (model: string) => `${model}: dates and sessions`,
+  methodsFirstStarted: "First session started (UTC)",
+  methodsLastFinished: "Last session finished (UTC)",
+  methodsSessionCount: "Sessions",
+  methodsCountsCaption: (model: string) => `${model}: runs by scenario`,
+  methodsScenarioColumn: "Scenario",
+  methodsAttemptedColumn: "Attempted",
+  methodsValidColumn: "Valid",
+  methodsRefusedColumn: "Refused",
+  methodsFailedColumn: "Failed, by type",
+  methodsNoFailures: "none",
+  methodsSideStudy: "Side study: the thinking sub-study",
+  methodsRawCaption: "The raw text",
+  methodsRawObjects: "Objects",
+  methodsRawBytes: "Total bytes",
+  methodsRawFolderLink: "The folder on GitHub",
+  methodsRawManifestLink: "The manifest that hashes every object",
 };
 
 /**
@@ -537,5 +606,7 @@ export const explorerCardLabels = {
     studies: "The two side studies and what each one asks, and what the experiment does not measure.",
     memos:
       "The memo reader: what a memo is, and a note that each memo is a model\u2019s own writing, not the project\u2019s view.",
+    methods:
+      "The methods page: how the study was done and how to check it, and what the experiment does not measure.",
   } as Record<string, string>,
 };

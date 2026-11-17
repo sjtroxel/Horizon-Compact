@@ -26,6 +26,8 @@ export function pathOf(route) {
       return "/studies/";
     case "memos":
       return "/memos/";
+    case "methods":
+      return "/methods/";
     default:
       throw new Error(`pathOf: no path for a ${route.kind} route`);
   }
@@ -43,6 +45,7 @@ export function routeOfPath(path) {
   if (first === "cases" && third === undefined) return { kind: "case", label: second };
   if (first === "studies" && second === undefined) return { kind: "studies" };
   if (first === "memos" && second === undefined) return { kind: "memos" };
+  if (first === "methods" && second === undefined) return { kind: "methods" };
   return null;
 }
 
@@ -61,6 +64,8 @@ export function cardSlug(route) {
       return "studies";
     case "memos":
       return "memos";
+    case "methods":
+      return "methods";
     default:
       throw new Error(`cardSlug: no card for a ${route.kind} route`);
   }
@@ -84,5 +89,6 @@ export function allRoutes(scenarioIds, caseLabels) {
     ...caseLabels.map((label) => ({ kind: "case", label })),
     { kind: "studies" },
     { kind: "memos" },
+    { kind: "methods" },
   ];
 }

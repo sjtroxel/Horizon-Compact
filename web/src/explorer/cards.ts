@@ -573,6 +573,18 @@ function memosCard(files: CardFiles, route: PageRoute): Card {
   };
 }
 
+/** The methods page's card: his title and description and the scope sentence, as the studies card's. No number, no verdict. */
+function methodsCard(files: CardFiles, route: PageRoute): Card {
+  return {
+    route,
+    blocks: [
+      ...headerStack(files, route),
+      full(34, paragraph("headline", [hisRun("pages.methods.description")])),
+      scope(),
+    ],
+  };
+}
+
 /** The card of one route, as runs. Throws when anything it reads is missing, so a build never draws a half card. */
 export function buildCard(route: PageRoute, files: CardFiles): Card {
   switch (route.kind) {
@@ -588,6 +600,8 @@ export function buildCard(route: PageRoute, files: CardFiles): Card {
       return studiesCard(files, route);
     case "memos":
       return memosCard(files, route);
+    case "methods":
+      return methodsCard(files, route);
   }
 }
 

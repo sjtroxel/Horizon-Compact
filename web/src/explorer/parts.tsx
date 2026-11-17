@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { isPlaceholder, explorerHis, explorerLabels } from "./copy";
+import { isMethodsPlaceholder, isPlaceholder, explorerHis, explorerLabels } from "./copy";
 import { PROTOCOL_READINGS } from "./protocol";
 import type { ReadingKey } from "./protocol";
 import { pageMeta } from "./page-meta.mjs";
@@ -55,9 +55,13 @@ export function Title({
           id={id}
           tabIndex={-1}
           className={
-            heading === undefined && isPlaceholder(explorerHis.pages[route.kind].title)
-              ? "placeholder"
-              : undefined
+            heading !== undefined
+              ? undefined
+              : isPlaceholder(explorerHis.pages[route.kind].title)
+                ? "placeholder"
+                : isMethodsPlaceholder(explorerHis.pages[route.kind].title)
+                  ? "methods-placeholder"
+                  : undefined
           }
         >
           {title}

@@ -43,6 +43,8 @@ export function parseRoute(pathname: string, known?: Known): Route {
       return second === undefined ? { kind: "studies" } : NOT_FOUND;
     case "memos":
       return second === undefined ? { kind: "memos" } : NOT_FOUND;
+    case "methods":
+      return second === undefined ? { kind: "methods" } : NOT_FOUND;
     default:
       return NOT_FOUND;
   }

@@ -9,6 +9,7 @@ const FIXTURE_FILES = {
   thinking: { m1: { s1: "thinking/m1/s1.json" } },
   cases: "cases/index.json",
   case_results: { c1: { m1: "cases/c1/m1.json" } },
+  methods: "methods.json",
 };
 
 function fixtureFetcher(files: unknown, requested: string[]) {
@@ -18,6 +19,7 @@ function fixtureFetcher(files: unknown, requested: string[]) {
     "/data/thinking/m1/s1.json": { from: "thinking" },
     "/data/cases/index.json": { from: "cases index" },
     "/data/cases/c1/m1.json": { from: "case" },
+    "/data/methods.json": { from: "methods" },
   };
   return async (path: string) => {
     requested.push(path);
@@ -35,12 +37,14 @@ describe("the loaders", () => {
     await api.loadThinking();
     await api.loadCasesIndex();
     await api.loadCase("c1", "m1");
+    await api.loadMethods();
     expect(requested).toEqual([
       "/data/index.json",
       "/data/grid/m1/s1.json",
       "/data/thinking/m1/s1.json",
       "/data/cases/index.json",
       "/data/cases/c1/m1.json",
+      "/data/methods.json",
     ]);
   });
 
@@ -111,6 +115,25 @@ describe("the loaders", () => {
     expect(new Set(requested).size).toBe(1 + 8 + 10); // the index, 2 models x 4 scenarios, 5 cases x 2 models
   });
 
+  it("read the real methods file: the raw text's totals and one sweep for each official run", async () => {
+    const api = realApi();
+    const methods = await api.loadMethods();
+    const index = await api.loadIndex();
+    expect(index.files.methods).toBe("methods.json");
+    expect(Object.keys(methods)).toEqual(["raw_text", "sweeps"]);
+    expect(methods.sweeps.map((s) => [s.model_key, s.kind]).sort()).toEqual([
+      ["gpt-oss-openrouter", "grid"],
+      ["haiku-5-5", "grid"],
+      ["haiku-5-5", "thinking"],
+    ]);
+    // Each grid sweep is the one the index names for its model.
+    for (const model of index.models) {
+      expect(methods.sweeps.find((s) => s.model_key === model.model_key && s.kind === "grid")?.sweep_id).toBe(
+        model.sweep_id,
+      );
+    }
+  });
+
   it("refuse a path outside /data/", async () => {
     for (const bad of [
       "../secret.json",
@@ -136,6 +159,10 @@ describe("the loaders", () => {
     await expect(api.loadCase("c1", "nope")).rejects.toThrow(/lists no file/);
     const missing = createDataApi(fileFetcher());
     await expect(missing.loadGrid("haiku-5-5", "s9")).rejects.toThrow(/lists no file/);
+    // An index with no methods file (an older build's) says so, rather than fetching a guessed path.
+    const { methods: _methods, ...withoutMethods } = FIXTURE_FILES;
+    const old = createDataApi(fixtureFetcher(withoutMethods, []));
+    await expect(old.loadMethods()).rejects.toThrow(/lists no file for the methods data/);
     const down = createDataApi(async () => ({ ok: false, status: 503 }) as Response);
     await expect(down.loadIndex()).rejects.toThrow(/503/);
   });

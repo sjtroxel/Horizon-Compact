@@ -12,8 +12,8 @@ const modelKeys = realIndex.models.map((m) => m.model_key);
 describe("parseRoute", () => {
   const routes = allRoutes(known.scenarioIds, known.caseLabels);
 
-  it("has a page for the story, every scenario, the cases, each case, the studies and the memos", () => {
-    expect(routes).toHaveLength(1 + known.scenarioIds.length + 1 + known.caseLabels.length + 1 + 1);
+  it("has a page for the story, every scenario, the cases, each case, the studies, the memos and the methods", () => {
+    expect(routes).toHaveLength(1 + known.scenarioIds.length + 1 + known.caseLabels.length + 1 + 1 + 1);
     expect(known.scenarioIds).toEqual(["s1", "s2", "s3", "s4"]);
   });
 
@@ -31,6 +31,7 @@ describe("parseRoute", () => {
     expect(parseRoute("/cases/", known)).toEqual({ kind: "cases" });
     expect(parseRoute("/studies/", known)).toEqual({ kind: "studies" });
     expect(parseRoute("/memos/", known)).toEqual({ kind: "memos" });
+    expect(parseRoute("/methods/", known)).toEqual({ kind: "methods" });
   });
 
   it("gives not_found for an unknown scenario id, case label or top path", () => {
@@ -42,6 +43,7 @@ describe("parseRoute", () => {
     expect(parseRoute("/scenario/s1/extra/", known)).toEqual(missing);
     expect(parseRoute("/studies/extra/", known)).toEqual(missing);
     expect(parseRoute("/memos/extra", known)).toEqual(missing);
+    expect(parseRoute("/methods/extra", known)).toEqual(missing);
     expect(parseRoute("/Scenario/S1/", known)).toEqual(missing);
     expect(parseRoute("/scenario/%E0%A4%A/", known)).toEqual(missing); // a malformed percent escape
   });

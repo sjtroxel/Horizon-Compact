@@ -561,8 +561,10 @@ describe("the story, from the real files", () => {
     });
   });
 
-  it("beat 9 links to the protocol at the pre-registered tag, the studies and the memo reader", () => {
+  it("beat 9 links to the methods page first, then the protocol at the pre-registered tag, the studies and the memo reader", () => {
     const section = beat(container, "beat-methods");
+    const links = [...section.querySelectorAll(".story-links a")].map((a) => a.getAttribute("href"));
+    expect(links).toEqual(["/methods/", protocolUrl(), "/studies/", "/memos/"]);
     expect(section.querySelector(`a[href="${protocolUrl()}"]`)).not.toBeNull();
     expect(section.querySelector('a[href="/studies/"]')).not.toBeNull();
     expect(section.querySelector('a[href="/memos/"]')).not.toBeNull();

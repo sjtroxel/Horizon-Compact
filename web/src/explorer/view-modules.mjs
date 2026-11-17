@@ -14,4 +14,5 @@ export const VIEW_MODULES = {
   case: "src/explorer/Cases.tsx",
   studies: "src/explorer/Studies.tsx",
   memos: "src/explorer/MemoReader.tsx",
+  methods: "src/explorer/Methods.tsx",
 };

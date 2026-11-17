@@ -102,6 +102,7 @@ export async function warmViews(): Promise<void> {
     import("./Cases"),
     import("./Studies"),
     import("./MemoReader"),
+    import("./Methods"),
   ]);
 }
 

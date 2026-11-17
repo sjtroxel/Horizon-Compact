@@ -262,6 +262,86 @@ explorer's own build, so the page inherits its content security policy, fonts, `
 | M11 | The video | The AI-generated label, with every tool named; that every fact in it is also on this page or the explorer; the transcript | (scope Delivers 5) | decision C |
 | M12 | Changes to this site | The dated changelog from go-live, each entry saying whether it is presentation or a published number, and for a number, by which protocol rule | (scope Delivers 10) | the go-live record onward |
 
+**As built, step 4 (2026-11-17, Sonnet; Opus review pending).** The frame of the page, with no sentence of its prose.
+- **The data.** `hc site explorer` now also writes `methods.json` (`src/horizon_compact/site/explorer.py`, `_read_methods`;
+  a hidden `--raw` option points it at other raw text, the way `--results` does). It reads, for the three official sweeps
+  that have a results file and no other, each `manifest.json`, every `sessions/*.json` and every `runs/*/attempt-*.json`,
+  and once `raw-manifest.json`; fields are picked by name. The seventeen request-side fields are copied and **refused
+  unless identical on every attempt of a sweep** (the message names the field, the sweep and two attempt ids); on the
+  real data none disagreed (1,128, 1,333 and 100 attempts). Two counts of copied values are the only things it derives,
+  both stated in the module docstring: `runs_in_manifest` (the length of the manifest's `runs`) and `served` (attempts
+  per distinct `served_by` and `served_model`; gpt-oss: DeepInfra 1,322, unknown 11; Haiku: one model, 1,128 and 100).
+  Nothing from a record's text, request, tool calls, task, image or ids is copied. `index.json` lists the file and gains
+  eight sources (the raw manifest, three sweep manifests, four session records: 27 to 35); the attempt files are covered
+  by the raw manifest. Every other file in `web/explorer-data/` is byte for byte unchanged (`git diff --stat`: `index.json`
+  only, `methods.json` added). **Version decision:** `EXPLORER_DATA_VERSION` stays 1: a new file and a new key of `files`
+  are additions, no existing field changed shape, and nothing reads the number (every loader takes its path from `files`).
+- **The route.** Kind `methods` everywhere a kind is listed (`pathOf`, `routeOfPath`, `cardSlug`, `allRoutes` after
+  `memos`, `parseRoute`, `Pages`, `VIEW_MODULES` as its own chunk, `views.tsx`, `check-dist`'s `kindOfPath`); a `Methods`
+  nav entry after Memos; no model switch; the story's last beat gains the link to `/methods/` first. His page title and
+  description are placeholders in `his.json` (`pages.methods`); the card is drawn from them like the studies card.
+- **The page.** `web/src/explorer/Methods.tsx`; its outline is `methods.json` (thirteen sections, anchor, ledger ids, `also`
+  for the sections with no ledger id). Each section is a `<section id=anchor>` with an `<h2>` and the body placeholder; a
+  contents list sits on the title band. The sections draw after the data loads (as the studies page does, so nothing
+  shifts), and an address that names one is revealed then. M3's data part: per model (the main one first) the settings, who
+  served the attempts, the first start and last finish in UTC and the session count, and the runs of each scenario
+  (attempted, valid, refused, failures by type, summed from the grid files' `cells`); the thinking sweep in its own part
+  labelled as the side study; nothing added across models. M7's data part: the object count, the total bytes and two links.
+- **The tests.** `web/src/explorer/methods.test.ts` (the outline is M0 to M12 with safe, unique anchors; the ledger ids
+  are exactly 1 to 40 plus 14a, 20a, 20b and are held equal to **this doc's §1 table**, and each section's ledger to **§3's
+  Ledger column**; 17 sits in M3 and M5 only; the placeholder census pins 2 + 13 + 13 places and that his.json holds the
+  one exported constant), `Methods.test.tsx` (the rendered page, both data parts against the data, no digit outside the
+  two data parts), and tests added to `cards`, `route`, `Shell`, `Story`, `data`, `format`, `links` and `write-paths`;
+  `tests/test_site_explorer.py` gained the builder's fakes and tests. Step 5 extends the placement test to "every ledger
+  id has a block that carries it"; go-live must make `check-dist` refuse any placeholder (not added now: it would fail
+  `make check`).
+- **New labels for the words pass** (`explorerLabels` unless named): `navMethods` "Methods"; `storyMethodsLink` "How the
+  study was done, in full"; `methodsContentsLabel`; `methodsLoading`; `methodsSettingsCaption`; `methodsSettingLabels` (the
+  seventeen fields' names); `methodsSettingColumn`, `methodsValueColumn`, `methodsNone`, `methodsYes`, `methodsNo`;
+  `methodsServedCaption`, `methodsServedLabels` (two), `methodsServedColumn`, `methodsAttemptsColumn`;
+  `methodsDatesCaption`, `methodsFirstStarted`, `methodsLastFinished`, `methodsSessionCount`; `methodsCountsCaption`,
+  `methodsScenarioColumn`, `methodsAttemptedColumn`, `methodsValidColumn`, `methodsRefusedColumn`, `methodsFailedColumn`,
+  `methodsNoFailures`; `methodsSideStudy`; `methodsRawCaption`, `methodsRawObjects`, `methodsRawBytes`,
+  `methodsRawFolderLink`, `methodsRawManifestLink`; and `explorerCardLabels.cardAlt.methods`. The two placeholders are the
+  constant `METHODS_PLACEHOLDER` (`[his title]`, `[to be written]`).
+- **Proof.** `make check` exit 0: Python 3,580 (3,545 before: +35), web 621 (585 before: +36). Mutations, each one change,
+  the test failing, the file restored (hash checked): (1) the same-value comparison made always true: `DID NOT RAISE
+  ExplorerDataRefusal` in the disagreement tests (all 17 fields and the type-only case); (2) `tool_calls` added to the
+  settings field names: `AssertionError: ('methods.json', 'FIXTURE RAW MEMO TEXT THAT MUST NEVER REACH THE METHODS DATA')`.
+  Browser pass (`scratch/p65-s4-shoot.mjs`, 14 paths): 56 loads, 0 with a problem, max layout shift 0.001, crop test 0
+  missing, **number trace 0 untraced on `/methods/`** (115 numbers). The trace still allows any number found in
+  `his.json`'s text; the placeholders hold no digit, so that is safe now, but step 5 needs a stricter rule for
+  `methods.json`, where a quoted evidence figure must trace to its source (not built now). Dist: added `methods/index.html`,
+  `cards/methods.png`, `data/methods.json`, the `Methods` chunk and a new shared `format-*.js` chunk; the other assets only
+  change their content hashes. The methods path loads 86.9 KB of JavaScript gzipped, the story's 94.7 KB (budget 100 KB).
+- **What did not fit, and what was done instead.** (1) The build prompt gave M7 to M12 no ledger ids; the doc's §3 gives M8
+  ledger 38 and 39, so the doc was followed (the test holds methods.json to the doc). (2) No `methods.pageTitle` in
+  `his.json`: the page's title is `pages.methods.title`, which the heading, the head tags and the card already read, and a
+  second copy would be two places for one of his words. (3) The sections carry no `aria-labelledby`: while all thirteen
+  titles are one placeholder, a labelled section is thirteen identical landmarks (axe `landmark-unique`); revisit when the
+  titles are written. (4) The placement test is two files, `methods.test.ts` and `Methods.test.tsx`, since rendering needs
+  JSX. (5) Two phone-width fixes the browser pass found: the run counts' last column overflowed 390 px, so those tables
+  take less side padding and a failure type breaks after its underscores. (6) The card is an image, so it shows the
+  placeholder text until his words replace it; the census test, not a pixel check, guards that.
+
+**Reviewed, step 4 (2026-11-17, Opus): passed after one test addition.** Read the whole diff; re-ran `make check` (exit 0,
+3,580 and 621); looked at the `/methods/` captures at 390 and 1280, light and dark, and the card. The builder picks by name,
+refuses on any disagreement, and its arn and bucket refusal covers `methods.json`; the page orders the models by the labels
+(Haiku 5.5 first) whatever the file's order; the placement test reads the doc's own §1 and §3 tables, so the outline cannot
+drift from them. All six deviations stand: (1) was the build prompt's error, and the test it was told to write would have
+failed without 38 and 39. **The addition:** the prompt asked that a case path under the fake raw root be shown never
+opened, and the fake had none; it now holds a case's sweep (`official/case-alpha/...`) beside the stray, the pilot and the
+awareness run. Mutation-checked: a builder that also reads every `official/*/*/manifest.json` fails
+`test_the_builder_opens_only_the_three_sweeps_records_and_the_raw_manifest` at `assert allowed.fullmatch(...)`; restored,
+hash checked. **For the words pass, besides the labels listed above:** (a) the served tables' "Attempts" (API calls, retries
+included: Haiku 1,128) and the run tables' "Attempted" (runs: Haiku 990) are two units under one word, and read as a
+contradiction; (b) the settings table shows all seventeen fields, several of which repeat for a reader (Provider and Route;
+Model and Model name sent) or are internal (Runner, Kind of run); whether the page shows a shorter table with the rest in a
+closed details section is his call; (c) the side study's tables are captioned "Haiku 5.5: ..." exactly as the main Haiku's
+are; (d) `explorerCardLabels.cardAlt.methods` describes a page that is not written yet; (e) cosmetic, for step 5: the
+two-column key and value tables (settings, dates, raw text) do not share a value column, and the contents list's two columns
+sit far apart while every title is the same placeholder.
+
 **What the outline leaves open:** each section's length, and how much of M6 sits on the page against linked records.
 Both are settled on the draft, read as the four readers (`planning/06` §5); the hostile reader decides M5 and M6, the
 LinkedIn reader decides M0.
@@ -568,7 +648,7 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 1 | **[done 2026-11-14]** `hc site raw-pull` and `hc site raw-verify` (§5.1), on fakes | Opus (his choice) | C1 |
 | 2 | **[done 2026-11-15]** His pull; Claude's verify; the packed size and the guard's time measured | him; Claude | C2 (the raw text) |
 | 3 | **[done 2026-11-16, §5.2; built by Sonnet, reviewed by Opus]** The re-scoring test, and its failure shown once (§5.2) | Sonnet; Opus reviews | C3 |
-| 4 | The methods page: the route, its data, its sections with placeholders for his titles (§3, decision E) | Sonnet; Opus reviews | C4 |
+| 4 | **[done 2026-11-17, §3; built by Sonnet, reviewed by Opus]** The methods page: the route, its data, its sections with placeholders for his titles (§3, decision E) | Sonnet; Opus reviews | C4 |
 | 5 | Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences; every ledger line placed, checked by script | him and Claude | C5 |
 | 6 | Serving in `main` (§7 item 2) | Opus; his apply | C6 |
 | 7 | The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |

@@ -5,6 +5,7 @@ export type Route =
   | { kind: "case"; label: string }
   | { kind: "studies" }
   | { kind: "memos" }
+  | { kind: "methods" }
   | { kind: "not_found" };
 
 /** A route that has a page of its own. */

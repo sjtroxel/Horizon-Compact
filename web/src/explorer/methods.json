@@ -1,0 +1,66 @@
+{
+  "sections": [
+    { "id": "M0", "anchor": "opening", "ledger": ["1", "2", "3"], "also": [], "blocks": [] },
+    { "id": "M1", "anchor": "objectives", "ledger": ["4", "5", "7"], "also": [], "blocks": [] },
+    { "id": "M2", "anchor": "company-and-scenarios", "ledger": ["6"], "also": [], "blocks": [] },
+    {
+      "id": "M3",
+      "anchor": "models-dates-and-runs",
+      "ledger": ["8", "9", "10", "17"],
+      "also": [],
+      "blocks": []
+    },
+    {
+      "id": "M4",
+      "anchor": "pre-registration",
+      "ledger": ["11", "18", "22", "23", "31"],
+      "also": [],
+      "blocks": []
+    },
+    {
+      "id": "M5",
+      "anchor": "statistics",
+      "ledger": ["12", "13", "14", "14a", "15", "16", "17", "40"],
+      "also": [],
+      "blocks": []
+    },
+    {
+      "id": "M6",
+      "anchor": "real-cases",
+      "ledger": [
+        "19",
+        "20",
+        "20a",
+        "20b",
+        "21",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37"
+      ],
+      "also": [],
+      "blocks": []
+    },
+    {
+      "id": "M7",
+      "anchor": "checking-it-yourself",
+      "ledger": [],
+      "also": ["Delivers 2", "Delivers 3", "DoD 2", "DoD 3", "DoD 8"],
+      "blocks": []
+    },
+    { "id": "M8", "anchor": "cost", "ledger": ["38", "39"], "also": [], "blocks": [] },
+    { "id": "M9", "anchor": "known-limits", "ledger": [], "also": ["gathers"], "blocks": [] },
+    { "id": "M10", "anchor": "words", "ledger": [], "also": ["Delivers 7"], "blocks": [] },
+    { "id": "M11", "anchor": "video", "ledger": [], "also": ["Delivers 5"], "blocks": [] },
+    { "id": "M12", "anchor": "changes", "ledger": [], "also": ["Delivers 10"], "blocks": [] }
+  ]
+}

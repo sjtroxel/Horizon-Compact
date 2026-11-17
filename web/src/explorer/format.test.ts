@@ -10,11 +10,15 @@ import {
   confidenceLevel,
   dotY,
   edgeAnchor,
+  formatCount,
   formatDifference,
   formatPercent,
   formatPoints,
   formatWholePercent,
+  formatUtc,
   jitter,
+  sessionSpan,
+  statusCounts,
   unitBox,
   unitSlot,
   wholePointsDown,
@@ -280,5 +284,77 @@ describe("the redesign's pixel-position helpers and run sums (step 11)", () => {
     expect(w2.valid).toBe(valid); // every valid run is a descriptive run in this file
     expect(w2.attempted).toBeLessThan(attemptedRuns(grid.objective_rates)); // one wording of three
     expect(wordingRuns(grid, "nope")).toEqual({ valid: 0, attempted: 0 });
+  });
+});
+
+describe("the methods page's counts and dates (Phase 6.5 step 4)", () => {
+  it("sums every real scenario's cells into the attempted, valid and refused runs and the failures by type", () => {
+    for (const { label, file } of realGrids) {
+      const counts = statusCounts(file.cells);
+      expect(counts.attempted, label).toBe(attemptedRuns(file.objective_rates));
+      let valid = 0;
+      for (const cell of file.cells) valid += cell.valid;
+      expect(counts.valid, label).toBe(valid);
+      // Every attempt is valid, refused or failed: the sums close without a total of failures being derived.
+      let failed = 0;
+      for (const [, runs] of counts.failed) failed += runs;
+      expect(counts.valid + counts.refused + failed, label).toBe(counts.attempted);
+    }
+  });
+
+  it("merges a failure type across cells, sorted by type, and leaves a cell with none out", () => {
+    const counts = statusCounts([
+      {
+        attempted: 5,
+        valid: 3,
+        refused: 0,
+        failed_by_type: [
+          ["truncated", 1],
+          ["schema_invalid", 1],
+        ],
+      },
+      { attempted: 5, valid: 4, refused: 0, failed_by_type: [["truncated", 1]] },
+      { attempted: 5, valid: 5, refused: 0, failed_by_type: [] },
+    ]);
+    expect(counts).toEqual({
+      attempted: 15,
+      valid: 12,
+      refused: 0,
+      failed: [
+        ["schema_invalid", 1],
+        ["truncated", 2],
+      ],
+    });
+  });
+
+  it("writes a whole count with commas between thousands, and nothing else", () => {
+    expect(formatCount(0)).toBe("0");
+    expect(formatCount(999)).toBe("999");
+    expect(formatCount(1000)).toBe("1,000");
+    expect(formatCount(1322)).toBe("1,322");
+    expect(formatCount(104785272)).toBe("104,785,272");
+  });
+
+  it("writes a UTC moment to the minute, and returns any other offset as written", () => {
+    expect(formatUtc("2026-10-14T09:52:25.086417+00:00")).toBe("2026-10-14 09:52");
+    expect(formatUtc("2026-10-14T23:18:07+00:00")).toBe("2026-10-14 23:18");
+    expect(formatUtc("2026-10-14T23:18:07Z")).toBe("2026-10-14 23:18");
+    expect(formatUtc("2026-10-14T09:52:25+02:00")).toBe("2026-10-14T09:52:25+02:00");
+    expect(formatUtc("not a moment")).toBe("not a moment");
+  });
+
+  it("picks the earliest start and the latest finish, and none for no sessions", () => {
+    expect(sessionSpan([])).toBeNull();
+    const a = {
+      started_at: "2026-10-14T09:52:27.211690+00:00",
+      finished_at: "2026-10-14T15:11:46.304286+00:00",
+    };
+    const b = {
+      started_at: "2026-10-14T15:47:45.658799+00:00",
+      finished_at: "2026-10-14T23:18:07.721747+00:00",
+    };
+    expect(sessionSpan([a, b])).toEqual({ first: a.started_at, last: b.finished_at });
+    expect(sessionSpan([b, a])).toEqual({ first: a.started_at, last: b.finished_at });
+    expect(sessionSpan([a])).toEqual({ first: a.started_at, last: a.finished_at });
   });
 });

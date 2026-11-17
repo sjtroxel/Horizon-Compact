@@ -268,6 +268,11 @@ export function Shell({ data = defaultData }: { data?: DataApi }) {
                   {explorerLabels.navMemos}
                 </a>
               </li>
+              <li>
+                <a href={link("/methods/")} aria-current={current("/methods/")}>
+                  {explorerLabels.navMethods}
+                </a>
+              </li>
             </ul>
           </nav>
         </div>

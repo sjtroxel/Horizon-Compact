@@ -1733,3 +1733,41 @@ text.diff-value {
 .view .story-cases .case-card h3 {
   margin-top: 0;
 }
+
+/* The methods page (Phase 6.5 step 4): a title or body his words have not replaced yet is outlined, so a preview is
+   never taken for a finished page. An outline, not a border, so marking it moves nothing. */
+.methods-placeholder {
+  color: var(--ink2);
+  outline: 1px dashed var(--axis);
+  outline-offset: 3px;
+}
+.view p.methods-placeholder {
+  display: inline-block;
+}
+.methods-section {
+  scroll-margin-top: 4.5rem;
+  margin-top: 2.5rem;
+}
+.methods-section:focus,
+.methods-section:focus-visible {
+  outline: none;
+}
+.methods-data h3 {
+  margin: 1.5rem 0 0.25rem;
+  font-family: var(--sans);
+  font-size: var(--x-body);
+}
+/* A long value (a digest, a commit, a failure type) breaks anywhere rather than scrolling its table, and the methods
+   page's tables take a little less room at the sides, so the five columns of the run counts fit a phone. */
+.x-table .break {
+  overflow-wrap: anywhere;
+}
+.methods-data .x-table th,
+.methods-data .x-table td {
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+}
+.methods-data .x-table th:first-child,
+.methods-data .x-table td:first-child {
+  padding-left: 0;
+}

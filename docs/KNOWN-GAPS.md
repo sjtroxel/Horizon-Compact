@@ -7,7 +7,21 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-16, about 8:10 AM (PHASE 6.5 STEP 3: THE RE-SCORING TEST BUILT AND REVIEWED)
+> ## START HERE — where things stand, 2026-11-17, about 9:45 AM (PHASE 6.5 STEP 4: THE METHODS PAGE'S FRAME BUILT AND REVIEWED)
+>
+> **C3 committed `9dbab42` (his) and pushed; CI `43886444310` and Deploy `43886443998` green.** **Step 4 (doc §3, "As
+> built, step 4" and "Reviewed, step 4"):** `/methods/` in the explorer, its thirteen sections M0 to M12 with visible
+> placeholders for his titles and the step 5 words; `hc site explorer` writes `methods.json` from the three official
+> sweeps' raw records (settings refused unless identical on every attempt; the one new count is who served the attempts:
+> gpt-oss DeepInfra 1,322, unknown 11); M3 and M7 carry their data parts; a placement test holds the outline to the
+> ledger. Built by Sonnet, reviewed by Opus: passed after one test addition (a case path in the fake raw root, shown never
+> opened, mutation-checked). `make check` green, 3,580 and 621. **Uncommitted:** the step, his commit C4 `phase 6.5: c4
+> methods page frame`. **Next:** step 5, the page's words (§3; him and Claude), which opens with the words pass on the
+> step 4 labels and the review's five notes.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-16, about 8:10 AM (PHASE 6.5 STEP 3: THE RE-SCORING TEST BUILT AND REVIEWED) *(superseded by the block above)*
 >
 > **C2 committed `4687410` (his) and pushed; CI `43735395010` and Deploy `43735395019` green.** **Step 3 (doc §5.2,
 > "As built, step 3" and "Reviewed, step 3"):** `hc analyze --runs-root` (visible help; refused with `--store s3`) and

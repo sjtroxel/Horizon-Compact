@@ -148,6 +148,8 @@ export interface DataFiles {
   case_results: Record<string, Record<string, string>>;
   /** model key to the awareness probe's file (protocol 9.6). */
   awareness: Record<string, string>;
+  /** The methods page's data file (Phase 6.5 step 4). */
+  methods: string;
 }
 
 export interface DataIndex {
@@ -409,6 +411,50 @@ export interface AwarenessFile {
   calls: AwarenessCall[];
 }
 
+/** A request-side setting as the attempt records have it: a sentence, a number, a flag, or none (`null`). */
+export type MethodsSetting = string | number | boolean | null;
+
+/** One value a response-side field took, and the number of attempts that had it. */
+export interface MethodsServedValue {
+  value: string;
+  attempts: number;
+}
+
+/** One launch of a sweep's task: the fields of the session record the methods page reads. */
+export interface MethodsSession {
+  started_at: string;
+  finished_at: string;
+  stopped: string;
+  runs_total: number;
+  runs_finished_this_session: number;
+  status_counts_this_session: Record<string, number>;
+  cost_usd_sweep_total: number;
+  cap_usd: number;
+}
+
+/** One official sweep, from the published raw text (the builder refuses unless every attempt had the same settings). */
+export interface MethodsSweep {
+  sweep_id: string;
+  model_key: string;
+  /** The manifest's label: the main grid, or the thinking sub-study. */
+  kind: "grid" | "thinking";
+  seed: number;
+  repeats: Record<string, number>;
+  templates: string[];
+  scenarios: string[];
+  /** The number of entries in the manifest's `runs` list. */
+  runs_in_manifest: number;
+  settings: Record<string, MethodsSetting>;
+  /** `served_by` and/or `served_model`, each with its distinct values; a field no attempt reports is absent. */
+  served: Record<string, MethodsServedValue[]>;
+  sessions: MethodsSession[];
+}
+
+export interface MethodsFile {
+  raw_text: { folder: string; manifest: string; object_count: number; total_bytes: number; hash: string };
+  sweeps: MethodsSweep[];
+}
+
 /** A pointer to the source record a memo was read from, so a reader can check it against the raw-object manifest. */
 export interface SourceRecord {
   key: string;
@@ -502,6 +548,8 @@ export interface DataApi {
   loadMemos(kind: string, model: string, scenario: string, objective: string): Promise<MemoCell>;
   /** One model's awareness probe (protocol 9.6). */
   loadAwareness(model: string): Promise<AwarenessFile>;
+  /** The methods page's data: each official sweep's settings, sessions and served counts, and the raw text's totals. */
+  loadMethods(): Promise<MethodsFile>;
 }
 
 /** The loaders over a fetch function; tests pass one that serves fixtures. Each file is fetched once. */
@@ -592,6 +640,7 @@ export function createDataApi(fetcher: Fetcher = (path) => fetch(path)): DataApi
       return { found: true, rows: parts.flat(), paths };
     },
     loadAwareness: (model) => fromFiles(`awareness ${model}`, (files) => files.awareness[model]),
+    loadMethods: () => fromFiles("the methods data", (files) => files.methods),
   };
 }
 
@@ -605,4 +654,5 @@ export const {
   loadMemoIndex,
   loadMemos,
   loadAwareness,
+  loadMethods,
 } = defaultData;

@@ -5,8 +5,10 @@ It reads only committed files: under ``experiment/results/`` the three official 
 the case results under ``cases/`` and, per case and model, the memo summary beside them (**counts only**);
 ``experiment/company/objectives.toml``; and the two awareness reports,
 ``docs/phases/evidence/phase-4/awareness-<model_key>.md``, each by its exact path and never by a prefix
-(Phase 6 IMPLEMENTATION doc section 5's dated note of 2026-11-10, C5). It calls nothing and writes nothing
-but its own output directory. Run code under ``protocol/sets.py``'s rules. Standard library only.
+(Phase 6 IMPLEMENTATION doc section 5's dated note of 2026-11-10, C5); and, for the methods data (below),
+the three official sweeps' records under ``experiment/raw/`` and ``raw-manifest.json``. It calls nothing and
+writes nothing but its own output directory. Run code under ``protocol/sets.py``'s rules. Standard library
+only.
 
 **It reshapes and never computes.** Every value in the output is copied from its source field. The things it
 derives are: the split into files; the membership of the section for results against the thesis (section 19),
@@ -36,6 +38,17 @@ flagged ``empty_reply`` (none exists today).
 **What it does not read:** any ``*-memos.jsonl`` (a real case's memo text: decision 5 holds it off the site;
 a test records every path the builder opens), ``reident.json`` (named, not listed), and no memo text of any
 kind. Grid memos come from ``hc site memos``, a different step.
+
+**The methods data (Phase 6.5 step 4, 2026-11-17).** ``methods.json`` is built from the published raw text
+(``experiment/raw/``, beside the results root) for the three official sweeps that have a results file, and for
+no other: per sweep its ``manifest.json``, every ``sessions/*.json`` and every ``runs/*/attempt-*.json``, and
+once ``docs/phases/evidence/phase-4/raw-manifest.json``. Fields are picked by name and never copied whole; no
+memo, prompt, model text, request id, task or image reference is ever copied. The request-side settings are
+copied from the attempts and **refused unless every attempt of a sweep has the same value** (a check, not a
+computation). The things this adds to "derives", each a count of copied values: the number of entries in a
+manifest's ``runs`` list, and, for the two response-side fields ``served_by`` and ``served_model``, how many
+attempts had each distinct value (the one new computed value: the page must say that 11 of one model's
+attempts did not report which provider served them, and the number has to trace to a file, not be typed).
 """
 
 from __future__ import annotations
@@ -45,14 +58,23 @@ import json
 import re
 import shutil
 import tomllib
+from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+# Unchanged by the methods data (2026-11-17): a new file and a new key of ``files`` are additions, no existing
+# field changes shape, and nothing reads this number (the explorer's loaders take every path from ``files``).
 EXPLORER_DATA_VERSION = 1
 OUT_NAME = "explorer-data"
 RESULTS_PREFIX = "experiment/results"
 OBJECTIVES_SOURCE = "experiment/company/objectives.toml"
+
+# The published raw text (Phase 6.5 step 4): where it is, and the manifest that hashes every object in it.
+RAW_FOLDER = "experiment/raw"
+RAW_MANIFEST_SOURCE = "docs/phases/evidence/phase-4/raw-manifest.json"
+METHODS_PATH = "methods.json"
+_OFFICIAL_SWEEPS = "official/company"
 
 GRID_RESULTS_VERSION = 2
 CASE_RESULTS_VERSION = 1
@@ -132,7 +154,47 @@ _LAYOUT = (
     re.compile(r"cases/index\.json"),
     re.compile(rf"cases/{_PLAIN}/{_PLAIN}\.json"),
     re.compile(rf"awareness/{_PLAIN}\.json"),
+    re.compile(r"methods\.json"),
 )
+
+# The methods data. Each tuple is a list of fields picked by name from a raw record, never the record whole.
+#
+# The sweep's own plan, from its manifest.json.
+_SWEEP_FIELDS = ("seed", "repeats", "templates", "scenarios")
+# The request-side fields of an attempt: each must be a single value across every attempt of a sweep.
+_SETTINGS_FIELDS = (
+    "api",
+    "provider",
+    "route_kind",
+    "model_id",
+    "invoke_id",
+    "max_tokens",
+    "temperature",
+    "effort",
+    "thinking",
+    "region",
+    "inference_profile",
+    "harness_version",
+    "image_digest",
+    "git_sha",
+    "git_dirty",
+    "runner",
+    "label",
+)
+# The response-side fields (inside ``provider_details``) that may differ between attempts, and are counted.
+_SERVED_FIELDS = ("served_by", "served_model")
+# A session record's fields (a session is one launch of the sweep's task).
+_SESSION_FIELDS = (
+    "started_at",
+    "finished_at",
+    "stopped",
+    "runs_total",
+    "runs_finished_this_session",
+    "status_counts_this_session",
+    "cost_usd_sweep_total",
+    "cap_usd",
+)
+_RAW_MANIFEST_FIELDS = ("object_count", "total_bytes", "hash")
 
 # The exact fields of a memo summary's ``counts`` that a case result carries (decision 5: counts, never text).
 MEMO_COUNT_FIELDS = (
@@ -752,6 +814,129 @@ def _against_thesis(grids: list[_Grid]) -> dict[str, Any]:
     return {"rule": RULE_NAME, "entries": entries, "scenarios": whole}
 
 
+# --- the methods data (Phase 6.5 step 4) -------------------------------------------------------------------
+
+
+def _same_value(a: Any, b: Any) -> bool:
+    return type(a) is type(b) and a == b
+
+
+def _read_sweep_raw(raw_root: Path, grid: _Grid) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """One official sweep's methods record and its sources (path and sha256 of its manifest and sessions).
+
+    Opens exactly three kinds of file under the sweep's folder: ``manifest.json``, ``sessions/*.json`` and
+    ``runs/*/attempt-*.json``. Never ``final.json``, never another sweep, never a pilot or an awareness
+    run."""
+    sweep = grid.sweep_id
+    base = raw_root / _OFFICIAL_SWEEPS / sweep
+    shown_base = f"{RAW_FOLDER}/{_OFFICIAL_SWEEPS}/{sweep}"
+    sources: list[dict[str, str]] = []
+
+    shown_manifest = f"{shown_base}/manifest.json"
+    manifest, manifest_sha = _load(base / "manifest.json", shown_manifest)
+    sources.append({"path": shown_manifest, "sha256": manifest_sha})
+    for key, expected in (("sweep_id", sweep), ("model_key", grid.model_key), ("label", grid.kind)):
+        if manifest.get(key) != expected:
+            raise ExplorerDataRefusal(
+                f"{shown_manifest} has {key} {manifest.get(key)!r}, not {expected!r}"
+            )
+    planned = manifest.get("runs")
+    if not isinstance(planned, list):
+        raise ExplorerDataRefusal(f"{shown_manifest} has no runs list")
+    record: dict[str, Any] = {"sweep_id": sweep, "model_key": grid.model_key, "kind": grid.kind}
+    record.update(_pick(manifest, _SWEEP_FIELDS, shown_manifest))
+    record["runs_in_manifest"] = len(planned)
+
+    sessions: list[dict[str, Any]] = []
+    for path in sorted((base / "sessions").glob("*.json")):
+        shown = f"{shown_base}/sessions/{path.name}"
+        data, sha = _load(path, shown)
+        sources.append({"path": shown, "sha256": sha})
+        sessions.append(_pick(data, _SESSION_FIELDS, shown))
+    if not sessions:
+        raise ExplorerDataRefusal(f"{shown_base}/sessions holds no session record")
+    sessions.sort(key=lambda s: str(s["started_at"]))
+
+    settings: dict[str, Any] | None = None
+    first_id = ""
+    attempts = 0
+    seen = {field: Counter[str]() for field in _SERVED_FIELDS}
+    lacking: dict[str, str] = {}
+    for path in sorted((base / "runs").glob("*/attempt-*.json")):
+        attempt_id = f"{path.parent.name}/{path.stem}"
+        data, _sha = _load(path, f"{shown_base}/runs/{attempt_id}.json")
+        here = _pick(data, _SETTINGS_FIELDS, f"{shown_base}/runs/{attempt_id}.json")
+        attempts += 1
+        if settings is None:
+            settings, first_id = here, attempt_id
+        else:
+            for field in _SETTINGS_FIELDS:
+                if not _same_value(settings[field], here[field]):
+                    raise ExplorerDataRefusal(
+                        f"{shown_base}: the request-side field {field} is {settings[field]!r} on "
+                        f"{first_id} and {here[field]!r} on {attempt_id}; a sweep's settings must be "
+                        "identical on every attempt"
+                    )
+        details = data.get("provider_details")
+        if not isinstance(details, dict):
+            raise ExplorerDataRefusal(
+                f"{shown_base}/runs/{attempt_id}.json has no provider_details block"
+            )
+        for field in _SERVED_FIELDS:
+            if field not in details:
+                lacking.setdefault(field, attempt_id)
+                continue
+            value = details[field]
+            if not isinstance(value, str) or not value:
+                raise ExplorerDataRefusal(
+                    f"{shown_base}/runs/{attempt_id}.json: {field} is not a plain value ({value!r})"
+                )
+            seen[field][value] += 1
+    if settings is None:
+        raise ExplorerDataRefusal(f"{shown_base}/runs holds no attempt record")
+
+    served: dict[str, list[dict[str, Any]]] = {}
+    for field in _SERVED_FIELDS:
+        counted = seen[field]
+        if not counted:
+            continue  # no attempt of this sweep reports the field: it is left out, not invented
+        if field in lacking:
+            raise ExplorerDataRefusal(
+                f"{shown_base}: {field} is reported on some attempts and not on {lacking[field]}"
+            )
+        served[field] = [{"value": v, "attempts": counted[v]} for v in sorted(counted)]
+    record["settings"] = settings
+    record["served"] = served
+    record["sessions"] = sessions
+    return record, sources
+
+
+def _read_methods(
+    results_root: Path, raw_root: Path, grids: list[_Grid], thinking: _Grid
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """The methods document and its sources: the two grids then the thinking sub-study, and the raw manifest's
+    totals. Reads the raw text of those three sweeps and of no other."""
+    manifest_path = results_root.parent.parent / RAW_MANIFEST_SOURCE
+    manifest, manifest_sha = _load(manifest_path, RAW_MANIFEST_SOURCE)
+    totals = _pick(manifest, _RAW_MANIFEST_FIELDS, RAW_MANIFEST_SOURCE)
+    for key in ("object_count", "total_bytes"):
+        if not _is_count(totals[key]):
+            raise ExplorerDataRefusal(
+                f"{RAW_MANIFEST_SOURCE}: {key} is not a count ({totals[key]!r})"
+            )
+    sweeps: list[dict[str, Any]] = []
+    sources: list[dict[str, str]] = [{"path": RAW_MANIFEST_SOURCE, "sha256": manifest_sha}]
+    for grid in [*grids, thinking]:
+        record, more = _read_sweep_raw(raw_root, grid)
+        sweeps.append(record)
+        sources.extend(more)
+    document = {
+        "raw_text": {"folder": RAW_FOLDER, "manifest": RAW_MANIFEST_SOURCE, **totals},
+        "sweeps": sweeps,
+    }
+    return document, sources
+
+
 # --- the build ---------------------------------------------------------------------------------------------
 
 
@@ -794,8 +979,10 @@ def _objectives(root: Path) -> tuple[list[dict[str, Any]], str]:
     return objectives, hashlib.sha256(raw).hexdigest()
 
 
-def build_explorer_data(results_root: Path) -> dict[str, str]:
-    """Published relative path to the file's exact text, each ending in one newline."""
+def build_explorer_data(results_root: Path, raw_root: Path | None = None) -> dict[str, str]:
+    """Published relative path to the file's exact text, each ending in one newline. ``raw_root`` is the
+    published raw text (default: ``raw`` beside the results root); only the methods data reads it."""
+    raw_root = results_root.parent / "raw" if raw_root is None else raw_root
     grids, thinking = _read_prereg(results_root)
     for grid in [*grids, thinking]:
         _check_scenarios(grid)
@@ -807,6 +994,7 @@ def build_explorer_data(results_root: Path) -> dict[str, str]:
         for label, model_key, _shown, _data, _sha in case_results
     }
     awareness = _read_awareness(results_root, model_keys, [o["id"] for o in objectives])
+    methods, methods_sources = _read_methods(results_root, raw_root, grids, thinking)
 
     # The same scenario must carry the same outcome name, kind and threshold in every file.
     scenario_facts: dict[str, dict[str, Any]] = {}
@@ -827,6 +1015,7 @@ def build_explorer_data(results_root: Path) -> dict[str, str]:
         "cases": "cases/index.json",
         "case_results": {},
         "awareness": {},
+        "methods": METHODS_PATH,
     }
 
     for grid in [*grids, thinking]:
@@ -882,6 +1071,7 @@ def build_explorer_data(results_root: Path) -> dict[str, str]:
         path = f"awareness/{model_key}.json"
         out[path] = _text(doc, path)
         files["awareness"][model_key] = path
+    out[METHODS_PATH] = _text(methods, METHODS_PATH)
 
     sources = (
         [{"path": g.shown, "sha256": g.sha} for g in [*grids, thinking]]
@@ -892,6 +1082,7 @@ def build_explorer_data(results_root: Path) -> dict[str, str]:
         + [{"path": shown, "sha256": sha} for _l, _m, shown, _d, sha in case_results]
         + [{"path": shown, "sha256": sha} for _c, shown, sha in memo_counts.values()]
         + [{"path": shown, "sha256": sha} for _m, shown, _d, sha in awareness]
+        + methods_sources
     )
     sources.sort(key=lambda s: s["path"])
 

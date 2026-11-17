@@ -149,6 +149,7 @@ describe("the cards: where every string comes from", () => {
       ...caseLabels.map((label) => `case-${label}`),
       "studies",
       "memos",
+      "methods",
     ]);
     expect(new Set(built.map((b) => b.name)).size).toBe(built.length);
     for (const { name } of built) expect(name).toMatch(/^[a-z0-9][a-z0-9-]*$/);
@@ -499,6 +500,26 @@ describe("the studies and memos cards", () => {
     expect(text).not.toContain(textOf(cardOf("story").card)[2]!);
   });
 
+  it("the methods card: his title and description and the scope sentence, no digit and no verdict word", () => {
+    const { card } = cardOf("methods");
+    expect(textOf(card)).toEqual([
+      "Horizon Compact",
+      explorerHis.pages.methods.title,
+      explorerHis.pages.methods.description,
+      explorerHis.scopeSentence,
+    ]);
+    // His runs equal his values, word for word: the run's source says which key it came from.
+    const hisRuns = cardRuns(card).filter((run) => run.source.kind === "his");
+    expect(hisRuns.map((run) => (run.source.kind === "his" ? run.source.key : ""))).toEqual([
+      "pages.methods.title",
+      "pages.methods.description",
+      "scopeSentence",
+    ]);
+    const text = textOf(card).join(" ").toLowerCase();
+    for (const word of Object.values(L.verdictWords)) expect(text).not.toMatch(new RegExp(`\\b${word}\\b`));
+    expect(digits(text)).toEqual([]);
+  });
+
   it("the memo label's fixed part says what the memo card's label says of every memo (it is tied to it)", () => {
     const real = L.memoCardLabel("MODEL", "A", "GOAL", false);
     const fixed = explorerCardLabels.cardMemoLabel;
@@ -517,13 +538,14 @@ describe("the labels written for the cards", () => {
   ];
 
   it("has alternative text for every kind of page, and states no result, no ratio and no number", () => {
-    for (const kind of ["story", "scenario", "cases", "case", "studies", "memos"]) {
+    for (const kind of ["story", "scenario", "cases", "case", "studies", "memos", "methods"]) {
       expect(explorerCardLabels.cardAlt[kind], kind).toBeTruthy();
     }
     expect(Object.keys(explorerCardLabels.cardAlt).sort()).toEqual([
       "case",
       "cases",
       "memos",
+      "methods",
       "scenario",
       "story",
       "studies",

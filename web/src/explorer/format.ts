@@ -10,7 +10,7 @@
  *
  * Each output is pinned to its source field by format.test.ts.
  */
-import type { Comparison, GridFile, ObjectiveRate } from "./data";
+import type { CellStatus, Comparison, GridFile, MethodsSession, ObjectiveRate } from "./data";
 
 const MINUS = "−"; // a real minus sign, not a hyphen
 
@@ -124,6 +124,67 @@ export function wordingRuns(
   let attempted = 0;
   for (const cell of file.cells) if (cell.wording_id === wording) attempted += cell.attempted;
   return { valid, attempted };
+}
+
+/**
+ * A scenario's runs by outcome, for the methods page: integer sums of the file's cell statuses over every goal and
+ * wording (the same kind of reduce as `attemptedRuns`). `failed` is each failure type the cells name (the file's own
+ * words) with its summed runs, in the types' alphabetical order; no total of failures is derived.
+ */
+export function statusCounts(
+  cells: readonly Pick<CellStatus, "attempted" | "valid" | "refused" | "failed_by_type">[],
+): {
+  attempted: number;
+  valid: number;
+  refused: number;
+  failed: Array<[string, number]>;
+} {
+  let attempted = 0;
+  let valid = 0;
+  let refused = 0;
+  const byType = new Map<string, number>();
+  for (const cell of cells) {
+    attempted += cell.attempted;
+    valid += cell.valid;
+    refused += cell.refused;
+    for (const [type, runs] of cell.failed_by_type) byType.set(type, (byType.get(type) ?? 0) + runs);
+  }
+  const failed = [...byType.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return { attempted, valid, refused, failed };
+}
+
+/** A whole count with commas between the thousands ("1,322"): a display format, the number itself unchanged. */
+export function formatCount(count: number): string {
+  return String(count).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+const UTC_MOMENT = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):\d{2}(?:\.\d+)?(?:\+00:00|Z)$/;
+
+/**
+ * A moment the records write in UTC ("2026-10-14T09:52:25.086417+00:00") as "2026-10-14 09:52", to the minute. A moment
+ * with any other offset comes back as written: it is not claimed to be UTC. The label beside it says UTC.
+ */
+export function formatUtc(moment: string): string {
+  const found = UTC_MOMENT.exec(moment);
+  return found === null ? moment : `${found[1]} ${found[2]}`;
+}
+
+/**
+ * The first session's start and the last session's end, picked from the copied list (the data file computes neither):
+ * the earliest `started_at` and the latest `finished_at`, which for the records' one fixed UTC format is an ordinary
+ * string comparison. Null for no sessions.
+ */
+export function sessionSpan(
+  sessions: readonly Pick<MethodsSession, "started_at" | "finished_at">[],
+): { first: string; last: string } | null {
+  if (sessions.length === 0) return null;
+  let first = sessions[0]!.started_at;
+  let last = sessions[0]!.finished_at;
+  for (const session of sessions) {
+    if (session.started_at < first) first = session.started_at;
+    if (session.finished_at > last) last = session.finished_at;
+  }
+  return { first, last };
 }
 
 /** A value on an axis from `low` to `high`, as the percentage of the plot's width an SVG coordinate takes. */

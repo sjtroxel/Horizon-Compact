@@ -31,7 +31,16 @@ export const SELECTION_LOGS: ReadonlyArray<{ id: "preregistered" | "exploratory"
 ];
 
 export function selectionLogUrl(path: string): string {
+  return mainFileUrl(path);
+}
+
+/** A file, and a folder, of the repository on the main branch (what was committed after the tag). */
+export function mainFileUrl(path: string): string {
   return `${REPOSITORY}/blob/main/${path}`;
+}
+
+export function mainFolderUrl(path: string): string {
+  return `${REPOSITORY}/tree/main/${path}`;
 }
 
 /** The ids of the studies page's two parts, so a link from another page can name one. */

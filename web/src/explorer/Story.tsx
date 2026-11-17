@@ -397,6 +397,9 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
       <Beat id="beat-methods" title={explorerHis.story.methodsTitle} intro={explorerHis.story.methodsText}>
         <ul className="x-sources story-links">
           <li>
+            <a href={hrefOf({ kind: "methods" }, main)}>{L.storyMethodsLink}</a>
+          </li>
+          <li>
             <a href={protocolUrl()} target="_blank" rel="noopener noreferrer">
               {L.storyProtocolLink}
             </a>
