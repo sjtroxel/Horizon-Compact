@@ -1,4 +1,4 @@
-import { cpSync, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { cpSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
@@ -159,10 +159,40 @@ function explorerData(): Plugin {
   };
 }
 
+/**
+ * Placeholder mode only (Phase 6.5 IMPLEMENTATION doc, decision B). The distribution answers an address that names no
+ * file with 404.html and status 404, so the placeholder build needs one too: the placeholder page itself, titled "Page
+ * not found". It is written from the built index.html after the bundle, so it names the same assets. The explorer's
+ * not-found page is write-paths.mjs's, from the explorer's own page. check-dist requires both.
+ */
+function placeholderNotFound(): Plugin {
+  let outDir = "";
+  return {
+    name: "placeholder-not-found",
+    apply: "build",
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir);
+    },
+    closeBundle() {
+      const page = readFileSync(join(outDir, "index.html"), "utf8");
+      if (!/<title>[^<]*<\/title>/.test(page))
+        throw new Error("placeholder-not-found: the built page has no <title>");
+      writeFileSync(
+        join(outDir, "404.html"),
+        page.replace(/<title>[^<]*<\/title>/, "<title>Page not found: Horizon Compact</title>"),
+      );
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const explorer = mode === "explorer";
   return {
-    plugins: [react(), preloadFonts(explorer), ...(explorer ? [dropNewsreader(), explorerData()] : [])],
+    plugins: [
+      react(),
+      preloadFonts(explorer),
+      ...(explorer ? [dropNewsreader(), explorerData()] : [placeholderNotFound()]),
+    ],
     build: {
       // Nothing is inlined as a data: URI (the policy allows data: for images only), and no preload polyfill.
       assetsInlineLimit: 0,

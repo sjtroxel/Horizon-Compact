@@ -444,6 +444,9 @@ def test_deploy_policies_name_the_site_grants_exactly() -> None:
         "SiteDistributionCreate",
         "SiteDistributionManage",
         "SiteDistributionReadAfterDelete",
+        "SiteFunctionCreate",
+        "SiteFunctionManage",
+        "SiteFunctionRead",
         "SiteRead",
         "SiteReadOriginAccessControl",
         "SiteReadResponseHeadersPolicy",
@@ -490,6 +493,40 @@ def test_deploy_policies_name_the_site_grants_exactly() -> None:
     assert after_delete["Resource"] == "arn:aws:cloudfront::000000000000:distribution/*"
     assert "Condition" not in after_delete
 
+    # The viewer-request function (Phase 6.5, decision B). Its ARN carries its name, so every grant on
+    # it is held to the project's prefix; the writes are also fenced by tag, and the create by the tag in
+    # the request. The reads are unconditioned, for the reason SiteDistributionReadAfterDelete is: a
+    # deleted function has no tags.
+    function_arn = "arn:aws:cloudfront::000000000000:function/horizon-compact-*"
+    create_function = by_sid["SiteFunctionCreate"]
+    assert _actions(create_function) == ["cloudfront:CreateFunction"]
+    assert create_function["Resource"] == "*"  # CreateFunction takes no resource type
+    assert create_function["Condition"] == {
+        "StringEquals": {"aws:RequestTag/Project": "horizon-compact"}
+    }
+    manage_function = by_sid["SiteFunctionManage"]
+    assert sorted(_actions(manage_function)) == sorted(
+        f"cloudfront:{a}"
+        for a in (
+            "UpdateFunction",
+            "PublishFunction",
+            "DeleteFunction",
+            "TagResource",
+            "UntagResource",
+        )
+    )
+    assert manage_function["Resource"] == function_arn
+    assert manage_function["Condition"] == {
+        "StringEquals": {"aws:ResourceTag/Project": "horizon-compact"}
+    }
+    read_function = by_sid["SiteFunctionRead"]
+    assert sorted(_actions(read_function)) == [
+        "cloudfront:DescribeFunction",
+        "cloudfront:GetFunction",
+        "cloudfront:ListTagsForResource",
+    ]
+    assert read_function["Resource"] == function_arn and "Condition" not in read_function
+
     read = by_sid["SiteRead"]
     assert sorted(_actions(read)) == [
         "cloudfront:GetCachePolicy",
@@ -531,7 +568,7 @@ def test_the_deploy_role_cannot_claim_another_projects_distribution_by_tag() -> 
         for s in _statements("deploy-site.json")
         if s["Effect"] == "Allow" and "cloudfront:TagResource" in _actions(s)
     ]
-    assert taggers == ["SiteDistributionCreate", "SiteDistributionManage"]
+    assert taggers == ["SiteDistributionCreate", "SiteDistributionManage", "SiteFunctionManage"]
 
 
 def test_deploy_role_never_gets_cloudfront_star_or_a_write_on_the_two_bootstrap_objects() -> None:
@@ -1189,6 +1226,25 @@ def test_the_distribution_is_https_get_only_and_the_cheapest_class() -> None:
     assert not re.search(r"\baliases\b", code)  # the public URL is the Vercel rewrite (C5)
 
 
+def test_each_page_path_serves_its_own_file_and_a_missing_one_is_a_404() -> None:
+    """Phase 6.5 decision B: the viewer-request function gives a path its own index.html, and an address that
+    names nothing answers the not-found page with status 404, never the root page with 200."""
+    code = re.sub(r"[ \t]+", " ", _site_code())
+    assert 'resource "aws_cloudfront_function" "site_paths"' in code
+    # The deploy role's function grants need the prefix.
+    assert 'name = "${var.project}-site-paths"' in code
+    assert 'runtime = "cloudfront-js-2.0"' in code
+    assert "publish = true" in code
+    assert 'code = file("${path.module}/functions/site-paths.js")' in code
+    assert 'event_type = "viewer-request"' in code
+    assert "function_arn = aws_cloudfront_function.site_paths.arn" in code
+    assert "response_code = 404" in code
+    assert 'response_page_path = "/404.html"' in code
+    assert "response_code = 200" not in code
+    assert '"/index.html"' not in code
+    assert (MAIN / "functions" / "site-paths.js").is_file()
+
+
 def test_main_outputs_hide_the_site_bucket_and_show_the_distribution() -> None:
     code = _strip_comments((MAIN / "outputs.tf").read_text(encoding="utf-8"))
     blocks = {
@@ -1293,6 +1349,9 @@ def test_the_smoke_test_checks_the_build_the_headers_and_the_sweep_on_cloudfront
         ".sweep.sweep_id",
         "text/css",
         "javascript",
+        # Phase 6.5 decision B: an unknown address is the not-found page with status 404.
+        '[ "$code" = "404" ]',
+        "<title>Page not found",
     ):
         assert needle in smoke, needle
 

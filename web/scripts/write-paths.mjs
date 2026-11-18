@@ -51,6 +51,20 @@ export function renderPage(template, path, { title, description }, card) {
   return template.replace(/<title>[^<]*<\/title>/, () => head);
 }
 
+/**
+ * The not-found page (Phase 6.5 decision B): the explorer's page, titled and described from the labels, and nothing
+ * that names an address (no canonical link, no link-preview tags), since the distribution serves it, with status 404, at
+ * every address that names no file. The page's script reads the address and shows the not-found view.
+ */
+export function renderNotFound(template, { title, description }) {
+  if (!/<title>[^<]*<\/title>/.test(template)) throw new Error("write-paths: the built page has no <title>");
+  const head = [
+    `<title>${escapeHtml(title)}</title>`,
+    `    <meta name="description" content="${escapeHtml(description)}" />`,
+  ].join("\n");
+  return template.replace(/<title>[^<]*<\/title>/, () => head);
+}
+
 async function writePaths(webRoot) {
   const dist = join(webRoot, "dist-explorer");
   const templatePath = join(dist, "explorer.html");
@@ -59,7 +73,7 @@ async function writePaths(webRoot) {
   const casesIndex = JSON.parse(readFileSync(join(webRoot, "explorer-data", index.files.cases), "utf8"));
   const pages = JSON.parse(readFileSync(join(webRoot, "src", "explorer", "his.json"), "utf8")).pages;
   // The image's alternative text is a label (copy.ts), which a plain Node script reads through Vite's module runner.
-  const { explorerCardLabels } = await loadTs(webRoot, "src/explorer/copy.ts");
+  const { explorerCardLabels, explorerLabels } = await loadTs(webRoot, "src/explorer/copy.ts");
 
   const scenarioIds = index.scenarios.map((s) => s.scenario_id);
   const caseLabels = casesIndex.cases.map((c) => c.label);
@@ -76,6 +90,14 @@ async function writePaths(webRoot) {
     writeFileSync(join(folder, "index.html"), renderPage(template, path, pageMeta(route, pages), card));
     written.push(path);
   }
+  writeFileSync(
+    join(dist, "404.html"),
+    renderNotFound(template, {
+      title: `${explorerLabels.notFoundTitle}: Horizon Compact`,
+      description: explorerLabels.notFoundText,
+    }),
+  );
+  written.push("/404.html");
   rmSync(templatePath);
   return written;
 }

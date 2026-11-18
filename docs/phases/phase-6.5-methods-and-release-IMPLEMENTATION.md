@@ -342,7 +342,7 @@ are; (d) `explorerCardLabels.cardAlt.methods` describes a page that is not writt
 two-column key and value tables (settings, dates, raw text) do not share a value column, and the contents list's two columns
 sit far apart while every title is the same placeholder.
 
-**Words pass and step 5, as drafted (2026-11-18, Opus; NOT YET APPROVED).** His instruction, about 9:23 AM: take Claude's
+**Words pass and step 5, as drafted (2026-11-18, Opus). APPROVED 2026-11-18, about 10:06 AM (his), on his read of the preview ("it all looks legit"); committed as C5 `fc8e65e` (his), CI `44344066964` and Deploy `44344066870` green.** His instruction, about 9:23 AM: take Claude's
 recommendation on every step 4 label and every review note, and have Claude draft the page's prose, the titles and the
 project sentences included, for his approval ("I'm going to direct you to write the prose for me to approve"). So this
 pass departs from the "his" column above at his request: every title and sentence is Claude-drafted, his to approve or
@@ -675,6 +675,40 @@ In order, each item checked off in this doc with its evidence:
    least LinkedIn's post inspector.
 8. **The changelog starts** (M12) with go-live as its first entry.
 
+**As built, step 6 (2026-11-18, Opus; item 2).** Facts read live the same day: CloudFront Functions cost $0.10 per
+million invocations after 2,000,000 free a month (always free), so at this traffic nothing; a function can be tagged,
+`CreateFunction` carries its tags in the request (`aws:RequestTag`), and every function action but the create takes
+`aws:ResourceTag` on an ARN that holds the function's **name** (AWS's service authorization reference and the
+CreateFunction API reference); the pinned provider (6.67) gives `aws_cloudfront_function` a `tags` argument.
+- **What the doc did not foresee:** `main` is applied by Deploy, as the deploy role, and that role had no function
+  permission. So the change has two halves. **`bootstrap` (his apply, first):** `infra/iam/deploy-site.json` gains three
+  statements: `SiteFunctionCreate` (`CreateFunction`, any resource, only with `Project=horizon-compact` in the request),
+  `SiteFunctionManage` (update, publish, delete, tag, untag, on `function/horizon-compact-*` and only with that tag),
+  `SiteFunctionRead` (describe, get, list tags, on `function/horizon-compact-*`, unconditioned for the reason the
+  distribution's read after delete is). The retag deny already covers functions (its resource is `*`). No new
+  `cloudfront:*` and no write on the two bootstrap objects; `test_architecture.py` pins all three.
+- **`main` (Deploy, on his push):** `aws_cloudfront_function.site_paths` (`horizon-compact-site-paths`,
+  `cloudfront-js-2.0`, published, tagged by `default_tags`), code in `infra/terraform/main/functions/site-paths.js`: a
+  path ending in `/` gets its `index.html`; a page path with no slash and no file extension gets a permanent, relative
+  redirect to the slash form, its query string kept; a file passes. Associated as `viewer-request`. The two error
+  responses (403, 404) now serve `/404.html` with **status 404**, where they served `/index.html` with 200.
+- **The not-found page, in both builds:** the placeholder's `404.html` is its own page titled "Page not found: Horizon
+  Compact" (a Vite plugin, `placeholderNotFound`); the explorer's is written by `write-paths.mjs` from the explorer's
+  page, with no canonical link and no share tags, and the shell shows the not-found view at any address. `check-dist`
+  requires it in both (the placeholder build now holds exactly `index.html` and `404.html`) and counts its JavaScript
+  as the entry alone (82.5 KB gzipped, under 100 KB).
+- **Deploy's smoke test** now also requires an unknown address on the distribution to answer 404 with the not-found
+  page, retried for about six minutes, since a distribution change reaches the edge after the apply.
+- **Proof so far.** `make check` green: Python 3,581, web 636 (`web/src/site-paths.test.ts`, five cases, runs the file
+  Terraform uploads). Mutations: the function serving `/` unchanged fails it (`expected { uri: '/' } to match object {
+  uri: '/index.html' }`); a placeholder build without `404.html` fails `check-dist` ("must hold exactly two HTML files").
+  **His `bootstrap` half, done 2026-11-18, about 11:57 AM:** his plan (`scratch/p65-s6-plan.sh`): **0 to add, 1 to
+  change, 0 to destroy**, the one change `aws_iam_role_policy.github_deploy_site` gaining exactly the three statements
+  above, the others unchanged; his apply: "Apply complete! Resources: 0 added, 1 changed, 0 destroyed.", the two site ids
+  as §17 of the Phase 1.5 doc recorded them; his second plan: "No changes." **Owed:** his commit and push, and Claude's
+  read of the Deploy log; then a check of `/methods/`-style paths is only possible after go-live (the
+  placeholder has none), so item 6 of this list covers it.
+
 ## 8. The steps and the commit order
 
 Sonnet builds code steps and Opus reviews each diff, as in every phase since 3; Opus builds the infrastructure, as in
@@ -687,8 +721,8 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 2 | **[done 2026-11-15]** His pull; Claude's verify; the packed size and the guard's time measured | him; Claude | C2 (the raw text) |
 | 3 | **[done 2026-11-16, §5.2; built by Sonnet, reviewed by Opus]** The re-scoring test, and its failure shown once (§5.2) | Sonnet; Opus reviews | C3 |
 | 4 | **[done 2026-11-17, §3; built by Sonnet, reviewed by Opus]** The methods page: the route, its data, its sections with placeholders for his titles (§3, decision E) | Sonnet; Opus reviews | C4 |
-| 5 | **[drafted 2026-11-18, §3, awaiting his approval]** Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences (Claude-drafted too, his instruction of 2026-11-18); every ledger line placed, checked by script | him and Claude | C5 |
-| 6 | Serving in `main` (§7 item 2) | Opus; his apply | C6 |
+| 5 | **[done 2026-11-18, §3; approved (his), C5 `fc8e65e`]** Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences (Claude-drafted too, his instruction of 2026-11-18); every ledger line placed, checked by script | him and Claude | C5 |
+| 6 | **[built 2026-11-18, §7 "As built, step 6"; his `bootstrap` apply, then his push]** Serving in `main` (§7 item 2) | Opus; his apply | C6 |
 | 7 | The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |
 | 8 | The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |
 | 9 | The video (§6): pack, generation, check, captions, the file | him and Claude | C9 |

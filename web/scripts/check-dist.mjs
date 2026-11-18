@@ -108,9 +108,18 @@ function checkPreviewTags(html, name, file) {
   namedCards.add(`${cardSlug(route)}.png`);
 }
 
+/**
+ * The not-found page (Phase 6.5 decision B): the distribution answers any address that names no file with 404.html and
+ * status 404, in both builds. It is the build's own page with its own title, noindex, and nothing that names an address:
+ * no canonical link and no link-preview tags, since it is served at every address that has no page.
+ */
+const NOT_FOUND = "404.html";
+const NOT_FOUND_TITLE = /<title>Page not found[^<]*<\/title>/;
+
 function checkPage(file) {
   const name = rel(file);
   const html = readFileSync(file, "utf8");
+  const notFound = name === NOT_FOUND;
   for (const tag of html.match(/<script\b[^>]*>/gi) ?? []) {
     if (!/\bsrc=/.test(tag)) fail(`inline <script> in ${name}: ${tag}`);
   }
@@ -121,7 +130,14 @@ function checkPage(file) {
   // An explorer page also names itself: its canonical link is its own address on the site, and only that. The tag is
   // checked here and left out of the rule below, which allows no other host.
   let rest = html;
-  if (explorer) {
+  if (notFound) {
+    if (!NOT_FOUND_TITLE.test(html)) fail(`${name} must be titled "Page not found"`);
+    if (!/<meta\b[^>]*\bname\s*=\s*"robots"[^>]*\bcontent\s*=\s*"noindex"/i.test(html)) {
+      fail(`${name} is not noindex`);
+    }
+    if (/<link\b[^>]*\brel\s*=\s*"canonical"/i.test(html)) fail(`${name} must not name a canonical address`);
+    if (/\b(og|twitter):[a-z:]+/i.test(html)) fail(`${name} must not carry link-preview tags`);
+  } else if (explorer) {
     const canonical = html.match(/<link\b[^>]*\brel\s*=\s*"canonical"[^>]*>/gi) ?? [];
     const own = `${SITE_ORIGIN}${pathOfPage(file)}`;
     if (canonical.length !== 1 || !canonical[0].includes(`href="${own}"`)) {
@@ -181,14 +197,16 @@ if (explorer) {
     fail("explorer.html is still in dist-explorer/ (write-paths deletes it)");
   if (!htmlFiles.some((f) => rel(f) === "index.html"))
     fail("dist-explorer/ has no index.html for the path /");
+  if (!htmlFiles.some((f) => rel(f) === NOT_FOUND))
+    fail(`dist-explorer/ has no ${NOT_FOUND} (write-paths writes it)`);
 } else {
-  const index = htmlFiles.filter((f) => rel(f) === "index.html");
-  if (index.length !== 1 || htmlFiles.length !== 1) {
+  const names = htmlFiles.map(rel).sort();
+  if (names.join(",") !== [NOT_FOUND, "index.html"].sort().join(",")) {
     fail(
-      `dist/ must hold exactly one HTML file, index.html; it holds ${htmlFiles.map(rel).join(", ") || "none"}`,
+      `dist/ must hold exactly two HTML files, index.html and ${NOT_FOUND}; it holds ${names.join(", ") || "none"}`,
     );
   }
-  for (const file of index) checkPage(file);
+  for (const file of htmlFiles) checkPage(file);
 }
 
 // CSS: every url() is relative to the build; no @import.
@@ -329,6 +347,14 @@ function checkPathBudgets() {
   }
   for (const file of htmlFiles) {
     const path = pathOfPage(file);
+    // The not-found page loads the entry alone: the shell draws the not-found view inline (view-modules.mjs).
+    if (rel(file) === NOT_FOUND) {
+      const bytes = pathFiles(manifest, entryKey, entryKey).reduce((sum, name) => sum + gzipBytes(name), 0);
+      if (bytes > JS_BUDGET)
+        fail(`${path} loads ${bytes} bytes of JavaScript gzipped, over the ${JS_BUDGET} budget`);
+      perKind.set("not_found", { path, bytes });
+      continue;
+    }
     const kind = kindOfPath(path);
     const source = kind === null ? undefined : VIEW_MODULES[kind];
     if (source === undefined || manifest[source] === undefined) {

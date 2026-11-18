@@ -7,7 +7,19 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-18, about 10:00 AM (PHASE 6.5 STEP 5: THE METHODS PAGE'S WORDS DRAFTED, NOT APPROVED)
+> ## START HERE — where things stand, 2026-11-18, about 12:00 PM (PHASE 6.5 STEP 6: SERVING BUILT; HIS BOOTSTRAP APPLY NEXT)
+>
+> **C5 committed `fc8e65e` (his), approved on his read of the preview; CI `44344066964` and Deploy `44344066870`
+> green.** **Step 6 (doc §7, "As built, step 6"):** a CloudFront Function gives each page path its own `index.html`,
+> an unknown address answers a not-found page with 404 in both builds, and Deploy's smoke test checks it. `main` is
+> applied by the deploy role, which had no function permission, so `infra/iam/deploy-site.json` gains three tag- and
+> name-scoped grants: **his `bootstrap` apply must land before his push.** `make check` green, 3,581 and 636.
+> **His `bootstrap` apply done** (about 11:57 AM: 0 added, 1 changed, 0 destroyed; second plan "No changes").
+> **Uncommitted:** the step. **Next:** his commit C6 `phase 6.5: c6 serving in main` and push; Claude reads the Deploy log.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-18, about 10:00 AM (PHASE 6.5 STEP 5: THE METHODS PAGE'S WORDS DRAFTED, NOT APPROVED) *(superseded by the block above)*
 >
 > **C4 committed `7050601` (his) and pushed; CI `44122817993` and Deploy `44122818155` green.** **Step 5 (doc §3, "Words
 > pass and step 5, as drafted"):** at his instruction, Claude took its own recommendation on every step 4 label and the

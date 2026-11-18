@@ -332,6 +332,26 @@ jobs:
             failures=$((failures + 1))
           fi
 
+          # Phase 6.5 decision B: an address that names no file answers the not-found page with status 404, never
+          # the root page with 200. Retried, since a change to the distribution reaches the edge minutes after the
+          # apply (wait_for_deployment is off).
+          missing="$site/no-such-page-$GITHUB_RUN_ID/"
+          not_found=false
+          for attempt in $(seq 1 36); do
+            code="$(curl -sS -o /tmp/not-found.html -w '%{http_code}' --max-time 20 "$missing" || true)"
+            if [ "$code" = "404" ] && grep -qF "<title>Page not found" /tmp/not-found.html; then
+              echo "an unknown address answers the not-found page with 404 (attempt $attempt)"
+              not_found=true
+              break
+            fi
+            echo "attempt $attempt: an unknown address answered $code, waiting"
+            sleep 10
+          done
+          if [ "$not_found" != true ]; then
+            echo "::error::an unknown address did not answer the not-found page with 404 within about six minutes"
+            failures=$((failures + 1))
+          fi
+
           if [ "$failures" -ne 0 ]; then
             echo "$failures smoke checks failed"
             exit 1

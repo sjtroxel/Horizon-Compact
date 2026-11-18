@@ -51,6 +51,44 @@
       "Resource": "arn:aws:cloudfront::${account_id}:distribution/*"
     },
     {
+      "Sid": "SiteFunctionCreate",
+      "Effect": "Allow",
+      "Action": "cloudfront:CreateFunction",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/Project": "horizon-compact"
+        }
+      }
+    },
+    {
+      "Sid": "SiteFunctionManage",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:UpdateFunction",
+        "cloudfront:PublishFunction",
+        "cloudfront:DeleteFunction",
+        "cloudfront:TagResource",
+        "cloudfront:UntagResource"
+      ],
+      "Resource": "arn:aws:cloudfront::${account_id}:function/horizon-compact-*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/Project": "horizon-compact"
+        }
+      }
+    },
+    {
+      "Sid": "SiteFunctionRead",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:DescribeFunction",
+        "cloudfront:GetFunction",
+        "cloudfront:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:cloudfront::${account_id}:function/horizon-compact-*"
+    },
+    {
       "Sid": "SiteRead",
       "Effect": "Allow",
       "Action": [

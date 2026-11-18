@@ -44,6 +44,17 @@ data "aws_cloudfront_cache_policy" "optimized" {
   name = "Managed-CachingOptimized"
 }
 
+# Each page is its own file, <path>/index.html (Phase 6.5 IMPLEMENTATION doc, decision B): the function serves a
+# path ending in "/" its own index.html and redirects a page path missing its "/" (functions/site-paths.js). Named
+# with the project's prefix and tagged by default_tags, which is what the deploy role's function grants are fenced by.
+resource "aws_cloudfront_function" "site_paths" {
+  name    = "${var.project}-site-paths"
+  runtime = "cloudfront-js-2.0"
+  comment = "${var.project}: a page path serves its own index.html"
+  publish = true
+  code    = file("${path.module}/functions/site-paths.js")
+}
+
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   comment             = "${var.project} site"
@@ -67,16 +78,23 @@ resource "aws_cloudfront_distribution" "site" {
     compress                   = true
     cache_policy_id            = data.aws_cloudfront_cache_policy.optimized.id
     response_headers_policy_id = data.aws_cloudfront_response_headers_policy.site.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.site_paths.arn
+    }
   }
 
-  # A private bucket answers a missing key with 403, not 404, so both serve the page (as Musical Mycelium does).
+  # A private bucket answers a missing key with 403, not 404, so both are an address that names nothing: the
+  # not-found page, with status 404 (decision B). Until Phase 6.5 both served the root page with 200, which gave
+  # every deep link the root's title and card. Every build the site serves has a 404.html (check-dist).
   dynamic "custom_error_response" {
     for_each = [403, 404]
 
     content {
       error_code            = custom_error_response.value
-      response_code         = 200
-      response_page_path    = "/index.html"
+      response_code         = 404
+      response_page_path    = "/404.html"
       error_caching_min_ttl = 0
     }
   }
