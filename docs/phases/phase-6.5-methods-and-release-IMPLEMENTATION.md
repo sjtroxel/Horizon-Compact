@@ -342,6 +342,44 @@ are; (d) `explorerCardLabels.cardAlt.methods` describes a page that is not writt
 two-column key and value tables (settings, dates, raw text) do not share a value column, and the contents list's two columns
 sit far apart while every title is the same placeholder.
 
+**Words pass and step 5, as drafted (2026-11-18, Opus; NOT YET APPROVED).** His instruction, about 9:23 AM: take Claude's
+recommendation on every step 4 label and every review note, and have Claude draft the page's prose, the titles and the
+project sentences included, for his approval ("I'm going to direct you to write the prose for me to approve"). So this
+pass departs from the "his" column above at his request: every title and sentence is Claude-drafted, his to approve or
+change.
+- **The five notes, as recommended.** (a) The served tables' column is "API calls, retries included" and the run tables'
+  "Runs attempted"; M3's last paragraph says a run is one decision and an API call one request. (b) Each sweep's settings
+  show eight fields (`methodsSettingsMain`: model ID, output limit, temperature, effort, thinking, where it ran, image,
+  code version); the other nine sit in a closed "The other recorded settings" part under them; none is dropped, and a test
+  holds both tables to the record in its order. (c) The side study's tables are captioned "Haiku 5.5, thinking sub-study:
+  ...". (d) `cardAlt.methods` describes the written page. (e) The key-and-value tables share a 15rem key column (45% at
+  phone width); the contents list keeps its two columns, which read evenly now that the titles differ. Labels also
+  changed: "Model ID", "Where the program ran", "Kind of sweep", the settings caption "the same on every API call".
+- **The words.** `methods.json` gives each section its blocks: a paragraph, a quote, a list, three blocks drawn from data
+  or his.json (his scope sentence first; the goals table from `index.json`; the scenarios from his approved briefs) and
+  `pending` parts. Each block names the ledger ids it states and its source files (linked at the section's end). **Every
+  figure in the prose is traced** (`methods.test.ts`): a quoted figure names a file and the words there that hold it, and
+  the test finds them (markdown marks dropped, white space collapsed) and requires every digit run of the figure in them;
+  a counted figure (the failure counts in M5) is recomputed from the explorer's grid files; any other digit fails, except
+  model names, the tag, `sha256`, the case labels and section signs. Quotes (the three wordings, the reader's objection,
+  the recognition question) are checked word for word. Mutation-checked: 62.9% changed to 63.9% fails the trace; the
+  count 27 changed to 28 fails it (`expected '27' to be '28'`); $46 changed to $47 with no figure fails the digit rule.
+- **Placement:** every ledger id has a block that states it, and no block claims an id its section lacks (the DoD's row 1,
+  by script). Ledger 7 is written as the protocol has it (the lines' and options' order is shuffled per run; the ledger's
+  "wording order" was loose). Ledger 5 says plainly that his review was mostly acceptance of Claude's recommendations
+  (protocol §3), not an independent line-by-line check. The sections carry `aria-labelledby` again, since the thirteen
+  titles now differ.
+- **Still pending, by step:** M0's link to the video and M11 (step 9), M7's prompt-reconstruction check (step 7), M10's
+  dated vocabulary recheck (step 10). The census test pins exactly these four. `check-dist`'s refusal of a placeholder is
+  still for go-live.
+- **Proof.** `make check` green: Python 3,580, web 631. Browser pass (`scratch/p65-s5-shoot.mjs`, a copy of step 4's whose
+  trace also allows methods.json's figures, quotes and source paths): 56 loads, 0 with a problem, max layout shift 0.001;
+  `/methods/` 18,542 px at 1280 and 25,881 at 390; trace 1 untraced on `/methods/`, "1,237", a script quirk (it strips
+  commas before matching), traced by the unit test. A plain-text copy for his read: `scratch/p65-s5-methods-prose.md`.
+  **The name guard, run on the working files before any commit, found one term** in the first draft (a cloud vendor's
+  name, in M3 and M8); both places reworded to name only the service and the model, as the rest of the repo does, and a
+  re-scan of every changed file found none.
+
 **What the outline leaves open:** each section's length, and how much of M6 sits on the page against linked records.
 Both are settled on the draft, read as the four readers (`planning/06` §5); the hostile reader decides M5 and M6, the
 LinkedIn reader decides M0.
@@ -649,7 +687,7 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 2 | **[done 2026-11-15]** His pull; Claude's verify; the packed size and the guard's time measured | him; Claude | C2 (the raw text) |
 | 3 | **[done 2026-11-16, §5.2; built by Sonnet, reviewed by Opus]** The re-scoring test, and its failure shown once (§5.2) | Sonnet; Opus reviews | C3 |
 | 4 | **[done 2026-11-17, §3; built by Sonnet, reviewed by Opus]** The methods page: the route, its data, its sections with placeholders for his titles (§3, decision E) | Sonnet; Opus reviews | C4 |
-| 5 | Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences; every ledger line placed, checked by script | him and Claude | C5 |
+| 5 | **[drafted 2026-11-18, §3, awaiting his approval]** Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences (Claude-drafted too, his instruction of 2026-11-18); every ledger line placed, checked by script | him and Claude | C5 |
 | 6 | Serving in `main` (§7 item 2) | Opus; his apply | C6 |
 | 7 | The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |
 | 8 | The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |

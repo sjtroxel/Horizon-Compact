@@ -516,16 +516,28 @@ export const explorerLabels = {
   storyStudiesLink: "The side studies",
   storyMemosLink: "Read the memos the models wrote",
   storyMethodsLink: "How the study was done, in full",
-  // Phase 6.5 step 4: the methods page's table labels and link labels (Claude-drafted, for the words pass). The page's
-  // sentences are step 5's; these only name what a table shows.
+  // Phase 6.5 step 4: the methods page's table labels and link labels. Claude-drafted; the words pass of 2026-11-18
+  // (step 5) took Claude's recommendation on each, his instruction ("take your recommendations as given").
   methodsContentsLabel: "Sections of this page",
   methodsLoading: "Loading the methods",
-  methodsSettingsCaption: (model: string) => `${model}: settings, the same on every attempt`,
+  methodsSettingsCaption: (model: string) => `${model}: settings, the same on every API call`,
+  /** The settings a reader needs first; the rest sit in a closed details part under them (the words pass, note b). */
+  methodsSettingsMain: [
+    "model_id",
+    "max_tokens",
+    "temperature",
+    "effort",
+    "thinking",
+    "region",
+    "image_digest",
+    "git_sha",
+  ],
+  methodsSettingsMore: "The other recorded settings",
   methodsSettingLabels: {
     api: "Interface used",
     provider: "Provider",
     route_kind: "Route",
-    model_id: "Model",
+    model_id: "Model ID",
     invoke_id: "Model name sent",
     max_tokens: "Output limit, in tokens",
     temperature: "Temperature",
@@ -537,38 +549,50 @@ export const explorerLabels = {
     image_digest: "Program image",
     git_sha: "Code version",
     git_dirty: "Uncommitted changes when run",
-    runner: "Runner",
-    label: "Kind of run",
+    runner: "Where the program ran",
+    label: "Kind of sweep",
   } as Record<string, string>,
   methodsSettingColumn: "Setting",
   methodsValueColumn: "Value",
   methodsNone: "none",
   methodsYes: "yes",
   methodsNo: "no",
-  methodsServedCaption: (model: string, field: string) => `${model}: ${field}`,
+  methodsServedCaption: (model: string, field: string) => `${model}: the ${field}, by API call`,
   methodsServedLabels: {
     served_by: "provider that served the attempt",
     served_model: "model the provider reported",
   } as Record<string, string>,
   methodsServedColumn: "Reported as",
-  methodsAttemptsColumn: "Attempts",
+  methodsAttemptsColumn: "API calls, retries included",
   methodsDatesCaption: (model: string) => `${model}: dates and sessions`,
   methodsFirstStarted: "First session started (UTC)",
   methodsLastFinished: "Last session finished (UTC)",
   methodsSessionCount: "Sessions",
   methodsCountsCaption: (model: string) => `${model}: runs by scenario`,
   methodsScenarioColumn: "Scenario",
-  methodsAttemptedColumn: "Attempted",
+  methodsAttemptedColumn: "Runs attempted",
   methodsValidColumn: "Valid",
   methodsRefusedColumn: "Refused",
   methodsFailedColumn: "Failed, by type",
   methodsNoFailures: "none",
   methodsSideStudy: "Side study: the thinking sub-study",
+  /** The side study's tables carry this name, so they are never captioned exactly as the main model's are (note c). */
+  methodsSideStudyModel: (model: string) => `${model}, thinking sub-study`,
   methodsRawCaption: "The raw text",
   methodsRawObjects: "Objects",
   methodsRawBytes: "Total bytes",
   methodsRawFolderLink: "The folder on GitHub",
   methodsRawManifestLink: "The manifest that hashes every object",
+  // Phase 6.5 step 5: the labels around the page's own words (Claude-drafted; his instruction of 2026-11-18).
+  methodsSourcesLabel: "Sources for this section, on GitHub",
+  methodsGoalsCaption: "The five goals, word for word as the prompts state them",
+  methodsGoalColumn: "Goal",
+  methodsWhoColumn: "Create value for",
+  methodsWhenColumn: "Over",
+  methodsNoGoal: "No goal is stated.",
+  methodsSeeSection: "Where it is explained",
+  methodsScenarioResult: (outcome: string, points: string) =>
+    `Its main result is the ${outcome}; two goals split on it only if they differ by at least ${points} percentage points.`,
 };
 
 /**
@@ -607,6 +631,6 @@ export const explorerCardLabels = {
     memos:
       "The memo reader: what a memo is, and a note that each memo is a model\u2019s own writing, not the project\u2019s view.",
     methods:
-      "The methods page: how the study was done and how to check it, and what the experiment does not measure.",
+      "The methods page: what the experiment measures and what it does not, how it was designed, run and checked, and its known limits.",
   } as Record<string, string>,
 };

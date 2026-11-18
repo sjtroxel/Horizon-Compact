@@ -43,7 +43,7 @@ const section = (container: HTMLElement, id: string) =>
 const anchorOf = (id: string) => OUTLINE.find((s) => s.id === id)!.anchor;
 
 describe("the methods page's frame", () => {
-  it("has a title, a contents list of thirteen links and thirteen sections, each with its heading and its body placeholder", async () => {
+  it("has a title, a contents list of thirteen links and thirteen sections, each with its heading, labelled by it, and its blocks", async () => {
     const { container } = await methods();
     expect(container.querySelectorAll("h1")).toHaveLength(1);
     expect(container.querySelector("h1")!.textContent).toBe(explorerHis.pages.methods.title);
@@ -55,22 +55,65 @@ describe("the methods page's frame", () => {
       expect(within(el).getByRole("heading", { level: 2 }).textContent, id).toBe(
         explorerHis.methods.sectionTitles[id],
       );
-      // The section can take focus (a contents link or a hash lands on it), and is not a landmark of its own.
-      expect(el.hasAttribute("aria-labelledby"), id).toBe(false);
+      // The section can take focus (a contents link or a hash lands on it), and is labelled by its own heading, now
+      // that his thirteen titles are distinct (axe: landmark-unique).
+      const heading = within(el).getByRole("heading", { level: 2 });
+      expect(el.getAttribute("aria-labelledby"), id).toBe(heading.id);
       expect(el.getAttribute("tabindex"), id).toBe("-1");
-      const bodies = el.querySelectorAll("[data-placeholder=body]");
-      expect(bodies, id).toHaveLength(1);
-      expect(bodies[0]!.textContent, id).toBe(METHODS_PLACEHOLDER.body);
+      const blocks = el.querySelectorAll(":scope > [data-block]");
+      expect(blocks, id).toHaveLength(OUTLINE[i]!.blocks.length);
+      blocks.forEach((b, j) =>
+        expect(b.getAttribute("data-block"), `${id} ${j}`).toBe(OUTLINE[i]!.blocks[j]!.kind),
+      );
     });
+    expect(new Set(sections.map((el) => explorerHis.methods.sectionTitles[el.id] ?? el.id)).size).toBe(13);
+  });
+
+  it("shows every written block's words as methods.json has them, and his scope sentence first", async () => {
+    const { container } = await methods();
+    for (const section of OUTLINE) {
+      const el = container.querySelector<HTMLElement>(`section#${section.anchor}`)!;
+      const rendered = [...el.querySelectorAll<HTMLElement>(":scope > [data-block]")];
+      section.blocks.forEach((block, j) => {
+        const text = rendered[j]!.textContent ?? "";
+        if (block.kind === "p")
+          expect(text, section.id).toBe(
+            block.lead === undefined ? block.text : `${block.lead} ${block.text}`,
+          );
+        if (block.kind === "quote")
+          for (const quoted of block.texts) expect(text, section.id).toContain(quoted);
+        if (block.kind === "list")
+          for (const item of block.items) expect(text, section.id).toContain(item.text);
+      });
+    }
+    const first = container.querySelector("section [data-block]")!;
+    expect(first.getAttribute("data-block")).toBe("scope");
+    expect(first.textContent).toBe(explorerHis.scopeSentence);
+  });
+
+  it("links each section's sources on GitHub, each once", async () => {
+    const { container } = await methods();
+    for (const section of OUTLINE) {
+      const wanted = [...new Set(section.blocks.flatMap((b) => b.sources ?? []))];
+      const el = container.querySelector<HTMLElement>(`section#${section.anchor}`)!;
+      const links = [...el.querySelectorAll<HTMLAnchorElement>(".methods-sources a")].map((a) =>
+        a.getAttribute("href"),
+      );
+      expect(links, section.id).toEqual(wanted.map((path) => mainFileUrl(path)));
+    }
   });
 
   it("marks every placeholder where it stands, with the class that draws a dashed outline", async () => {
     const { container } = await methods();
     const marked = (selector: string) => [...container.querySelectorAll(selector)];
-    expect(marked("h1.methods-placeholder")).toHaveLength(1);
-    expect(marked("h2.methods-placeholder")).toHaveLength(13);
-    expect(marked(".jump-menu a.methods-placeholder")).toHaveLength(13);
-    expect(marked("p.methods-placeholder")).toHaveLength(13);
+    // His titles are written; what is left is the parts later steps write (methods.test.ts's census names them).
+    const pending = OUTLINE.flatMap((s) => s.blocks).filter((b) => b.kind === "pending");
+    expect(pending.length).toBeGreaterThan(0);
+    expect(marked("h1.methods-placeholder")).toHaveLength(0);
+    expect(marked("h2.methods-placeholder")).toHaveLength(0);
+    expect(marked(".jump-menu a.methods-placeholder")).toHaveLength(0);
+    expect(marked("p.methods-placeholder")).toHaveLength(pending.length);
+    for (const p of marked("p.methods-placeholder")) expect(p.textContent).toBe(METHODS_PLACEHOLDER.body);
     const css = readFileSync(resolve(WEB_ROOT, "src/explorer/explorer.css"), "utf8");
     expect(css).toMatch(/\.methods-placeholder\s*\{[^}]*dashed/);
   });
@@ -150,27 +193,51 @@ describe("M3's data: models, settings, dates and run counts", () => {
       t.querySelector("caption")!.textContent!.endsWith("runs by scenario"),
     );
     expect(counts.map((t) => t.querySelectorAll("tbody tr").length)).toEqual([4, 4, 1]);
+    // The side study's tables are named for it, never captioned exactly as the main model's are (the words pass, c).
     expect(counts.map((t) => t.querySelector("caption")!.textContent)).toEqual([
       L.methodsCountsCaption(modelName(HAIKU)),
       L.methodsCountsCaption(modelName(GPT)),
-      L.methodsCountsCaption(modelName(HAIKU)),
+      L.methodsCountsCaption(L.methodsSideStudyModel(modelName(HAIKU))),
     ]);
+    const captions = [...part.querySelectorAll("caption")].map((c) => c.textContent);
+    expect(new Set(captions).size).toBe(captions.length - 3); // only each sweep's two settings captions repeat
   });
 
-  it("copies every setting of each sweep, as the record has it, under the label for its field", async () => {
+  it("copies every setting of each sweep, as the record has it, under the label for its field: the main ones shown, the rest in a closed details part", async () => {
     const { container } = await methods();
     const part = section(container, anchorOf("M3"));
-    const tables = [...part.querySelectorAll("table")].filter((t) =>
+    const settingsTables = [...part.querySelectorAll("table")].filter((t) =>
       t.querySelector("caption")!.textContent!.includes("settings"),
     );
-    expect(tables).toHaveLength(3);
+    expect(settingsTables).toHaveLength(6);
+    const details = [...part.querySelectorAll<HTMLDetailsElement>("details.methods-more")];
+    expect(details).toHaveLength(3);
+    for (const d of details) {
+      expect(d.open).toBe(false);
+      expect(d.querySelector("summary")!.textContent).toBe(L.methodsSettingsMore);
+    }
     const order = [sweepOf(HAIKU, "grid"), sweepOf(GPT, "grid"), sweepOf(HAIKU, "thinking")];
-    tables.forEach((table, i) => {
-      const rows = [...table.querySelectorAll("tbody tr")].map((tr) => [
-        tr.querySelector("th")!.textContent,
-        tr.querySelector("td")!.textContent,
-      ]);
-      const expected = Object.entries(order[i]!.settings).map(([field, value]) => [
+    // Each sweep's two tables, read together in page order, are every setting in the record's order, main ones first.
+    const tables = order.map((_, i): [HTMLElement, HTMLElement] => [
+      settingsTables[2 * i]!,
+      settingsTables[2 * i + 1]!,
+    ]);
+    expect(tables.map(([, more]) => more.closest("details") !== null)).toEqual([true, true, true]);
+    expect(tables.map(([main]) => main.closest("details") === null)).toEqual([true, true, true]);
+    tables.forEach((pair, i) => {
+      const rows = pair.flatMap((table) =>
+        [...table.querySelectorAll("tbody tr")].map((tr) => [
+          tr.querySelector("th")!.textContent,
+          tr.querySelector("td")!.textContent,
+        ]),
+      );
+      const entries = Object.entries(order[i]!.settings);
+      const sorted = [
+        ...entries.filter(([field]) => L.methodsSettingsMain.includes(field)),
+        ...entries.filter(([field]) => !L.methodsSettingsMain.includes(field)),
+      ];
+      expect(pair[0]!.querySelectorAll("tbody tr")).toHaveLength(L.methodsSettingsMain.length);
+      const expected = sorted.map(([field, value]) => [
         L.methodsSettingLabels[field],
         value === null
           ? L.methodsNone
@@ -183,7 +250,8 @@ describe("M3's data: models, settings, dates and run counts", () => {
       expect(rows).toEqual(expected);
     });
     // The side study differs from the grid in effort, and the page shows it as the record has it.
-    const effort = (i: number) => tables[i]!.querySelector("tbody tr:nth-child(8) td")!.textContent;
+    const at = L.methodsSettingsMain.indexOf("effort") + 1;
+    const effort = (i: number) => tables[i]![0]!.querySelector(`tbody tr:nth-child(${at}) td`)!.textContent;
     expect(effort(0)).toBe(String(sweepOf(HAIKU, "grid").settings["effort"]));
     expect(effort(2)).toBe(String(sweepOf(HAIKU, "thinking").settings["effort"]));
     expect(effort(0)).not.toBe(effort(2));
@@ -200,7 +268,10 @@ describe("M3's data: models, settings, dates and run counts", () => {
       L.methodsServedCaption(modelName(HAIKU), L.methodsServedLabels["served_model"]!),
       L.methodsServedCaption(modelName(GPT), L.methodsServedLabels["served_by"]!),
       L.methodsServedCaption(modelName(GPT), L.methodsServedLabels["served_model"]!),
-      L.methodsServedCaption(modelName(HAIKU), L.methodsServedLabels["served_model"]!),
+      L.methodsServedCaption(
+        L.methodsSideStudyModel(modelName(HAIKU)),
+        L.methodsServedLabels["served_model"]!,
+      ),
     ]);
     const rows = (table: HTMLElement) =>
       [...table.querySelectorAll("tbody tr")].map((tr) => [
@@ -297,15 +368,17 @@ describe("M7's data: the raw text", () => {
 });
 
 describe("where a number can be", () => {
-  it("holds data parts in M3 and M7 and nowhere else, and no digit on the page outside them", async () => {
+  it("holds data parts in M3 and M7 and nowhere else, and no digit outside them, the written blocks and the source links", async () => {
+    // The written blocks' digits are traced to their sources by methods.test.ts; the blocks drawn from data and his.json
+    // (the goals, the scenarios in brief) carry their files' own numbers; the source links are file paths.
     const { container } = await methods();
     const parts = [...container.querySelectorAll("[data-part=data]")];
     expect(parts.map((p) => p.closest("section")!.id)).toEqual([anchorOf("M3"), anchorOf("M7")]);
     const clone = container.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll("[data-part=data]").forEach((p) => p.remove());
+    clone.querySelectorAll("[data-part=data], [data-block], .methods-sources").forEach((p) => p.remove());
     expect(clone.textContent).not.toMatch(/\d/);
-    // The page's own labels hold no digit either, except where a data part uses them (checked above by being inside it).
-    expect(container.textContent).toMatch(/\d/); // the negative control: the data parts do hold digits
+    // The negative control: the parts removed do hold digits.
+    expect(container.textContent).toMatch(/\d/);
   });
 });
 

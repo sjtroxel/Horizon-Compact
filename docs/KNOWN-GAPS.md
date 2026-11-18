@@ -7,7 +7,19 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-17, about 9:45 AM (PHASE 6.5 STEP 4: THE METHODS PAGE'S FRAME BUILT AND REVIEWED)
+> ## START HERE — where things stand, 2026-11-18, about 10:00 AM (PHASE 6.5 STEP 5: THE METHODS PAGE'S WORDS DRAFTED, NOT APPROVED)
+>
+> **C4 committed `7050601` (his) and pushed; CI `44122817993` and Deploy `44122818155` green.** **Step 5 (doc §3, "Words
+> pass and step 5, as drafted"):** at his instruction, Claude took its own recommendation on every step 4 label and the
+> five review notes, and drafted every title, the page's title and description, and the prose of M0 to M12, for his
+> approval. Every ledger id is placed in a block; every figure in the prose is traced to a file or recounted from the
+> results files by `methods.test.ts` (mutation-checked). Four parts stay pending for steps 7, 9 and 10. `make check`
+> green, 3,580 and 631; browser pass clean. **Uncommitted:** the step. **Next:** his read of the prose
+> (`scratch/p65-s5-methods-prose.md` or the preview), his changes, then his commit C5 `phase 6.5: c5 methods page words`.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-17, about 9:45 AM (PHASE 6.5 STEP 4: THE METHODS PAGE'S FRAME BUILT AND REVIEWED) *(superseded by the block above)*
 >
 > **C3 committed `9dbab42` (his) and pushed; CI `43886444310` and Deploy `43886443998` green.** **Step 4 (doc §3, "As
 > built, step 4" and "Reviewed, step 4"):** `/methods/` in the explorer, its thirteen sections M0 to M12 with visible

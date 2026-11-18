@@ -19,19 +19,19 @@
   "studiesAwarenessTitle": "Can the model tell what is being tested?",
   "methods": {
     "sectionTitles": {
-      "M0": "[his title]",
-      "M1": "[his title]",
-      "M2": "[his title]",
-      "M3": "[his title]",
-      "M4": "[his title]",
-      "M5": "[his title]",
-      "M6": "[his title]",
-      "M7": "[his title]",
-      "M8": "[his title]",
-      "M9": "[his title]",
-      "M10": "[his title]",
-      "M11": "[his title]",
-      "M12": "[his title]"
+      "M0": "What this measures, and what it does not",
+      "M1": "The five goals",
+      "M2": "The company and the four decisions",
+      "M3": "The models, the dates and the runs",
+      "M4": "The plan fixed in advance, and what changed after it",
+      "M5": "What the statistics can and cannot show",
+      "M6": "The real cases",
+      "M7": "Checking it yourself",
+      "M8": "What it cost",
+      "M9": "Known limits, in one place",
+      "M10": "The words this project uses",
+      "M11": "The video",
+      "M12": "Changes to this site"
     }
   },
   "story": {
@@ -80,8 +80,8 @@
       "description": "Read the model's own explanation of each decision it made for the made-up company, by goal, scenario and run."
     },
     "methods": {
-      "title": "[his title]",
-      "description": "[to be written]"
+      "title": "How the study was done",
+      "description": "How the experiment was designed, run and checked: the goals, the made-up company, the models, the statistics, the real cases and every known limit."
     }
   }
 }

@@ -1771,3 +1771,53 @@ text.diff-value {
 .methods-data .x-table td:first-child {
   padding-left: 0;
 }
+
+/* The methods page's words (Phase 6.5 step 5). The key-and-value tables (settings, dates, raw text) share one width
+   for their key column, so their values line up from table to table (the words pass, note e). */
+.methods-data .x-table.methods-kv th[scope="row"] {
+  width: 15rem;
+}
+@media (max-width: 30rem) {
+  .methods-data .x-table.methods-kv th[scope="row"] {
+    width: 45%;
+  }
+}
+.methods-more {
+  margin: 0 0 1rem;
+  font-family: var(--sans);
+  font-size: var(--x-label);
+}
+.methods-more summary {
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+.methods-list {
+  max-width: 65ch;
+  padding-left: 1.25rem;
+}
+.methods-list li {
+  margin: 0 0 0.5rem;
+}
+.methods-quote {
+  margin: 0 0 1rem;
+  padding: 0 0 0 1rem;
+  border-left: 3px solid var(--axis);
+  max-width: 62ch;
+}
+.methods-quote p {
+  margin: 0;
+}
+.methods-scope {
+  font-weight: 600;
+}
+.methods-sources {
+  margin-top: 1rem;
+  font-size: var(--x-label);
+  color: var(--ink2);
+}
+.methods-sources p {
+  margin: 0 0 0.25rem;
+}
+.methods-sources code {
+  overflow-wrap: anywhere;
+}

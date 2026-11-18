@@ -1,28 +1,687 @@
 {
   "sections": [
-    { "id": "M0", "anchor": "opening", "ledger": ["1", "2", "3"], "also": [], "blocks": [] },
-    { "id": "M1", "anchor": "objectives", "ledger": ["4", "5", "7"], "also": [], "blocks": [] },
-    { "id": "M2", "anchor": "company-and-scenarios", "ledger": ["6"], "also": [], "blocks": [] },
+    {
+      "id": "M0",
+      "anchor": "opening",
+      "ledger": ["1", "2", "3"],
+      "also": [],
+      "blocks": [
+        {
+          "kind": "scope",
+          "ledger": ["1"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["1"],
+          "text": "Every result on this site is a statement about a model, in the form \"under this goal, the model ...\". None is a statement about how executives decide, and none says what any company should do. That limit comes first because everything below rests on it.",
+          "sources": ["experiment/protocol/protocol-v1.md"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["2"],
+          "text": "Asking a model the same question again gives a new answer, not the same one. Each run is one draw, and every result here is a pattern over many runs, shown with its run count and its spread. Anyone who repeats the experiment should expect numbers close to these, not identical ones."
+        },
+        {
+          "kind": "p",
+          "ledger": ["3"],
+          "text": "Where a real company gave a reason for its decision, the reason was not checked. The real cases record what each company did, never why it said it did it, and no case is described as having given a false reason.",
+          "sources": ["docs/planning/06-NARRATIVE-AND-VOCABULARY.md"]
+        },
+        {
+          "kind": "pending",
+          "ledger": [],
+          "note": "step 9: one line linking the video (M11)"
+        }
+      ]
+    },
+    {
+      "id": "M1",
+      "anchor": "objectives",
+      "ledger": ["4", "5", "7"],
+      "also": [],
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": ["4"],
+          "text": "Each run gives the model one of five goals. Four share one sentence frame, \"create value for [who], over [when]\", and differ in exactly two places: who counts, and how far ahead. The fifth states no goal and is the baseline. The protocol calls them objectives A to E; no prompt carries a letter or any hint of which goal is which.",
+          "sources": ["experiment/protocol/protocol-v1.md", "experiment/company/objectives.toml"]
+        },
+        {
+          "kind": "objectives",
+          "ledger": ["4"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["4"],
+          "text": "The \"who\" of B and D is the Business Roundtable's own list of stakeholders, in the order its 2019 statement gives it. The \"who\" of A and C follows the statement's own words for shareholders. The shared frame costs some realism: a real board rarely states its goal in one sentence, and never in the same sentence for shareholders and for everyone else. What it buys is a clean comparison: two goals that differ in one place can be compared on that difference alone.",
+          "sources": ["experiment/protocol/protocol-v1.md"],
+          "figures": [
+            {
+              "text": "2019",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "In August 2019"
+            }
+          ]
+        },
+        {
+          "kind": "quote",
+          "ledger": ["7"],
+          "lead": "Each goal reaches the model in one sentence, in one of three wordings; {who} and {when} are the goal's two parts, and the baseline uses each wording's second sentence:",
+          "source": "experiment/company/objectives.toml",
+          "texts": [
+            "The board has set your objective: create value for {who}, over {when}.",
+            "The board has not set an objective.",
+            "The board has asked you to create value for {who} over {when}.",
+            "The board has not asked you to pursue an objective.",
+            "Over {when}, the board's objective for you is to create value for {who}.",
+            "The board has given you no objective."
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["7"],
+          "text": "Every wording applies to every goal, so the same wording of two goals has the same structure, and the goal's sentence sits in the same place in every prompt. The order of the decision's lines and options is shuffled for each run, from a seed recorded for the sweep, so no goal is helped by a line that happens to come first; each run records the order it was shown. One wording, the second above, was drawn by a published hash on October 7, 2026 and sealed: no model saw it in a decision before the official runs. The results are also reported on that wording alone.",
+          "sources": ["experiment/protocol/protocol-v1.md"],
+          "figures": [
+            {
+              "text": "October 7, 2026",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "on 2026-10-07"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["5"],
+          "text": "Claude, Anthropic's model, working in Claude Code, drafted all of the experiment's text: the company's dossier and its sources, the four scenarios, the wordings and the analysis code. sjtroxel made every decision and reviewed the text, mostly by accepting or rejecting Claude's recommendation on each item rather than checking each line on his own. The main model is also a Claude model, so a reader may suspect that the text reads more naturally to it, or leans in a way it follows. Two outside readers from other vendors read the text before any run, one for realism and one for anything that leads a decision, and a second model from another vendor ran the same text. That answers the worry in part, not fully. Because every verdict compares two goals on the same text, a lean shared by every goal cancels out; a lean that works on one goal's wording would not, and checking each result under each wording is the guard against it.",
+          "lead": "Who wrote the test.",
+          "sources": ["experiment/protocol/protocol-v1.md"]
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "anchor": "company-and-scenarios",
+      "ledger": ["6"],
+      "also": [],
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": ["6"],
+          "text": "The company is made up: a mid-size US maker of industrial machinery with about $1.5 billion of revenue and six plants, described in an eleven-section dossier written like a board pack. Every number in it is one of three kinds, and marked as such: taken from a cited public source; a stated assumption, with the range it was chosen from and the reason (51 of them); or worked out from those by a stated formula.",
+          "sources": ["experiment/protocol/protocol-v1.md", "docs/phases/evidence/phase-2/dossier-cited.md"],
+          "figures": [
+            {
+              "text": "$1.5 billion",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "about $1.5 billion of revenue"
+            },
+            {
+              "text": "51",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "51 in all"
+            }
+          ]
+        },
+        {
+          "kind": "scenarios",
+          "ledger": ["6"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["6"],
+          "text": "Each decision is a table of lines, each with a maximum, that must balance by the scenario's own rule. Each line's label says who bears it or what it buys, in the same words under every goal. The full text of every scenario, with every figure cited to its source, is in the cited scenarios file.",
+          "sources": ["docs/phases/evidence/phase-2.5/scenarios-cited.md"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["6"],
+          "text": "Two simplifications were kept on purpose after an outside realism read, and both are limits. Every plant has the same revenue per employee, although the dossier calls one plant subscale, which would usually mean fewer sales per employee. And the dossier has no orders, backlog or outlook, which a real board pack would usually include: no free public source gives them, and an outlook would invite the model to forecast.",
+          "lead": "Known simplifications.",
+          "sources": ["docs/KNOWN-GAPS.md"]
+        }
+      ]
+    },
     {
       "id": "M3",
       "anchor": "models-dates-and-runs",
       "ledger": ["8", "9", "10", "17"],
       "also": [],
-      "blocks": []
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": ["9"],
+          "text": "Two models made the decisions: Claude Haiku 5.5, the main model, through Anthropic's own API, and OpenAI's gpt-oss-120b, an open-weights model, through OpenRouter, pinned to one host. The plan first named larger models reached through Bedrock, a cloud service for running models. Bedrock was unavailable to the project's account from October 5, 2026, and the plan's fallback pair was taken before the protocol was fixed. What that gives up is reach: the results are for a small current model and an open-weights model, not for the larger models a company would put in front of a capital decision.",
+          "sources": ["experiment/protocol/protocol-v1.md", "docs/KNOWN-GAPS.md"],
+          "figures": [
+            {
+              "text": "October 5, 2026",
+              "source": "docs/KNOWN-GAPS.md",
+              "match": "every Bedrock call throttled, quotas reset to 0, 2026-10-05"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["8"],
+          "text": "No sampling setting, such as temperature, was ever sent, so each model ran at its own defaults, which are recorded on every call. The same setting would not mean the same thing on two models in any case. Haiku 5.5 ran with thinking off. gpt-oss-120b cannot turn its reasoning off; it ran at the medium level on every call, so its results are a reasoning model's, and an agreement or a disagreement between the two models cannot be put down to the model family alone.",
+          "sources": ["experiment/protocol/protocol-v1.md"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["10"],
+          "text": "Each run record names the program image it ran in, by its digest. The image registry has since deleted two official images, the one every grid run used and the first test run's, under a rule that kept only the newest ten; the rule was removed on November 4, 2026. The records are unchanged, and the code is pinned by the protocol's tag, an outside archive and each record's commit, but no run can be repeated in the identical image.",
+          "lead": "Two images are gone.",
+          "sources": ["docs/KNOWN-GAPS.md"],
+          "figures": [
+            {
+              "text": "November 4, 2026",
+              "source": "docs/KNOWN-GAPS.md",
+              "match": "Closed 2026-11-04, about noon"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["17"],
+          "text": "The tables below are read from the run records and the results files, not typed. A run is one decision; an API call is one request to the model. A run that failed validation was retried with the identical request, up to three calls in all, so a model made more calls than runs. A run counts as failed only when its last call failed, and a refusal counts as a failure.",
+          "sources": ["experiment/protocol/protocol-v1.md", "docs/phases/evidence/phase-4/raw-manifest.json"]
+        }
+      ]
     },
     {
       "id": "M4",
       "anchor": "pre-registration",
       "ledger": ["11", "18", "22", "23", "31"],
       "also": [],
-      "blocks": []
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": ["18"],
+          "text": "The study's plan, the protocol, was committed and tagged prereg-v1 on October 13, 2026, before any official run, and an outside archive, Software Heritage, recorded the tag the same day. After the tag the protocol allows two kinds of change: an erratum, which changes no computation, no content and no rule, listed with its date; and a new version, prereg-v2, whose results would be reported beside version 1's and never merged with them. Five errata were made, all on the day of the tag, all notes left over from drafting. No prereg-v2 exists.",
+          "sources": [
+            "experiment/protocol/protocol-v1.md",
+            "experiment/protocol/errata-v1.md",
+            "docs/phases/evidence/phase-3.5/tag-record.md"
+          ],
+          "figures": [
+            {
+              "text": "October 13, 2026",
+              "source": "experiment/protocol/errata-v1.md",
+              "match": "tagged 2026-10-13"
+            },
+            {
+              "text": "version 1",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "beside version 1's"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["18"],
+          "text": "Code that only runs the study (the runner, the connections to the models, the pacing) may be fixed after the tag, each fix logged with its effect on runs. Two faults were found during the grid runs: a dropped connection could end a session, and a crashed session was recorded as complete. Both were fixed after the grid runs ended, and no run record was affected. The code that computes the verdicts never changed: the official analysis runs from a checkout of the tag.",
+          "sources": ["docs/phases/evidence/phase-4/run-log.md", "docs/KNOWN-GAPS.md"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["11"],
+          "text": "The real cases ran later, from the main branch with a case driver, because no case existed at the tag. The code that computes each case's result is still the tag's: a check run every time compares it, byte for byte, with the tagged code. So the protocol's rule that official results come from a checkout of the tag was kept in purpose, since the computing code is the tag's, though not to the letter.",
+          "sources": ["docs/phases/phase-5.5-case-runs-IMPLEMENTATION.md"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["22"],
+          "text": "Some rules for the real cases were set after the tag and before the case search of October 16, 2026, each dated in the search's record. A case's scenario may take only the decision's subject and its size from the document that first announced it. Every other figure, every option's economics included, comes only from documents dated before that announcement, and where an option has no such figure, every option is described without figures alike.",
+          "lead": "Rules set after the tag.",
+          "sources": ["docs/phases/phase-5-case-building-search-IMPLEMENTATION.md"],
+          "figures": [
+            {
+              "text": "October 16, 2026",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "Stage B: 2026-10-16, the search"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["31"],
+          "text": "On October 17, 2026, before any candidate was checked against it, criterion 4 (whether a decision fits one of the four scenarios) was split into two parts, checked in order: the shape of the decision, then the total the scenario is built around, such as a plant's headcount. Every rejection on criterion 4 still goes to the independent reader, a failed total included, and the reader judges only whether the figure is the total.",
+          "sources": ["docs/phases/phase-5-case-building-search-IMPLEMENTATION.md"],
+          "figures": [
+            {
+              "text": "October 17, 2026",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "4.6.2 Patch 2026-10-17"
+            },
+            {
+              "text": "criterion 4",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "(4) maps onto a scenario shape"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["23"],
+          "text": "Also on October 17, 2026: a headcount total must be 167 or more, before scaling. Each case's figures are multiplied by a random factor, between 0.6 and 0.9 or between 1.1 and 1.6, to hide them, and a scaled headcount under 100 is stated only as \"fewer than 100\", which a decision about a number of people cannot use; 167 is the smallest total that every factor keeps at 100 or more. The protocol says each case's size is \"never used to choose\", and the independent reader objected:",
+          "lead": "The headcount floor.",
+          "sources": [
+            "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+            "experiment/protocol/protocol-v1.md"
+          ],
+          "figures": [
+            {
+              "text": "October 17, 2026",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "4.6.3 Patch 2026-10-17"
+            },
+            {
+              "text": "167",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "passes at 167 or more"
+            },
+            {
+              "text": "0.6",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "[0.6, 0.9] ∪ [1.1, 1.6]"
+            },
+            {
+              "text": "0.9",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "[0.6, 0.9] ∪ [1.1, 1.6]"
+            },
+            {
+              "text": "1.1",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "[0.6, 0.9] ∪ [1.1, 1.6]"
+            },
+            {
+              "text": "1.6",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "[0.6, 0.9] ∪ [1.1, 1.6]"
+            },
+            {
+              "text": "100",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "stated as \"fewer than 100\""
+            }
+          ]
+        },
+        {
+          "kind": "quote",
+          "ledger": ["23"],
+          "source": "docs/phases/evidence/phase-5/patch-4.6.3-review-raw.md",
+          "sources": ["docs/phases/evidence/phase-5/patch-4.6.3-review-raw.md"],
+          "texts": [
+            "Rejecting a candidate because its headcount is under 167 uses its size to choose. The patch fails to recognize this contradiction and must declare it as a reported deviation."
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["23"],
+          "text": "The answer, sjtroxel's decision, was to state the rule as a reading of the protocol rather than a departure from it: that sentence forbids choosing cases by how big the company is, while the floor is on the decision's own total, the number the scenario is about, and it follows from the protocol's own rule that a small headcount is stated only as \"fewer than 100\". It is set out here so a reader can judge it. For the exploratory cases only, the floor for a plant decision was later lowered to 50 (see the real cases).",
+          "sources": ["docs/phases/phase-5-case-building-search-IMPLEMENTATION.md"],
+          "figures": [
+            {
+              "text": "100",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "stated as \"fewer than 100\""
+            },
+            {
+              "text": "50",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "an S3 total of 50 or more"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "M5",
       "anchor": "statistics",
       "ledger": ["12", "13", "14", "14a", "15", "16", "17", "40"],
       "also": [],
-      "blocks": []
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": ["13"],
+          "text": "Each comparison asks whether two goals moved one named outcome by at least a set amount: 10 percentage points for a share (the first two decisions) and 20 for a choice rate (the last two). Each interval is at the 99.7% level, so that the 16 main comparisons for a model together keep the chance of any false split to about 5%. At the number of runs the study could afford, a choice-rate interval is about ±25 points wide near 50% and about ±16 near 5%, and a share interval about ±8.3 points at a typical spread. Those widths are the Newcombe interval's, measured before any result; an earlier planning estimate, by a simpler method, gave ±27 and ±12.",
+          "lead": "Precision.",
+          "sources": [
+            "experiment/protocol/protocol-v1.md",
+            "docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md"
+          ],
+          "figures": [
+            {
+              "text": "10",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "10 percentage points"
+            },
+            {
+              "text": "20",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "20 percentage points"
+            },
+            {
+              "text": "99.7%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "99.7%"
+            },
+            {
+              "text": "16",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "16 primary comparisons"
+            },
+            {
+              "text": "5%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "at most 5% at the target"
+            },
+            {
+              "text": "±25",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "about ±25 points near 50% and ±16 near 5%"
+            },
+            {
+              "text": "50%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "±25 points near 50%"
+            },
+            {
+              "text": "±16",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "±16 near 5%"
+            },
+            {
+              "text": "5%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "±16 near 5%"
+            },
+            {
+              "text": "±8.3",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "about ±8.3 points"
+            },
+            {
+              "text": "±27",
+              "source": "docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md",
+              "match": "about ±27 points at 50% and about ±12 at 5%"
+            },
+            {
+              "text": "±12",
+              "source": "docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md",
+              "match": "about ±12 at 5%"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["14"],
+          "text": "At the cap of 20 runs per wording, a true 30-point difference in a choice rate near 50% is called a split 62.9% of the time in the simulations, and a 35-point difference 81.9% of the time. A real difference of that size can still be missed.",
+          "lead": "Power.",
+          "sources": [
+            "experiment/protocol/protocol-v1.md",
+            "docs/phases/evidence/phase-3/simulation-summary.md"
+          ],
+          "figures": [
+            {
+              "text": "20",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "Floor 6, cap 20"
+            },
+            {
+              "text": "30",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "a 30-point choice difference a split 62.9% of the time, a 35-point one 81.9%"
+            },
+            {
+              "text": "50%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "±25 points near 50%"
+            },
+            {
+              "text": "62.9%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "a split 62.9% of the time"
+            },
+            {
+              "text": "35",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "a 35-point one 81.9%"
+            },
+            {
+              "text": "81.9%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "81.9%"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["14a"],
+          "text": "The study finds a split more easily than it shows there is none. To call \"no split\", the whole interval must sit inside the threshold. On a share, where the run count is below the cap, that was within reach at least 49.7% of the time in the simulations when the true difference was zero, against about 54% the plan expected. Where the cap binds, it is effectively out of reach, and such a result reads \"inconclusive\" with its precision shown.",
+          "lead": "Showing no difference is harder.",
+          "sources": [
+            "experiment/protocol/protocol-v1.md",
+            "docs/phases/evidence/phase-3/simulation-summary.md"
+          ],
+          "figures": [
+            {
+              "text": "49.7%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "49.7% to 100%"
+            },
+            {
+              "text": "54%",
+              "source": "docs/phases/evidence/phase-3/simulation-summary.md",
+              "match": "about 54%"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["12"],
+          "text": "The target was a 0.3125% chance, per comparison, of calling a split where there is none. Simulated before any result existed, the worst case was 0.43% for shares and 0.417% for choice rates. sjtroxel kept the rule, holding the target approximately rather than exactly (his decision, October 9, 2026). Across the 16 comparisons that is at most about 6.9% if every one sat at its worst point, against 5% at the target.",
+          "lead": "False splits.",
+          "sources": [
+            "experiment/protocol/protocol-v1.md",
+            "docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md",
+            "docs/phases/evidence/phase-3/plain-english.md"
+          ],
+          "figures": [
+            {
+              "text": "0.3125%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "0.3125%"
+            },
+            {
+              "text": "0.43%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "worst 0.43%"
+            },
+            {
+              "text": "0.417%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "0.417%"
+            },
+            {
+              "text": "October 9, 2026",
+              "source": "docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md",
+              "match": "which he accepted on 2026-10-09"
+            },
+            {
+              "text": "16",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "16 primary comparisons"
+            },
+            {
+              "text": "6.9%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "at most about 6.9%"
+            },
+            {
+              "text": "5%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "at most 5% at the target"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["15"],
+          "text": "A failed run is never filled in with a guess. Instead each verdict is computed again with every failed run in the kept wordings set to the outcome that most weakens it, and any verdict that changes becomes \"inconclusive\". That bound is the worst case for the difference between two goals, not for the width of its interval.",
+          "lead": "Failed runs.",
+          "sources": ["experiment/protocol/protocol-v1.md"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["17"],
+          "text": "A cell is one model, decision, goal and wording. A cell in which more than 10% of runs failed has its wording dropped from both sides of every comparison it is in. On gpt-oss-120b's second decision, 27 of 300 runs failed (9.0%), 4 cells crossed the 10% line, and one comparison, A against C, was left with no wording to compare: it is not assessable. Haiku 5.5 ran that decision at 6 runs a cell, the number the pilot's spread set, where a single failure already drops a wording; 3 cells lost one run each. The planning warned that a model failing more than about 2% of its runs supports few firm verdicts. Over the whole grid, Haiku 5.5 failed 10 of 990 runs and gpt-oss-120b 39 of 1,200, and the thinking sub-study none of its 100; the tables in the models section give every count.",
+          "lead": "What failures cost.",
+          "sources": [
+            "experiment/protocol/protocol-v1.md",
+            "docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md"
+          ],
+          "figures": [
+            {
+              "text": "10%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "strictly greater than 10%"
+            },
+            {
+              "text": "27",
+              "count": {
+                "sweep": "grid",
+                "model": "gpt-oss-openrouter",
+                "measure": "unsuccessful",
+                "scenario": "s2"
+              }
+            },
+            {
+              "text": "300",
+              "count": {
+                "sweep": "grid",
+                "model": "gpt-oss-openrouter",
+                "measure": "attempted",
+                "scenario": "s2"
+              }
+            },
+            {
+              "text": "9.0%",
+              "count": {
+                "sweep": "grid",
+                "model": "gpt-oss-openrouter",
+                "measure": "unsuccessful_percent",
+                "scenario": "s2"
+              }
+            },
+            {
+              "text": "4",
+              "count": {
+                "sweep": "grid",
+                "model": "gpt-oss-openrouter",
+                "measure": "cells_over_limit",
+                "scenario": "s2"
+              }
+            },
+            {
+              "text": "6",
+              "count": {
+                "sweep": "grid",
+                "model": "haiku-5-5",
+                "measure": "runs_per_cell",
+                "scenario": "s2"
+              }
+            },
+            {
+              "text": "3",
+              "count": {
+                "sweep": "grid",
+                "model": "haiku-5-5",
+                "measure": "cells_with_unsuccessful",
+                "scenario": "s2"
+              }
+            },
+            {
+              "text": "2%",
+              "source": "docs/phases/phase-3-scoring-and-simulation-IMPLEMENTATION.md",
+              "match": "more than about 2% of the time"
+            },
+            {
+              "text": "10",
+              "count": {
+                "sweep": "grid",
+                "model": "haiku-5-5",
+                "measure": "unsuccessful"
+              }
+            },
+            {
+              "text": "990",
+              "count": {
+                "sweep": "grid",
+                "model": "haiku-5-5",
+                "measure": "attempted"
+              }
+            },
+            {
+              "text": "39",
+              "count": {
+                "sweep": "grid",
+                "model": "gpt-oss-openrouter",
+                "measure": "unsuccessful"
+              }
+            },
+            {
+              "text": "1,200",
+              "count": {
+                "sweep": "grid",
+                "model": "gpt-oss-openrouter",
+                "measure": "attempted"
+              }
+            },
+            {
+              "text": "100",
+              "count": {
+                "sweep": "thinking",
+                "model": "haiku-5-5",
+                "measure": "attempted"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["16"],
+          "text": "For the real cases, the matcher asks which goal's runs came closest to what the company did, and says \"no good match\" when none came close enough. Before any real case existed, the simulations made \"no good match\" rare by design, since with five goals another one usually sits near any decision. In the event, all 20 readings, five cases on two models with two readings each, were \"no good match\".",
+          "lead": "The matcher.",
+          "sources": [
+            "docs/phases/evidence/phase-3/matcher-calibration.md",
+            "docs/phases/evidence/phase-5.5/run-log.md"
+          ],
+          "figures": [
+            {
+              "text": "20",
+              "source": "docs/phases/evidence/phase-5.5/run-log.md",
+              "match": "All 20 readings are no good match"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["40"],
+          "text": "Before any run, the project expected a longer horizon, or a wider group of people who count, to make the model cut less. The story has a fixed section listing every main comparison where that did not happen. The rule that fills it was written on November 9, 2026, after the results were known, from terms all dated before them, and no other rule was tried against the data. The explorer's build applies it; no one fills the section by hand.",
+          "lead": "Results against the expectation.",
+          "sources": ["docs/phases/phase-6-explorer-IMPLEMENTATION.md"],
+          "figures": [
+            {
+              "text": "November 9, 2026",
+              "source": "docs/phases/phase-6-explorer-IMPLEMENTATION.md",
+              "match": "Written 2026-11-09 by Claude"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "M6",
@@ -48,19 +707,402 @@
         "37"
       ],
       "also": [],
-      "blocks": []
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": ["20a"],
+          "text": "The pre-registered rule found no case. The search ran once, on October 16, 2026, through the SEC's full-text search, for three types of decision: a plant closure or restructuring (two cases wanted), an investment or retooling (two), and a workforce change the company put down to AI (one). No candidate passed every criterion. The shortfall, 2 closures, 2 retooling cases and 1 AI case, is reported as the rule's result and never filled.",
+          "lead": "First, the result of the rule.",
+          "sources": [
+            "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+            "docs/phases/evidence/phase-5/selection-public.json"
+          ],
+          "figures": [
+            {
+              "text": "October 16, 2026",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "Stage B: 2026-10-16, the search"
+            },
+            {
+              "text": "2",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "shortfalls 2 (closure), 2 (retool), 1 (ai)"
+            },
+            {
+              "text": "1",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "shortfalls 2 (closure), 2 (retool), 1 (ai)"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["20"],
+          "text": "sjtroxel then chose to relax the rule in logged steps, rather than close the study with no case, until it had three to five cases. Each step is written down with what it changed, why, and what it let in. Five cases came out of it, all plant closures, so the retooling and AI types have no case at all. Each case carries the label \"exploratory\", with the step that selected it, everywhere it appears. The cases are readings of the protocol applied to real decisions, never part of the 16 main comparisons.",
+          "lead": "Then, five exploratory cases.",
+          "sources": [
+            "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+            "experiment/results/cases/cases.json"
+          ],
+          "figures": [
+            {
+              "text": "16",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "16 primary comparisons"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["20b"],
+          "text": "Three of the five, pre-11, pre-25 and pre-224, were first announced before Haiku 5.5's training cut-off of June 2026, so the model may have read about them. The plan's protection, a window that opened only after every model's cut-off, was replaced for these three by a knowledge probe: both official models, and the model that wrote the case summaries, were each asked three times what they knew of the decision, and none showed that it knew. A probe that finds no recall does not prove there is none.",
+          "lead": "What the models may already know.",
+          "sources": [
+            "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+            "experiment/results/cases/cases.json"
+          ],
+          "figures": [
+            {
+              "text": "June 2026",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "June 2026"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["19"],
+          "text": "Companies must disclose some decisions, such as a closure that brings exit costs, and need not disclose others. So a search of filings finds decisions taken and announced, not the options a company weighed and turned down, and not its intentions. Five cases cannot stand for all companies, and they are not offered as a sample of anything.",
+          "lead": "What filings can and cannot show.",
+          "sources": ["experiment/protocol/protocol-v1.md"]
+        },
+        {
+          "kind": "p",
+          "ledger": ["24", "29", "25", "30"],
+          "text": "The search for a scenario's total reads only the passages that a fixed list of search terms reaches, and a total stated in a part of a document no term reached is missed. A decision first mentioned only on an earnings call can also be missed, since call transcripts were out of scope. Each filing is read in excerpts, and an excerpt can leave out a reason given elsewhere in the same report, so the reader may not see why a decision was or was not a real choice (criterion 3); it changed no outcome. And one decision was filed twice and found as two candidates; no rule was written for that, both failed for another reason, and it did not happen again.",
+          "lead": "What the search can miss.",
+          "sources": ["docs/phases/phase-5-case-building-search-IMPLEMENTATION.md", "docs/KNOWN-GAPS.md"],
+          "figures": [
+            {
+              "text": "criterion 3",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "(3) a real decision with real"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["26"],
+          "text": "The independent reader is Gemini 3.1 Pro, another vendor's model. It reads every rejection on a judgment criterion and every case's mapping of what the company did. Its brief asks it to read each mapping blind first, before the source; that is asked, not enforced. Its vendor does not state its training cut-off; it was inferred from the model's release date, February 19, 2026, which falls before the search window.",
+          "lead": "The independent reader.",
+          "sources": ["docs/phases/phase-5-case-building-search-IMPLEMENTATION.md"],
+          "figures": [
+            {
+              "text": "3.1",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "Gemini 3.1 Pro"
+            },
+            {
+              "text": "February 19, 2026",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "released 2026-02-19"
+            }
+          ]
+        },
+        {
+          "kind": "quote",
+          "ledger": ["32"],
+          "lead": "Before any decision run, each official model was given the case's dossier and asked, three times:",
+          "source": "experiment/protocol/protocol-v1.md",
+          "texts": ["Which company is this? If you are not sure, say unknown."]
+        },
+        {
+          "kind": "p",
+          "ledger": ["32", "27"],
+          "text": "A case fails if any reply names its company. One case, closure-19, failed the first time, was made coarser by a fixed procedure, and passed the second time. The check sent the dossier file itself rather than the decision prompt's system text; the dossier's words are the same in both. A reply counted as naming the company if it gave the name \"written in full or in a form a reader would take for it\", and a listed word used only in its ordinary sense did not count: the brief's stated reading of the protocol's definition, made before any reply was read.",
+          "sources": [
+            "experiment/protocol/protocol-v1.md",
+            "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+            "docs/phases/phase-5.5-case-runs-IMPLEMENTATION.md"
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["28"],
+          "text": "The case summaries were written by Claude Sonnet 5.5, from the company's filings dated before the decision, and it was never told the outcome. It comes from the main model's vendor, so a Claude model summarizes for a Claude model. The guards that were measured are the recognition check above and a search of each summary for words that give the outcome away.",
+          "sources": ["docs/phases/phase-5-case-building-search-IMPLEMENTATION.md"],
+          "figures": [
+            {
+              "text": "5.5",
+              "source": "docs/phases/phase-5-case-building-search-IMPLEMENTATION.md",
+              "match": "Claude Sonnet 5.5 through Anthropic's API"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["21"],
+          "text": "The selection logs are published by case type, without names: one for the pre-registered search and one for the exploratory steps.",
+          "sources": [
+            "docs/phases/evidence/phase-5/selection-public.json",
+            "docs/phases/evidence/phase-5/exploratory-public.json"
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["33"],
+          "text": "No case's dossier is published, so no real case can be re-run from published inputs. The plan promised that the experiment could be re-run from what it publishes: for the made-up company it can, and for the real cases it cannot. Each dossier is withheld because its figures, with the scale removed, match fewer than 20 companies in the SEC's structured data, or could not be confirmed to match more.",
+          "lead": "Why no case can be re-run.",
+          "sources": ["experiment/results/cases/cases.json", "docs/phases/evidence/phase-5.5/run-log.md"],
+          "figures": [
+            {
+              "text": "20",
+              "source": "experiment/results/cases/cases.json",
+              "match": "fewer than 20 filers"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["34"],
+          "text": "Of 1,500 memos the models wrote on the cases, 263 are held back. They were held because they repeat their case's text while every dossier is withheld, not because any was found to name a company. The rule that holds them cannot tell a placeholder label from a product term, so it holds both.",
+          "lead": "Held memos.",
+          "sources": ["docs/phases/evidence/phase-5.5/run-log.md"],
+          "figures": [
+            {
+              "text": "1,500",
+              "source": "docs/phases/evidence/phase-5.5/run-log.md",
+              "match": "1,237 of 1,500 memos published, 263 held"
+            },
+            {
+              "text": "263",
+              "source": "docs/phases/evidence/phase-5.5/run-log.md",
+              "match": "263 held"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["37"],
+          "text": "The published case memos repeat words from their withheld dossiers. A count found that 845 of the 1,237 published memos hold at least one distinctive word from their case's dossier that the short description leaves out. That is an upper bound, since a word can be distinctive without pointing anywhere. For that reason this site shows no real-case memo text, only counts; the copies already published in the repository stay as published. sjtroxel read the private reports and found nothing that points to a specific company or plant; that is his judgment, not a check.",
+          "lead": "Memos that echo their dossiers.",
+          "sources": ["docs/KNOWN-GAPS.md", "docs/phases/evidence/phase-6/memo-echoes.json"],
+          "figures": [
+            {
+              "text": "845",
+              "source": "docs/KNOWN-GAPS.md",
+              "match": "845 of 1,237 published memos hold a distinctive token"
+            },
+            {
+              "text": "1,237",
+              "source": "docs/KNOWN-GAPS.md",
+              "match": "845 of 1,237 published memos"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["35"],
+          "text": "Each public case description was searched for its company, three searches each and three more where one hit, once, with one search tool, on November 2, 2026. A hit kept one description off the site. Search results change over time.",
+          "lead": "The search check on the descriptions.",
+          "sources": ["docs/phases/evidence/phase-5.5/run-log.md"],
+          "figures": [
+            {
+              "text": "November 2, 2026",
+              "source": "docs/phases/evidence/phase-5.5/run-log.md",
+              "match": "the coarse descriptions, 2026-11-02"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["36"],
+          "text": "Two behaviors of the frozen matcher show in the case results, and neither changes a label. First, when all five goals are exactly as far from the company's decision, as in Haiku 5.5's main reading of every case, the code still names a nearest goal, by letter order, and the \"depends on reading\" flag compares those arbitrary picks; there, the flag does not mean that the reading changes the result, and the case pages show no nearest goal. Second, a reading with only one observable line still counts that line in the distance, which pulls the distance toward a match by construction; closure-19's second reading is the one such case, and its distances cannot be compared with the other cases'.",
+          "lead": "Two behaviors of the matcher.",
+          "sources": ["docs/KNOWN-GAPS.md"]
+        }
+      ]
     },
     {
       "id": "M7",
       "anchor": "checking-it-yourself",
       "ledger": [],
       "also": ["Delivers 2", "Delivers 3", "DoD 2", "DoD 3", "DoD 8"],
-      "blocks": []
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": [],
+          "text": "Every response the models gave on the made-up company, in the official runs and the pilot, is published in full in the repository: one file per API call, each with its request, its reply and its provenance. A manifest lists every file with its sha256 hash, so anyone can check that a file is the one the runs stored; the command hc site raw-verify does it for all of them.",
+          "sources": ["docs/phases/evidence/phase-4/raw-manifest.json"]
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "text": "The results can be computed again from that text, with no network and no credentials. A test in every CI check runs the frozen analysis on the published records and requires it to write all three official results files byte for byte, and runs the frozen validator again on every recorded tool call and requires the recorded result. It was shown to fail when a single digit of a results file was changed by hand.",
+          "lead": "Scoring it again.",
+          "sources": ["tests/test_analysis_rescoring.py", ".github/workflows/ci.yml"]
+        },
+        {
+          "kind": "pending",
+          "ledger": [],
+          "note": "step 7: the prompt-reconstruction check, its samples and its result"
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "text": "Every grid result can be computed again from the published records and the tagged code. Two things cannot be repeated: a run in the identical program image, since two images are deleted (see the models section), and any real case, since no dossier is published.",
+          "lead": "What can and cannot be re-run."
+        }
+      ]
     },
-    { "id": "M8", "anchor": "cost", "ledger": ["38", "39"], "also": [], "blocks": [] },
-    { "id": "M9", "anchor": "known-limits", "ledger": [], "also": ["gathers"], "blocks": [] },
-    { "id": "M10", "anchor": "words", "ledger": [], "also": ["Delivers 7"], "blocks": [] },
-    { "id": "M11", "anchor": "video", "ledger": [], "also": ["Delivers 5"], "blocks": [] },
-    { "id": "M12", "anchor": "changes", "ledger": [], "also": ["Delivers 10"], "blocks": [] }
+    {
+      "id": "M8",
+      "anchor": "cost",
+      "ledger": ["38", "39"],
+      "also": [],
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": ["39"],
+          "text": "Measured spend through the real-case runs was at most about $46, read from the three bills on November 3, 2026. That overstates it: it counts the whole of a cloud account the project shares with another project. It is under the plan's $60 re-plan point and its $80 ceiling. Building this site made no model call. The final figure, with the monthly cost of keeping the site up, comes with the write-up.",
+          "sources": ["docs/phases/evidence/phase-5.5/cost.md"],
+          "figures": [
+            {
+              "text": "$46",
+              "source": "docs/phases/evidence/phase-5.5/cost.md",
+              "match": "at most about $46"
+            },
+            {
+              "text": "November 3, 2026",
+              "source": "docs/phases/evidence/phase-5.5/cost.md",
+              "match": "2026-11-03"
+            },
+            {
+              "text": "$60",
+              "source": "docs/phases/evidence/phase-5.5/cost.md",
+              "match": "$60 re-plan point"
+            },
+            {
+              "text": "$80",
+              "source": "docs/phases/evidence/phase-5.5/cost.md",
+              "match": "$80 ceiling"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": ["38"],
+          "text": "The plan had a cut list, things to drop if money ran short. Nothing on it was cut. One change looks like a cut and is not: the second model family changed from Nova Pro to gpt-oss-120b because Bedrock was unavailable, a substitution the protocol provides for. All five cases that ran are exploratory.",
+          "sources": ["docs/phases/evidence/phase-5.5/cost.md", "experiment/protocol/protocol-v1.md"]
+        }
+      ]
+    },
+    {
+      "id": "M9",
+      "anchor": "known-limits",
+      "ledger": [],
+      "also": ["gathers"],
+      "blocks": [
+        {
+          "kind": "list",
+          "ledger": [],
+          "lead": "Every limit named above, in one list:",
+          "items": [
+            {
+              "text": "The results are about two models, a small current one and an open-weights one, under five plainly stated goals; not about executives, and not about larger models.",
+              "anchor": "models-dates-and-runs"
+            },
+            {
+              "text": "The test's text was drafted by the main model's vendor.",
+              "anchor": "objectives"
+            },
+            {
+              "text": "The made-up company has two known simplifications.",
+              "anchor": "company-and-scenarios"
+            },
+            {
+              "text": "Two program images are deleted, so no run can be repeated in the identical image.",
+              "anchor": "models-dates-and-runs"
+            },
+            {
+              "text": "The chance of a false split is held approximately, not exactly.",
+              "anchor": "statistics"
+            },
+            {
+              "text": "\"No split\" is hard to reach, and out of reach where the run count is capped.",
+              "anchor": "statistics"
+            },
+            {
+              "text": "gpt-oss-120b's failures left one comparison not assessable.",
+              "anchor": "statistics"
+            },
+            {
+              "text": "The rule for the results against the expectation was written after the results.",
+              "anchor": "statistics"
+            },
+            {
+              "text": "No case met the pre-registered rule; the five exploratory cases are all closures, and three may be in the main model's training data.",
+              "anchor": "real-cases"
+            },
+            {
+              "text": "No real case can be re-run, and the published case memos repeat words from their withheld dossiers.",
+              "anchor": "real-cases"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M10",
+      "anchor": "words",
+      "ledger": [],
+      "also": ["Delivers 7"],
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": [],
+          "text": "This site says \"goal\" where the protocol says \"objective\"; they mean the same thing. It uses the plain or standard word for a business term and avoids words that carry a political charge for business readers: it never uses \"ESG\" or \"stakeholder capitalism\", and \"stakeholder\" appears only in the Business Roundtable's own sense or to describe goals B and D. Where a filing uses a softened word for a layoff or a closure, the project uses the plain one in its own voice. A model's memo is its own writing and is never edited. The word list was checked against current usage on October 3, 2026.",
+          "sources": ["docs/planning/06-NARRATIVE-AND-VOCABULARY.md"],
+          "figures": [
+            {
+              "text": "October 3, 2026",
+              "source": "docs/planning/06-NARRATIVE-AND-VOCABULARY.md",
+              "match": "what the live check found (2026-10-03)"
+            }
+          ]
+        },
+        {
+          "kind": "pending",
+          "ledger": [],
+          "note": "step 10: the vocabulary recheck before go-live, dated"
+        }
+      ]
+    },
+    {
+      "id": "M11",
+      "anchor": "video",
+      "ledger": [],
+      "also": ["Delivers 5"],
+      "blocks": [
+        {
+          "kind": "pending",
+          "ledger": [],
+          "note": "step 9: the video, its label naming every tool, and its transcript"
+        }
+      ]
+    },
+    {
+      "id": "M12",
+      "anchor": "changes",
+      "ledger": [],
+      "also": ["Delivers 10"],
+      "blocks": [
+        {
+          "kind": "p",
+          "ledger": [],
+          "text": "This list starts when the site goes live. Each entry will give its date and say whether it changed only how something is shown or changed a published number, and for a number, under which rule of the protocol."
+        }
+      ]
+    }
   ]
 }

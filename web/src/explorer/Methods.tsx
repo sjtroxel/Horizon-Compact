@@ -1,11 +1,14 @@
 /**
- * The methods page, `/methods/` (Phase 6.5 IMPLEMENTATION doc section 3, decision E; step 4 builds its frame).
+ * The methods page, `/methods/` (Phase 6.5 IMPLEMENTATION doc section 3, decision E; step 4 built its frame, step 5
+ * its words).
  *
- * The frame is the outline's thirteen sections (methods.json), each with an anchor, his title (his.json) and a body.
- * **No sentence of the page is written in this step**: a title or a body that is not written yet shows as a visibly
- * marked placeholder (`METHODS_PLACEHOLDER`), so nobody takes this preview for a finished page. Two sections carry
- * data now, because they need no prose: the models, settings, dates and run counts (M3) and the published raw text's
- * totals and links (M7). Every number there is a field of a data file, shown through format.ts; nothing is typed.
+ * The page is the outline's thirteen sections (methods.json), each with an anchor, his title (his.json) and its
+ * blocks of words. A block carries the disclosure ledger's ids it states (doc section 1), and every figure in its text
+ * names where it comes from: a file and the words there that hold it, or a count of the results files. methods.test.ts
+ * checks each one against its source, so no number in the prose is typed without a trace. A part not written yet (one
+ * that a later step fills) is a `pending` block and shows as a visibly marked placeholder (`METHODS_PLACEHOLDER`).
+ * Two sections also carry data: the models, settings, dates and run counts (M3) and the published raw text's totals
+ * and links (M7). Every number there is a field of a data file, shown through format.ts; nothing is typed.
  *
  * Both models are shown, the main one first, one under the other and never added together. There is no model switch.
  */
@@ -19,7 +22,57 @@ import outlineJson from "./methods.json";
 import { modelName, orderedModels } from "./models";
 import { Title } from "./parts";
 
-/** One section of the outline: the file's shape, which step 5's test also reads. */
+/**
+ * Where a figure in a block's text comes from. Either a file of the repository and the words in it that hold the
+ * figure (`match`, or the figure's own text when it is absent), or a count made from the results files (`count`),
+ * which the test recomputes from the explorer's data.
+ */
+export interface Figure {
+  text: string;
+  source?: string;
+  match?: string;
+  count?: CountSpec;
+}
+
+/** A count of runs or cells, over one sweep of one model, one scenario or all of them. */
+export interface CountSpec {
+  sweep: "grid" | "thinking";
+  model: string;
+  scenario?: string;
+  measure:
+    | "attempted"
+    | "unsuccessful"
+    | "unsuccessful_percent"
+    | "cells_over_limit"
+    | "cells_with_unsuccessful"
+    | "runs_per_cell";
+}
+
+interface BlockBase {
+  /** The disclosure ledger's ids (doc section 1) this block states; empty for a block the ledger does not name. */
+  ledger: string[];
+  /** Files of the repository the block rests on, linked at the end of its section. */
+  sources?: string[];
+  figures?: Figure[];
+}
+
+/** A block of the page's words. */
+export type Block =
+  | (BlockBase & { kind: "p"; lead?: string; text: string })
+  /** Words quoted exactly: each text is found, word for word, in `source` (the test checks it). */
+  | (BlockBase & { kind: "quote"; lead?: string; source: string; texts: string[] })
+  /** A list; an item may link to the section that explains it. */
+  | (BlockBase & { kind: "list"; lead?: string; items: Array<{ text: string; anchor?: string }> })
+  /** His scope sentence (his.json), shown first. */
+  | (BlockBase & { kind: "scope" })
+  /** The five goals, from index.json's objectives. */
+  | (BlockBase & { kind: "objectives" })
+  /** The four scenarios in brief (his.json) and each one's main result (index.json). */
+  | (BlockBase & { kind: "scenarios" })
+  /** A part a later step writes: the placeholder shows, and `note` says which step (it is never shown). */
+  | (BlockBase & { kind: "pending"; note: string });
+
+/** One section of the outline: the file's shape, which the tests also read. */
 export interface OutlineSection {
   id: string;
   anchor: string;
@@ -27,11 +80,11 @@ export interface OutlineSection {
   ledger: string[];
   /** What else the outline's column names (Delivers and definition-of-done rows) when it gives no ledger line. */
   also: string[];
-  /** The section's blocks of words, written in step 5. Empty until then: the body placeholder shows. */
-  blocks: unknown[];
+  /** The section's blocks of words. A section with none shows the body placeholder. */
+  blocks: Block[];
 }
 
-export const OUTLINE: readonly OutlineSection[] = outlineJson.sections;
+export const OUTLINE: readonly OutlineSection[] = outlineJson.sections as unknown as OutlineSection[];
 
 const markClass = (text: string): string | undefined =>
   isMethodsPlaceholder(text) ? "methods-placeholder" : undefined;
@@ -55,39 +108,68 @@ function settingText(value: MethodsSetting): string {
   return String(value);
 }
 
-function SettingsTable({ sweep }: { sweep: MethodsSweep }) {
+function SettingRows({ entries }: { entries: Array<[string, MethodsSetting]> }) {
   return (
-    <div className="x-table-wrap">
-      <table className="x-table">
-        <caption>{L.methodsSettingsCaption(modelName(sweep.model_key))}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{L.methodsSettingColumn}</th>
-            <th scope="col">{L.methodsValueColumn}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.entries(sweep.settings).map(([field, value]) => (
-            <tr key={field}>
-              <th scope="row">{L.methodsSettingLabels[field] ?? field}</th>
-              <td className="break">{settingText(value)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      {entries.map(([field, value]) => (
+        <tr key={field}>
+          <th scope="row">{L.methodsSettingLabels[field] ?? field}</th>
+          <td className="break">{settingText(value)}</td>
+        </tr>
+      ))}
+    </>
   );
 }
 
-function ServedTables({ sweep }: { sweep: MethodsSweep }) {
+/** The settings a reader needs first, then every other recorded setting in a closed details part (none is dropped). */
+function SettingsTable({ sweep, name }: { sweep: MethodsSweep; name: string }) {
+  const all = Object.entries(sweep.settings);
+  const main = all.filter(([field]) => L.methodsSettingsMain.includes(field));
+  const more = all.filter(([field]) => !L.methodsSettingsMain.includes(field));
+  const head = (
+    <thead>
+      <tr>
+        <th scope="col">{L.methodsSettingColumn}</th>
+        <th scope="col">{L.methodsValueColumn}</th>
+      </tr>
+    </thead>
+  );
+  return (
+    <>
+      <div className="x-table-wrap">
+        <table className="x-table methods-kv">
+          <caption>{L.methodsSettingsCaption(name)}</caption>
+          {head}
+          <tbody>
+            <SettingRows entries={main} />
+          </tbody>
+        </table>
+      </div>
+      {more.length > 0 && (
+        <details className="methods-more">
+          <summary>{L.methodsSettingsMore}</summary>
+          <div className="x-table-wrap">
+            <table className="x-table methods-kv">
+              <caption>{L.methodsSettingsCaption(name)}</caption>
+              {head}
+              <tbody>
+                <SettingRows entries={more} />
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+    </>
+  );
+}
+
+function ServedTables({ sweep, name }: { sweep: MethodsSweep; name: string }) {
   return (
     <>
       {Object.entries(sweep.served).map(([field, values]) => (
         <div className="x-table-wrap" key={field}>
           <table className="x-table">
-            <caption>
-              {L.methodsServedCaption(modelName(sweep.model_key), L.methodsServedLabels[field] ?? field)}
-            </caption>
+            <caption>{L.methodsServedCaption(name, L.methodsServedLabels[field] ?? field)}</caption>
             <thead>
               <tr>
                 <th scope="col">{L.methodsServedColumn}</th>
@@ -113,12 +195,12 @@ function ServedTables({ sweep }: { sweep: MethodsSweep }) {
   );
 }
 
-function DatesTable({ sweep }: { sweep: MethodsSweep }) {
+function DatesTable({ sweep, name }: { sweep: MethodsSweep; name: string }) {
   const span = sessionSpan(sweep.sessions);
   return (
     <div className="x-table-wrap">
-      <table className="x-table">
-        <caption>{L.methodsDatesCaption(modelName(sweep.model_key))}</caption>
+      <table className="x-table methods-kv">
+        <caption>{L.methodsDatesCaption(name)}</caption>
         <tbody>
           {span !== null && (
             <>
@@ -162,11 +244,11 @@ function BreakableType({ text }: { text: string }) {
 }
 
 /** The runs of each scenario of one sweep, read from its results files' cells and summed (never derived further). */
-function CountsTable({ model, files }: { model: string; files: readonly GridFile[] }) {
+function CountsTable({ name, files }: { name: string; files: readonly GridFile[] }) {
   return (
     <div className="x-table-wrap">
       <table className="x-table">
-        <caption>{L.methodsCountsCaption(modelName(model))}</caption>
+        <caption>{L.methodsCountsCaption(name)}</caption>
         <thead>
           <tr>
             <th scope="col">{L.methodsScenarioColumn}</th>
@@ -210,13 +292,22 @@ function CountsTable({ model, files }: { model: string; files: readonly GridFile
   );
 }
 
-function SweepData({ sweep, files }: { sweep: MethodsSweep; files: readonly GridFile[] }) {
+/** One sweep's four parts. `name` captions every table: the model's name, or the side study's name for it. */
+function SweepData({
+  sweep,
+  files,
+  name,
+}: {
+  sweep: MethodsSweep;
+  files: readonly GridFile[];
+  name: string;
+}) {
   return (
     <>
-      <SettingsTable sweep={sweep} />
-      <ServedTables sweep={sweep} />
-      <DatesTable sweep={sweep} />
-      <CountsTable model={sweep.model_key} files={files} />
+      <SettingsTable sweep={sweep} name={name} />
+      <ServedTables sweep={sweep} name={name} />
+      <DatesTable sweep={sweep} name={name} />
+      <CountsTable name={name} files={files} />
     </>
   );
 }
@@ -256,13 +347,13 @@ function ModelsData({ loaded }: { loaded: Loaded }) {
       {loaded.grids.map(({ sweep, files }) => (
         <Fragment key={sweep.sweep_id}>
           <h3>{modelName(sweep.model_key)}</h3>
-          <SweepData sweep={sweep} files={files} />
+          <SweepData sweep={sweep} files={files} name={modelName(sweep.model_key)} />
         </Fragment>
       ))}
       {loaded.thinking.map(({ sweep, files }) => (
         <Fragment key={sweep.sweep_id}>
           <h3>{L.methodsSideStudy}</h3>
-          <SweepData sweep={sweep} files={files} />
+          <SweepData sweep={sweep} files={files} name={L.methodsSideStudyModel(modelName(sweep.model_key))} />
         </Fragment>
       ))}
     </div>
@@ -276,7 +367,7 @@ function RawData({ raw }: { raw: MethodsFile["raw_text"] }) {
   return (
     <div className="methods-data" data-part="data">
       <div className="x-table-wrap">
-        <table className="x-table">
+        <table className="x-table methods-kv">
           <caption>{L.methodsRawCaption}</caption>
           <tbody>
             <tr>
@@ -309,20 +400,188 @@ function RawData({ raw }: { raw: MethodsFile["raw_text"] }) {
 // ----------------------------------------------------------------------------------------------------------------
 // The sections
 
-function Section({ section, children }: { section: OutlineSection; children?: ReactNode }) {
+function Lead({ text }: { text: string | undefined }) {
+  return text === undefined ? null : (
+    <>
+      <strong>{text}</strong>{" "}
+    </>
+  );
+}
+
+function ObjectivesTable({ index }: { index: DataIndex }) {
+  return (
+    <div className="x-table-wrap">
+      <table className="x-table">
+        <caption>{L.methodsGoalsCaption}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{L.methodsGoalColumn}</th>
+            <th scope="col">{L.methodsWhoColumn}</th>
+            <th scope="col">{L.methodsWhenColumn}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {index.objectives.map((o) => (
+            <tr key={o.id}>
+              <th scope="row">
+                {o.id}: {L.objectiveNames[o.id] ?? o.id}
+              </th>
+              {o.who === null || o.when === null ? (
+                <td colSpan={2}>{L.methodsNoGoal}</td>
+              ) : (
+                <>
+                  <td>{o.who}</td>
+                  <td>{o.when}</td>
+                </>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ScenarioList({ index }: { index: DataIndex }) {
+  return (
+    <ul className="methods-list">
+      {index.scenarios.map((s) => (
+        <li key={s.scenario_id}>
+          <strong>{L.scenarioNames[s.scenario_id] ?? s.scenario_id}.</strong>{" "}
+          {explorerHis.scenarioBriefs[s.scenario_id as keyof typeof explorerHis.scenarioBriefs]}{" "}
+          {L.methodsScenarioResult(s.primary_outcome, String(Math.round(s.threshold * 100)))}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** One block of words, as methods.json has it. `data-block` names its kind, so a test can find every block. */
+function BlockView({ block, index }: { block: Block; index: DataIndex }) {
+  switch (block.kind) {
+    case "p":
+      return (
+        <p data-block="p">
+          <Lead text={block.lead} />
+          {block.text}
+        </p>
+      );
+    case "quote":
+      return (
+        <div data-block="quote">
+          {block.lead !== undefined && (
+            <p>
+              <strong>{block.lead}</strong>
+            </p>
+          )}
+          {block.texts.map((text) => (
+            <blockquote key={text} className="methods-quote">
+              <p>{text}</p>
+            </blockquote>
+          ))}
+        </div>
+      );
+    case "list":
+      return (
+        <div data-block="list">
+          {block.lead !== undefined && (
+            <p>
+              <strong>{block.lead}</strong>
+            </p>
+          )}
+          <ul className="methods-list">
+            {block.items.map((item) => (
+              <li key={item.text}>
+                {item.text}
+                {item.anchor !== undefined && (
+                  <>
+                    {" "}
+                    <a href={`#${item.anchor}`}>{L.methodsSeeSection}</a>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    case "scope":
+      return (
+        <p data-block="scope" className="methods-scope">
+          {explorerHis.scopeSentence}
+        </p>
+      );
+    case "objectives":
+      return (
+        <div data-block="objectives">
+          <ObjectivesTable index={index} />
+        </div>
+      );
+    case "scenarios":
+      return (
+        <div data-block="scenarios">
+          <ScenarioList index={index} />
+        </div>
+      );
+    case "pending":
+      return (
+        <p className="methods-placeholder" data-placeholder="body" data-block="pending">
+          {METHODS_PLACEHOLDER.body}
+        </p>
+      );
+  }
+}
+
+/** A section's sources, each once, in the order its blocks name them. */
+function sourcesOf(section: OutlineSection): string[] {
+  const seen: string[] = [];
+  for (const block of section.blocks)
+    for (const source of block.sources ?? []) if (!seen.includes(source)) seen.push(source);
+  return seen;
+}
+
+function Section({
+  section,
+  index,
+  children,
+}: {
+  section: OutlineSection;
+  index: DataIndex;
+  children?: ReactNode;
+}) {
   const title = explorerHis.methods.sectionTitles[section.id];
   if (title === undefined) throw new Error(`his.json has no title for methods section ${section.id}`);
-  if (section.blocks.length > 0) {
-    // Step 5 gives blocks a renderer; until it does, a block must not be dropped without a word.
-    throw new Error(`methods section ${section.id} has blocks and the page has no renderer for them yet`);
-  }
+  const sources = sourcesOf(section);
+  const headingId = `${section.anchor}-title`;
   return (
-    // No aria-labelledby: a labelled section is a landmark, and until his titles replace the placeholders thirteen of
-    // them would share one name (axe: landmark-unique). The heading gives the structure.
-    <section id={section.anchor} className="x-section methods-section" tabIndex={-1}>
-      <h2 className={markClass(title)}>{title}</h2>
-      <BodyPlaceholder />
+    <section
+      id={section.anchor}
+      className="x-section methods-section"
+      tabIndex={-1}
+      aria-labelledby={headingId}
+    >
+      <h2 id={headingId} className={markClass(title)}>
+        {title}
+      </h2>
+      {section.blocks.length === 0 ? (
+        <BodyPlaceholder />
+      ) : (
+        section.blocks.map((block, i) => <BlockView key={i} block={block} index={index} />)
+      )}
       {children}
+      {sources.length > 0 && (
+        <div className="methods-sources">
+          <p>{L.methodsSourcesLabel}</p>
+          <ul className="x-sources">
+            {sources.map((source) => (
+              <li key={source}>
+                <a href={mainFileUrl(source)} target="_blank" rel="noopener noreferrer">
+                  <code>{source}</code>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
@@ -390,7 +649,7 @@ export function MethodsView({ index, data }: MethodsViewProps) {
         <p role="status">{L.methodsLoading}</p>
       ) : (
         OUTLINE.map((section) => (
-          <Section key={section.id} section={section}>
+          <Section key={section.id} section={section} index={index}>
             {section.id === "M3" && <ModelsData loaded={loaded} />}
             {section.id === "M7" && <RawData raw={loaded.methods.raw_text} />}
           </Section>
