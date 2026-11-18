@@ -117,9 +117,15 @@ describe("the ledger placement (doc section 1, held to doc section 3)", () => {
   });
 });
 
-/** Text from a repository file as prose reads it: markdown emphasis and code marks dropped, white space collapsed. */
+/**
+ * Text from a repository file as prose reads it: markdown quote marks at a line's start, emphasis and code marks
+ * dropped, white space collapsed.
+ */
 function plain(text: string): string {
-  return text.replace(/[*`]/g, "").replace(/\s+/g, " ");
+  return text
+    .replace(/^[ \t]*>[ \t]?/gm, "")
+    .replace(/[*`]/g, "")
+    .replace(/\s+/g, " ");
 }
 const fileCache = new Map<string, string>();
 function repoText(path: string): string {
@@ -269,16 +275,11 @@ describe("the page's words", () => {
 });
 
 describe("the placeholder census", () => {
-  // Every place a placeholder still stands. After step 5 these are the parts a later step writes: the video and its
-  // link (step 9), the prompt-reconstruction check (step 7) and the vocabulary recheck (step 10). Go-live (doc section
+  // Every place a placeholder still stands: the parts a later step writes, the video and its link (step 9) and the
+  // vocabulary recheck (step 10). Step 7 wrote M7's (the prompt-reconstruction check, 2026-11-18). Go-live (doc section
   // 7) must make `check-dist` refuse any placeholder in dist-explorer/; that refusal is not added yet, because it would
   // fail `make check` while these stand.
-  const expected = [
-    "methods.json M0 pending",
-    "methods.json M7 pending",
-    "methods.json M10 pending",
-    "methods.json M11 pending",
-  ];
+  const expected = ["methods.json M0 pending", "methods.json M10 pending", "methods.json M11 pending"];
 
   function collect(value: unknown, path: string, found: string[], odd: string[]) {
     if (typeof value === "string") {
@@ -290,7 +291,7 @@ describe("the placeholder census", () => {
     }
   }
 
-  it("is the four parts later steps write, and nothing else: his titles and the page's title are written", () => {
+  it("is the three parts later steps write, and nothing else: his titles and the page's title are written", () => {
     const found: string[] = [];
     const odd: string[] = [];
     collect(hisJson, "", found, odd);
@@ -305,7 +306,7 @@ describe("the placeholder census", () => {
 
   it("says, for each part still to write, which step writes it", () => {
     for (const { section, block } of allBlocks)
-      if (block.kind === "pending") expect(block.note, section).toMatch(/^step (7|9|10): /);
+      if (block.kind === "pending") expect(block.note, section).toMatch(/^step (9|10): /);
   });
 
   it("keeps the one exported constant for the placeholders", () => {

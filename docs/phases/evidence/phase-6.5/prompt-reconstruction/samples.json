@@ -1,0 +1,256 @@
+[
+  {
+    "sample": "grid-haiku-5-5-s1",
+    "kind": "decision",
+    "model": "Claude Haiku 5.5",
+    "model_key": "haiku-5-5",
+    "model_id": "claude-haiku-5-5",
+    "sweep_id": "grid-haiku-5-5-0b99fabb",
+    "run_id": "r-025287a73180",
+    "scenario_id": "s1",
+    "objective_id": "A",
+    "wording_variant_id": "w2",
+    "menu_order": [
+      "eliminate",
+      "move_keep_pay",
+      "move_plant_pay"
+    ],
+    "option_order": [],
+    "menu_order_seed": "14440043416216082630",
+    "sweep_kind": "grid"
+  },
+  {
+    "sample": "grid-haiku-5-5-s2",
+    "kind": "decision",
+    "model": "Claude Haiku 5.5",
+    "model_key": "haiku-5-5",
+    "model_id": "claude-haiku-5-5",
+    "sweep_id": "grid-haiku-5-5-0b99fabb",
+    "run_id": "r-02014c24e067",
+    "scenario_id": "s2",
+    "objective_id": "D",
+    "wording_variant_id": "w1",
+    "menu_order": [
+      "suppliers",
+      "lower_profit",
+      "cut_wages_hours",
+      "payouts",
+      "eliminate_roles",
+      "cut_env_projects",
+      "cut_rnd",
+      "keep_people",
+      "raise_prices"
+    ],
+    "option_order": [],
+    "menu_order_seed": "17566223516578613184",
+    "sweep_kind": "grid"
+  },
+  {
+    "sample": "grid-haiku-5-5-s3",
+    "kind": "decision",
+    "model": "Claude Haiku 5.5",
+    "model_key": "haiku-5-5",
+    "model_id": "claude-haiku-5-5",
+    "sweep_id": "grid-haiku-5-5-0b99fabb",
+    "run_id": "r-0065d100cd6a",
+    "scenario_id": "s3",
+    "objective_id": "B",
+    "wording_variant_id": "w3",
+    "menu_order": [
+      "eliminated",
+      "kept_at_plant",
+      "transferred_to_buyer",
+      "moved_other_plants"
+    ],
+    "option_order": [
+      "sell",
+      "retool",
+      "close"
+    ],
+    "menu_order_seed": "9881125279885529213",
+    "sweep_kind": "grid"
+  },
+  {
+    "sample": "grid-haiku-5-5-s4",
+    "kind": "decision",
+    "model": "Claude Haiku 5.5",
+    "model_key": "haiku-5-5",
+    "model_id": "claude-haiku-5-5",
+    "sweep_id": "grid-haiku-5-5-0b99fabb",
+    "run_id": "r-00f155c05972",
+    "scenario_id": "s4",
+    "objective_id": "C",
+    "wording_variant_id": "w2",
+    "menu_order": [
+      "increase_payouts",
+      "lower_prices",
+      "add_rnd",
+      "retain_cash",
+      "pay_suppliers_more",
+      "raise_wages",
+      "env_projects",
+      "cut_payouts",
+      "cut_rnd",
+      "suppliers",
+      "training",
+      "program",
+      "cut_wages_hours",
+      "raise_prices",
+      "cut_env_projects",
+      "eliminate_roles"
+    ],
+    "option_order": [
+      "decline",
+      "fund"
+    ],
+    "menu_order_seed": "12384764362721754743",
+    "sweep_kind": "grid"
+  },
+  {
+    "sample": "grid-gpt-oss-openrouter-s1",
+    "kind": "decision",
+    "model": "gpt-oss-120b",
+    "model_key": "gpt-oss-openrouter",
+    "model_id": "openai/gpt-oss-120b",
+    "sweep_id": "grid-gpt-oss-openrouter-fe599ad2",
+    "run_id": "r-01767b62b553",
+    "scenario_id": "s1",
+    "objective_id": "D",
+    "wording_variant_id": "w1",
+    "menu_order": [
+      "eliminate",
+      "move_keep_pay",
+      "move_plant_pay"
+    ],
+    "option_order": [],
+    "menu_order_seed": "3142808259032909411",
+    "sweep_kind": "grid"
+  },
+  {
+    "sample": "grid-gpt-oss-openrouter-s2",
+    "kind": "decision",
+    "model": "gpt-oss-120b",
+    "model_key": "gpt-oss-openrouter",
+    "model_id": "openai/gpt-oss-120b",
+    "sweep_id": "grid-gpt-oss-openrouter-fe599ad2",
+    "run_id": "r-017fee342bfe",
+    "scenario_id": "s2",
+    "objective_id": "B",
+    "wording_variant_id": "w2",
+    "menu_order": [
+      "raise_prices",
+      "suppliers",
+      "keep_people",
+      "payouts",
+      "cut_wages_hours",
+      "lower_profit",
+      "cut_rnd",
+      "eliminate_roles",
+      "cut_env_projects"
+    ],
+    "option_order": [],
+    "menu_order_seed": "15990953023452926977",
+    "sweep_kind": "grid"
+  },
+  {
+    "sample": "grid-gpt-oss-openrouter-s3",
+    "kind": "decision",
+    "model": "gpt-oss-120b",
+    "model_key": "gpt-oss-openrouter",
+    "model_id": "openai/gpt-oss-120b",
+    "sweep_id": "grid-gpt-oss-openrouter-fe599ad2",
+    "run_id": "r-01614db5fce9",
+    "scenario_id": "s3",
+    "objective_id": "B",
+    "wording_variant_id": "w3",
+    "menu_order": [
+      "kept_at_plant",
+      "moved_other_plants",
+      "eliminated",
+      "transferred_to_buyer"
+    ],
+    "option_order": [
+      "sell",
+      "retool",
+      "close"
+    ],
+    "menu_order_seed": "13860711813388937996",
+    "sweep_kind": "grid"
+  },
+  {
+    "sample": "grid-gpt-oss-openrouter-s4",
+    "kind": "decision",
+    "model": "gpt-oss-120b",
+    "model_key": "gpt-oss-openrouter",
+    "model_id": "openai/gpt-oss-120b",
+    "sweep_id": "grid-gpt-oss-openrouter-fe599ad2",
+    "run_id": "r-000630122fe6",
+    "scenario_id": "s4",
+    "objective_id": "B",
+    "wording_variant_id": "w2",
+    "menu_order": [
+      "cut_wages_hours",
+      "add_rnd",
+      "cut_env_projects",
+      "env_projects",
+      "retain_cash",
+      "program",
+      "suppliers",
+      "raise_wages",
+      "cut_rnd",
+      "raise_prices",
+      "eliminate_roles",
+      "lower_prices",
+      "pay_suppliers_more",
+      "cut_payouts",
+      "increase_payouts",
+      "training"
+    ],
+    "option_order": [
+      "fund",
+      "decline"
+    ],
+    "menu_order_seed": "12665767831533277463",
+    "sweep_kind": "grid"
+  },
+  {
+    "sample": "thinking-haiku-5-5-s1",
+    "kind": "decision",
+    "model": "Claude Haiku 5.5",
+    "model_key": "haiku-5-5",
+    "model_id": "claude-haiku-5-5",
+    "sweep_id": "thinking-haiku-5-5-418caa9c",
+    "run_id": "r-00eed66e1f2d",
+    "scenario_id": "s1",
+    "objective_id": "E",
+    "wording_variant_id": "w2",
+    "menu_order": [
+      "move_plant_pay",
+      "eliminate",
+      "move_keep_pay"
+    ],
+    "option_order": [],
+    "menu_order_seed": "8088587153271427819",
+    "sweep_kind": "thinking"
+  },
+  {
+    "sample": "awareness-haiku-5-5",
+    "kind": "awareness",
+    "model": "Claude Haiku 5.5",
+    "model_key": "haiku-5-5",
+    "model_id": "claude-haiku-5-5",
+    "sweep_id": "awareness-haiku-5-5-0ce6ad12",
+    "run_id": "r-0c7d6fc867d6",
+    "scenario_id": "s1",
+    "objective_id": "C",
+    "wording_variant_id": "w2",
+    "menu_order": [
+      "move_plant_pay",
+      "move_keep_pay",
+      "eliminate"
+    ],
+    "option_order": [],
+    "menu_order_seed": "14833752343971267776",
+    "sweep_kind": "awareness"
+  }
+]

@@ -28,11 +28,14 @@ export const realCasesIndex = readData<CasesIndex>("cases/index.json");
 export function fileFetcher(requested: string[] = []): (path: string) => Promise<Response> {
   return async (path) => {
     requested.push(path);
+    // A file of the build's own source (the methods page's words, which Vitest names by its source path).
     const file = path.startsWith("/data/memos/")
       ? `${WEB_ROOT}explorer-memos/${path.slice("/data/memos/".length)}`
       : path.startsWith("/data/")
         ? `${WEB_ROOT}explorer-data/${path.slice("/data/".length)}`
-        : null;
+        : path.startsWith("/src/explorer/") && path.endsWith(".json")
+          ? `${WEB_ROOT}${path.slice(1)}`
+          : null;
     if (file === null || !existsSync(file)) return { ok: false, status: 404 } as Response;
     const text = readFileSync(file, "utf8");
     return {

@@ -16,75 +16,14 @@ import { Fragment, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { explorerHis, explorerLabels as L, isMethodsPlaceholder, METHODS_PLACEHOLDER } from "./copy";
 import type { DataApi, DataIndex, GridFile, MethodsFile, MethodsSetting, MethodsSweep } from "./data";
+import { SECTIONS } from "./methodsOutline";
+import type { Block, OutlineSection } from "./methodsOutline";
 import { formatCount, formatUtc, sessionSpan, statusCounts } from "./format";
 import { mainFileUrl, mainFolderUrl } from "./links";
-import outlineJson from "./methods.json";
 import { modelName, orderedModels } from "./models";
 import { Title } from "./parts";
 
-/**
- * Where a figure in a block's text comes from. Either a file of the repository and the words in it that hold the
- * figure (`match`, or the figure's own text when it is absent), or a count made from the results files (`count`),
- * which the test recomputes from the explorer's data.
- */
-export interface Figure {
-  text: string;
-  source?: string;
-  match?: string;
-  count?: CountSpec;
-}
-
-/** A count of runs or cells, over one sweep of one model, one scenario or all of them. */
-export interface CountSpec {
-  sweep: "grid" | "thinking";
-  model: string;
-  scenario?: string;
-  measure:
-    | "attempted"
-    | "unsuccessful"
-    | "unsuccessful_percent"
-    | "cells_over_limit"
-    | "cells_with_unsuccessful"
-    | "runs_per_cell";
-}
-
-interface BlockBase {
-  /** The disclosure ledger's ids (doc section 1) this block states; empty for a block the ledger does not name. */
-  ledger: string[];
-  /** Files of the repository the block rests on, linked at the end of its section. */
-  sources?: string[];
-  figures?: Figure[];
-}
-
-/** A block of the page's words. */
-export type Block =
-  | (BlockBase & { kind: "p"; lead?: string; text: string })
-  /** Words quoted exactly: each text is found, word for word, in `source` (the test checks it). */
-  | (BlockBase & { kind: "quote"; lead?: string; source: string; texts: string[] })
-  /** A list; an item may link to the section that explains it. */
-  | (BlockBase & { kind: "list"; lead?: string; items: Array<{ text: string; anchor?: string }> })
-  /** His scope sentence (his.json), shown first. */
-  | (BlockBase & { kind: "scope" })
-  /** The five goals, from index.json's objectives. */
-  | (BlockBase & { kind: "objectives" })
-  /** The four scenarios in brief (his.json) and each one's main result (index.json). */
-  | (BlockBase & { kind: "scenarios" })
-  /** A part a later step writes: the placeholder shows, and `note` says which step (it is never shown). */
-  | (BlockBase & { kind: "pending"; note: string });
-
-/** One section of the outline: the file's shape, which the tests also read. */
-export interface OutlineSection {
-  id: string;
-  anchor: string;
-  /** The disclosure ledger's line ids (doc section 1) this section carries. */
-  ledger: string[];
-  /** What else the outline's column names (Delivers and definition-of-done rows) when it gives no ledger line. */
-  also: string[];
-  /** The section's blocks of words. A section with none shows the body placeholder. */
-  blocks: Block[];
-}
-
-export const OUTLINE: readonly OutlineSection[] = outlineJson.sections as unknown as OutlineSection[];
+export type { Block, CountSpec, Figure, MethodsWordsFile, OutlineSection } from "./methodsOutline";
 
 const markClass = (text: string): string | undefined =>
   isMethodsPlaceholder(text) ? "methods-placeholder" : undefined;
@@ -313,6 +252,8 @@ function SweepData({
 }
 
 interface Loaded {
+  /** The page's words (methods.json), checked to hold exactly the thirteen sections, in order. */
+  words: OutlineSection[];
   methods: MethodsFile;
   /** Each model's main grid: its sweep, and its results file for every scenario, in the index's order. */
   grids: Array<{ sweep: MethodsSweep; files: GridFile[] }>;
@@ -321,7 +262,16 @@ interface Loaded {
 }
 
 async function loadAll(index: DataIndex, data: DataApi): Promise<Loaded> {
-  const [methods, thinkingFiles] = await Promise.all([data.loadMethods(), data.loadThinking()]);
+  const [wordsFile, methods, thinkingFiles] = await Promise.all([
+    data.loadMethodsWords(),
+    data.loadMethods(),
+    data.loadThinking(),
+  ]);
+  const words = wordsFile.sections;
+  const shape = (list: ReadonlyArray<{ id: string; anchor: string }>) =>
+    list.map((s) => `${s.id}#${s.anchor}`).join(",");
+  if (shape(words) !== shape(SECTIONS))
+    throw new Error("explorer data: the methods words do not hold the thirteen sections in order");
   const sweepOf = (model: string, kind: MethodsSweep["kind"]): MethodsSweep => {
     const found = methods.sweeps.find((s) => s.model_key === model && s.kind === kind);
     if (found === undefined)
@@ -338,7 +288,7 @@ async function loadAll(index: DataIndex, data: DataApi): Promise<Loaded> {
     const files = thinkingFiles.filter((f) => f.model_key === m.model_key);
     return files.length === 0 ? [] : [{ sweep: sweepOf(m.model_key, "thinking"), files }];
   });
-  return { methods, grids, thinking };
+  return { words, methods, grids, thinking };
 }
 
 function ModelsData({ loaded }: { loaded: Loaded }) {
@@ -620,7 +570,7 @@ export function MethodsView({ index, data }: MethodsViewProps) {
       return; // a malformed percent escape names nothing
     }
     const target = id === "" ? null : document.getElementById(id);
-    if (target === null || !OUTLINE.some((section) => section.anchor === id)) return;
+    if (target === null || !SECTIONS.some((section) => section.anchor === id)) return;
     if (typeof target.scrollIntoView === "function") target.scrollIntoView();
     target.focus({ preventScroll: true });
   }, [loaded]);
@@ -630,7 +580,7 @@ export function MethodsView({ index, data }: MethodsViewProps) {
       <Title route={{ kind: "methods" }}>
         <nav className="jump-menu" aria-label={L.methodsContentsLabel}>
           <ul>
-            {OUTLINE.map((section) => {
+            {SECTIONS.map((section) => {
               const title = explorerHis.methods.sectionTitles[section.id] ?? section.id;
               return (
                 <li key={section.id}>
@@ -648,7 +598,7 @@ export function MethodsView({ index, data }: MethodsViewProps) {
       ) : loaded === null ? (
         <p role="status">{L.methodsLoading}</p>
       ) : (
-        OUTLINE.map((section) => (
+        loaded.words.map((section) => (
           <Section key={section.id} section={section} index={index}>
             {section.id === "M3" && <ModelsData loaded={loaded} />}
             {section.id === "M7" && <RawData raw={loaded.methods.raw_text} />}

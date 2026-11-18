@@ -9,6 +9,10 @@
  * `unknown`; the step that first reads it types it.
  */
 
+// The methods page's words, emitted by the build as a file of their own (never inlined: assetsInlineLimit is 0).
+import METHODS_WORDS_URL from "./methods.json?url";
+import type { MethodsWordsFile } from "./methodsOutline";
+
 export interface ModelEntry {
   model_key: string;
   sweep_id: string;
@@ -550,6 +554,8 @@ export interface DataApi {
   loadAwareness(model: string): Promise<AwarenessFile>;
   /** The methods page's data: each official sweep's settings, sessions and served counts, and the raw text's totals. */
   loadMethods(): Promise<MethodsFile>;
+  /** The methods page's words (methods.json), a file of the build, fetched so the prose is not in the page's code. */
+  loadMethodsWords(): Promise<MethodsWordsFile>;
 }
 
 /** The loaders over a fetch function; tests pass one that serves fixtures. Each file is fetched once. */
@@ -641,6 +647,7 @@ export function createDataApi(fetcher: Fetcher = (path) => fetch(path)): DataApi
     },
     loadAwareness: (model) => fromFiles(`awareness ${model}`, (files) => files.awareness[model]),
     loadMethods: () => fromFiles("the methods data", (files) => files.methods),
+    loadMethodsWords: () => getJson<MethodsWordsFile>(METHODS_WORDS_URL),
   };
 }
 
@@ -655,4 +662,5 @@ export const {
   loadMemos,
   loadAwareness,
   loadMethods,
+  loadMethodsWords,
 } = defaultData;

@@ -24,7 +24,8 @@ function specifiers(source: string): string[] {
 }
 
 function resolveRelative(from: string, specifier: string): string | null {
-  const base = resolve(dirname(from), specifier);
+  // A Vite query (`./methods.json?url`) names the same file; only the path is resolved.
+  const base = resolve(dirname(from), specifier.split("?")[0]!);
   const candidates = [
     ...EXTENSIONS.map((ext) => `${base}${ext}`),
     ...EXTENSIONS.slice(1, 3).map((ext) => join(base, `index${ext}`)),

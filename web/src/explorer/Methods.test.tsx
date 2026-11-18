@@ -10,7 +10,10 @@ import type { DataApi, MethodsFile } from "./data";
 import { editedApi, readData, realApi, realGrids, realIndex, warmViews, WEB_ROOT } from "./fixtures";
 import { formatCount, formatUtc, sessionSpan, statusCounts } from "./format";
 import { mainFileUrl, mainFolderUrl } from "./links";
-import { MethodsView, OUTLINE } from "./Methods";
+import { MethodsView } from "./Methods";
+import outlineJson from "./methods.json";
+import type { OutlineSection } from "./methodsOutline";
+import { SECTIONS } from "./methodsOutline";
 import { modelName } from "./models";
 import { Shell } from "./Shell";
 
@@ -40,6 +43,7 @@ async function violations(container: HTMLElement) {
 
 const section = (container: HTMLElement, id: string) =>
   container.querySelector<HTMLElement>(`section#${id}`)!;
+const OUTLINE = outlineJson.sections as unknown as OutlineSection[];
 const anchorOf = (id: string) => OUTLINE.find((s) => s.id === id)!.anchor;
 
 describe("the methods page's frame", () => {
@@ -140,6 +144,20 @@ describe("the methods page's frame", () => {
     const failed = render(<MethodsView index={realIndex} data={failing} />);
     await failed.findByRole("alert");
     expect(failed.container.querySelectorAll("section")).toHaveLength(0);
+  });
+
+  it("draws its contents from the thirteen sections in code, which are methods.json's, in order", () => {
+    expect(SECTIONS.map((s) => [s.id, s.anchor])).toEqual(OUTLINE.map((s) => [s.id, s.anchor]));
+  });
+
+  it("refuses words whose sections are not the thirteen, in order: an alert and no section", async () => {
+    const swapped: DataApi = {
+      ...realApi(),
+      loadMethodsWords: async () => ({ sections: [...OUTLINE].reverse() }),
+    };
+    const view = render(<MethodsView index={realIndex} data={swapped} />);
+    await view.findByRole("alert");
+    expect(view.container.querySelectorAll("section")).toHaveLength(0);
   });
 
   it("refuses to show half a table: a methods file with no sweep for a model is an alert", async () => {
@@ -395,11 +413,15 @@ describe("in the shell", () => {
     await waitFor(() => expect(view.container.querySelectorAll("section.methods-section")).toHaveLength(13));
   });
 
-  it("asks only for files under /data/: the methods file, the grids and the thinking file, and no memo and no raw record", async () => {
+  it("asks only for its words file and files under /data/: the methods file, the grids and the thinking file, and no memo and no raw record", async () => {
     const requested: string[] = [];
     const view = render(<Shell data={realApi(requested)} />);
     await waitFor(() => expect(view.container.querySelectorAll("section.methods-section")).toHaveLength(13));
-    for (const path of requested) expect(path.startsWith("/data/"), path).toBe(true);
+    // The page's words are one file of the build (methods.json, fetched); everything else is data under /data/.
+    const words = requested.filter((path) => path.endsWith("/methods.json") && !path.startsWith("/data/"));
+    expect(words).toHaveLength(1);
+    for (const path of requested)
+      if (!words.includes(path)) expect(path.startsWith("/data/"), path).toBe(true);
     expect(requested).toContain("/data/methods.json");
     expect(requested.filter((p) => p.includes("/memos/") || p.includes("awareness"))).toEqual([]);
   });

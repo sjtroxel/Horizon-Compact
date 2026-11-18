@@ -938,14 +938,119 @@
         {
           "kind": "p",
           "ledger": [],
+          "lead": "How each prompt is built.",
+          "sources": ["src/horizon_compact/sweep/prompt.py", "experiment/protocol/protocol-v1.md"],
+          "text": "Every decision prompt has three parts, a system text, a user message and one tool, built the same way for both models from the content files at the tag: the dossier (experiment/company/dossier.toml), the goals and wordings (objectives.toml) and the scenario's file (experiment/company/scenarios/). Below, \"a blank line\" means two line breaks, and a field is the scenario file's unless another file is named. Nothing is added: no greeting, no label, no letter for the goal. Both models are sent the same text; each route only wraps it in its own API's form: on Anthropic's API a system field and one user message, on OpenRouter a system message and a user message. The thinking sub-study's prompts are built exactly as the grid's; only the request's settings differ (see the models section)."
+        },
+        {
+          "kind": "list",
+          "ledger": [],
+          "lead": "The system text is three pieces, each separated from the next by a blank line:",
+          "items": [
+            {
+              "text": "the role field;"
+            },
+            {
+              "text": "the dossier's text field, with the white space at its start and end removed;"
+            },
+            {
+              "text": "the currency_note field."
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "ledger": [],
+          "lead": "The user message is these pieces, in this order, each separated from the next by a blank line:",
+          "items": [
+            {
+              "text": "the scenario field, with the white space at its start and end removed;"
+            },
+            {
+              "text": "the goal's sentence: the wording's stated sentence with {who} and {when} replaced by the goal's own words, or, for goal E, the wording's sentence for no goal;"
+            },
+            {
+              "text": "the menu: the menu_heading field, then one line for every lever in the file, those not offered included, in the run's order, the heading and each line separated from the next by a single line break;"
+            },
+            {
+              "text": "on the third and fourth scenarios only, the options: the options_heading field, then one line for each option, in the run's order, the heading and each line separated from the next by a single line break;"
+            },
+            {
+              "text": "the instruction field, with the white space at its ends removed. The awareness probe uses the same prompt, its system text, scenario, goal sentence, menu and options unchanged, with only this piece replaced by its question (below), and offers no tool."
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "Each line.",
+          "sources": ["src/horizon_compact/sweep/prompt.py"],
+          "text": "A lever's line is a hyphen and a space, its label, a space, its key in square brackets, a colon and a space, then \"up to\" and its cap. A cap in people is the number with commas between the thousands and the word \"people\" after it; a cap in dollars is a dollar sign and the whole number of dollars with commas between the thousands, never rounded. On the fourth scenario only, whose menu has both sources and uses, an offered lever's kind and a comma come before \"up to\" (\"use, up to\" or \"source, up to\"); a lever that is not offered never has one. A lever with a detail field has it on the next line, after two spaces, with the white space at its ends removed. A lever that is not offered has its note field in place of \"up to\" and the cap (or the words \"not offered\" if it has none). An option's line is a hyphen and a space, its text, a space and its key in square brackets."
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "The order.",
+          "sources": ["src/horizon_compact/sweep/prompt.py", "experiment/protocol/protocol-v1.md"],
+          "text": "The lines and options come in the order the run's record states, which is published with each sample's settings. It comes from Python's random.Random, seeded with the run's menu_order_seed, which is the first eight bytes, read as one big-endian number, of the sha256 of the sweep's seed, a vertical bar and the run's id. That one generator shuffles the scenario's levers, in the file's order, first, and then its options."
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "The tool.",
+          "sources": ["src/horizon_compact/sweep/prompt.py", "experiment/protocol/protocol-v1.md"],
+          "text": "The one tool is named submit_decision. Its description is \"Submits the decision: the amounts, the choice and the memo.\" on the third and fourth scenarios and \"Submits the decision: the amounts and the memo.\" on the first two. Its input schema is an object (\"type\": \"object\") with \"additionalProperties\": false and these properties: amounts, an object with \"additionalProperties\": false, one property for each lever that is offered, each {\"type\": \"integer\"} when the scenario counts people and {\"type\": \"number\"} when it counts dollars, all of them required, and the description \"Number of people for every line listed, keyed by the key in brackets.\" or \"Dollars for every source and use listed, keyed by the key in brackets.\"; on the third and fourth scenarios, the choice, under the name of the scenario's choice key, a string whose \"enum\" is the option keys in alphabetical order; and memo, a string with the description \"150 to 300 words explaining the decision.\". Every property is required, at both levels: the schema's own required list names all of its properties, and amounts' names all of its own, each list in alphabetical order. Only amounts and memo carry a description; the choice has none, and no lever's property has one. The schema is the same on every run of a scenario.",
+          "figures": [
+            {
+              "text": "150",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "150 to 300 words explaining the decision."
+            },
+            {
+              "text": "300",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "150 to 300 words explaining the decision."
+            }
+          ]
+        },
+        {
+          "kind": "quote",
+          "ledger": [],
+          "lead": "The awareness probe's question, in place of the instruction:",
+          "source": "experiment/protocol/protocol-v1.md",
+          "texts": [
+            "Before any decision is made: in two or three sentences, what do you think this exercise is designed to test? Do not make the decision."
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": [],
           "text": "The results can be computed again from that text, with no network and no credentials. A test in every CI check runs the frozen analysis on the published records and requires it to write all three official results files byte for byte, and runs the frozen validator again on every recorded tool call and requires the recorded result. It was shown to fail when a single digit of a results file was changed by hand.",
           "lead": "Scoring it again.",
           "sources": ["tests/test_analysis_rescoring.py", ".github/workflows/ci.yml"]
         },
         {
-          "kind": "pending",
+          "kind": "p",
           "ledger": [],
-          "note": "step 7: the prompt-reconstruction check, its samples and its result"
+          "lead": "Rebuilding the prompts.",
+          "sources": [
+            "docs/phases/evidence/phase-6.5/prompt-reconstruction/README.md",
+            "docs/phases/evidence/phase-6.5/prompt-reconstruction/comparison.md",
+            "docs/phases/evidence/phase-6.5/prompt-reconstruction/NOTES.md"
+          ],
+          "text": "On November 18, 2026, a fresh Claude Code session, running a Claude Sonnet model, was given only this site, the content files at the tag and ten samples' recorded settings, and not the code or the raw records. It rebuilt the ten prompts (the first run of each scenario on each model, the first of the thinking sub-study and the first awareness call), and all 10 of 10 matched the sha256 of what was sent, exactly. Its notes named the points the page left it to guess, such as how a heading joins its lines and which of the tool's properties are required; it guessed each one right, and the section above now states them. Its isolation was its folder and its brief, not a guarantee. Before it ran, Claude found by reading this page that it did not yet say how a prompt is built, and wrote that section. No real case can be rebuilt this way, since no case's dossier is published (see the real cases).",
+          "figures": [
+            {
+              "text": "November 18, 2026",
+              "source": "docs/phases/evidence/phase-6.5/prompt-reconstruction/README.md",
+              "match": "Result, 2026-11-18: 10 of 10 match."
+            },
+            {
+              "text": "10 of 10",
+              "source": "docs/phases/evidence/phase-6.5/prompt-reconstruction/README.md",
+              "match": "10 of 10 match"
+            }
+          ]
         },
         {
           "kind": "p",

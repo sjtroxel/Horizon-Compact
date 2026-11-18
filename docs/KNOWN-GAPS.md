@@ -7,7 +7,43 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-18, about 12:00 PM (PHASE 6.5 STEP 6: SERVING BUILT; HIS BOOTSTRAP APPLY NEXT)
+> ## START HERE — where things stand, 2026-11-18, about 5:45 PM (PHASE 6.5 STEP 7 DONE: 10 OF 10 PROMPTS REBUILT)
+>
+> **Step 7 (doc §5.3, "As prepared" and "As run, step 7"):** his fresh session, given only the site, the content files
+> and ten samples' settings, rebuilt all ten prompts, **10 of 10** equal to the recorded hashes. Before it, Claude
+> added M7's "How each prompt is built" (a gap found by reading the page); after it, M7 states the seven points the
+> session had to guess (each guessed right). The page's words are now a fetched file (`/methods/` 88.0 KB of
+> JavaScript). Record: `docs/phases/evidence/phase-6.5/prompt-reconstruction/`. **Uncommitted:** step 7's prep and
+> result together, his commit C7 `phase 6.5: c7 prompt reconstruction`; his approval of M7's new words rides with it.
+> **Next:** step 8, the cold-read test (§5.4: Claude in Chrome, the extension, in his browser, on the local preview,
+> with no context beyond the address; Claude scores its conclusions against `planning/06` §4).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-18, about 5:30 PM (PHASE 6.5 STEP 7 PREPARED: HIS FRESH SESSION NEXT) *(superseded by the block above)*
+>
+> **Step 6 done** (C6 `954b222`, below). **Step 7 prepared** (doc §5.3, "As prepared, step 7"): the reader's folder
+> `~/hc-reconstruct/` (content at the tag, ten samples' settings, the brief), the comparison in
+> `scratch/p65-s7-reconstruct.py`. A gap found first, by inspection: the page did not say how a prompt is built; M7 now
+> does (Claude-drafted, his to approve), and a rebuild from those words alone matches all ten records. The page's words
+> moved to a fetched file to keep `/methods/` under its JavaScript budget (88.0 KB). `make check` green, 3,581 and 638.
+> **Uncommitted:** all of it. **Next:** his fresh Claude Code session in `~/hc-reconstruct` (the preview must be up at
+> 127.0.0.1:4173), then Claude runs `compare` and records the result in `docs/phases/evidence/phase-6.5/`.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-18, about 12:10 PM (PHASE 6.5 STEP 6 DONE: EACH PATH ITS OWN PAGE, A REAL 404) *(superseded by the block above)*
+>
+> **C6 committed `954b222` (his) and pushed; CI `44364703009` and Deploy `44364703011` green, first attempt.** His
+> `bootstrap` apply gave the deploy role three tag- and name-scoped CloudFront Function grants; Deploy then created
+> `horizon-compact-site-paths` and changed the distribution. Live on the public address: an unknown path answers 404 with
+> the not-found page, `/methods` redirects to `/methods/`, `/` still serves the placeholder (doc §7, "As built, step 6").
+> **Uncommitted:** these doc notes, to ride in the next commit. **Next:** step 7, the prompt-reconstruction check (§5.3:
+> his fresh session rebuilds ten sampled prompts from the site, the content files and each sample's recorded settings).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-18, about 12:00 PM (PHASE 6.5 STEP 6: SERVING BUILT; HIS BOOTSTRAP APPLY NEXT) *(superseded by the block above)*
 >
 > **C5 committed `fc8e65e` (his), approved on his read of the preview; CI `44344066964` and Deploy `44344066870`
 > green.** **Step 6 (doc §7, "As built, step 6"):** a CloudFront Function gives each page path its own `index.html`,
@@ -3398,6 +3434,8 @@ results are shown (the explorer, the methods page), so a reader does not take a 
 their conditions hold (note 1, no nearest objective in a tied reading and the `depends_on_reading` note; note 2 on
 `closure-19`'s `u1`), pinned by `Cases.test.tsx`; its DoD audit names this entry (Phase 6 IMPLEMENTATION doc §34.2,
 DoD 8). **The entry stays open** until Phase 6.5's methods page carries them.
+
+*Dated note, 2026-11-18 (handoff):* **the methods page now carries both** (M6, "Two behaviors of the matcher", committed in C5 `fc8e65e`). Left open on purpose: Phase 6.5's DoD audit (row 10, step 12) closes it, after go-live puts the page on the public site.
 
 ---
 

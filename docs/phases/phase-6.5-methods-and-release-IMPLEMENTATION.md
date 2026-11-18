@@ -599,6 +599,45 @@ decision (below).**
   `prompt_sha256`. A mismatch is a gap in the methods page, fixed there and re-checked with a new fresh session. The
   record (briefs, replies, diffs) goes to `docs/phases/evidence/phase-6.5/`.
 
+**As prepared, step 7 (2026-11-18, Opus).** `scratch/p65-s7-reconstruct.py prepare ~/hc-reconstruct` built the
+reader's folder **outside the repository** (a session started inside it would load the repo's `CLAUDE.md` and project
+memory; his global `CLAUDE.md` still loads anywhere and names the repo's path, so the brief forbids leaving the folder,
+and the isolation is the folder and the brief, not a guarantee). It holds the six content files at `prereg-v1`, each
+checked against the hash all ten samples' records carry; `samples.json` (each sample's model, sweep, run id, scenario,
+goal, wording, menu and option order and `menu_order_seed`, and no request field); `BRIEF.md`; an empty `rebuilt/`.
+The samples, by the rule: the first run by run id of each scenario in Haiku 5.5's grid and in gpt-oss-120b's, the first
+of the thinking sub-study, the first call of Haiku 5.5's awareness probe. `compare` hashes each rebuilt prompt as the
+harness hashed what it sent (canonical JSON of system, user and, for a decision, the tool; the awareness call has no
+tool) against the record's `prompt_sha256`, and diffs each part of a mismatch. Checked: every record's own parts
+reproduce its hash (ten of ten), and a dry run with one blank line removed from one sample reads "9 of 10" with the diff
+at that line.
+- **A gap found before the reader, by inspection (his choice (b), about 4:31 PM):** the page did not say how a prompt is
+  put together (the role sentence, the currency note, the user message's order, a line's format, the tool's schema), so
+  the reader would have failed all ten for a reason already known. Claude drafted M7's "How each prompt is built" (six
+  blocks and the awareness question, quoted from the protocol), from `sweep/prompt.py` and protocol §4.4-§4.5. **Checked
+  against the records:** a script that follows only those written rules and the reader's folder (no harness code)
+  rebuilt all ten, **10 of 10**. This proves the words are right; the reader tests whether a stranger can follow them.
+  His approval of the new blocks rides with his read of the result.
+- **A budget the new words broke, fixed:** with them, `/methods/` loaded 103.4 KB of JavaScript gzipped, over the 100
+  KB budget, because the page's words were bundled into its chunk. The words are now a file of the build
+  (`methods.json?url`, emitted under `assets/`), fetched by `loadMethodsWords` with the page's data; the thirteen ids and
+  anchors stay in code (`methodsOutline.ts`) so the contents list draws at once, a test holds them equal to the file's,
+  and the page refuses words whose sections differ (an alert, no section). `/methods/` now loads 88.0 KB.
+  `make check` green, 3,581 and 638; browser pass 56 loads, 0 with a problem, layout shift 0.001.
+
+**As run, step 7 (2026-11-18, his session about 5:00 PM; Claude's comparison about 5:35 PM): 10 of 10 match.** His
+fresh Claude Code session in `~/hc-reconstruct`, a Claude Sonnet model (`/model sonnet`), rebuilt the ten prompts from
+the preview and the folder, and `compare` found every one equal to the record's `prompt_sha256`. Its notes list seven
+points the page left to a guess (a heading's join to its first line; which tool properties are required; whether the
+choice has a description; whether a not-offered line on S4 carries a kind; whether the thinking sub-study's prompt is
+the grid's; what the awareness probe keeps; whether the second model gets the same text). **Every guess was right, and
+the page now states each** (M7's blocks reworded; Claude's rule-only rebuild still 10 of 10). Its honor statement: no
+link off the site followed; one site data file fetched and not used. **No re-check with a new session:** §5.3 asks for
+one after a mismatch, and there was none; the rewording only settles what the session guessed correctly. The record:
+`docs/phases/evidence/phase-6.5/prompt-reconstruction/` (README, brief, samples, the rebuilds, its notes, the
+comparison, and `reconstruct.py`, which reproduces "10 of 10" from there). M7's pending part now gives the result.
+**DoD row 3 met** (the page says why no real case can be re-run: M6 and M7).
+
 ### 5.4 The cold-read test (Delivers 4; DoD row 4)
 
 - **Claude in Chrome, in his browser,** on the local preview (his machine serves it; checked live before the brief
@@ -705,9 +744,16 @@ CreateFunction API reference); the pinned provider (6.67) gives `aws_cloudfront_
   **His `bootstrap` half, done 2026-11-18, about 11:57 AM:** his plan (`scratch/p65-s6-plan.sh`): **0 to add, 1 to
   change, 0 to destroy**, the one change `aws_iam_role_policy.github_deploy_site` gaining exactly the three statements
   above, the others unchanged; his apply: "Apply complete! Resources: 0 added, 1 changed, 0 destroyed.", the two site ids
-  as §17 of the Phase 1.5 doc recorded them; his second plan: "No changes." **Owed:** his commit and push, and Claude's
-  read of the Deploy log; then a check of `/methods/`-style paths is only possible after go-live (the
-  placeholder has none), so item 6 of this list covers it.
+  as §17 of the Phase 1.5 doc recorded them; his second plan: "No changes." **His commit C6 `954b222` and push; CI
+  `44364703009` and Deploy `44364703011` green, first attempt, no permission added.** Claude's read of the Deploy log:
+  the plan read "2 to add, 2 to change, 1 to destroy" (the function and the task definition replaced as on every image
+  build; the distribution in place; the site bucket's policy shown only because the distribution's ARN reads as known
+  after apply during an in-place update) and the apply "2 added, 1 changed, 1 destroyed", the bucket policy never
+  modified; `aws_cloudfront_function.site_paths: Creation complete after 2s`. The smoke test: "an unknown address answers
+  the not-found page with 404 (attempt 1)", every header ok. **On the public address** (Claude, curl, about 12:07 PM):
+  `/` 200 "Horizon Compact"; `/no-such-page/` **404** "Page not found: Horizon Compact"; `/methods` **301** to
+  `https://horizon-compact.vercel.app/methods/`, so the relative redirect stays on the rewrite's host; `/404.html` 200 (a
+  file). Per-page HTML and cards are checked at go-live (item 6), since the placeholder has one page. **Item 2 done.**
 
 ## 8. The steps and the commit order
 
@@ -722,8 +768,8 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 3 | **[done 2026-11-16, §5.2; built by Sonnet, reviewed by Opus]** The re-scoring test, and its failure shown once (§5.2) | Sonnet; Opus reviews | C3 |
 | 4 | **[done 2026-11-17, §3; built by Sonnet, reviewed by Opus]** The methods page: the route, its data, its sections with placeholders for his titles (§3, decision E) | Sonnet; Opus reviews | C4 |
 | 5 | **[done 2026-11-18, §3; approved (his), C5 `fc8e65e`]** Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences (Claude-drafted too, his instruction of 2026-11-18); every ledger line placed, checked by script | him and Claude | C5 |
-| 6 | **[built 2026-11-18, §7 "As built, step 6"; his `bootstrap` apply, then his push]** Serving in `main` (§7 item 2) | Opus; his apply | C6 |
-| 7 | The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |
+| 6 | **[done 2026-11-18, §7 "As built, step 6"; his `bootstrap` apply, C6 `954b222`, Deploy green]** Serving in `main` (§7 item 2) | Opus; his apply | C6 |
+| 7 | **[done 2026-11-18, §5.3 "As run, step 7": 10 of 10]** The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |
 | 8 | The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |
 | 9 | The video (§6): pack, generation, check, captions, the file | him and Claude | C9 |
 | 10 | The public checks (§5.5) | Claude; him for the four readers | C10 |
