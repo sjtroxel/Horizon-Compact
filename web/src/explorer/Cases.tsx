@@ -13,6 +13,7 @@ import {
   dependsOnReadingNote,
   everyReadingNoGoodMatch,
   hasOneLineNote,
+  hasChoiceBasisNote,
   hasTieNote,
   labelUnderEveryReading,
   orderedReadings,
@@ -305,6 +306,11 @@ function ModelSection({ entry, file }: { entry: CaseEntry; file: CaseFile }) {
                 </p>
               )}
             </div>
+          )}
+          {hasChoiceBasisNote(reading) && (
+            <p className="x-note case-note" data-note="choice-basis">
+              {L.choiceBasisNote}
+            </p>
           )}
           {hasTieNote(reading) && (
             <p className="x-note case-note" data-note="tie">

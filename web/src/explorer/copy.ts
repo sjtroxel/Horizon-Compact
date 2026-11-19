@@ -422,6 +422,14 @@ export const explorerLabels = {
     `distance ${distance}, interval ${low} to ${high}`,
   distanceRunsPlain: (runs: number, choiceOnly: number, undistanced: number) =>
     `${runs} runs compared, ${choiceOnly} on the choice alone; ${undistanced}\u00a0had nothing to compare`,
+  // Phase 6.5 step 8 (2026-11-19), the cold-read fix: in a reading the company is matched on by its choice alone
+  // (`company_basis` "choice"), every run is compared on its choice, and the matcher's `choice_only_runs` (runs that
+  // fall back to the choice because their own shares are undefined) is 0 by construction, so the line says what holds.
+  // Claude-drafted, approved by him in-session.
+  distanceRunsChoiceBasis: (runs: number, undistanced: number) =>
+    `${runs} runs compared, each on its choice alone; ${undistanced}\u00a0had nothing to compare`,
+  choiceBasisNote:
+    "In this reading a run counts 0 if it made the company\u2019s choice and 1 if it did not, so a goal\u2019s distance is the share of its runs that chose otherwise; 1.000 means none of them made the company\u2019s choice.",
   distanceChartLabel: (caseLabel: string, model: string, reading: string) =>
     `Distances for ${caseLabel}, ${model}, ${reading}`,
   distanceLevel: (level: string) => `${level} range, from resampling the runs (a bootstrap interval)`,

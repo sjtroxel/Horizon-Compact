@@ -647,6 +647,24 @@ comparison, and `reconstruct.py`, which reproduces "10 of 10" from there). M7's 
 - **Scored by Claude, against `planning/06` §4:** each conclusion is allowed, or a misreading. A misreading is fixed in
   the site and re-tested with a fresh agent. The record goes to `docs/phases/evidence/phase-6.5/`.
 
+**As run, step 8 (2026-11-19, about 7:40 to 8:45 AM): no conclusion a misreading; one misread detail fixed and
+re-tested.** The preview was checked live first (the served build equal, file for file, to a fresh build of `6876762`).
+The brief (`BRIEF.md`) went verbatim into a new Claude in Chrome conversation in his browser, Sonnet 5.5 at medium
+effort (the panel's default, kept so a stronger reader could not paper over a weak page; the re-test used the same).
+Claude scored each conclusion against `planning/06` §4 with every figure checked against the data files and the
+rendered pages. **First agent:** every figure right, no conclusion a misreading; one detail misread, caused by the
+site: closure-07's choice-only reading said "30 runs compared, 0 on the choice alone" under "Only the choice is coded",
+and nothing said what a choice-only distance means, so the agent read "0 runs compared" and could not square 1.000
+with Plant 6. **Fixed** (his approval of Claude's words, all three): (a) a choice-only reading's rows say "each on its
+choice alone"; (b) a note says a run counts 0 or 1 by its choice, so 1.000 means none made the company's choice; (c)
+the cases introduction says a case's runs used its own background file, so Plant 6's result does not carry over.
+Tests added and mutation-checked; `make check` green (3,581 and 641); browser pass clean. **Second agent (fresh):** no
+misreading; it read closure-07 and stated the distance correctly (the fix confirmed). Recorded at the edge, not fixed:
+both readers took the long-horizon pair's splits as the Roundtable's claim failing (the second for both models); **his
+decision, about 8:42 AM: no sentence added** (Claude's lean: a fair reading of a test result, the scope sentence is on
+every surface, and words at that spot risk the site arguing). The record: `docs/phases/evidence/phase-6.5/cold-read/`
+(the brief, both reports verbatim, both scorings). **DoD row 4 met once C8 is committed.**
+
 ### 5.5 The public checks (Delivers 6, 7; DoD row 6)
 
 `planning/06` §9's seven checks on every surface (the explorer's pages, the methods page, the share cards, the story,
@@ -770,7 +788,7 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 5 | **[done 2026-11-18, §3; approved (his), C5 `fc8e65e`]** Its words: Claude drafts the technical descriptions, each flagged; his titles and project sentences (Claude-drafted too, his instruction of 2026-11-18); every ledger line placed, checked by script | him and Claude | C5 |
 | 6 | **[done 2026-11-18, §7 "As built, step 6"; his `bootstrap` apply, C6 `954b222`, Deploy green]** Serving in `main` (§7 item 2) | Opus; his apply | C6 |
 | 7 | **[done 2026-11-18, §5.3 "As run, step 7": 10 of 10]** The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |
-| 8 | The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |
+| 8 | **[done 2026-11-19, §5.4 "As run, step 8": no misreading after one fix, re-tested]** The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |
 | 9 | The video (§6): pack, generation, check, captions, the file | him and Claude | C9 |
 | 10 | The public checks (§5.5) | Claude; him for the four readers | C10 |
 | 11 | Go-live (§7 items 3-8), the teardown test | Opus; his apply and deploy | C11 |

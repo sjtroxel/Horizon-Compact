@@ -418,6 +418,19 @@ describe.each(LABELS)("/cases/%s/", (label) => {
         }
         if (reading.one_observable_line)
           expect(block.querySelector("[data-note=one-line]")!.textContent).toBe(L.oneLineNote);
+        // Phase 6.5 step 8: a reading matched on the choice alone says so on each row and says what its distance means.
+        const choiceBasis = reading.company_basis === "choice";
+        expect(block.querySelector("[data-note=choice-basis]") !== null, where).toBe(choiceBasis);
+        if (choiceBasis)
+          expect(block.querySelector("[data-note=choice-basis]")!.textContent).toBe(L.choiceBasisNote);
+        for (const d of reading.distances) {
+          const row = block.querySelector(`.distance-row[data-goal="${d.objective_id}"] .distance-numbers`)!;
+          expect(row.textContent, `${where} ${d.objective_id}`).toContain(
+            choiceBasis
+              ? L.distanceRunsChoiceBasis(d.runs, d.undistanced_runs)
+              : L.distanceRunsPlain(d.runs, d.choice_only_runs, d.undistanced_runs),
+          );
+        }
       }
       // depends_on_reading is shown with the tie note exactly where some reading is a tie.
       const some = file.readings.some((r) => r.all_distances_equal);
@@ -467,6 +480,48 @@ describe("the matcher notes on today's files (KNOWN-GAPS OPEN 2026-10-31)", () =
     expect(note).toContain(L.dependsTieNote);
     expect(note).toContain(L.dependsSameLabel("no good match"));
     expect(haiku.querySelector("[data-depends]")!.getAttribute("data-depends")).toBe("yes");
+  });
+});
+
+describe("the cold-read fix (Phase 6.5 step 8): a reading matched on the choice alone", () => {
+  it("is every primary reading and no alternative one, and in each the matcher's choice-only count is 0 by construction", () => {
+    for (const { label, model, file } of realCaseFiles) {
+      for (const r of orderedReadings(file)) {
+        const where = `${label} ${model} ${r.reading}`;
+        expect(r.company_basis === "choice", where).toBe(r.reading === "primary");
+        // The plain line's count is of runs that fell back to the choice; with no company shares, none can.
+        if (r.company_basis === "choice")
+          for (const d of r.distances) expect(d.choice_only_runs, where).toBe(0);
+      }
+    }
+  });
+
+  it("on closure-07, Haiku 5.5's primary reading no longer says '0 on the choice alone' beside 'only the choice is coded'", async () => {
+    const { container } = await page("closure-07");
+    const haiku = container.querySelector<HTMLElement>(`.case-model[data-model="${HAIKU}"]`)!;
+    const primary = haiku.querySelector<HTMLElement>(".case-reading[data-reading=primary]")!;
+    expect(primary.textContent).not.toContain("0 on the choice alone");
+    expect(primary.textContent).toContain("30 runs compared, each on its choice alone");
+    expect(primary.querySelector("[data-note=choice-basis]")!.textContent).toContain(
+      "1.000 means none of them made the company\u2019s choice",
+    );
+    // The note sits after the chart, before the tie note it explains alongside.
+    expect(before(primary.querySelector("figure")!, primary.querySelector("[data-note=choice-basis]")!)).toBe(
+      true,
+    );
+    expect(
+      before(primary.querySelector("[data-note=choice-basis]")!, primary.querySelector("[data-note=tie]")!),
+    ).toBe(true);
+    const u1 = haiku.querySelector<HTMLElement>(".case-reading[data-reading=u1]")!;
+    expect(u1.querySelector("[data-note=choice-basis]")).toBeNull();
+    expect(u1.textContent).toContain("30 runs compared, 0 on the choice alone");
+  });
+
+  it("the cases page says a case's runs used its own background file, so Plant 6's result does not carry over", async () => {
+    const { container } = await list();
+    expect(container.textContent).toContain(
+      "Each case's runs gave the model that case's own background file in place of the made-up company's, so a goal's result on Plant 6 does not carry over to a case.",
+    );
   });
 });
 

@@ -36,6 +36,11 @@ export function hasTieNote(reading: Pick<CaseReading, "all_distances_equal">): b
   return reading.all_distances_equal;
 }
 
+/** The choice-basis note (Phase 6.5 step 8) applies to a reading where the company is matched on its choice alone. */
+export function hasChoiceBasisNote(reading: Pick<CaseReading, "company_basis">): boolean {
+  return reading.company_basis === "choice";
+}
+
 /** Note 2 applies to a reading with one observable line. */
 export function hasOneLineNote(reading: Pick<CaseReading, "one_observable_line">): boolean {
   return reading.one_observable_line;

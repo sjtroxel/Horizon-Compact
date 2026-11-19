@@ -123,7 +123,9 @@ export function DistanceChart({
               <div className="distance-numbers">
                 <span>{numbers}</span>
                 <span className="muted">
-                  {L.distanceRunsPlain(d.runs, d.choice_only_runs, d.undistanced_runs)}
+                  {reading.company_basis === "choice"
+                    ? L.distanceRunsChoiceBasis(d.runs, d.undistanced_runs)
+                    : L.distanceRunsPlain(d.runs, d.choice_only_runs, d.undistanced_runs)}
                 </span>
               </div>
             </div>

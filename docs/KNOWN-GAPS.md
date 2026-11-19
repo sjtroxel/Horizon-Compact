@@ -7,7 +7,20 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-18, about 5:45 PM (PHASE 6.5 STEP 7 DONE: 10 OF 10 PROMPTS REBUILT)
+> ## START HERE — where things stand, 2026-11-19, about 8:45 AM (PHASE 6.5 STEP 8 DONE: THE COLD READ, NO MISREADING)
+>
+> **C7 committed `6876762` (his) and pushed; CI `44423330851` and Deploy `44423330858` green.** **Step 8 (doc §5.4,
+> "As run, step 8"):** two fresh Claude in Chrome agents (Sonnet 5.5, medium) read the local preview from the address
+> alone. The first misread one detail on closure-07, caused by the site (a choice-only reading's row count and no word
+> on what its distance means); fixed with his approval (the rows, a note, a line in the cases introduction), tests
+> mutation-checked. The second, fresh, read it right; no conclusion of either was a misreading under `planning/06` §4.
+> Both took the long-horizon pair's splits as the Roundtable's claim failing; his decision: no sentence added. Record:
+> `docs/phases/evidence/phase-6.5/cold-read/`. `make check` green, 3,581 and 641. **Uncommitted:** all of it, his
+> commit C8 `phase 6.5: c8 cold-read test`. **Next:** step 9, the video (§6).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-18, about 5:45 PM (PHASE 6.5 STEP 7 DONE: 10 OF 10 PROMPTS REBUILT) *(superseded by the block above)*
 >
 > **Step 7 (doc §5.3, "As prepared" and "As run, step 7"):** his fresh session, given only the site, the content files
 > and ten samples' settings, rebuilt all ten prompts, **10 of 10** equal to the recorded hashes. Before it, Claude
