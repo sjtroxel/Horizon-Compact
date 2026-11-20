@@ -1,0 +1,237 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:02.680
+All right, let's jump right into this.
+
+2
+00:00:02.680 --> 00:00:05.280
+Give an AI model a company to run.
+
+3
+00:00:05.280 --> 00:00:06.680
+The researchers set up a scenario
+
+4
+00:00:06.680 --> 00:00:08.560
+where they told an AI to run a business
+
+5
+00:00:08.560 --> 00:00:12.440
+with one singular directive, make money for shareholders.
+
+6
+00:00:12.440 --> 00:00:14.360
+Then they completely wiped its memory,
+
+7
+00:00:14.360 --> 00:00:16.900
+gave it the exact same business scenario again,
+
+8
+00:00:16.900 --> 00:00:18.420
+but changed the prompt.
+
+9
+00:00:18.420 --> 00:00:20.660
+This time they told it to look after everyone
+
+10
+00:00:20.660 --> 00:00:22.120
+the company touches.
+
+11
+00:00:22.120 --> 00:00:24.640
+The massive question the researchers wanted to answer is,
+
+12
+00:00:24.640 --> 00:00:26.200
+does the AI choose differently
+
+13
+00:00:26.200 --> 00:00:28.440
+based on that one simple sentence?
+
+14
+00:00:28.440 --> 00:00:29.760
+And going even deeper,
+
+15
+00:00:29.760 --> 00:00:31.800
+does it actually matter if you tell the AI
+
+16
+00:00:31.800 --> 00:00:34.900
+to be thinking one year ahead or 20?
+
+17
+00:00:34.900 --> 00:00:36.940
+Well, that's Horizon Compact.
+
+18
+00:00:36.940 --> 00:00:41.940
+Two AI models, Claude Haiku 5.5 and gpt-oss-120b,
+
+19
+00:00:42.260 --> 00:00:45.040
+made the exact same decisions hundreds of times
+
+20
+00:00:45.040 --> 00:00:47.620
+based only on those changing goals.
+
+21
+00:00:47.620 --> 00:00:49.560
+So here were the different setups,
+
+22
+00:00:49.560 --> 00:00:53.540
+shareholders short-term, everyone with a stake short-term,
+
+23
+00:00:53.540 --> 00:00:56.880
+shareholders long-term, everyone with a stake long-term,
+
+24
+00:00:56.880 --> 00:00:59.520
+and finally, one with no goal at all.
+
+25
+00:01:00.240 --> 00:01:02.880
+Now, the company is a US machinery maker with six plants,
+
+26
+00:01:02.880 --> 00:01:05.600
+and it faces four really hard calls.
+
+27
+00:01:05.600 --> 00:01:08.380
+First, new AI tools can efficiently do the work
+
+28
+00:01:08.380 --> 00:01:10.560
+of 125 office staff.
+
+29
+00:01:10.560 --> 00:01:12.720
+Second, macroeconomic pressures hit
+
+30
+00:01:12.720 --> 00:01:14.360
+and orders are falling.
+
+31
+00:01:14.360 --> 00:01:17.480
+Third, Plant 6 is actively losing money.
+
+32
+00:01:17.480 --> 00:01:21.060
+And fourth, there's a ten-year engineering bet on the table.
+
+33
+00:01:21.060 --> 00:01:23.200
+The Business Roundtable has famously stated
+
+34
+00:01:23.200 --> 00:01:26.000
+that in the long run, what's good for shareholders
+
+35
+00:01:26.000 --> 00:01:28.480
+and what's good for everyone else go together.
+
+36
+00:01:28.520 --> 00:01:32.320
+So if an AI model is instructed to think 20 years out,
+
+37
+00:01:32.320 --> 00:01:34.520
+does it still matter who counts?
+
+38
+00:01:34.520 --> 00:01:36.020
+Let's look at the results.
+
+39
+00:01:36.020 --> 00:01:38.220
+Under the long-term shareholder goal,
+
+40
+00:01:38.220 --> 00:01:41.080
+Haiku kept about 19 percentage points fewer
+
+41
+00:01:41.080 --> 00:01:43.280
+of those staff across 60 runs.
+
+42
+00:01:43.280 --> 00:01:48.280
+gpt-oss kept about 45 points fewer across 58 and 60 runs.
+
+43
+00:01:48.380 --> 00:01:51.400
+Both models chose to close Plant 6 much more often
+
+44
+00:01:51.400 --> 00:01:54.240
+when instructed to focus purely on shareholders.
+
+45
+00:01:54.240 --> 00:01:56.740
+Haiku actually funded the ten-year bet less often
+
+46
+00:01:56.740 --> 00:01:59.460
+for shareholders, while gpt-oss's runs were,
+
+47
+00:01:59.460 --> 00:02:01.180
+honestly, just too close to call.
+
+48
+00:02:01.180 --> 00:02:02.500
+For the following orders,
+
+49
+00:02:02.500 --> 00:02:05.700
+neither model's runs could settle on a clear pattern.
+
+50
+00:02:05.700 --> 00:02:08.460
+The prevailing logic suggests that thinking further ahead
+
+51
+00:02:08.460 --> 00:02:10.900
+would naturally make the models cut less,
+
+52
+00:02:10.900 --> 00:02:13.280
+but twice, for Haiku, it didn't.
+
+53
+00:02:13.280 --> 00:02:16.060
+Looking after everyone over one year or over 20,
+
+54
+00:02:16.060 --> 00:02:17.840
+it made about the exact same call.
+
+55
+00:02:18.720 --> 00:02:22.260
+Then came five real decisions, and here's the kicker.
+
+56
+00:02:22.260 --> 00:02:24.180
+None of the AI's choices matched
+
+57
+00:02:24.220 --> 00:02:26.780
+any of the real-world choices particularly well,
+
+58
+00:02:26.780 --> 00:02:29.180
+regardless of which goal they were operating under.
+
+59
+00:02:29.180 --> 00:02:31.780
+Keep in mind, this is a comparison, not a verdict.

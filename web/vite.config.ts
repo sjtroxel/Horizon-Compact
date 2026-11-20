@@ -99,6 +99,14 @@ const DATA_SOURCES = [
   { from: join(root, "explorer-data"), to: "data" },
   { from: join(root, "explorer-memos"), to: "data/memos" },
 ] as const;
+// The methods page's video, its poster and its captions (Phase 6.5 step 9, doc section 6). Explorer only: the folder is
+// not public/, which both builds copy, so nothing of it reaches the placeholder page before go-live.
+const MEDIA_SOURCE = { from: join(root, "explorer-media"), to: "media" } as const;
+const MEDIA_TYPES: Record<string, string> = {
+  ".mp4": "video/mp4",
+  ".vtt": "text/vtt; charset=utf-8",
+  ".jpg": "image/jpeg",
+};
 
 function hasFiles(dir: string): boolean {
   return existsSync(dir) && readdirSync(dir, { recursive: true }).length > 0;
@@ -107,8 +115,9 @@ function hasFiles(dir: string): boolean {
 /**
  * Explorer mode only (Phase 6 IMPLEMENTATION doc, C3 decision 4). The data reaches the explorer by `fetch` from its
  * own origin, never by import, so none of it is in the JavaScript. After the bundle is written this copies the two
- * data folders into the output byte for byte, and fails the build if either is missing or empty. The dev server
- * serves the same files at the same paths, and answers any page path with the explorer's HTML.
+ * data folders into the output byte for byte, and fails the build if either is missing or empty; the media folder
+ * (the methods page's video) is copied the same way, to media/. The dev server serves the same files at the same
+ * paths, and answers any page path with the explorer's HTML.
  */
 function explorerData(): Plugin {
   return {
@@ -137,6 +146,23 @@ function explorerData(): Plugin {
           response.end("not found");
           return;
         }
+        if (path.startsWith(`/${MEDIA_SOURCE.to}/`)) {
+          const file = resolve(MEDIA_SOURCE.from, path.slice(MEDIA_SOURCE.to.length + 2));
+          const type = MEDIA_TYPES[file.slice(file.lastIndexOf("."))];
+          if (
+            !file.startsWith(`${MEDIA_SOURCE.from}${sep}`) ||
+            type === undefined ||
+            !existsSync(file) ||
+            statSync(file).isDirectory()
+          ) {
+            response.statusCode = 404;
+            response.end("not found");
+            return;
+          }
+          response.setHeader("Content-Type", type);
+          response.end(readFileSync(file));
+          return;
+        }
         // A page path (no file extension, not a Vite internal): the explorer's single HTML entry.
         if (!/\.[a-z0-9]+$/i.test(path) && !path.startsWith("/@") && !path.startsWith("/node_modules/")) {
           request.url = "/explorer.html";
@@ -155,6 +181,9 @@ function explorerData(): Plugin {
         }
         cpSync(source.from, join(outDir, source.to), { recursive: true });
       }
+      if (!hasFiles(MEDIA_SOURCE.from))
+        throw new Error(`explorer-data: ${MEDIA_SOURCE.from} is missing or empty`);
+      cpSync(MEDIA_SOURCE.from, join(outDir, MEDIA_SOURCE.to), { recursive: true });
     },
   };
 }

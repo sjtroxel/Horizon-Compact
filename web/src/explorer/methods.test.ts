@@ -275,11 +275,11 @@ describe("the page's words", () => {
 });
 
 describe("the placeholder census", () => {
-  // Every place a placeholder still stands: the parts a later step writes, the video and its link (step 9) and the
-  // vocabulary recheck (step 10). Step 7 wrote M7's (the prompt-reconstruction check, 2026-11-18). Go-live (doc section
-  // 7) must make `check-dist` refuse any placeholder in dist-explorer/; that refusal is not added yet, because it would
-  // fail `make check` while these stand.
-  const expected = ["methods.json M0 pending", "methods.json M10 pending", "methods.json M11 pending"];
+  // Every place a placeholder still stands: the part a later step writes, the vocabulary recheck (step 10). Step 7 wrote
+  // M7's (the prompt-reconstruction check, 2026-11-18); step 9 wrote the video and its link (M11 and M0, 2026-11-20).
+  // Go-live (doc section 7) must make `check-dist` refuse any placeholder in dist-explorer/; that refusal is not added
+  // yet, because it would fail `make check` while this stands.
+  const expected = ["methods.json M10 pending"];
 
   function collect(value: unknown, path: string, found: string[], odd: string[]) {
     if (typeof value === "string") {
@@ -291,7 +291,7 @@ describe("the placeholder census", () => {
     }
   }
 
-  it("is the three parts later steps write, and nothing else: his titles and the page's title are written", () => {
+  it("is the one part a later step writes, and nothing else: his titles and the page's title are written", () => {
     const found: string[] = [];
     const odd: string[] = [];
     collect(hisJson, "", found, odd);
@@ -306,11 +306,63 @@ describe("the placeholder census", () => {
 
   it("says, for each part still to write, which step writes it", () => {
     for (const { section, block } of allBlocks)
-      if (block.kind === "pending") expect(block.note, section).toMatch(/^step (9|10): /);
+      if (block.kind === "pending") expect(block.note, section).toMatch(/^step 10: /);
   });
 
   it("keeps the one exported constant for the placeholders", () => {
     expect(METHODS_PLACEHOLDER).toEqual({ title: "[his title]", body: "[to be written]" });
     expect(Object.values(hisJson.methods.sectionTitles).some(isMethodsPlaceholder)).toBe(false);
+  });
+});
+
+describe("the video (step 9, doc section 6)", () => {
+  const MEDIA = resolve(WEB_ROOT, "explorer-media");
+  const videos = allBlocks.filter(({ block }) => block.kind === "video");
+
+  it("is one block, in M11, after its label, and M0 links to it", () => {
+    expect(videos.map(({ section }) => section)).toEqual(["M11"]);
+    const m11 = sections.find((s) => s.id === "M11")!;
+    expect(m11.anchor).toBe("video");
+    expect(m11.blocks[0]!.kind).toBe("p");
+    const m0 = sections.find((s) => s.id === "M0")!;
+    const links = m0.blocks.flatMap((b) => (b.kind === "list" ? b.items.map((i) => i.anchor) : []));
+    expect(links).toContain("video");
+  });
+
+  it("names every tool that made or checked it in its label and its record", () => {
+    const words = sections
+      .find((s) => s.id === "M11")!
+      .blocks.flatMap((b) => (b.kind === "p" ? [b.text] : []))
+      .join(" ");
+    for (const tool of ["Gemini Notebook", "Claude", "faster-whisper", "ffmpeg"])
+      expect(words, tool).toContain(tool);
+    expect(words).toMatch(/AI tools/);
+  });
+
+  it("has its file, poster and captions in explorer-media/, the video under the media budget", () => {
+    for (const { block } of videos) {
+      if (block.kind !== "video") continue;
+      for (const name of [block.file, block.poster, block.captions])
+        expect(existsSync(resolve(MEDIA, name)), name).toBe(true);
+      expect(block.file).toMatch(/\.mp4$/);
+      expect(block.poster).toMatch(/\.jpg$/);
+      expect(block.captions).toMatch(/\.vtt$/);
+    }
+  });
+
+  it("shows below it the same words its captions carry, cue by cue, and the end card's words are the scope sentence", () => {
+    for (const { block } of videos) {
+      if (block.kind !== "video") continue;
+      const vtt = readFileSync(resolve(MEDIA, block.captions), "utf8").replace(/\r/g, "");
+      expect(vtt.startsWith("WEBVTT\n")).toBe(true);
+      const cues = vtt
+        .split("\n\n")
+        .slice(1)
+        .map((cue) => cue.trim().split("\n"))
+        .filter((lines) => lines.length >= 3)
+        .map((lines) => lines.slice(2).join(" "));
+      expect(cues).toEqual(block.spoken);
+      expect(block.onScreen).toBe(hisJson.scopeSentence);
+    }
   });
 });

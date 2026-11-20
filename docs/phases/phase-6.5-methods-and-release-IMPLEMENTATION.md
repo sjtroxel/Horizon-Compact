@@ -712,6 +712,27 @@ sources re-read live and the result dated on the page (M10).
    - Either way, **a binary file is the one surface the name guard cannot read** (CLAUDE.md); the frame check is its
      rule-zero check.
 
+**As run, step 9 (2026-11-20; record `docs/phases/evidence/phase-6.5/video/README.md`).** Four Explainers in one
+notebook (memory off, Classic, producer notes reviewed by Claude before each render). Attempts 1 and 2 came from the
+14-page source pack, attempt 3 from the methods and story pages only; each failed the check (a result read the wrong way
+round, run counts not the study's, results the site does not list, the steering prompt read aloud). **Attempt 4 came from
+a narration script Claude wrote from the site's pages at his request, every figure checked against the explorer's data:
+a departure from item 1** ("nothing else is uploaded"), logged. It passed on every figure and failed on two lines at its
+end: the scope was dropped, and "every response they gave on it is published" followed the real cases. **His decision
+(12:17 PM): keep it with one edit, logged as a departure from item 4** ("regenerating, not editing around it"): ffmpeg
+cut the last sentence and added an 8 s card of `his.json`'s scope sentence before the closing logo; the kept file was
+checked again (12 distinct frames, transcript equal to attempt 4's less the cut sentence). At 11:58 AM the gate was
+split, his agreement: a wrong number, a reversed direction, a claim past `planning/06` §4, invented on-screen text or a
+missing scope fail; tone, agenda slides, plain titles and length are his call. Four kept wordings that differ from the
+site are disclosed on M11. **Decision F as built:** the files are in `web/explorer-media/` (served at `/media/` by the
+explorer build only), not `web/public/`, because both builds copy `public/` and the placeholder page must not change
+before go-live; `check-dist` holds a media budget (20 MiB, `.mp4`, `.vtt`, `.jpg`, explorer only) and
+`check-added-large-files` names the video. M11 shows the label (every tool named), the player (`preload="none"`, poster,
+captions), how it was checked, the edit, the differences, and the spoken words below it; M0 links to it. **Until go-live
+adds `media-src 'self'` (section 7), the preview's policy blocks the video and its captions:** the poster and the words
+show, and `/methods/` logs two policy errors, which the browser pass will report until then. Not done: the Short for
+Phase 7 (item 3). The labels and M11's words are Claude-drafted, his to approve.
+
 ## 7. The go-live checklist (decision B; Delivers 8, 9)
 
 In order, each item checked off in this doc with its evidence:
@@ -789,7 +810,7 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 6 | **[done 2026-11-18, §7 "As built, step 6"; his `bootstrap` apply, C6 `954b222`, Deploy green]** Serving in `main` (§7 item 2) | Opus; his apply | C6 |
 | 7 | **[done 2026-11-18, §5.3 "As run, step 7": 10 of 10]** The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |
 | 8 | **[done 2026-11-19, §5.4 "As run, step 8": no misreading after one fix, re-tested]** The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |
-| 9 | The video (§6): pack, generation, check, captions, the file | him and Claude | C9 |
+| 9 | **[done 2026-11-20, §6 "As run, step 9"; attempt 4 kept with one edit, two departures logged]** The video (§6): pack, generation, check, captions, the file | him and Claude | C9 |
 | 10 | The public checks (§5.5) | Claude; him for the four readers | C10 |
 | 11 | Go-live (§7 items 3-8), the teardown test | Opus; his apply and deploy | C11 |
 | 12 | The close: DoD audit, version `0.6.5`, cost | Opus | C12 |

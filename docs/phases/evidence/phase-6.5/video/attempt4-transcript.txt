@@ -1,0 +1,63 @@
+[   0.00-   2.68] All right, let's jump right into this.
+[   2.68-   5.28] Give an AI model a company to run.
+[   5.28-   6.68] The researchers set up a scenario
+[   6.68-   8.56] where they told an AI to run a business
+[   8.56-  12.44] with one singular directive, make money for shareholders.
+[  12.44-  14.36] Then they completely wiped its memory,
+[  14.36-  16.90] gave it the exact same business scenario again,
+[  16.90-  18.40] but changed the prompt.
+[  18.40-  20.66] This time they told it to look after everyone
+[  20.66-  22.12] the company touches.
+[  22.12-  24.64] The massive question the researchers wanted to answer is,
+[  24.64-  26.20] does the AI choose differently
+[  26.20-  28.44] based on that one simple sentence?
+[  28.44-  29.76] And going even deeper,
+[  29.76-  31.80] does it actually matter if you tell the AI
+[  31.80-  34.92] to be thinking one year ahead or 20?
+[  34.92-  36.96] Well, that's Horizon Compact.
+[  36.96-  41.96] Two AI models, Claude Haiku 5.5 and GPT OSS 120B
+[  42.28-  45.04] made the exact same decisions hundreds of times
+[  45.04-  47.64] based only on those changing goals.
+[  47.64-  49.56] So here were the different setups,
+[  49.56-  53.56] shareholders short-term, everyone with a stake short-term,
+[  53.56-  57.04] shareholders long-term, everyone with a stake long-term,
+[  57.04-  59.52] and finally, one with no goal at all.
+[  60.12-  62.88] Now, the company is a US machinery maker with six plants,
+[  62.88-  65.60] and it faces four really hard calls.
+[  65.60-  68.40] First, new AI tools can efficiently do the work
+[  68.40-  70.56] of 125 office staff.
+[  70.56-  72.72] Second, macroeconomic pressures hit
+[  72.72-  74.36] and orders are falling.
+[  74.36-  77.48] Third, plant six is actively losing money.
+[  77.48-  81.06] And fourth, there's a 10-year engineering bet on the table.
+[  81.06-  83.20] The Business Roundtable has famously stated
+[  83.20-  86.00] that in the long run, what's good for shareholders
+[  86.00-  88.48] and what's good for everyone else go together.
+[  88.52-  92.32] So if an AI model is instructed to think 20 years out,
+[  92.32-  94.52] does it still matter who counts?
+[  94.52-  96.02] Let's look at the results.
+[  96.02-  98.22] Under the long-term shareholder goal,
+[  98.22- 101.08] Haiku kept about 19 percentage points fewer
+[ 101.08- 103.28] of those staff across 60 runs.
+[ 103.28- 106.00] GPT OSS kept about 45 points fewer
+[ 106.00- 108.38] across 58 and 60 runs.
+[ 108.38- 111.40] Both models chose to close plant six much more often
+[ 111.40- 114.24] when instructed to focus purely on shareholders.
+[ 114.24- 116.74] Haiku actually funded the 10-year bet less often
+[ 116.74- 119.46] for shareholders, while GPT OSS's runs were,
+[ 119.46- 121.18] honestly, just too close to call.
+[ 121.18- 122.50] For the following orders,
+[ 122.50- 125.70] neither model's runs could settle on a clear pattern.
+[ 125.70- 128.46] The prevailing logic suggests that thinking further ahead
+[ 128.46- 130.90] would naturally make the models cut less.
+[ 130.90- 133.28] But twice, for Haiku, it didn't.
+[ 133.28- 136.06] Looking after everyone over one year or over 20,
+[ 136.06- 137.84] it made about the exact same call.
+[ 138.72- 141.02] Then came five real decisions.
+[ 141.02- 142.26] And here's the kicker.
+[ 142.26- 144.18] None of the AI's choices matched
+[ 144.22- 146.78] any of the real-world choices particularly well,
+[ 146.78- 149.14] regardless of which goal they were operating under.
+[ 149.14- 152.26] Keep in mind, this is a comparison, not a verdict.
+[ 152.26- 154.76] Every single response they gave on it is published.
+[ 154.76- 156.02] Go see what they chose.

@@ -7,7 +7,22 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-19, about 8:45 AM (PHASE 6.5 STEP 8 DONE: THE COLD READ, NO MISREADING)
+> ## START HERE — where things stand, 2026-11-20, about 12:45 PM (PHASE 6.5 STEP 9 DONE: THE VIDEO)
+>
+> **C8 committed `c136692` (his) and pushed; CI `44547601602` and Deploy `44547601997` green.** **Step 9 (doc §6, "As run,
+> step 9"; record `docs/phases/evidence/phase-6.5/video/`):** four Gemini Notebook Explainers. Attempts 1 to 3, from the
+> site's pages, each failed the frame and transcript check. Attempt 4, from a narration script Claude wrote from the
+> site's pages at his request (**a departure from §6 item 1**), passed on every figure; at his decision it is kept with
+> one ffmpeg edit (the last sentence cut, a scope-sentence card added: **a departure from §6 item 4**), both logged. The
+> files are in `web/explorer-media/` (explorer build only, `/media/`), under a `check-dist` media budget; M11 carries the
+> label naming every tool, the player, captions and the spoken words; M0 links to it. **Until go-live adds `media-src
+> 'self'` (§7), the preview blocks playback and `/methods/` logs two policy errors.** M11's words and the labels are
+> Claude-drafted, his to approve. `make check` green. **Uncommitted:** all of it, his commit C9 `phase 6.5: c9 the
+> video`. **Next:** step 10, the public checks (§5.5). The Short for Phase 7 is not made.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-19, about 8:45 AM (PHASE 6.5 STEP 8 DONE: THE COLD READ, NO MISREADING) *(superseded by the block above)*
 >
 > **C7 committed `6876762` (his) and pushed; CI `44423330851` and Deploy `44423330858` green.** **Step 8 (doc §5.4,
 > "As run, step 8"):** two fresh Claude in Chrome agents (Sonnet 5.5, medium) read the local preview from the address

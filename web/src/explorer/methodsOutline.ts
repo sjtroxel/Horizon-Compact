@@ -51,6 +51,21 @@ export type Block =
   | (BlockBase & { kind: "objectives" })
   /** The four scenarios in brief (his.json) and each one's main result (index.json). */
   | (BlockBase & { kind: "scenarios" })
+  /**
+   * The video (Phase 6.5 step 9, doc section 6): its file, poster and captions, each a file name under media/, and
+   * its words as spoken, one caption cue to a line (a test holds them equal to the captions file's cues). The words are
+   * the video's, checked against the site when it was made (docs/phases/evidence/phase-6.5/video/), not the page's own
+   * figures, so the figure trace does not read them.
+   */
+  | (BlockBase & {
+      kind: "video";
+      title: string;
+      file: string;
+      poster: string;
+      captions: string;
+      spoken: string[];
+      onScreen: string;
+    })
   /** A part a later step writes: the placeholder shows, and `note` says which step (it is never shown). */
   | (BlockBase & { kind: "pending"; note: string });
 

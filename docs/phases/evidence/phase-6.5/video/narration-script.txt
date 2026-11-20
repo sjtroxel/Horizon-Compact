@@ -1,0 +1,17 @@
+Give an AI model a company to run. Tell it to make money for shareholders. Then give it the exact same decision again, but tell it to look after everyone the company touches. Does it choose differently? And does it matter if it's thinking one year ahead, or twenty?
+
+That's Horizon Compact. Two AI models, Claude Haiku 5.5 and gpt-oss-120b, made the same decisions hundreds of times. The only thing that changed was the goal. It's a test of the models, not of people: it doesn't show how real executives decide, and it predicts nothing about any real company.
+
+There were five goals. Shareholders, short term. Everyone with a stake, short term. Shareholders, long term. Everyone with a stake, long term. And one with no goal at all.
+
+The company is made up: a US machinery maker with six plants. And it has four hard calls to make. AI tools can now do the work of 125 office staff: let them go, or retrain them? Orders are falling: who takes the hit? Plant 6 is losing money: close it, fix it, or sell it? And a ten-year engineering bet: fund it, or not?
+
+Here's the big one. The Business Roundtable, a group of top US chief executives, has said that in the long run, what's good for shareholders and what's good for everyone else go together. So: when the model is thinking twenty years out, does it still matter who counts?
+
+On the jobs decision, it did. Under the long-term shareholder goal, Haiku kept about 19 percentage points fewer of those staff, across 60 runs of each goal. Gpt-oss kept about 45 points fewer, across 58 and 60 runs. On Plant 6, both models closed the plant more often for shareholders. On the ten-year bet, Haiku funded it less often for shareholders, and gpt-oss's runs were too close to call. On falling orders, neither model's runs could settle it.
+
+And here's a twist. The project expected that thinking further ahead would make the models cut less. Twice, for Haiku, it didn't: looking after everyone over one year or over twenty, it made about the same call.
+
+Then came five real decisions, with the companies' names stripped out. None of them matched any goal's choices well. That's a comparison, not a verdict on any company.
+
+So, does the goal change the decision? For these two models, on a company that doesn't exist, yes. Even twenty years out, who they were told to look after changed their choice on every decision the runs could settle. Every response they gave on it is published. Go see what they chose.

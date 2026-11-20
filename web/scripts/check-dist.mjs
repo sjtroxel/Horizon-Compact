@@ -19,6 +19,10 @@ import { findDataCopies, findLeaks, loadDataHashes, loadOfficialIds, walk } from
 const SITE_ORIGIN = "https://horizon-compact.vercel.app";
 const JS_BUDGET = 100 * 1024; // gzipped: all JavaScript in placeholder mode; what one path loads in explorer mode
 const FONT_BUDGET = 150 * 1024; // all font files
+// The methods page's video, its poster and captions (Phase 6.5 step 9, decision F): explorer only, in media/, one file
+// each kind; the video under 20 MiB (GitHub warns at 50), the rest small.
+const MEDIA_BUDGET = 20 * 1024 * 1024;
+const MEDIA_EXTENSIONS = new Set([".mp4", ".vtt", ".jpg"]);
 const EXPECTED_RUN_IDS = 2290; // the official runs of the grid and the thinking sub-study (Phase 6 doc section 5.3)
 const EXPECTED_SWEEP_IDS = 13; // two grids, the thinking sub-study, ten case sweeps
 
@@ -370,6 +374,20 @@ function checkPathBudgets() {
   }
 }
 if (explorer) checkPathBudgets();
+
+// Media: explorer only, in media/, MP4, WebVTT and JPEG only, all of it under budget. The placeholder page has none.
+const MEDIA = join(DIST, "media") + "/";
+const mediaFiles = all.filter((f) => MEDIA_EXTENSIONS.has(extname(f)) || f.startsWith(MEDIA));
+let mediaBytes = 0;
+for (const f of mediaFiles) {
+  mediaBytes += statSync(f).size;
+  if (!explorer) fail(`${rel(f)}: the placeholder page ships no media until go-live`);
+  else if (!f.startsWith(MEDIA)) fail(`${rel(f)}: media belongs in media/`);
+  else if (!MEDIA_EXTENSIONS.has(extname(f))) fail(`${rel(f)}: media/ holds only .mp4, .vtt and .jpg`);
+}
+if (explorer && mediaFiles.filter((f) => extname(f) === ".mp4").length !== 1)
+  fail("media/: expected exactly one video (the methods page's)");
+if (mediaBytes > MEDIA_BUDGET) fail(`media is ${mediaBytes} bytes, over the ${MEDIA_BUDGET} budget`);
 console.log(
   `${explorer ? "dist-explorer" : "dist"}: ${all.length} files${explorer ? ` (${files.length} outside data/)` : ""}`,
 );
@@ -386,6 +404,10 @@ for (const [kind, { path, bytes }] of perKind) {
 console.log(
   `fonts: ${fonts.length} files, ${fontBytes} bytes (${kb(fontBytes)}); budget ${kb(FONT_BUDGET)}; WOFF2 only`,
 );
+if (explorer)
+  console.log(
+    `media: ${mediaFiles.length} files, ${mediaBytes} bytes (${kb(mediaBytes)}); budget ${kb(MEDIA_BUDGET)}`,
+  );
 for (const line of summary) console.log(line);
 
 if (failures.length > 0) {

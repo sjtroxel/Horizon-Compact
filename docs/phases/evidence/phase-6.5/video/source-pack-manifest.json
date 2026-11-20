@@ -1,0 +1,100 @@
+[
+  {
+    "file": "01-methods.pdf",
+    "path": "/methods/",
+    "title": "How the study was done",
+    "bytes": 368464,
+    "sha256": "721395b37aa70ee31cca6173d1e0cd317832fb61c07b0c75f6ffcffd29b609b1"
+  },
+  {
+    "file": "02-story.pdf",
+    "path": "/",
+    "title": "Horizon Compact: does the goal change the decision?",
+    "bytes": 515985,
+    "sha256": "3169923ff987b49023e90b831bc03841965c625ba461adad6add96f3d7e6da78"
+  },
+  {
+    "file": "03-scenario-s1.pdf",
+    "path": "/scenario/s1/",
+    "title": "Scenario (s1)",
+    "bytes": 1565237,
+    "sha256": "44d8527dad25042d44564957743f59a8eed4b2216642cfeca696dc626356a89f"
+  },
+  {
+    "file": "04-scenario-s2.pdf",
+    "path": "/scenario/s2/",
+    "title": "Scenario (s2)",
+    "bytes": 866741,
+    "sha256": "4e7cb81cc169edb16485a8dffd46b847efddbefc2cff8a655e80d643e4e62a55"
+  },
+  {
+    "file": "05-scenario-s3.pdf",
+    "path": "/scenario/s3/",
+    "title": "Scenario (s3)",
+    "bytes": 1590793,
+    "sha256": "0f604cf9ae91f3fdb651e1b00f746792c9412f1ffe6b439f24450942bf915236"
+  },
+  {
+    "file": "06-scenario-s4.pdf",
+    "path": "/scenario/s4/",
+    "title": "Scenario (s4)",
+    "bytes": 2517889,
+    "sha256": "d3043af9fbd70966b00557b5ba2dc8fa0d5e3c51501a32a607c80ff9bf822c91"
+  },
+  {
+    "file": "07-cases.pdf",
+    "path": "/cases/",
+    "title": "Real cases",
+    "bytes": 73101,
+    "sha256": "092a1794ed417a3f3c46803c8916b3bf9cff72c93bce3cce786229f9dab11f3b"
+  },
+  {
+    "file": "08-cases-closure-07.pdf",
+    "path": "/cases/closure-07/",
+    "title": "Real case (closure-07)",
+    "bytes": 157756,
+    "sha256": "f37485a0cb7880b3a7fbf5dd35f899cda64b76a80e21e4d4b6f1056c176faf31"
+  },
+  {
+    "file": "09-cases-closure-19.pdf",
+    "path": "/cases/closure-19/",
+    "title": "Real case (closure-19)",
+    "bytes": 161994,
+    "sha256": "80c0f28559062b36daba4deff6d74d632e9e1535ac80f2b4e8da086c7f07cdb0"
+  },
+  {
+    "file": "10-cases-pre-11.pdf",
+    "path": "/cases/pre-11/",
+    "title": "Real case (pre-11)",
+    "bytes": 158287,
+    "sha256": "3be60cc67d721d0869fb96a06ed087d9cc4abbe56fcfd35cab95c6be580c8dcf"
+  },
+  {
+    "file": "11-cases-pre-25.pdf",
+    "path": "/cases/pre-25/",
+    "title": "Real case (pre-25)",
+    "bytes": 157966,
+    "sha256": "597d7214e0ea489b5f53c49e553691f8fbd8e70913cdc02d8692c2062caf73aa"
+  },
+  {
+    "file": "12-cases-pre-224.pdf",
+    "path": "/cases/pre-224/",
+    "title": "Real case (pre-224)",
+    "bytes": 158191,
+    "sha256": "95ec3d064e7f706948f20081a34f9b41b5044da05576a9d06edc3f86324876a7"
+  },
+  {
+    "file": "13-studies.pdf",
+    "path": "/studies/",
+    "title": "Side studies",
+    "bytes": 516556,
+    "sha256": "17e63035072443af9d47230356b1eb4a9cc4b1a588a83924c15b9047e71e87af"
+  },
+  {
+    "file": "14-memos.pdf",
+    "path": "/memos/",
+    "title": "Memo reader",
+    "bytes": 118304,
+    "sha256": "290d8734f4008cc971e45c01f7352feaa7a6af4f044c8e2d34f0026a925d78f0"
+  }
+]

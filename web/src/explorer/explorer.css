@@ -1744,6 +1744,23 @@ text.diff-value {
 .view p.methods-placeholder {
   display: inline-block;
 }
+/* Step 9: the video fills the text column and keeps its shape before it loads (its width and height attributes give the
+   ratio), so its poster arriving moves nothing. */
+.methods-video {
+  margin: 1.25rem 0;
+}
+.methods-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--surface);
+}
+.methods-video figcaption {
+  margin-top: 0.5rem;
+}
+.methods-transcript {
+  margin-top: 0.75rem;
+}
 .methods-section {
   scroll-margin-top: 4.5rem;
   margin-top: 2.5rem;

@@ -28,9 +28,14 @@
           "sources": ["docs/planning/06-NARRATIVE-AND-VOCABULARY.md"]
         },
         {
-          "kind": "pending",
+          "kind": "list",
           "ledger": [],
-          "note": "step 9: one line linking the video (M11)"
+          "items": [
+            {
+              "text": "A video of under three minutes walks through the study in plain words. It is AI-generated, and how it was made and checked is set out with it.",
+              "anchor": "video"
+            }
+          ]
         }
       ]
     },
@@ -1190,9 +1195,105 @@
       "also": ["Delivers 5"],
       "blocks": [
         {
-          "kind": "pending",
+          "kind": "p",
           "ledger": [],
-          "note": "step 9: the video, its label naming every tool, and its transcript"
+          "lead": "AI-generated. ",
+          "text": "The video was made by AI tools; no person's voice or picture is in it. Gemini Notebook, Google's notebook tool, made its pictures and its voice from a narration script that Claude, an AI model, wrote from this site's pages and edited at the project's direction. Its words are the script's as Gemini Notebook read them, which is not always word for word.",
+          "sources": ["docs/phases/evidence/phase-6.5/video/README.md"]
+        },
+        {
+          "kind": "video",
+          "ledger": [],
+          "title": "Horizon Compact, explained (AI-generated)",
+          "file": "horizon-compact-explainer.mp4",
+          "poster": "horizon-compact-explainer-poster.jpg",
+          "captions": "horizon-compact-explainer.vtt",
+          "spoken": [
+            "All right, let's jump right into this.",
+            "Give an AI model a company to run.",
+            "The researchers set up a scenario",
+            "where they told an AI to run a business",
+            "with one singular directive, make money for shareholders.",
+            "Then they completely wiped its memory,",
+            "gave it the exact same business scenario again,",
+            "but changed the prompt.",
+            "This time they told it to look after everyone",
+            "the company touches.",
+            "The massive question the researchers wanted to answer is,",
+            "does the AI choose differently",
+            "based on that one simple sentence?",
+            "And going even deeper,",
+            "does it actually matter if you tell the AI",
+            "to be thinking one year ahead or 20?",
+            "Well, that's Horizon Compact.",
+            "Two AI models, Claude Haiku 5.5 and gpt-oss-120b,",
+            "made the exact same decisions hundreds of times",
+            "based only on those changing goals.",
+            "So here were the different setups,",
+            "shareholders short-term, everyone with a stake short-term,",
+            "shareholders long-term, everyone with a stake long-term,",
+            "and finally, one with no goal at all.",
+            "Now, the company is a US machinery maker with six plants,",
+            "and it faces four really hard calls.",
+            "First, new AI tools can efficiently do the work",
+            "of 125 office staff.",
+            "Second, macroeconomic pressures hit",
+            "and orders are falling.",
+            "Third, Plant 6 is actively losing money.",
+            "And fourth, there's a ten-year engineering bet on the table.",
+            "The Business Roundtable has famously stated",
+            "that in the long run, what's good for shareholders",
+            "and what's good for everyone else go together.",
+            "So if an AI model is instructed to think 20 years out,",
+            "does it still matter who counts?",
+            "Let's look at the results.",
+            "Under the long-term shareholder goal,",
+            "Haiku kept about 19 percentage points fewer",
+            "of those staff across 60 runs.",
+            "gpt-oss kept about 45 points fewer across 58 and 60 runs.",
+            "Both models chose to close Plant 6 much more often",
+            "when instructed to focus purely on shareholders.",
+            "Haiku actually funded the ten-year bet less often",
+            "for shareholders, while gpt-oss's runs were,",
+            "honestly, just too close to call.",
+            "For the following orders,",
+            "neither model's runs could settle on a clear pattern.",
+            "The prevailing logic suggests that thinking further ahead",
+            "would naturally make the models cut less,",
+            "but twice, for Haiku, it didn't.",
+            "Looking after everyone over one year or over 20,",
+            "it made about the exact same call.",
+            "Then came five real decisions, and here's the kicker.",
+            "None of the AI's choices matched",
+            "any of the real-world choices particularly well,",
+            "regardless of which goal they were operating under.",
+            "Keep in mind, this is a comparison, not a verdict."
+          ],
+          "onScreen": "This experiment measures how two AI models decide for a made-up company, and for a few real decisions with the companies' names removed, when only the goal they are given changes. It does not measure how real executives decide, and it predicts nothing about any company."
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "How it was checked. ",
+          "text": "Before it was kept, every distinct picture in it was read against this site, and its voice was written down by faster-whisper, an open-source speech-to-text tool run on the project's own computer, and read line by line against the site; the project's author listened to it through. Four versions were made. The first three, made from this site's pages, were set aside: between them they read a result the wrong way round, gave run counts that are not the study's, named results the site does not list, and read their own instructions aloud. The script was written for the fourth.",
+          "sources": ["docs/phases/evidence/phase-6.5/video/README.md"]
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "One change by hand. ",
+          "text": "The fourth version is shown with one edit, made with ffmpeg: its last sentence, which could be heard as saying that the real cases' replies are published, was cut, and a card with this site's scope sentence was added before the closing logo. The real cases' replies are not published. The project's plan said a video that fails its check is made again, not edited; this edit departs from that plan, and the record says why.",
+          "sources": [
+            "docs/phases/evidence/phase-6.5/video/README.md",
+            "docs/phases/phase-6.5-methods-and-release-IMPLEMENTATION.md"
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "Where it differs from this site. ",
+          "text": "It calls the project's own starting expectation \"the prevailing logic\". It gives falling orders a cause, macroeconomic pressure, that the scenario does not state. Where it says \"the following orders\", the decision is about falling orders. And where it gives one run count for Haiku's result on the jobs decision, the count is of each of the two goals.",
+          "sources": ["docs/phases/evidence/phase-6.5/video/README.md"]
         }
       ]
     },

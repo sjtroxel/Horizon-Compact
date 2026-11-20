@@ -406,6 +406,35 @@ function ScenarioList({ index }: { index: DataIndex }) {
   );
 }
 
+/**
+ * The video (step 9): it loads nothing until it is played (`preload="none"`), shows its poster, carries its captions,
+ * and has its words below it as text, so a reader who cannot or will not play it loses nothing.
+ */
+function VideoBlock({ block }: { block: Extract<Block, { kind: "video" }> }) {
+  const at = (name: string) => `/media/${name}`;
+  return (
+    <figure data-block="video" className="methods-video">
+      <video controls preload="none" poster={at(block.poster)} title={block.title} width={1280} height={720}>
+        <source src={at(block.file)} type="video/mp4" />
+        <track kind="captions" src={at(block.captions)} srcLang="en" label="English" default />
+        {L.methodsVideoFallback}
+      </video>
+      <figcaption>
+        <a href={at(block.file)} download>
+          {L.methodsVideoDownload}
+        </a>
+      </figcaption>
+      <details className="methods-transcript">
+        <summary>{L.methodsVideoTranscript}</summary>
+        <p>{block.spoken.join(" ")}</p>
+        <p>
+          <strong>{L.methodsVideoOnScreen}</strong> {block.onScreen}
+        </p>
+      </details>
+    </figure>
+  );
+}
+
 /** One block of words, as methods.json has it. `data-block` names its kind, so a test can find every block. */
 function BlockView({ block, index }: { block: Block; index: DataIndex }) {
   switch (block.kind) {
@@ -472,6 +501,8 @@ function BlockView({ block, index }: { block: Block; index: DataIndex }) {
           <ScenarioList index={index} />
         </div>
       );
+    case "video":
+      return <VideoBlock block={block} />;
     case "pending":
       return (
         <p className="methods-placeholder" data-placeholder="body" data-block="pending">

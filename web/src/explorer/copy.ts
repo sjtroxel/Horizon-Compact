@@ -599,6 +599,11 @@ export const explorerLabels = {
   methodsWhenColumn: "Over",
   methodsNoGoal: "No goal is stated.",
   methodsSeeSection: "Where it is explained",
+  // Step 9 (doc section 6): the video's player and its words. Claude-drafted, his to approve.
+  methodsVideoFallback: "This browser cannot play the video. Its words are below.",
+  methodsVideoTranscript: "The video's words, as spoken",
+  methodsVideoOnScreen: "On screen at the end, with no voice:",
+  methodsVideoDownload: "Download the video (MP4)",
   methodsScenarioResult: (outcome: string, points: string) =>
     `Its main result is the ${outcome}; two goals split on it only if they differ by at least ${points} percentage points.`,
 };

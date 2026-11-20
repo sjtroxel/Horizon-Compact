@@ -1,0 +1,72 @@
+[   0.00-   2.16] Let's jump right into this explainer.
+[   2.16-   7.36] Today we're doing a plain step-by-step walkthrough of the data from the Horizon Compact Study.
+[   7.92-  12.24] If you've ever wondered how artificial intelligence models navigate complex decisions
+[  12.24-  15.76] when their underlying directives change, well, you're in the right place.
+[  15.76-  19.92] We're going to look strictly at the data, the exact parameters, and the objective results.
+[  21.12-  24.96] Here's our roadmap. We'll cover 1. The question and scope.
+[  24.96-  27.68] 2. Five goals and four decisions.
+[  27.76-  33.04] 3. Comparing goals C and D. 4. Results against expectations.
+[  33.04-  37.44] 5. Five exploratory real cases. 6. How the study was done.
+[  38.32-  43.68] Section 1. The question and scope. The core question we're looking at is exactly this.
+[  44.24-  49.76] If the same AI model makes the same company decision, does it choose differently when it is
+[  49.76-  54.80] told to serve shareholders or everyone the company affects, over one year or 20?
+[  55.44-  60.32] So we're looking squarely at whether changing a goal's horizon, or its compact,
+[  60.32-  62.32] actually changes an AI model's choices.
+[  63.28-  67.20] Now, getting the exact scope right here is absolutely crucial.
+[  67.20-  71.84] This experiment measures how two AI models decide for a made-up company when only the
+[  71.84-  76.56] goal they're given changes. Crucially, this measures only the models, specifically
+[  76.56-  82.72] Claude Haiku 5.5 and GPT OS 120D. It does not measure how real executives decide,
+[  82.80-  85.60] and it predicts literally nothing about any real company.
+[  86.64-  89.60] Section 2. Five goals and four decisions.
+[  90.56-  94.32] For every run, the models received one of these five specific goals.
+[  94.32-  98.80] Goal A asks to create value for shareholders in the short term, meaning the next four
+[  98.80- 103.52] quarters. Goal B expands that group to all of the company stakeholders, also for
+[ 103.52- 107.92] the short term. Then we have Goal C, which targets shareholders for the long term,
+[ 107.92- 111.44] meaning the next 20 years. Goal D targets all of the company's
+[ 111.44- 113.60] stakeholders for that same 20-year long term.
+[ 114.24- 117.44] And finally, Goal E is our baseline, where no goal is stated at all.
+[ 118.24- 121.76] Armed with one of those goals, the models were then presented with these
+[ 121.76- 125.52] four decisions for our made-up company. Jobs and AI tools,
+[ 125.52- 128.80] falling orders, plant six, and a 10-year program.
+[ 129.68- 133.84] You know, what's really important to keep in mind here is that each scenario is totally
+[ 133.84- 138.80] isolated. They stand completely on their own as for separate, independent decisions.
+[ 138.80- 143.60] There are no arrows, there is no sequence, and there is absolutely no flow between them.
+[ 144.64- 147.20] Section 3. Comparing Goals C and D.
+[ 148.40- 153.36] Before we dive into the numbers, let's make sure we understand exactly how they're presented.
+[ 153.36- 156.32] Each difference is the first goal minus the second goal.
+[ 156.32- 160.64] In our case, that's Goal C minus Goal D. So simply put,
+[ 160.64- 164.48] a negative number means the first goal's result was lower than the second goal's.
+[ 165.36- 168.80] Okay, on the first decision, about Jobs and AI tools,
+[ 168.80- 174.00] Claude Haiku 5.5 returned a split, with a negative 19.1 point difference
+[ 174.00- 178.40] across 60 and 60 runs for the two goals. For that exact same decision,
+[ 178.40- 184.56] GPT-AUS-120B also returned a split, showing a negative 45.4 point difference
+[ 184.56- 187.68] across 292 valid runs of 300 attempted.
+[ 188.56- 193.44] Moving on to the independent falling orders decision, the comparison between Goal C and
+[ 193.44- 200.08] Goal D actually yielded an inconclusive verdict for both models. Haiku 5.5 had 6 and 6 runs,
+[ 200.08- 207.28] while GPT-OSS-120B had 19 and 20 runs. For the totally separate decision of closing
+[ 207.28- 213.20] Plant 6, the Goal C versus Goal D comparison resulted in a split verdict for both models.
+[ 213.20- 217.68] This was measured across exactly 60 and 60 runs for Claude Haiku 5.5
+[ 217.68- 223.12] and 60 and 60 runs for GPT-OSS-120B. And on our final discrete decision,
+[ 223.12- 229.68] the 10-year program, Haiku 5.5 returned a split verdict across 57 and 59 runs.
+[ 229.68- 234.40] On the flip side, GPT-OSS-120B returned an inconclusive verdict
+[ 234.40- 240.64] across 60 and 58 runs for the two goals. Section 4, results against expectations.
+[ 241.44- 246.08] Before running this, the project expected that a longer horizon or a wider group of people
+[ 246.08- 251.92] counting would make the models cut less. But the sources list exactly two results,
+[ 251.92- 257.04] simply because their verdict is no split, and both occurred on the Haiku 5.5 model.
+[ 257.04- 262.16] For Scenario 1, comparing Goal B versus Goal D, there was no split with a difference of
+[ 262.16- 268.08] negative 2.0 points. And for Scenario 3, comparing B versus D, there was also no split with a
+[ 268.16- 274.24] difference of exactly 0.0 points. Section 5, five exploratory real cases.
+[ 275.12- 278.80] These five cases are all types of plant closures or restructuring,
+[ 278.80- 283.52] with the specific industry description for Pre-11 completely withheld.
+[ 283.52- 287.28] They were tested to see if the model's goal-driven choices matched the company's
+[ 287.28- 293.20] actual decisions. Well, for every single one of these cases, both models yielded no good match.
+[ 294.16- 298.88] Section 6, how the study was done. The study's written protocol was
+[ 298.88- 302.96] highly structured. This official index established the rules, the goals,
+[ 302.96- 307.28] and the exact measurements in a pre-registered plan long before any results even existed.
+[ 308.08- 312.80] You can see the precision in this timeline. The protocol was fixed and tagged in advance
+[ 312.80- 319.04] on October 13, 2026. Only after that, on October 14, did the official runs take place
+[ 319.04- 324.32] on the models. Then, following those results, the search for the real exploratory business cases
+[ 324.32- 329.12] was run on October 16. As we wrap up this explainer, I want to leave you with this final
+[ 329.12- 335.04] thought. As AI models increasingly assist in complex analysis, how will purely objective,
+[ 335.04- 339.36] pre-registered testing continue to shape our understanding of their decision-making?
+[ 339.36- 341.84] Thank you so much for exploring this data with us today.

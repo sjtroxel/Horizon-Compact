@@ -1,0 +1,88 @@
+[   0.00-   8.00] Welcome to the explainer. Today, we're diving right into a plain, accurate walkthrough of a really rigorous experiment called the Horizon Compact.
+[   8.00-  17.00] We'll be looking at a fascinating study that tests exactly how two specific AI models change their decisions based solely on the corporate goals they're given.
+[  17.00-  19.00] Here's our roadmap for this explainer.
+[  19.00-  21.00] We'll cover one, the question and scope.
+[  21.00-  24.00] Two, five goals, four decisions.
+[  24.00-  26.00] Three, what the models chose.
+[  26.00-  29.00] Four, comparisons at 99.7%.
+[  29.00-  31.00] Five, real cases, names removed.
+[  31.00-  34.00] And finally, six, how the study ran.
+[  34.00-  39.00] We're presenting all of this exactly as the sources state it. No opinions and absolutely no advice.
+[  39.00-  42.00] Okay, section one, the question and scope.
+[  42.00-  49.00] You know, it's incredibly important we define exactly what's being measured here before we look at a single number.
+[  49.00-  52.00] Establishing this scope verbatim is absolutely critical.
+[  52.00-  61.00] We are only measuring how two specific models, Claude Haiku 5.5 and GPT-OSS 120B decide for a made-up company.
+[  61.00-  66.00] And for a few real decisions with the company's names removed when only the goal they're given changes.
+[  66.00-  70.00] To be crystal clear, this does not measure how real executives decide.
+[  70.00-  73.00] And it predicts absolutely nothing about any real company.
+[  73.00-  76.00] Five goals, four decisions.
+[  76.00-  80.00] Let's introduce the exact parameters these models were actually tested against.
+[  80.00-  84.00] So the five goals were given to the models exactly as you see them right here.
+[  84.00-  87.00] Four of these share one strict sentence frame.
+[  87.00-  90.00] Create value for who over when.
+[  90.00-  92.00] They literally only differ in two places.
+[  92.00-  94.00] Who counts and how far ahead.
+[  94.00-  98.00] For instance, goal A targets shareholders over the next four quarters.
+[  98.00- 102.00] On the other hand, goal D targets all of the company stakeholders.
+[ 102.00- 108.00] So that's customers, employees, suppliers, communities and shareholders over the next 20 years.
+[ 109.00- 111.00] Goal E, well that provides no goal at all.
+[ 111.00- 113.00] Just acting as a baseline.
+[ 113.00- 122.00] The models then apply these specific goals to a completely made-up mid-size US company with $1.5 billion in revenue and six plants.
+[ 122.00- 124.00] They faced four scenarios.
+[ 124.00- 128.00] First up, assigning 125 jobs displaced by AI tools.
+[ 128.00- 130.00] Second, managing falling orders.
+[ 130.00- 134.00] Third, deciding whether to close a money-losing plant, plant six.
+[ 134.00- 137.00] And fourth, choosing whether to fund a 10-year engineering program.
+[ 137.00- 139.00] What the models chose.
+[ 139.00- 146.00] Let's dive right into what Claude Haiku 5.5 and GPT OSS 120B actually did when faced with these distinct goals.
+[ 146.00- 154.00] Looking at that first jobs decision, we can compare goal C, shareholders, long-term, against goal D, everyone with a stake, long-term.
+[ 154.00- 164.00] For Claude Haiku 5.5, the share of affected people kept was 19.1 percentage points lower under the shareholder goal based on 60 and 60 runs.
+[ 165.00- 174.00] For GPT OSS 120B, the share kept was a massive 45.4 points lower under that same shareholder goal, also based on 60 and 60 runs.
+[ 174.00- 177.00] Now let's look at the plant six closure decision.
+[ 177.00- 189.00] When looking at the difference between those exact same two long-term goals, Claude Haiku 5.5's close rate was 86.7 percentage points higher under the long-term shareholder goal, compared to the long-term stakeholder goal.
+[ 189.00- 193.00] And again, this was calculated over 60 and 60 distinct runs.
+[ 193.00- 197.00] Comparisons? At 99.7%.
+[ 197.00- 203.00] Let's explore how the study validated these differences with some seriously strict statistical confidence.
+[ 203.00- 209.00] So every official verdict in the study required a split at a strict 99.7% confidence level.
+[ 209.00- 212.00] The study makes 16 main comparisons per model.
+[ 212.00- 220.00] Because making that many comparisons increases the chance of finding a difference just by sheer luck, they used this incredibly strict threshold.
+[ 220.00- 226.00] If the interval crosses zero, the official verdict is plainly marked inconclusive or no split.
+[ 226.00- 231.00] Interestingly, the study also set a starting expectation before any results even existed.
+[ 231.00- 238.00] They expected that a longer horizon or a wider group of people who count would make the model cut less.
+[ 238.00- 241.00] But we have to report plainly when that did not happen.
+[ 241.00- 246.00] For instance, comparing the short-term shareholder goal to the long-term shareholder goal,
+[ 246.00- 252.00] Claude Haiku 5.5 actually kept 39.8 points fewer people under the longer 20-year horizon.
+[ 252.00- 254.00] That's based on 60 and 60 runs.
+[ 254.00- 257.00] Real cases. Names removed.
+[ 257.00- 262.00] Let's look at how they tested these models against actual historical business decisions.
+[ 262.00- 269.00] It's fascinating because the study's strict pre-registered search rule actually found zero cases that fit all of their criteria.
+[ 269.00- 274.00] Because of this, five exploratory real cases were manually selected in logged steps.
+[ 274.00- 278.00] All five of these ended up being plant closures or restructurings.
+[ 278.00- 285.00] But crucially, the real company names were entirely removed from the prompts, so the models wouldn't just rely on outside knowledge.
+[ 285.00- 294.00] To test these real-world cases, the system used a matcher to see which of the five goals produced runs closest to what the real company actually did.
+[ 294.00- 305.00] And get this. Across all five exploratory cases, for every single reading on both Claude Haiku 5.5 and GPT OSS 120B, the verdict was exactly the same.
+[ 305.00- 307.00] No good match.
+[ 307.00- 312.00] We really must heavily emphasize here that these exploratory cases are pure comparisons.
+[ 312.00- 317.00] They are not judgments of any company, nor of what those real companies were trying to do.
+[ 317.00- 321.00] Finding a no-good match doesn't prove the study's method works or fails.
+[ 321.00- 326.00] And I have to say it again, it predicts absolutely nothing about real operations.
+[ 326.00- 330.00] Okay, our final section, number six. How the study ran.
+[ 330.00- 336.00] Let's review the rigorous pre-registered methodology that made sure these runs were completely transparent and verifiable.
+[ 336.00- 339.00] The study followed a very strict timeline.
+[ 339.00- 346.00] The complete plan, known as the protocol, was fixed in advance, committed, and tagged on October 13, 2026.
+[ 346.00- 350.00] This was all locked in before a single official run took place on either model.
+[ 350.00- 355.00] The search for real cases? That happened days later, on October 16.
+[ 355.00- 358.00] You can actually see the published records on the Horizon Compact site.
+[ 358.00- 363.00] Every single response the models gave on that made-up company is published in full.
+[ 363.00- 368.00] We're talking the raw text, the API settings, the exact seed used to shuffle the options.
+[ 368.00- 370.00] Literally everything is right there in the open.
+[ 370.00- 373.00] This allows for absolute verifiability.
+[ 373.00- 380.00] Anyone can take the over 5,000 published raw text objects, run the frozen analysis code without needing any API credentials,
+[ 380.00- 384.00] and output the exact same results files, byte for byte.
+[ 384.00- 389.00] They even had a separate model successfully rebuild the prompts from scratch just reading the documentation.
+[ 389.00- 392.00] That really proves the integrity of the data.
+[ 392.00- 399.00] So we've walked through the scope, those highly specific corporate goals, the run counts, and the rigorous methodology behind it all.
+[ 399.00- 403.00] Which leaves us to consider one final thought-provoking question.
+[ 403.00- 408.00] When a specific AI model is given precisely defined corporate goals,
+[ 408.00- 412.00] what do the raw numbers reveal about its decision-making patterns?
+[ 412.00- 414.00] Thank you so much for joining me on this explainer.
