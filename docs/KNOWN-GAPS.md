@@ -7,7 +7,48 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-21, about 10:15 AM (PHASE 6.5 STEP 11: GO-LIVE PREPARED)
+> ## START HERE — where things stand, 2026-11-21, about 3:15 PM (PHASE 6.5 CLOSED: VERSION 0.6.5)
+>
+> **Phase 6.5 is closed with its DoD audit** (IMPLEMENTATION doc §11.1: eleven rows met, row 5 with two logged
+> departures and two disclosures, row 6 with two qualifications, row 1 waiting on his read of M12's first entry), **version
+> `0.6.5`**, cost inside the rounding (cumulative at most about $46). **The explorer is public at
+> `horizon-compact.vercel.app` from 2026-11-21, about 10:15 AM** (C11 `42e6284`); the teardown test passed. KNOWN-GAPS
+> OPEN 2026-10-31 is closed. **Uncommitted:** step 11's teardown and live-check records, `infra/vercel/vercel.json` (the
+> rewrite to the new distribution, already deployed) and the close: his one commit `phase 6.5: close, version 0.6.5`;
+> read its CI and Deploy first (the version bump starts Deploy's image build and `main` apply, as at Phase 6's close; the
+> site is not re-synced). **Next:** Phase 7 (the README, the launch post and the Short; his words);
+> its scope doc (`docs/phases/phase-7-writeup-and-launch.md`, approved 2026-10-04) is reviewed and its IMPLEMENTATION
+> doc written and approved first.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-21, about 2:45 PM (PHASE 6.5 STEP 11 DONE: LIVE, TEARDOWN TEST PASSED) *(superseded by the block above)*
+>
+> **The explorer is public at `horizon-compact.vercel.app`, from about 10:15 AM** (C11 `42e6284`; CI `44922943678`,
+> Deploy `44922943677`). **Step 11 (doc §7, "As built, step 11"; record `docs/phases/evidence/phase-6.5/go-live/`): every
+> item checked.** His `bootstrap` apply; the live site and the preview give identical reports; **the teardown test
+> passes** (destroy `44928743719`, 21 destroyed, the INACTIVE-cluster check's first real run passing; re-apply
+> `44929157666`, 21 added, the new distribution `E34HK7Y6ZF40HF` at `d3e4e283m4fruz.cloudfront.net`; the rewrite in
+> `infra/vercel/vercel.json` moved and deployed by him; before and after counts identical); LinkedIn's Post Inspector
+> matches (his read). The site was down about 1 hour 45 minutes during the test. **This block, the record and
+> `vercel.json` ride in his commit `phase 6.5: c11 teardown test and live checks`; read its CI first** (a docs and
+> `infra/vercel/` push starts no Deploy). **Next:** step 12, the close (doc §8: DoD audit, version `0.6.5`, cost; Opus).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-21, about 10:30 AM (PHASE 6.5 STEP 11: THE SITE IS LIVE) *(superseded by the block above)*
+>
+> **C11 committed `42e6284` (his) and pushed; CI `44922943678` and Deploy `44922943677` green, first attempt. The
+> explorer has been public at `horizon-compact.vercel.app` since that Deploy, about 10:15 AM.** Record
+> `docs/phases/evidence/phase-6.5/go-live/README.md`: items 3 (his `bootstrap` apply), 4, 6 (the live site against the
+> preview: 14 paths with no script, 56 browser loads each side, the two reports identical) and 8 done. **Open:** item 5,
+> the teardown test (his: the before counts, the teardown dispatch, Deploy's re-apply, the rewrite to the new domain
+> and its Vercel deploy, the after counts; the public site is down from the destroy until the rewrite), and item 7,
+> LinkedIn's post inspector (his). These notes are uncommitted; they ride in the next commit.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-21, about 10:15 AM (PHASE 6.5 STEP 11: GO-LIVE PREPARED) *(superseded by the block above)*
 >
 > **C10 committed `6a5f027` (his) and pushed; CI `44898505411` and Deploy `44898505418` green.** **Step 11 (doc §7,
 > "As built, step 11"; record `docs/phases/evidence/phase-6.5/go-live/README.md`), begun at his go-ahead:** the go-live
@@ -3456,7 +3497,7 @@ there.
 
 ---
 
-## OPEN 2026-10-31 — two behaviors of the frozen matcher that the case results must disclose (for Phase 6 and 6.5)
+## CLOSED 2026-11-21, at Phase 6.5's close (was OPEN 2026-10-31) — two behaviors of the frozen matcher that the case results must disclose (for Phase 6 and 6.5)
 
 Found at Phase 5.5 §6.4, by Opus reading the ten results files against `analysis/matcher.py` and
 `analysis/descriptive.py`. **Neither is a fault to fix:** both are the frozen code behaving as written, and neither
@@ -3490,6 +3531,10 @@ their conditions hold (note 1, no nearest objective in a tied reading and the `d
 DoD 8). **The entry stays open** until Phase 6.5's methods page carries them.
 
 *Dated note, 2026-11-18 (handoff):* **the methods page now carries both** (M6, "Two behaviors of the matcher", committed in C5 `fc8e65e`). Left open on purpose: Phase 6.5's DoD audit (row 10, step 12) closes it, after go-live puts the page on the public site.
+
+**Closed 2026-11-21 (Phase 6.5's close):** both notes are on the public site, in the explorer (since Phase 6) and on the
+methods page's M6 (since C5), live since go-live (C11 `42e6284`). Phase 6.5's DoD audit names this entry (its
+IMPLEMENTATION doc §11.1, row 10).
 
 ---
 

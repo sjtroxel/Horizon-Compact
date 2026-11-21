@@ -825,7 +825,14 @@ smoke test, not a build switch: `npm run check` already built both, and the smok
 named the placeholder's sweep). Proof before the push: `make check` green (3,581 and 649); the new refusals
 mutation-checked on the built files (a pending block in the methods words; a robots tag on `/methods/`); on a fresh
 preview with the new policy, the video loads (ready state 4, 163.5 s) with its 59 caption cues and no console or policy
-error. Items 3 (his apply), 4 (his push, CI and Deploy), 5 to 7 follow.
+error. **Done the same day** (the record has each item's evidence): item 3, his apply (0 to add, 1 to change, 0 to
+destroy); item 4, C11 `42e6284`, CI `44922943678` and Deploy `44922943677` green on the first attempt, **the site public
+from about 10:15 AM**; item 6, the live site and a fresh preview give identical reports (14 paths with no script; 56
+browser loads each, none with a problem); item 5, the teardown test passes (destroy `44928743719`, 21 destroyed, the
+first real run of the INACTIVE-cluster check, passing; re-apply `44929157666`, 21 added, the new distribution
+`E34HK7Y6ZF40HF`; the rewrite moved and deployed by him; before and after identical); item 7, LinkedIn's Post Inspector
+shows the story's title, description and card (his read). The public site was down about 1 hour 45 minutes during the
+teardown test.
 
 ## 8. The steps and the commit order
 
@@ -845,8 +852,8 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 8 | **[done 2026-11-19, §5.4 "As run, step 8": no misreading after one fix, re-tested]** The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |
 | 9 | **[done 2026-11-20, §6 "As run, step 9"; attempt 4 kept with one edit, two departures logged]** The video (§6): pack, generation, check, captions, the file | him and Claude | C9 |
 | 10 | **[done 2026-11-21, §5.5 "As run, step 10": three findings fixed or disclosed, the search re-run passes]** The public checks (§5.5) | Claude; him for the four readers | C10 |
-| 11 | Go-live (§7 items 3-8), the teardown test | Opus; his apply and deploy | C11 |
-| 12 | The close: DoD audit, version `0.6.5`, cost | Opus | C12 |
+| 11 | **[done 2026-11-21, §7 "As built, step 11": live from about 10:15 AM; the teardown test passes]** Go-live (§7 items 3-8), the teardown test | Opus; his apply and deploy | C11 |
+| 12 | **[done 2026-11-21, §11]** The close: DoD audit, version `0.6.5`, cost | Opus | C12 |
 
 Steps 7 and 8 come after 5 because they test the page's words; step 9 after them because the video is made from the
 fixed page.
@@ -879,3 +886,47 @@ No experiment call. AWS: his S3 read of 5,247 objects (well under a cent), the C
 this traffic, cents a month at most; checked on the pricing page before step 6), hosting. Outside AWS: the fresh
 session and Claude in Chrome on his Claude plan; Gemini Notebook on his free Google account; ElevenLabs only as the
 fallback, its cost named first. The ceiling and re-plan point stand ($80, $60); cumulative is at most about $46.
+
+## 11. The close (C12), 2026-11-21: the DoD audit, the version, the cost
+
+Claude (Opus), on his instruction to finish step 12 and commit once with step 11's records ("can we bypass the
+gitcommit for now and wait and do it after we finish step 12 to make it a finale end of step 6.5 commit", about 2:44
+PM). One commit carries step 11's teardown and live-check records, the moved rewrite (`infra/vercel/vercel.json`) and
+this section.
+
+### 11.1 The DoD audit (§9)
+
+| DoD | Met | Proof |
+|---|---|---|
+| 1. The methods page complete against Delivers 1; every ledger line on it, by script; his approval | yes | `methods.test.ts`: the 43 ledger ids, each placed, against §3's table, section by section; every figure traced to its source and no digit untraced. His approval: C5 (`fc8e65e`), and his reads of the words added at steps 7 to 10 (§5.3, §5.4, §6, §5.5). **M12's first entry (step 11, Claude-drafted) awaits his read** |
+| 2. The re-scoring check in CI and passing; failed once on a number changed by hand, recorded | yes | `tests/test_analysis_rescoring.py` (the three official sweeps from `experiment/raw/`, byte for byte, no AWS client) and the re-validation test in the same file, in `make check` and CI on every commit since C3 (`9dbab42`); its mutations, §5.2 "As built, step 3" |
+| 3. The prompt reconstruction passes for all ten samples; the page says why no real case can be re-run | yes | §5.3 "As run, step 7": 10 of 10 equal to the recorded sha256, his fresh session, the record in `evidence/phase-6.5/prompt-reconstruction/`; M7's "Why no case can be re-run" and "What can and cannot be re-run", on the live page |
+| 4. The cold read's conclusions all fit `planning/06` §4, after fixes, record committed | yes | §5.4 "As run, step 8": one misread detail caused by the site, fixed, a fresh agent re-tested, no conclusion a misreading; `evidence/phase-6.5/cold-read/`, in C8 (`c136692`) |
+| 5. The video passed its frame and narration checks, captioned and labeled | **yes, with two logged departures and two disclosures** | §6 "As run, step 9": attempt 4 passed on every figure; it came from a script Claude wrote (a departure from §6 item 1) and is shown with one edit (a departure from item 4), both logged and on M11; step 10 found two lines broader than the site, disclosed on M11 (§5.5). Captions (59 cues) held equal to the page's transcript by `methods.test.ts`; on the live site the video and its captions load with no policy error (§7 "As built, step 11") |
+| 6. Every §9 check on every surface; no description identifies its company; no real-case memo text deployed; the vocabulary recheck dated | **yes, with two qualifications** | §5.5 "As run, step 10" and `evidence/phase-6.5/public-checks/`: checks 1-3, 5 and 7 pass after one fix and one disclosure; **check 6** passes on `/` and is accepted as absent on the cards and the video (his decision); **check 4** is his one read ("fine for now"), not four reads with notes. The search re-run: four descriptions, 12 searches, no hit. No case memo text in the build (7,415 sentence openings, none found). M10 dated 2026-11-21 |
+| 7. Live at `horizon-compact.vercel.app`, matching the preview; each path its own HTML and card with no script; an unknown path 404 | yes | `evidence/phase-6.5/go-live/` items 4 and 6: live from about 10:15 AM; 14 paths with no script, each its own title, canonical link and card; 56 browser loads on the live URL and on the preview, identical reports; again after the teardown test; 404 on an unknown path |
+| 8. The full text of every Phase 4 pilot and official object published; the verify passes against `raw-manifest.json` | yes | §5.1 "As run, step 2": `hc site raw-verify`, "ok: 5247 objects, 104785272 bytes"; `tests/test_site_rawtext.py::test_the_committed_raw_text_matches_the_committed_manifest`, on the real `experiment/raw/`, in `make check` and CI. (The doc's "`hc raw verify`" is the command `hc site raw-verify`.) |
+| 9. `make check` and CI green; every commit through the guard | yes | every Phase 6.5 commit, `96ab718` to `42e6284` (12, all since Phase 6's close), green: CI `43578717282`, `43609886539`, `43735395010`, `43886444310`, `44122817993`, `44344066964`, `44364703009`, `44423330851`, `44547601602`, `44795927700`, `44898505411`, `44922943678`, and every Deploy they started; the teardown run `44928743719` and the re-apply `44929157666` green. The hooks and the name guard dry-run before each commit; no bypass recorded. `make check` exit 0 on this tree (below) |
+| 10. KNOWN-GAPS OPEN 2026-10-31 closed (both matcher notes on the methods page) | yes, closed with this commit | M6, "Two behaviors of the matcher" (C5), live since go-live; the explorer's half since Phase 6 (§34.2 of its doc); the entry closed today |
+| 11. The teardown test passed after the changes to `main` | yes | `evidence/phase-6.5/go-live/` item 5: destroy `44928743719` (21 destroyed; the INACTIVE-cluster check's first real run, passing), re-apply `44929157666` (21 added, distribution `E34HK7Y6ZF40HF`), the rewrite moved, before and after counts identical |
+
+### 11.2 The version, the cost, and what Phase 7 inherits
+
+**Version `0.6.5`** in `pyproject.toml`, `src/horizon_compact/__init__.py` and `uv.lock` (`uv lock --check` agrees).
+`web/package.json` stays `0.0.0`, as at every close before.
+
+**Cost.** No experiment call and no paid model call in the phase: the fresh session (step 7), the cold-read agents (step
+8) and the web searches (step 10) ran on his Claude plan; Gemini Notebook on his free Google account; ElevenLabs was not
+needed. AWS: his one S3 read of 5,247 objects (step 2, well under a cent); the CloudFront Function at this traffic
+(nothing, inside its free tier); the image-building Deploys, each adding about a cent a month of ECR storage at most
+(Phase 1.5 doc §26). Not read from Cost Explorer: the phase has no spend item in its DoD, and the amount is inside the
+rounding of the cumulative figure, **at most about $46**, against the $80 ceiling and the $60 re-plan point. If he wants
+it on the record, his Cost Explorer reading for 2026-11-14 to 2026-11-21, filtered to the `Project` tag, can be added as
+a dated note.
+
+**Carried to Phase 7:** the README and the launch post (his words, `planning/06` §6.1; the README is where a feed
+reader meets the name, step 10's check 6); the Short from the same notebook (§6 item 3, not made); `planning/06` §11's
+re-check of the vocabulary when the launch post is written; M12's changelog, from its first entry; the search check's
+two private cross-appearances, not hits, his call to coarsen further.
+
+**`make check`:** exit 0 on this tree: Python 3,581 passed; web 649 passed; `check-dist` ok in both modes; `doctor` ok.

@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "https://d10219migxiagd.cloudfront.net/$1"
+      "destination": "https://d3e4e283m4fruz.cloudfront.net/$1"
     }
   ]
 }
