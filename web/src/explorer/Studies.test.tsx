@@ -5,7 +5,7 @@ import { findComparison, goalRunCount, orderedComparisons, runsOfGoal } from "./
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { AwarenessFile, DataApi } from "./data";
 import { editedApi, readAwareness, realApi, realGrids, realIndex } from "./fixtures";
-import { comparisonRuns, confidenceLevel, wordingRuns } from "./format";
+import { comparisonRuns, confidenceLevel, formatDifference, formatWholePercent, wordingRuns } from "./format";
 import { AWARENESS_ANCHOR, THINKING_ANCHOR, protocolUrl } from "./links";
 import { modelName } from "./models";
 import { AWARENESS_INSTRUCTION, PROTOCOL_READINGS } from "./protocol";
@@ -199,6 +199,42 @@ describe("the thinking sub-study", () => {
       ]);
       expect(li.querySelectorAll(".headline")).toHaveLength(1);
     }
+  });
+
+  it("gives each comparison its difference and interval in the closed section, from the file's own fields (step 10)", async () => {
+    const { container } = await studies();
+    const items = [...container.querySelectorAll<HTMLElement>(".x-sentence-list li.sent")];
+    for (const [i, c] of orderedComparisons(thinking).entries()) {
+      const line = items[i]!.querySelector<HTMLElement>("details.finding-more [data-difference]")!;
+      const numbers = formatDifference(c.difference, c.low, c.high);
+      expect(numbers, `${c.first} vs ${c.second}`).not.toBeNull();
+      expect(line.textContent).toBe(`${L.differenceLabel}: ${numbers}`);
+    }
+  });
+
+  it("explains an interval of no width by protocol section 6.5's two rules, where the analysis applied them", async () => {
+    const { container } = await studies();
+    const items = [...container.querySelectorAll<HTMLElement>(".x-sentence-list li.sent")];
+    for (const [i, c] of orderedComparisons(thinking).entries()) {
+      const more = items[i]!.querySelector<HTMLElement>("details.finding-more")!;
+      const constant = more.querySelector("[data-rule=constant]");
+      const floor = more.querySelector("[data-rule=floor]");
+      if (c.constant_value != null && c.constant_check != null)
+        expect(constant!.textContent).toBe(
+          L.studiesConstantNote(formatWholePercent(c.constant_value), verdictWord(c.constant_check)),
+        );
+      else expect(constant).toBeNull();
+      if (c.floor_applied === true && c.final_verdict === "inconclusive")
+        expect(floor!.textContent).toBe(L.studiesFloorNote);
+      else expect(floor).toBeNull();
+    }
+    // On the real file every run of each goal agrees, so every interval has no width: the two inconclusive pairs are the
+    // floor's, and every pair carries the constant check.
+    const cd = findComparison(thinking, "C", "D")!;
+    expect([cd.final_verdict, cd.low, cd.high, cd.floor_applied]).toEqual(["inconclusive", 0, 0, true]);
+    expect(items[0]!.querySelector("[data-rule=floor]")).not.toBeNull();
+    expect(container.querySelectorAll("[data-rule=constant]")).toHaveLength(5);
+    expect(container.querySelectorAll("[data-rule=floor]")).toHaveLength(2);
   });
 
   it("shows the grid's verdict on wording w2 alone for each pair as a column: the long phrase once, as its heading, and only the verdict word in each row (step 11 pages, item 16)", async () => {

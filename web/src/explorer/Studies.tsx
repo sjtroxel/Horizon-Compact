@@ -16,7 +16,7 @@ import { ShareStrip } from "./charts";
 import type { Names } from "./charts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { AwarenessFile, DataApi, DataIndex, GridFile } from "./data";
-import { comparisonRuns, confidenceLevel, wordingRuns } from "./format";
+import { comparisonRuns, confidenceLevel, formatDifference, formatWholePercent, wordingRuns } from "./format";
 import {
   AWARENESS_ANCHOR,
   STUDIES_AWARENESS_ID,
@@ -147,6 +147,24 @@ function Thinking({ loaded, index }: { loaded: Loaded; index: DataIndex }) {
                   <p className="fine headline">
                     {L.headlineLabel}: {c.headline}
                   </p>
+                  {/* The difference and its interval, as the scenario view's details give them (Phase 6.5 step 10,
+                      planning/06 section 9 check 1: spread shown). */}
+                  <p className="fine" data-difference>
+                    {L.differenceLabel}: {formatDifference(c.difference, c.low, c.high) ?? L.noNumbers}
+                  </p>
+                  {c.constant_value != null && c.constant_check != null && (
+                    <p className="fine" data-rule="constant">
+                      {L.studiesConstantNote(
+                        formatWholePercent(c.constant_value),
+                        verdictWord(c.constant_check),
+                      )}
+                    </p>
+                  )}
+                  {c.floor_applied === true && c.final_verdict === "inconclusive" && (
+                    <p className="fine" data-rule="floor">
+                      {L.studiesFloorNote}
+                    </p>
+                  )}
                 </FindingMore>
               </div>
               {gridPair !== undefined && (

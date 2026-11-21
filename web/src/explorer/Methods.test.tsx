@@ -110,9 +110,10 @@ describe("the methods page's frame", () => {
   it("marks every placeholder where it stands, with the class that draws a dashed outline", async () => {
     const { container } = await methods();
     const marked = (selector: string) => [...container.querySelectorAll(selector)];
-    // His titles are written; what is left is the parts later steps write (methods.test.ts's census names them).
+    // His titles are written, and since step 10 (M10, 2026-11-21) no part is left for a later step
+    // (methods.test.ts's census); the marking is still tested, so a placeholder added back would show.
     const pending = OUTLINE.flatMap((s) => s.blocks).filter((b) => b.kind === "pending");
-    expect(pending.length).toBeGreaterThan(0);
+    expect(pending).toHaveLength(0);
     expect(marked("h1.methods-placeholder")).toHaveLength(0);
     expect(marked("h2.methods-placeholder")).toHaveLength(0);
     expect(marked(".jump-menu a.methods-placeholder")).toHaveLength(0);

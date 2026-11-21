@@ -488,6 +488,12 @@ export const explorerLabels = {
   studiesGridColumn: (wording: string) =>
     `The main grid on wording ${wording} alone, also not one of the 16 main comparisons`,
   studiesGridRowLabel: (wording: string) => `Main grid, wording ${wording} alone`,
+  // Phase 6.5 step 10 (2026-11-21): Claude-drafted, his to approve. Shown in a comparison's closed section when the
+  // analysis applied protocol section 6.5's rules, so an interval of no width is never left unexplained.
+  studiesFloorNote:
+    "This interval is narrower than one person in 125, and protocol section 6.5 never reads an interval that narrow as “no split”, so the verdict is inconclusive.",
+  studiesConstantNote: (value: string, verdict: string) =>
+    `Every run of at least one of the two goals kept ${value} of the affected people, so protocol section 6.5 also compared the share of each goal’s runs at that value; that check gave “${verdict}”.`,
   studiesMemosLink: "Read the sub-study’s memos",
   studiesRunsHeading: "Every run of the sub-study",
   studiesRunsKey: "Each run id opens that run’s memo in the reader.",

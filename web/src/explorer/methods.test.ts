@@ -275,11 +275,10 @@ describe("the page's words", () => {
 });
 
 describe("the placeholder census", () => {
-  // Every place a placeholder still stands: the part a later step writes, the vocabulary recheck (step 10). Step 7 wrote
-  // M7's (the prompt-reconstruction check, 2026-11-18); step 9 wrote the video and its link (M11 and M0, 2026-11-20).
-  // Go-live (doc section 7) must make `check-dist` refuse any placeholder in dist-explorer/; that refusal is not added
-  // yet, because it would fail `make check` while this stands.
-  const expected = ["methods.json M10 pending"];
+  // Every place a placeholder still stands: none. Step 7 wrote M7's (the prompt-reconstruction check, 2026-11-18); step 9
+  // wrote the video and its link (M11 and M0, 2026-11-20); step 10 wrote M10's vocabulary recheck (2026-11-21). Go-live
+  // (doc section 7) makes `check-dist` refuse any placeholder in dist-explorer/.
+  const expected: string[] = [];
 
   function collect(value: unknown, path: string, found: string[], odd: string[]) {
     if (typeof value === "string") {

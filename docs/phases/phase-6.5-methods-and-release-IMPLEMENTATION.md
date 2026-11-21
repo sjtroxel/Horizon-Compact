@@ -673,6 +673,24 @@ the four published case descriptions (§6.3; the record notes it is a second run
 confirmed by construction on what is deployed (the explorer holds real-case memo text); the vocabulary recheck, its
 sources re-read live and the result dated on the page (M10).
 
+**As run, step 10 (2026-11-21, about 4:20 to 5:10 AM; record `docs/phases/evidence/phase-6.5/public-checks/README.md`).**
+Claude read every surface: the 14 explorer paths as rendered (a headless dump, every details section open), the 14 cards,
+and the video's transcript and script against the grid data. Checks 1-3 and 5-7 pass after three findings, each settled
+by his decision on Claude's recommendation: (1) `/studies/` gave no difference or interval for the sub-study's five
+comparisons; it now does, with one line for each of §6.5's rules where the analysis applied them, since all five
+intervals have no width (every run of each goal held one value); (2) two video lines say more than the site does (the
+falling-orders line, true of the long-term pair only, where Haiku's short-term pair split; "about the exact same call",
+without "on this one measure"); disclosed on M11, not regenerated, so M11 now lists six differences, not four; (3) the
+name is explained on `/` only; the site is read as one surface opening at `/`, and the cards and the video are accepted
+without it for v1. **The search re-run** (Claude at his instruction, after the permission check first refused the read
+of the private appendix and he allowed it): 12 searches, the four published descriptions at their published levels with
+the same two variations, no hit; the detail in the private appendix. **The memo scan by construction:** no case sweep in
+`data/memos/`, no memo text in `data/cases/`, and none of 7,415 sentence openings from the 1,237 published case memos
+anywhere in the build. **The vocabulary recheck:** `planning/06` §11's sources re-read (7 of 10 read; one empty, one
+behind a login, one not fetched by rule) and its re-check topics searched; the list stands, and M10 says so, dated
+(the page's last placeholder). **Check 4:** his read, one pass, "fine for now", with no note per reader; the same read
+approved the Claude-drafted words of steps 9 and 10. `make check` green, 3,581 and 647.
+
 ### 5.6 One more decision, G
 
 - **G. What the prompt-reconstruction reader gets** (§5.3). **DECIDED 2026-11-14, about 8:55 AM (his): (a), as leaned.**
@@ -811,7 +829,7 @@ Phase 1.5's C4. Every commit is his, after `make check` and the hooks' dry run.
 | 7 | **[done 2026-11-18, §5.3 "As run, step 7": 10 of 10]** The prompt-reconstruction check (§5.3) and any fixes | him (the fresh session); Claude | C7 |
 | 8 | **[done 2026-11-19, §5.4 "As run, step 8": no misreading after one fix, re-tested]** The cold-read test (§5.4) and any fixes | him (Chrome); Claude | C8 |
 | 9 | **[done 2026-11-20, §6 "As run, step 9"; attempt 4 kept with one edit, two departures logged]** The video (§6): pack, generation, check, captions, the file | him and Claude | C9 |
-| 10 | The public checks (§5.5) | Claude; him for the four readers | C10 |
+| 10 | **[done 2026-11-21, §5.5 "As run, step 10": three findings fixed or disclosed, the search re-run passes]** The public checks (§5.5) | Claude; him for the four readers | C10 |
 | 11 | Go-live (§7 items 3-8), the teardown test | Opus; his apply and deploy | C11 |
 | 12 | The close: DoD audit, version `0.6.5`, cost | Opus | C12 |
 

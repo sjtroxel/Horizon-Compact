@@ -107,6 +107,10 @@ export interface GridComparison extends Comparison {
   per_wording: PerWording[];
   sealed: SealedBlock;
   first_attempt: FirstAttempt;
+  /** Protocol section 6.5's two rules for shares, as the analysis recorded them (read by the studies view). */
+  floor_applied?: boolean;
+  constant_value?: number | null;
+  constant_check?: Verdict | null;
 }
 
 export interface VerdictBlock {

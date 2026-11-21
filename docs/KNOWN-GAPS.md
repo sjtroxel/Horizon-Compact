@@ -7,7 +7,22 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-20, about 12:45 PM (PHASE 6.5 STEP 9 DONE: THE VIDEO)
+> ## START HERE — where things stand, 2026-11-21, about 5:15 AM (PHASE 6.5 STEP 10 DONE: THE PUBLIC CHECKS)
+>
+> **C9 committed `8457a84` (his) and pushed; CI `44795927700` and Deploy `44795927780` green.** **Step 10 (doc §5.5,
+> "As run, step 10"; record `docs/phases/evidence/phase-6.5/public-checks/`):** `planning/06` §9's seven checks on the
+> pages, cards and video pass after three findings, each settled by his decision: `/studies/` now gives each comparison's
+> difference and interval and explains a zero-width one by protocol §6.5; M11 discloses the video's two broader lines;
+> the name is explained on `/` and accepted as absent on cards and the video. The search re-run (12 searches, at his
+> instruction) passes, detail private; the memo scan by construction passes; the vocabulary list stands, M10 dated (the
+> page's last placeholder). Check 4 is his one read, "fine for now", no note per reader; it approved the Claude-drafted
+> words of steps 9 and 10. `make check` green, 3,581 and 647. **This block rides in C10 `phase 6.5: c10 public checks`;
+> read its CI and Deploy first.** **Next:** step 11, go-live (doc §7 items 3-8: his `bootstrap` apply, the go-live
+> commit, the teardown test; Opus).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-20, about 12:45 PM (PHASE 6.5 STEP 9 DONE: THE VIDEO) *(superseded by the block above)*
 >
 > **C8 committed `c136692` (his) and pushed; CI `44547601602` and Deploy `44547601997` green.** **Step 9 (doc §6, "As run,
 > step 9"; record `docs/phases/evidence/phase-6.5/video/`):** four Gemini Notebook Explainers. Attempts 1 to 3, from the

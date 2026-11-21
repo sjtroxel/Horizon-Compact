@@ -1182,9 +1182,17 @@
           ]
         },
         {
-          "kind": "pending",
+          "kind": "p",
           "ledger": [],
-          "note": "step 10: the vocabulary recheck before go-live, dated"
+          "text": "It was checked again on November 21, 2026, before the site went public: its sources were read again, a search found no newer Business Roundtable statement on a company's purpose, and \"ESG\" and \"stakeholder capitalism\" were still contested in that year's coverage. Nothing on the list changed.",
+          "sources": ["docs/phases/evidence/phase-6.5/public-checks/README.md"],
+          "figures": [
+            {
+              "text": "November 21, 2026",
+              "source": "docs/phases/evidence/phase-6.5/public-checks/README.md",
+              "match": "The vocabulary recheck (M10), 2026-11-21"
+            }
+          ]
         }
       ]
     },
@@ -1292,7 +1300,7 @@
           "kind": "p",
           "ledger": [],
           "lead": "Where it differs from this site. ",
-          "text": "It calls the project's own starting expectation \"the prevailing logic\". It gives falling orders a cause, macroeconomic pressure, that the scenario does not state. Where it says \"the following orders\", the decision is about falling orders. And where it gives one run count for Haiku's result on the jobs decision, the count is of each of the two goals.",
+          "text": "It calls the project's own starting expectation \"the prevailing logic\". It gives falling orders a cause, macroeconomic pressure, that the scenario does not state. Where it says \"the following orders\", the decision is about falling orders. Where it gives one run count for Haiku's result on the jobs decision, the count is of each of the two goals. Its results on the four decisions are for the two long-term goals, shareholders against everyone with a stake: when it says neither model's runs could settle falling orders, that is that pair, and on falling orders Haiku's two short-term goals did split. And where it says Haiku \"made about the exact same call\" under the two goals for everyone with a stake, they came out about the same on each decision's main measure, not on every choice.",
           "sources": ["docs/phases/evidence/phase-6.5/video/README.md"]
         }
       ]
