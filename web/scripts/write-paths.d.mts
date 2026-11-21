@@ -4,3 +4,4 @@ export function renderPage(
   meta: { title: string; description: string },
   card: { slug: string; alt: string },
 ): string;
+export function renderNotFound(template: string, meta: { title: string; description: string }): string;

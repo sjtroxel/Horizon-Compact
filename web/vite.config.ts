@@ -61,15 +61,15 @@ const CONTENT_SECURITY_POLICY = [
   "img-src 'self' data:",
   "font-src 'self'",
   "connect-src 'self'",
+  "media-src 'self'",
   "base-uri 'none'",
   "form-action 'none'",
   "frame-ancestors 'none'",
 ].join("; ");
 
+// Phase 6.5's go-live removed `X-Robots-Tag: noindex` here and from CloudFront together.
 const headers = {
   "Content-Security-Policy": CONTENT_SECURITY_POLICY,
-  // Removed at Phase 6.5's go-live, with the CloudFront header of the same name.
-  "X-Robots-Tag": "noindex",
 };
 
 /**

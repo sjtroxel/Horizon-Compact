@@ -24,8 +24,9 @@ const escapeHtml = (text) =>
 
 /**
  * One page's HTML from the built template: its title, a description, the canonical link, the link-preview tags for its
- * card (`card` is `{ slug, alt }`: the file's name and the image's alternative text) and `noindex` (removed at Phase
- * 6.5's go-live). The built page's script, stylesheet, preload and icon tags are kept as they are.
+ * card (`card` is `{ slug, alt }`: the file's name and the image's alternative text). Since Phase 6.5's go-live the
+ * template carries no `noindex`, so every page can be indexed. The built page's script, stylesheet, preload and icon
+ * tags are kept as they are.
  */
 export function renderPage(template, path, { title, description }, card) {
   if (!/<title>[^<]*<\/title>/.test(template)) throw new Error("write-paths: the built page has no <title>");
@@ -54,12 +55,17 @@ export function renderPage(template, path, { title, description }, card) {
 /**
  * The not-found page (Phase 6.5 decision B): the explorer's page, titled and described from the labels, and nothing
  * that names an address (no canonical link, no link-preview tags), since the distribution serves it, with status 404, at
- * every address that names no file. The page's script reads the address and shows the not-found view.
+ * every address that names no file. The page's script reads the address and shows the not-found view. It alone is
+ * `noindex`, added here since the go-live took the tag off the template: an address that names nothing is not a page.
  */
 export function renderNotFound(template, { title, description }) {
   if (!/<title>[^<]*<\/title>/.test(template)) throw new Error("write-paths: the built page has no <title>");
+  if (/<meta\b[^>]*\bname\s*=\s*"robots"/i.test(template)) {
+    throw new Error("write-paths: the built page already has a robots tag");
+  }
   const head = [
-    `<title>${escapeHtml(title)}</title>`,
+    `<meta name="robots" content="noindex" />`,
+    `    <title>${escapeHtml(title)}</title>`,
     `    <meta name="description" content="${escapeHtml(description)}" />`,
   ].join("\n");
   return template.replace(/<title>[^<]*<\/title>/, () => head);

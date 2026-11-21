@@ -256,12 +256,31 @@ jobs:
           distribution="$(terraform -chdir=infra/terraform/main output -raw site_distribution_id)"
           echo "distribution: $distribution"
 
-          aws s3 sync web/dist/assets "s3://${bucket}/assets/" \
+          # Since Phase 6.5's go-live (its IMPLEMENTATION doc section 7 item 4) Deploy syncs the explorer, not the
+          # placeholder page, which stays a build mode and is not synced. Never `.vite/`, the build's manifest. Two
+          # types are set by hand, since the CLI's guess depends on the runner: the captions (text/vtt, which the
+          # browser needs for a <track>) and the memo files (JSON lines; text/plain so CloudFront compresses them).
+          aws s3 sync web/dist-explorer/assets "s3://${bucket}/assets/" \
             --delete \
             --cache-control "public, max-age=31536000, immutable"
-          aws s3 sync web/dist "s3://${bucket}/" \
+          aws s3 sync web/dist-explorer "s3://${bucket}/" \
             --delete \
             --exclude "assets/*" \
+            --exclude ".vite/*" \
+            --exclude "*.vtt" \
+            --exclude "*.jsonl" \
+            --cache-control "no-cache"
+          aws s3 sync web/dist-explorer "s3://${bucket}/" \
+            --delete \
+            --exclude "*" \
+            --include "*.vtt" \
+            --content-type "text/vtt; charset=utf-8" \
+            --cache-control "no-cache"
+          aws s3 sync web/dist-explorer "s3://${bucket}/" \
+            --delete \
+            --exclude "*" \
+            --include "*.jsonl" \
+            --content-type "text/plain; charset=utf-8" \
             --cache-control "no-cache"
 
           # One wildcard path counts as one of the 1,000 free invalidation paths a month.
@@ -277,11 +296,9 @@ jobs:
         run: |
           set -euo pipefail
           site="https://$(terraform -chdir=infra/terraform/main output -raw site_domain)"
-          asset="$(basename "$(ls web/dist/assets/index-*.js)")"
-          sweep="$(jq -r '.sweep.sweep_id' web/src/data/placeholder.json)"
+          asset="$(basename "$(ls web/dist-explorer/assets/explorer-*.js)")"
           echo "site:  $site"
           echo "asset: $asset"
-          echo "sweep: $sweep"
 
           serving=false
           for attempt in $(seq 1 36); do
@@ -298,37 +315,79 @@ jobs:
             exit 1
           fi
 
+          # The headers, retried: a change to the response headers policy (his `bootstrap` apply) reaches the edge
+          # minutes after it is made. Since go-live the policy allows the site's own media and sends no noindex.
           failures=0
-          headers="$(curl -fsSI --max-time 20 "$site/")"
-          for wanted in \
-            "content-security-policy: default-src 'none'; script-src 'self'; style-src 'self'" \
-            "x-robots-tag: noindex" \
-            "x-content-type-options: nosniff" \
-            "strict-transport-security: max-age=" \
-            "referrer-policy: no-referrer"; do
-            if printf '%s' "$headers" | grep -qiF "$wanted"; then
-              echo "header ok: $wanted"
-            else
-              echo "::error::header missing: $wanted"
-              failures=$((failures + 1))
+          headers_ok=false
+          for attempt in $(seq 1 36); do
+            headers="$(curl -fsSI --max-time 20 "$site/" || true)"
+            missing=0
+            for wanted in \
+              "content-security-policy: default-src 'none'; script-src 'self'; style-src 'self'" \
+              "media-src 'self'" \
+              "x-content-type-options: nosniff" \
+              "strict-transport-security: max-age=" \
+              "referrer-policy: no-referrer"; do
+              printf '%s' "$headers" | grep -qiF "$wanted" || missing=$((missing + 1))
+            done
+            printf '%s' "$headers" | grep -qi '^x-robots-tag' && missing=$((missing + 1))
+            if [ "$missing" -eq 0 ]; then
+              echo "headers ok, no x-robots-tag (attempt $attempt)"
+              headers_ok=true
+              break
             fi
+            echo "attempt $attempt: $missing header checks not met yet, waiting"
+            sleep 10
           done
+          if [ "$headers_ok" != true ]; then
+            printf '%s\n' "$headers"
+            echo "::error::the headers did not match within about six minutes"
+            failures=$((failures + 1))
+          fi
 
-          # nosniff makes the browser refuse a script or stylesheet served with the wrong type.
+          # nosniff makes the browser refuse a script, stylesheet or caption file served with the wrong type.
           script_headers="$(curl -fsSI --max-time 20 "$site/assets/$asset")"
           if ! printf '%s' "$script_headers" | grep -qiE '^content-type: (text|application)/javascript'; then
             echo "::error::the script is not served as JavaScript"
             failures=$((failures + 1))
           fi
-          style="$(basename "$(ls web/dist/assets/*.css)")"
+          style="$(basename "$(ls web/dist-explorer/assets/*.css)")"
           if ! curl -fsSI --max-time 20 "$site/assets/$style" | grep -qiE '^content-type: text/css'; then
             echo "::error::the stylesheet is not served as CSS"
             failures=$((failures + 1))
           fi
-          if curl -fsS --max-time 20 "$site/assets/$asset" | grep -qF "$sweep"; then
-            echo "the bundle names the sweep $sweep"
+          for pair in \
+            "media/horizon-compact-explainer.mp4|video/mp4" \
+            "media/horizon-compact-explainer.vtt|text/vtt" \
+            "data/index.json|application/json" \
+            "cards/story.png|image/png"; do
+            path="${pair%%|*}"
+            type="${pair##*|}"
+            if curl -fsSI --max-time 20 "$site/$path" | grep -qi "^content-type: $type"; then
+              echo "served as $type: /$path"
+            else
+              echo "::error::/$path is not served as $type"
+              failures=$((failures + 1))
+            fi
+          done
+          memo="$(cd web/dist-explorer && find data/memos -name '*.jsonl' | sort | head -n 1)"
+          if curl -fsSI --max-time 20 "$site/$memo" | grep -qi '^content-type: text/plain'; then
+            echo "served as text/plain: /$memo"
           else
-            echo "::error::the bundle does not name the sweep $sweep"
+            echo "::error::/$memo is not served as text/plain"
+            failures=$((failures + 1))
+          fi
+
+          # Each path is its own page (Phase 6.5 decision B): what a client running no script sees, its own title.
+          title="$(grep -o '<title>[^<]*</title>' web/dist-explorer/methods/index.html)"
+          if curl -fsS --max-time 20 "$site/methods/" | grep -qF "$title"; then
+            echo "/methods/ serves its own page: $title"
+          else
+            echo "::error::/methods/ does not serve its own page"
+            failures=$((failures + 1))
+          fi
+          if curl -fsS --max-time 20 "$site/.vite/manifest.json" -o /dev/null -w '%{http_code}' | grep -q '^200$'; then
+            echo "::error::the build's manifest is on the site"
             failures=$((failures + 1))
           fi
 

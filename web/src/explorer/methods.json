@@ -1314,7 +1314,21 @@
         {
           "kind": "p",
           "ledger": [],
-          "text": "This list starts when the site goes live. Each entry will give its date and say whether it changed only how something is shown or changed a published number, and for a number, under which rule of the protocol."
+          "text": "This list started when the site went live. Each entry gives its date and says whether it changed only how something is shown or changed a published number, and for a number, under which rule of the protocol."
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "November 21, 2026. ",
+          "text": "The site went live, showing what the checked preview showed. No published number changed.",
+          "sources": ["docs/phases/evidence/phase-6.5/go-live/README.md"],
+          "figures": [
+            {
+              "text": "November 21, 2026",
+              "source": "docs/phases/evidence/phase-6.5/go-live/README.md",
+              "match": "Go-live: 2026-11-21"
+            }
+          ]
         }
       ]
     }

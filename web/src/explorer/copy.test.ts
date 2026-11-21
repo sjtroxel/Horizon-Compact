@@ -310,3 +310,16 @@ describe("the step 11 words (the redesign batch, 2026-11-12)", () => {
     expect(Object.keys(explorerLabels.chartTitles.share).sort()).toEqual(["s1", "s2"]);
   });
 });
+
+describe("the markers check-dist repeats (it reads no TypeScript)", () => {
+  it("holds check-dist's placeholder markers equal to the ones the code uses", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const { METHODS_PLACEHOLDER } = await import("./copy");
+    const script = readFileSync(resolve(__dirname, "../../scripts/check-dist.mjs"), "utf8");
+    expect(script).toContain(`const PLACEHOLDER_MARK = ${JSON.stringify(PLACEHOLDER_MARK)};`);
+    expect(script).toContain(
+      `const METHODS_PLACEHOLDER_TEXT = [${JSON.stringify(METHODS_PLACEHOLDER.title)}, ${JSON.stringify(METHODS_PLACEHOLDER.body)}];`,
+    );
+  });
+});

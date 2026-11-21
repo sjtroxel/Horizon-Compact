@@ -2,8 +2,8 @@
 // nothing in the build asks for another host, runs inline or styles inline. Run after the build it checks and prints
 // the measured sizes; exits 1 on the first group of failures.
 //
-//   node scripts/check-dist.mjs                  the placeholder page, in dist/ (what Deploy syncs)
-//   node scripts/check-dist.mjs --mode explorer  the explorer, in dist-explorer/ (never synced)
+//   node scripts/check-dist.mjs                  the placeholder page, in dist/ (kept as a mode, unused since go-live)
+//   node scripts/check-dist.mjs --mode explorer  the explorer, in dist-explorer/ (what Deploy syncs since go-live)
 //
 // Placeholder mode also fails if anything of the explorer reached dist/: a copy of a data file, an official run id
 // or sweep id, any path with "explorer" in it, a cards/ folder or an og:image tag. The public page must not change
@@ -17,6 +17,10 @@ import { entryKeyOf, pathFiles, reachedFromEntry } from "./dist-closure.mjs";
 import { findDataCopies, findLeaks, loadDataHashes, loadOfficialIds, walk } from "./leaks.mjs";
 
 const SITE_ORIGIN = "https://horizon-compact.vercel.app";
+// src/copy.ts's PLACEHOLDER_MARK and src/explorer/copy.ts's METHODS_PLACEHOLDER, repeated here because this script reads
+// no TypeScript (copy.test.ts holds them equal).
+const PLACEHOLDER_MARK = "[his:";
+const METHODS_PLACEHOLDER_TEXT = ["[his title]", "[to be written]"];
 const JS_BUDGET = 100 * 1024; // gzipped: all JavaScript in placeholder mode; what one path loads in explorer mode
 const FONT_BUDGET = 150 * 1024; // all font files
 // The methods page's video, its poster and captions (Phase 6.5 step 9, decision F): explorer only, in media/, one file
@@ -152,9 +156,9 @@ function checkPage(file) {
     if (!/<meta\b[^>]*\bname\s*=\s*"description"[^>]*\bcontent\s*=\s*"[^"]+"/i.test(html)) {
       fail(`${name} has no description`);
     }
-    if (!/<meta\b[^>]*\bname\s*=\s*"robots"[^>]*\bcontent\s*=\s*"noindex"/i.test(html)) {
-      fail(`${name} is not noindex`);
-    }
+    // Phase 6.5's go-live: a page of the site can be indexed; only the not-found page is noindex.
+    if (/<meta\b[^>]*\bname\s*=\s*"robots"/i.test(html))
+      fail(`${name} has a robots tag; a live page must not`);
     checkPreviewTags(html, name, file);
   } else if (/\b(og|twitter):[a-z:]+/i.test(html)) {
     fail(`${name} has link-preview tags: the placeholder page must not (Phase 6 doc section 10)`);
@@ -203,6 +207,31 @@ if (explorer) {
     fail("dist-explorer/ has no index.html for the path /");
   if (!htmlFiles.some((f) => rel(f) === NOT_FOUND))
     fail(`dist-explorer/ has no ${NOT_FOUND} (write-paths writes it)`);
+
+  // Phase 6.5's go-live (its IMPLEMENTATION doc section 7): nothing goes live still waiting for words. The code knows how
+  // to draw a placeholder, so the bundles hold the markers; the check reads the words instead: his file, as the build
+  // bundles it, and the methods page's words, as the build ships them.
+  const his = JSON.parse(readFileSync(join(WEB, "src", "explorer", "his.json"), "utf8"));
+  const placeholders = [];
+  const visit = (value, path) => {
+    if (typeof value === "string") {
+      if (value.startsWith(PLACEHOLDER_MARK) || METHODS_PLACEHOLDER_TEXT.includes(value))
+        placeholders.push(`his.json ${path}`);
+    } else if (value !== null && typeof value === "object") {
+      for (const [key, inner] of Object.entries(value)) visit(inner, path === "" ? key : `${path}.${key}`);
+    }
+  };
+  visit(his, "");
+  const methodsWords = files.filter((f) => /\/assets\/methods-[^/]*\.json$/.test(f));
+  if (methodsWords.length !== 1)
+    fail(`dist-explorer/assets/ must hold one methods words file; it holds ${methodsWords.length}`);
+  for (const f of methodsWords) {
+    const blocks =
+      JSON.parse(readFileSync(f, "utf8")).sections?.flatMap((section) => section.blocks ?? []) ?? [];
+    if (blocks.length === 0) fail(`${rel(f)} holds no section blocks`);
+    for (const block of blocks) if (block.kind === "pending") placeholders.push(`${rel(f)} a pending block`);
+  }
+  for (const where of placeholders) fail(`a placeholder is still in the build: ${where}`);
 } else {
   const names = htmlFiles.map(rel).sort();
   if (names.join(",") !== [NOT_FOUND, "index.html"].sort().join(",")) {

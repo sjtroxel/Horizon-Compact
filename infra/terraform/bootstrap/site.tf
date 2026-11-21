@@ -17,9 +17,10 @@ resource "aws_cloudfront_response_headers_policy" "site" {
   comment = "Security headers for the static site; no third-party request is allowed."
 
   security_headers_config {
-    # Nothing on the page may load from, or send data to, any host but its own.
+    # Nothing on the page may load from, or send data to, any host but its own. `media-src 'self'` lets the methods
+    # page play its own video and captions (Phase 6.5 decision F, added at go-live, its IMPLEMENTATION doc section 7).
     content_security_policy {
-      content_security_policy = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+      content_security_policy = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
       override                = true
     }
 
@@ -39,12 +40,6 @@ resource "aws_cloudfront_response_headers_policy" "site" {
     }
   }
 
-  custom_headers_config {
-    # Phase 1.5 decision 3: the test page is not to be indexed. This header is removed at Phase 6.5's go-live.
-    items {
-      header   = "X-Robots-Tag"
-      value    = "noindex"
-      override = true
-    }
-  }
+  # Phase 1.5 decision 3 sent `X-Robots-Tag: noindex` on every response until the site went live; Phase 6.5's go-live
+  # removed it (its IMPLEMENTATION doc section 7 item 3), so the published pages can be indexed.
 }

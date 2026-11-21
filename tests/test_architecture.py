@@ -388,7 +388,7 @@ def test_site_origin_access_control_signs_every_request_to_s3() -> None:
     assert re.search(r'signing_protocol\s*=\s*"sigv4"', code)
 
 
-def test_site_headers_policy_forbids_third_party_requests_and_noindexes_until_go_live() -> None:
+def test_site_headers_policy_forbids_third_party_requests_and_no_longer_noindexes() -> None:
     raw = (BOOTSTRAP / "site.tf").read_text(encoding="utf-8")
     code = _strip_comments(raw)
     assert 'resource "aws_cloudfront_response_headers_policy" "site"' in code
@@ -396,18 +396,19 @@ def test_site_headers_policy_forbids_third_party_requests_and_noindexes_until_go
     assert match
     assert match.group(1) == (
         "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
-        "font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; "
+        "font-src 'self'; connect-src 'self'; media-src 'self'; base-uri 'none'; form-action 'none'; "
         "frame-ancestors 'none'"
     )
     assert re.search(r"access_control_max_age_sec\s*=\s*63072000", code)
     assert re.search(r"include_subdomains\s*=\s*true", code)
     assert re.search(r'referrer_policy\s*=\s*"no-referrer"', code)
-    assert re.search(r'header\s*=\s*"X-Robots-Tag"', code)
-    assert re.search(r'value\s*=\s*"noindex"', code)
+    # Phase 6.5's go-live (its IMPLEMENTATION doc section 7 item 3) removed Phase 1.5 decision 3's noindex.
+    assert "X-Robots-Tag" not in code and "noindex" not in code
+    assert "custom_headers_config" not in code
     # Every header overrides whatever the origin sends, so the policy is the one source of truth.
     assert "override" in code and not re.search(r"override\s*=\s*false", code)
-    # The comment says when the noindex header goes (decision 3).
-    assert "Phase 6.5" in raw
+    # The comment says when the noindex header went, and why media-src is there.
+    assert "Phase 6.5" in raw and "media-src" in raw
 
 
 def test_site_objects_outputs_are_the_two_ids_and_hold_no_account_id() -> None:
@@ -1328,27 +1329,44 @@ def test_the_site_job_runs_after_a_good_apply_or_alone_and_never_after_a_failure
 
 def test_the_site_sync_caches_hashed_assets_only() -> None:
     site = _job(_deploy(), "site")
-    assets = site.index('aws s3 sync web/dist/assets "s3://${bucket}/assets/"')
-    rest = site.index('aws s3 sync web/dist "s3://${bucket}/"')
+    # Since Phase 6.5's go-live Deploy syncs the explorer; the placeholder page is a build mode, never synced.
+    assert "web/dist/" not in site and 'web/dist "' not in site
+    assets = site.index('aws s3 sync web/dist-explorer/assets "s3://${bucket}/assets/"')
+    rest = site.index('aws s3 sync web/dist-explorer "s3://${bucket}/"')
     assert assets < rest
     assert "immutable" in site[assets:rest]
     assert '--exclude "assets/*"' in site[rest:] and '--cache-control "no-cache"' in site[rest:]
+    # Never the build's manifest (Phase 6 C3 note).
+    assert '--exclude ".vite/*"' in site[rest:]
+    # The two types set by hand, each in its own sync of that kind of file only.
+    for kind, content_type in (("*.vtt", "text/vtt"), ("*.jsonl", "text/plain")):
+        assert f'--exclude "{kind}"' in site[rest:]
+        own = site.index(f'--include "{kind}"')
+        assert f'--content-type "{content_type}' in site[own : own + 120]
     assert "--paths '/*'" in site
 
 
-def test_the_smoke_test_checks_the_build_the_headers_and_the_sweep_on_cloudfront_only() -> None:
+def test_the_smoke_test_checks_the_live_build_its_headers_and_types_on_cloudfront_only() -> None:
     site = _job(_deploy(), "site")
     smoke = site[site.index("Smoke test the site") :]
     assert "output -raw site_domain" in smoke
     assert "vercel.app" not in smoke  # the rewrite is his step; a teardown day cannot turn this red
+    assert "x-robots-tag: noindex" not in smoke  # removed at go-live; now its absence is checked
     for needle in (
+        "web/dist-explorer/assets/explorer-*.js",
         "content-security-policy: default-src 'none'",
-        "x-robots-tag: noindex",
+        "media-src 'self'",
+        "grep -qi '^x-robots-tag'",
         "x-content-type-options: nosniff",
         "strict-transport-security",
-        ".sweep.sweep_id",
         "text/css",
         "javascript",
+        "video/mp4",
+        "text/vtt",
+        "application/json",
+        "image/png",
+        "/methods/ serves its own page",
+        ".vite/manifest.json",
         # Phase 6.5 decision B: an unknown address is the not-found page with status 404.
         '[ "$code" = "404" ]',
         "<title>Page not found",

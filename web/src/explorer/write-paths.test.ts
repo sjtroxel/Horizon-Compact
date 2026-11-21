@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { renderPage } from "../../scripts/write-paths.mjs";
+import { renderNotFound, renderPage } from "../../scripts/write-paths.mjs";
 import { explorerCardLabels, explorerHis } from "./copy";
 import { WEB_ROOT, realCasesIndex, realIndex } from "./fixtures";
 import {
@@ -20,7 +20,7 @@ const card = { slug: "scenario-s1", alt: "A card for one decision." };
 
 describe("write-paths: one page's HTML", () => {
   const template =
-    '<head>\n    <meta name="robots" content="noindex" />\n    <title>Horizon Compact</title>\n    <link rel="icon" href="/favicon.svg" />\n  </head>';
+    '<head>\n    <title>Horizon Compact</title>\n    <link rel="icon" href="/favicon.svg" />\n  </head>';
 
   it("sets the title, description and canonical address, and keeps the rest", () => {
     const html = renderPage(
@@ -32,8 +32,22 @@ describe("write-paths: one page's HTML", () => {
     expect(html).toContain("<title>A title (s1)</title>");
     expect(html).toContain('<meta name="description" content="A description." />');
     expect(html).toContain('<link rel="canonical" href="https://horizon-compact.vercel.app/scenario/s1/" />');
-    expect(html).toContain('<meta name="robots" content="noindex" />');
+    // Since Phase 6.5's go-live a page can be indexed: no robots tag is added.
+    expect(html).not.toContain('name="robots"');
     expect(html).toContain('<link rel="icon" href="/favicon.svg" />');
+  });
+
+  it("makes the not-found page alone noindex, with no canonical link or preview tags, and refuses a second robots tag", () => {
+    const html = renderNotFound(template, { title: "Page not found: X", description: "None here." });
+    expect(html).toContain('<meta name="robots" content="noindex" />');
+    expect(html).toContain("<title>Page not found: X</title>");
+    expect(html).toContain('<meta name="description" content="None here." />');
+    expect(html).not.toContain("canonical");
+    expect(html).not.toMatch(/(og|twitter):/);
+    const tagged = template.replace("<title>", '<meta name="robots" content="noindex" />\n    <title>');
+    expect(() => renderNotFound(tagged, { title: "t", description: "d" })).toThrow(
+      /already has a robots tag/,
+    );
   });
 
   it("escapes what it is given", () => {

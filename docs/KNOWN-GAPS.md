@@ -7,7 +7,18 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-21, about 5:15 AM (PHASE 6.5 STEP 10 DONE: THE PUBLIC CHECKS)
+> ## START HERE — where things stand, 2026-11-21, about 10:15 AM (PHASE 6.5 STEP 11: GO-LIVE PREPARED)
+>
+> **C10 committed `6a5f027` (his) and pushed; CI `44898505411` and Deploy `44898505418` green.** **Step 11 (doc §7,
+> "As built, step 11"; record `docs/phases/evidence/phase-6.5/go-live/README.md`), begun at his go-ahead:** the go-live
+> commit is built and `make check` green (3,581 and 649). **Order:** his `bootstrap` plan (`scratch/p65-s11-plan.sh`;
+> expected 0 to add, 1 to change, 0 to destroy, the response headers policy) and apply; then his commit C11 `phase 6.5:
+> c11 go-live` and push, whose Deploy syncs the explorer to the site. **After it:** the teardown test (item 5), the live
+> site against the preview (6), LinkedIn's post inspector (7). This block rides in C11; read its CI and Deploy first.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-21, about 5:15 AM (PHASE 6.5 STEP 10 DONE: THE PUBLIC CHECKS) *(superseded by the block above)*
 >
 > **C9 committed `8457a84` (his) and pushed; CI `44795927700` and Deploy `44795927780` green.** **Step 10 (doc §5.5,
 > "As run, step 10"; record `docs/phases/evidence/phase-6.5/public-checks/`):** `planning/06` §9's seven checks on the

@@ -812,6 +812,21 @@ CreateFunction API reference); the pinned provider (6.67) gives `aws_cloudfront_
   `https://horizon-compact.vercel.app/methods/`, so the relative redirect stays on the rewrite's host; `/404.html` 200 (a
   file). Per-page HTML and cards are checked at go-live (item 6), since the placeholder has one page. **Item 2 done.**
 
+**As built, step 11 (2026-11-21, Opus; items 3, 4 and 8; record `docs/phases/evidence/phase-6.5/go-live/README.md`).**
+Begun at his go-ahead (9:43 AM). The go-live commit holds `bootstrap`'s new headers policy (`media-src 'self'`
+added; the `X-Robots-Tag: noindex` header removed), which he applies before pushing, and what goes with it: the
+preview's mirrored policy; the explorer's `noindex` tag taken off every page and kept on the not-found page alone
+(`renderNotFound`); `check-dist` refusing a robots tag on a live page and any placeholder in his words or the shipped
+methods words; Deploy syncing `web/dist-explorer` (never `.vite/`; captions as `text/vtt`, memo files as `text/plain`)
+with a smoke test for the explorer's entry, the headers (retried; `media-src` present, no `x-robots-tag`), each media and
+data type, `/methods/` as its own page and the manifest's absence; the architecture tests to match; M12's first entry.
+**What the doc did not foresee:** the item-4 line ("Deploy builds the explorer, not the placeholder") was a sync and a
+smoke test, not a build switch: `npm run check` already built both, and the smoke test was the placeholder's (its bundle
+named the placeholder's sweep). Proof before the push: `make check` green (3,581 and 649); the new refusals
+mutation-checked on the built files (a pending block in the methods words; a robots tag on `/methods/`); on a fresh
+preview with the new policy, the video loads (ready state 4, 163.5 s) with its 59 caption cues and no console or policy
+error. Items 3 (his apply), 4 (his push, CI and Deploy), 5 to 7 follow.
+
 ## 8. The steps and the commit order
 
 Sonnet builds code steps and Opus reviews each diff, as in every phase since 3; Opus builds the infrastructure, as in
