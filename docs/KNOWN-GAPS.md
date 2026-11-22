@@ -7,7 +7,42 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-21, about 3:15 PM (PHASE 6.5 CLOSED: VERSION 0.6.5)
+> ## START HERE — where things stand, 2026-11-22, about 10:30 AM (PHASE 7 IMPLEMENTATION DOC APPROVED; C1, THEN STEP 1)
+>
+> **The Phase 7 IMPLEMENTATION doc is APPROVED** (his, about 10:27 AM) (`docs/phases/phase-7-writeup-and-launch-IMPLEMENTATION.md`, Opus,
+> written while he was out): steps 0 to 15, commits C1 to C8, the README's outline, the marker scheme, the audit's five
+> parts, the Short. **Decisions A-D DECIDED about 10:12 AM (his):** A, Claude in Chrome re-verifies the audit's sample
+> (Claude to walk him through its setup at step 7); B, seven measured days scaled to a month; C, MIT for code, CC BY
+> 4.0 for the rest (the repo has no license today); D, one Short, Gemini first, the cut from renders only as fallback
+> (amends the re-scope's R-A; dated note on the scope doc). **Next:** his C1, then step 1, the rule-zero sweep (Opus). **Step 0 done:** the card line and website field set by him, confirmed by `gh repo view`.
+> **Nothing committed yet, by his choice:** C1 (`phase 7: re-scope and implementation doc`) carries Phase 6.5's held
+> START HERE and row 1 note, the re-scope and this doc, once approved.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-22, about 9:00 AM (PHASE 7 RE-SCOPED AND APPROVED; IMPLEMENTATION DOC NEXT) *(superseded by the block above)*
+>
+> **The Phase 7 scope doc is re-scoped** (its section "Re-scoped 2026-11-22", APPROVED about 8:51 AM, his): the
+> results support `planning/06` §1's "C and D split" row; nothing was cut; five facts corrected (the models are Haiku 5.5
+> and `gpt-oss-120b`, the repo card is false on two points, no README exists, the hosting plan is smaller, the cost has
+> three pots). **Two new decisions, his:** R-A, the Short is made by a bake-off (a Gemini Short against a cut built from
+> the site's renders); R-B, the card is corrected now (Delivers 0, a Claude-drafted line at his request). **Next:** his
+> card correction, then the Phase 7 IMPLEMENTATION doc (Opus), written and approved before any build.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-21, about 3:20 PM (PHASE 6.5 CLOSED AND LANDED; PHASE 7 NEXT) *(superseded by the block above)*
+>
+> **The close landed:** `6450b93` `phase 6.5: close, version 0.6.5`, CI `44948868995` and Deploy `44948869003` green; the
+> public site answers 200. **DoD row 1 is now met in full:** his read of M12's first entry, "it is indeed fine" (the
+> IMPLEMENTATION doc §11.1, dated note). The explorer is public at `horizon-compact.vercel.app` from 2026-11-21, about
+> 10:15 AM; version `0.6.5`. **This block and the row 1 note are uncommitted, by his choice:** they ride in Phase 7's
+> first commit. **Next:** Phase 7 (`docs/phases/phase-7-writeup-and-launch.md`, approved 2026-10-04): review the scope doc,
+> then write and approve its IMPLEMENTATION doc (Opus); the README, the launch post and the Short are his words.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-21, about 3:15 PM (PHASE 6.5 CLOSED: VERSION 0.6.5) *(superseded by the block above)*
 >
 > **Phase 6.5 is closed with its DoD audit** (IMPLEMENTATION doc §11.1: eleven rows met, row 5 with two logged
 > departures and two disclosures, row 6 with two qualifications, row 1 waiting on his read of M12's first entry), **version

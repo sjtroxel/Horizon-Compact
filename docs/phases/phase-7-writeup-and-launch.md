@@ -3,6 +3,11 @@
 > **Scope doc.** Written 2026-10-04 from `planning/00` §2, §8 and §10, `planning/03` §1, `planning/05` §5 (Phase 7's
 > row) and §6, `planning/06` §1, §4-6, §8-9 and §11, and the Phase 6 and 6.5 scope docs. **APPROVED 2026-10-04
 > (his)**, with all six decisions at the end taken as recommended. Not split.
+> **Re-scoped 2026-11-22, APPROVED 2026-11-22 about 8:51 AM (his):** section "Re-scoped 2026-11-22", answering every
+> opening below and correcting five facts (the models, the repo card, the missing README, the hosting, the cost pots);
+> two new decisions, R-A (the Short, by bake-off) and R-B (the card now), both DECIDED 2026-11-22 (his).
+> **IMPLEMENTATION doc APPROVED 2026-11-22, about 10:27 AM (his):** `phase-7-writeup-and-launch-IMPLEMENTATION.md`.
+> Its decision D amends R-A: one Short, Gemini first, the cut from the site's renders only as the fallback.
 >
 > **Written to be re-scoped.** This phase starts after every other phase is built, probably weeks from now. Its
 > purpose and its definition of done are fixed here; much of its content cannot be, because it depends on what the
@@ -142,6 +147,146 @@ Expected to change, by a dated amendment to this doc before its IMPLEMENTATION d
 - **Which impressive pieces shipped** in Phase 6 and 6.5, and which images the README can use.
 - **The tools**, if the post uses any (an image tool, the video): availability and cost, checked live.
 - **The launch timing,** his, set against whatever else is happening that week.
+
+## Re-scoped 2026-11-22 (Claude-drafted; APPROVED 2026-11-22, about 8:51 AM, his)
+
+Written at the phase's start, after Phase 6.5's close (`6450b93`). Each opening above is answered from the repo, and
+four facts this doc assumed on 2026-10-04 are corrected. **Where this section and the text above disagree, this
+section governs.**
+
+### R.1 What the results say
+
+Read 2026-11-22 from the two official grids (`experiment/results/prereg-v1/<model>/grid-*.json`, `final_verdict` on
+each primary comparison):
+
+| Pair | Haiku 5.5 (S1 / S2 / S3 / S4) | `gpt-oss-120b` (S1 / S2 / S3 / S4) |
+|---|---|---|
+| A vs C (horizon, shareholders) | split / inconclusive / inconclusive / inconclusive | inconclusive / not assessable / inconclusive / split |
+| A vs B (who counts, four quarters) | split / split / split / split | split / inconclusive / split / inconclusive |
+| **C vs D (who counts, twenty years)** | **split / inconclusive / split / split** | **split / inconclusive / split / inconclusive** |
+| B vs D (horizon, all stakeholders) | no split / inconclusive / no split / inconclusive | inconclusive / inconclusive / inconclusive / split |
+
+- **The `planning/06` §1 row the data supports is "C and D split":** over twenty years, who counts still changed the
+  model's decision, on three of four scenarios for Haiku 5.5 and two of four for `gpt-oss-120b`, every split robust
+  across the three wordings. **No scenario shows "no split" on C vs D for either model**, so the row the Roundtable's
+  "in the long term" predicts ("A and B split, but C and D do not") appears nowhere. The README's lead result and the
+  post's one sentence come from that row, in §4's allowed wording with run counts; which scenario and chart lead is
+  his.
+- **The inconclusive cells are stated as inconclusive**, not as half a split, and S2 (inconclusive on C vs D for both
+  models; one `gpt-oss-120b` comparison not assessable, its failure rate) is named, not dropped.
+- **The section for results against the thesis holds two entries,** both Haiku 5.5, both B vs D "no split" (S1 and
+  S3): with all stakeholders counted, the longer horizon did not change the decision (`web/explorer-data/index.json`,
+  `against_thesis`, by the Phase 6 IMPLEMENTATION doc §19's rule). The README shows them without scrolling past the end
+  (`planning/06` §9 item 7).
+- **The real cases are reported pre-registered result first:** the rule found no case (shortfalls 2, 2 and 1); the
+  five cases are exploratory, all closures, three with a leakage disclosure; all 20 readings are "no good match"
+  (methods page ledger lines 16, 20, 20a, 20b). Any README or post line on the cases says that, in that order.
+
+### R.2 What was cut
+
+**Nothing** under `planning/05` §5.1 (Phase 5.5's cost check; methods ledger line 38). Two substitutions are not
+cuts and are said as substitutions wherever the models are named: `gpt-oss-120b` for Nova Pro as the second family,
+and Haiku 5.5 for Sonnet 4.6 as the Anthropic model, both because Bedrock was blocked (KNOWN-GAPS BLOCKED 2026-10-05;
+protocol 5.1; Phase 3.5 IMPLEMENTATION doc §23).
+
+### R.3 Corrections to this doc's 2026-10-04 facts
+
+1. **The main model (replaces "The main model" above).** The official models are **Haiku 5.5** (Anthropic's API) and
+   **`gpt-oss-120b`** (OpenRouter), fixed by the protocol before the tag; Sonnet 4.6 is not in v1's official set, and
+   no new sweep is planned. Scoping finding 6 and Delivers 7 apply to both: Haiku 5.5's tentative retirement is "Not
+   sooner than October 7, 2027" (Anthropic's model deprecations page, read 2026-11-22, with at least 60 days' notice);
+   `gpt-oss-120b` has open weights, so it does not retire as such, but the host that served it can stop, and the
+   dated line then says so. The README and the audit name both models with their run dates.
+2. **The repo card is now wrong on facts,** not only possibly on tone (scoping finding 2). Read live 2026-11-22, it
+   says "one AI" (v1 has two models) and "on AWS Bedrock" (the models were reached through Anthropic's API and
+   OpenRouter after Bedrock was blocked). Its "measuring where decisions split" does not misdescribe the result. The
+   website field is empty. The card is his words (decision 1); when it changes is decision R-B.
+3. **There is no README yet.** The root holds 14 entries against the cap of 16; `README.md` makes 15.
+4. **The hosting picture under decision 5 changed:** the public URL is already a free host's
+   (`horizon-compact.vercel.app`, a Vercel rewrite to the CloudFront distribution, Phase 6.5), and the raw text is
+   already in the public repo (Phase 6.5 decision A). So the 2027-06-30 plan is smaller than written: serve the built
+   files from the free host directly, then tear down the distribution and bucket, or keep them on a stated cash
+   budget. Free hosts' terms are still checked live at the time. The budgets' 2027-10-01 end (the reminder's
+   2026-10-08 note) stays in the plan.
+5. **The cost record has three pots, not one:** AWS credit (expiring 2027-07-30), Anthropic prepaid credit, and his
+   OpenRouter cash (`evidence/phase-5.5/cost.md`). The OpenRouter spend is cash and the record says so; this phase
+   itself calls no model.
+
+### R.4 The vocabulary climate
+
+Phase 6.5's recheck (M10, `evidence/phase-6.5/public-checks/README.md`, 2026-11-21) found no new Roundtable statement
+on corporate purpose and nothing new for the word list. **"A few weeks" in Delivers 9 is set at three:** if the
+launch post goes out after 2026-12-12, the recheck runs again before it.
+
+### R.5 What shipped that the README and post can use
+
+The explorer (14 paths, each with its own share card), the methods page and its ledger, the section for results
+against the thesis, the Explainer video (two logged departures, disclosed on M11), the full raw text with the
+re-scoring check in CI, and the prompt reconstruction. Images are real renders from the site; the site has light and
+dark styles, so both variants exist. The image list is the IMPLEMENTATION doc's.
+
+### R.6 Tools: the Short
+
+Phase 6.5 decision C held **a Short** for this phase's post; this doc predates it. It is not made
+(`evidence/phase-6.5/video/README.md`). **It is made (decision R-A), about a minute long, for the LinkedIn post,
+by a bake-off:** one candidate from Gemini Notebook's Short format (the existing notebook and source pack, capped at
+three attempts) and one cut built from the site's own renders (captured by the headless browser Phase 6 uses, with
+motion and burned-in captions, over his voice reading his own script or on-screen text only). Both pass the
+Explainer's frame and narration check; he picks by eye. Before either is made, the IMPLEMENTATION doc re-reads live:
+Gemini Notebook's formats and cost, any comparable tool worth a third candidate, and LinkedIn's current video specs
+(aspect ratio, length, captions). Two rules hold for whichever wins: **the scope sentence appears in substance** (an
+end card is enough), and **narration that speaks for him in his post is his words** (the Explainer's Claude-written
+script was a logged departure, not a precedent). A generated clip carries the AI-generated label.
+
+### R.7 Launch timing
+
+His. On the calendar: 2026-11-26 is Thanksgiving. The post is his standing choice for LinkedIn, whose Post Inspector
+already matched the site (Phase 6.5 step 11). His decision of 2026-10-05 for the post stands: its "The hardest part"
+section is about AWS (the quotas set to zero and the support case), with how the build continued (the move to
+Anthropic's API and OpenRouter, 2026-10-11). The words are his.
+
+### R.8 Carried in from earlier phases
+
+- **The `horizon-compact-dev` access key** is deleted at this phase's close or on 2027-01-02, whichever is first
+  (Phase 1.5 decision 6). Added as Delivers 11 and DoD 9.
+- **M12's changelog:** any change to the live site in this phase gets an entry.
+- **The search check's two private cross-appearances** (Phase 6.5 step 10, not hits): his call whether to coarsen
+  further, made in Delivers 1's sweep.
+- **The uncommitted START HERE block and row 1 note** from Phase 6.5's close ride in this phase's first commit (his
+  choice, 2026-11-21).
+
+### R.9 Changes to Delivers and the definition of done
+
+- **Delivers 7** covers both models (R.3 item 1).
+- **Delivers 4** reads the card against facts as well as results (R.3 item 2). **By decision R-B, a first
+  correction comes first** (Delivers 0 below), and Delivers 4 re-reads it against the finished README.
+- **Added, Delivers 0, before the rule-zero sweep:** his corrected card line, typed into GitHub by him, fixing "one
+  AI" and "on AWS Bedrock", and the website field set to `https://horizon-compact.vercel.app`. A minimal correction;
+  the final wording waits for Delivers 4. Rule zero applies to it as to any text typed into GitHub. *Dated note,
+  2026-11-22:* **Claude drafted this correction at his request on this pass** (decision 1's allowed exception),
+  flagged as Claude's words with the watermark when handed over; it passed the name guard's message check. His
+  rewording, if any, is his call at Delivers 4.
+- **Delivers 6** states all three pots (R.3 item 5).
+- **Added, Delivers 11:** the dev access key deleted (R.8). **DoD 9:** it is deleted, or Phase 7 closed after
+  2027-01-02 and it was deleted on that date.
+- **Added, Delivers 12 (decision R-A), before the launch post:** the Short, by the bake-off in R.6. **DoD 10:** the
+  chosen Short passed the frame and narration check and carries the scope sentence.
+
+### R.10 Two new decisions for him (both DECIDED 2026-11-22, his)
+
+- **R-A. The Short. DECIDED 2026-11-22, about 8:48 AM (his): make it, by bake-off** (R.6). *Amended 2026-11-22, about
+  10:12 AM (his, the IMPLEMENTATION doc's decision D): one Short, made well; the Gemini Short first under a
+  three-attempt cap, the cut from the site's renders only if no Gemini attempt passes or he wants none that does.
+  R.6 and Delivers 12 read accordingly.* "I do think we need a
+  dynamically short video of a minute or so for the LinkedIn release." *Was:*
+  - (a) Make it, from the same notebook, under the Explainer's check, before the post.
+  - (b) Claude's first lean: drop it, a logged departure from Phase 6.5 decision C. **Withdrawn by Claude** in
+    discussion: it went against his standing view (2026-11-14) that the video is to be made to work, not dropped, and
+    that the launch post is a place a clip helps. The bake-off replaced both options.
+- **R-B. When the repo card changes. DECIDED 2026-11-22, about 8:48 AM (his): (a), as leaned.** *Was:*
+  - (a) **Claude's lean: now, before the README,** since it is public and false today (R.3 item 2), with the website
+    field set to the site; re-read again at Delivers 4 against the finished README.
+  - (b) At Delivers 4 only, in the order decision 2 set.
 
 ## Known risks
 
