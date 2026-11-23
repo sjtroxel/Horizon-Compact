@@ -13,9 +13,10 @@ import type { IntervalRow } from "./charts";
 import { explorerHis, explorerLabels as L } from "./copy";
 import type { AgainstThesisEntry, DataIndex } from "./data";
 import { comparisonRuns, formatPoints } from "./format";
-import { modelName } from "./models";
-import { His, HisHeading, ProtocolReading } from "./parts";
+import { modelName, orderedModels } from "./models";
+import { His, HisHeading, ProtocolReading, RunNotes } from "./parts";
 import { readingFor } from "./protocol";
+import { runSpan } from "./runs";
 
 function listOrNone(items: readonly string[]): string {
   return items.length === 0 ? againstWords.none : items.join(", ");
@@ -106,6 +107,14 @@ export function AgainstThesis({ index }: { index: DataIndex }) {
     >
       <HisHeading text={explorerHis.againstTitle} level={2} id={titleId} />
       <His text={explorerHis.againstIntro} />
+      {orderedModels(index.models).map((model) => (
+        <RunNotes
+          key={model.model_key}
+          index={index}
+          model={model.model_key}
+          span={runSpan(index, "grid", model.model_key)}
+        />
+      ))}
       <h3>{againstWords.ruleHeading}</h3>
       {againstWords.ruleParagraphs.map((paragraph) => (
         <p key={paragraph}>{paragraph}</p>

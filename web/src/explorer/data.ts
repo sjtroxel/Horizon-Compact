@@ -160,6 +160,31 @@ export interface DataFiles {
   methods: string;
 }
 
+/**
+ * When a run happened: the UTC calendar dates of its first start and last finish, copied by the build from the
+ * raw session records (`sessions`), the raw awareness call records (`calls`) or the Phase 5.5 run log (`run_log`,
+ * whose dates are session starts: the log records no finish time). Never typed on a page; never computed here.
+ */
+export interface RunSpan {
+  from: string;
+  to: string;
+  basis: "sessions" | "calls" | "run_log";
+}
+
+/** The index's `runs` block (Phase 7 step 2): the runs' dates, and each model's retirement date. */
+export interface RunsBlock {
+  /** model key to the official grid's dates. */
+  grid: Record<string, RunSpan>;
+  /** model key to the thinking sub-study's dates (one model today). */
+  thinking: Record<string, RunSpan>;
+  /** model key to the awareness probe's dates. */
+  awareness: Record<string, RunSpan>;
+  /** case label, then model key, to the case runs' dates. */
+  cases: Record<string, Record<string, RunSpan>>;
+  /** model key to its retirement date (YYYY-MM-DD), or null while it is still served: null for every model in v1. */
+  retired_on: Record<string, string | null>;
+}
+
 export interface DataIndex {
   explorer_data_version: number;
   sources: Array<{ path: string; sha256: string }>;
@@ -168,6 +193,7 @@ export interface DataIndex {
   scenarios: ScenarioEntry[];
   verdicts: VerdictBlock[];
   against_thesis: AgainstThesis;
+  runs: RunsBlock;
   files: DataFiles;
 }
 

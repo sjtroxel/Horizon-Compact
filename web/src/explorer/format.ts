@@ -7,6 +7,8 @@
  *  2. Integer sums of run counts, for a total the file does not carry. No mean, rate, share, difference, interval,
  *     median or verdict is ever derived.
  *  3. Pixel positions: a value mapped to an axis, and a deterministic vertical jitter from a hash of the run id.
+ *  4. (Phase 7 step 2) A calendar date from the run records written in words ("October 14, 2026"), by a fixed table
+ *     of month names: no clock, no time zone, no date arithmetic. The build already made each one a UTC date.
  *
  * Each output is pinned to its source field by format.test.ts.
  */
@@ -185,6 +187,65 @@ export function sessionSpan(
     if (session.finished_at > last) last = session.finished_at;
   }
   return { first, last };
+}
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
+const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** A date the build wrote ("2026-10-14") as its pieces, or null for anything that is not a real calendar date. */
+function dateParts(iso: string): { year: number; month: number; day: number } | null {
+  const found = ISO_DATE.exec(iso);
+  if (found === null) return null;
+  const [year, month, day] = [Number(found[1]), Number(found[2]), Number(found[3])];
+  const daysInMonth = [
+    31,
+    year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1]!) return null;
+  return { year, month, day };
+}
+
+/** A date as "October 14, 2026". Anything that is not a YYYY-MM-DD calendar date comes back as written. */
+export function formatLongDate(iso: string): string {
+  const parts = dateParts(iso);
+  return parts === null ? iso : `${MONTH_NAMES[parts.month - 1]} ${parts.day}, ${parts.year}`;
+}
+
+/**
+ * The dates of a run: one date as "October 14, 2026"; two dates in one year as "October 29 to October 30, 2026" (the
+ * year said once, at the end); two in different years each in full. A date that is not a calendar date is shown as
+ * written, in full, never repaired.
+ */
+export function formatRunDates(from: string, to: string): string {
+  if (from === to) return formatLongDate(from);
+  const a = dateParts(from);
+  const b = dateParts(to);
+  if (a === null || b === null || a.year !== b.year)
+    return `${formatLongDate(from)} to ${formatLongDate(to)}`;
+  return `${MONTH_NAMES[a.month - 1]} ${a.day} to ${MONTH_NAMES[b.month - 1]} ${b.day}, ${b.year}`;
 }
 
 /** A value on an axis from `low` to `high`, as the percentage of the plot's width an SVG coordinate takes. */

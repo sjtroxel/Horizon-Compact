@@ -1329,6 +1329,20 @@
               "match": "Go-live: 2026-11-21"
             }
           ]
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "November 23, 2026. ",
+          "text": "Each results page now says when its runs happened: the official runs from their run records, the real cases from the run log. No published number changed.",
+          "sources": ["docs/phases/evidence/phase-7/run-dates.md"],
+          "figures": [
+            {
+              "text": "November 23, 2026",
+              "source": "docs/phases/evidence/phase-7/run-dates.md",
+              "match": "Step 2 built: 2026-11-23"
+            }
+          ]
         }
       ]
     }

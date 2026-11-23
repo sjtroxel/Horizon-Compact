@@ -18,6 +18,7 @@ import os
 import re
 import tomllib
 from collections.abc import Callable, Iterator
+from datetime import datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -51,6 +52,8 @@ MODELS = (OTHER_MODEL, MAIN_MODEL)  # sorted, as the builder sorts them
 SCENARIOS = ("s1", "s2", "s3", "s4")
 BIG_SEED = 51708200104990895674395918064214010461
 OBJECTIVES = "ABCDE"
+# The two fixture cases, each with its own hex in its sweep ids (the builder refuses a sweep id used twice).
+CASE_HEX = {"case-one": "dddd4444", "case-two": "eeee5555"}
 
 Obj = dict[str, Any]
 
@@ -232,7 +235,7 @@ def _memo_summary(label: str, model: str) -> Obj:
         "exploratory": True,
         "exploratory_label": "exploratory: fixture label",
         "model_key": model,
-        "sweep_id": f"case-{model}-dddd4444",
+        "sweep_id": f"case-{model}-{CASE_HEX[label]}",
         "counts": {
             "runs": 30,
             "with_text": 29,
@@ -388,6 +391,98 @@ def _raw_sweep_dir(tmp_path: Path, model: str, hexid: str, kind: str) -> Path:
     return tmp_path / "experiment" / "raw" / "official" / "company" / _sweep_id(model, hexid, kind)
 
 
+# --- the fixture run dates (Phase 7 step 2) -------------------------------------------------------------
+
+AWARENESS_START = {
+    OTHER_MODEL: "2026-10-14T23:50:00+00:00",
+    MAIN_MODEL: "2026-10-14T14:03:00+00:00",
+}
+
+
+def _awareness_stamps(model: str, call: int) -> tuple[str, str]:
+    """One fixture call's start and finish: a minute apart, a minute after the call before it. The other
+    model's fifteen calls cross midnight, as the real second probe's do not and a probe could."""
+    start = datetime.fromisoformat(AWARENESS_START[model]) + timedelta(minutes=call)
+    return start.isoformat(), (start + timedelta(seconds=30)).isoformat()
+
+
+def _write_awareness_raw(tmp_path: Path) -> None:
+    for model in MODELS:
+        sweep = f"awareness-{model}-ab12cd34"
+        base = tmp_path / "experiment" / "raw" / "official" / "company" / "awareness" / sweep
+        _write_json(
+            base / "manifest.json", {"sweep_id": sweep, "model_key": model, "label": "official"}
+        )
+        for call in range(AWARENESS_CALLS):
+            started, finished = _awareness_stamps(model, call)
+            _write_json(
+                base / "runs" / f"r-{call:012x}.json",
+                {
+                    "model_key": model,
+                    "started_at": started,
+                    "finished_at": finished,
+                    "raw_response": {"content": SENTINEL_RAW},
+                    "text_blocks": [SENTINEL_RAW],
+                },
+            )
+
+
+RUN_LOG_HEAD = """# Phase 5.5 run log (a fixture)
+
+## Not the table
+
+| When | Sweep | Model |
+|---|---|---|
+| 2020-01-01 about 01:00 UTC | `case-nobody-0000aaaa` (`nothing`) | `nobody` |
+
+## Sessions
+
+| When | Sweep | Model | Session | Stopped | Runs finished | Cost (USD) | Note |
+|---|---|---|---|---|---|---|---|
+"""
+RUN_LOG_ROWS = (
+    # case-one on the main model: one session.
+    "| 2026-10-29 about 14:24 UTC (9:24 AM CDT) | `case-haiku-5-5-dddd4444` (`case-one`, seed 1, cap $2) "
+    "| `haiku-5-5` | task `t1` | complete (session started 2026-10-29 14:24:41 UTC) | 150 of 150 | 0.1 | n |",
+    # case-one on the other model: a session, a stop, and a re-launch the next UTC day.
+    "| 2026-10-29 about 21:14 UTC (4:14 PM CDT) | `case-alpha-model-dddd4444` (`case-one`, seed 2, cap $1) "
+    "| `alpha-model` | task `t2` | **stopped** (session started 21:15:00 UTC) | 19 of 150 | 0.1 | n |",
+    "| 2026-10-29 about 00:53 UTC 10/30 (7:53 PM CDT) | `case-alpha-model-dddd4444` | `alpha-model` "
+    "| (second stop, read by him) | | | | a stop is not a session |",
+    "| 2026-10-30 00:55 UTC (7:55 PM CDT 10/29) | `case-alpha-model-dddd4444` (`case-one`, re-launch) "
+    "| `alpha-model` | session started 00:55:02 UTC (task id not pasted) | complete | 150 of 150 | 0.1 | n |",
+    # case-two: one session each, the next day.
+    "| 2026-10-30 about 12:54 UTC (7:54 AM CDT) | `case-haiku-5-5-eeee5555` (`case-two`, seed 3, cap $2) "
+    "| `haiku-5-5` | task `t3` | complete (session started 12:54:33 UTC) | 150 of 150 | 0.1 | n |",
+    "| 2026-10-30 about 14:16 UTC (9:16 AM CDT) | `case-alpha-model-eeee5555` (`case-two`, seed 4, cap $1) "
+    "| `alpha-model` | task `t4` | complete (session started 14:16:19 UTC) | 150 of 150 | 0.1 | n |",
+)
+RUN_LOG_TAIL = "\nThe table ends, and prose follows it.\n"
+# What the fixture run log says, by (label, model): the first and last session's date.
+RUN_LOG_DATES = {
+    ("case-one", MAIN_MODEL): ("2026-10-29", "2026-10-29"),
+    ("case-one", OTHER_MODEL): ("2026-10-29", "2026-10-30"),
+    ("case-two", MAIN_MODEL): ("2026-10-30", "2026-10-30"),
+    ("case-two", OTHER_MODEL): ("2026-10-30", "2026-10-30"),
+}
+
+
+def _run_log_path(tmp_path: Path) -> Path:
+    return tmp_path / "docs" / "phases" / "evidence" / "phase-5.5" / "run-log.md"
+
+
+def _write_run_log(tmp_path: Path, rows: tuple[str, ...] = RUN_LOG_ROWS) -> None:
+    path = _run_log_path(tmp_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        RUN_LOG_HEAD + "\n".join(rows) + "\n" + RUN_LOG_TAIL, encoding="utf-8", newline="\n"
+    )
+
+
+def _retirements_path(tmp_path: Path) -> Path:
+    return tmp_path / "experiment" / "retirements.toml"
+
+
 def _write_raw(tmp_path: Path) -> None:
     """The fictional raw text beside the fixture results, with the manifest that hashes it."""
     for model, hexid, kind in RAW_SWEEPS:
@@ -506,7 +601,8 @@ def make_tree(tmp_path: Path, verdicts: Verdicts | None = None) -> Path:
     for label in ("case-one", "case-two"):
         for model in MODELS:
             _write_json(
-                root / "cases" / label / f"{model}.json", _case_result(label, model, "dddd4444")
+                root / "cases" / label / f"{model}.json",
+                _case_result(label, model, CASE_HEX[label]),
             )
             _write_json(
                 root / "cases" / label / f"{model}-memos-summary.json", _memo_summary(label, model)
@@ -520,6 +616,9 @@ def make_tree(tmp_path: Path, verdicts: Verdicts | None = None) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(awareness_text(model), encoding="utf-8", newline="\n")
     _write_raw(tmp_path)
+    _write_awareness_raw(tmp_path)
+    _write_run_log(tmp_path)
+    _retirements_path(tmp_path).write_text("# empty in v1\n", encoding="utf-8")
     return root
 
 
@@ -720,7 +819,7 @@ def test_it_refuses_a_model_key_or_sweep_id_that_does_not_match_the_filename(
     _refuses(root, "has sweep_id")
     grid.write_text(original)
     case = root / "cases" / "case-one" / f"{MAIN_MODEL}.json"
-    _edit(case, lambda d: d.__setitem__("sweep_id", f"case-{OTHER_MODEL}-dddd4444"))
+    _edit(case, lambda d: d.__setitem__("sweep_id", f"case-{OTHER_MODEL}-{CASE_HEX['case-one']}"))
     _refuses(root, "has sweep_id")
 
 
@@ -1868,7 +1967,7 @@ def test_no_model_text_prompt_memo_or_account_reference_reaches_any_output_file(
         assert f'"{name}"' not in methods, name
 
 
-def test_the_builder_opens_only_the_three_sweeps_records_and_the_raw_manifest(
+def test_the_builder_opens_only_the_three_sweeps_records_the_awareness_calls_and_the_raw_manifest(
     tmp_path: Path,
 ) -> None:
     root = make_tree(tmp_path)
@@ -1877,19 +1976,25 @@ def test_the_builder_opens_only_the_three_sweeps_records_and_the_raw_manifest(
     raw = tmp_path / "experiment" / "raw"
     opened = {Path(p) for p in seen if Path(p).is_relative_to(raw)}
     sweeps = "|".join(re.escape(_sweep_id(*s)) for s in RAW_SWEEPS)
+    probes = "|".join(re.escape(f"awareness-{m}-ab12cd34") for m in MODELS)
     allowed = re.compile(
         rf"official/company/({sweeps})/(manifest\.json|sessions/[^/]+\.json|runs/r-[0-9a-f]{{12}}/attempt-[0-9]+\.json)"
+        rf"|official/company/awareness/({probes})/(manifest\.json|runs/r-[0-9a-f]{{12}}\.json)"
     )
     for path in opened:
         assert allowed.fullmatch(path.relative_to(raw).as_posix()), path
-    # Each kind was opened, in each sweep: 1 manifest, 2 sessions and 3 attempts.
-    assert len(opened) == len(RAW_SWEEPS) * (1 + 2 + 3)
+    # Each kind was opened, in each sweep: 1 manifest, 2 sessions and 3 attempts; and in each probe, 1
+    # manifest and 15 call records (Phase 7 step 2: two timestamps are read from each).
+    assert len(opened) == len(RAW_SWEEPS) * (1 + 2 + 3) + len(MODELS) * (1 + AWARENESS_CALLS)
     assert not [p for p in seen if p.endswith("final.json")]
-    # Nothing else under the raw root: not the stray sweep, the pilot, the case or the awareness run.
-    for stray in ("stray", "pilot", "case-alpha", "awareness"):
+    # Nothing else under the raw root: not the stray sweep, the pilot, the case or the other awareness run.
+    for stray in ("stray", "pilot", "case-alpha", "7777"):
         assert not [p for p in opened if stray in p.relative_to(raw).as_posix()]
     manifest = "docs/phases/evidence/phase-4/raw-manifest.json"
     assert [p for p in seen if p.endswith(manifest)] != []
+    # And the two other committed inputs of the run dates.
+    assert [p for p in seen if p.endswith("docs/phases/evidence/phase-5.5/run-log.md")] != []
+    assert [p for p in seen if p.endswith("experiment/retirements.toml")] != []
 
 
 def test_the_recorder_sees_a_raw_record_being_opened(tmp_path: Path) -> None:
@@ -1979,8 +2084,10 @@ def test_the_sources_name_every_input_with_its_real_sha256(real: dict[str, str])
         assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"], source["path"]
     paths = {s["path"] for s in _index(real)["sources"]}
     # three results files, cases.json, objectives.toml, ten cases, their ten memo summaries, two reports, and
-    # (Phase 6.5 step 4) the raw manifest, three sweeps' manifests and four session records
-    assert len(paths) == 3 + 1 + 1 + 10 + 10 + 2 + 1 + 3 + 4
+    # (Phase 6.5 step 4) the raw manifest, three sweeps' manifests and four session records, and (Phase 7
+    # step 2)
+    # the two awareness probes' manifests, the Phase 5.5 run log and the retirements file
+    assert len(paths) == 3 + 1 + 1 + 10 + 10 + 2 + 1 + 3 + 4 + 2 + 1 + 1
 
 
 def _same(out: Any, src: Any, where: str, counter: list[int]) -> None:
@@ -2214,25 +2321,34 @@ def test_the_real_build_never_opens_a_real_case_memo_file() -> None:
     assert reports == ["awareness-gpt-oss-openrouter.md", "awareness-haiku-5-5.md"]
 
 
-def test_the_real_build_opens_only_the_three_sweeps_raw_records_and_the_raw_manifest() -> None:
-    """Phase 6.5 step 4: of the published raw text, only each official sweep's manifest, sessions and attempt
-    records. Never a final record, a pilot, an awareness run, or any sweep with no results file."""
+def test_the_real_build_opens_only_the_three_sweeps_raw_records_the_awareness_calls_and_the_manifest() -> (
+    None
+):
+    """Phase 6.5 step 4, widened by Phase 7 step 2: of the published raw text, each official sweep's manifest,
+    sessions and attempt records, and each awareness probe's manifest and 15 call records (two timestamps
+    each).
+    Never a final record, a pilot, or any sweep with no results file."""
     raw = REPO / "experiment" / "raw"
     with _recording_opens() as seen:
         build_explorer_data(REAL_RESULTS)
     opened = {Path(p) for p in seen if Path(p).is_relative_to(raw)}
     sweeps = sorted(p.stem for p in (REAL_RESULTS / "prereg-v1").glob("*/*.json"))
     assert len(sweeps) == 3  # two grids and the thinking sub-study
+    probes = sorted(p.name for p in (raw / "official" / "company" / "awareness").iterdir())
+    assert len(probes) == 2
     allowed = re.compile(
         rf"official/company/({'|'.join(map(re.escape, sweeps))})/"
         r"(manifest\.json|sessions/[^/]+\.json|runs/r-[0-9a-f]{12}/attempt-[0-9]+\.json)"
+        rf"|official/company/awareness/({'|'.join(map(re.escape, probes))})/"
+        r"(manifest\.json|runs/r-[0-9a-f]{12}\.json)"
     )
     for path in opened:
         assert allowed.fullmatch(path.relative_to(raw).as_posix()), path
-    assert len([p for p in opened if p.name == "manifest.json"]) == 3
+    assert len([p for p in opened if p.name == "manifest.json"]) == 3 + 2
     assert len([p for p in opened if p.parent.name == "sessions"]) == 4
     assert len([p for p in opened if p.name.startswith("attempt-")]) == 1128 + 1333 + 100
-    assert len(opened) == 3 + 4 + 1128 + 1333 + 100
+    assert len([p for p in opened if p.parent.name == "runs" and p.name.startswith("r-")]) == 30
+    assert len(opened) == 3 + 4 + 1128 + 1333 + 100 + 2 + 30
     manifest = "docs/phases/evidence/phase-4/raw-manifest.json"
     assert [p for p in seen if p.endswith(manifest)] != []
 
@@ -2362,3 +2478,333 @@ def test_the_real_output_is_not_changed_by_deep_copying_the_inputs(real: dict[st
     snapshot = copy.deepcopy(real)
     build_explorer_data(REAL_RESULTS)
     assert snapshot == real
+
+
+# --- the run dates (Phase 7 IMPLEMENTATION doc, step 2) -----------------------------------------------------
+
+
+def _runs(files: dict[str, str]) -> Obj:
+    runs: Obj = _index(files)["runs"]
+    return runs
+
+
+def _span_of(first: str, last: str, basis: str) -> Obj:
+    return {"from": first, "to": last, "basis": basis}
+
+
+def test_the_runs_block_has_each_kind_of_run_and_the_retirement_field(tmp_path: Path) -> None:
+    runs = _runs(build_explorer_data(make_tree(tmp_path)))
+    assert set(runs) == {"grid", "thinking", "awareness", "cases", "retired_on"}
+    assert set(runs["grid"]) == set(MODELS) and set(runs["thinking"]) == {MAIN_MODEL}
+    assert set(runs["awareness"]) == set(MODELS)
+    assert set(runs["cases"]) == {"case-one", "case-two"}
+    assert all(set(by_model) == set(MODELS) for by_model in runs["cases"].values())
+
+
+def test_a_sweeps_dates_are_the_earliest_session_start_and_the_latest_finish(
+    tmp_path: Path,
+) -> None:
+    root = make_tree(tmp_path)
+    runs = _runs(build_explorer_data(root))
+    for model in MODELS:
+        assert runs["grid"][model] == _span_of("2026-10-14", "2026-10-14", "sessions")
+    assert runs["thinking"][MAIN_MODEL] == _span_of("2026-10-14", "2026-10-14", "sessions")
+    # A session that finishes after midnight UTC moves the sweep's last date, whatever the file order.
+    late = _raw_sweep_dir(tmp_path, OTHER_MODEL, "aaaa1111", "grid") / "sessions" / "a-late.json"
+    _edit(late, lambda d: d.__setitem__("finished_at", "2026-10-15T00:30:00+00:00"))
+    again = _runs(build_explorer_data(root))
+    assert again["grid"][OTHER_MODEL] == _span_of("2026-10-14", "2026-10-15", "sessions")
+    assert again["grid"][MAIN_MODEL] == _span_of("2026-10-14", "2026-10-14", "sessions")
+
+
+def test_a_date_is_read_in_utc_never_in_the_writers_local_time(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    late = _raw_sweep_dir(tmp_path, OTHER_MODEL, "aaaa1111", "grid") / "sessions" / "a-late.json"
+    # 22:00 on the 14th at UTC-5 is 03:00 on the 15th UTC; a record in local time is refused, not converted.
+    _edit(late, lambda d: d.__setitem__("finished_at", "2026-10-14T22:00:00-05:00"))
+    _refuses(root, "not in UTC")
+
+
+@pytest.mark.parametrize("stamp", ["2026-10-14T10:00:00", "not a time", None, 5])
+def test_a_session_timestamp_that_is_not_utc_iso_is_refused(tmp_path: Path, stamp: Any) -> None:
+    root = make_tree(tmp_path)
+    early = _raw_sweep_dir(tmp_path, MAIN_MODEL, "bbbb2222", "grid") / "sessions" / "b-early.json"
+    _edit(early, lambda d: d.__setitem__("started_at", stamp))
+    with pytest.raises(ExplorerDataRefusal):
+        build_explorer_data(root)
+
+
+def test_an_awareness_probes_dates_come_from_its_call_records(tmp_path: Path) -> None:
+    runs = _runs(build_explorer_data(make_tree(tmp_path)))
+    assert runs["awareness"][MAIN_MODEL] == _span_of("2026-10-14", "2026-10-14", "calls")
+    # The other fixture probe's fifteen calls cross midnight UTC.
+    assert runs["awareness"][OTHER_MODEL] == _span_of("2026-10-14", "2026-10-15", "calls")
+
+
+def test_no_reply_text_from_an_awareness_call_reaches_any_output(tmp_path: Path) -> None:
+    for text in build_explorer_data(make_tree(tmp_path)).values():
+        assert SENTINEL_RAW not in text
+
+
+def _call_path(tmp_path: Path, model: str, call: int) -> Path:
+    base = tmp_path / "experiment" / "raw" / "official" / "company" / "awareness"
+    return base / f"awareness-{model}-ab12cd34" / "runs" / f"r-{call:012x}.json"
+
+
+def test_it_refuses_a_probe_without_fifteen_call_records(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    _call_path(tmp_path, MAIN_MODEL, 3).unlink()
+    _refuses(root, "14 call records, not 15")
+
+
+def test_it_refuses_a_call_record_of_another_model_or_a_manifest_of_another_probe(
+    tmp_path: Path,
+) -> None:
+    root = make_tree(tmp_path)
+    _edit(_call_path(tmp_path, MAIN_MODEL, 0), lambda d: d.__setitem__("model_key", OTHER_MODEL))
+    _refuses(root, "is not a haiku-5-5 record")
+    other = make_tree(tmp_path / "second")
+    manifest = (
+        tmp_path / "second" / "experiment" / "raw" / "official" / "company" / "awareness"
+        / f"awareness-{MAIN_MODEL}-ab12cd34" / "manifest.json"
+    )  # fmt: skip
+    _edit(manifest, lambda d: d.__setitem__("sweep_id", "awareness-haiku-5-5-ffffffff"))
+    _refuses(other, "sweep_id")
+
+
+def test_it_refuses_a_call_record_without_its_timestamps(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+
+    def drop(d: Obj) -> None:
+        del d["finished_at"]
+
+    _edit(_call_path(tmp_path, MAIN_MODEL, 7), drop)
+    _refuses(root, "lacks finished_at")
+
+
+def test_a_cases_dates_are_its_session_start_dates_from_the_run_log(tmp_path: Path) -> None:
+    runs = _runs(build_explorer_data(make_tree(tmp_path)))
+    for (label, model), (first, last) in RUN_LOG_DATES.items():
+        assert runs["cases"][label][model] == _span_of(first, last, "run_log"), (label, model)
+
+
+def test_a_stop_row_is_not_a_session_and_a_table_before_the_sessions_one_is_not_read(
+    tmp_path: Path,
+) -> None:
+    # The stop row (When "2026-10-29 about 00:53 UTC 10/30") and the first table's row (2020) never count.
+    runs = _runs(build_explorer_data(make_tree(tmp_path)))
+    assert runs["cases"]["case-one"][OTHER_MODEL]["from"] == "2026-10-29"
+    assert "2020-01-01" not in json.dumps(runs)
+
+
+def _log_refuses(tmp_path: Path, change: Callable[[str], str], message: str) -> None:
+    root = make_tree(tmp_path)
+    path = _run_log_path(tmp_path)
+    path.write_text(change(path.read_text(encoding="utf-8")), encoding="utf-8", newline="\n")
+    _refuses(root, message)
+
+
+def test_it_refuses_a_run_log_with_no_sessions_section(tmp_path: Path) -> None:
+    _log_refuses(
+        tmp_path, lambda t: t.replace("## Sessions", "## Something else"), "no '## Sessions'"
+    )
+
+
+def test_it_refuses_a_case_sweep_with_no_session_row(tmp_path: Path) -> None:
+    def drop(text: str) -> str:
+        return "\n".join(line for line in text.split("\n") if "case-haiku-5-5-eeee5555" not in line)
+
+    _log_refuses(tmp_path, drop, "no session row for case-haiku-5-5-eeee5555")
+
+
+def test_it_refuses_a_session_row_for_a_sweep_the_results_do_not_hold(tmp_path: Path) -> None:
+    _log_refuses(
+        tmp_path,
+        lambda t: t.replace("case-haiku-5-5-dddd4444", "case-haiku-5-5-9999aaaa", 1),
+        "not a case sweep the results hold",
+    )
+
+
+def test_it_refuses_a_row_whose_case_label_or_model_disagrees_with_the_results(
+    tmp_path: Path,
+) -> None:
+    _log_refuses(
+        tmp_path,
+        lambda t: t.replace(
+            "`case-haiku-5-5-eeee5555` (`case-two`", "`case-haiku-5-5-eeee5555` (`case-one`", 1
+        ),
+        "is case-two on haiku-5-5 in the results, not case-one on haiku-5-5",
+    )
+    _log_refuses(
+        tmp_path / "second",
+        lambda t: t.replace("| `haiku-5-5` | task `t1`", "| `alpha-model` | task `t1`", 1),
+        "not case-one on alpha-model",
+    )
+
+
+def test_it_refuses_a_time_that_is_not_marked_utc(tmp_path: Path) -> None:
+    _log_refuses(
+        tmp_path,
+        lambda t: t.replace(
+            "2026-10-29 about 14:24 UTC (9:24 AM CDT)", "2026-10-29 about 9:24 AM CDT"
+        ),
+        "UTC date and time",
+    )
+
+
+def test_it_refuses_when_the_when_cell_and_the_session_cell_name_different_days(
+    tmp_path: Path,
+) -> None:
+    _log_refuses(
+        tmp_path,
+        lambda t: t.replace(
+            "session started 2026-10-29 14:24:41 UTC", "session started 2026-10-28 14:24:41 UTC"
+        ),
+        "the When cell says 2026-10-29 and the Session cell says 2026-10-28",
+    )
+
+
+def test_it_refuses_a_row_that_is_not_eight_cells_wide(tmp_path: Path) -> None:
+    _log_refuses(
+        tmp_path, lambda t: t.replace("| 0.1 | n |\n", "| 0.1 | n | extra |\n", 1), "9 cells, not 8"
+    )
+
+
+def test_it_refuses_an_impossible_date(tmp_path: Path) -> None:
+    _log_refuses(
+        tmp_path,
+        lambda t: t.replace("2026-10-30 about 12:54 UTC", "2026-13-40 about 12:54 UTC"),
+        "is not a date",
+    )
+
+
+def test_it_refuses_a_sweep_id_used_by_two_results_files(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    for model in MODELS:
+        _edit(
+            root / "cases" / "case-two" / f"{model}.json",
+            lambda d: d.__setitem__("sweep_id", f"case-{d['model_key']}-{CASE_HEX['case-one']}"),
+        )
+    with pytest.raises(ExplorerDataRefusal):
+        build_explorer_data(root)
+
+
+def test_every_model_is_still_served_in_v1_and_the_field_says_none(tmp_path: Path) -> None:
+    assert _runs(build_explorer_data(make_tree(tmp_path)))["retired_on"] == dict.fromkeys(MODELS)
+
+
+def test_a_filled_retirement_is_carried_for_that_model_only(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    _retirements_path(tmp_path).write_text(
+        f'[[retired]]\nmodel_key = "{OTHER_MODEL}"\ndate = "2027-02-17"\n', encoding="utf-8"
+    )
+    assert _runs(build_explorer_data(root))["retired_on"] == {
+        OTHER_MODEL: "2027-02-17",
+        MAIN_MODEL: None,
+    }
+
+
+@pytest.mark.parametrize(
+    ("body", "message"),
+    [
+        ('[[retired]]\nmodel_key = "nobody"\ndate = "2027-02-17"\n', "not an official model"),
+        (
+            f'[[retired]]\nmodel_key = "{MAIN_MODEL}"\ndate = "2027-02-17"\n'
+            f'[[retired]]\nmodel_key = "{MAIN_MODEL}"\ndate = "2027-03-01"\n',
+            "twice",
+        ),
+        (f'[[retired]]\nmodel_key = "{MAIN_MODEL}"\ndate = "17 February 2027"\n', "not YYYY-MM-DD"),
+        (f'[[retired]]\nmodel_key = "{MAIN_MODEL}"\ndate = "2027-02-31"\n', "is not a date"),
+        (f'[[retired]]\nmodel_key = "{MAIN_MODEL}"\n', "exactly model_key and date"),
+        (
+            f'[[retired]]\nmodel_key = "{MAIN_MODEL}"\ndate = "2027-02-17"\nnote = "x"\n',
+            "exactly model_key and date",
+        ),
+        ("other = 1\n", "other than 'retired'"),
+        ('retired = "yes"\n', "must be a list"),
+        ("not = [toml", "cannot be read"),
+    ],
+)
+def test_it_refuses_a_retirements_file_that_is_not_what_it_says_it_is(
+    tmp_path: Path, body: str, message: str
+) -> None:
+    root = make_tree(tmp_path)
+    _retirements_path(tmp_path).write_text(body, encoding="utf-8")
+    _refuses(root, message)
+
+
+def test_the_new_inputs_join_the_sources_with_their_real_sha256(tmp_path: Path) -> None:
+    root = make_tree(tmp_path)
+    sources = {s["path"]: s["sha256"] for s in _index(build_explorer_data(root))["sources"]}
+    for relative in (
+        "docs/phases/evidence/phase-5.5/run-log.md",
+        "experiment/retirements.toml",
+        *(
+            f"experiment/raw/official/company/awareness/awareness-{m}-ab12cd34/manifest.json"
+            for m in MODELS
+        ),
+    ):
+        assert hashlib.sha256((tmp_path / relative).read_bytes()).hexdigest() == sources[relative]
+
+
+# The real data: each date recomputed here, from the raw files and the log's text, by a different route.
+
+
+def _real_runs(real: dict[str, str]) -> Obj:
+    return _runs(real)
+
+
+def test_the_real_grid_and_thinking_dates_are_the_raw_session_records(real: dict[str, str]) -> None:
+    runs = _real_runs(real)
+    base = REPO / "experiment" / "raw" / "official" / "company"
+    for kind, folder in (("grid", "grid-*"), ("thinking", "thinking-*")):
+        for sweep in sorted(base.glob(folder)):
+            model = json.loads((sweep / "manifest.json").read_text(encoding="utf-8"))["model_key"]
+            sessions = [
+                json.loads(p.read_text(encoding="utf-8"))
+                for p in (sweep / "sessions").glob("*.json")
+            ]
+            first = min(s["started_at"] for s in sessions)  # one format, so strings order as times
+            last = max(s["finished_at"] for s in sessions)
+            assert runs[kind][model] == _span_of(first[:10], last[:10], "sessions"), sweep.name
+
+
+def test_the_real_awareness_dates_are_the_raw_call_records(real: dict[str, str]) -> None:
+    runs = _real_runs(real)
+    base = REPO / "experiment" / "raw" / "official" / "company" / "awareness"
+    for probe in sorted(base.iterdir()):
+        model = json.loads((probe / "manifest.json").read_text(encoding="utf-8"))["model_key"]
+        calls = [
+            json.loads(p.read_text(encoding="utf-8")) for p in (probe / "runs").glob("r-*.json")
+        ]
+        assert len(calls) == 15
+        first = min(c["started_at"] for c in calls)
+        last = max(c["finished_at"] for c in calls)
+        assert runs["awareness"][model] == _span_of(first[:10], last[:10], "calls"), probe.name
+
+
+def test_the_real_case_dates_are_the_run_logs_session_rows(real: dict[str, str]) -> None:
+    runs = _real_runs(real)
+    log = (REPO / "docs/phases/evidence/phase-5.5/run-log.md").read_text(encoding="utf-8")
+    table = log.split("\n## Sessions\n", 1)[1]
+    seen = 0
+    for label, by_model in runs["cases"].items():
+        for model, span in by_model.items():
+            sweep = json.loads(
+                (REAL_RESULTS / "cases" / label / f"{model}.json").read_text(encoding="utf-8")
+            )["sweep_id"]
+            days = [
+                m.group(1)
+                for line in table.splitlines()
+                if line.startswith("|") and f"`{sweep}`" in line and "| (" not in line
+                for m in [re.match(r"\| ([0-9]{4}-[0-9]{2}-[0-9]{2}) ", line)]
+                if m
+            ]
+            assert days, sweep
+            assert span == _span_of(min(days), max(days), "run_log"), (label, model)
+            seen += 1
+    assert seen == 10
+
+
+def test_no_real_model_is_retired_in_v1(real: dict[str, str]) -> None:
+    assert _real_runs(real)["retired_on"] == {"gpt-oss-openrouter": None, "haiku-5-5": None}

@@ -26,7 +26,8 @@ import { DistanceChart } from "./distanceChart";
 import { formatDistance, formatWholePercent, withoutWithheldPrefix } from "./format";
 import { SELECTION_LOGS, selectionLogUrl } from "./links";
 import { modelName, orderedModels } from "./models";
-import { His, Title } from "./parts";
+import { His, RunNotes, Title } from "./parts";
+import { caseRunSpan } from "./runs";
 import { hrefOf } from "./route";
 
 const names: Readonly<Record<string, string>> = L.objectiveNames;
@@ -198,6 +199,9 @@ export function CasesView({ index, casesIndex, model, data }: CasesViewProps) {
                 })}
               </ul>
             )}
+            {models.map((key) => (
+              <RunNotes key={key} index={index} model={key} span={caseRunSpan(index, entry.label, key)} />
+            ))}
             <p>
               <a href={hrefOf({ kind: "case", label: entry.label }, model)}>{L.caseSeeCase}</a>
             </p>
@@ -237,7 +241,7 @@ function CompanyDecision({
   );
 }
 
-function ModelSection({ entry, file }: { entry: CaseEntry; file: CaseFile }) {
+function ModelSection({ entry, file, index }: { entry: CaseEntry; file: CaseFile; index: DataIndex }) {
   const model = modelName(file.model_key);
   const counts = file.memo_counts;
   const sameLabel = labelUnderEveryReading(file);
@@ -249,6 +253,7 @@ function ModelSection({ entry, file }: { entry: CaseEntry; file: CaseFile }) {
   return (
     <section className="x-section case-model" data-model={file.model_key}>
       <h2>{L.caseModelHeading(model)}</h2>
+      <RunNotes index={index} model={file.model_key} span={caseRunSpan(index, entry.label, file.model_key)} />
       {oneStatus === null ? (
         <>
           <p>{L.caseRunCounts(file.run_counts.runs)}</p>
@@ -479,7 +484,9 @@ export function CaseView({ label, index, casesIndex, data }: CaseViewProps) {
           <p className="chart-key">{L.distanceKey}</p>
           {models.map((key) => {
             const file = mine[key];
-            return file === undefined ? null : <ModelSection key={key} entry={entry} file={file} />;
+            return file === undefined ? null : (
+              <ModelSection key={key} entry={entry} file={file} index={index} />
+            );
           })}
         </>
       )}

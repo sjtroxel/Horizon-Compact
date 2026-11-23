@@ -7,7 +7,39 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-22, about 10:30 AM (PHASE 7 IMPLEMENTATION DOC APPROVED; C1, THEN STEP 1)
+> ## START HERE — where things stand, 2026-11-23, about 9:55 AM (PHASE 7 STEPS 1 AND 2 DONE; C2 HOLDS BOTH; STEP 3 NEXT)
+>
+> **C1 landed:** `29296ab`, CI `45045014729` green. **Steps 1 and 2 are done and ride together in C2** (`phase 7: c2
+> rule-zero sweep and dates`); **read C2's CI and Deploy first** (Deploy builds the image and applies `main`, and
+> publishes the site). **Step 1** (the rule-zero sweep): record `docs/phases/evidence/phase-7/rule-zero.md`, all clean,
+> his call on the two cross-appearances: no further coarsening. **Step 2** (Sonnet built, Opus to review in a separate
+> chat; record `docs/phases/evidence/phase-7/run-dates.md`): every results surface now states its run dates (each
+> already named its model), from a new `runs` block in `index.json` (grids and sub-study from the raw sessions,
+> awareness from the raw call records, **case runs from the Phase 5.5 run log's Sessions table, so they are session
+> start dates and the line says "started"**); a retirement field, `experiment/retirements.toml`, empty and rendered only
+> when it names a date; the four strings approved by him word for word; the M12 entry dated November 23, 2026 (its date
+> is Claude's to change before the Deploy that publishes it, if C2 lands on another day). Two decisions of his, 1a and
+> 2a, are in the IMPLEMENTATION doc's As built note for step 2. **Next:** step 3, the README machinery (Sonnet builds,
+> Opus reviews; C3). **Opus's review of step 2 is done** (2026-11-23: no code change; the M12 entry reworded, his
+> approval, because it said the pages newly named their model). Not yet done on step 2: the Deploy's green.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-23, about 9:05 AM (PHASE 7 STEP 1 DONE; STEP 2 NEXT) *(superseded by the block above)*
+>
+> **C1 landed:** `29296ab` `phase 7: re-scope & implementation doc`, CI `45045014729` green (a docs push, no Deploy).
+> **Step 1, the rule-zero sweep's first pass, is done** (record `docs/phases/evidence/phase-7/rule-zero.md`, Opus):
+> `guard-history` clean over 177 commits, `paths-check` and `doctor` clean; the 14 live paths rendered and read in
+> full, the built site's 104 text files and the captions through the guard's matcher with 0 findings, the video's 12
+> distinct frames, the poster and the 14 link-preview cards read as images, the tag message read by him; nothing to
+> fix. **His call on the two private cross-appearances: no further coarsening.** **Next:** step 2, the model and run
+> dates on the results surfaces (a site change with an M12 entry; Claude reads, Sonnet builds, Opus reviews). **This
+> block and step 1's record ride in C2** (`phase 7: c2 rule-zero sweep and dates`) with step 2; read C2's CI and
+> Deploy first.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-22, about 10:30 AM (PHASE 7 IMPLEMENTATION DOC APPROVED; C1, THEN STEP 1) *(superseded by the block above)*
 >
 > **The Phase 7 IMPLEMENTATION doc is APPROVED** (his, about 10:27 AM) (`docs/phases/phase-7-writeup-and-launch-IMPLEMENTATION.md`, Opus,
 > written while he was out): steps 0 to 15, commits C1 to C8, the README's outline, the marker scheme, the audit's five

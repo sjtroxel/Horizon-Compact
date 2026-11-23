@@ -180,6 +180,13 @@ export const explorerLabels = {
   capValidOfAttempted: (valid: number, attempted: number) => `${valid} valid runs of ${attempted} attempted`,
   loadingScenario: "Loading this scenario",
 
+  // Phase 7 step 2 (2026-11-23): the run dates and the retirement line. Claude-drafted, approved by him word for word
+  // the same day (his "yes", on the strings as listed). The dates are the build's, UTC; a case's are session starts.
+  runsLine: (model: string, dates: string) => `Runs: ${model}, ${dates} (UTC).`,
+  runsLineStarted: (model: string, dates: string) => `Runs: ${model}, started ${dates} (UTC).`,
+  retiredLine: (model: string, date: string) =>
+    `${model} was retired on ${date}; these results describe it as it was.`,
+
   // The sentence column. `outcomePhrases` fill the result-sentence templates (sentences.ts), one per scenario.
   outcomePhrases: {
     s1: "the share of the affected people who were kept",

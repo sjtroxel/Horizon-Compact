@@ -25,7 +25,8 @@ import {
   protocolUrl,
 } from "./links";
 import { modelName, orderedModels } from "./models";
-import { FindingMore, His, HisHeading, Title } from "./parts";
+import { FindingMore, His, HisHeading, RunNotes, Title } from "./parts";
+import { runSpan } from "./runs";
 import { AWARENESS_INSTRUCTION } from "./protocol";
 import { memoHref } from "./route";
 import { Details, RunsTable } from "./RunDetails";
@@ -96,6 +97,11 @@ function Thinking({ loaded, index }: { loaded: Loaded; index: DataIndex }) {
         <p className="x-note" data-label="sub-study">
           {L.studiesSubStudyLabel}
         </p>
+        <RunNotes
+          index={index}
+          model={thinking.model_key}
+          span={runSpan(index, "thinking", thinking.model_key)}
+        />
         <p className="fine">
           {L.studiesSettings}{" "}
           <a href={protocolUrl(THINKING_ANCHOR)} target="_blank" rel="noopener noreferrer">
@@ -276,6 +282,7 @@ function Awareness({ files, index, model }: { files: AwarenessFile[]; index: Dat
       {file !== undefined && (
         <div className="awareness-model" data-model={file.model_key}>
           <h3>{modelName(file.model_key)}</h3>
+          <RunNotes index={index} model={file.model_key} span={runSpan(index, "awareness", file.model_key)} />
           <p className="chart-key">{L.awarenessGridLabel(modelName(file.model_key))}</p>
           <div className="reply-grid">
             {index.objectives.map((o) => (

@@ -13,7 +13,8 @@ import { explorerHis, explorerLabels as L } from "./copy";
 import type { DataApi, DataIndex, MemoCell, MemoIndex, MemoRow } from "./data";
 import { groupRunsByWording, memoCells, resolveMemoQuery, scenariosOf } from "./memoData";
 import { modelName } from "./models";
-import { His, Title } from "./parts";
+import { His, RunNotes, Title } from "./parts";
+import { runSpan } from "./runs";
 import { MEMO_KINDS, memoHref, readMemoQuery, withModel } from "./route";
 import { STUDIES_THINKING_ID } from "./links";
 
@@ -364,6 +365,9 @@ export function MemosView({ index, model, search, data }: MemosViewProps) {
     <>
       <Title route={{ kind: "memos" }} />
       <His text={explorerHis.memosIntro} />
+      {resolved !== null && resolved.ok && (
+        <RunNotes index={index} model={model} span={runSpan(index, resolved.kind, model)} />
+      )}
       {body()}
     </>
   );

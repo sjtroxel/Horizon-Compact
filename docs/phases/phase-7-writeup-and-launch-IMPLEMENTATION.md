@@ -131,7 +131,7 @@ the code in steps 2 and 3; Opus to review that code.
 His line, Claude-drafted at his request, set with `gh repo edit` before 9:08 AM, with `homepageUrl`
 `https://horizon-compact.vercel.app`; his `gh repo view` showed both. Re-read at step 8 against the finished README.
 
-### Step 1. The rule-zero sweep, first pass (Delivers 1)
+### Step 1. The rule-zero sweep, first pass (Delivers 1) [done]
 
 Claude, Opus. Read-only.
 
@@ -154,7 +154,12 @@ Claude, Opus. Read-only.
 (step 12) and before the post (step 13): `make guard-history`, the new surfaces (README, write-up, audit, release
 notes, the Short, the post draft and its image).
 
-### Step 2. The model and run dates on the results surfaces (Delivers 7)
+**As built, step 1 (2026-11-23).** Every item clean, nothing to fix; record `docs/phases/evidence/phase-7/rule-zero.md`.
+Beyond the list: the built site's 104 text files and the captions run through the guard's own matcher (0 findings), the
+14 link-preview cards, the poster and one Phase 1.5 screenshot read as images. His call on the two cross-appearances: no
+further coarsening. The README images move to the second pass.
+
+### Step 2. The model and run dates on the results surfaces (Delivers 7) [done]
 
 Claude reads, Sonnet builds, Opus reviews. A site change: M12 entry, Deploy.
 
@@ -172,6 +177,26 @@ Claude reads, Sonnet builds, Opus reviews. A site change: M12 entry, Deploy.
 
 **Done:** every results surface names its model and run dates from data; tests for both and for the empty retirement
 field rendering nothing; `make check` green; Deploy green; an M12 entry ("presentation"); his approval of the words.
+
+**As built, step 2 (2026-11-23).** Record: `docs/phases/evidence/phase-7/run-dates.md`. **Measured first:** the model was
+already named on every results surface; run dates were on none except the methods page, so six surfaces gained a line
+and none gained a model name. **Where the dates come from:** a new `runs` block in `index.json`, built by
+`site/explorer.py`: the grids and the thinking sub-study from the raw session records, each awareness probe from its 15
+raw call records (two timestamps picked, never the reply), and the case runs from the Sessions table of the Phase 5.5
+run log, read by its exact path. **Two departures from the step's text, both his decisions of 2026-11-23 (1a and 2a):**
+the awareness raw is now opened, for two timestamps (a dated note in the builder's docstring amends its "never an
+awareness run"); and the case dates are not "from the results files and the raw manifest", because no results file
+carries a date and the case raw is not published, so they are **session start dates** from the run log, checked
+against each case result's sweep id, label and model, and the lines say "started". The retirement field is
+`experiment/retirements.toml` (empty; outside the hashed `experiment/company/`), rendered only when it names a date.
+**The words:** the four strings of the record's section 3, Claude-drafted and approved by him word for word; lines on
+the scenario view, the story (first decision and second-model section), the section against the thesis, Studies, the
+cases list and each case page, and the memo reader; none on the story's case cards or its other-scenarios section (his
+"yes" to that placement). **M12:** the entry dated November 23, 2026 ("presentation", no published number changed).
+**A bug the tests found:** the run-log date cross-check read the wrong cell and never ran; fixed, with a test. **Opus's
+review (2026-11-23):** no code change; the M12 entry reworded with his approval, because its first version said the
+pages newly named their model, which none did. **Still open:** Deploy green (it rides in C2); if C2 is committed on another day, the M12 entry's date is
+Claude's to change before the Deploy that publishes it.
 
 ### Step 3. The README machinery (Delivers 2; scope decision 3; §5)
 

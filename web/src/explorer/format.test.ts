@@ -12,20 +12,22 @@ import {
   edgeAnchor,
   formatCount,
   formatDifference,
+  formatDistance,
+  formatLongDate,
   formatPercent,
   formatPoints,
-  formatWholePercent,
+  formatRunDates,
   formatUtc,
+  formatWholePercent,
   jitter,
   sessionSpan,
   statusCounts,
   unitBox,
   unitSlot,
   wholePointsDown,
+  withoutWithheldPrefix,
   wordingRuns,
   wordsSide,
-  withoutWithheldPrefix,
-  formatDistance,
 } from "./format";
 import { realCaseFiles, realGrids, realIndex, WEB_ROOT } from "./fixtures";
 
@@ -356,5 +358,54 @@ describe("the methods page's counts and dates (Phase 6.5 step 4)", () => {
     expect(sessionSpan([a, b])).toEqual({ first: a.started_at, last: b.finished_at });
     expect(sessionSpan([b, a])).toEqual({ first: a.started_at, last: b.finished_at });
     expect(sessionSpan([a])).toEqual({ first: a.started_at, last: a.finished_at });
+  });
+});
+
+describe("the run dates in words (Phase 7 step 2)", () => {
+  it("writes a calendar date as the month's name, the day and the year", () => {
+    expect(formatLongDate("2026-10-14")).toBe("October 14, 2026");
+    expect(formatLongDate("2027-01-02")).toBe("January 2, 2027");
+    expect(formatLongDate("2026-12-31")).toBe("December 31, 2026");
+  });
+
+  it("knows the leap day, and the days a month does not have", () => {
+    expect(formatLongDate("2028-02-29")).toBe("February 29, 2028");
+    expect(formatLongDate("2000-02-29")).toBe("February 29, 2000");
+    for (const bad of ["2027-02-29", "2100-02-29", "2026-04-31", "2026-13-01", "2026-00-10", "2026-10-00"]) {
+      expect(formatLongDate(bad)).toBe(bad); // as written, never repaired
+    }
+  });
+
+  it("returns anything that is not YYYY-MM-DD as written", () => {
+    for (const odd of ["", "October 14", "2026-10-14T09:52:25+00:00", "26-10-14", "2026-1-4"]) {
+      expect(formatLongDate(odd)).toBe(odd);
+    }
+  });
+
+  it("writes one day as a date, and two days of one year with the year said once", () => {
+    expect(formatRunDates("2026-10-14", "2026-10-14")).toBe("October 14, 2026");
+    expect(formatRunDates("2026-10-29", "2026-10-30")).toBe("October 29 to October 30, 2026");
+    expect(formatRunDates("2026-10-29", "2026-11-02")).toBe("October 29 to November 2, 2026");
+  });
+
+  it("writes two days in different years each in full, and an impossible date as written", () => {
+    expect(formatRunDates("2026-12-31", "2027-01-01")).toBe("December 31, 2026 to January 1, 2027");
+    expect(formatRunDates("2026-10-29", "2026-10-99")).toBe("October 29, 2026 to 2026-10-99");
+    expect(formatRunDates("2026-10-99", "2026-10-99")).toBe("2026-10-99");
+  });
+
+  it("never reads the clock or a time zone: the same text for any date, whatever the machine says", () => {
+    const real = Date;
+    const was = process.env.TZ;
+    try {
+      process.env.TZ = "Pacific/Kiritimati"; // UTC+14, where a UTC date would slip a day
+      expect(formatLongDate("2026-10-14")).toBe("October 14, 2026");
+      process.env.TZ = "Pacific/Pago_Pago"; // UTC-11
+      expect(formatLongDate("2026-10-14")).toBe("October 14, 2026");
+    } finally {
+      if (was === undefined) delete process.env.TZ;
+      else process.env.TZ = was;
+      expect(Date).toBe(real);
+    }
   });
 });

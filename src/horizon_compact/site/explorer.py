@@ -35,6 +35,18 @@ lossless: the builder re-renders the report from its own JSON in the writer's fo
 text is literally ``(no text)`` cannot be told from the empty reply the writer prints that for; it is
 flagged ``empty_reply`` (none exists today).
 
+**The run dates (Phase 7 step 2, 2026-11-23).** The index gains a ``runs`` block: for the grids and the
+thinking sub-study, the earliest session start and the latest session finish of the sweep's raw session
+records (the methods data's ``sessions``); for each awareness probe, the earliest start and latest finish of
+its 15 raw call records (``experiment/raw/official/company/awareness/``: the manifest and every
+``runs/r-*.json``, of which only the two timestamps are picked, never the reply); for each case and model,
+the dates of the sessions in the **Sessions table of ``docs/phases/evidence/phase-5.5/run-log.md``**, read
+by its exact path (the case sweeps' raw text is not published and no results file carries a date). Every
+date is the UTC calendar date of a copied timestamp, the one thing computed from it; the case dates are
+**session start dates**, because the log records no finish time. A model's retirement date comes from
+``experiment/retirements.toml`` (empty in v1; ``None`` in the output while it is). This amends the line
+below for the awareness runs: their records are opened for two timestamps and nothing else.
+
 **What it does not read:** any ``*-memos.jsonl`` (a real case's memo text: decision 5 holds it off the site;
 a test records every path the builder opens), ``reident.json`` (named, not listed), and no memo text of any
 kind. Grid memos come from ``hc site memos``, a different step.
@@ -60,6 +72,7 @@ import shutil
 import tomllib
 from collections import Counter
 from collections.abc import Mapping
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -75,6 +88,19 @@ RAW_FOLDER = "experiment/raw"
 RAW_MANIFEST_SOURCE = "docs/phases/evidence/phase-4/raw-manifest.json"
 METHODS_PATH = "methods.json"
 _OFFICIAL_SWEEPS = "official/company"
+
+# The run dates (Phase 7 IMPLEMENTATION doc step 2). Four kinds of date, each from the one place that holds
+# it: the grids and the thinking sub-study from the raw session records (the methods data already has them),
+# the awareness probes from their raw call records, and the case runs from the Phase 5.5 run log's Sessions
+# table, because the case sweeps' raw text is not published and no results file carries a date.
+RUN_LOG_SOURCE = "docs/phases/evidence/phase-5.5/run-log.md"
+RETIREMENTS_SOURCE = "experiment/retirements.toml"
+_AWARENESS_SWEEPS = "official/company/awareness"
+_CALL_FIELDS = ("started_at", "finished_at")
+_CASE_SWEEP_ID = re.compile(r"case-[a-z0-9-]+-[0-9a-f]{8}")
+_RUN_LOG_WHEN = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2}) (?:about )?[0-9]{2}:[0-9]{2} UTC")
+_RUN_LOG_SESSION_DATE = re.compile(r"session started ([0-9]{4}-[0-9]{2}-[0-9]{2}) [0-9:]+ UTC")
+_RUN_LOG_CELLS = 8  # When, Sweep, Model, Session, Stopped, Runs finished, Cost, Note
 
 GRID_RESULTS_VERSION = 2
 CASE_RESULTS_VERSION = 1
@@ -937,6 +963,239 @@ def _read_methods(
     return document, sources
 
 
+# --- the run dates -----------------------------------------------------------------------------------------
+
+
+def _utc(stamp: Any, shown: str) -> datetime:
+    """A timestamp the raw records wrote. It must say it is UTC: a date read off local time would be wrong."""
+    if not isinstance(stamp, str):
+        raise ExplorerDataRefusal(f"{shown} has no timestamp where one is needed ({stamp!r})")
+    try:
+        moment = datetime.fromisoformat(stamp)
+    except ValueError as exc:
+        raise ExplorerDataRefusal(
+            f"{shown} has a timestamp that is not ISO 8601 ({stamp!r})"
+        ) from exc
+    if moment.tzinfo is None or moment.utcoffset() != timedelta(0):
+        raise ExplorerDataRefusal(f"{shown} has a timestamp that is not in UTC ({stamp!r})")
+    return moment
+
+
+def _span(first: str, last: str, basis: str) -> dict[str, str]:
+    """The UTC calendar dates of a run's first start and last finish (the one thing computed from a timestamp:
+    its date). ``basis`` says which record they were read from."""
+    return {"from": first, "to": last, "basis": basis}
+
+
+def _sweep_span(record: Mapping[str, Any], shown: str) -> dict[str, str]:
+    """One official sweep's dates from its sessions (already copied into the methods data): the earliest
+    start and the latest finish, as UTC dates."""
+    sessions = record["sessions"]
+    starts = [_utc(s["started_at"], f"{shown}, a session's started_at") for s in sessions]
+    ends = [_utc(s["finished_at"], f"{shown}, a session's finished_at") for s in sessions]
+    first, last = min(starts), max(ends)
+    if last < first:
+        raise ExplorerDataRefusal(f"{shown} finishes before it starts")
+    return _span(first.date().isoformat(), last.date().isoformat(), "sessions")
+
+
+def _awareness_span(
+    raw_root: Path, model_key: str, sweep_id: str
+) -> tuple[dict[str, str], dict[str, str]]:
+    """One awareness probe's dates from its 15 raw call records, and its manifest as a source. Opens the
+    sweep's ``manifest.json`` and every ``runs/r-*.json``, and picks only the two timestamps of a call: the
+    reply text in those files is never copied."""
+    base = raw_root / _AWARENESS_SWEEPS / sweep_id
+    shown_base = f"{RAW_FOLDER}/{_AWARENESS_SWEEPS}/{sweep_id}"
+    shown_manifest = f"{shown_base}/manifest.json"
+    manifest, manifest_sha = _load(base / "manifest.json", shown_manifest)
+    for key, expected in (("sweep_id", sweep_id), ("model_key", model_key)):
+        if manifest.get(key) != expected:
+            raise ExplorerDataRefusal(
+                f"{shown_manifest} has {key} {manifest.get(key)!r}, not {expected!r}"
+            )
+    paths = sorted((base / "runs").glob("r-*.json"))
+    if len(paths) != AWARENESS_CALLS:
+        raise ExplorerDataRefusal(
+            f"{shown_base}/runs holds {len(paths)} call records, not {AWARENESS_CALLS}"
+        )
+    starts: list[datetime] = []
+    ends: list[datetime] = []
+    for path in paths:
+        shown = f"{shown_base}/runs/{path.name}"
+        data, _sha = _load(path, shown)
+        if data.get("model_key") != model_key:
+            raise ExplorerDataRefusal(f"{shown} is not a {model_key} record")
+        stamps = _pick(data, _CALL_FIELDS, shown)
+        starts.append(_utc(stamps["started_at"], shown))
+        ends.append(_utc(stamps["finished_at"], shown))
+    first, last = min(starts), max(ends)
+    span = _span(first.date().isoformat(), last.date().isoformat(), "calls")
+    return span, {"path": shown_manifest, "sha256": manifest_sha}
+
+
+def _read_case_run_dates(
+    root: Path, expected: Mapping[str, tuple[str, str]]
+) -> tuple[dict[str, dict[str, str]], dict[str, str]]:
+    """The case runs' dates from the Sessions table of the Phase 5.5 run log, by its exact path.
+
+    ``expected`` maps each case sweep id (from the case results) to its (case label, model key). A row
+    is a session when its Session cell does not start with ``(`` (the table also records stops, which
+    are not sessions). Each session row must say its time is UTC, name a sweep the results have, and
+    agree with that sweep's case label and model; a ``session started <date>`` in the Session or Stopped
+    cell must give the same date as the When cell. The dates are **session start dates**: the log
+    records no finish time, so a case's ``to`` is the date its last session started. Every case sweep
+    must have at least one session row.
+    """
+    shown = RUN_LOG_SOURCE
+    path = root.parent.parent / RUN_LOG_SOURCE
+    try:
+        raw = path.read_bytes()
+        lines = raw.decode("utf-8").splitlines()
+    except (OSError, UnicodeDecodeError) as exc:
+        raise ExplorerDataRefusal(f"{shown} cannot be read: {exc}") from exc
+    if "## Sessions" not in lines:
+        raise ExplorerDataRefusal(f"{shown} has no '## Sessions' section")
+    start = lines.index("## Sessions")
+    found: dict[str, list[str]] = {}
+    in_table = False
+    for number, line in enumerate(lines[start + 1 :], start + 2):
+        if line.startswith("## "):
+            break
+        if not line.startswith("|"):
+            if in_table:
+                break
+            continue
+        in_table = True
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if cells[0] == "When" or set(line) <= set("|- "):
+            continue
+        if len(cells) != _RUN_LOG_CELLS:
+            raise ExplorerDataRefusal(
+                f"{shown}, line {number}: {len(cells)} cells, not {_RUN_LOG_CELLS}"
+            )
+        when, sweep_cell, model_cell, session_cell, stopped_cell = cells[:5]
+        if session_cell.startswith("("):
+            continue  # a stop that was read, not a session
+        ticked = re.findall(r"`([^`]+)`", sweep_cell)
+        if len(ticked) < 2 or not _CASE_SWEEP_ID.fullmatch(ticked[0]):
+            raise ExplorerDataRefusal(
+                f"{shown}, line {number}: the Sweep cell does not hold a case sweep id and a case label"
+            )
+        sweep_id, label = ticked[0], ticked[1]
+        if sweep_id not in expected:
+            raise ExplorerDataRefusal(
+                f"{shown}, line {number}: sweep {sweep_id} is not a case sweep the results hold"
+            )
+        want_label, want_model = expected[sweep_id]
+        if label != want_label or model_cell.strip("`") != want_model:
+            raise ExplorerDataRefusal(
+                f"{shown}, line {number}: sweep {sweep_id} is {want_label} on {want_model} in the "
+                f"results, not {label} on {model_cell.strip('`')}"
+            )
+        when_match = _RUN_LOG_WHEN.match(when)
+        if when_match is None:
+            raise ExplorerDataRefusal(
+                f"{shown}, line {number}: the When cell does not give a UTC date and time"
+            )
+        day = when_match.group(1)
+        try:
+            date.fromisoformat(day)
+        except ValueError as exc:
+            raise ExplorerDataRefusal(f"{shown}, line {number}: {day} is not a date") from exc
+        in_cell = _RUN_LOG_SESSION_DATE.search(f"{session_cell} {stopped_cell}")
+        if in_cell is not None and in_cell.group(1) != day:
+            raise ExplorerDataRefusal(
+                f"{shown}, line {number}: the When cell says {day} and the Session cell says "
+                f"{in_cell.group(1)}"
+            )
+        found.setdefault(sweep_id, []).append(day)
+    missing = sorted(set(expected) - set(found))
+    if missing:
+        raise ExplorerDataRefusal(f"{shown} has no session row for {', '.join(missing)}")
+    spans = {sid: _span(min(days), max(days), "run_log") for sid, days in found.items()}
+    return spans, {"path": shown, "sha256": hashlib.sha256(raw).hexdigest()}
+
+
+def _read_retirements(
+    root: Path, model_keys: list[str]
+) -> tuple[dict[str, str | None], dict[str, str]]:
+    """Each model's retirement date, ``None`` while it is still served (every model, in v1). The source is a
+    small TOML list, ``[[retired]]`` entries of ``model_key`` and ``date``; filling one is a data change with
+    an M12 entry. Anything else in the file is refused."""
+    path = root.parent / "retirements.toml"
+    shown = RETIREMENTS_SOURCE
+    try:
+        raw = path.read_bytes()
+        loaded = tomllib.loads(raw.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
+        raise ExplorerDataRefusal(f"{shown} cannot be read: {exc}") from exc
+    if set(loaded) - {"retired"}:
+        raise ExplorerDataRefusal(f"{shown} holds a key other than 'retired'")
+    items = loaded.get("retired", [])
+    if not isinstance(items, list):
+        raise ExplorerDataRefusal(f"{shown}: 'retired' must be a list of [[retired]] tables")
+    retired: dict[str, str | None] = dict.fromkeys(model_keys)
+    for item in items:
+        if not isinstance(item, dict) or set(item) != {"model_key", "date"}:
+            raise ExplorerDataRefusal(f"{shown}: each [[retired]] holds exactly model_key and date")
+        key, day = item["model_key"], item["date"]
+        if key not in retired:
+            raise ExplorerDataRefusal(f"{shown} names {key!r}, which is not an official model")
+        if retired[key] is not None:
+            raise ExplorerDataRefusal(f"{shown} names {key!r} twice")
+        if not isinstance(day, str) or re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", day) is None:
+            raise ExplorerDataRefusal(f"{shown}: the date for {key} is not YYYY-MM-DD ({day!r})")
+        try:
+            date.fromisoformat(day)
+        except ValueError as exc:
+            raise ExplorerDataRefusal(f"{shown}: {day} is not a date") from exc
+        retired[key] = day
+    return retired, {"path": shown, "sha256": hashlib.sha256(raw).hexdigest()}
+
+
+def _read_runs(
+    root: Path,
+    raw_root: Path,
+    methods: Mapping[str, Any],
+    awareness: list[tuple[str, str, dict[str, Any], str]],
+    case_results: list[tuple[str, str, str, dict[str, Any], str]],
+    model_keys: list[str],
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """The ``runs`` block of the index: when each kind of run happened, and each model's retirement date."""
+    sources: list[dict[str, str]] = []
+    grid: dict[str, Any] = {}
+    thinking: dict[str, Any] = {}
+    for record in methods["sweeps"]:
+        shown = f"the methods data for {record['sweep_id']}"
+        target = grid if record["kind"] == "grid" else thinking
+        target[record["model_key"]] = _sweep_span(record, shown)
+    aware: dict[str, Any] = {}
+    for model_key, _shown, doc, _sha in awareness:
+        span, source = _awareness_span(raw_root, model_key, str(doc["sweep_id"]))
+        aware[model_key] = span
+        sources.append(source)
+    expected = {
+        str(data["sweep_id"]): (label, model_key)
+        for label, model_key, _shown, data, _sha in case_results
+    }
+    by_sweep, log_source = _read_case_run_dates(root, expected)
+    sources.append(log_source)
+    cases: dict[str, dict[str, Any]] = {}
+    for label, model_key, _shown, data, _sha in case_results:
+        cases.setdefault(label, {})[model_key] = by_sweep[str(data["sweep_id"])]
+    retired, retired_source = _read_retirements(root, model_keys)
+    sources.append(retired_source)
+    runs = {
+        "grid": grid,
+        "thinking": thinking,
+        "awareness": aware,
+        "cases": cases,
+        "retired_on": retired,
+    }
+    return runs, sources
+
+
 # --- the build ---------------------------------------------------------------------------------------------
 
 
@@ -995,6 +1254,9 @@ def build_explorer_data(results_root: Path, raw_root: Path | None = None) -> dic
     }
     awareness = _read_awareness(results_root, model_keys, [o["id"] for o in objectives])
     methods, methods_sources = _read_methods(results_root, raw_root, grids, thinking)
+    runs, runs_sources = _read_runs(
+        results_root, raw_root, methods, awareness, case_results, model_keys
+    )
 
     # The same scenario must carry the same outcome name, kind and threshold in every file.
     scenario_facts: dict[str, dict[str, Any]] = {}
@@ -1083,6 +1345,7 @@ def build_explorer_data(results_root: Path, raw_root: Path | None = None) -> dic
         + [{"path": shown, "sha256": sha} for _c, shown, sha in memo_counts.values()]
         + [{"path": shown, "sha256": sha} for _m, shown, _d, sha in awareness]
         + methods_sources
+        + runs_sources
     )
     sources.sort(key=lambda s: s["path"])
 
@@ -1103,6 +1366,7 @@ def build_explorer_data(results_root: Path, raw_root: Path | None = None) -> dic
         ],
         "verdicts": verdicts,
         "against_thesis": _against_thesis(grids),
+        "runs": runs,
         "files": files,
     }
     out = {"index.json": _text(index, "index.json"), **dict(sorted(out.items()))}

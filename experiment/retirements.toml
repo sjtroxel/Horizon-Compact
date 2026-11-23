@@ -1,0 +1,11 @@
+# A model's retirement, as the site states it (Phase 7 IMPLEMENTATION doc, step 2, item 4).
+#
+# Empty in v1: every model the study ran is still served. When a provider retires one, add an entry here,
+#
+#   [[retired]]
+#   model_key = "haiku-5-5"
+#   date = "YYYY-MM-DD"
+#
+# rebuild the explorer data (`hc site explorer`), and add an entry to the methods page's list of changes (M12):
+# a data change, with a dated note. Nothing else in this folder reads the file; it is kept outside
+# experiment/company/ on purpose, because that folder is hashed into the protocol lock.

@@ -32,7 +32,8 @@ import type { CaseFile, CasesIndex, DataApi, DataIndex, GridComparison, GridFile
 import { attemptedRuns, comparisonRuns, formatPoints } from "./format";
 import { ROUNDTABLE_CLAIM_URL, ROUNDTABLE_OVERVIEW_URL, protocolUrl, scenarioTextUrl } from "./links";
 import { modelName, orderedModels } from "./models";
-import { FindingMore, His, HisHeading, HisInline, ProtocolReading, Title } from "./parts";
+import { FindingMore, His, HisHeading, HisInline, ProtocolReading, RunNotes, Title } from "./parts";
+import { runSpan } from "./runs";
 import { readingFor } from "./protocol";
 import { hrefOf } from "./route";
 import { resultSentence } from "./sentences";
@@ -297,6 +298,7 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
       <Setup index={index} alpha={mainEntry?.alpha} />
 
       <Beat id="beat-s1" title={explorerHis.story.s1Title} intro={explorerHis.story.s1Intro}>
+        <RunNotes index={index} model={main} span={runSpan(index, "grid", main)} />
         <div className="beside">
           <div className="beside-text">
             {explorerHis.scenarioBriefs[walked] !== undefined && (
@@ -355,7 +357,7 @@ export function Story({ index, casesIndex, data, onSettled }: StoryProps) {
           <>
             <div className="layout-pair">
               {bothWalked.values.map((file) => (
-                <ModelColumn key={file.model_key} file={file} />
+                <ModelColumn key={file.model_key} file={file} index={index} />
               ))}
             </div>
             <VerdictTable
@@ -471,11 +473,12 @@ function Comparisons({ file }: { file: GridFile }) {
 }
 
 /** Beat 5: one model's five comparisons as one chart in its frame. The sentences are on the scenario pages. */
-function ModelColumn({ file }: { file: GridFile }) {
+function ModelColumn({ file, index }: { file: GridFile; index: DataIndex }) {
   const comparisons = orderedComparisons(file);
   return (
     <div className="story-model" data-model={file.model_key}>
       <h3>{modelName(file.model_key)}</h3>
+      <RunNotes index={index} model={file.model_key} span={runSpan(index, "grid", file.model_key)} />
       <IntervalFrame
         rows={comparisons.map(rowOfComparison)}
         outcome={L.outcomePhrases[file.scenario_id] ?? ""}

@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import { isMethodsPlaceholder, isPlaceholder, explorerHis, explorerLabels } from "./copy";
+import type { DataIndex, RunSpan } from "./data";
+import { formatLongDate, formatRunDates } from "./format";
+import { modelName } from "./models";
 import { PROTOCOL_READINGS } from "./protocol";
+import { retiredOn } from "./runs";
 import type { ReadingKey } from "./protocol";
 import { pageMeta } from "./page-meta.mjs";
 import type { PageRoute } from "./page-meta.mjs";
@@ -99,5 +103,39 @@ export function FindingMore({ children }: { children: ReactNode }) {
       <summary>{explorerLabels.findingMore}</summary>
       {children}
     </details>
+  );
+}
+
+/**
+ * When a model's runs happened, and, only if the data names a date, that it has been retired (Phase 7 step 2). The
+ * dates are the data's own (`runs.ts`), never typed or worked out here. A run with no dates in the data (`span`
+ * undefined) says nothing, and a model with no retirement date says nothing about retirement. A case's dates are
+ * session starts (basis `run_log`), and the line says "started".
+ */
+export function RunNotes({
+  index,
+  model,
+  span,
+}: {
+  index: DataIndex;
+  model: string;
+  span: RunSpan | undefined;
+}) {
+  const retired = retiredOn(index, model);
+  if (span === undefined && retired === null) return null;
+  const name = modelName(model);
+  return (
+    <>
+      {span !== undefined && (
+        <p className="fine muted runs-line">
+          {span.basis === "run_log"
+            ? explorerLabels.runsLineStarted(name, formatRunDates(span.from, span.to))
+            : explorerLabels.runsLine(name, formatRunDates(span.from, span.to))}
+        </p>
+      )}
+      {retired !== null && (
+        <p className="fine muted runs-line">{explorerLabels.retiredLine(name, formatLongDate(retired))}</p>
+      )}
+    </>
   );
 }

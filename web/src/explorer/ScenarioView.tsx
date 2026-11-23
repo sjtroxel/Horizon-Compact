@@ -16,7 +16,8 @@ import { explorerHis, explorerLabels as L } from "./copy";
 import type { DataApi, DataIndex, GridComparison, GridFile } from "./data";
 import { comparisonRuns, formatDifference } from "./format";
 import { scenarioTextUrl } from "./links";
-import { FindingMore, His, ProtocolReading, Title } from "./parts";
+import { FindingMore, His, ProtocolReading, RunNotes, Title } from "./parts";
+import { runSpan } from "./runs";
 import { againstWords } from "./againstWords";
 import { readingFor } from "./protocol";
 import { Details, RunsTable } from "./RunDetails";
@@ -297,6 +298,7 @@ export function ScenarioView({ id, index, model, data }: ScenarioViewProps) {
     <>
       <Title route={{ kind: "scenario", id }} heading={L.scenarioNames[id] ?? id}>
         <p className="scenario-name">{L.scenarioIdLine(id)}</p>
+        <RunNotes index={index} model={model} span={runSpan(index, "grid", model)} />
       </Title>
       <His text={explorerHis.scopeSentence} />
       <AboutResults alpha={modelEntry?.alpha} />
