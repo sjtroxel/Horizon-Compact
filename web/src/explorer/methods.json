@@ -97,6 +97,43 @@
         },
         {
           "kind": "p",
+          "ledger": [],
+          "lead": "What the order did. ",
+          "text": "The analysis also checked, as the protocol requires, whether coming first in the list changed how often an option was chosen. The check describes; it decides nothing. Of the ten options it covers, on the third and fourth decisions for both models, one was chosen more often when it came first: for Haiku 5.5 on the plant decision, selling the plant was chosen in 8 of 106 runs where it was listed first and 3 of 194 otherwise, a difference of +6.0 points, with a 95% interval of +1.3 to +12.7. With ten such checks at that confidence, about one is what chance alone would give. Because the order was shuffled for every run, it could not favor one goal over another. For the decisions' lines, the check reports a trend with no interval, so it does not test whether the order mattered. Both are in the results files.",
+          "sources": [
+            "experiment/protocol/protocol-v1.md",
+            "experiment/results/prereg-v1/haiku-5-5/grid-haiku-5-5-0b99fabb.json"
+          ],
+          "figures": [
+            {
+              "text": "8 of 106",
+              "source": "experiment/results/prereg-v1/haiku-5-5/grid-haiku-5-5-0b99fabb.json",
+              "match": "\"chosen_first\": 8, \"runs_first\": 106"
+            },
+            {
+              "text": "3 of 194",
+              "source": "experiment/results/prereg-v1/haiku-5-5/grid-haiku-5-5-0b99fabb.json",
+              "match": "\"chosen_not_first\": 3, \"runs_not_first\": 194"
+            },
+            {
+              "text": "+6.0",
+              "source": "experiment/results/prereg-v1/haiku-5-5/grid-haiku-5-5-0b99fabb.json",
+              "match": "\"estimate\": 0.06000778058743435"
+            },
+            {
+              "text": "95%",
+              "source": "experiment/protocol/protocol-v1.md",
+              "match": "with a 95% Newcombe interval"
+            },
+            {
+              "text": "+1.3 to +12.7",
+              "source": "experiment/results/prereg-v1/haiku-5-5/grid-haiku-5-5-0b99fabb.json",
+              "match": "\"low\": 0.013200934852499853, \"high\": 0.12721367435324438"
+            }
+          ]
+        },
+        {
+          "kind": "p",
           "ledger": ["5"],
           "text": "Claude, Anthropic's model, working in Claude Code, drafted all of the experiment's text: the company's dossier and its sources, the four scenarios, the wordings and the analysis code. sjtroxel made every decision and reviewed the text, mostly by accepting or rejecting Claude's recommendation on each item rather than checking each line on his own. The main model is also a Claude model, so a reader may suspect that the text reads more naturally to it, or leans in a way it follows. Two outside readers from other vendors read the text before any run, one for realism and one for anything that leads a decision, and a second model from another vendor ran the same text. That answers the worry in part, not fully. Because every verdict compares two goals on the same text, a lean shared by every goal cancels out; a lean that works on one goal's wording would not, and checking each result under each wording is the guard against it.",
           "lead": "Who wrote the test.",
@@ -175,7 +212,7 @@
         {
           "kind": "p",
           "ledger": ["10"],
-          "text": "Each run record names the program image it ran in, by its digest. The image registry has since deleted two official images, the one every grid run used and the first test run's, under a rule that kept only the newest ten; the rule was removed on November 4, 2026. The records are unchanged, and the code is pinned by the protocol's tag, an outside archive and each record's commit, but no run can be repeated in the identical image.",
+          "text": "Each run record names the program image it ran in, by its digest. The image registry has since deleted two images, under a rule that kept only the newest ten: the one every official run on the made-up company used, and an earlier test run's. The rule was removed on November 4, 2026. The real cases' image is still there. The records are unchanged, and the code is pinned by the protocol's tag, an outside archive and each record's commit, but no run on the made-up company can be repeated in the identical image.",
           "lead": "Two images are gone.",
           "sources": ["docs/KNOWN-GAPS.md"],
           "figures": [
@@ -1060,7 +1097,7 @@
         {
           "kind": "p",
           "ledger": [],
-          "text": "Every grid result can be computed again from the published records and the tagged code. Two things cannot be repeated: a run in the identical program image, since two images are deleted (see the models section), and any real case, since no dossier is published.",
+          "text": "Every grid result can be computed again from the published records and the tagged code. Two things cannot be repeated: a run on the made-up company in the identical program image, since that image is deleted (see the models section), and any real case, since no dossier is published.",
           "lead": "What can and cannot be re-run."
         }
       ]
@@ -1131,7 +1168,7 @@
               "anchor": "company-and-scenarios"
             },
             {
-              "text": "Two program images are deleted, so no run can be repeated in the identical image.",
+              "text": "A program image is deleted, so no run on the made-up company can be repeated in the identical image.",
               "anchor": "models-dates-and-runs"
             },
             {
@@ -1341,6 +1378,20 @@
               "text": "November 23, 2026",
               "source": "docs/phases/evidence/phase-7/run-dates.md",
               "match": "Step 2 built: 2026-11-23"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "November 24, 2026. ",
+          "text": "The page now reports the check on the order in which options were listed, which the results files held but no page showed, and corrects a sentence that called both deleted program images official: one was a test run's. No published number changed.",
+          "sources": ["docs/v1-audit.md"],
+          "figures": [
+            {
+              "text": "November 24, 2026",
+              "source": "docs/v1-audit.md",
+              "match": "His decision, 2026-11-24, about 12:02 PM"
             }
           ]
         }

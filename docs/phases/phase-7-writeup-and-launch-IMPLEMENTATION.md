@@ -274,7 +274,7 @@ step 3's "all 20 readings" test: the lead comparison's `final_verdict` is still 
 allowed year (1620, 2019, 2024, 2026) passes anywhere, so a count equal to one would pass unmarked; no figure today is
 one.
 
-### Step 4. The README (Delivers 2; §4)
+### Step 4. The README (Delivers 2; §4) [done]
 
 His words, or Claude's draft on his grant made on this pass (scope decision 1). Claude interviews and outlines first
 either way (§4 is the outline). Every result sentence from `planning/06` §4's allowed column with run counts.
@@ -290,7 +290,7 @@ either way (§4 is the outline). Every result sentence from `planning/06` §4's 
 
 **Done:** the README is in the repo; the §5 tests pass; §9's checks recorded; his approval.
 
-**As built, step 4 (2026-11-24; draft, awaiting his approval).** **His choice on this pass:** a Claude draft ("just
+**As built, step 4 (2026-11-24). APPROVED by him, 2026-11-24, about 11:13 AM** ("Yes the README is approved"), as pushed in C3. **His choice on this pass:** a Claude draft ("just
 have you write the readme.md now"), so flagged once for the watermark; he asked for it to be the most striking README
 he has. The lead and its chart were left at the defaults (Haiku 5.5, s1, C against D; the site's s1 dot chart) for
 him to confirm. **Built:** `README.md` (twelve sections, the outline's order, with "How it works" moved below the lead so
@@ -299,11 +299,11 @@ one chart and one sentence come first), `docs/readme/` (the two images), `LICENS
 the thesis, the 40-cell verdict grid) with a claim test for each sentence a marker cannot protect. `make check` green,
 3,691 Python tests passed and none skipped (the real-files test now runs), 697 frontend. **Record:**
 `docs/phases/evidence/phase-7/readme.md` (what reuses his approved words, the images, the four readers, §9's seven
-checks, rule zero). **Still open:** his read and approval or rewrite; decision C's live read of the providers' terms
+checks, rule zero). **Still open:** decision C's live read of the providers' terms
 on model outputs (until then the license line claims only the project's own work); the cost line waits for step 9.
 This step and step 3 can ride in one commit (C3 and C4 merged), or C3 first, at his choice.
 
-### Step 5. The plain-English write-up (Delivers 3)
+### Step 5. The plain-English write-up (Delivers 3) [done]
 
 Claude drafts, he reviews (scope decision 1), at `docs/plain-english.md`: what was asked, what was done, what was
 found, what it does not show, for a reader who will not open the methods page. Every result sentence from §4's
@@ -312,7 +312,14 @@ it says so in one line at its top, in his words.
 
 **Done:** in the repo, tests passing, his review recorded.
 
-### Step 6. The audit (Delivers 5; scope decision 4; §6)
+**As built, step 5 (2026-11-24). APPROVED by him, 2026-11-24, about 11:13 AM, without the top line** (his decision: "I don't see the need for a top line at all"; this departs from the step's text, which asked for a line in his words saying Claude drafted it; the page's maintainer comment records the drafting instead). `docs/plain-english.md`, Claude-drafted: what was asked,
+what was done, five findings, six limits, where to go next, with no term left undefined (an interval is "the range
+the true difference most likely lies in"; inconclusive is "the runs could not tell"). Its figures use the README's
+keys; no new key. **Two tests added:** over one year, Haiku 5.5's A against B is a split on every decision (the
+write-up says so in words); and no governed file holds a `[his:` placeholder. The second is kept, though no placeholder is left: it guards the governed files against one being left later. The name guard is clean on a throwaway index; the vocabulary scan finds "stakeholder" only
+inside the Roundtable's quoted words. **His question on this pass, answered:** the write-up's reader (one who will not open the methods page) is unlikely to open a docs file either; Claude's read was that the site and the README already serve that reader and recommended a cut; he chose to keep it, since it was finished.
+
+### Step 6. The audit (Delivers 5; scope decision 4; §6) [done]
 
 Claude, Opus. At `docs/v1-audit.md`.
 
@@ -320,7 +327,26 @@ Claude, Opus. At `docs/v1-audit.md`.
 evidence a reader can follow (a commit, a file and line, a run ID, a URL); partials stated as partial; every item the
 README leans on flagged.
 
-### Step 7. The audit's sample, re-verified cold (scope decision 4; decision A)
+**As built, step 6 (2026-11-24, Opus; drafted, awaiting his read).** `docs/v1-audit.md`: 56 scored rows across
+Parts A to D, plus 12 listed in Part E. **Nothing is not met.** Weakest rows: A 7 met, 5 partial; B 9 met, 3 partial,
+1 waived (Phase 1's DoD 7, his); C 18 met, 3 partial; D 9 met, 1 partial. Each ID is a stable token (`A3b`, `B65`,
+`C19c`), ready for §5.3's markers at step 8. Every run ID cited was read with `gh run view` that day; the live paths
+fetched; `hc site raw-verify` run ("ok: 5247 objects"); one item per phase re-checked (Part B's last column).
+**Two partials this doc's §6 did not expect:** the menu-order results are published as data but on no page (A3b, C9;
+one of ten option intervals excludes zero, Haiku 5.5 s3 `sell`), and the budget alarm was blind to the first full
+run's spend (A5f: the model calls were off AWS, and the tasks carried no cost tag). Two more read stricter than the
+expected list: Terraform for everything (A5d, D8b: the operator's IAM user is console-made, by decision A of Phase
+0.5) and tokens per sweep (C19c). **His calls, open:** E12 (a methods-page line for the menu-order results and the
+token totals, or leave both as partial). **Two notes for step 8's read, not audit rows:** the README's "A full
+teardown and re-apply was tested before launch" is true of the post, but the explorer's teardown test ran after the
+site went live (2026-11-21); and "a substitution the protocol provides for" rests on protocol §5.1 and Phase 3.5
+decision 5. `make check` green: 3,697 Python tests, 697 frontend. The name guard is clean on a throwaway index.
+*Dated note, 2026-11-24, about 12:02 PM:* **E12 decided (his), as leaned:** a methods-page line for the menu-order
+results, with an M12 entry, built after step 7; the tokens per sweep stay partial. *Dated note, 2026-11-24, after
+step 7:* the counts above moved: B 8 met, 4 partial, 1 waived (B65 re-marked); C 17 met, 4 partial (C6 re-marked);
+E 13 entries (E13 added). The audit's own summary is the authority.
+
+### Step 7. The audit's sample, re-verified cold (scope decision 4; decision A) [done]
 
 Per decision A. **The sample:** every item flagged "README leans on it", plus enough others to reach at least ten,
 chosen across the five parts, including at least one partial. The brief lists the items and their evidence and asks
@@ -331,13 +357,35 @@ verbatim, the scoring).
 
 **Done:** every sampled item agrees, or was corrected and re-checked.
 
-### Step 8. The README read against the audit; the card re-read (Delivers 4; scope decision 3)
+**As built, step 7 (2026-11-24, about 12:15 to 1:30 PM; Claude scored, he ran each batch).** Record:
+`docs/phases/evidence/phase-7/audit-sample/README.md`, with the four briefs and the four reports verbatim. 28 rows in
+three batches (every README row, after the flags were pruned from 36 to 25 as duplicates; A3b and A5f; E6), a new
+conversation each, Sonnet 5.5 at the panel's default, no status in any brief. **First pass:** 24 of 27 scored rows
+agree; 3 disagree (A2 kept partial with its reason written in; B65 and C6 re-marked partial, the agent's way); 8 rows'
+evidence corrected. **The re-check,** six rows to a fresh agent with the corrected claims: six of six agree. **Found
+by it and public:** the README and the methods page call both deleted images official, and only one was (audit E13;
+the README at step 8, the methods page with E12's change). Also corrected: the tag's time is 01:19 CDT (the tag
+object), not the commit's 01:14.
+
+### Step 8. The README read against the audit; the card re-read (Delivers 4; scope decision 3) [done]
 
 Claude, Opus. Each README claim that is not a number cites an audit item (§5.3); Claude reads each claim against its
 item and records any mismatch, which is fixed in the README. Then the card (step 0's line) is read against the
 finished README and the results; any change is his.
 
 **Done:** no claim beyond its item; his yes or his new line for the card.
+
+**As built, step 8 (2026-11-24, Opus).** Record: `docs/phases/evidence/phase-7/readme-against-audit.md`. **E12 first**
+(his decision, approved word for word about 1:38 PM): the methods page reports the menu-order check ("What the order
+did", in the goals-and-wordings section), corrects the deleted-images sentence in three places (E13), and adds an M12
+entry dated November 24, 2026 (Claude's to change before the Deploy that publishes it, if C5 lands on another day);
+A3b and C9 re-marked met. **Then §5.3:** 40 `<!-- audit:ID -->` markers in `README.md`, citing 26 rows, exactly the
+rows the audit flags README (A3b added to the flags, a row step 7 sampled); the test in `tests/test_readme_figures.py`
+with three planted faults. **The read:** five README claims went beyond their rows and were reworded (the goal as the
+only change; "Terraform for everything", twice; the teardown "before launch"; "a substitution the protocol provides
+for"; the two official images, twice), and one sentence in `docs/plain-english.md`. **His, 2026-11-24, about 1:55 PM:**
+every rewording approved ("the rewordings I all approve"), and the card changed by him, "decision" to "decisions"
+("I'm not thrilled about the repo card but it is what it is").
 
 ### Step 9. The final cost record (Delivers 6; decision B)
 

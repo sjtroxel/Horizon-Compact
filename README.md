@@ -28,14 +28,14 @@ Horizon is how far ahead a decision looks: here, one year or twenty. A compact i
 
 In 2019 the [Business Roundtable](https://en.wikipedia.org/wiki/Business_Roundtable), a group of chief executives of large US companies, published a statement on the purpose of a corporation that committed its signers to all five of a company's stakeholders: customers, employees, suppliers, communities and shareholders. In 2024, its [five-year retrospective](https://www.businessroundtable.org/five-years-on-corporate-purpose-and-profit) said that "in the long term, the interests of a company's stakeholders are inseparable."
 
-A model cannot test whether that is true of the world. It can test a narrower question: **hand a decider the Roundtable's own words in place of a shareholder mandate, and does it decide differently?** And over twenty years, does the difference go away, as "in the long term" says it should? The project was built to report either answer. A result in the Roundtable's favor would have been as publishable as one against it, and the plan said so before any run.
+A model cannot test whether that is true of the world. It can test a narrower question: **hand a decider the Roundtable's own words in place of a shareholder mandate, and does it decide differently?** And over twenty years, does the difference go away, as "in the long term" says it should? The project was built to report either answer. A result in the Roundtable's favor would have been as publishable as one against it, and the plan said so before any run. <!-- audit:D1 -->
 
 > [!NOTE]
-> This experiment measures how two AI models decide for a made-up company, and for a few real decisions with the companies' names removed, when only the goal they are given changes. It does not measure how real executives decide, and it predicts nothing about any company.
+> This experiment measures how two AI models decide for a made-up company, and for a few real decisions with the companies' names removed, when only the goal they are given changes. <!-- audit:A2 --> It does not measure how real executives decide, and it predicts nothing about any company.
 
 ## The lead result: over twenty years, who counts still mattered
 
-The first decision: AI tools can now do the work of 125 office and finance staff. The model decides what happens to each person: severance, retraining for a plant job at their current pay, or retraining at the plant's pay. Each dot below is one run, grouped by the goal the model was given.
+The first decision: AI tools can now do the work of 125 office and finance staff. The model decides what happens to each person: severance, retraining for a plant job at their current pay, or retraining at the plant's pay. Each dot below is one run, grouped by the goal the model was given. <!-- audit:A1 -->
 
 <p align="center">
   <picture>
@@ -52,11 +52,11 @@ On the first decision, for Haiku 5.5: "Shareholders, long term" and "Everyone wi
 | Interval | <!-- n:haiku_cd_s1_interval -->−29.3 to −9.0<!-- /n --> points, at <!-- n:haiku_cd_s1_confidence -->99.7%<!-- /n --> confidence |
 | Valid runs | <!-- n:haiku_cd_s1_runs_c -->60<!-- /n --> under C, <!-- n:haiku_cd_s1_runs_d -->60<!-- /n --> under D |
 
-Read the way the plan said it would be read: over twenty years, under the Roundtable's wording, the model still decided differently depending on who counts. That is a statement about this model on this decision, not about whether stakeholders' interests converge in the world. The confidence level is stricter than the usual one because the study makes many main comparisons, and with that many, some would look like a difference by chance alone.
+Read the way the plan said it would be read: over twenty years, under the Roundtable's wording, the model still decided differently depending on who counts. That is a statement about this model on this decision, not about whether stakeholders' interests converge in the world. <!-- audit:D1 --> The confidence level is stricter than the usual one because the study makes many main comparisons, and with that many, some would look like a difference by chance alone. <!-- audit:C4 -->
 
 ## How it works
 
-One made-up company, four decisions, five goals. Each model makes the same decision for the same company many times. From one run to the next, the only thing that changes is the goal it is given.
+One made-up company, four decisions, five goals. Each model makes the same decision for the same company many times. From one run to the next, the goal it is given is the only thing that changes by design; the order in which its options are listed is shuffled for every run, so that coming first favors no goal. <!-- audit:D6 --> <!-- audit:A3b -->
 
 | | Goal | The model is told to create value for | Over |
 |:-:|---|---|---|
@@ -73,7 +73,7 @@ One made-up company, four decisions, five goals. Each model makes the same decis
 | **s3** | Plant 6 and its 190 employees lose money once the plant's share of company overhead is counted. The model chooses to close the plant, retool it or sell it, and decides where its people go. | the rate of closing the plant |
 | **s4** | The company's engineers have designed a ten-year program to build machines for new customers. It may pay off, or it may not. The model decides whether to fund it, and whether to cut anything else to free up this year's money. | the rate of funding the program |
 
-Each goal is given in three wordings, so that a result does not rest on one phrasing alone. Two models made the decisions: **Claude Haiku 5.5**, the main model, through Anthropic's API, and **OpenAI's gpt-oss-120b**, an open-weights model, through OpenRouter. That is <!-- n:grid_runs_haiku -->990<!-- /n --> attempted runs on Haiku 5.5 and <!-- n:grid_runs_gpt_oss -->1,200<!-- /n --> on gpt-oss-120b, run on October 14, 2026. The plan, the protocol, was fixed and tagged on October 13, 2026, before any official run: what would be measured, how, and what each result would mean.
+Each goal is given in three wordings, so that a result does not rest on one phrasing alone. <!-- audit:A3a --> Two models made the decisions: **Claude Haiku 5.5**, the main model, through Anthropic's API, and **OpenAI's gpt-oss-120b**, an open-weights model, through OpenRouter. <!-- audit:C12 --> That is <!-- n:grid_runs_haiku -->990<!-- /n --> attempted runs on Haiku 5.5 and <!-- n:grid_runs_gpt_oss -->1,200<!-- /n --> on gpt-oss-120b, run on October 14, 2026. The plan, the protocol, was fixed and tagged on October 13, 2026, before any official run: what would be measured, how, and what each result would mean. <!-- audit:A1 --> <!-- audit:D1 -->
 
 ## The twenty-year pair on every decision
 
@@ -83,7 +83,7 @@ Each goal is given in three wordings, so that a result does not rest on one phra
 - **s3, gpt-oss-120b:** "Shareholders, long term" and "Everyone with a stake, long term" came out different: the rate of closing the plant was about <!-- n:gpt_oss_cd_s3_points_down -->38<!-- /n --> percentage points higher under "Shareholders, long term".
 - **The rest, inconclusive:** on s2 for both models, and on s4 for gpt-oss-120b, the runs can't tell whether "Shareholders, long term" and "Everyone with a stake, long term" differ.
 
-Where both models split on the same decision, they split the same way. The two models' results are shown side by side and never added together.
+Where both models split on the same decision, they split the same way. The two models' results are shown side by side and never added together. <!-- audit:C12 -->
 
 <details>
 <summary><b>The twenty-year pair in numbers</b></summary>
@@ -104,7 +104,7 @@ Every interval is at <!-- n:haiku_cd_s1_confidence -->99.7%<!-- /n --> confidenc
 
 ## Every verdict
 
-Every main comparison, on every decision, for both models. **Split:** the two goals decided differently on the decision's measure. **No split:** they came out about the same on that one measure, inside a narrow band fixed in advance; that is about this one measure, not every choice they made. **Inconclusive:** the runs can't tell. **Not assessable:** too many of one goal's runs failed or were refused, in every wording.
+Every main comparison, on every decision, for both models. **Split:** the two goals decided differently on the decision's measure. **No split:** they came out about the same on that one measure, inside a narrow band fixed in advance; that is about this one measure, not every choice they made. **Inconclusive:** the runs can't tell. **Not assessable:** too many of one goal's runs failed or were refused, in every wording. <!-- audit:C5 --> <!-- audit:C2 -->
 
 **Haiku 5.5**, the main model
 
@@ -126,7 +126,7 @@ Every main comparison, on every decision, for both models. **Split:** the two go
 | A vs B, who counts, short term | <!-- n:verdict_gpt_oss_s1_ab -->split<!-- /n --> | <!-- n:verdict_gpt_oss_s2_ab -->inconclusive<!-- /n --> | <!-- n:verdict_gpt_oss_s3_ab -->split<!-- /n --> | <!-- n:verdict_gpt_oss_s4_ab -->inconclusive<!-- /n --> |
 | A vs D, secondary | <!-- n:verdict_gpt_oss_s1_ad -->split<!-- /n --> | <!-- n:verdict_gpt_oss_s2_ad -->inconclusive<!-- /n --> | <!-- n:verdict_gpt_oss_s3_ad -->inconclusive<!-- /n --> | <!-- n:verdict_gpt_oss_s4_ad -->split<!-- /n --> |
 
-**The pattern the Roundtable's words predict** is A and B splitting at four quarters while C and D do not at twenty years. That pattern appears on no decision for either model. C and D split wherever the runs could tell them apart, and never came out "no split". One caution belongs beside that: a "no split" needs the whole interval inside the narrow band, which is hard to reach, so "never no split" is partly a statement about how much evidence a no split takes. The [known limits](https://horizon-compact.vercel.app/methods/#known-limits) say so too.
+**The pattern the Roundtable's words predict** is A and B splitting at four quarters while C and D do not at twenty years. That pattern appears on no decision for either model. C and D split wherever the runs could tell them apart, and never came out "no split". One caution belongs beside that: a "no split" needs the whole interval inside the narrow band, which is hard to reach, so "never no split" is partly a statement about how much evidence a no split takes. The [known limits](https://horizon-compact.vercel.app/methods/#known-limits) say so too. <!-- audit:C6 -->
 
 ## Where the results went against the project's starting expectation
 
@@ -141,16 +141,16 @@ So for the main model, once it was told to serve everyone with a stake, a twenty
 
 The same test, applied to a few real business decisions described only in broad terms. Each case asks which goal's runs came closest to what the real company did. That is a comparison, not a judgment of the company or of what it was trying to do.
 
-- **The pre-registered rule found no case.** The search for real decisions that met the rule fixed in advance came back empty. Every case here was chosen after it, and each is labeled exploratory wherever it appears.
-- **<!-- n:cases_exploratory_closures -->5<!-- /n --> exploratory cases, all closures.** <!-- n:cases_leakage_disclosed -->3<!-- /n --> of them were first disclosed before the main model's training cut-off, so the model may have read about them; each of those was admitted only after a knowledge probe of both official models found no recall.
-- **All <!-- n:cases_readings -->20<!-- /n --> readings came out "no good match"** (<!-- n:cases_readings_no_good_match -->20<!-- /n --> of <!-- n:cases_readings -->20<!-- /n -->): for every case and both models, no goal's runs came close enough to what the company did to count as a match.
-- **No case can be re-run from published inputs.** The cases' background files are withheld so that the companies cannot be identified from them.
+- **The pre-registered rule found no case.** The search for real decisions that met the rule fixed in advance came back empty. Every case here was chosen after it, and each is labeled exploratory wherever it appears. <!-- audit:C14 -->
+- **<!-- n:cases_exploratory_closures -->5<!-- /n --> exploratory cases, all closures.** <!-- n:cases_leakage_disclosed -->3<!-- /n --> of them were first disclosed before the main model's training cut-off, so the model may have read about them; each of those was admitted only after a knowledge probe of both official models found no recall. <!-- audit:C15 -->
+- **All <!-- n:cases_readings -->20<!-- /n --> readings came out "no good match"** (<!-- n:cases_readings_no_good_match -->20<!-- /n --> of <!-- n:cases_readings -->20<!-- /n -->): for every case and both models, no goal's runs came close enough to what the company did to count as a match. <!-- audit:C16 -->
+- **No case can be re-run from published inputs.** The cases' background files are withheld so that the companies cannot be identified from them. <!-- audit:A6 -->
 
-The cases are kept apart from the main results, and the [cases page](https://horizon-compact.vercel.app/cases/) says how each was chosen.
+The cases are kept apart from the main results, and the [cases page](https://horizon-compact.vercel.app/cases/) says how each was chosen. <!-- audit:A2 -->
 
 ## What was built
 
-An experiment, not a product, built solo: Python on AWS, Terraform for everything, and a static explorer. The models were planned to run through Bedrock, which was unavailable to the project's account from October 5, 2026. The plan's fallback pair, reached through Anthropic's API and OpenRouter, was taken before the protocol was fixed: a substitution the protocol provides for, not a cut.
+An experiment, not a product, built solo: Python on AWS, its infrastructure in Terraform, and a static explorer. The models were planned to run through Bedrock, which was unavailable to the project's account from October 5, 2026. The plan's fallback pair, reached through Anthropic's API and OpenRouter, was taken before the protocol was fixed: a substitution, not a cut. <!-- audit:C12 -->
 
 ```mermaid
 flowchart LR
@@ -165,16 +165,16 @@ flowchart LR
     results --> site["Static explorer<br/>S3 and CloudFront"]
 ```
 
-- **Pre-registered, and enforced in code.** The protocol was committed and tagged `prereg-v1` before any official run. The experiment's content is versioned and hashed, and the harness refuses an official sweep whose protocol hash does not match the committed protocol.
-- **One way to capture a decision.** Every model answers through a single tool, with the tool choice left on `auto`, so both models' decisions are read and validated by the same code.
-- **Provenance on every call, and the raw text kept.** Each run is one write-once object: every write sends `IfNoneMatch="*"`, so nothing is ever overwritten. Every response on the made-up company is published in the repo, with a manifest of sha256 hashes.
-- **The analysis re-runs in CI.** A test runs the frozen analysis over the published raw records and must reproduce every official results file byte for byte, with any AWS client refused while it runs.
+- **Pre-registered, and enforced in code.** The protocol was committed and tagged `prereg-v1` before any official run. The experiment's content is versioned and hashed, and the harness refuses an official sweep whose protocol hash does not match the committed protocol. <!-- audit:D1 --> <!-- audit:D6 -->
+- **One way to capture a decision.** Every model answers through a single tool, with the tool choice left on `auto`, so both models' decisions are read and validated by the same code. <!-- audit:D5 -->
+- **Provenance on every call, and the raw text kept.** Each run is one write-once object: every write sends `IfNoneMatch="*"`, so nothing is ever overwritten. <!-- audit:D2 --> <!-- audit:D3 --> Every response on the made-up company is published in the repo, with a manifest of sha256 hashes. <!-- audit:A6 -->
+- **The analysis re-runs in CI.** A test runs the frozen analysis over the published raw records and must reproduce every official results file byte for byte, with any AWS client refused while it runs. <!-- audit:A6 -->
 - **The numbers in this README are tested.** Each one is generated from the same committed data the site reads. A test fails if a figure drifts from its source, if a marker names nothing, or if a digit appears in the prose without being a date, a name or a reference.
-- **A name guard that fails closed.** No real company's name may appear in this public repo, ever. A hook checks every commit, commit message and push against a private term file kept outside it, and refuses on any doubt.
-- **Terraform for everything, and nothing always on.** Fargate tasks launched on demand, S3, CloudFront and IAM, with deploys through GitHub's OIDC and no long-lived AWS keys in CI. No NAT gateway, load balancer or database. A full teardown and re-apply was tested before launch.
-- **A site that tracks no one.** No cookies, no analytics, no third-party requests. Every number on it is read from the committed data, and every chart shows its run count and its spread.
+- **A name guard that fails closed.** No real company's name may appear in this public repo, ever. A hook checks every commit, commit message and push against a private term file kept outside it, and refuses on any doubt. <!-- audit:D7 -->
+- **The infrastructure in Terraform, and nothing always on.** Fargate tasks launched on demand, S3, CloudFront and IAM, with deploys through GitHub's OIDC and no long-lived AWS keys in CI. <!-- audit:A5a --> <!-- audit:A5b --> <!-- audit:A5e --> Two things were set up by hand: the maintainer's own AWS user, which Terraform runs as, and switching on the billing tag. <!-- audit:A5d --> No NAT gateway, load balancer or database. A full teardown and re-apply was tested twice, the second time on the day the site went live. <!-- audit:B65 -->
+- **A site that tracks no one.** No cookies, no analytics, no third-party requests. Every number on it is read from the committed data, and every chart shows its run count and its spread. <!-- audit:B15 --> <!-- audit:A1 -->
 
-**Why containers, honestly.** The workload is API calls, and a laptop could run it. The container earns its place for two reasons: the exact code behind every official result is pinned by image digest, and a sweep of several hours does not depend on a laptop staying awake. The registry has since deleted two official images under an old retention rule, so no run can be repeated in the identical image; the records still name each image, and the code is pinned by the tag.
+**Why containers, honestly.** The workload is API calls, and a laptop could run it. The container earns its place for two reasons: the exact code behind every official result is pinned by image digest, and a sweep of several hours does not depend on a laptop staying awake. The registry has since deleted the image every official run on the made-up company used, under an old retention rule, so none of those runs can be repeated in the identical image; the records still name each image, and the code is pinned by the tag. <!-- audit:A5a --> <!-- audit:A6 -->
 
 ## Check it yourself
 
@@ -189,7 +189,7 @@ CI=1 make check                                  # everything CI runs; the infra
 
 `make setup` is for the maintainer: it asks for the private name-guard term file.
 
-- [The explorer](https://horizon-compact.vercel.app): every result, every run, and the models' own memos on the made-up company
+- [The explorer](https://horizon-compact.vercel.app): every result, every run, and the models' own memos on the made-up company <!-- audit:A4 -->
 - [How the study was done](https://horizon-compact.vercel.app/methods/): the goals in full, the statistics, the real cases and every known limit
 - [Every prompt, exactly as it is built](https://horizon-compact.vercel.app/methods/#checking-it-yourself), and [the scenario files the models saw](https://github.com/sjtroxel/horizon-compact/tree/prereg-v1/experiment/company/scenarios), at the tag
 - [The protocol at the pre-registered tag](https://github.com/sjtroxel/horizon-compact/blob/prereg-v1/experiment/protocol/protocol-v1.md), and [its release](https://github.com/sjtroxel/horizon-compact/releases/tag/prereg-v1)
@@ -202,7 +202,7 @@ CI=1 make check                                  # everything CI runs; the infra
 - The results are about two models, a small current one and an open-weights one, under five plainly stated goals; not about executives, and not about larger models.
 - The test's text was drafted by the main model's vendor.
 - The made-up company has two known simplifications.
-- Two program images are deleted, so no run can be repeated in the identical image.
+- A program image is deleted, so no run on the made-up company can be repeated in the identical image. <!-- audit:A6 -->
 - The chance of a false split is held approximately, not exactly.
 - "No split" is hard to reach, and out of reach where the run count is capped.
 - gpt-oss-120b's failures left one comparison not assessable.

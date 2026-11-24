@@ -7,7 +7,43 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-24, about 9:00 AM (PHASE 7 STEP 4 DRAFTED; HIS READ NEXT; NOTHING COMMITTED)
+> ## START HERE — where things stand, 2026-11-24, about 2:00 PM (PHASE 7 STEPS 6 TO 8 DONE; HIS TWO READS, THEN C5)
+>
+> **Steps 6 and 7 are done** (`docs/v1-audit.md`; the cold sample, six of six on the re-check,
+> `docs/phases/evidence/phase-7/audit-sample/README.md`). **E12 is built** (his approval, about 1:38 PM): the methods
+> page reports the menu-order check, corrects the deleted-images sentence (E13) and has an M12 entry dated November
+> 24, 2026 (change it if C5 lands later). **Step 8 is built** (`docs/phases/evidence/phase-7/readme-against-audit.md`):
+> 40 audit markers in `README.md` and their test; five README claims and one plain-English sentence reworded to fit
+> their rows. **His, done about 1:55 PM:** the rewordings approved; the card changed to "decisions" by him. **Then C5**, his commit:
+> everything since C3 (steps 5 to 8 and the methods page); it changes `web/`, so it starts Deploy's site half.
+> **After C5:** step 9, the final cost record. The block below still stands for everything else.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stand, 2026-11-24, about 1:40 PM (PHASE 7 STEPS 6 AND 7 DONE; E12'S SITE LINE AND STEP 8 NEXT)
+>
+> **Step 6, the audit, is done:** `docs/v1-audit.md`; nothing not met. **E12 decided (his, about 12:02 PM):** a
+> methods-page line for the menu-order results (an M12 entry; the tokens per sweep stay partial). **Step 7 is done:**
+> 28 rows re-verified cold in three Claude in Chrome batches, then six to a fresh agent, six of six agreeing
+> (`docs/phases/evidence/phase-7/audit-sample/README.md`). **Next:** E12's site change, which also fixes E13 (the
+> methods page calls both deleted images official; one was a test image), then step 8 (the README against the
+> audit, E13's README sentence, the audit markers and their test; the card re-read). **Uncommitted, by his choice:**
+> everything since C3 (steps 5 to 7), for one commit after step 8 (C5 in the commit order). The block below still
+> stands for everything else.
+>
+> ## START HERE — where things stood, 2026-11-24, about 11:20 AM (PHASE 7 STEPS 3 TO 5 DONE; STEP 6, THE AUDIT, NEXT)
+>
+> **C3 landed:** `4911440` `phase 7: c3 readme machinery and README.md` (steps 3 and 4 together, his choice), CI
+> `45415548299` and Deploy `45415548052` green. **The README is approved** (his, about 11:13 AM). **Step 5, the
+> plain-English write-up, is done:** `docs/plain-english.md`, Claude-drafted, approved by him **without a top line**
+> (his decision; step 5's As built note). **Not committed, by his choice (11:25 AM):** step 5's four files
+> (`docs/plain-english.md`, this file, the IMPLEMENTATION doc, `tests/test_readme_figures.py`) fold into the next
+> commit, step 6's. **Next:** step 6, the audit (Opus, best started in a fresh session). **Open from step 4:** decision C's live read of the providers' terms on
+> model outputs; the cost line (step 9).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-24, about 9:00 AM (PHASE 7 STEP 4 DRAFTED; HIS READ NEXT; NOTHING COMMITTED) *(superseded by the block above)*
 >
 > **Step 4, the README, is drafted by Claude on his grant** (he chose to hold C3 and have the README written now):
 > `README.md`, `docs/readme/` (the s1 chart, light and dark), `LICENSE` (decision C), and step 3's generator

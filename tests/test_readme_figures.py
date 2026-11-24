@@ -10,8 +10,7 @@ first). The skeleton's marked values are placeholders, so test 1 renders it from
 fails on a real file, run ``make readme``; if the diff surprises you, that is the point.
 
 **Out of this file, by his decision of 2026-11-24:** section 5.2's test 5 (the scope sentence waits for his
-words at step 4) and section 5.3's audit-ID test (it waits for ``docs/v1-audit.md`` and its format at
-step 6).
+words at step 4). Section 5.3's audit-ID test was added at step 8, once ``docs/v1-audit.md`` existed.
 
 The last group plants one fault each in a copy of the skeleton, in ``tmp_path``, and asserts the check
 reports it. Those tests stay in the suite: a check that cannot fail protects nothing.
@@ -433,6 +432,97 @@ def test_where_both_models_split_c_against_d_they_split_the_same_way(
             if scenario == scenario_id
         }
         assert len(signs) <= 1, (scenario_id, signs)
+
+
+def test_over_one_year_a_and_b_split_on_every_decision_for_the_main_model(
+    values: dict[str, str],
+) -> None:
+    """The plain-English write-up says so, on one year: every Haiku 5.5 A against B cell is a split."""
+    for scenario_id in readme_figures.VERDICT_SCENARIOS:
+        assert values[readme_figures.verdict_key("haiku", scenario_id, "A", "B")] == "split", (
+            scenario_id
+        )
+
+
+@pytest.mark.parametrize("path", REAL_FILES, ids=[path.name for path in REAL_FILES])
+def test_no_placeholder_for_his_words_is_left(path: Path) -> None:
+    """No governed file keeps a placeholder for his words (Phase 7 step 5; the write-up has no top line, his
+    decision). Like the site's check on his words, this fails while a `[his:` placeholder is still in one."""
+    assert "[his:" not in _read(path), f"{path.name} still holds a placeholder for his words"
+
+
+# --- section 5.3: the claims tied to the audit (Phase 7 step 8) ------------------------------------------
+
+AUDIT = REPO_ROOT / "docs" / "v1-audit.md"
+README = REPO_ROOT / "README.md"
+AUDIT_MARKER = re.compile(r"<!-- audit:([A-Z][0-9][0-9a-z]*) -->")
+AUDIT_ROW = re.compile(r"^\| ([A-E][0-9][0-9a-z]*) \|")
+
+
+def _audit_rows(audit: str) -> dict[str, tuple[str, bool]]:
+    """Each audit row's id, its status cell and whether it is flagged README. Parts A, C and D hold the
+    status in their third column, Part B in its fourth; Part E is listed, not scored, and has neither."""
+    rows: dict[str, tuple[str, bool]] = {}
+    for line in audit.splitlines():
+        found = AUDIT_ROW.match(line)
+        if found is None:
+            continue
+        row_id = found.group(1)
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if row_id.startswith("E"):
+            rows[row_id] = ("", False)
+            continue
+        status = cells[3] if row_id.startswith("B") else cells[2]
+        rows[row_id] = (status.lower(), cells[-1].startswith("README"))
+    return rows
+
+
+def _audit_problems(readme: str, audit: str) -> list[str]:
+    """What breaks section 5.3: a marker naming no row, a cited row marked not met, and a mismatch between
+    the rows the README cites and the rows the audit flags README (Parts A to D)."""
+    rows = _audit_rows(audit)
+    cited = set(AUDIT_MARKER.findall(readme))
+    problems = [f"no audit row {row_id}" for row_id in sorted(cited - rows.keys())]
+    problems += [
+        f"{row_id} is marked not met"
+        for row_id in sorted(cited & rows.keys())
+        if "not met" in rows[row_id][0]
+    ]
+    flagged = {row_id for row_id, (_, readme_flag) in rows.items() if readme_flag}
+    scored_cited = {row_id for row_id in cited if not row_id.startswith("E")}
+    problems += [
+        f"{row_id} is flagged README but not cited" for row_id in sorted(flagged - scored_cited)
+    ]
+    problems += [
+        f"{row_id} is cited but not flagged README"
+        for row_id in sorted((scored_cited & rows.keys()) - flagged)
+    ]
+    return problems
+
+
+def test_the_readme_cites_only_audit_rows_that_exist_and_are_not_not_met() -> None:
+    """Section 5.3. It cannot check that a claim matches its row; step 8's read does, and every later change
+    to the README is read against the audit again (the README's maintainer note)."""
+    audit = _read(AUDIT)
+    rows = _audit_rows(audit)
+    assert len(rows) >= 60, "the audit's rows were not found; has its table format changed?"
+    assert len(AUDIT_MARKER.findall(_read(README))) >= 30, (
+        "the README's audit markers were not found"
+    )
+    assert _audit_problems(_read(README), audit) == []
+
+
+def test_the_audit_check_catches_an_unknown_row_a_not_met_row_and_a_missing_flag() -> None:
+    audit = _read(AUDIT)
+    readme = _read(README)
+    assert _audit_problems(readme + "\nA claim. <!-- audit:A99 -->\n", audit) == [
+        "no audit row A99"
+    ]
+    not_met = audit.replace("| A1 | ", "| A1 | x | **not met** | x | README |\n| A0 | ", 1)
+    assert "A1 is marked not met" in _audit_problems(readme, not_met)
+    assert _audit_problems(readme.replace("<!-- audit:A4 -->", ""), audit) == [
+        "A4 is flagged README but not cited"
+    ]
 
 
 def test_every_case_is_an_exploratory_closure(values: dict[str, str]) -> None:
