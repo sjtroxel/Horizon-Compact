@@ -3,7 +3,7 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help setup install fmt lint typecheck test root-check paths-check dossier-check scenarios-check protocol-check doctor \
-        check guard-history fingerprint tf-fmt tf-check web-check
+        check guard-history fingerprint tf-fmt tf-check web-check readme
 
 GUARD := uv run --no-sync python -m horizon_compact.privacy.guard
 ROOT_CAP := 16
@@ -80,6 +80,12 @@ tf-check: ## Terraform fmt -check and validate (no credentials, no AWS call)
 # One Vitest check, `his words are written`, fails while any of his values in web/src/copy.ts is still a `[his:` placeholder.
 web-check: ## Check the page in web/ (format, types, tests, build, built files)
 	npm --prefix web run check
+
+# Offline, no model, no AWS: rewrites only the marked values (<!-- n:key -->value<!-- /n -->) in README.md and
+# docs/plain-english.md from the committed explorer data (Phase 7 step 3). A file that does not exist is skipped.
+# `make check` never rewrites: tests/test_readme_figures.py fails and says to run this.
+readme: ## Rewrite the marked figures in README.md and docs/plain-english.md from the committed data
+	uv run --no-sync python -m horizon_compact.site.readme_figures
 
 paths-check: ## Fail if any tracked path is under methods-appendix/ (needs no private file)
 	@$(GUARD) paths-check

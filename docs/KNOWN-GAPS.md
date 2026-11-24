@@ -7,7 +7,40 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-23, about 9:55 AM (PHASE 7 STEPS 1 AND 2 DONE; C2 HOLDS BOTH; STEP 3 NEXT)
+> ## START HERE — where things stand, 2026-11-24, about 9:00 AM (PHASE 7 STEP 4 DRAFTED; HIS READ NEXT; NOTHING COMMITTED)
+>
+> **Step 4, the README, is drafted by Claude on his grant** (he chose to hold C3 and have the README written now):
+> `README.md`, `docs/readme/` (the s1 chart, light and dark), `LICENSE` (decision C), and step 3's generator
+> extended to 81 keys with a claim test per unprotected sentence. Record: `docs/phases/evidence/phase-7/readme.md`.
+> `make check` green, 3,691 passed and none skipped, 697 frontend; the guard clean on a throwaway index. **Next:** his
+> read of the README (approve, edit or rewrite; the lead and chart are defaults for him to confirm), then one commit
+> or two (C3 and C4) at his choice. **Open:** decision C's live read of the providers' terms on model outputs; the
+> cost line (step 9). *The block below is kept; its "next" is overtaken by this one.*
+>
+> **Opus's review of step 3 is done** (2026-11-24, recorded in step 3's As built note): no generator change; four holes
+> in the digit census fixed in the test file, each now a failing case; one claim test added (the lead is still a
+> split); the leakage paragraph below is right, except that its alarm is the pin test, not the stale-figure test.
+> `make check` green after it: 3,676 Python tests passed and 1 skipped, 697 frontend. **Next:** his C3, then step 4.
+> The rest of this block is as Sonnet wrote it.
+>
+> **C2 landed:** `343d1dc` `phase 7: c2 rule-zero sweep and dates`, CI `45216487477` and Deploy `45216487205` green (his
+> report; steps 1 and 2 are closed apart from Opus's review of step 2, which is done). **Step 3, the README machinery,
+> is built** (Sonnet; `docs/phases/phase-7-writeup-and-launch-IMPLEMENTATION.md`, step 3's As built note): the generator
+> `src/horizon_compact/site/readme_figures.py` (13 keys, read from `web/explorer-data/` only, formatted as the site's
+> `format.ts` does), `make readme`, and `tests/test_readme_figures.py` with the skeleton
+> `tests/fixtures/readme-skeleton.md` (§5.2's tests 1 to 4 and the planted-fault tests); `make check` green, 3,667 Python
+> tests passed and 1 skipped (the real-files test, until step 4), 697 frontend. **Three choices of his, 2026-11-24:** the
+> skeleton is a fixture and not a root `README.md`; §5.2's test 5 and §5.3's audit-ID test are deferred (the scope
+> sentence waits for his wording at step 4, the audit IDs for `docs/v1-audit.md` at step 6); no cost key until step 9.
+> **One thing to look at in the review:** `cases_leakage_disclosed` counts the cases whose `exploratory_label` holds
+> "first disclosed before the main model's training cut-off", because no structured field carries that disclosure. **Next:**
+> Opus reviews step 3 in a separate chat, then his C3 (`phase 7: c3 readme machinery`; CI, and Deploy for its image and
+> `main` apply because `src/` changes, no task); then step 4, the README (his words or a Claude draft on his grant; the
+> lead scenario and chart are his choice, R.1). **C3 is not yet committed; this block rides in it.**
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-23, about 9:55 AM (PHASE 7 STEPS 1 AND 2 DONE; C2 HOLDS BOTH; STEP 3 NEXT) *(superseded by the block above)*
 >
 > **C1 landed:** `29296ab`, CI `45045014729` green. **Steps 1 and 2 are done and ride together in C2** (`phase 7: c2
 > rule-zero sweep and dates`); **read C2's CI and Deploy first** (Deploy builds the image and applies `main`, and

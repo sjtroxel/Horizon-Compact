@@ -198,13 +198,81 @@ review (2026-11-23):** no code change; the M12 entry reworded with his approval,
 pages newly named their model, which none did. **Still open:** Deploy green (it rides in C2); if C2 is committed on another day, the M12 entry's date is
 Claude's to change before the Deploy that publishes it.
 
-### Step 3. The README machinery (Delivers 2; scope decision 3; §5)
+### Step 3. The README machinery (Delivers 2; scope decision 3; §5) [done]
 
 Sonnet builds, Opus reviews. Before any README prose, so the first sentence with a number is already under test.
 
 **Done:** §5's generator, markers and tests exist and pass on a README skeleton holding one marked figure of each
 kind; each of the three tests fails on a planted fault (a changed digit, an unknown key, a removed marker) and the
 digit census fails on an unmarked number; `make readme` rewrites marked figures; `make check` runs the tests.
+
+**As built, step 3 (2026-11-24).** **Three choices of his, made 2026-11-24 before the build:** (1) the skeleton is a
+test fixture, `tests/fixtures/readme-skeleton.md`, and not a `README.md` in the root, which would have shown on the
+public repo page until step 4; (2) §5.2's test 5 (the scope sentence) and §5.3's audit-ID test are deferred; (3) no
+cost key until step 9. **Built:** `src/horizon_compact/site/readme_figures.py` (the generator, the marker helpers
+and the `make readme` entry point, standard library only, no network, AWS client or clock; a test reads its imports),
+`tests/test_readme_figures.py`, the fixture, and a `readme` target in the Makefile
+(`python -m horizon_compact.site.readme_figures`, with a help line; no change to `cli.py`). `make check`: 3,667 Python
+tests passed and 1 skipped (the real-files test of §5.2 test 3, which has nothing to read until step 4), 697 frontend
+tests.
+
+**The keys and their sources.** Every figure is read from `web/explorer-data/` (`index.json` and the files it lists),
+the data the site reads and `test_site_explorer` already holds equal to a fresh build from the official results
+files and the case results. The table `KEYS` in the module names each key's source and the `format.ts` function it
+mirrors, and a test holds the table and the generator to the same keys. For the lead, Haiku 5.5 on s1, C against D:
+`haiku_cd_s1_difference` (the difference in points, `formatPoints`), `haiku_cd_s1_points_down` (whole points,
+`wholePointsDown`, as the site's sentences use it), `haiku_cd_s1_interval` (the two ends, joined as
+`AgainstThesis.tsx` does), `haiku_cd_s1_confidence` (`confidenceLevel` of the model's `alpha`),
+`haiku_cd_s1_runs_c` and `haiku_cd_s1_runs_d` (valid runs per side, `comparisonRuns`). Run counts per model:
+`grid_runs_haiku` and `grid_runs_gpt_oss`, the attempted runs summed over the four scenarios (`attemptedRuns`; attempted,
+not valid). Against the thesis: `against_thesis_count`, the length of the section's entries. The cases:
+`cases_exploratory_closures`, `cases_leakage_disclosed`, `cases_readings` and `cases_readings_no_good_match`. **The
+lead scenario and pair are in the module's constants** (`LEAD_SCENARIO`, `LEAD_PAIR`) and are his choice at step 4
+(the re-scope's R.1); a figure for another comparison is one more entry in the module and one more marker. The
+rounding is the site's: a test pins that an exact tie rounds up as JavaScript's `toFixed` does and Python's `format`
+does not.
+
+**The tests** (all in `tests/test_readme_figures.py`; §5.2's tests 1 to 4): each runs on the fixture always and on
+`README.md` and `docs/plain-english.md` whenever they exist. The census blanks, in order, text that is not prose
+(fenced code, comments, tags, link targets, URLs, a code span that is a path or file name), then dates, section and
+planning references (`§`, `planning/NN`, `protocol N.N`, `Phase N`, `step N`), versions (only after `v` or the word
+"version", never a bare decimal), the names (Haiku 5.5, `gpt-oss-120b`, `prereg-v1`, `sha256` and the five case
+labels from the data), the years (1620, 2019, 2024 and the run years from the data's `runs` block, today 2026),
+scenario and wording ids (`s1`, `w3`, lower case) and list markers; whatever digit is left fails, with its line. The
+explicit allowlist holds one entry, `S3` (the storage service's name), with its reason; an entry is added with the
+step that needs it. **The planted-fault tests** write a faulty copy of the rendered skeleton to `tmp_path` and assert
+the check reports it: a changed digit (test 1), an unknown key (test 2), a removed marker (test 3, and the retyped
+number also fails the census), an unclosed marker, and an unmarked number in prose (the census). They stay in the
+suite.
+
+**Departures from the step's text and choices to review.** (a) **The skeleton's marked values are placeholders**
+(`0`), by design: test 1 renders the fixture from the data before it compares, so a change in the data never needs a
+fixture edit; on the real files test 1 compares the committed text as it stands. Tests 2 to 4 read the fixture as
+committed. (b) **Test 3 on the real files is across `README.md` and `docs/plain-english.md` together:** the plain-English
+write-up need not carry every figure, the pair must. On the fixture alone every key must be marked. (c) **There is no
+structured field for "three with a leakage disclosure".** `cases_leakage_disclosed` counts the cases whose
+`exploratory_label` holds the phrase "first disclosed before the main model's training cut-off" (constant
+`LEAKAGE_PHRASE`); the label is the disclosure the site shows beside each case, but a reworded label would count 0.
+The alarm for that is the pin (`test_the_figures_hold_what_the_sources_hold`, "3"), not the stale-figure test, which
+would fail only until `make readme` wrote the 0 in (Opus's review corrected this sentence). (d) **A claim test the outline's "all 20 readings"
+needs:** a test fails if `cases_readings` and `cases_readings_no_good_match` ever differ, because the word "all" is
+not a number the markers protect. (e) **Not in this step, as decided:** §5.2 test 5, the scope sentence, waits for his
+wording at step 4; §5.3's audit-ID test waits for `docs/v1-audit.md` and its format at step 6. (f) No change to
+`web/explorer-data/`, the site, `experiment/` or any planning doc; the root holds 14 of its 16 entries. **Still
+open:** C3 is not yet committed.
+
+**Opus's review of step 3 (2026-11-24).** The generator's values, sources and formatting were checked against the data
+and `format.ts` (each twin is the same expression; `toFixed`'s tie rule is right); no change to the generator. **Four
+holes in the census, each a number that passed unmarked, fixed in the test file:** (1) the path-in-code pattern also
+matched the prose *between* two code spans when that prose held a "/" or an "e.g.", so its digits were blanked; code
+spans are now found left to right and only a path-like one is blanked; (2) and (3) the list-marker pattern blanked any
+line starting "990." or "20. All", which a hard-wrapped sentence can produce; a marker is now blanked only where
+Markdown renders a list (after a blank line or another list line); (4) the long-date pattern took any four digits after
+"October 14, " as its year; the year is now left to the year pass, so only an allowed year passes. One false positive
+went with it ("June 2026" had failed on "26"). Each is a failing case in the suite. **One claim test added,** beside
+step 3's "all 20 readings" test: the lead comparison's `final_verdict` is still "split". **Left as designed:** an
+allowed year (1620, 2019, 2024, 2026) passes anywhere, so a count equal to one would pass unmarked; no figure today is
+one.
 
 ### Step 4. The README (Delivers 2; §4)
 
@@ -221,6 +289,19 @@ either way (§4 is the outline). Every result sentence from `planning/06` §4's 
 4. **`planning/06` §9's seven checks**, each recorded.
 
 **Done:** the README is in the repo; the §5 tests pass; §9's checks recorded; his approval.
+
+**As built, step 4 (2026-11-24; draft, awaiting his approval).** **His choice on this pass:** a Claude draft ("just
+have you write the readme.md now"), so flagged once for the watermark; he asked for it to be the most striking README
+he has. The lead and its chart were left at the defaults (Haiku 5.5, s1, C against D; the site's s1 dot chart) for
+him to confirm. **Built:** `README.md` (twelve sections, the outline's order, with "How it works" moved below the lead so
+one chart and one sentence come first), `docs/readme/` (the two images), `LICENSE` (decision C; the root now holds
+16 of its 16 entries), and an extended generator (81 keys: every C against D split in numbers, both results against
+the thesis, the 40-cell verdict grid) with a claim test for each sentence a marker cannot protect. `make check` green,
+3,691 Python tests passed and none skipped (the real-files test now runs), 697 frontend. **Record:**
+`docs/phases/evidence/phase-7/readme.md` (what reuses his approved words, the images, the four readers, §9's seven
+checks, rule zero). **Still open:** his read and approval or rewrite; decision C's live read of the providers' terms
+on model outputs (until then the license line claims only the project's own work); the cost line waits for step 9.
+This step and step 3 can ride in one commit (C3 and C4 merged), or C3 first, at his choice.
 
 ### Step 5. The plain-English write-up (Delivers 3)
 
