@@ -7,7 +7,30 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-24, about 2:00 PM (PHASE 7 STEPS 6 TO 8 DONE; HIS TWO READS, THEN C5)
+> ## START HERE — where things stand, 2026-11-25, about 5:05 AM (PHASE 7 STEPS 9 AND 10 DONE; STEP 11 NEXT)
+>
+> **Step 10, the Short, is done:** attempt 1 of 3 kept (his, about 5:02 AM), with two ffmpeg edits and an end card in
+> his words; record `docs/phases/evidence/phase-7/short/README.md`; the video in `scratch/p7-s10-video/`
+> (`attempt1-final.mp4`, hash in the record). **His gate for the video:** presentation first, a small factual floor.
+> **One commit holds steps 9 and 10** (his, C6's step 9 with C7; it changes `web/`, so Deploy's site half runs).
+> **Next:** step 11, the hosting plan, then steps 12 to 15. The block below still stands for step 9.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-25, about 4:05 AM (PHASE 7 STEP 9 DONE; HIS READ OF M8, THEN STEP 11)
+>
+> **C5 landed:** `03ba012` `phase 7: c5 write-up, audit and readme read`, CI `45475637004` and Deploy `45475636849`
+> green. **Step 9, the final cost record, is built** (`docs/phases/evidence/phase-7/cost.md`): this project drew no model
+> credit since 2026-11-03 (the Anthropic credit's $0.11 fall is another project's key); cumulative at most about $46;
+> the idle bill about $0.17 a month over 2026-11-14 to 2026-11-20, **decision B amended (his, about 3:51 AM)** to that
+> window, before go-live, rather than wait for 12/01. M8 and an M12 entry (dated November 25, 2026) are changed;
+> **their words are Claude's draft, approved by him (about 4:21 AM).** **Uncommitted:** step 9's files, which ride in C6 with step 11 (the
+> commit order), or alone at his choice. **Next:** step 11, the hosting plan, or step 10, the Short. **Dropped (his,
+> about 4:12 AM):** decision B's December full-month note on M8 and M12.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-24, about 2:00 PM (PHASE 7 STEPS 6 TO 8 DONE; HIS TWO READS, THEN C5)
 >
 > **Steps 6 and 7 are done** (`docs/v1-audit.md`; the cold sample, six of six on the re-check,
 > `docs/phases/evidence/phase-7/audit-sample/README.md`). **E12 is built** (his approval, about 1:38 PM): the methods

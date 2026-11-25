@@ -98,6 +98,11 @@ kept as the record.
     run and every Deploy in the window listed beside the figure. Stated as "measured over seven days, about $X a month at that rate", and the first full calendar
     month after close added as a dated note on M8 and in M12. It closes the phase without waiting, and it says what
     it is.
+  - **Amended 2026-11-25 (his, about 3:51 AM: "i'd like to be done and not have to wait").** The window is 2026-11-14
+    to 2026-11-20 UTC, before go-live, in place of seven days after C2's Deploy: the first such window (11/24 to 11/30)
+    cannot be read before 12/01. The nine Deploys in it are listed beside the figure. **The December note is dropped**
+    (his, about 4:12 AM: it would not affect the project's outcome); M8 makes no promise of it.
+    Step 9's As built note and `evidence/phase-7/cost.md` hold the detail.
   - (b) A full calendar month (December 2026) before the close. Exact, but it holds the phase until early January,
     past the dev key's 2027-01-02 date.
 - **C. The license (§0 item 2). DECIDED: (a), MIT for the code, CC BY 4.0 for the rest.**
@@ -403,11 +408,32 @@ His readings, Claude's record, as at every close.
 
 **Done:** the record committed; M8 live with the final figure; the idle bill measured per decision B.
 
+**As built, step 9 (2026-11-25, Opus).** Record: `docs/phases/evidence/phase-7/cost.md`, from his readings about 3:45
+to 3:51 AM. **Drawn since 2026-11-03 by this project:** Anthropic none (the $0.11 the credit fell is another project's
+key, a game of his, by the Console's API keys page), OpenRouter none, AWS $0.12 under the tag and at most $0.16 for
+the shared account. **Cumulative: at most about $46**, under $60 and $80. **His OpenRouter cash** since 2026-10-15:
+$12.70 with the card fee. **AWS credit left** $135.38, expiring 2027-07-30. **The idle bill:** about $0.17 a month, from
+$0.04 over 2026-11-14 to 2026-11-20, decision B as amended the same morning (the window before go-live, his choice
+not to hold the phase); the charge type filter was not set, and the figure is positive, so no credit was netted.
+**M8** now gives the final figure and the idle bill, sourced to the new record, and an **M12 entry** is dated
+November 25, 2026 (Claude's to change before the Deploy that publishes it, if C6 lands on another day). The trace and
+digit tests pass, 655 of 655 explorer tests. **The December note is dropped** (his, about 4:12 AM).
+**The M8 and M12 wording is Claude's draft, approved by him (about 4:21 AM: "fine, approved").**
+
 ### Step 10. The Short, Gemini first (Delivers 12; decision R-A as amended by D; §7)
 
 Him and Claude. Before the post. §7 holds the detail.
 
 **Done:** one Short he wants, its check record committed, the scope sentence on it.
+
+**As built, step 10 (2026-11-25, Opus).** Record: `docs/phases/evidence/phase-7/short/README.md`. **Attempt 1 of 3 kept**
+(his, about 5:02 AM): a Gemini Notebook Short, 720 by 1280, from the live methods and story pages, steered by Claude's
+topic as he revised it (the narration ends on the result; the scope on an end card). **His gate, about 4:40 AM:** the
+presentation first, with a floor (a wrong number or direction, the people presented as real, a claim about real
+companies, executives or AI in general, a missing scope); it passed. **Two ffmpeg edits:** the label "Stakeholders"
+restored over the bar from the video's own frame (his catch), and a six-second end card in his words with the scope
+sentence, the second model's split and the AI-generated label. **Commit order:** steps 9 and 10 go in one commit
+(his, 2026-11-25), C6's step 9 with C7; step 11 follows in its own commit.
 
 ### Step 11. The hosting plan, the dated reminders, the after-v1 list (Delivers 10; scope decision 5)
 

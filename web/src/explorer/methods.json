@@ -1111,28 +1111,33 @@
         {
           "kind": "p",
           "ledger": ["39"],
-          "text": "Measured spend through the real-case runs was at most about $46, read from the three bills on November 3, 2026. That overstates it: it counts the whole of a cloud account the project shares with another project. It is under the plan's $60 re-plan point and its $80 ceiling. Building this site made no model call. The final figure, with the monthly cost of keeping the site up, comes with the write-up.",
-          "sources": ["docs/phases/evidence/phase-5.5/cost.md"],
+          "text": "Measured spend for the whole project was at most about $46, read from the three bills on November 25, 2026. That overstates it: it counts the whole of a cloud account the project shares with another project. It is under the plan's $60 re-plan point and its $80 ceiling. Building this site and writing it up made no model call. Keeping the site up costs about $0.17 a month, measured over seven days in November, before it went live, and scaled to a month.",
+          "sources": ["docs/phases/evidence/phase-7/cost.md"],
           "figures": [
             {
               "text": "$46",
-              "source": "docs/phases/evidence/phase-5.5/cost.md",
+              "source": "docs/phases/evidence/phase-7/cost.md",
               "match": "at most about $46"
             },
             {
-              "text": "November 3, 2026",
-              "source": "docs/phases/evidence/phase-5.5/cost.md",
-              "match": "2026-11-03"
+              "text": "November 25, 2026",
+              "source": "docs/phases/evidence/phase-7/cost.md",
+              "match": "2026-11-25"
             },
             {
               "text": "$60",
-              "source": "docs/phases/evidence/phase-5.5/cost.md",
+              "source": "docs/phases/evidence/phase-7/cost.md",
               "match": "$60 re-plan point"
             },
             {
               "text": "$80",
-              "source": "docs/phases/evidence/phase-5.5/cost.md",
+              "source": "docs/phases/evidence/phase-7/cost.md",
               "match": "$80 ceiling"
+            },
+            {
+              "text": "$0.17",
+              "source": "docs/phases/evidence/phase-7/cost.md",
+              "match": "about $0.17 a month at that rate"
             }
           ]
         },
@@ -1392,6 +1397,20 @@
               "text": "November 24, 2026",
               "source": "docs/v1-audit.md",
               "match": "His decision, 2026-11-24, about 12:02 PM"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "ledger": [],
+          "lead": "November 25, 2026. ",
+          "text": "The cost section now gives the final measured spend and the monthly cost of keeping the site up. A published number changed: the cost, which is not a result of the experiment, so no rule of the protocol applies.",
+          "sources": ["docs/phases/evidence/phase-7/cost.md"],
+          "figures": [
+            {
+              "text": "November 25, 2026",
+              "source": "docs/phases/evidence/phase-7/cost.md",
+              "match": "2026-11-25 about 4:00 AM CST"
             }
           ]
         }
