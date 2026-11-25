@@ -455,6 +455,13 @@ checklist (the re-scope's R.3 item 4):
 
 **Done:** the checklist in KNOWN-GAPS with its dates; the ROADMAP notes; his yes on the plan.
 
+**As built, step 11 (2026-11-25, Opus).** The 2026-10-04 REMINDER is now a dated CHECKLIST in KNOWN-GAPS (the old
+text kept beneath it). **His, about 8:40 AM:** the move to Vercel and the AWS teardown by 2027-06-30 (Vercel's pricing,
+Hobby docs and fair use pages read live first: Hobby $0 a month, 100 GB of transfer, no extra usage for sale; the
+Terms of Service are read at the move); **the monthly readings dropped**, one reading at the move in their place; **no
+calendar entry** (the calendar connector refused for lack of event scope, and he chose to skip it); the after-v1
+list confirmed. **ROADMAP:** dated notes on §2's Sonnet 4.6 line and §5's Sonnet 5.5 line (§0 item 5).
+
 ### Step 12. Version 1.0.0, the tag and the release (Delivers 8)
 
 1. **Claude:** `1.0.0` in `pyproject.toml`, `src/horizon_compact/__init__.py` and `uv.lock` (`uv lock --check`
@@ -467,6 +474,12 @@ checklist (the re-scope's R.3 item 4):
    "..." --notes-file ...`. Claude gives each command one at a time, with the output to look for.
 
 **Done:** the tag and release exist (`gh release view v1.0`); Deploy green on the version commit.
+
+**As built, step 12, first half (2026-11-25, Opus).** `1.0.0` in the three files, `uv lock --check` agreeing, `make
+check` green (3,699 and 697). **Commit order:** the version lands in its own commit with step 11, `phase 7: c8
+version 1.0.0 and hosting plan`, not in the close (C8 as planned held both), because the tag needs a green Deploy
+on the version and comes before the post; the close gets its own commit. The release notes are Claude's draft
+(scope decision 1), in `scratch/p7-s12-release-notes.md`, through the name guard's message check (clean), for his read.
 
 ### Step 13. The launch post (Delivers 9; scope decisions 1, 2, 6)
 

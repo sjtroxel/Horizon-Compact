@@ -7,7 +7,25 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-25, about 5:05 AM (PHASE 7 STEPS 9 AND 10 DONE; STEP 11 NEXT)
+> ## START HERE — where things stand, 2026-11-25, about 9:00 AM (PHASE 7 STEP 11 DONE; STEP 12 HALF DONE)
+>
+> **Version `1.0.0`** in `pyproject.toml`, `__init__.py` and `uv.lock`; `make check` green. **His next:** the commit
+> `phase 7: c8 version 1.0.0 and hosting plan` (step 11 rides in it), push, a green Deploy, then the `v1.0` tag and the
+> release from `scratch/p7-s12-release-notes.md` after his read. **Then:** step 13, the launch post (his words).
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-25, about 8:50 AM (PHASE 7 STEP 11 DONE; STEP 12, VERSION 1.0.0, NEXT)
+>
+> **C6/C7 landed:** `631392b` `phase 7: c6 cost record and c7 the short`, CI `45601938272` and Deploy `45601938419`
+> green; M8's new line is live. **Step 11 is done** (uncommitted): the hosting CHECKLIST in this file (his: Vercel and
+> an AWS teardown by 2027-06-30; no monthly readings; no calendar entry; the after-v1 list confirmed) and the two
+> ROADMAP dated notes. **Next:** step 12, version 1.0.0, the tag and the release; step 11's files ride in that commit
+> or alone, his choice.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-25, about 5:05 AM (PHASE 7 STEPS 9 AND 10 DONE; STEP 11 NEXT)
 >
 > **Step 10, the Short, is done:** attempt 1 of 3 kept (his, about 5:02 AM), with two ffmpeg edits and an end card in
 > his words; record `docs/phases/evidence/phase-7/short/README.md`; the video in `scratch/p7-s10-video/`
@@ -4560,7 +4578,29 @@ IMPLEMENTATION doc.
 
 ---
 
-## REMINDER — hosting before the credits expire, set 2026-10-04 (Phase 7 decision 5)
+## CHECKLIST — hosting and the dated reminders, set 2026-10-04, rewritten 2026-11-25 (Phase 7 step 11)
+
+**His decisions, 2026-11-25, about 8:40 AM:** the site moves to Vercel and AWS hosting is torn down; no monthly
+readings of the idle bill (one reading at the hosting decision instead); no calendar entry (the connector lacked
+event access; he chose to skip it); the after-v1 list (`ROADMAP.md` §5) confirmed as it stands.
+
+- [ ] **By 2027-06-30: move the site to Vercel and tear down AWS hosting.** Read Vercel's terms live first (on
+  2026-11-25 the Hobby plan was $0 a month with 100 GB of transfer and 1,000,000 requests a month, no purchase of
+  extra usage, and a feature that goes over waits 30 days; the pricing page, the Hobby docs and the fair use page
+  said nothing of non-commercial use; the Terms of Service were not read). Serve the built site from Vercel directly,
+  then tear down the CloudFront distribution, the site bucket and the ECR repository, with the teardown workflow's
+  knowledge of what `main` holds. The raw text is already in the repo. Take **one Cost Explorer reading** of the
+  idle bill at this point (it was about $0.17 a month on 2026-11-25, `docs/phases/evidence/phase-7/cost.md`).
+- [ ] **If AWS stays after all:** a cash budget, stated by him before 2027-06-30, and **extend the budgets past
+  2027-10-01** (below).
+- [ ] **2027-01-02:** the dev access key's date, if Phase 7 step 15 has not deleted it.
+- [ ] **From 2027-08-08** (60 days before 2027-10-07, the earliest date Anthropic gives for Haiku 5.5's retirement):
+  watch for the retirement notice; on retirement, fill the retirement field (Phase 7 step 2). For `gpt-oss-120b`, fill
+  it if its pinned host stops serving it.
+
+*The entry as set on 2026-10-04 and 2026-10-08 follows; the checklist above governs.*
+
+### REMINDER — hosting before the credits expire, set 2026-10-04 (Phase 7 decision 5)
 
 **Act by 2027-06-30.** The AWS credits expire **2027-07-30** (`planning/03` §1); after that, anything AWS still
 bills is charged in cash, and the project's budget rule is that it never is. From launch, the idle monthly bill is

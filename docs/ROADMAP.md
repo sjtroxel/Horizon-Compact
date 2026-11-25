@@ -53,7 +53,9 @@ scorer, the page and the teardown test become Phase 1.5, both before Phase 2.
 **The main model is Sonnet 4.6, fixed for v1** (his, 2026-10-05). Until then it was a slot held open for Sonnet
 5.5. AWS answered the quota case on 2026-10-05: the newest models are held until an account has several billing
 cycles of Bedrock use, so Sonnet 5.5 is no longer awaited (`planning/05` §5.2, patched). Model IDs, prices and
-quotas stay config, never code (Phase 1 scope doc).
+quotas stay config, never code (Phase 1 scope doc). *Dated note, 2026-11-25 (Phase 7 step 11):* superseded when
+Bedrock was blocked (2026-10-05 to 2026-10-11): the protocol's official models are Haiku 5.5, through Anthropic's
+API, and `gpt-oss-120b`, through OpenRouter (`prereg-v1`). Sonnet 4.6 ran no official sweep.
 
 **Phase 2 was split in two on 2026-10-04** (his; Phase 2 scope doc, decision 1): the cited company dossier is Phase
 2, the scenarios, wordings, neutrality review and blind development runs are Phase 2.5.
@@ -743,4 +745,7 @@ ceiling covers v1 only. Credits expire 2027-07-30.
 7. A fine-tuned or distilled CEO, after a cost check.
 
 *2026-10-05:* a Sonnet 5.5 sweep is no longer planned (`planning/05` §5.2). If access ever arrives, it is a new
-decision of his, run as its own sweep and never merged.
+decision of his, run as its own sweep and never merged. *Dated note, 2026-11-25 (Phase 7 step 11):* Anthropic's API
+now reaches Sonnet 5.5 without Bedrock, so "if access ever arrives" is out of date. The plan is unchanged: any
+Sonnet 5.5 sweep is a new decision of his with its own budget (`planning/05` §6), never merged into v1. The list
+above is confirmed as it stands (his, 2026-11-25).
