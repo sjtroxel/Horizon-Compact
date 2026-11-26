@@ -57,3 +57,30 @@ is"). No site change follows, and the search check is not re-run.
 **Done.** Every surface is clean, with no finding to fix; the tag message is read and the cross-appearances are left
 as published, by his decision. A second, shorter pass runs before the tag (step 12) and before the post (step 13).
 This record rides in C2 (`phase 7: c2 rule-zero sweep and dates`) with step 2.
+
+## 5. The second pass, 2026-11-26 (late: after the tag, before the post)
+
+The IMPLEMENTATION doc's step 1 asked for a second, shorter pass before the tag (step 12) and before the post (step
+13). **It was not run before the tag**; the release notes went through the guard's message check at step 12, and
+nothing else of this pass was done then. Found at the close (step 15) and run then, by Claude (Opus), read-only, from
+`main` at `b471063` with steps 12 to 14's records uncommitted. A finding on a surface already public would have been
+fixed and disclosed; there was none.
+
+| Command | Output line |
+|---|---|
+| `make guard-history` | `name guard: history clean, 182 commit(s) scanned.` |
+| `make paths-check` | `paths-check: no tracked path under methods-appendix/ (6005 tracked files).` |
+
+| Surface | What was read | Result |
+|---|---|---|
+| Repo description and website | `gh repo view`: the description and website as set at step 0, no topics | clean |
+| Releases | `gh release list`: `v1.0` and `prereg-v1`; `gh release view v1.0`, its notes read in full and run through the guard's matcher | clean, 0 findings |
+| Tags and tag messages | `v1.0` and `prereg-v1`, scanned by `guard-history` (above); `v1.0`'s message as recorded at step 12 | clean |
+| Issues, pull requests, branches | none; none; `main` and `origin/main` | clean |
+| The README and the write-up, the audit | tracked text, scanned by the guard on every commit and by `guard-history`; their real-case lines are the coarse ones already public | clean |
+| The README images | `docs/readme/s1-haiku-light.png` and `s1-haiku-dark.png`, read as images: the made-up company's first decision, Haiku 5.5, the scope line | clean |
+| The Short | its contact sheet of 33 frames read as an image (the Roundtable, Haiku 5.5, "Fictional Company", the made-up company's figures); its transcript, 17 segments, read and run through the guard's matcher | clean, 0 findings |
+| The launch post | read in full and run through the guard's matcher (kept outside the repo) | clean, 0 findings |
+
+The matcher was the guard's own (`scan_text` with the configured term file); a canary of one term matched, so the
+file was live. **Done:** every surface clean. This section rides in the close commit.

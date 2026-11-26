@@ -7,7 +7,42 @@ they closed.
 **Never write a real company's name in this file, or in anything else under version control.** Refer to a real
 case by its type and a neutral label. The names live only in the private longlist outside this repo.
 
-> ## START HERE — where things stand, 2026-11-25, about 9:00 AM (PHASE 7 STEP 11 DONE; STEP 12 HALF DONE)
+> ## START HERE — where things stand, 2026-11-26, about 9:45 AM (v1.0 COMPLETE: PHASE 7 CLOSED)
+>
+> **Horizon Compact v1 is done.** Version `1.0.0`, tagged `v1.0` and released 2026-11-25; the site live at
+> `horizon-compact.vercel.app`; Phase 7 closed 2026-11-26 (its IMPLEMENTATION doc §12: the DoD audit, eleven rows;
+> the second rule-zero pass ran late, at the close, clean; the public-prose record
+> `docs/phases/evidence/phase-7/public-prose.md`). **The dev access key is kept** (DoD 9 not met, his decision, "just in case"): delete it by 2027-01-02 (CHECKLIST).
+> **What is left, none of it build work:** the launch post, his, Monday 2026-11-30, morning (his read as the four
+> readers first; the text and the Short are kept outside the repo); the CHECKLIST below (Vercel and the AWS teardown
+> by 2027-06-30, Haiku 5.5's retirement watch from 2027-08-08); the after-v1 list, `ROADMAP.md` §5, nothing scheduled.
+> **A new session here** has nothing to build unless he starts a v1.x; read the CHECKLIST's dates first.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-26, about 9:00 AM (PHASE 7 STEPS 13 AND 14 DONE; STEP 15, THE CLOSE, NEXT)
+>
+> **Step 13 is done:** the launch post is drafted (Claude's words at his request, for his edit), checked, and kept
+> outside the repo with the Short, its only media (LinkedIn refused a video with images). No first person, so the
+> "hardest part" section is dropped (his). **His date: Monday 2026-11-30, morning**; his read as the four readers
+> comes first. **Step 14 is dropped** (his): v1 is a one-post launch. **Next:** step 15, the close: he deletes the
+> `horizon-compact-dev` access key in the IAM console; then the DoD audit, the public-prose record, the ROADMAP's
+> Phase 7 row and this block rewritten for v1.0. **Uncommitted:** this block, and steps 12 to 14's As built notes.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-25, about 9:15 AM (PHASE 7 STEP 12 DONE: v1.0 TAGGED AND RELEASED; STEP 13 NEXT)
+>
+> **v1.0 is out:** `b471063` `phase 7: c8 version 1.0.0 and hosting plan` (CI `45640010627`, Deploy `45640010122`
+> green); the annotated tag `v1.0` on it; the release published 2026-11-25 15:11 UTC. **Next:** step 13, the launch
+> post (his words; Claude interviews, outlines and critiques; the "hardest part" section on AWS is his standing
+> decision; §0 item 7, a video and an image in one post, checked live then), later today or tomorrow, his choice.
+> Then steps 14 (the second post's outline) and 15 (the dev key, the DoD audit, the close commit). **Uncommitted:**
+> this block and step 12's As built note, for the next commit.
+>
+> *The block below is superseded.*
+>
+> ## START HERE — where things stood, 2026-11-25, about 9:00 AM (PHASE 7 STEP 11 DONE; STEP 12 HALF DONE)
 >
 > **Version `1.0.0`** in `pyproject.toml`, `__init__.py` and `uv.lock`; `make check` green. **His next:** the commit
 > `phase 7: c8 version 1.0.0 and hosting plan` (step 11 rides in it), push, a green Deploy, then the `v1.0` tag and the
@@ -4593,7 +4628,8 @@ event access; he chose to skip it); the after-v1 list (`ROADMAP.md` §5) confirm
   idle bill at this point (it was about $0.17 a month on 2026-11-25, `docs/phases/evidence/phase-7/cost.md`).
 - [ ] **If AWS stays after all:** a cash budget, stated by him before 2027-06-30, and **extend the budgets past
   2027-10-01** (below).
-- [ ] **2027-01-02:** the dev access key's date, if Phase 7 step 15 has not deleted it.
+- [ ] **2027-01-02:** the dev access key's date, if Phase 7 step 15 has not deleted it. *(Dated note, 2026-11-26: Phase 7 closed with the key kept, his decision; this date now governs.)*
+- **A laptop read of S3 at the teardown needs a new key.** Phase 6.5's before-and-after counts (`scratch/p15-teardown-counts.sh`) read S3 through the `horizon-compact` profile, the dev key. Once the key is deleted, a laptop count at the 2027 teardown needs a short-lived key, created and deleted that day (his call then); the teardown itself runs from GitHub over OIDC and needs none.
 - [ ] **From 2027-08-08** (60 days before 2027-10-07, the earliest date Anthropic gives for Haiku 5.5's retirement):
   watch for the retirement notice; on retirement, fill the retirement field (Phase 7 step 2). For `gpt-oss-120b`, fill
   it if its pinned host stops serving it.

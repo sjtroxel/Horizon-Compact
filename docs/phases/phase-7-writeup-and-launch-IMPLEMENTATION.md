@@ -1,11 +1,13 @@
 # Phase 7 — Write-up and Launch: IMPLEMENTATION (v1.0)
 
+> **CLOSED 2026-11-26 (§12): the DoD audit, the public-prose record; v1.0 tagged and released 2026-11-25.**
+>
 > **IMPLEMENTATION doc. APPROVED 2026-11-22, about 10:27 AM (his).** Drafted by Claude (Opus) the same morning, from
 > about 9:10 AM, while he was out. **Decisions A-D DECIDED about 10:12 AM (his, §2):** A, B and C as leaned; D, one
 > Short, Gemini first, which amends the re-scope's R-A (the scope doc's header note of 2026-11-22). Drafted the morning the scope doc was re-scoped and approved (its
 > section "Re-scoped 2026-11-22", approved about 8:51 AM). Sections: §0 the review; §1 facts checked live; §2 decisions
 > A-D; §3 the steps; §4 the README's outline; §5 the marker scheme and its tests; §6 the audit; §7 the Short; §8 the
-> commit order; §9 the definition of done; §10 cost; §11 risks to the build.
+> commit order; §9 the definition of done; §10 cost; §11 risks to the build; §12 the close.
 >
 > Sources: the scope doc as re-scoped (`docs/phases/phase-7-writeup-and-launch.md`); the Phase 6.5 IMPLEMENTATION doc
 > (§3, the methods page; §6, the video; §11.2, what Phase 7 inherits); `planning/00` §2, §8 and §10; `planning/02`
@@ -392,7 +394,7 @@ for"; the two official images, twice), and one sentence in `docs/plain-english.m
 every rewording approved ("the rewordings I all approve"), and the card changed by him, "decision" to "decisions"
 ("I'm not thrilled about the repo card but it is what it is").
 
-### Step 9. The final cost record (Delivers 6; decision B)
+### Step 9. The final cost record (Delivers 6; decision B) [done]
 
 His readings, Claude's record, as at every close.
 
@@ -420,7 +422,7 @@ November 25, 2026 (Claude's to change before the Deploy that publishes it, if C6
 digit tests pass, 655 of 655 explorer tests. **The December note is dropped** (his, about 4:12 AM).
 **The M8 and M12 wording is Claude's draft, approved by him (about 4:21 AM: "fine, approved").**
 
-### Step 10. The Short, Gemini first (Delivers 12; decision R-A as amended by D; §7)
+### Step 10. The Short, Gemini first (Delivers 12; decision R-A as amended by D; §7) [done]
 
 Him and Claude. Before the post. §7 holds the detail.
 
@@ -435,7 +437,7 @@ restored over the bar from the video's own frame (his catch), and a six-second e
 sentence, the second model's split and the AI-generated label. **Commit order:** steps 9 and 10 go in one commit
 (his, 2026-11-25), C6's step 9 with C7; step 11 follows in its own commit.
 
-### Step 11. The hosting plan, the dated reminders, the after-v1 list (Delivers 10; scope decision 5)
+### Step 11. The hosting plan, the dated reminders, the after-v1 list (Delivers 10; scope decision 5) [done]
 
 Claude records, he decides the plan's content. In KNOWN-GAPS, the REMINDER entry of 2026-10-04 rewritten as a dated
 checklist (the re-scope's R.3 item 4):
@@ -462,7 +464,7 @@ Terms of Service are read at the move); **the monthly readings dropped**, one re
 calendar entry** (the calendar connector refused for lack of event scope, and he chose to skip it); the after-v1
 list confirmed. **ROADMAP:** dated notes on §2's Sonnet 4.6 line and §5's Sonnet 5.5 line (§0 item 5).
 
-### Step 12. Version 1.0.0, the tag and the release (Delivers 8)
+### Step 12. Version 1.0.0, the tag and the release (Delivers 8) [done]
 
 1. **Claude:** `1.0.0` in `pyproject.toml`, `src/horizon_compact/__init__.py` and `uv.lock` (`uv lock --check`
    agrees); `make check` green. This commit starts Deploy's image build and `main` apply, as at Phase 6.5's close.
@@ -481,7 +483,12 @@ version 1.0.0 and hosting plan`, not in the close (C8 as planned held both), bec
 on the version and comes before the post; the close gets its own commit. The release notes are Claude's draft
 (scope decision 1), in `scratch/p7-s12-release-notes.md`, through the name guard's message check (clean), for his read.
 
-### Step 13. The launch post (Delivers 9; scope decisions 1, 2, 6)
+**As built, step 12, second half (2026-11-25).** `b471063` landed, CI `45640010627` and Deploy `45640010122` green.
+**His:** the annotated tag `v1.0` ("Horizon Compact v1.0") on `b471063`, pushed through the pre-push guard; the notes
+read ("notes are fine"); `gh release create v1.0`, published 2026-11-25 15:11 UTC, not a draft or pre-release
+(`gh release view v1.0`). **Step 12 is done.**
+
+### Step 13. The launch post (Delivers 9; scope decisions 1, 2, 6) [done; posting his, 2026-11-30]
 
 His words: Claude interviews, outlines and critiques line by line, never drafts unless he asks on that pass.
 
@@ -499,12 +506,31 @@ His words: Claude interviews, outlines and critiques line by line, never drafts 
 
 **Done:** the post published, or its date set by him, after every check.
 
-### Step 14. The second post, planned (scope decision 6)
+**As built, step 13 (2026-11-26).** **The words are Claude's draft, at his request on this pass** (scope decision 1),
+for his edit. **His changes to the plan:** no first person, so the "hardest part" section (his standing decision of
+2026-10-05) is dropped; the AWS facts stay in KNOWN-GAPS' BLOCKED entry. The opening is the Mayflower line, set
+against Thanksgiving the week before. **§0 item 7, checked live (his composer test):** LinkedIn refused a video with
+images ("Share images or a single video in your post"), so the Short is the post's only media and carries the chart.
+About 2,160 characters; the text and the Short (sha256 matching the Short's record) are kept outside this repo.
+**The checks:** `planning/06` §9 items 1 (both models' figures with run counts; Haiku 5.5's interval as "a likely range
+of 9 to 29 points"), 2 (no §3.1 or §3.3 word), 3 (the scope sentence in full), 5 (no real case in the post), 6 (the
+Mayflower line opens it; the name is explained in the third paragraph) and 7 (the two B vs D entries and "the pattern
+... showed up on no decision" in the body) pass on Claude's read; **item 4 is his read**, before it posts. The name
+guard's message check is clean. The vocabulary recheck does not apply (the date is before 2026-12-12). Post Inspector
+is not re-run: no page head, title, description or card changed between go-live (`42e6284`) and `b471063`.
+**His date:** Monday 2026-11-30, morning. DoD 6 is met by the date; publishing is his. **Step 13 is done.**
+
+### Step 14. The second post, planned (scope decision 6) [dropped, his, 2026-11-26]
 
 An outline only, with him: the method post, a week or two after the first, on the pre-registration, the sealed
 wording, and what went against the thesis (the two B vs D entries). His words, his date. Recorded in the close.
 
-### Step 15. The close
+**As built, step 14 (2026-11-26): dropped, his decision.** None of the three hooks offered (the rules locked before
+the first run, the results that went the other way, "how do you test an AI model honestly?") suited him; v1 is a
+one-post launch. The second post existed to answer questions the first raises, so it can be planned later if they
+come. Nothing in v1 depends on it.
+
+### Step 15. The close [done 2026-11-26, §12; item 1, the key, declined by him]
 
 1. **The dev access key deleted** (Delivers 11): his, in the IAM console (`horizon-compact-dev`), after every step
    that needs a laptop read of AWS (none is planned in this phase; the cost readings are consoles). Claude confirms
@@ -711,3 +737,40 @@ chooses ElevenLabs for the Short's voice (read first) or a third tool under deci
 - **Thanksgiving week.** The post's date is his; nothing in steps 1 to 12 depends on it.
 - **Something identifying in an image or the Short.** Mitigation: both are read as images and frames by Claude at step
   1's second pass; the Short's frames are already read by §7.4.
+
+## 12. The close (step 15), 2026-11-26: the DoD audit, the public-prose record, v1.0
+
+Claude (Opus), on his instruction ("let's just do step 15 now", about 9:26 AM). One commit carries steps 12 to 15's
+records: steps 12 to 14's As built notes, step 1's second pass, the public-prose record, this section, the ROADMAP's
+Phase 7 row and START HERE. The version stays `1.0.0` (step 12); nothing under `web/` or `src/` changes.
+
+### 12.1 The DoD audit (§9)
+
+| DoD | Met | Proof |
+|---|---|---|
+| 1. The rule-zero sweep clean | **yes, the second pass late** | `evidence/phase-7/rule-zero.md`: the first pass (2026-11-23) clean; **the second pass was due before the tag and was run at the close instead** (§5 of the record), every surface clean, nothing public to correct |
+| 2. The README in the repo, numbers tested by `make check`, claims checked against the audit | yes | `tests/test_readme_figures.py` (every marked figure from the data, the digit census, the 40 audit markers) in `make check` and CI since C3 (`4911440`); step 8's record, `evidence/phase-7/readme-against-audit.md` |
+| 3. The audit published, every item marked with evidence | yes | `docs/v1-audit.md` (step 6); the cold sample, six of six on the re-check, `evidence/phase-7/audit-sample/README.md` (step 7) |
+| 4. The final cost record on the methods page, the idle bill measured | yes, decision B amended | `evidence/phase-7/cost.md`: cumulative at most about $46; the idle bill about $0.17 a month over 2026-11-14 to 2026-11-20 (decision B's window, amended by him 2026-11-25); M8 live since C6 (`631392b`) |
+| 5. The `v1.0` tag and release exist (his) | yes | `gh release view v1.0`: "Horizon Compact v1.0", published 2026-11-25 15:11 UTC, not a draft or pre-release; the annotated tag on `b471063` |
+| 6. The launch post published, or its date set (his), after `planning/06` §9's checks | **yes, by the date** | step 13's As built: checks 1-3 and 5-7 pass on Claude's read, check 4 is his read before it posts; his date Monday 2026-11-30, morning. Published is his |
+| 7. The hosting plan recorded with its dated reminder | yes | KNOWN-GAPS CHECKLIST (step 11): Vercel and the AWS teardown by 2027-06-30; the retirement watch from 2027-08-08 |
+| 8. `make check` and CI green; every commit through the guard | yes | C1 `29296ab` CI `45045014729`; C2 `343d1dc` CI `45216487477`, Deploy `45216487205`; C3 `4911440` CI `45415548299`, Deploy `45415548052`; C5 `03ba012` CI `45475637004`, Deploy `45475636849`; C6/C7 `631392b` CI `45601938272`, Deploy `45601938419`; C8 `b471063` CI `45640010627`, Deploy `45640010122`; all green; `guard-history` 182 commits clean (2026-11-26); this commit's CI to be confirmed |
+| 9. The dev access key deleted | **no, his decision** | 2026-11-26, about 9:44 AM: he keeps `horizon-compact-dev`'s key "just in case we need it", declining deletion and the offered deactivation. It stays due by **2027-01-02**, 90 days from its creation (Phase 1.5 decision 6 (a)), carried in KNOWN-GAPS' CHECKLIST |
+| 10. The chosen Short passed the check and carries the scope sentence | yes | `evidence/phase-7/short/README.md`: attempt 1 of 3 kept, two edits; the end card carries the scope sentence; his approval 2026-11-25 |
+| 11. Every results surface names its model and run dates from data | yes | step 2's tests (`web/src/explorer/runDates.test.tsx`, `runs.test.ts`) in `make check`; M12's entry; `evidence/phase-7/run-dates.md` |
+
+**Departures, stated plainly:** the dev key is kept (row 9, his); step 1's second pass ran late (row 1); step 14, the second post, was dropped (his);
+the "hardest part" section of the post was dropped (his, no first person); the post's words are Claude's draft at his
+request, not his (`planning/06` §8 planned them as his; the record is `evidence/phase-7/public-prose.md`).
+
+### 12.2 The public-prose record (step 15 item 3)
+
+`evidence/phase-7/public-prose.md`: every public piece of v1 and who wrote its words. In one line: nearly all of it is
+Claude's draft at his request, approved by him; his own words are the planning disclosure line, the Short's end card
+and the edits the records name.
+
+### 12.3 The cost, and what is left
+
+**Cost:** nothing in the close; the phase's spend is in `cost.md`. **Left after v1, none of it blocking:** the post
+(his, 2026-11-30); the hosting CHECKLIST's dates in KNOWN-GAPS; the after-v1 list in `ROADMAP.md` §5.
